@@ -1,15 +1,21 @@
 ﻿{
     "dependencies": {
+        "Microsoft.Framework.CodeGeneration.Common": "",
+        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
+        "System.Runtime": "4.0.20.0"
     },
 
     "configurations" : {
-        "net451" : { 
+        "net45" : { 
             "dependencies": {
             }
         },
         "k10" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20.0"
+                "System.Collections": "4.0.0.0",
+                "System.Diagnostics.Contracts": "4.0.0.0",
+                "System.Console": "4.0.0.0"
             }
         }
     }

@@ -1,9 +1,13 @@
 ﻿{
     "dependencies": {
+        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Common": "",
+        "Microsoft.Framework.CodeGeneration.Core": "",
+        "Microsoft.Framework.CommandLineUtils": "1.0.0-*"
     },
 
     "configurations" : {
-        "net451" : { },
+        "net45" : { },
         "k10" : { 
             "dependencies": {
                 "System.Console": "4.0.0.0"

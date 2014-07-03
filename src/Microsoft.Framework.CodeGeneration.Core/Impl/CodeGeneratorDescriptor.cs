@@ -59,8 +59,6 @@ namespace Microsoft.Framework.CodeGeneration
                         .GetDeclaredMethods("GenerateCode")
                         .Where(mi => IsValidAction(mi));
 
-                    // ToDo: Throwing here means one bad code generator could make others
-                    // unusable. Should change that.
                     var count = candidates.Count();
                     if (count == 0)
                     {

@@ -40,6 +40,7 @@
     <Compile Include="Impl\CodeGeneratorsLocator.cs" />
     <Compile Include="Impl\ConsoleLogger.cs" />
     <Compile Include="Impl\MemberInfoExtensions.cs" />
+    <Compile Include="Impl\ParameterDescriptor.cs" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

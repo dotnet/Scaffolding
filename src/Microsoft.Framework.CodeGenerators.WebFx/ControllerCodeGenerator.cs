@@ -32,6 +32,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             _logger.LogMessage("Model: " + model.Model);
             _logger.LogMessage("DataContext: " + model.DataContext);
             _logger.LogMessage("GenerateViews: " + model.GenerateViews);
+            _logger.LogMessage("ReferenceScriptLibraries: " + model.ReferenceScriptLibraries);
             _logger.LogMessage("TestProperty: " + model.TestProperty);
         }
 

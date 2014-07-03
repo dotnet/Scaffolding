@@ -28,7 +28,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         //Todo: Right now this assumes we allow invocation only on Alias if one exists
         //and only fallback to type name otherwise. Perhaps we may need to support both?
-        internal string Name
+        public string Name
         {
             get
             {

@@ -5,10 +5,11 @@ using System;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    public enum CommandOptionType
+    /// <summary>
+    /// Marker interface to indicate that this class is a code generator.
+    /// </summary>
+    //ToDo: Is this necessary?
+    public interface ICodeGenerator
     {
-        Switch,
-
-        SingleValue
     }
 }

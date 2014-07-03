@@ -29,17 +29,17 @@
     <Content Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLine\CommandArgument.cs" />
-    <Compile Include="CommandLine\CommandOption.cs" />
-    <Compile Include="CommandLine\CommandOptionType.cs" />
-    <Compile Include="Def\CodeGeneratorFactory.cs" />
-    <Compile Include="Def\CodeGeneratorMetadata.cs" />
+    <Compile Include="CommandLine\AliasAttribute.cs" />
+    <Compile Include="CommandLine\ArgumentAttribute.cs" />
+    <Compile Include="CommandLine\OptionAttribute.cs" />
+    <Compile Include="Def\ICodeGenerator.cs" />
     <Compile Include="Def\ILogger.cs" />
     <Compile Include="Def\LogMessageLevel.cs" />
-    <Compile Include="Impl\ActionDescriptor.cs" />
-    <Compile Include="Impl\CodeGeneratorFactoriesLocator.cs" />
-    <Compile Include="Impl\CodeGeneratorInvoker.cs" />
+    <Compile Include="Impl\ActionInvoker.cs" />
+    <Compile Include="Impl\CodeGeneratorDescriptor.cs" />
+    <Compile Include="Impl\CodeGeneratorsLocator.cs" />
     <Compile Include="Impl\ConsoleLogger.cs" />
+    <Compile Include="Impl\MemberInfoExtensions.cs" />
     <Compile Include="Impl\ParameterDescriptor.cs" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />

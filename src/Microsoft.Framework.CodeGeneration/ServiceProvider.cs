@@ -38,41 +38,9 @@ namespace Microsoft.Framework.CodeGeneration
                 return instance;
             }
 
-            Array serviceArray = GetServiceArrayOrNull(serviceType);
-
-            if (serviceArray != null && serviceArray.Length != 0)
-            {
-                return serviceArray;
-            }
-
             if (_fallbackServiceProvider != null)
             {
                 return _fallbackServiceProvider.GetService(serviceType);
-            }
-
-            return serviceArray;
-        }
-
-        private Array GetServiceArrayOrNull(Type serviceType)
-        {
-            var typeInfo = serviceType.GetTypeInfo();
-
-            if (typeInfo.IsGenericType &&
-                serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-            {
-                var itemType = typeInfo.GenericTypeArguments[0];
-
-                object instance;
-                if (_instances.TryGetValue(itemType, out instance))
-                {
-                    var serviceArray = Array.CreateInstance(itemType, 1);
-                    serviceArray.SetValue(instance, 0);
-                    return serviceArray;
-                }
-                else
-                {
-                    return Array.CreateInstance(itemType, 0);
-                }
             }
 
             return null;

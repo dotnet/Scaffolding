@@ -10,9 +10,9 @@ using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    //Todo: Perhaps this should be internal, it's public right for being able to access
+    //Todo: Perhaps this should be internal, it's public right now for being able to access
     //it in CodeGeneration project.
-    public class CodeGeneratorFactoriesLocator
+    public class CodeGeneratorsLocator
     {
         private static readonly HashSet<string> _codeGenerationFrameworkAssemblies =
             new HashSet<string>(StringComparer.Ordinal)
@@ -24,7 +24,7 @@ namespace Microsoft.Framework.CodeGeneration
         private IServiceProvider _serviceProvider;
         private ITypeActivator _typeActivator;
 
-        public CodeGeneratorFactoriesLocator(
+        public CodeGeneratorsLocator(
             [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILibraryManager libraryManager)
@@ -36,10 +36,10 @@ namespace Microsoft.Framework.CodeGeneration
 
         //Perhaps this method could be optimized not to reflect all code generators
         //once we find a match?
-        public CodeGeneratorFactory GetCodeGeneratorFactory([NotNull]string codeGeneratorName)
+        public CodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
         {
-            var candidates = CodeGeneratorFactories
-                .Where(f => string.Equals(f.CodeGeneratorMetadata.Name, codeGeneratorName, StringComparison.OrdinalIgnoreCase));
+            var candidates = CodeGenerators
+                .Where(gen => string.Equals(gen.Name, codeGeneratorName, StringComparison.OrdinalIgnoreCase));
 
             var count = candidates.Count();
 
@@ -56,11 +56,11 @@ namespace Microsoft.Framework.CodeGeneration
             return candidates.First();
         }
 
-        public IEnumerable<CodeGeneratorFactory> CodeGeneratorFactories
+        public IEnumerable<CodeGeneratorDescriptor> CodeGenerators
         {
             get
             {
-                var factories = new List<CodeGeneratorFactory>();
+                var descriptors = new List<CodeGeneratorDescriptor>();
 
                 var libs = _codeGenerationFrameworkAssemblies
                     .SelectMany(_libraryManager.GetReferencingLibraries)
@@ -73,23 +73,23 @@ namespace Microsoft.Framework.CodeGeneration
 
                     if (assembly != null)
                     {
-                        factories.AddRange(assembly
+                        descriptors.AddRange(assembly
                             .DefinedTypes
-                            .Where(IsCodeGeneratorFactory)
-                            .Select(typeInfo => FactoryFromTypeInfo(typeInfo)));
+                            .Where(IsCodeGenerator)
+                            .Select(typeInfo => DescriptorFromTypeInfo(typeInfo)));
                     }
                 }
 
-                return factories;
+                return descriptors;
             }
         }
 
-        private CodeGeneratorFactory FactoryFromTypeInfo([NotNull]TypeInfo typeInfo)
+        private CodeGeneratorDescriptor DescriptorFromTypeInfo([NotNull]TypeInfo typeInfo)
         {
-            return (CodeGeneratorFactory)_typeActivator.CreateInstance(_serviceProvider, typeInfo.AsType());
+            return new CodeGeneratorDescriptor(typeInfo, _typeActivator, _serviceProvider);
         }
 
-        private bool IsCodeGeneratorFactory([NotNull]TypeInfo typeInfo)
+        private bool IsCodeGenerator([NotNull]TypeInfo typeInfo)
         {
             if (!typeInfo.IsClass ||
                 typeInfo.IsAbstract ||
@@ -98,13 +98,8 @@ namespace Microsoft.Framework.CodeGeneration
                 return false;
             }
 
-            if (typeInfo.Name.Equals("CodeGeneratorFactory", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            return typeInfo.Name.EndsWith("CodeGeneratorFactory", StringComparison.OrdinalIgnoreCase) ||
-                typeof(CodeGeneratorFactory).GetTypeInfo().IsAssignableFrom(typeInfo);
+            return typeInfo.Name.EndsWith("CodeGenerator", StringComparison.OrdinalIgnoreCase) ||
+                typeof(ICodeGenerator).GetTypeInfo().IsAssignableFrom(typeInfo);
         }
 
         private bool IsCandidateLibrary(ILibraryInformation library)

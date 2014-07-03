@@ -23,96 +23,31 @@ namespace Microsoft.Framework.CodeGeneration
             Console.WriteLine("Attach Debugger");
             Console.Read();
 
-            var factoryLocator = _serviceProvider.GetService<CodeGeneratorFactoriesLocator>();
+            var generatorsLocator = _serviceProvider.GetService<CodeGeneratorsLocator>();
 
             if (args == null || args.Length == 0)
             {
-                ShowCodeGeneratorList(factoryLocator.CodeGeneratorFactories);
+                ShowCodeGeneratorList(generatorsLocator.CodeGenerators);
                 return;
             }
 
             var codeGeneratorName = args[0];
+            var generator = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
-            var factory = factoryLocator.GetCodeGeneratorFactory(codeGeneratorName);
-
-            CommandLineApplication app = new CommandLineApplication();
-
-            app.Command(codeGeneratorName, c =>
-            {
-                foreach (var argument in factory.CodeGeneratorMetadata.Arguments)
-                {
-                    c.Argument(argument.Name, argument.Description);
-                }
-
-                foreach (var option in factory.CodeGeneratorMetadata.Options)
-                {
-                    c.Option(template: option.ToTemplate(),
-                        description: option.Description,
-                        optionType: RuntimeOptionTypeFromOptionType(option.OptionType));
-                }
-
-                c.HelpOption("-h|-?|--help");
-
-                c.Invoke = () =>
-                {
-                    //Todo: pass remaining args...
-                    var invoker = new CodeGeneratorInvoker(factory,
-                        _serviceProvider.GetService<ITypeActivator>(),
-                        _serviceProvider);
-
-                    var values = new Dictionary<string, object>();
-
-                    foreach (var argument in c.Arguments)
-                    {
-                        values.Add(argument.Name, argument.Value);
-                    }
-                    foreach (var option in c.Options.Where(opt => opt.HasValue()))
-                    {
-                        if (option.OptionType == RuntimeOptionType.NoValue)
-                        {
-                            values.Add(option.LongName, true);
-                        }
-                        else
-                        {
-                            values.Add(option.LongName, option.Value());
-                        }
-                    }
-
-                    invoker.Invoke(values);
-                    return 0;
-                };
-            });
-
-            app.Execute(args);
+            generator.Execute(args);
         }
 
-        private RuntimeOptionType RuntimeOptionTypeFromOptionType(CommandOptionType optionType)
-        {
-            if (optionType == CommandOptionType.SingleValue)
-            {
-                return RuntimeOptionType.SingleValue;
-            }
-
-            if (optionType == CommandOptionType.Switch)
-            {
-                return RuntimeOptionType.NoValue;
-            }
-
-            Contract.Assert(false, "New CommandOptionType introduced for which there is no runtime option type");
-            throw new Exception("Undetected command option type");
-        }
-
-        private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorFactory> codeGeneratorFactories)
+        private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
             var logger = _serviceProvider.GetService<ILogger>();
 
-            if (codeGeneratorFactories.Any())
+            if (codeGenerators.Any())
             {
                 logger.LogMessage("k gen <code generator name>");
 
-                foreach (var factory in codeGeneratorFactories)
+                foreach (var generator in codeGenerators)
                 {
-                    logger.LogMessage(factory.CodeGeneratorMetadata.Name);
+                    logger.LogMessage(generator.Name);
                 }
             }
             else
@@ -130,7 +65,7 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.Add(typeof(ITypeActivator), typeActivator);
 
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
-            serviceProvider.AddServiceWithDependencies<CodeGeneratorFactoriesLocator, CodeGeneratorFactoriesLocator>();
+            serviceProvider.AddServiceWithDependencies<CodeGeneratorsLocator, CodeGeneratorsLocator>();
         }
     }
 }

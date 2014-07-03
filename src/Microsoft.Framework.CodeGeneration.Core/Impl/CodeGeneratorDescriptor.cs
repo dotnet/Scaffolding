@@ -39,7 +39,14 @@ namespace Microsoft.Framework.CodeGeneration
 
         internal object CreateCodeGeneratorInstace()
         {
-            return _typeActivator.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
+            var instance = _typeActivator.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
+
+            if (instance == null)
+            {
+                throw new Exception("There was an error creating the code generator instance: " + _codeGeneratorType.FullName);
+            }
+
+            return instance;
         }
 
         private ActionInvoker CodeGeneratorAction

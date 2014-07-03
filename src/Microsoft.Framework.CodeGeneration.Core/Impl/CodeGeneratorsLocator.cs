@@ -34,8 +34,6 @@ namespace Microsoft.Framework.CodeGeneration
             _libraryManager = libraryManager;
         }
 
-        //Perhaps this method could be optimized not to reflect all code generators
-        //once we find a match?
         public CodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
         {
             var candidates = CodeGenerators

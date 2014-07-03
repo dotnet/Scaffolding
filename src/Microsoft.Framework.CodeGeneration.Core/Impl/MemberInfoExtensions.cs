@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Framework.CodeGeneration.CommandLine;
@@ -31,7 +30,7 @@ namespace Microsoft.Framework.CodeGeneration
                 return new OptionAttribute()
                 {
                     // This is kind of fragile, refactoring a property name will break this
-                    // code, either should find a better way or should unit test.
+                    // code, is there a better way? One good thing is we have unit tests to cover this now.
                     Name = (string)optionAttributeData.GetNamedArgumentValue("Name"),
                     ShortName = (string)optionAttributeData.GetNamedArgumentValue("ShortName"),
                     DefaultValue = optionAttributeData.GetNamedArgumentValue("DefaultValue"),

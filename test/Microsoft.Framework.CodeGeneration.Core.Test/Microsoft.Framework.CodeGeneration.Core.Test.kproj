@@ -10,9 +10,9 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>a48c047e-8f94-42a5-bd19-97dff077e6b1</ProjectGuid>
+    <ProjectGuid>711edee0-e390-4a66-b0fd-ae058383b63a</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.Framework.CodeGeneration</RootNamespace>
+    <RootNamespace>Microsoft.Framework.CodeGeneration.Core.Test</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="$(OutputType) == 'Console'">
     <DebuggerFlavor>ConsoleDebugger</DebuggerFlavor>
@@ -29,19 +29,8 @@
     <Content Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLine\AliasAttribute.cs" />
-    <Compile Include="CommandLine\ArgumentAttribute.cs" />
-    <Compile Include="CommandLine\OptionAttribute.cs" />
-    <Compile Include="Def\ICodeGenerator.cs" />
-    <Compile Include="Def\ILogger.cs" />
-    <Compile Include="Def\LogMessageLevel.cs" />
-    <Compile Include="Impl\ActionInvoker.cs" />
-    <Compile Include="Impl\CodeGeneratorDescriptor.cs" />
-    <Compile Include="Impl\CodeGeneratorsLocator.cs" />
-    <Compile Include="Impl\ConsoleLogger.cs" />
-    <Compile Include="Impl\MemberInfoExtensions.cs" />
-    <Compile Include="Impl\ParameterDescriptor.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MemberInfoExtensionsTests.cs" />
+    <Compile Include="TypeUtil.cs" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

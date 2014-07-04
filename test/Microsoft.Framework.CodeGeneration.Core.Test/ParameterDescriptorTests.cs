@@ -92,6 +92,39 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             Assert.Equal(expectedValueWhenOptionIsPresent, descriptor.Value);
         }
 
+        [Theory]
+        [InlineData("StringWithoutExplicitArgument", "")]
+        [InlineData("StringWithExplicitArgument", "My string description")]
+        public void Arguments_HaveCorrectDescription_Returns_CorrectValue(
+            string propertyName,
+            string expectedDescription)
+        {
+            //Arrange
+            var command = new CommandLineApplication();
+            var property = typeof(TestClass).GetProperty(propertyName);
+            var descriptor = new ParameterDescriptor(property);
+
+            //Act
+            descriptor.AddCommandLineParameterTo(command);
+
+            //Assert
+            var actualOption = command.Arguments.First();
+            Assert.Equal(propertyName, actualOption.Name);
+            Assert.Equal(expectedDescription, actualOption.Description);
+
+            //Arrange
+            command.Execute(new string[0] { });
+
+            //Assert
+            Assert.Equal(null, descriptor.Value); //Is this right assumption to test?
+
+            //Arrange
+            command.Execute(new string[] { "PassedValue" });
+
+            //Assert
+            Assert.Equal("PassedValue", descriptor.Value);
+        }
+
         private class TestClass
         {
             public bool BooleanWithoutExplicitOption { get; set; }
@@ -110,6 +143,11 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             [Option(DefaultValue = "Default Value")]
             public string StringOptionWithDefaultValue { get; set; }
+
+            public string StringWithoutExplicitArgument { get; set; }
+
+            [Argument(Description = "My string description")]
+            public string StringWithExplicitArgument { get; set; }
         }
     }
 }

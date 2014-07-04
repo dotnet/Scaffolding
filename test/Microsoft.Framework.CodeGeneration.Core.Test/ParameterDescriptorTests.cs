@@ -15,30 +15,59 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         [InlineData("BooleanWithoutExplicitOption",
                     "--BooleanWithoutExplicitOption",
                     "",
+                    CommandOptionType.NoValue,
                     "--BooleanWithoutExplicitOption",
+                    true,
                     false)]
         [InlineData("BooleanWithExplicitOption",
                     "--NameOverride|-bwo",
                     "Bool with explicit option",
+                    CommandOptionType.NoValue,
                     "--NameOverride",
+                    true,
                     false)]
         [InlineData("BooleanWithDefaultValue",
                     "--BooleanWithDefaultValue",
                     "",
+                    CommandOptionType.NoValue,
                     "--BooleanWithDefaultValue",
+                    true,
                     true)]
-        public void Boolean_Options_UseCorrectName_Returns_CorrectValue(
+        [InlineData("StringOption",
+                    "--StringOption|-so",
+                    "String with explicit option",
+                    CommandOptionType.SingleValue,
+                    "--StringOption GivenValue",
+                    "GivenValue",
+                    "")]
+        [InlineData("StringOptionWithNameOverride",
+                    "--OverridenName",
+                    "",
+                    CommandOptionType.SingleValue,
+                    "--OverridenName GivenValue",
+                    "GivenValue",
+                    "")]
+        [InlineData("StringOptionWithDefaultValue",
+                    "--StringOptionWithDefaultValue",
+                    "",
+                    CommandOptionType.SingleValue,
+                    "--StringOptionWithDefaultValue GivenValue",
+                    "GivenValue",
+                    "Default Value")]
+        public void Options_UseCorrectName_Returns_CorrectValue(
             string propertyName,
             string expectedOptionTemplate,
             string expectedOptionDescription,
-            string trueValuTestCase,
-            bool falseTestDefaultValue)
+            int expectedCommandOptionType,
+            string commandLineStringWithTheOption,
+            object expectedValueWhenOptionIsPresent,
+            object expectedValueWhenOptionIsNotPresent)
         {
             //Arrange
             var command = new CommandLineApplication();
             var property = typeof(TestClass).GetProperty(propertyName);
             var descriptor = new ParameterDescriptor(property);
-            var expectedOption = new CommandOption(expectedOptionTemplate, CommandOptionType.NoValue);
+            var expectedOption = new CommandOption(expectedOptionTemplate, (CommandOptionType)expectedCommandOptionType);
 
             //Act
             descriptor.AddCommandLineParameterTo(command);
@@ -47,20 +76,20 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             var actualOption = command.Options.First();
             Assert.Equal(expectedOption.LongName, actualOption.LongName);
             Assert.Equal(expectedOption.ShortName, actualOption.ShortName);
-            Assert.Equal(CommandOptionType.NoValue, actualOption.OptionType);
+            Assert.Equal(expectedOption.OptionType, actualOption.OptionType);
             Assert.Equal(expectedOptionDescription, actualOption.Description);
 
             //Arrange
             command.Execute(new string[0] { });
 
             //Assert
-            Assert.Equal(falseTestDefaultValue, descriptor.Value);
+            Assert.Equal(expectedValueWhenOptionIsNotPresent, descriptor.Value);
 
             //Arrange
-            command.Execute(new string[] { trueValuTestCase });
+            command.Execute(commandLineStringWithTheOption.Split(' '));
 
             //Assert
-            Assert.Equal(true, descriptor.Value);
+            Assert.Equal(expectedValueWhenOptionIsPresent, descriptor.Value);
         }
 
         private class TestClass
@@ -72,6 +101,15 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             [Option(DefaultValue = true)]
             public bool BooleanWithDefaultValue { get; set; }
+
+            [Option(Description = "String with explicit option", ShortName = "so")]
+            public string StringOption { get; set; }
+
+            [Option(Name = "OverridenName")]
+            public string StringOptionWithNameOverride { get; set; }
+
+            [Option(DefaultValue = "Default Value")]
+            public string StringOptionWithDefaultValue { get; set; }
         }
     }
 }

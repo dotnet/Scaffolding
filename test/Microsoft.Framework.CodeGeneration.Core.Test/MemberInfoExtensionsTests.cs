@@ -27,7 +27,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void GetOptionAttribute_Returns_Correct_Value()
         {
             //Arrange
-            var testType = typeof(ClassWithOptionProperty).TypeInfoFromType();
+            var testType = typeof(ClassWithAlias).TypeInfoFromType();
             var testProp = testType.GetProperty("PropertyWithOptionAttribute");
 
             //Act
@@ -44,7 +44,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void GetArgumentAttribute_Returns_Correct_Value()
         {
             //Arrange
-            var testType = typeof(ClassWithArgumentProperty).TypeInfoFromType();
+            var testType = typeof(ClassWithAlias).TypeInfoFromType();
             var testProp = testType.GetProperty("PropertyWithArgumentAttribute");
 
             //Act
@@ -55,16 +55,11 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         }
 
         [Alias("CoolClass")]
-        private class ClassWithAlias { }
-
-        private class ClassWithOptionProperty
+        private class ClassWithAlias
         {
             [Option(Description = "Awesome Property", Name = "Awesome", ShortName = "aw", DefaultValue = "Default")]
             public bool PropertyWithOptionAttribute { get; set; }
-        }
 
-        private class ClassWithArgumentProperty
-        {
             [Argument(Description = "Awesome argument")]
             public string PropertyWithArgumentAttribute { get; set; }
         }

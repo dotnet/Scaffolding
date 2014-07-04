@@ -14,7 +14,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void GetAliasAttribute_Returns_Correct_Value()
         {
             //Arrange
-            var testType = typeof(ClassWithAlias).TypeInfoFromType();
+            var testType = typeof(ClassWithAlias);
 
             //Act
             var attribute = testType.GetAliasAttribute();
@@ -27,8 +27,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void GetOptionAttribute_Returns_Correct_Value()
         {
             //Arrange
-            var testType = typeof(ClassWithAlias).TypeInfoFromType();
-            var testProp = testType.GetProperty("PropertyWithOptionAttribute");
+            var testProp = typeof(ClassWithAlias).GetProperty("PropertyWithOptionAttribute");
 
             //Act
             var attribute = testProp.GetOptionAttribute();
@@ -44,8 +43,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void GetArgumentAttribute_Returns_Correct_Value()
         {
             //Arrange
-            var testType = typeof(ClassWithAlias).TypeInfoFromType();
-            var testProp = testType.GetProperty("PropertyWithArgumentAttribute");
+            var testProp = typeof(ClassWithAlias).GetProperty("PropertyWithArgumentAttribute");
 
             //Act
             var attribute = testProp.GetArgumentAttribute();

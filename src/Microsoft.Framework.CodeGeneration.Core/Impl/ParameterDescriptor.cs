@@ -9,7 +9,7 @@ using Microsoft.Framework.Runtime.Common.CommandLine;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal class ParameterDescriptor
+    public class ParameterDescriptor
     {
         private Func<object> _valueAccessor;
 

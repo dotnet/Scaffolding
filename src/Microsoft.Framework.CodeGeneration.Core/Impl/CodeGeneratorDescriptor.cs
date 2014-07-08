@@ -10,12 +10,12 @@ using Microsoft.Framework.Runtime.Common.CommandLine;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    public class CodeGeneratorDescriptor
+    public class CodeGeneratorDescriptor : ICodeGeneratorDescriptor
     {
         private TypeInfo _codeGeneratorType;
         private ITypeActivator _typeActivator;
         private IServiceProvider _serviceProvider;
-        private ActionInvoker _codeGeneratorAction;
+        private ActionDescriptor _codeGeneratorAction;
 
         public CodeGeneratorDescriptor([NotNull]TypeInfo codeGeneratorType,
             [NotNull]ITypeActivator typeActivator,
@@ -37,19 +37,7 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        internal object CreateCodeGeneratorInstace()
-        {
-            var instance = _typeActivator.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
-
-            if (instance == null)
-            {
-                throw new Exception("There was an error creating the code generator instance: " + _codeGeneratorType.FullName);
-            }
-
-            return instance;
-        }
-
-        private ActionInvoker CodeGeneratorAction
+        public IActionDescriptor CodeGeneratorAction
         {
             get
             {
@@ -69,23 +57,28 @@ namespace Microsoft.Framework.CodeGeneration
                         throw new Exception("Multiple GenerateCode methods with a model parameter are found in class: " + _codeGeneratorType.FullName);
                     }
 
-                    _codeGeneratorAction = new ActionInvoker(this, candidates.First());
+                    _codeGeneratorAction = new ActionDescriptor(this, candidates.First());
                 }
                 return _codeGeneratorAction;
             }
         }
 
-        public void Execute(string[] args)
+        public object CodeGeneratorInstance
         {
-            var app = new CommandLineApplication();
-
-            app.Command(Name, c =>
+            get
             {
-                c.HelpOption("-h|-?|--help");
-                CodeGeneratorAction.BuildCommandLine(c);
-            });
+                object instance;
+                try
+                {
+                    instance = _typeActivator.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
+                }
+                catch(Exception ex)
+                {
+                    throw new Exception("There was an error creating the code generator instance: " + _codeGeneratorType.FullName + "\r\n" + ex.Message);
+                }
 
-            app.Execute(args);
+                return instance;
+            }
         }
 
         private bool IsValidAction(MethodInfo method)

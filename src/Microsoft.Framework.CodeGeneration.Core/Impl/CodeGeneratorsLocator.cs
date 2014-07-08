@@ -12,29 +12,23 @@ namespace Microsoft.Framework.CodeGeneration
 {
     //Todo: Perhaps this should be internal, it's public right now for being able to access
     //it in CodeGeneration project.
-    public class CodeGeneratorsLocator
+    public class CodeGeneratorsLocator : ICodeGeneratorLocator
     {
-        private static readonly HashSet<string> _codeGenerationFrameworkAssemblies =
-            new HashSet<string>(StringComparer.Ordinal)
-            {
-                "Microsoft.Framework.CodeGeneration",
-            };
-
-        private ILibraryManager _libraryManager;
+        private ICodeGeneratorAssemblyProvider _assemblyProvider;
         private IServiceProvider _serviceProvider;
         private ITypeActivator _typeActivator;
 
         public CodeGeneratorsLocator(
             [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILibraryManager libraryManager)
+            [NotNull]ICodeGeneratorAssemblyProvider assemblyProvider)
         {
             _typeActivator = typeActivator;
             _serviceProvider = serviceProvider;
-            _libraryManager = libraryManager;
+            _assemblyProvider = assemblyProvider;
         }
 
-        public CodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
+        public ICodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
         {
             var candidates = CodeGenerators
                 .Where(gen => string.Equals(gen.Name, codeGeneratorName, StringComparison.OrdinalIgnoreCase));
@@ -54,28 +48,18 @@ namespace Microsoft.Framework.CodeGeneration
             return candidates.First();
         }
 
-        public IEnumerable<CodeGeneratorDescriptor> CodeGenerators
+        public IEnumerable<ICodeGeneratorDescriptor> CodeGenerators
         {
             get
             {
                 var descriptors = new List<CodeGeneratorDescriptor>();
 
-                var libs = _codeGenerationFrameworkAssemblies
-                    .SelectMany(_libraryManager.GetReferencingLibraries)
-                    .Distinct()
-                    .Where(IsCandidateLibrary);
-
-                foreach (var lib in libs)
+                foreach (var assembly in _assemblyProvider.CandidateAssemblies)
                 {
-                    var assembly = Assembly.Load(new AssemblyName(lib.Name));
-
-                    if (assembly != null)
-                    {
-                        descriptors.AddRange(assembly
-                            .DefinedTypes
-                            .Where(IsCodeGenerator)
-                            .Select(typeInfo => DescriptorFromTypeInfo(typeInfo)));
-                    }
+                    descriptors.AddRange(assembly
+                        .DefinedTypes
+                        .Where(IsCodeGenerator)
+                        .Select(typeInfo => DescriptorFromTypeInfo(typeInfo)));
                 }
 
                 return descriptors;
@@ -98,11 +82,6 @@ namespace Microsoft.Framework.CodeGeneration
 
             return typeInfo.Name.EndsWith("CodeGenerator", StringComparison.OrdinalIgnoreCase) ||
                 typeof(ICodeGenerator).GetTypeInfo().IsAssignableFrom(typeInfo);
-        }
-
-        private bool IsCandidateLibrary(ILibraryInformation library)
-        {
-            return !_codeGenerationFrameworkAssemblies.Contains(library.Name);
         }
     }
 }

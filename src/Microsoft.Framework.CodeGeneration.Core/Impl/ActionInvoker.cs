@@ -12,67 +12,23 @@ namespace Microsoft.Framework.CodeGeneration
 {
     internal class ActionInvoker
     {
-        private Type _actionModel;
         private List<ParameterDescriptor> _parameters;
-        private CodeGeneratorDescriptor _descriptor;
-        private MethodInfo _method;
 
-        public ActionInvoker([NotNull]CodeGeneratorDescriptor descriptor,
-            [NotNull]MethodInfo method)
+        public IActionDescriptor ActionDescriptor
         {
-            _method = method;
-            _descriptor = descriptor;
+            get;
+            private set;
         }
 
-        public Type ActionModel
+        public ActionInvoker([NotNull]IActionDescriptor descriptor)
         {
-            get
-            {
-                if (_actionModel == null)
-                {
-                    var parameters = _method.GetParameters();
-                    Contract.Assert(parameters.Count() == 1);
-
-                    _actionModel = parameters.First().ParameterType;
-                }
-                return _actionModel;
-            }
+            ActionDescriptor = descriptor;
         }
 
-        public List<ParameterDescriptor> Parameters
-        {
-            get
-            {
-                if (_parameters == null)
-                {
-                    //ToDo: Should we filter indexed parameters?
-                    _parameters = ActionModel.GetTypeInfo()
-                        .DeclaredProperties
-                        .Where(pi => IsCandidateProperty(pi))
-                        .Select(pi => new ParameterDescriptor(pi))
-                        .ToList();
-                }
-                return _parameters;
-            }
-        }
-
-        private bool IsCandidateProperty(PropertyInfo property)
-        {
-            return property.CanWrite && IsSupportedPropertyType(property.PropertyType);
-        }
-
-        private bool IsSupportedPropertyType(Type propertyType)
-        {
-            //TodO: This can be improved to support more types that can convert from string.
-            //If we do that, we need to change the valueAccessor in ParameterDescriptor to
-            //convert the value from command line to target type.
-            return propertyType == typeof(string) ||
-                propertyType == typeof(bool);
-        }
 
         internal void BuildCommandLine(CommandLineApplication command)
         {
-            foreach (var param in Parameters)
+            foreach (var param in ActionDescriptor.Parameters)
             {
                 param.AddCommandLineParameterTo(command);
             }
@@ -82,23 +38,23 @@ namespace Microsoft.Framework.CodeGeneration
                 object modelInstance;
                 try
                 {
-                    modelInstance = Activator.CreateInstance(ActionModel);
+                    modelInstance = Activator.CreateInstance(ActionDescriptor.ActionModel);
                 }
                 catch (Exception ex)
                 {
                     throw new Exception("There was an error attempting to create an instace of model for GenerateCode method: " + ex.Message);
                 }
 
-                foreach (var param in Parameters)
+                foreach (var param in ActionDescriptor.Parameters)
                 {
                     param.Property.SetValue(modelInstance, param.Value);
                 }
 
-                var codeGeneratorInstance = _descriptor.CreateCodeGeneratorInstace();
+                var codeGeneratorInstance = ActionDescriptor.Generator.CodeGeneratorInstance;
 
                 try
                 {
-                    _method.Invoke(codeGeneratorInstance, new[] { modelInstance });
+                    ActionDescriptor.ActionMethod.Invoke(codeGeneratorInstance, new[] { modelInstance });
                 }
                 catch (TargetInvocationException ex)
                 {
@@ -107,6 +63,19 @@ namespace Microsoft.Framework.CodeGeneration
 
                 return 0;
             };
+        }
+
+        public void Execute(string[] args)
+        {
+            var app = new CommandLineApplication();
+
+            app.Command(ActionDescriptor.Generator.Name, c =>
+            {
+                c.HelpOption("-h|-?|--help");
+                BuildCommandLine(c);
+            });
+
+            app.Execute(args);
         }
     }
 }

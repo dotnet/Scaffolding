@@ -23,7 +23,7 @@ namespace Microsoft.Framework.CodeGeneration
             Console.WriteLine("Attach Debugger");
             Console.Read();
 
-            var generatorsLocator = _serviceProvider.GetService<CodeGeneratorsLocator>();
+            var generatorsLocator = _serviceProvider.GetService<ICodeGeneratorLocator>();
 
             if (args == null || args.Length == 0)
             {
@@ -34,10 +34,11 @@ namespace Microsoft.Framework.CodeGeneration
             var codeGeneratorName = args[0];
             var generator = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
-            generator.Execute(args);
+            var generatorInvoker = new CodeGeneratorInvoker(generator);
+            generatorInvoker.Execute(args);
         }
 
-        private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
+        private void ShowCodeGeneratorList(IEnumerable<ICodeGeneratorDescriptor> codeGenerators)
         {
             var logger = _serviceProvider.GetService<ILogger>();
 
@@ -65,7 +66,8 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.Add(typeof(ITypeActivator), typeActivator);
 
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
-            serviceProvider.AddServiceWithDependencies<CodeGeneratorsLocator, CodeGeneratorsLocator>();
+            serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
+            serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
         }
     }
 }

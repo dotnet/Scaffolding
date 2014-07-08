@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Runtime.Common.CommandLine;
-using RuntimeOptionType = Microsoft.Framework.Runtime.Common.CommandLine.CommandOptionType;
 
 namespace Microsoft.Framework.CodeGeneration
 {

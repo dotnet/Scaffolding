@@ -33,10 +33,9 @@
     <Compile Include="CommandLine\ArgumentAttribute.cs" />
     <Compile Include="CommandLine\OptionAttribute.cs" />
     <Compile Include="Def\IActionDescriptor.cs" />
-    <Compile Include="Def\IActionInvoker.cs" />
     <Compile Include="Def\ICodeGenerator.cs" />
+    <Compile Include="Def\ICodeGeneratorAssemblyProvider.cs" />
     <Compile Include="Def\ICodeGeneratorDescriptor.cs" />
-    <Compile Include="Def\ICodeGeneratorInvoker.cs" />
     <Compile Include="Def\ICodeGeneratorLocator.cs" />
     <Compile Include="Def\ILogger.cs" />
     <Compile Include="Def\LogMessageLevel.cs" />
@@ -46,6 +45,7 @@
     <Compile Include="Impl\CodeGeneratorInvoker.cs" />
     <Compile Include="Impl\CodeGeneratorsLocator.cs" />
     <Compile Include="Impl\ConsoleLogger.cs" />
+    <Compile Include="Impl\DefaultCodeGeneratorAssemblyProvider.cs" />
     <Compile Include="Impl\MemberInfoExtensions.cs" />
     <Compile Include="Impl\ParameterDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

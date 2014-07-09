@@ -14,7 +14,7 @@ namespace Microsoft.Framework.CodeGeneration
         private Type _actionModel;
         private List<ParameterDescriptor> _parameters;
 
-        public ActionDescriptor([NotNull]ICodeGeneratorDescriptor descriptor,
+        public ActionDescriptor([NotNull]CodeGeneratorDescriptor descriptor,
             [NotNull]MethodInfo method)
         {
             Generator = descriptor;
@@ -42,7 +42,7 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        public ICodeGeneratorDescriptor Generator
+        public CodeGeneratorDescriptor Generator
         {
             get;
             private set;

@@ -8,7 +8,7 @@ using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    public class CodeGeneratorDescriptor : ICodeGeneratorDescriptor
+    public class CodeGeneratorDescriptor
     {
         private TypeInfo _codeGeneratorType;
         private ITypeActivator _typeActivator;
@@ -26,7 +26,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         //Todo: Right now this assumes we allow invocation only on Alias if one exists
         //and only fallback to type name otherwise. Perhaps we may need to support both?
-        public string Name
+        public virtual string Name
         {
             get
             {
@@ -35,7 +35,7 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        public ActionDescriptor CodeGeneratorAction
+        public virtual ActionDescriptor CodeGeneratorAction
         {
             get
             {
@@ -61,7 +61,7 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        public object CodeGeneratorInstance
+        public virtual object CodeGeneratorInstance
         {
             get
             {

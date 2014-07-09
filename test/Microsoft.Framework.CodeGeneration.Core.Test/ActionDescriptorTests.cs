@@ -3,6 +3,8 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
+using Microsoft.Framework.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -14,7 +16,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void ActionDescriptor_ActionModel_Returns_Correct_Type()
         {
             //Arrange
-            var genDescriptorMock = new Mock<ICodeGeneratorDescriptor>();
+            var genDescriptorMock = GetMockDescriptor(typeof(CodeGeneratorSample).GetTypeInfo());
             var actionDescriptor = new ActionDescriptor(genDescriptorMock.Object,
                 typeof(CodeGeneratorSample).GetMethod("GenerateCode"));
 
@@ -29,7 +31,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void ActionDescriptor_Parameters_Returns_Parameters_Writeable_And_Of_Supported_Type()
         {
             //Arrange
-            var genDescriptorMock = new Mock<ICodeGeneratorDescriptor>();
+            var genDescriptorMock = GetMockDescriptor(typeof(CodeGeneratorSample).GetTypeInfo());
             var actionDescriptor = new ActionDescriptor(genDescriptorMock.Object,
                 typeof(CodeGeneratorSample).GetMethod("GenerateCode"));
 
@@ -40,6 +42,15 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             var propertyNames = parameters.Select(pd => pd.Property.Name);
             var expectedProperties = new[] { "StringProperty", "BoolProperty" }.ToList();
             Assert.Equal(expectedProperties, propertyNames, StringComparer.Ordinal);
+        }
+
+        private Mock<CodeGeneratorDescriptor> GetMockDescriptor(TypeInfo generatorTypeInfo)
+        {
+            var typeActivatorMock = new Mock<ITypeActivator>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            return new Mock<CodeGeneratorDescriptor>(generatorTypeInfo,
+                typeActivatorMock.Object,
+                serviceProviderMock.Object);
         }
 
         private class CodeGeneratorSample

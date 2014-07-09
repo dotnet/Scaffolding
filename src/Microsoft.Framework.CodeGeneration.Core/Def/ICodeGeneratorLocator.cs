@@ -7,8 +7,8 @@ namespace Microsoft.Framework.CodeGeneration
 {
     public interface ICodeGeneratorLocator
     {
-        IEnumerable<ICodeGeneratorDescriptor> CodeGenerators { get; }
+        IEnumerable<CodeGeneratorDescriptor> CodeGenerators { get; }
 
-        ICodeGeneratorDescriptor GetCodeGenerator(string codeGeneratorName);
+        CodeGeneratorDescriptor GetCodeGenerator(string codeGeneratorName);
     }
 }

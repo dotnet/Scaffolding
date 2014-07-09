@@ -36,7 +36,7 @@ namespace Microsoft.Framework.CodeGeneration
             generatorInvoker.Execute(args);
         }
 
-        private void ShowCodeGeneratorList(IEnumerable<ICodeGeneratorDescriptor> codeGenerators)
+        private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
             var logger = _serviceProvider.GetService<ILogger>();
 

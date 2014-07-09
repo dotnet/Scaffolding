@@ -34,7 +34,6 @@
     <Compile Include="CommandLine\OptionAttribute.cs" />
     <Compile Include="Def\ICodeGenerator.cs" />
     <Compile Include="Def\ICodeGeneratorAssemblyProvider.cs" />
-    <Compile Include="Def\ICodeGeneratorDescriptor.cs" />
     <Compile Include="Def\ICodeGeneratorLocator.cs" />
     <Compile Include="Def\ILogger.cs" />
     <Compile Include="Def\LogMessageLevel.cs" />

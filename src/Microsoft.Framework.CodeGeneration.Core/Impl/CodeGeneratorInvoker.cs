@@ -7,12 +7,12 @@ namespace Microsoft.Framework.CodeGeneration
     //Is this class really necessary?
     public class CodeGeneratorInvoker
     {
-        public CodeGeneratorInvoker([NotNull]ICodeGeneratorDescriptor descriptor)
+        public CodeGeneratorInvoker([NotNull]CodeGeneratorDescriptor descriptor)
         {
             CodeGeneratorDescriptor = descriptor;
         }
 
-        public ICodeGeneratorDescriptor CodeGeneratorDescriptor
+        public CodeGeneratorDescriptor CodeGeneratorDescriptor
         {
             get;
             private set;

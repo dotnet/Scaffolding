@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Reflection;
+using Microsoft.Framework.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -21,13 +23,20 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 methodCalled = true;
                 invokedModel = model;
             });
-            var generatorMock = new Mock<ICodeGeneratorDescriptor>();
+
+            var typeActivatorMock = new Mock<ITypeActivator>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            var generatorMock = new Mock<CodeGeneratorDescriptor>(typeof(CodeGeneratorSample).GetTypeInfo(),
+                typeActivatorMock.Object,
+                serviceProviderMock.Object);
+
             generatorMock
                 .SetupGet(cd => cd.CodeGeneratorInstance)
                 .Returns(codeGenInstance);
             generatorMock
                 .SetupGet(cd => cd.Name)
                 .Returns(typeof(CodeGeneratorSample).Name);
+
             var actionDescriptor = new ActionDescriptor(generatorMock.Object,
                 typeof(CodeGeneratorSample).GetMethod("GenerateCode")); //This is not a perfect unit test as the arrange is using actual instance rather than a mock
 

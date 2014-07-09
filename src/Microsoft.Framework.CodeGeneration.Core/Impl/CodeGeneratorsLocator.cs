@@ -27,7 +27,7 @@ namespace Microsoft.Framework.CodeGeneration
             _assemblyProvider = assemblyProvider;
         }
 
-        public ICodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
+        public CodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
         {
             var candidates = CodeGenerators
                 .Where(gen => string.Equals(gen.Name, codeGeneratorName, StringComparison.OrdinalIgnoreCase));
@@ -47,7 +47,7 @@ namespace Microsoft.Framework.CodeGeneration
             return candidates.First();
         }
 
-        public IEnumerable<ICodeGeneratorDescriptor> CodeGenerators
+        public IEnumerable<CodeGeneratorDescriptor> CodeGenerators
         {
             get
             {

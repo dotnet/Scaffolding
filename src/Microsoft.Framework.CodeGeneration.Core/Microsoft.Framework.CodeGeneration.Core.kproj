@@ -32,7 +32,6 @@
     <Compile Include="CommandLine\AliasAttribute.cs" />
     <Compile Include="CommandLine\ArgumentAttribute.cs" />
     <Compile Include="CommandLine\OptionAttribute.cs" />
-    <Compile Include="Def\IActionDescriptor.cs" />
     <Compile Include="Def\ICodeGenerator.cs" />
     <Compile Include="Def\ICodeGeneratorAssemblyProvider.cs" />
     <Compile Include="Def\ICodeGeneratorDescriptor.cs" />

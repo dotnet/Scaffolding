@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    public class ActionDescriptor : IActionDescriptor
+    public class ActionDescriptor
     {
         private Type _actionModel;
         private List<ParameterDescriptor> _parameters;

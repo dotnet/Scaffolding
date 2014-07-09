@@ -8,7 +8,7 @@ namespace Microsoft.Framework.CodeGeneration
     {
         string Name { get; }
 
-        IActionDescriptor CodeGeneratorAction { get; }
+        ActionDescriptor CodeGeneratorAction { get; }
 
         object CodeGeneratorInstance { get; }
     }

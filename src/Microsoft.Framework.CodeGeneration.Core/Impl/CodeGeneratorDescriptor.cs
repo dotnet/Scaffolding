@@ -35,7 +35,7 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        public IActionDescriptor CodeGeneratorAction
+        public ActionDescriptor CodeGeneratorAction
         {
             get
             {

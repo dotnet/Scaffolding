@@ -12,17 +12,16 @@ namespace Microsoft.Framework.CodeGeneration
     {
         private List<ParameterDescriptor> _parameters;
 
-        public IActionDescriptor ActionDescriptor
-        {
-            get;
-            private set;
-        }
-
-        public ActionInvoker([NotNull]IActionDescriptor descriptor)
+        public ActionInvoker([NotNull]ActionDescriptor descriptor)
         {
             ActionDescriptor = descriptor;
         }
 
+        public ActionDescriptor ActionDescriptor
+        {
+            get;
+            private set;
+        }
 
         internal void BuildCommandLine(CommandLineApplication command)
         {

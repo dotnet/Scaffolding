@@ -13,9 +13,9 @@ namespace Microsoft.Framework.CodeGeneration
     //it in CodeGeneration project.
     public class CodeGeneratorsLocator : ICodeGeneratorLocator
     {
-        private ICodeGeneratorAssemblyProvider _assemblyProvider;
-        private IServiceProvider _serviceProvider;
-        private ITypeActivator _typeActivator;
+        private readonly ICodeGeneratorAssemblyProvider _assemblyProvider;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ITypeActivator _typeActivator;
 
         public CodeGeneratorsLocator(
             [NotNull]ITypeActivator typeActivator,

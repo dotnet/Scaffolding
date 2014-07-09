@@ -10,9 +10,9 @@ namespace Microsoft.Framework.CodeGeneration
 {
     public class CodeGeneratorDescriptor
     {
-        private TypeInfo _codeGeneratorType;
-        private ITypeActivator _typeActivator;
-        private IServiceProvider _serviceProvider;
+        private readonly TypeInfo _codeGeneratorType;
+        private readonly ITypeActivator _typeActivator;
+        private readonly IServiceProvider _serviceProvider;
         private ActionDescriptor _codeGeneratorAction;
 
         public CodeGeneratorDescriptor([NotNull]TypeInfo codeGeneratorType,

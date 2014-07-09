@@ -17,7 +17,7 @@ namespace Microsoft.Framework.CodeGeneration
                 "Microsoft.Framework.CodeGeneration",
             };
 
-        private ILibraryManager _libraryManager;
+        private readonly ILibraryManager _libraryManager;
 
         public DefaultCodeGeneratorAssemblyProvider([NotNull]ILibraryManager libraryManager)
         {

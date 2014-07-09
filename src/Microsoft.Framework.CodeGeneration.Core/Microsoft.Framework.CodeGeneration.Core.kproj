@@ -40,7 +40,6 @@
     <Compile Include="Impl\ActionDescriptor.cs" />
     <Compile Include="Impl\ActionInvoker.cs" />
     <Compile Include="Impl\CodeGeneratorDescriptor.cs" />
-    <Compile Include="Impl\CodeGeneratorInvoker.cs" />
     <Compile Include="Impl\CodeGeneratorsLocator.cs" />
     <Compile Include="Impl\ConsoleLogger.cs" />
     <Compile Include="Impl\DefaultCodeGeneratorAssemblyProvider.cs" />

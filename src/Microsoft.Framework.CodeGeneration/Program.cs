@@ -30,10 +30,10 @@ namespace Microsoft.Framework.CodeGeneration
             }
 
             var codeGeneratorName = args[0];
-            var generator = generatorsLocator.GetCodeGenerator(codeGeneratorName);
+            var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
-            var generatorInvoker = new CodeGeneratorInvoker(generator);
-            generatorInvoker.Execute(args);
+            var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
+            actionInvoker.Execute(args);
         }
 
         private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)

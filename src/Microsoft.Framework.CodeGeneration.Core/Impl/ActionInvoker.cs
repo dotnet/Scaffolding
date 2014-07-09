@@ -8,7 +8,7 @@ using Microsoft.Framework.Runtime.Common.CommandLine;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal class ActionInvoker
+    public class ActionInvoker
     {
         private List<ParameterDescriptor> _parameters;
 
@@ -21,6 +21,19 @@ namespace Microsoft.Framework.CodeGeneration
         {
             get;
             private set;
+        }
+
+        public void Execute(string[] args)
+        {
+            var app = new CommandLineApplication();
+
+            app.Command(ActionDescriptor.Generator.Name, c =>
+            {
+                c.HelpOption("-h|-?|--help");
+                BuildCommandLine(c);
+            });
+
+            app.Execute(args);
         }
 
         internal void BuildCommandLine(CommandLineApplication command)
@@ -60,19 +73,6 @@ namespace Microsoft.Framework.CodeGeneration
 
                 return 0;
             };
-        }
-
-        public void Execute(string[] args)
-        {
-            var app = new CommandLineApplication();
-
-            app.Command(ActionDescriptor.Generator.Name, c =>
-            {
-                c.HelpOption("-h|-?|--help");
-                BuildCommandLine(c);
-            });
-
-            app.Execute(args);
         }
     }
 }

@@ -29,22 +29,22 @@
     <Content Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionDescriptor.cs" />
+    <Compile Include="ActionInvoker.cs" />
+    <Compile Include="CodeGeneratorDescriptor.cs" />
+    <Compile Include="CodeGeneratorsLocator.cs" />
     <Compile Include="CommandLine\AliasAttribute.cs" />
     <Compile Include="CommandLine\ArgumentAttribute.cs" />
     <Compile Include="CommandLine\OptionAttribute.cs" />
-    <Compile Include="Def\ICodeGenerator.cs" />
-    <Compile Include="Def\ICodeGeneratorAssemblyProvider.cs" />
-    <Compile Include="Def\ICodeGeneratorLocator.cs" />
-    <Compile Include="Def\ILogger.cs" />
-    <Compile Include="Def\LogMessageLevel.cs" />
-    <Compile Include="Impl\ActionDescriptor.cs" />
-    <Compile Include="Impl\ActionInvoker.cs" />
-    <Compile Include="Impl\CodeGeneratorDescriptor.cs" />
-    <Compile Include="Impl\CodeGeneratorsLocator.cs" />
-    <Compile Include="Impl\ConsoleLogger.cs" />
-    <Compile Include="Impl\DefaultCodeGeneratorAssemblyProvider.cs" />
-    <Compile Include="Impl\MemberInfoExtensions.cs" />
-    <Compile Include="Impl\ParameterDescriptor.cs" />
+    <Compile Include="ConsoleLogger.cs" />
+    <Compile Include="DefaultCodeGeneratorAssemblyProvider.cs" />
+    <Compile Include="ICodeGenerator.cs" />
+    <Compile Include="ICodeGeneratorAssemblyProvider.cs" />
+    <Compile Include="ICodeGeneratorLocator.cs" />
+    <Compile Include="ILogger.cs" />
+    <Compile Include="LogMessageLevel.cs" />
+    <Compile Include="MemberInfoExtensions.cs" />
+    <Compile Include="ParameterDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />

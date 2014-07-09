@@ -39,7 +39,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             //Assert
             var propertyNames = parameters.Select(pd => pd.Property.Name);
             var expectedProperties = new[] { "StringProperty", "BoolProperty" }.ToList();
-            Assert.Equal(expectedProperties, propertyNames, StringComparer.Ordinal); 
+            Assert.Equal(expectedProperties, propertyNames, StringComparer.Ordinal);
         }
 
         private class CodeGeneratorSample

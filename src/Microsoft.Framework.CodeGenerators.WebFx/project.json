@@ -4,13 +4,11 @@
         "Microsoft.Framework.CodeGeneration.Common": "",
         "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*"
     },
-
-    "configurations" : {
-        "net45" : { 
-            "dependencies": {
-            }
+    "configurations": {
+        "net45": {
+            "dependencies": { }
         },
-        "k10" : { 
+        "k10": {
             "dependencies": {
                 "System.Runtime": "4.0.20.0"
             }

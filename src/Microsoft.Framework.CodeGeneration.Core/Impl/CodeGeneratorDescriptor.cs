@@ -70,7 +70,7 @@ namespace Microsoft.Framework.CodeGeneration
                 {
                     instance = _typeActivator.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new Exception("There was an error creating the code generator instance: " + _codeGeneratorType.FullName + "\r\n" + ex.Message);
                 }

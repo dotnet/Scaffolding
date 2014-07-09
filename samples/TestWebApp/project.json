@@ -18,7 +18,7 @@
         "gen": "Microsoft.Framework.CodeGeneration" /*Add this command to you app*/
     },
     "configurations": {
-        "net451" : { },
-        "k10" : { }
+        "net451": { },
+        "k10": { }
     }
 }

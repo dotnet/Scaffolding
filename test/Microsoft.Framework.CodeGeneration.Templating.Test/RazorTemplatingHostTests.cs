@@ -24,7 +24,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
             Assert.Equal("WriteLiteral", host.GeneratedClassContext.WriteLiteralMethodName);
             Assert.Equal("WriteTo", host.GeneratedClassContext.WriteToMethodName);
             Assert.Equal("WriteLiteralTo", host.GeneratedClassContext.WriteLiteralToMethodName);
-            Assert.Equal("HelperResult", host.GeneratedClassContext.TemplateTypeName);
+            Assert.Equal("", host.GeneratedClassContext.TemplateTypeName);
         }
 
         private class MyBaseType

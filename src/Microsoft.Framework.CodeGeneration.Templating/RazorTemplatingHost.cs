@@ -31,7 +31,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating
                 writeLiteralMethodName: "WriteLiteral",
                 writeToMethodName: "WriteTo",
                 writeLiteralToMethodName: "WriteLiteralTo",
-                templateTypeName: "HelperResult")
+                templateTypeName: "")
             {
             };
 

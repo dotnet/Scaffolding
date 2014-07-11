@@ -31,7 +31,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating
             WriteLiteralTo(Output, value);
         }
 
-        public virtual void WriteLiteralTo(TextWriter writer, object text)
+        public virtual void WriteLiteralTo([NotNull]TextWriter writer, object text)
         {
             if (text != null)
             {
@@ -44,7 +44,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating
             WriteTo(Output, value);
         }
 
-        public virtual void WriteTo(TextWriter writer, object content)
+        public virtual void WriteTo([NotNull]TextWriter writer, object content)
         {
             if (content != null)
             {

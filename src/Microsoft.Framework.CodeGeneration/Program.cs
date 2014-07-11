@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Microsoft.Framework.CodeGeneration.Templating;
+using Microsoft.Framework.CodeGeneration.Templating.Compilation;
 using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.Framework.CodeGeneration
@@ -64,8 +66,12 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.Add(typeof(ITypeActivator), typeActivator);
 
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
+
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
+
+            serviceProvider.AddServiceWithDependencies<ICompilationService, RoslynCompilationService>();
+            serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
         }
     }
 }

@@ -1,15 +1,22 @@
 ﻿{
     "dependencies": {
+        "Microsoft.Framework.CodeGeneration.Common": "",
+        "Microsoft.AspNet.Razor": "4.0.0-*",
+        "K.Roslyn": "1.0.0-*",
+        "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*"
     },
 
     "configurations" : {
-        "net451" : { 
+        "net45" : { 
             "dependencies": {
             }
         },
         "k10" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20.0"
+                "System.Runtime": "4.0.20.0",
+                "System.Dynamic.Runtime": "4.0.0.0",
+                "System.Collections.Concurrent": "4.0.0.0",
+                "System.Reflection.TypeExtensions": "4.0.0.0"
             }
         }
     }

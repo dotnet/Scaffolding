@@ -40,9 +40,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             var actionDescriptor = new ActionDescriptor(generatorMock.Object,
                 typeof(CodeGeneratorSample).GetMethod("GenerateCode")); //This is not a perfect unit test as the arrange is using actual instance rather than a mock
 
-            var actionInvoker = new ActionInvoker(actionDescriptor,
-                typeActivatorMock.Object,
-                serviceProviderMock.Object);
+            var actionInvoker = new ActionInvoker(actionDescriptor);
 
             //Act
             actionInvoker.Execute("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' '));

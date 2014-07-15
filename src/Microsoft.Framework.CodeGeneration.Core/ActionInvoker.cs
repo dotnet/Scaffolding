@@ -12,16 +12,10 @@ namespace Microsoft.Framework.CodeGeneration
     public class ActionInvoker
     {
         private List<ParameterDescriptor> _parameters;
-        private readonly ITypeActivator _typeActivator;
-        private readonly IServiceProvider _serviceProvider;
 
-        public ActionInvoker([NotNull]ActionDescriptor descriptor,
-            [NotNull]ITypeActivator typeActivator,
-            [NotNull]IServiceProvider serviceProvider)
+        public ActionInvoker([NotNull]ActionDescriptor descriptor)
         {
             ActionDescriptor = descriptor;
-            _typeActivator = typeActivator;
-            _serviceProvider = serviceProvider;
         }
 
         public ActionDescriptor ActionDescriptor
@@ -55,7 +49,7 @@ namespace Microsoft.Framework.CodeGeneration
                 object modelInstance;
                 try
                 {
-                    modelInstance = _typeActivator.CreateInstance(_serviceProvider, ActionDescriptor.ActionModel);
+                    modelInstance = Activator.CreateInstance(ActionDescriptor.ActionModel);
                 }
                 catch (Exception ex)
                 {

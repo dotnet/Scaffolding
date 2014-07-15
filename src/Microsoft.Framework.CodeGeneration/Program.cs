@@ -34,9 +34,7 @@ namespace Microsoft.Framework.CodeGeneration
             var codeGeneratorName = args[0];
             var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
-            var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction,
-                _serviceProvider.GetService<ITypeActivator>(),
-                _serviceProvider);
+            var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
 
             actionInvoker.Execute(args);
         }

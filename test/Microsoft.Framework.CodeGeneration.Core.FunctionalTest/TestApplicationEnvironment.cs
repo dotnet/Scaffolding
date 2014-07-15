@@ -7,9 +7,7 @@ using Microsoft.Framework.Runtime;
 namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
 {
     // Represents an application environment that overrides the base path of the original
-    // application environment in order to make it point to the folder of the original web
-    // aplication so that components like ViewEngines can find views as if they were executing
-    // in a regular context.
+    // application environment in order to make it point to the test application folder.
     public class TestApplicationEnvironment : IApplicationEnvironment
     {
         private readonly IApplicationEnvironment _originalAppEnvironment;

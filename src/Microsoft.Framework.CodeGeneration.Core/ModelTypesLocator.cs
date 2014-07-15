@@ -23,28 +23,17 @@ namespace Microsoft.Framework.CodeGeneration
 
         public IEnumerable<ITypeSymbol> GetAllTypes()
         {
-            var projectReferences = _libraryManager.GetProjectsInApp(_application);
-
-            var types = projectReferences
-                .Select(compilation => GetTypesInCompilation(compilation.Compilation))
+            return _libraryManager
+                .GetProjectsInApp(_application)
+                .Select(compilation => GetDirectTypesInCompilation(compilation.Compilation))
                 .Aggregate((coll1, coll2) => coll1.Concat(coll2).ToList());
-
-            return types;
         }
 
         public IEnumerable<ITypeSymbol> GetType([NotNull]string typeName)
         {
-            var project = _libraryManager.GetProject(_application);
-
-            var exactTypeInCurrentProject = project.Compilation.GetTypeByMetadataName(typeName) as ITypeSymbol;
-            if (exactTypeInCurrentProject != null)
-            {
-                return new[] { exactTypeInCurrentProject };
-            }
-
             var exactTypesInAllProjects = _libraryManager
                 .GetProjectsInApp(_application)
-                .Select(comp => comp.Compilation.GetTypeByMetadataName(typeName) as ITypeSymbol)
+                .Select(comp => comp.Compilation.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
                 .Where(type => type != null);
 
             if (exactTypesInAllProjects.Any())
@@ -58,7 +47,7 @@ namespace Microsoft.Framework.CodeGeneration
                 .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
         }
 
-        private IEnumerable<ITypeSymbol> GetTypesInCompilation([NotNull]Compilation compilation)
+        private IEnumerable<ITypeSymbol> GetDirectTypesInCompilation([NotNull]Compilation compilation)
         {
             var types = new List<ITypeSymbol>();
             CollectTypes(compilation.Assembly.GlobalNamespace, types);

@@ -1,0 +1,26 @@
+﻿{
+    "dependencies": {
+        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Core": "",
+        "ModelTypesLocatorTestWebApp": "",
+        "Moq": "4.2.1312.1622",
+        "Xunit.KRunner": "1.0.0-*"
+    },
+
+    "commands": {
+        "test": "Xunit.KRunner"
+    },
+
+    "configurations" : {
+        "net451" : { 
+            "dependencies": {
+            }
+        },
+        "k10" : { 
+            "dependencies": {
+                "System.Runtime": "4.0.20.0"
+            }
+        }
+    }
+}

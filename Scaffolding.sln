@@ -35,6 +35,14 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGen
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Templating.Test", "test\Microsoft.Framework.CodeGeneration.Templating.Test\Microsoft.Framework.CodeGeneration.Templating.Test.kproj", "{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core.FunctionalTest", "test\Microsoft.Framework.CodeGeneration.Core.FunctionalTest\Microsoft.Framework.CodeGeneration.Core.FunctionalTest.kproj", "{84B1175D-923C-48E0-982B-3CB66B7C603D}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestWebApp", "test\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.kproj", "{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{40F75CAB-26AB-4BC4-8DC3-B401046EA5FC}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestClassLibrary", "test\TestApps\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.kproj", "{F6C4B32C-5F1A-4381-A763-E171F713732B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +81,18 @@ Global
 		{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84B1175D-923C-48E0-982B-3CB66B7C603D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84B1175D-923C-48E0-982B-3CB66B7C603D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84B1175D-923C-48E0-982B-3CB66B7C603D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84B1175D-923C-48E0-982B-3CB66B7C603D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6C4B32C-5F1A-4381-A763-E171F713732B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6C4B32C-5F1A-4381-A763-E171F713732B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6C4B32C-5F1A-4381-A763-E171F713732B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6C4B32C-5F1A-4381-A763-E171F713732B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,5 +106,9 @@ Global
 		{711EDEE0-E390-4A66-B0FD-AE058383B63A} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 		{FC8487B6-D0AA-4121-B23E-9ACDF134520B} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 		{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
+		{84B1175D-923C-48E0-982B-3CB66B7C603D} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
+		{3BFF833B-6E1B-4A0A-85E3-545DE528B66D} = {40F75CAB-26AB-4BC4-8DC3-B401046EA5FC}
+		{40F75CAB-26AB-4BC4-8DC3-B401046EA5FC} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
+		{F6C4B32C-5F1A-4381-A763-E171F713732B} = {40F75CAB-26AB-4BC4-8DC3-B401046EA5FC}
 	EndGlobalSection
 EndGlobal

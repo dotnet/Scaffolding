@@ -14,9 +14,9 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
     {
         private readonly ILogger _logger;
 
-        //Todo: Instead of each generator taking ILogger provide it in some base class?
-        //However for it to be effective, it should be property dependecy injection rather
-        //than constructor injection.
+        // Todo: Instead of each generator taking ILogger provide it in some base class?
+        // However for it to be effective, it should be property dependecy injection rather
+        // than constructor injection.
         public ViewGenerator([NotNull]ILogger logger)
         {
             _logger = logger;
@@ -33,10 +33,10 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             _logger.LogMessage("Provided DataContext Type: " + FullNameForType(viewGeneratorModel.DataContextType));
         }
 
-        //Perhaps find some existing utility in Roslyn or provide this as API?
+        // ToDo: Perhaps find some existing utility in Roslyn or provide this as API?
         private string FullNameForType([NotNull]ISymbol symbol)
         {
-            if (string.IsNullOrEmpty(symbol.ContainingNamespace.Name))
+            if (symbol.ContainingNamespace != null & string.IsNullOrEmpty(symbol.ContainingNamespace.Name))
             {
                 return symbol.Name;
             }

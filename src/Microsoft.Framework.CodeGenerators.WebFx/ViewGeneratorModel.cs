@@ -75,14 +75,16 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 return false;
             }
 
-            var candidateModelTypes = _modelTypesLocator.GetType(typeName);
-            if (!candidateModelTypes.Any())
+            var candidateModelTypes = _modelTypesLocator.GetType(typeName).ToList();
+
+            int count = candidateModelTypes.Count;
+            if (count == 0)
             {
                 errorMessage = string.Format("A type with the name {0} does not exist", typeName);
                 return false;
             }
 
-            if (candidateModelTypes.Count() > 1)
+            if (count > 1)
             {
                 errorMessage = string.Format(
                     "Multiple types matching the name {0} exist:{1}, please use a fully qualified name",

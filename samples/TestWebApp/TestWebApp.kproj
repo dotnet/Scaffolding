@@ -33,6 +33,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\Person.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>

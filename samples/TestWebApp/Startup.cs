@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.AspNet.Builder;
+﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Security;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.Security.Cookies;
 using Microsoft.Data.Entity;

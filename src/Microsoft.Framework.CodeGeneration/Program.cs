@@ -34,7 +34,10 @@ namespace Microsoft.Framework.CodeGeneration
             var codeGeneratorName = args[0];
             var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
-            var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
+            var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction,
+                _serviceProvider.GetService<ITypeActivator>(),
+                _serviceProvider);
+
             actionInvoker.Execute(args);
         }
 
@@ -72,6 +75,8 @@ namespace Microsoft.Framework.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<ICompilationService, RoslynCompilationService>();
             serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
+
+            serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
         }
     }
 }

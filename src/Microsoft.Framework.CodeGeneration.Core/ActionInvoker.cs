@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime.Common.CommandLine;
 
 namespace Microsoft.Framework.CodeGeneration
@@ -11,10 +12,16 @@ namespace Microsoft.Framework.CodeGeneration
     public class ActionInvoker
     {
         private List<ParameterDescriptor> _parameters;
+        private readonly ITypeActivator _typeActivator;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ActionInvoker([NotNull]ActionDescriptor descriptor)
+        public ActionInvoker([NotNull]ActionDescriptor descriptor,
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider)
         {
             ActionDescriptor = descriptor;
+            _typeActivator = typeActivator;
+            _serviceProvider = serviceProvider;
         }
 
         public ActionDescriptor ActionDescriptor
@@ -48,7 +55,7 @@ namespace Microsoft.Framework.CodeGeneration
                 object modelInstance;
                 try
                 {
-                    modelInstance = Activator.CreateInstance(ActionDescriptor.ActionModel);
+                    modelInstance = _typeActivator.CreateInstance(_serviceProvider, ActionDescriptor.ActionModel);
                 }
                 catch (Exception ex)
                 {
@@ -68,7 +75,7 @@ namespace Microsoft.Framework.CodeGeneration
                 }
                 catch (TargetInvocationException ex)
                 {
-                    throw new Exception("There was an error running the GenerateCode method: " + ex.Message);
+                    throw new Exception("There was an error running the GenerateCode method: " + ex.InnerException.Message);
                 }
 
                 return 0;

@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.AspNet.Identity.Entity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Data.Entity;
 using Microsoft.Framework.OptionsModel;
 
@@ -11,7 +11,7 @@ namespace TestWebApp.Models
 
     }
 
-    public class ApplicationDbContext : IdentitySqlContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         private static bool _created = false;
         

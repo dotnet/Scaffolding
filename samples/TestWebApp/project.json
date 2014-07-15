@@ -1,15 +1,15 @@
 ﻿{
     "dependencies": {
-        "EntityFramework.SqlServer": "7.0.0-alpha2",
-        "Microsoft.AspNet.Mvc": "6.0.0-alpha2",
-        "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-alpha2",
-        "Microsoft.AspNet.Identity.Authentication": "3.0.0-alpha2",
-        "Microsoft.AspNet.Security.Cookies": "1.0.0-alpha2",
-        "Microsoft.AspNet.Server.IIS": "1.0.0-alpha2",
-        "Microsoft.AspNet.Server.WebListener": "1.0.0-alpha2",
-        "Microsoft.AspNet.StaticFiles": "1.0.0-alpha2",
-        "Microsoft.Framework.ConfigurationModel.Json": "1.0.0-alpha2",
-        "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0-alpha2",
+        "EntityFramework.SqlServer": "7.0.0-*",
+        "Microsoft.AspNet.Mvc": "6.0.0-*",
+        "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-*",
+        "Microsoft.AspNet.Identity.Authentication": "3.0.0-*",
+        "Microsoft.AspNet.Security.Cookies": "1.0.0-*",
+        "Microsoft.AspNet.Server.IIS": "1.0.0-*",
+        "Microsoft.AspNet.Server.WebListener": "1.0.0-*",
+        "Microsoft.AspNet.StaticFiles": "1.0.0-*",
+        "Microsoft.Framework.ConfigurationModel.Json": "1.0.0-*",
+        "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0-*",
         "Microsoft.Framework.CodeGenerators.WebFx": "" /*Add code generator package to your app */
     },
     "commands": {

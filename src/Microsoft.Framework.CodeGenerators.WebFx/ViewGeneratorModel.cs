@@ -7,6 +7,10 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
 {
     public class ViewGeneratorModel
     {
+        public string ViewName { get; set; }
+
+        public string TemplateName { get; set; }
+
         [Option(Name = "model", ShortName = "m", Description = "Model class to use")]
         public string ModelClass { get; set; }
 
@@ -21,5 +25,8 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
 
         [Option(Name = "layout", ShortName = "l", Description = "Layout page to use, pass empty string if set in a Razor _viewStart file")]
         public string LayoutPage { get; set; }
+
+        [Option(Name = "useLayout", ShortName = "ul", Description = "Switch to specify whether to use a layout or not, if this is not present, --layout is ignored")]
+        public bool UseLayout { get; set; }
     }
 }

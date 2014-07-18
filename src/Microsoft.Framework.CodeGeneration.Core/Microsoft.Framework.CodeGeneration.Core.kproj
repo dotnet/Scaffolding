@@ -31,6 +31,9 @@
   <ItemGroup>
     <Compile Include="ActionDescriptor.cs" />
     <Compile Include="ActionInvoker.cs" />
+    <Compile Include="FilesLocator.cs" />
+    <Compile Include="IFilesLocator.cs" />
+    <Compile Include="ReflectionUtilities.cs" />
     <Compile Include="CodeGeneratorDescriptor.cs" />
     <Compile Include="CodeGeneratorsLocator.cs" />
     <Compile Include="CommandLine\AliasAttribute.cs" />

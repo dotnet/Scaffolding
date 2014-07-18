@@ -14,7 +14,8 @@ namespace Microsoft.Framework.CodeGeneration
         private IApplicationEnvironment _application;
         private ILibraryManager _libraryManager;
 
-        public ModelTypesLocator([NotNull]ILibraryManager libraryManager,
+        public ModelTypesLocator(
+            [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment application)
         {
             _libraryManager = libraryManager;

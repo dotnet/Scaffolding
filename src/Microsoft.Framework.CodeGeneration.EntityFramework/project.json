@@ -1,5 +1,9 @@
 ﻿{
     "dependencies": {
+        "EntityFramework": "7.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Common": "",
+        "Microsoft.Framework.CodeGeneration.Core": "",
+        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*"
     },
 
     "configurations" : {

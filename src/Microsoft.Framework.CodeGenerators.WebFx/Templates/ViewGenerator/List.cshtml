@@ -1,0 +1,134 @@
+﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.Framework.CodeGeneration.EntityFramework
+@@model @GetEnumerableTypeExpression(Model.ViewDataTypeName)
+@{
+    if (Model.IsPartialView)
+    {
+    }
+    else if (Model.IsLayoutPageSelected)
+    {
+<text>
+@@{
+    ViewBag.Title = "@Model.ViewName";
+</text>
+        if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+        {
+    @:@@Layout = "@Model.LayoutPageFile";
+        }
+@:}
+
+<h2>@Model.ViewName</h2>
+
+    }
+    else
+    {
+
+<text>
+@@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.ViewName</title>
+</head>
+<body>
+</text>
+        //    PushIndent("    ");
+    }
+}
+@{
+<text>
+<p>
+    @@Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+</text>
+    IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
+    foreach (var property in properties)
+    {
+        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+        {
+            // We do not want to show any association properties for which there is
+            // no associated foreign key.
+            if (property.IsAssociation) //Todo: GetRelatedModelMetadata(property) == null
+            {
+                continue;
+            }
+        <th>
+            @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+        </th>
+        }
+    }
+        @:<th></th>
+    @:</tr>
+@:@@foreach (var item in Model) {
+    @:<tr>
+    foreach (PropertyMetadata property in properties)
+    {
+        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+        {
+            // We do not want to show any association properties for which there is
+            // no associated foreign key.
+            if (property.IsAssociation) //Todo: GetRelatedModelMetadata(property) == null
+            {
+                continue;
+            }
+        <td>
+            @@Html.DisplayFor(modelItem => item.@GetValueExpression(property))
+        </td>
+        }
+    }
+
+    string pkName = GetPrimaryKeyName();
+    if (pkName != null)
+    {
+        <td>
+            @@Html.ActionLink("Edit", "Edit", new { id=item.@pkName }) |
+            @@Html.ActionLink("Details", "Details", new { id=item.@pkName }) |
+            @@Html.ActionLink("Delete", "Delete", new { id=item.@pkName })
+        </td>
+    }
+    else
+    {
+        <td>
+            @@Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+            @@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+            @@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+        </td>
+    }
+    @:</tr>
+@:}
+
+@:</table>
+    if(!Model.IsPartialView && !Model.IsLayoutPageSelected)
+    {
+        //ClearIndent();
+@:</body>
+@:</html>
+    }
+}
+@functions
+{
+    string GetPrimaryKeyName()
+    {
+        return (Model.ModelMetadata.PrimaryKeys != null && Model.ModelMetadata.PrimaryKeys.Length == 1)
+        ? Model.ModelMetadata.PrimaryKeys[0].PropertyName
+        : null;
+    }
+
+    string GetValueExpression(PropertyMetadata property)
+    {
+        //Todo: Get the association for the property and use that.
+        return property.PropertyName;
+    }
+
+    string GetEnumerableTypeExpression(string typeName)
+    {
+        return "IEnumerable<" + typeName + ">";
+    }
+}

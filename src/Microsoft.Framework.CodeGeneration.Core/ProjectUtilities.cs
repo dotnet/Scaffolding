@@ -45,10 +45,10 @@ namespace Microsoft.Framework.CodeGeneration
             var export = libraryManager.GetLibraryExport(environment.ApplicationName);
 
             return export.MetadataReferences
+                .OfType<IMetadataProjectReference>()
                 .OfType<IRoslynMetadataReference>()
                 .Select(reference => reference.MetadataReference as CompilationReference)
-                .Where(compilation => compilation != null &&
-                    !_frameworkProjectNames.Contains(compilation.Compilation.AssemblyName));
+                .Where(compilation => !_frameworkProjectNames.Contains(compilation.Compilation.AssemblyName));
         }
     }
 }

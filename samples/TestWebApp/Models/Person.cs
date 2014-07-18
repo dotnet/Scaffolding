@@ -9,6 +9,8 @@ namespace TestWebApp.Models
         public int PersonId { get; set; }
 
         public string Name { get; set; }
+
+        public bool BoolProperty { get; set; }
     }
 
     //Intentionally kept in this file rather than separate file for testing non-normal case.

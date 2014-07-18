@@ -2,6 +2,8 @@
     "dependencies": {
         "Microsoft.Framework.CodeGeneration": "",
         "Microsoft.Framework.CodeGeneration.Common": "",
+        "Microsoft.Framework.CodeGeneration.EntityFramework": "",
+        "Microsoft.Framework.CodeGeneration.Templating": "",
         "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*"
     },
     "configurations": {

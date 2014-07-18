@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Microsoft.Framework.CodeGeneration.EntityFramework;
 using Microsoft.Framework.CodeGeneration.Templating;
 using Microsoft.Framework.CodeGeneration.Templating.Compilation;
 using Microsoft.Framework.DependencyInjection;
@@ -67,6 +68,7 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.Add(typeof(ITypeActivator), typeActivator);
 
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
+            serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());
 
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
@@ -75,6 +77,7 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
+            serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }
     }
 }

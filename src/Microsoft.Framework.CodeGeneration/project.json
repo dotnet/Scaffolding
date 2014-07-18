@@ -4,6 +4,7 @@
         "Microsoft.Framework.CodeGeneration.Common": "",
         "Microsoft.Framework.CodeGeneration.Core": "",
         "Microsoft.Framework.CodeGeneration.Templating": "",
+        "Microsoft.Framework.CodeGeneration.EntityFramework": "",
         "Microsoft.Framework.CommandLineUtils": "1.0.0-*"
     },
     "configurations": {

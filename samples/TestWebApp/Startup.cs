@@ -31,10 +31,9 @@ namespace TestWebApp
                 {
                     options.UseSqlServer(configuration.Get("Data:DefaultConnection:ConnectionString"));
                 });
-                
+
                 // Add Identity services to the services container
-                services.AddIdentity<ApplicationUser>()
-                    .AddEntityFramework<ApplicationUser, ApplicationDbContext>()
+                services.AddIdentitySqlServer<ApplicationDbContext, ApplicationUser>()
                     .AddHttpSignIn();
 
                 // Add MVC services to the services container

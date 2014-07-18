@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Data.Entity;
 using Microsoft.Framework.OptionsModel;
@@ -6,7 +7,7 @@ using Microsoft.Framework.OptionsModel;
 namespace TestWebApp.Models
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : User
+    public class ApplicationUser : IdentityUser
     {
 
     }

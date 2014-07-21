@@ -98,7 +98,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 IsLayoutPageSelected = viewGeneratorModel.UseLayout,
                 IsPartialView = viewGeneratorModel.PartialView,
                 ReferenceScriptLibraries = viewGeneratorModel.ReferenceScriptLibraries,
-                IsBundleConfigPresent = false, //Todo
                 ModelMetadata = modelMetadata,
                 JQueryVersion = "1.10.2" //Todo
             };

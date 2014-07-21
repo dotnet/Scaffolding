@@ -29,8 +29,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
 
         public bool ReferenceScriptLibraries { get; set; }
 
-        public bool IsBundleConfigPresent { get; set; }
-
         public ModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }

@@ -40,21 +40,11 @@
 </text>
         //    PushIndent("    ");
     }
-    if (Model.ReferenceScriptLibraries)
+    if (Model.ReferenceScriptLibraries && !Model.IsLayoutPageSelected)
     {
-        if (!Model.IsLayoutPageSelected && Model.IsBundleConfigPresent)
-        {
-<text>
-@@Scripts.Render("~/bundles/jquery")
-@@Scripts.Render("~/bundles/jqueryval")
-</text>
-        }
-        else if (!Model.IsLayoutPageSelected)
-        {
 @:<script src="~/Scripts/jquery-@(Model.JQueryVersion).min.js"></script>
 @:<script src="~/Scripts/jquery.validate.min.js"></script>
 @:<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
-        }
     }
 }
 @@using (Html.BeginForm()) 
@@ -132,16 +122,7 @@
     @@Html.ActionLink("Back to List", "Index")
 </div>
 @{
-    if (Model.IsLayoutPageSelected && Model.ReferenceScriptLibraries && Model.IsBundleConfigPresent)
-    {
-<text>
-
-@@section Scripts {
-    @@Scripts.Render("~/bundles/jqueryval")
-}
-</text>
-    }
-    else if (Model.IsLayoutPageSelected && Model.ReferenceScriptLibraries)
+    if (Model.IsLayoutPageSelected && Model.ReferenceScriptLibraries)
     {
 
 @:<script src="~/Scripts/jquery-@(Model.JQueryVersion).min.js"></script>

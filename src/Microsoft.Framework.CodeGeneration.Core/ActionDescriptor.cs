@@ -56,7 +56,7 @@ namespace Microsoft.Framework.CodeGeneration
                 {
                     //ToDo: Should we filter indexed parameters?
                     _parameters = ActionModel.GetTypeInfo()
-                        .DeclaredProperties
+                        .GetProperties()
                         .Where(pi => IsCandidateProperty(pi))
                         .Select(pi => new ParameterDescriptor(pi))
                         .ToList();

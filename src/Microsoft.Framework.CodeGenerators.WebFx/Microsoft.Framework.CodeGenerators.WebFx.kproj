@@ -34,7 +34,9 @@
     <Content Include="Templates\ViewGenerator\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommanCommandLineModel.cs" />
     <Compile Include="ControllerCodeGenerator.cs" />
+    <Compile Include="ControllerGeneratorModel.cs" />
     <Compile Include="ViewGenerator.cs" />
     <Compile Include="ViewGeneratorModel.cs" />
     <Compile Include="ViewGeneratorTemplateModel.cs" />

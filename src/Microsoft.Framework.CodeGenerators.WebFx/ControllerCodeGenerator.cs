@@ -29,34 +29,10 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         private void GenerateCode([NotNull]ControllerGeneratorModel model)
         {
             _logger.LogMessage("Values passed:");
-            _logger.LogMessage("Model: " + model.Model);
-            _logger.LogMessage("DataContext: " + model.DataContext);
+            _logger.LogMessage("Model: " + model.ModelClass);
+            _logger.LogMessage("DataContext: " + model.DataContextClass);
             _logger.LogMessage("GenerateViews: " + model.GenerateViews);
             _logger.LogMessage("ReferenceScriptLibraries: " + model.ReferenceScriptLibraries);
-            _logger.LogMessage("TestProperty: " + model.TestProperty);
-        }
-
-        private class ControllerGeneratorModel
-        {
-            [Argument(Description = "Model class to be used")]
-            public string Model { get; set; }
-
-            [Option(DefaultValue = "", Description = "Data Context Class to use", ShortName = "dc")]
-            public string DataContext { get; set; }
-
-            [Option(Description = "Switch to indicate whether to generate views or not", ShortName = "views")]
-            public bool GenerateViews { get; set; }
-
-            //Any bool property is considered an option by default.
-            public bool ReferenceScriptLibraries { get; set; }
-
-            //For string properties ArgumentAttribute is optional.
-            //Private properties also become the command line model, should that be changed?
-            //private string NonPublicProperty { get; set; }
-
-            //Right now any types that are not strings or bools are not considered
-            //for command line.
-            public int TestProperty { get; set; }
         }
     }
 }

@@ -34,9 +34,12 @@
     <Content Include="Templates\ViewGenerator\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGeneratorBase.cs" />
     <Compile Include="CommanCommandLineModel.cs" />
     <Compile Include="ControllerCodeGenerator.cs" />
     <Compile Include="ControllerGeneratorModel.cs" />
+    <Compile Include="RoslynUtilities.cs" />
+    <Compile Include="ValidationUtil.cs" />
     <Compile Include="ViewGenerator.cs" />
     <Compile Include="ViewGeneratorModel.cs" />
     <Compile Include="ViewGeneratorTemplateModel.cs" />

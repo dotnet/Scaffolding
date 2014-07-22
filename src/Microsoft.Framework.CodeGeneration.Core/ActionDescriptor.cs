@@ -54,9 +54,8 @@ namespace Microsoft.Framework.CodeGeneration
             {
                 if (_parameters == null)
                 {
-                    //ToDo: Should we filter indexed parameters?
-                    _parameters = ActionModel.GetTypeInfo()
-                        .GetProperties()
+                    _parameters = ActionModel
+                        .GetRuntimeProperties()
                         .Where(pi => IsCandidateProperty(pi))
                         .Select(pi => new ParameterDescriptor(pi))
                         .ToList();
@@ -65,9 +64,11 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        private bool IsCandidateProperty(PropertyInfo property)
+        private bool IsCandidateProperty([NotNull]PropertyInfo property)
         {
-            return property.CanWrite && IsSupportedPropertyType(property.PropertyType);
+            return property.CanWrite &&
+                property.GetIndexParameters().Length == 0 &&
+                IsSupportedPropertyType(property.PropertyType);
         }
 
         private bool IsSupportedPropertyType(Type propertyType)

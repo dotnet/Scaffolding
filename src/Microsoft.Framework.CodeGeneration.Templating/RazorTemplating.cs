@@ -57,6 +57,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating
                 if (razorTemplate != null)
                 {
                     razorTemplate.Model = templateModel;
+                    //ToDo: If there are errors executing the code, they are missed here.
                     result = await razorTemplate.ExecuteTemplate();
                 }
 

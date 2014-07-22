@@ -44,6 +44,8 @@ namespace Microsoft.Framework.CodeGeneration
                 param.AddCommandLineParameterTo(command);
             }
 
+            // ToDo: Exceptions from GenerateCode are not really caught here
+            // when the GenerateCode method is async.
             command.Invoke = () =>
             {
                 object modelInstance;
@@ -67,8 +69,12 @@ namespace Microsoft.Framework.CodeGeneration
                 {
                     ActionDescriptor.ActionMethod.Invoke(codeGeneratorInstance, new[] { modelInstance });
                 }
-                catch (TargetInvocationException ex)
+                catch (Exception ex)
                 {
+                    while (ex is TargetInvocationException)
+                    {
+                        ex = ex.InnerException;
+                    }
                     throw new Exception("There was an error running the GenerateCode method: " + ex.InnerException.Message);
                 }
 

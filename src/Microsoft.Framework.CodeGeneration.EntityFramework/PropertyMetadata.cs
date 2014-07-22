@@ -21,7 +21,6 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             IsPrimaryKey = entityType.GetKey().Properties.Contains(property);
             IsForeignKey = entityType.ForeignKeys
                 .Any(fk => fk.Properties.Contains(property));
-            DefaultValue = TypeUtil.GetDefaultValue(property.PropertyType);
 
             // Todo:we need proper logic for these below.
             IsEnumFlags = false;
@@ -53,7 +52,5 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         public string ShortTypeName { get; set; }
 
         public string TypeName { get; set; }
-
-        public string DefaultValue { get; set; }
     }
 }

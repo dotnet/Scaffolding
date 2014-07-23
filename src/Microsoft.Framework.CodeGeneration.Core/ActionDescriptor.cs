@@ -73,9 +73,6 @@ namespace Microsoft.Framework.CodeGeneration
 
         private bool IsSupportedPropertyType(Type propertyType)
         {
-            //TodO: This can be improved to support more types that can convert from string.
-            //If we do that, we need to change the valueAccessor in ParameterDescriptor to
-            //convert the value from command line to target type.
             return propertyType == typeof(string) ||
                 propertyType == typeof(bool);
         }

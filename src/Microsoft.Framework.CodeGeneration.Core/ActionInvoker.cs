@@ -45,8 +45,6 @@ namespace Microsoft.Framework.CodeGeneration
                 param.AddCommandLineParameterTo(command);
             }
 
-            // ToDo: Exceptions from GenerateCode are not really caught here
-            // when the GenerateCode method is async.
             command.Invoke = () =>
             {
                 object modelInstance;
@@ -78,7 +76,7 @@ namespace Microsoft.Framework.CodeGeneration
                             {
                                 throw t.Exception;
                             }
-                        }).Wait(); //Review: Is this bad? Command line mode does not allow async delegates - are there better ways?
+                        }).Wait(); //ToDo: Is this bad? Command line mode does not allow async delegates - are there better ways?
                     }
                 }
                 catch (Exception ex)

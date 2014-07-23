@@ -23,7 +23,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IEntityFrameworkService _entityFrameworkService;
 
-        // Todo: Instead of each generator taking ILogger provide it in some base class?
+        // Todo: Instead of each generator taking services, provide them in some base class?
         // However for it to be effective, it should be property dependecy injection rather
         // than constructor injection.
         public ViewGenerator(

@@ -24,8 +24,6 @@ namespace Microsoft.Framework.CodeGeneration
             _serviceProvider = serviceProvider;
         }
 
-        //Todo: Right now this assumes we allow invocation only on Alias if one exists
-        //and only fallback to type name otherwise. Perhaps we may need to support both?
         public virtual string Name
         {
             get

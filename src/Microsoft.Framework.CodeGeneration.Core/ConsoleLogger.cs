@@ -15,7 +15,6 @@ namespace Microsoft.Framework.CodeGeneration
 
         public void LogMessage(string message, LogMessageLevel level)
         {
-            //Todo: Customize font color based on level
             Console.WriteLine(message);
         }
     }

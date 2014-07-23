@@ -16,11 +16,22 @@ namespace TestWebApp.Models
     //Intentionally kept in this file rather than separate file for testing non-normal case.
     public class PersonContext : DbContext
     {
+        private static bool isCreated = false;
+
+        public PersonContext()
+        {
+            if (!isCreated)
+            {
+                this.Database.EnsureCreated();
+                isCreated = true;
+            }
+        }
+
         public DbSet<Person> People { get; set; }
 
         protected override void OnConfiguring(DbContextOptions options)
         {
-            options.UseSqlServer(@"Data Source=.\SQLEXPRESS;Initial Catalog=PersonContext;Integrated Security=True;MultipleActiveResultSets=True");
+            options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=aspnetvnext-TestWebApp-6a883536-855a-4c46-84f6-09412e2735c9;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

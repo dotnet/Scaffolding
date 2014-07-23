@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime.Common.CommandLine;
 
@@ -67,15 +68,29 @@ namespace Microsoft.Framework.CodeGeneration
 
                 try
                 {
-                    ActionDescriptor.ActionMethod.Invoke(codeGeneratorInstance, new[] { modelInstance });
+                    var result = ActionDescriptor.ActionMethod.Invoke(codeGeneratorInstance, new[] { modelInstance });
+
+                    if (result is Task)
+                    {
+                        ((Task)result).ContinueWith(t =>
+                        {
+                            if (t.IsFaulted)
+                            {
+                                throw t.Exception;
+                            }
+                        }).Wait(); //Review: Is this bad? Command line mode does not allow async delegates - are there better ways?
+                    }
                 }
                 catch (Exception ex)
                 {
-                    while (ex is TargetInvocationException)
+                    // We are ignoring if there are multiple exceptions with an AggregateException but
+                    // mostly that's ok in our scenarios as our current implementations are not using multiple exceptions.
+                    while (ex is TargetInvocationException || ex is AggregateException)
                     {
                         ex = ex.InnerException;
                     }
-                    throw new Exception("There was an error running the GenerateCode method: " + ex.InnerException.Message);
+                    
+                    throw new Exception("There was an error running the GenerateCode method: " + ex.Message);
                 }
 
                 return 0;

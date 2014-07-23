@@ -25,7 +25,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
         // This should use reflection to get the actual property name
         // on DbContext.
-        public string DbSetName
+        public string EntitySetName
         {
             get
             {

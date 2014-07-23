@@ -7,6 +7,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
@@ -38,7 +39,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             _entityFrameworkService = entityFrameworkService;
         }
 
-        public async void GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
+        public async Task GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
         {
             // Validate model
             string validationMessage;
@@ -50,19 +51,19 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 throw new Exception(validationMessage);
             }
 
-            // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
-            Contract.Assert(dataContext != null, "Validation succeded but DataContext type not set");
-
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
                 throw new Exception("The ViewName cannot be empty");
             }
 
+            // Validation successful
+            Contract.Assert(model != null, "Validation succeded but model type not set");
+            Contract.Assert(dataContext != null, "Validation succeded but DataContext type not set");
+
             var templateName = viewGeneratorModel.TemplateName + ".cshtml";
 
-            var dbContextFullName = dataContext.FullNameForType();
-            var modelTypeFullName = model.FullNameForType();
+            var dbContextFullName = dataContext.FullNameForSymbol();
+            var modelTypeFullName = model.FullNameForSymbol();
 
             var modelMetadata = _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
@@ -80,8 +81,11 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 JQueryVersion = "1.10.2" //Todo
             };
 
-            var outputPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath,
-                "Views", model.Name, viewGeneratorModel.ViewName + ".cshtml");
+            var outputPath = Path.Combine(
+                ApplicationEnvironment.ApplicationBasePath,
+                Constants.ViewsFolderName,
+                model.Name,
+                viewGeneratorModel.ViewName + ".cshtml");
 
             await AddFileFromTemplateAsync(outputPath, templateName, templateModel);
         }

@@ -10,13 +10,13 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
     internal static class RoslynUtilities
     {
         // ToDo: Perhaps find some existing utility in Roslyn or provide this as API?
-        public static string FullNameForType([NotNull]this ISymbol symbol)
+        public static string FullNameForSymbol([NotNull]this ISymbol symbol)
         {
             if (symbol.ContainingNamespace != null & string.IsNullOrEmpty(symbol.ContainingNamespace.Name))
             {
                 return symbol.Name;
             }
-            return FullNameForType(symbol.ContainingNamespace) + "." + symbol.Name;
+            return FullNameForSymbol(symbol.ContainingNamespace) + "." + symbol.Name;
         }
     }
 }

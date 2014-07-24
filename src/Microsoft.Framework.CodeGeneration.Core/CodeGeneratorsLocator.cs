@@ -9,8 +9,6 @@ using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    //Todo: Perhaps this should be internal, it's public right now for being able to access
-    //it in CodeGeneration project.
     public class CodeGeneratorsLocator : ICodeGeneratorLocator
     {
         private readonly ICodeGeneratorAssemblyProvider _assemblyProvider;

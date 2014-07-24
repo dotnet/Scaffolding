@@ -45,50 +45,24 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                         syntaxTrees: syntaxTrees,
                         references: references);
 
-            using (var ms = new MemoryStream())
+            Assembly assembly;
+            EmitResult result;
+            if (CommonUtil.TryGetAssemblyFromCompilation(_loader, compilation, out assembly, out result))
             {
-                using (var pdb = new MemoryStream())
-                {
-                    EmitResult result;
+                var type = assembly.GetExportedTypes()
+                                   .First();
 
-                    if (PlatformHelper.IsMono)
-                    {
-                        result = compilation.Emit(ms, pdbStream: null);
-                    }
-                    else
-                    {
-                        result = compilation.Emit(ms, pdbStream: pdb);
-                    }
+                return CompilationResult.Successful(string.Empty, type);
+            }
+            else
+            {
+                var formatter = new DiagnosticFormatter();
 
-                    if (!result.Success)
-                    {
-                        var formatter = new DiagnosticFormatter();
+                var messages = result.Diagnostics
+                                     .Where(IsError)
+                                     .Select(d => formatter.Format(d));
 
-                        var messages = result.Diagnostics
-                                             .Where(IsError)
-                                             .Select(d => formatter.Format(d));
-
-                        return CompilationResult.Failed(content, messages);
-                    }
-
-                    Assembly assembly;
-                    ms.Seek(0, SeekOrigin.Begin);
-
-                    if (PlatformHelper.IsMono)
-                    {
-                        assembly = _loader.LoadStream(ms, pdbStream: null);
-                    }
-                    else
-                    {
-                        pdb.Seek(0, SeekOrigin.Begin);
-                        assembly = _loader.LoadStream(ms, pdb);
-                    }
-
-                    var type = assembly.GetExportedTypes()
-                                       .First();
-
-                    return CompilationResult.Successful(string.Empty, type);
-                }
+                return CompilationResult.Failed(content, messages);
             }
         }
 

@@ -28,6 +28,7 @@
     <Content Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommonUtil.cs" />
     <Compile Include="NotNullArgument.cs" />
     <Compile Include="PlatformHelper.cs" />
     <Compile Include="TypeExtensions.cs" />

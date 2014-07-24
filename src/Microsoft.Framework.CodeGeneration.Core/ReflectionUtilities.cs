@@ -9,8 +9,6 @@ using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    // Todo: This needs to consider not locking the assemblies
-    // when used from VS.
     public static class ReflectionUtilities
     {
         public static Type GetReflectionType(

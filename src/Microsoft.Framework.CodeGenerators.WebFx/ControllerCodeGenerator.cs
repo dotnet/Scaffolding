@@ -30,8 +30,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             "List"
         };
 
-        //Todo: there will be a base class CodeGenerator that gives access to logger and
-        //other most common services
         public ControllerCodeGenerator(
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment,
@@ -106,7 +104,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                         IsPartialView = false,
                         ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries,
                         ModelMetadata = modelMetadata,
-                        JQueryVersion = "1.10.2" //Todo
+                        JQueryVersion = "1.10.2"
                     };
 
                     var viewOutputPath = Path.Combine(

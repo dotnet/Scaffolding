@@ -45,8 +45,6 @@ namespace Microsoft.Framework.CodeGeneration
                 param.AddCommandLineParameterTo(command);
             }
 
-            // ToDo: Exceptions from GenerateCode are not really caught here
-            // when the GenerateCode method is async.
             command.Invoke = () =>
             {
                 object modelInstance;

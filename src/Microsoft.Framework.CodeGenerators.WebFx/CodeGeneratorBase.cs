@@ -32,23 +32,10 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         {
             get
             {
-                string templatesFolderName = "Templates";
-                var templateFolders = new List<string>();
-
-                var webFxProjReference = GetProjectReference("Microsoft.Framework.CodeGenerators.WebFx");
-                if (webFxProjReference != null)
-                {
-                    templateFolders.Add(Path.Combine(
-                        Path.GetDirectoryName(webFxProjReference.ProjectPath),
-                        templatesFolderName));
-                }
-                //Todo: Get the path of  executing assembly and add it to template folders
-                //var webFxAssemblyLocation = typeof(ViewGenerator).GetTypeInfo().Assembly.CodeBase;
-                //if (!string.IsNullOrEmpty(webFxAssemblyLocation))
-                //{
-                //    templateFolders.Add(Path.Combine(webFxAssemblyLocation, templatesFolderName));
-                //}
-                return templateFolders.ToArray();
+                return TemplateFolderUtil.GetTemplateFolders(
+                    containingProject: "Microsoft.Framework.CodeGenerators.WebFx",
+                    libraryManager: LibraryManager,
+                    appEnvironment: ApplicationEnvironment);
             }
         }
 
@@ -94,21 +81,5 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         public IFilesLocator FilesLocator { get; private set; }
 
         public ITemplating TemplateService { get; private set; }
-
-        private IMetadataProjectReference GetProjectReference(string projectReferenceName)
-        {
-            return LibraryManager
-                .GetLibraryExport(ApplicationEnvironment.ApplicationName)
-                .MetadataReferences
-                .OfType<IRoslynMetadataReference>()
-                .Where(reference =>
-                {
-                    var compilation = reference.MetadataReference as CompilationReference;
-                    return compilation != null &&
-                        string.Equals(projectReferenceName, compilation.Compilation.AssemblyName);
-                })
-                .OfType<IMetadataProjectReference>()
-                .FirstOrDefault();
-        }
     }
 }

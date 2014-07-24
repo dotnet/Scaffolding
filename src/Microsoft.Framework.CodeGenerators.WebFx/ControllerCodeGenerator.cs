@@ -49,11 +49,16 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             string validationMessage;
             ITypeSymbol model, dataContext;
 
-            if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage) ||
-                !ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage))
+            if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
             {
                 throw new Exception(validationMessage);
             }
+
+            if (string.IsNullOrWhiteSpace(controllerGeneratorModel.DataContextClass))
+            {
+                throw new Exception("Please provide a name for DataContext");
+            }
+            ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
 
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
@@ -63,16 +68,15 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
 
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
-            Contract.Assert(dataContext != null, "Validation succeded but DataContext type not set");
 
             var templateName = "ControllerWithContext.cshtml";
 
-            var dbContextFullName = dataContext.FullNameForSymbol();
+            var dbContextFullName = dataContext != null ? dataContext.FullNameForSymbol() : controllerGeneratorModel.DataContextClass;
             var modelTypeFullName = model.FullNameForSymbol();
 
-            var modelMetadata = _entityFrameworkService.GetModelMetadata(
+            var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
-                modelTypeFullName);
+                model);
 
             var templateModel = new ControllerGeneratorTemplateModel(model, dataContext)
             {

@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
@@ -13,8 +15,9 @@ namespace Microsoft.Framework.CodeGeneration
     internal static class CommonUtil
     {
         public static bool TryGetAssemblyFromCompilation(IAssemblyLoaderEngine loader,
-            Compilation compilation, out Assembly assembly, out EmitResult result)
+            Compilation compilation, out Assembly assembly, out IEnumerable<string> errorMessages)
         {
+            EmitResult result;
             using (var ms = new MemoryStream())
             {
                 using (var pdb = new MemoryStream())
@@ -31,6 +34,12 @@ namespace Microsoft.Framework.CodeGeneration
                     if (!result.Success)
                     {
                         assembly = null;
+
+                        var formatter = new DiagnosticFormatter();
+                        errorMessages = result.Diagnostics
+                                             .Where(IsError)
+                                             .Select(d => formatter.Format(d));
+
                         return false;
                     }
 
@@ -46,9 +55,15 @@ namespace Microsoft.Framework.CodeGeneration
                         assembly = loader.LoadStream(ms, pdb);
                     }
 
+                    errorMessages = null;
                     return true;
                 }
             }
+        }
+
+        private static bool IsError(Diagnostic diagnostic)
+        {
+            return diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error;
         }
     }
 }

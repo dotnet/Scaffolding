@@ -7,10 +7,8 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
 {
-    public interface IEntityFrameworkService
+    public interface IDbContextEditorServices
     {
-        // ToDo: Perhaps this needs to take ITypeSymbol parameters when
-        // we need to edit the db context.
-        Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ITypeSymbol modelTypeName);
+        Task<Compilation> AddNewContext(string dbContextName, ITypeSymbol modelType);
     }
 }

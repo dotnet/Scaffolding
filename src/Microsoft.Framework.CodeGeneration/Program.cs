@@ -77,6 +77,7 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
+            serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
             serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }
     }

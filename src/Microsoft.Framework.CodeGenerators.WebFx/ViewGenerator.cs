@@ -65,9 +65,9 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             var dbContextFullName = dataContext.FullNameForSymbol();
             var modelTypeFullName = model.FullNameForSymbol();
 
-            var modelMetadata = _entityFrameworkService.GetModelMetadata(
+            var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
-                modelTypeFullName);
+                model);
 
             var templateModel = new ViewGeneratorTemplateModel()
             {

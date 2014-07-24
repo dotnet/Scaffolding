@@ -72,22 +72,19 @@ namespace Microsoft.Framework.CodeGeneration
 
                     if (result is Task)
                     {
-                        ((Task)result).ContinueWith(t =>
-                        {
-                            if (t.IsFaulted)
-                            {
-                                throw t.Exception;
-                            }
-                        }).Wait(); //Review: Is this bad? Command line mode does not allow async delegates - are there better ways?
+                        ((Task)result).Wait();
                     }
                 }
                 catch (Exception ex)
                 {
-                    // We are ignoring if there are multiple exceptions with an AggregateException but
-                    // mostly that's ok in our scenarios as our current implementations are not using multiple exceptions.
-                    while (ex is TargetInvocationException || ex is AggregateException)
+                    while (ex is TargetInvocationException)
                     {
                         ex = ex.InnerException;
+                    }
+
+                    if (ex is AggregateException)
+                    {
+                        ex = ex.GetBaseException();
                     }
                     
                     throw new Exception("There was an error running the GenerateCode method: " + ex.Message);

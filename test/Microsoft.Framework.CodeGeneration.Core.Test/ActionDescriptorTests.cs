@@ -40,7 +40,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             //Assert
             var propertyNames = parameters.Select(pd => pd.Property.Name);
-            var expectedProperties = new[] { "StringProperty", "BoolProperty" }.ToList();
+            var expectedProperties = new[] { "BoolProperty", "StringProperty" }.ToList();
             Assert.Equal(expectedProperties, propertyNames, StringComparer.Ordinal);
         }
 
@@ -61,7 +61,14 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             }
         }
 
-        private class CodeGeneratorModel
+        // This exists to ensure that properties on base class are also considered
+        // for parameters.
+        private class BaseModel
+        {
+            public string StringProperty { get; set; }
+        }
+
+        private class CodeGeneratorModel : BaseModel
         {
             public string NonWritableProperty
             {
@@ -70,8 +77,6 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                     return "";
                 }
             }
-
-            public string StringProperty { get; set; }
 
             public bool BoolProperty { get; set; }
 

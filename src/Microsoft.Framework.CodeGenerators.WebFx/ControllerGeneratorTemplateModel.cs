@@ -54,13 +54,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 // That's not possible in command line scaffolding - the closest we can get is
                 // the name of assembly??
                 return ModelType.ContainingAssembly.Name + "." + Constants.ControllersFolderName;
-
-                // I tried the below, but ModelType.ContainingAssembly.ContainingNamespace is null normally.
-                //if (ModelType.ContainingAssembly.ContainingNamespace != null &&
-                //    !string.IsNullOrWhiteSpace(ModelType.ContainingAssembly.ContainingNamespace.Name))
-                //{
-                //    return ModelType.ContainingAssembly.ContainingNamespace.Name + "." + Constants.ControllersFolderName;
-                //}
             }
         }
 
@@ -101,7 +94,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         {
             get
             {
-                SortedSet<string> requiredNamespaces = new SortedSet<string>(StringComparer.Ordinal);
+                var requiredNamespaces = new SortedSet<string>(StringComparer.Ordinal);
                 // We add ControllerNamespace first to make other entries not added to the set if they match.
                 requiredNamespaces.Add(ControllerNamespace);
                 requiredNamespaces.Add(ModelType.ContainingNamespace.FullNameForSymbol());

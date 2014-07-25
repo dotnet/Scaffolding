@@ -31,7 +31,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             app.Command(ActionDescriptor.Generator.Name, c =>
             {
-                c.HelpOption("-h|-?|--help");
+                c.HelpOption("--help|-h|-?");
                 BuildCommandLine(c);
             });
 

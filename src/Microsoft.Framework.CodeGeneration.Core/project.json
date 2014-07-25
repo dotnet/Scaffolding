@@ -5,6 +5,7 @@
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
         "Microsoft.Framework.CommandLineUtils": "1.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Templating": "",
         "System.Runtime": "4.0.20.0"
     },
     "configurations": {

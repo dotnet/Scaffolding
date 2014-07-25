@@ -33,8 +33,8 @@ namespace TestWebApp
                 });
 
                 // Add Identity services to the services container
-                //services.AddIdentitySqlServer<ApplicationDbContext, ApplicationUser>()
-                //    .AddHttpSignIn();
+                services.AddIdentitySqlServer<ApplicationDbContext, ApplicationUser>()
+                    .AddAuthentication();
 
                 // Add MVC services to the services container
                 services.AddMvc();
@@ -47,11 +47,11 @@ namespace TestWebApp
             app.UseStaticFiles();
 
             // Add cookie-based authentication to the request pipeline
-            //app.UseCookieAuthentication(new CookieAuthenticationOptions
-            //{
-            //    AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
-            //    LoginPath = new PathString("/Account/Login"),
-            //});
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = ClaimsIdentityOptions.DefaultAuthenticationType,
+                LoginPath = new PathString("/Account/Login"),
+            });
 
             // Add MVC to the request pipeline
             app.UseMvc(routes =>

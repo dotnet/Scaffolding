@@ -35,7 +35,6 @@
     <Content Include="Templates\ViewGenerator\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeGeneratorBase.cs" />
     <Compile Include="CommanCommandLineModel.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ControllerCodeGenerator.cs" />

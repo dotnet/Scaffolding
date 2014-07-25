@@ -5,23 +5,23 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
-using Microsoft.Framework.CodeGeneration.Templating;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.WebFx
 {
     [Alias("view")]
-    public class ViewGenerator : CodeGeneratorBase
+    public class ViewGenerator : ICodeGenerator
     {
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IEntityFrameworkService _entityFrameworkService;
+        private readonly ILibraryManager _libraryManager;
+        private readonly IApplicationEnvironment _applicationEnvironment;
+        private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
 
         // Todo: Instead of each generator taking services, provide them in some base class?
         // However for it to be effective, it should be property dependecy injection rather
@@ -31,12 +31,24 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ITemplating templateService, 
-            [NotNull]IFilesLocator filesLocator)
-            : base(libraryManager, filesLocator, templateService, environment)
+            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService)
         {
+            _libraryManager = libraryManager;
+            _applicationEnvironment = environment;
+            _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
+        }
+
+        public virtual IEnumerable<string> TemplateFolders
+        {
+            get
+            {
+                return TemplateFoldersUtil.GetTemplateFolders(
+                    containingProject: "Microsoft.Framework.CodeGenerators.WebFx",
+                    libraryManager: _libraryManager,
+                    appEnvironment: _applicationEnvironment);
+            }
         }
 
         public async Task GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
@@ -82,12 +94,12 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             };
 
             var outputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _applicationEnvironment.ApplicationBasePath,
                 Constants.ViewsFolderName,
                 model.Name,
                 viewGeneratorModel.ViewName + ".cshtml");
 
-            await AddFileFromTemplateAsync(outputPath, templateName, templateModel);
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
         }
     }
 }

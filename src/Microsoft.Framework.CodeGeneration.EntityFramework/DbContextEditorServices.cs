@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Reflection;
@@ -66,11 +67,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             return projectCompilation.AddSyntaxTrees(tree).WithAssemblyName(newAssemblyName);
         }
 
-        private string[] TemplateFolders
+        private IEnumerable<string> TemplateFolders
         {
             get
             {
-                return TemplateFolderUtil.GetTemplateFolders(
+                return TemplateFoldersUtil.GetTemplateFolders(
                     containingProject: "Microsoft.Framework.CodeGeneration.EntityFramework",
                     libraryManager: _libraryManager,
                     appEnvironment: _environment);

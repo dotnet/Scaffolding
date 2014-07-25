@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,9 +9,12 @@ using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal class TemplateFolderUtil
+    internal static class TemplateFoldersUtil
     {
-        public static string[] GetTemplateFolders(string containingProject, ILibraryManager libraryManager, IApplicationEnvironment appEnvironment)
+        public static IEnumerable<string> GetTemplateFolders(
+            [NotNull]string containingProject,
+            [NotNull]ILibraryManager libraryManager,
+            [NotNull]IApplicationEnvironment appEnvironment)
         {
             string templatesFolderName = "Templates";
             var templateFolders = new List<string>();
@@ -30,10 +32,11 @@ namespace Microsoft.Framework.CodeGeneration
             //{
             //    templateFolders.Add(Path.Combine(webFxAssemblyLocation, templatesFolderName));
             //}
-            return templateFolders.ToArray();
+            return templateFolders;
         }
 
-        private static IMetadataProjectReference GetProjectReference(string projectReferenceName, ILibraryManager libraryManager, IApplicationEnvironment appEnvironment)
+        private static IMetadataProjectReference GetProjectReference(string projectReferenceName,
+            ILibraryManager libraryManager, IApplicationEnvironment appEnvironment)
         {
             return libraryManager
                 .GetLibraryExport(appEnvironment.ApplicationName)

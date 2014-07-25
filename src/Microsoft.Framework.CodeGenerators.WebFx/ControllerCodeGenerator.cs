@@ -10,17 +10,20 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
-using Microsoft.Framework.CodeGeneration.Templating;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.WebFx
 {
     [Alias("controller")]
-    public class ControllerCodeGenerator : CodeGeneratorBase
+    public class ControllerCodeGenerator : ICodeGenerator
     {
 
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IEntityFrameworkService _entityFrameworkService;
+        private readonly IApplicationEnvironment _applicationEnvironment;
+        private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
+        private readonly ILibraryManager _libraryManager;
+
         private readonly List<string> _views = new List<string>()
         {
             "Create",
@@ -35,12 +38,24 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ITemplating templateService,
-            [NotNull]IFilesLocator filesLocator)
-            : base(libraryManager, filesLocator, templateService, environment)
+            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService)
         {
+            _libraryManager = libraryManager;
+            _applicationEnvironment = environment;
+            _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
+        }
+
+        public virtual IEnumerable<string> TemplateFolders
+        {
+            get
+            {
+                return TemplateFoldersUtil.GetTemplateFolders(
+                    containingProject: "Microsoft.Framework.CodeGenerators.WebFx",
+                    libraryManager: _libraryManager,
+                    appEnvironment: _applicationEnvironment);
+            }
         }
 
         public async Task GenerateCode([NotNull]ControllerGeneratorModel controllerGeneratorModel)
@@ -83,11 +98,11 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             };
 
             var outputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _applicationEnvironment.ApplicationBasePath,
                 Constants.ControllersFolderName,
                 controllerGeneratorModel.ControllerName + ".cs");
 
-            await AddFileFromTemplateAsync(outputPath, templateName, templateModel);
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
 
             if (controllerGeneratorModel.GenerateViews)
             {
@@ -108,12 +123,13 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                     };
 
                     var viewOutputPath = Path.Combine(
-                        ApplicationEnvironment.ApplicationBasePath,
+                        _applicationEnvironment.ApplicationBasePath,
                         Constants.ViewsFolderName,
                         model.Name,
                         viewName + ".cshtml");
 
-                    await AddFileFromTemplateAsync(viewOutputPath, viewTemplate + ".cshtml", viewTemplateModel);
+                    await _codeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
+                        viewTemplate + ".cshtml", TemplateFolders, viewTemplateModel);
                 }
             }
         }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -72,6 +73,20 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             Contract.Assert(model != null, "Validation succeded but model type not set");
             Contract.Assert(dataContext != null, "Validation succeded but DataContext type not set");
 
+            var outputPath = Path.Combine(
+                _applicationEnvironment.ApplicationBasePath,
+                Constants.ViewsFolderName,
+                model.Name,
+                viewGeneratorModel.ViewName + ".cshtml");
+
+            if (File.Exists(outputPath) && !viewGeneratorModel.Force)
+            {
+                throw new Exception(string.Format(
+                    CultureInfo.CurrentCulture,
+                    "View file {0} exists, use -f option to overwrite",
+                    outputPath));
+            }
+
             var templateName = viewGeneratorModel.TemplateName + ".cshtml";
 
             var dbContextFullName = dataContext.FullNameForSymbol();
@@ -92,12 +107,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 ModelMetadata = modelMetadata,
                 JQueryVersion = "1.10.2" //Todo
             };
-
-            var outputPath = Path.Combine(
-                _applicationEnvironment.ApplicationBasePath,
-                Constants.ViewsFolderName,
-                model.Name,
-                viewGeneratorModel.ViewName + ".cshtml");
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
         }

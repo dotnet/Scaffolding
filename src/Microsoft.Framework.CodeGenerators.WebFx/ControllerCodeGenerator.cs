@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -82,6 +83,19 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
 
             var templateName = "ControllerWithContext.cshtml";
 
+            var outputPath = Path.Combine(
+                _applicationEnvironment.ApplicationBasePath,
+                Constants.ControllersFolderName,
+                controllerGeneratorModel.ControllerName + ".cs");
+
+            if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
+            {
+                throw new Exception(string.Format(
+                    CultureInfo.CurrentCulture,
+                    "View file {0} exists, use -f option to overwrite",
+                    outputPath));
+            }
+
             var dbContextFullName = dataContext.FullNameForSymbol();
             var modelTypeFullName = model.FullNameForSymbol();
 
@@ -96,11 +110,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 UseAsync = controllerGeneratorModel.UseAsync,
                 ModelMetadata = modelMetadata
             };
-
-            var outputPath = Path.Combine(
-                _applicationEnvironment.ApplicationBasePath,
-                Constants.ControllersFolderName,
-                controllerGeneratorModel.ControllerName + ".cs");
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
 

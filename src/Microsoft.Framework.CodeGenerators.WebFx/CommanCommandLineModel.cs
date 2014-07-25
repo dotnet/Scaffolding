@@ -23,5 +23,8 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
 
         [Option(Name = "useLayout", ShortName = "ul", Description = "Switch to specify whether to use a layout or not, if this is not present, --layout is ignored")]
         public bool UseLayout { get; set; }
+
+        [Option(Name = "force", ShortName = "f", Description = "Use this option to overwrite existing files")]
+        public bool Force { get; set; }
     }
 }

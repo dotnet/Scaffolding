@@ -13,10 +13,15 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
     {
         public ControllerGeneratorTemplateModel(
             [NotNull]ITypeSymbol modelType,
-            [NotNull]ITypeSymbol dbContext)
+            [NotNull]string dbContextFullTypeName)
         {
             ModelType = modelType;
-            DbContextType = dbContext;
+
+            string typeName, namespaceName;
+            TypeUtil.GetTypeNameandNamespace(dbContextFullTypeName, out typeName, out namespaceName);
+
+            ContextTypeName = typeName;
+            DbContextNamespace = namespaceName;
         }
 
         public string ControllerName { get; set; }
@@ -28,8 +33,6 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         public ModelMetadata ModelMetadata { get; set; }
 
         public ITypeSymbol ModelType { get; private set; }
-
-        public ITypeSymbol DbContextType { get; private set; }
 
         public string ControllerRootName
         {
@@ -57,13 +60,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             }
         }
 
-        public string ContextTypeName
-        {
-            get
-            {
-                return DbContextType.Name;
-            }
-        }
+        public string ContextTypeName { get; private set; }
 
         public string ModelTypeName
         {
@@ -98,11 +95,17 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 // We add ControllerNamespace first to make other entries not added to the set if they match.
                 requiredNamespaces.Add(ControllerNamespace);
                 requiredNamespaces.Add(ModelType.ContainingNamespace.FullNameForSymbol());
-                requiredNamespaces.Add(DbContextType.ContainingNamespace.FullNameForSymbol());
+                if (!string.IsNullOrWhiteSpace(DbContextNamespace))
+                {
+                    requiredNamespaces.Add(DbContextNamespace);
+                }
+
                 // Finally we remove the ControllerNamespace as it's not required.
                 requiredNamespaces.Remove(ControllerNamespace);
                 return new HashSet<string>(requiredNamespaces);
             }
         }
+
+        public string DbContextNamespace { get; private set; }
     }
 }

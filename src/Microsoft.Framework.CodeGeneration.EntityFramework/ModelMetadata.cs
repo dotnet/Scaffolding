@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
+using System;
 using System.Linq;
+using System.Reflection;
+using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Metadata;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
@@ -16,23 +18,18 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
 
         //Todo: Perhaps move the constructor to something line MetadataReader?
-        public ModelMetadata([NotNull]IEntityType entityType)
+        public ModelMetadata([NotNull]IEntityType entityType, [NotNull]Type dbContextType)
         {
             EntityType = entityType;
+            DbContexType = dbContextType;
+            EntitySetName = GetEntitySetName(DbContexType, EntityType.Type);
         }
 
         public IEntityType EntityType { get; private set; }
 
-        // This should use reflection to get the actual property name
-        // on DbContext.
-        public string EntitySetName
-        {
-            get
-            {
-                Contract.Assert(EntityType != null);
-                return "Set<" + EntityType.Name + ">()";
-            }
-        }
+        public Type DbContexType { get; private set; }
+
+        public string EntitySetName { get; private set; }
 
         public PropertyMetadata[] Properties
         {
@@ -60,6 +57,25 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                         .ToArray();
                 }
                 return _primaryKeys;
+            }
+        }
+
+        private string GetEntitySetName([NotNull]Type dbContextType, [NotNull]Type modelType)
+        {
+            Type dbSetType = typeof(DbSet<>).MakeGenericType(modelType);
+
+            var prop = dbContextType.GetRuntimeProperties()
+                .Where(pi => pi.PropertyType == dbSetType)
+                .FirstOrDefault();
+
+            if (prop != null)
+            {
+                return prop.Name;
+            }
+            else
+            {
+                //Fallback to this or throw?
+                return "DbSet<" + modelType.Name + ">";
             }
         }
     }

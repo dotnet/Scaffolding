@@ -27,7 +27,7 @@ namespace TestWebApp.Models
             }
         }
 
-        public DbSet<Person> People { get; set; }
+        //public DbSet<Person> People { get; set; }
 
         protected override void OnConfiguring(DbContextOptions options)
         {
@@ -36,7 +36,7 @@ namespace TestWebApp.Models
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Person>().Key(a => a.PersonId);
+            builder.Entity<Person>();
         }
     }
 }

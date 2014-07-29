@@ -78,6 +78,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();
+            serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
             serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }
     }

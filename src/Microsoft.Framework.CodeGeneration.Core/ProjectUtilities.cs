@@ -10,7 +10,7 @@ using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal static class ProjectUtilities
+    public static class ProjectUtilities
     {
         private static string[] _frameworkProjectNames = new[]
         {

@@ -1,0 +1,49 @@
+﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
+using Microsoft.Data.Entity;
+using Microsoft.Data.Entity.Metadata;
+@{
+    foreach (var namespaceName in Model.RequiredNamespaces)
+    {
+@:using @namespaceName;
+    }
+
+    string baseClassName;
+    if (String.Equals(Model.DbContextTypeName, "DbContext", StringComparison.Ordinal))
+    {
+        baseClassName = "Microsoft.Data.Entity.DbContext";
+    }
+    else
+    {
+        baseClassName = "DbContext";
+    }
+    if (!String.IsNullOrEmpty(Model.DbContextNamespace))
+    {
+@:namespace @Model.DbContextNamespace
+@:{
+    //PushIndent("    ");
+    } 
+}
+    public class @Model.DbContextTypeName : @baseClassName
+    {
+        public @(Model.DbContextTypeName)()
+        {
+        }
+
+        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
+
+        protected override void OnConfiguring(DbContextOptions options)
+        {
+            options.UseSqlServer(@@"Server=(localdb)\mssqllocaldb;Database=@Model.DbContextTypeName;Trusted_Connection=True;MultipleActiveResultSets=true");
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+        }
+    }
+@{
+    if (!String.IsNullOrEmpty(Model.DbContextNamespace))
+    { 
+        //ClearIndent();
+@:}
+    }
+}

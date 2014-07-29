@@ -32,8 +32,10 @@
     <Compile Include="ExceptionUtil.cs" />
     <Compile Include="NotNullArgument.cs" />
     <Compile Include="PlatformHelper.cs" />
+    <Compile Include="RoslynUtilities.cs" />
     <Compile Include="TemplateFoldersUtil.cs" />
     <Compile Include="TypeExtensions.cs" />
+    <Compile Include="TypeUtil.cs" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

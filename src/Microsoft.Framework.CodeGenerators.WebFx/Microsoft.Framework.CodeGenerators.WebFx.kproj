@@ -40,7 +40,6 @@
     <Compile Include="ControllerCodeGenerator.cs" />
     <Compile Include="ControllerGeneratorModel.cs" />
     <Compile Include="ControllerGeneratorTemplateModel.cs" />
-    <Compile Include="RoslynUtilities.cs" />
     <Compile Include="StringUtil.cs" />
     <Compile Include="ValidationUtil.cs" />
     <Compile Include="ViewGenerator.cs" />

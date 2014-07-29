@@ -46,8 +46,8 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                         references: references);
 
             Assembly assembly;
-            EmitResult result;
-            if (CommonUtil.TryGetAssemblyFromCompilation(_loader, compilation, out assembly, out result))
+            IEnumerable<string> errorMessages;
+            if (CommonUtil.TryGetAssemblyFromCompilation(_loader, compilation, out assembly, out errorMessages))
             {
                 var type = assembly.GetExportedTypes()
                                    .First();
@@ -56,13 +56,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
             }
             else
             {
-                var formatter = new DiagnosticFormatter();
-
-                var messages = result.Diagnostics
-                                     .Where(IsError)
-                                     .Select(d => formatter.Format(d));
-
-                return CompilationResult.Failed(content, messages);
+                return CompilationResult.Failed(content, errorMessages);
             }
         }
 
@@ -108,11 +102,6 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                     return new MetadataImageReference(stream);
                 }
             });
-        }
-
-        private bool IsError(Diagnostic diagnostic)
-        {
-            return diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error;
         }
     }
 }

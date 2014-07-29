@@ -15,24 +15,19 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             ModelTypeName = modelType.Name;
             RequiredNamespaces = new HashSet<string>();
 
-            int lastDot = dbContextName.LastIndexOf('.');
-            if (lastDot > 0)
+            string typeName, namespaceName;
+            TypeUtil.GetTypeNameandNamespace(dbContextName, out typeName, out namespaceName);
+
+            DbContextTypeName = typeName;
+            DbContextNamespace = namespaceName;
+
+            if (!string.Equals(modelNamespace, DbContextNamespace, StringComparison.Ordinal))
             {
-                DbContextNamespace = dbContextName.Substring(0, lastDot);
-                DbContextType = dbContextName.Substring(lastDot+1);
-                if (!string.Equals(modelNamespace, DbContextNamespace, StringComparison.Ordinal))
-                {
-                    RequiredNamespaces.Add(modelNamespace);
-                }
-            }
-            else
-            {
-                DbContextType = dbContextName;
-                DbContextNamespace = modelType.ContainingNamespace.ToDisplayString();
+                RequiredNamespaces.Add(modelNamespace);
             }
         }
 
-        public string DbContextType { get; private set; }
+        public string DbContextTypeName { get; private set; }
 
         public string DbContextNamespace { get; private set; }
 

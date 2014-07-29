@@ -1,9 +1,6 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
-using System;
-using System.Collections.Generic;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Metadata;
-using System.Linq;
 @{
     foreach (var namespaceName in Model.RequiredNamespaces)
     {
@@ -11,7 +8,7 @@ using System.Linq;
     }
 
     string baseClassName;
-    if (String.Equals(Model.DbContextType, "DbContext", StringComparison.Ordinal))
+    if (String.Equals(Model.DbContextTypeName, "DbContext", StringComparison.Ordinal))
     {
         baseClassName = "Microsoft.Data.Entity.DbContext";
     }
@@ -26,20 +23,21 @@ using System.Linq;
     //PushIndent("    ");
     } 
 }
-    public class @Model.DbContextType : @baseClassName
+    public class @Model.DbContextTypeName : @baseClassName
     {
-        public @(Model.DbContextType)()
+        public @(Model.DbContextTypeName)()
         {
         }
 
+        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
+
         protected override void OnConfiguring(DbContextOptions options)
         {
-            options.UseSqlServer(@@"Server=(localdb)\mssqllocaldb;Database=@Model.DbContextType;Trusted_Connection=True;MultipleActiveResultSets=true");
+            options.UseSqlServer(@@"Server=(localdb)\mssqllocaldb;Database=@Model.DbContextTypeName;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<@Model.ModelTypeName>();
         }
     }
 @{

@@ -93,7 +93,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
                 dbContextFullName,
                 model);
 
-            var templateModel = new ControllerGeneratorTemplateModel(model, dataContext)
+            var templateModel = new ControllerGeneratorTemplateModel(model, dbContextFullName)
             {
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo

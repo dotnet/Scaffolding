@@ -5,13 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.Templating;
 using Microsoft.Framework.Runtime;
 
@@ -23,7 +20,6 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly ILibraryManager _libraryManager;
         private readonly ITemplating _templatingService;
         private readonly IFilesLocator _filesLocator;
-        private static int _counter = 1;
 
         public DbContextEditorServices(
             ILibraryManager libraryManager,
@@ -37,17 +33,15 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             _templatingService = templatingService;
         }
 
-        public async Task<Compilation> AddNewContext([NotNull]string dbContextName,[NotNull]ITypeSymbol modelType)
+        public async Task<SyntaxTree> AddNewContext([NotNull]NewDbContextTemplateModel dbContextTemplateModel)
         {
             var templateName = "NewLocalDbContext.cshtml";
             var templatePath = _filesLocator.GetFilePath(templateName, TemplateFolders);
             Contract.Assert(templatePath != null);
             Contract.Assert(File.Exists(templatePath));
 
-            var templateModel = new NewDbContextTemplateModel(dbContextName, modelType);
-
             var templateContent = File.ReadAllText(templatePath);
-            var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
+            var templateResult = await _templatingService.RunTemplateAsync(templateContent, dbContextTemplateModel);
 
             if (templateResult.ProcessingException != null)
             {
@@ -60,11 +54,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             var newContextContent = templateResult.GeneratedText;
 
             var sourceText = SourceText.From(newContextContent);
-            var tree = CSharpSyntaxTree.ParseText(sourceText);
-
-            var projectCompilation = _libraryManager.GetProject(_environment).Compilation;
-            var newAssemblyName = projectCompilation.AssemblyName + _counter++;
-            return projectCompilation.AddSyntaxTrees(tree).WithAssemblyName(newAssemblyName);
+            return CSharpSyntaxTree.ParseText(sourceText);
         }
 
         private IEnumerable<string> TemplateFolders

@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Data.Entity;
 using Microsoft.Framework.Runtime;
 
@@ -20,6 +22,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly ILibraryManager _libraryManager;
         private readonly IAssemblyLoaderEngine _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
+        private static int _counter = 1;
 
         public EntityFrameworkServices(
             [NotNull]ILibraryManager libraryManager,
@@ -39,11 +42,20 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             Type dbContextType;
             var dbContextSymbols = _modelTypesLocator.GetType(dbContextTypeName).ToList();
+            var isNewDbContext = false;
+            SyntaxTree newDbContextTree = null;
+            NewDbContextTemplateModel dbContextTemplateModel = null;
 
             if (dbContextSymbols.Count == 0)
             {
-                var newCompilation = await _dbContextEditorServices
-                    .AddNewContext(dbContextTypeName, modelTypeSymbol);
+                isNewDbContext = true;
+
+                dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
+                newDbContextTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
+
+                var projectCompilation = _libraryManager.GetProject(_environment).Compilation;
+                var newAssemblyName = projectCompilation.AssemblyName + _counter++;
+                var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
 
                 Assembly newAssembly;
                 IEnumerable<string> errorMessages;
@@ -78,7 +90,51 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 throw new Exception("Could not get the reflection type for Model : " + modelTypeName);
             }
 
-            return GetModelMetadata(dbContextType, modelType);
+            var metadata = GetModelMetadata(dbContextType, modelType);
+
+            // Write the DbContext if getting the model metadata is successful
+            if (isNewDbContext)
+            {
+                await WriteDbContext(dbContextTemplateModel, newDbContextTree);
+            }
+
+            return metadata;
+        }
+
+        private async Task WriteDbContext(NewDbContextTemplateModel dbContextTemplateModel,
+            SyntaxTree newDbContextTree)
+        {
+            //ToDo: What's the best place to write the DbContext?
+            var outputPath = Path.Combine(
+                _environment.ApplicationBasePath,
+                "Models",
+                dbContextTemplateModel.DbContextTypeName + ".cs");
+
+            if (File.Exists(outputPath))
+            {
+                // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
+                // the type defined in that file is different, what should we do in this case?
+                // How likely is the above scenario?
+                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
+                throw new Exception(string.Format(CultureInfo.CurrentCulture,
+                    "There was an error creating a DbContext, the file {0} already exists",
+                    outputPath));
+            }
+
+            var souceText = await newDbContextTree.GetTextAsync();
+
+            if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            }
+
+            using (var fileStream = new FileStream(outputPath, FileMode.CreateNew, FileAccess.Write))
+            {
+                using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
+                {
+                    souceText.Write(streamWriter);
+                }
+            }
         }
 
         private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType)
@@ -109,7 +165,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     dbContextType.FullName));
             }
 
-            return new ModelMetadata(entityType);
+            return new ModelMetadata(entityType, dbContextType);
         }
     }
 }

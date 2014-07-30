@@ -10,7 +10,7 @@
         "Microsoft.AspNet.StaticFiles": "1.0.0-*",
         "Microsoft.Framework.ConfigurationModel.Json": "1.0.0-*",
         "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0-*",
-        "Microsoft.Framework.CodeGenerators.WebFx": "" /*Add code generator package to your app */
+        "Microsoft.Framework.CodeGenerators.Mvc": "" /*Add code generator package to your app */
     },
     "commands": {
         /* Change the port number when you are self hosting this application */

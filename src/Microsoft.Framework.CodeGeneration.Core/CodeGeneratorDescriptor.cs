@@ -46,11 +46,11 @@ namespace Microsoft.Framework.CodeGeneration
                     var count = candidates.Count();
                     if (count == 0)
                     {
-                        throw new Exception("GenerateCode method with a model parameter is not found in class: " + _codeGeneratorType.FullName);
+                        throw new InvalidOperationException("GenerateCode method with a model parameter is not found in class: " + _codeGeneratorType.FullName);
                     }
                     if (count > 1)
                     {
-                        throw new Exception("Multiple GenerateCode methods with a model parameter are found in class: " + _codeGeneratorType.FullName);
+                        throw new InvalidOperationException("Multiple GenerateCode methods with a model parameter are found in class: " + _codeGeneratorType.FullName);
                     }
 
                     _codeGeneratorAction = new ActionDescriptor(this, candidates.First());
@@ -70,7 +70,7 @@ namespace Microsoft.Framework.CodeGeneration
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("There was an error creating the code generator instance: " + _codeGeneratorType.FullName + "\r\n" + ex.Message);
+                    throw new InvalidOperationException("There was an error creating the code generator instance: " + _codeGeneratorType.FullName + "\r\n" + ex.Message);
                 }
 
                 return instance;

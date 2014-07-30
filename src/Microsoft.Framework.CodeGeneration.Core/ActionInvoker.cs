@@ -54,7 +54,7 @@ namespace Microsoft.Framework.CodeGeneration
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("There was an error attempting to create an instace of model for GenerateCode method: " + ex.Message);
+                    throw new InvalidOperationException("There was an error attempting to create an instace of model for GenerateCode method: " + ex.Message);
                 }
 
                 foreach (var param in ActionDescriptor.Parameters)
@@ -85,7 +85,7 @@ namespace Microsoft.Framework.CodeGeneration
                         ex = ex.GetBaseException();
                     }
                     
-                    throw new Exception("There was an error running the GenerateCode method: " + ex.Message);
+                    throw new InvalidOperationException("There was an error running the GenerateCode method: " + ex.Message);
                 }
 
                 return 0;

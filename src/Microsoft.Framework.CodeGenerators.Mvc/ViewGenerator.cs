@@ -61,12 +61,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             if (!ValidationUtil.TryValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage) ||
                 !ValidationUtil.TryValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage))
             {
-                throw new Exception(validationMessage);
+                throw new ArgumentException(validationMessage);
             }
 
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
-                throw new Exception("The ViewName cannot be empty");
+                throw new ArgumentException("The ViewName cannot be empty");
             }
 
             // Validation successful
@@ -81,7 +81,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             if (File.Exists(outputPath) && !viewGeneratorModel.Force)
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
                     "View file {0} exists, use -f option to overwrite",
                     outputPath));

@@ -24,7 +24,7 @@ namespace Microsoft.Framework.CodeGeneration
 
                     if (matchingFiles.Count > 1)
                     {
-                        throw new Exception(string.Format(
+                        throw new InvalidOperationException(string.Format(
                             "Multiple files with name {0} found within {1}",
                             fileName,
                             searchPath));
@@ -36,7 +36,7 @@ namespace Microsoft.Framework.CodeGeneration
                 }
             }
 
-            throw new Exception(string.Format(
+            throw new InvalidOperationException(string.Format(
                 "A file matching the name {0} was not found within any of the folders: {1}",
                 fileName,
                 string.Join(";", searchPaths)));

@@ -67,12 +67,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
             {
-                throw new Exception(validationMessage);
+                throw new ArgumentException(validationMessage);
             }
 
             if (string.IsNullOrWhiteSpace(controllerGeneratorModel.DataContextClass))
             {
-                throw new Exception("Please provide a name for DataContext");
+                throw new ArgumentException("Please provide a name for DataContext");
             }
             ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
 
@@ -92,7 +92,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
                     "View file {0} exists, use -f option to overwrite",
                     outputPath));

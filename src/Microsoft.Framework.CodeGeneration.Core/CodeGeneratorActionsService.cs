@@ -54,7 +54,7 @@ namespace Microsoft.Framework.CodeGeneration
             var templatePath = _filesLocator.GetFilePath(templateName, templateFolders);
             if (string.IsNullOrEmpty(templatePath))
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     "Template file {0} not found within search paths {1}",
                     templateName,
                     string.Join(";", templateFolders)));
@@ -67,7 +67,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (templateResult.ProcessingException != null)
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     "There was an error running the template {0}: {1}",
                     templatePath,
                     templateResult.ProcessingException.Message));

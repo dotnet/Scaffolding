@@ -34,12 +34,12 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (count == 0)
             {
-                throw new Exception("No code generators found with the name " + codeGeneratorName);
+                throw new InvalidOperationException("No code generators found with the name " + codeGeneratorName);
             }
 
             if (count > 1)
             {
-                throw new Exception("Multiple code generators found matching the name " + codeGeneratorName);
+                throw new InvalidOperationException("Multiple code generators found matching the name " + codeGeneratorName);
             }
 
             return candidates.First();

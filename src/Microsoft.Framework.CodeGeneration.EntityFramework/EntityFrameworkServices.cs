@@ -63,12 +63,12 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     dbContextType = result.Assembly.GetType(dbContextTypeName);
                     if (dbContextType == null)
                     {
-                        throw new Exception("There was an error creating a DbContext, there was no type returned after compiling the new assembly successfully");
+                        throw new InvalidOperationException("There was an error creating a DbContext, there was no type returned after compiling the new assembly successfully");
                     }
                 }
                 else
                 {
-                    throw new Exception("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
+                    throw new InvalidOperationException("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
                 }
             }
             else
@@ -77,7 +77,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
                 if (dbContextType == null)
                 {
-                    throw new Exception("Could not get the reflection type for DbContext : " + dbContextTypeName);
+                    throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextTypeName);
                 }
             }
 
@@ -86,7 +86,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
             if (modelType == null)
             {
-                throw new Exception("Could not get the reflection type for Model : " + modelTypeName);
+                throw new InvalidOperationException("Could not get the reflection type for Model : " + modelTypeName);
             }
 
             var metadata = GetModelMetadata(dbContextType, modelType);
@@ -115,7 +115,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 // the type defined in that file is different, what should we do in this case?
                 // How likely is the above scenario?
                 // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
-                throw new Exception(string.Format(CultureInfo.CurrentCulture,
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
                     "There was an error creating a DbContext, the file {0} already exists",
                     outputPath));
             }
@@ -142,12 +142,12 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
             catch (Exception ex)
             {
-                throw new Exception("There was an error creating the DbContext instance to get the model: " + ex);
+                throw new InvalidOperationException("There was an error creating the DbContext instance to get the model: " + ex);
             }
 
             if (dbContextInstance == null)
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     "Instance of type {0} could not be cast to DbContext",
                     dbContextType.FullName));
             }
@@ -155,7 +155,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             var entityType = dbContextInstance.Model.GetEntityType(modelType);
             if (entityType == null)
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     "There is no entity type {0} on DbContext {1}",
                     modelType.FullName,
                     dbContextType.FullName));

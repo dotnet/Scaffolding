@@ -31,6 +31,7 @@
     <Content Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassNameModel.cs" />
     <Compile Include="CommonUtilities.cs" />
     <Compile Include="CompilationResult.cs" />
     <Compile Include="ExceptionUtilities.cs" />

@@ -5,20 +5,26 @@ namespace Microsoft.Framework.CodeGeneration
 {
     internal static class TypeUtilities
     {
-        public static void GetTypeNameandNamespace(string fullTypeName, out string typeName, out string namespaceName)
+        public static ClassNameModel GetTypeNameandNamespace(string fullTypeName)
         {
             ExceptionUtilities.ValidateStringArgument(fullTypeName, "fullTypeName");
 
             var index = fullTypeName.LastIndexOf(".");
             if (index == -1)
             {
-                typeName = fullTypeName;
-                namespaceName = string.Empty;
+                return new ClassNameModel()
+                {
+                    ClassName = fullTypeName,
+                    NamespaceName = string.Empty
+                };
             }
             else
             {
-                typeName = fullTypeName.Substring(index + 1);
-                namespaceName = fullTypeName.Substring(0, index);
+                return new ClassNameModel()
+                {
+                    ClassName = fullTypeName.Substring(index + 1),
+                    NamespaceName = fullTypeName.Substring(0, index)
+                };
             }
         }
     }

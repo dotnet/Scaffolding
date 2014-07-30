@@ -15,11 +15,10 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             ModelTypeName = modelType.Name;
             RequiredNamespaces = new HashSet<string>();
 
-            string typeName, namespaceName;
-            TypeUtilities.GetTypeNameandNamespace(dbContextName, out typeName, out namespaceName);
+            var classNameModel = TypeUtilities.GetTypeNameandNamespace(dbContextName);
 
-            DbContextTypeName = typeName;
-            DbContextNamespace = namespaceName;
+            DbContextTypeName = classNameModel.ClassName;
+            DbContextNamespace = classNameModel.NamespaceName;
 
             if (!string.Equals(modelNamespace, DbContextNamespace, StringComparison.Ordinal))
             {

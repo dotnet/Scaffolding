@@ -17,11 +17,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         {
             ModelType = modelType;
 
-            string typeName, namespaceName;
-            TypeUtilities.GetTypeNameandNamespace(dbContextFullTypeName, out typeName, out namespaceName);
+            var classNameModel = TypeUtilities.GetTypeNameandNamespace(dbContextFullTypeName);
 
-            ContextTypeName = typeName;
-            DbContextNamespace = namespaceName;
+            ContextTypeName = classNameModel.ClassName;
+            DbContextNamespace = classNameModel.NamespaceName;
         }
 
         public string ControllerName { get; set; }

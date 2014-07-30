@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,8 +12,9 @@ namespace Microsoft.Framework.CodeGeneration
 {
     internal static class CommonUtil
     {
-        public static bool TryGetAssemblyFromCompilation(IAssemblyLoaderEngine loader,
-            Compilation compilation, out Assembly assembly, out IEnumerable<string> errorMessages)
+        public static CompilationResult GetAssemblyFromCompilation(
+            IAssemblyLoaderEngine loader,
+            Compilation compilation)
         {
             EmitResult result;
             using (var ms = new MemoryStream())
@@ -33,18 +32,17 @@ namespace Microsoft.Framework.CodeGeneration
 
                     if (!result.Success)
                     {
-                        assembly = null;
-
                         var formatter = new DiagnosticFormatter();
-                        errorMessages = result.Diagnostics
+                        var errorMessages = result.Diagnostics
                                              .Where(IsError)
                                              .Select(d => formatter.Format(d));
 
-                        return false;
+                        return CompilationResult.FromErrorMessages(errorMessages);
                     }
 
                     ms.Seek(0, SeekOrigin.Begin);
 
+                    Assembly assembly;
                     if (PlatformHelper.IsMono)
                     {
                         assembly = loader.LoadStream(ms, pdbStream: null);
@@ -55,8 +53,7 @@ namespace Microsoft.Framework.CodeGeneration
                         assembly = loader.LoadStream(ms, pdb);
                     }
 
-                    errorMessages = null;
-                    return true;
+                    return CompilationResult.FromAssembly(assembly);
                 }
             }
         }

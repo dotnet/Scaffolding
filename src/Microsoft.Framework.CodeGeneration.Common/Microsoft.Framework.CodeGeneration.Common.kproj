@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommonUtil.cs" />
+    <Compile Include="CompilationResult.cs" />
     <Compile Include="ExceptionUtil.cs" />
     <Compile Include="NotNullArgument.cs" />
     <Compile Include="PlatformHelper.cs" />

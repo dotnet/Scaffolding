@@ -27,8 +27,6 @@ namespace TestWebApp.Models
             }
         }
 
-        //public DbSet<Person> People { get; set; }
-
         protected override void OnConfiguring(DbContextOptions options)
         {
             options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=aspnetvnext-TestWebApp-6a883536-855a-4c46-84f6-09412e2735c9;Trusted_Connection=True;MultipleActiveResultSets=true");

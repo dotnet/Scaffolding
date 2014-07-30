@@ -81,10 +81,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         private async Task AddFileHelper(string outputPath, Stream sourceStream)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             if (File.Exists(outputPath))
             {

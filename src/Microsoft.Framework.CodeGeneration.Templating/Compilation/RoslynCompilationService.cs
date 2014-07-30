@@ -45,18 +45,17 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                         syntaxTrees: syntaxTrees,
                         references: references);
 
-            Assembly assembly;
-            IEnumerable<string> errorMessages;
-            if (CommonUtil.TryGetAssemblyFromCompilation(_loader, compilation, out assembly, out errorMessages))
+            var result = CommonUtil.GetAssemblyFromCompilation(_loader, compilation);
+            if (result.Success)
             {
-                var type = assembly.GetExportedTypes()
+                var type = result.Assembly.GetExportedTypes()
                                    .First();
 
                 return CompilationResult.Successful(string.Empty, type);
             }
             else
             {
-                return CompilationResult.Failed(content, errorMessages);
+                return CompilationResult.Failed(content, result.ErrorMessages);
             }
         }
 

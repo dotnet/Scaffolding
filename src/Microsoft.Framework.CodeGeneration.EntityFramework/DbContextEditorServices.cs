@@ -37,7 +37,6 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             var templateName = "NewLocalDbContext.cshtml";
             var templatePath = _filesLocator.GetFilePath(templateName, TemplateFolders);
-            Contract.Assert(templatePath != null);
             Contract.Assert(File.Exists(templatePath));
 
             var templateContent = File.ReadAllText(templatePath);

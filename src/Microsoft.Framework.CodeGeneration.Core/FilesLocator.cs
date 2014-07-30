@@ -35,7 +35,11 @@ namespace Microsoft.Framework.CodeGeneration
                     }
                 }
             }
-            return null;
+
+            throw new Exception(string.Format(
+                "A file matching the name {0} was not found within any of the folders: {1}",
+                fileName,
+                string.Join(";", searchPaths)));
         }
     }
 }

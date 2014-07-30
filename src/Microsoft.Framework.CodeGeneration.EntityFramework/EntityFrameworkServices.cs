@@ -57,11 +57,10 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 var newAssemblyName = projectCompilation.AssemblyName + _counter++;
                 var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
 
-                Assembly newAssembly;
-                IEnumerable<string> errorMessages;
-                if (CommonUtil.TryGetAssemblyFromCompilation(_loader, newCompilation, out newAssembly, out errorMessages))
+                var result = CommonUtil.GetAssemblyFromCompilation(_loader, newCompilation);
+                if (result.Success)
                 {
-                    dbContextType = newAssembly.GetType(dbContextTypeName);
+                    dbContextType = result.Assembly.GetType(dbContextTypeName);
                     if (dbContextType == null)
                     {
                         throw new Exception("There was an error creating a DbContext, there was no type returned after compiling the new assembly successfully");
@@ -69,7 +68,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 }
                 else
                 {
-                    throw new Exception("There was an error creating a DbContext :" + string.Join("\n", errorMessages));
+                    throw new Exception("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
                 }
             }
             else
@@ -121,18 +120,15 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     outputPath));
             }
 
-            var souceText = await newDbContextTree.GetTextAsync();
+            var sourceText = await newDbContextTree.GetTextAsync();
 
-            if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (var fileStream = new FileStream(outputPath, FileMode.CreateNew, FileAccess.Write))
             {
                 using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
                 {
-                    souceText.Write(streamWriter);
+                    sourceText.Write(streamWriter);
                 }
             }
         }

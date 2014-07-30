@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Framework.CodeGeneration;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     internal static class StringUtil
     {

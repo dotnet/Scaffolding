@@ -13,7 +13,7 @@ using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
 using Microsoft.Framework.Runtime;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     [Alias("controller")]
     public class ControllerCodeGenerator : ICodeGenerator
@@ -53,7 +53,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             get
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: "Microsoft.Framework.CodeGenerators.WebFx",
+                    containingProject: "Microsoft.Framework.CodeGenerators.Mvc",
                     libraryManager: _libraryManager,
                     appEnvironment: _applicationEnvironment);
             }

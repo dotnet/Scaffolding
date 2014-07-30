@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     //Command line parameters common to controller and view scaffolder.
     public abstract class CommanCommandLineModel

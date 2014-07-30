@@ -3,7 +3,7 @@
 
 using Microsoft.Framework.CodeGeneration.CommandLine;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     public class ViewGeneratorModel : CommanCommandLineModel
     {

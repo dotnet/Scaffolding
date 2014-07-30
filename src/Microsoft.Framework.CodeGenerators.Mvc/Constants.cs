@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     internal static class Constants
     {

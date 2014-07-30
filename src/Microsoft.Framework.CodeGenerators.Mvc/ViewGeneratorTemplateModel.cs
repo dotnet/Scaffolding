@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     public class ViewGeneratorTemplateModel
     {

@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
 
-namespace Microsoft.Framework.CodeGenerators.WebFx
+namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     public class ControllerGeneratorTemplateModel
     {

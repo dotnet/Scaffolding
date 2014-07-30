@@ -9,7 +9,7 @@ using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal static class TemplateFoldersUtil
+    internal static class TemplateFoldersUtilities
     {
         public static IEnumerable<string> GetTemplateFolders(
             [NotNull]string containingProject,

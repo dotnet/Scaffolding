@@ -18,7 +18,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
             ModelType = modelType;
 
             string typeName, namespaceName;
-            TypeUtil.GetTypeNameandNamespace(dbContextFullTypeName, out typeName, out namespaceName);
+            TypeUtilities.GetTypeNameandNamespace(dbContextFullTypeName, out typeName, out namespaceName);
 
             ContextTypeName = typeName;
             DbContextNamespace = namespaceName;

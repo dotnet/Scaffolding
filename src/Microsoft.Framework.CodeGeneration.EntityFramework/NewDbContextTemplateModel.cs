@@ -16,7 +16,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             RequiredNamespaces = new HashSet<string>();
 
             string typeName, namespaceName;
-            TypeUtil.GetTypeNameandNamespace(dbContextName, out typeName, out namespaceName);
+            TypeUtilities.GetTypeNameandNamespace(dbContextName, out typeName, out namespaceName);
 
             DbContextTypeName = typeName;
             DbContextNamespace = namespaceName;

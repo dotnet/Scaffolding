@@ -3,11 +3,11 @@
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal static class TypeUtil
+    internal static class TypeUtilities
     {
         public static void GetTypeNameandNamespace(string fullTypeName, out string typeName, out string namespaceName)
         {
-            ExceptionUtil.ValidateStringArgument(fullTypeName, "fullTypeName");
+            ExceptionUtilities.ValidateStringArgument(fullTypeName, "fullTypeName");
 
             var index = fullTypeName.LastIndexOf(".");
             if (index == -1)

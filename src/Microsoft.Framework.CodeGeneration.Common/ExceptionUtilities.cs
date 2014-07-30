@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal static class ExceptionUtil
+    internal static class ExceptionUtilities
     {
         public static void ValidateStringArgument(string parameterValue, string parameterName)
         {

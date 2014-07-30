@@ -10,7 +10,7 @@ using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal static class CommonUtil
+    internal static class CommonUtilities
     {
         public static CompilationResult GetAssemblyFromCompilation(
             IAssemblyLoaderEngine loader,

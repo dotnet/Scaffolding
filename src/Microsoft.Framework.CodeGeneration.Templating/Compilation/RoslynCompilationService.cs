@@ -45,7 +45,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                         syntaxTrees: syntaxTrees,
                         references: references);
 
-            var result = CommonUtil.GetAssemblyFromCompilation(_loader, compilation);
+            var result = CommonUtilities.GetAssemblyFromCompilation(_loader, compilation);
             if (result.Success)
             {
                 var type = result.Assembly.GetExportedTypes()

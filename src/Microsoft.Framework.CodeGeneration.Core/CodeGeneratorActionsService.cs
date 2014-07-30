@@ -27,8 +27,8 @@ namespace Microsoft.Framework.CodeGeneration
 
         public async Task AddFileAsync(string outputPath, string sourceFilePath)
         {
-            ExceptionUtil.ValidateStringArgument(outputPath, "outputPath");
-            ExceptionUtil.ValidateStringArgument(sourceFilePath, "sourceFilePath");
+            ExceptionUtilities.ValidateStringArgument(outputPath, "outputPath");
+            ExceptionUtilities.ValidateStringArgument(sourceFilePath, "sourceFilePath");
 
             if (!File.Exists(sourceFilePath))
             {
@@ -48,8 +48,8 @@ namespace Microsoft.Framework.CodeGeneration
             [NotNull]IEnumerable<string> templateFolders,
             [NotNull]object templateModel)
         {
-            ExceptionUtil.ValidateStringArgument(outputPath, "outputPath");
-            ExceptionUtil.ValidateStringArgument(templateName, "templateName");
+            ExceptionUtilities.ValidateStringArgument(outputPath, "outputPath");
+            ExceptionUtilities.ValidateStringArgument(templateName, "templateName");
 
             var templatePath = _filesLocator.GetFilePath(templateName, templateFolders);
             if (string.IsNullOrEmpty(templatePath))

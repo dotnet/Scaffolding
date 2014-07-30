@@ -45,7 +45,7 @@ namespace Microsoft.Framework.CodeGenerators.WebFx
         {
             get
             {
-                return TemplateFoldersUtil.GetTemplateFolders(
+                return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: "Microsoft.Framework.CodeGenerators.WebFx",
                     libraryManager: _libraryManager,
                     appEnvironment: _applicationEnvironment);

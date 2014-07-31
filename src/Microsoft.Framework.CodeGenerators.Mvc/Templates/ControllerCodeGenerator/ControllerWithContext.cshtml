@@ -5,8 +5,7 @@ using System.Linq;
     {
 @:using System.Threading.Tasks;
     }
-}
-using Microsoft.AspNet.Mvc;
+}using Microsoft.AspNet.Mvc;
 using Microsoft.Data.Entity;
 @{
     foreach (var namespaceName in Model.RequiredNamespaces)
@@ -15,8 +14,7 @@ using Microsoft.Data.Entity;
     }
 }
 namespace @Model.ControllerNamespace
-{
-@{
+{@{
     string routePrefix;
     if (String.IsNullOrEmpty(Model.AreaName))
     {
@@ -84,8 +82,7 @@ namespace @Model.ControllerNamespace
             @:return View(db.@(entitySetName).ToList());
         }
     }
-}
-        }
+}        }
 
         // GET: @routePrefix/Details/5
 @{
@@ -97,12 +94,12 @@ namespace @Model.ControllerNamespace
     {
         @:public ActionResult Details(@primaryKeyNullableTypeName id)
     }
-}
-        {
+}        {
             if (id == null)
             {
                 return new HttpStatusCodeResult(404);
             }
+
 @{
     if (Model.UseAsync)
     {
@@ -112,11 +109,11 @@ namespace @Model.ControllerNamespace
     {
             @:@Model.ModelTypeName @Model.ModelVariable = db.@(entitySetName).Single(m => m.@primaryKeyName == id);
     }
-}
-            if (@Model.ModelVariable == null)
+}            if (@Model.ModelVariable == null)
             {
                 return new HttpStatusCodeResult(404);
             }
+
             return View(@Model.ModelVariable);
         }
 
@@ -128,8 +125,7 @@ namespace @Model.ControllerNamespace
     {
             @:ViewBag.@property.ForeignKeyPropertyNames[0] = new SelectList(db.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
     }
-}
-            return View();
+}            return View();
         }
 
         // POST: @routePrefix/Create
@@ -144,8 +140,7 @@ namespace @Model.ControllerNamespace
     {
         @:public ActionResult Create(@Model.ModelTypeName @Model.ModelVariable)
     }
-}
-        {
+}        {
             if (ModelState.IsValid)
             {
 @{
@@ -162,10 +157,8 @@ namespace @Model.ControllerNamespace
     {
                 @:db.SaveChanges();
     }
-}
-                return RedirectToAction("Index");
+}                return RedirectToAction("Index");
             }
-
 @{
     foreach (var property in relatedProperties.Values)
     {
@@ -185,12 +178,12 @@ namespace @Model.ControllerNamespace
     {
         @:public ActionResult Edit(@primaryKeyNullableTypeName id)
     }
-}
-        {
+}        {
             if (id == null)
             {
                 return new HttpStatusCodeResult(404);
             }
+
 @{
     if (Model.UseAsync)
     {
@@ -200,8 +193,7 @@ namespace @Model.ControllerNamespace
     {
             @:@Model.ModelTypeName @Model.ModelVariable = db.@(entitySetName).Single(m => m.@primaryKeyName == id);
     }
-}
-            if (@Model.ModelVariable == null)
+}            if (@Model.ModelVariable == null)
             {
                 return new HttpStatusCodeResult(404);
             }
@@ -226,8 +218,7 @@ namespace @Model.ControllerNamespace
     {
         @:public ActionResult Edit(@Model.ModelTypeName @Model.ModelVariable)
     }
-}
-        {
+}        {
             if (ModelState.IsValid)
             {
                 db.ChangeTracker.Entry(@Model.ModelVariable).State = EntityState.Modified;
@@ -240,8 +231,7 @@ namespace @Model.ControllerNamespace
     {
                 @:db.SaveChanges();
     }
-}
-                return RedirectToAction("Index");
+}                return RedirectToAction("Index");
             }
 @{
     foreach (var property in relatedProperties.Values)
@@ -262,12 +252,12 @@ namespace @Model.ControllerNamespace
     {
         @:public ActionResult Delete(@primaryKeyNullableTypeName id)
     }
-}
-        {
+}        {
             if (id == null)
             {
                 return new HttpStatusCodeResult(404);
             }
+
 @{
     if (Model.UseAsync)
     {
@@ -277,11 +267,11 @@ namespace @Model.ControllerNamespace
     {
             @:@Model.ModelTypeName @Model.ModelVariable = db.@(entitySetName).Single(m => m.@primaryKeyName == id);
     }
-}
-            if (@Model.ModelVariable == null)
+}            if (@Model.ModelVariable == null)
             {
                 return new HttpStatusCodeResult(404);
             }
+
             return View(@Model.ModelVariable);
         }
 

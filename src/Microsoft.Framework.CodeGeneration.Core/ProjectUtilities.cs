@@ -31,7 +31,6 @@ namespace Microsoft.Framework.CodeGeneration
                 .OfType<IMetadataProjectReference>()
                 .OfType<IRoslynMetadataReference>()
                 .Select(reference => reference.MetadataReference as CompilationReference)
-                .Where(compilation => string.Equals(environment.ApplicationName, compilation.Compilation.AssemblyName))
                 .FirstOrDefault();
 
             Contract.Assert(project != null);
@@ -42,7 +41,7 @@ namespace Microsoft.Framework.CodeGeneration
             [NotNull]this ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment)
         {
-            var export = libraryManager.GetLibraryExport(environment.ApplicationName);
+            var export = libraryManager.GetAllExports(environment.ApplicationName);
 
             return export.MetadataReferences
                 .OfType<IMetadataProjectReference>()

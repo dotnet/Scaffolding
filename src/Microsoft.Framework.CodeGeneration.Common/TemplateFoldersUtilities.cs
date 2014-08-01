@@ -39,15 +39,9 @@ namespace Microsoft.Framework.CodeGeneration
             ILibraryManager libraryManager, IApplicationEnvironment appEnvironment)
         {
             return libraryManager
-                .GetLibraryExport(appEnvironment.ApplicationName)
+                .GetLibraryExport(projectReferenceName)
                 .MetadataReferences
                 .OfType<IRoslynMetadataReference>()
-                .Where(reference =>
-                {
-                    var compilation = reference.MetadataReference as CompilationReference;
-                    return compilation != null &&
-                        string.Equals(projectReferenceName, compilation.Compilation.AssemblyName);
-                })
                 .OfType<IMetadataProjectReference>()
                 .FirstOrDefault();
         }

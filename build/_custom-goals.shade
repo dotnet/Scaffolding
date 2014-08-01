@@ -12,7 +12,7 @@ use namespace="System.Net"
         foreach (var projectName in projects)
         {
             var nupkgFiles = Directory
-                .EnumerateFiles(Path.Combine(baseDir, "artifacts\\build"), projectName + ".*.nupkg", SearchOption.AllDirectories)
+                .EnumerateFiles(Path.Combine(baseDir, "artifacts", "build"), projectName + ".*.nupkg", SearchOption.AllDirectories)
                 .Where(name => !name.EndsWith("symbols.nupkg"));
 
             foreach (var nupkgFile in nupkgFiles)

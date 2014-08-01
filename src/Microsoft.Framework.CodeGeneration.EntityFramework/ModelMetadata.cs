@@ -75,7 +75,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             else
             {
                 //Fallback to this or throw?
-                return "DbSet<" + modelType.Name + ">";
+                return "Set<" + modelType.Name + ">()";
             }
         }
     }

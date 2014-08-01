@@ -79,7 +79,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 mockAssemblyProvider.Object);
 
             //Act & Assert
-            var ex = Assert.Throws<Exception>(() => locator.GetCodeGenerator("NonExistingCodeGenerator"));
+            var ex = Assert.Throws<InvalidOperationException>(() => locator.GetCodeGenerator("NonExistingCodeGenerator"));
             Assert.Equal("No code generators found with the name NonExistingCodeGenerator", ex.Message);
         }
 

@@ -57,7 +57,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 mockServiceProvider.Object);
 
             //Act
-            var ex = Assert.Throws<Exception>(() => descriptor.CodeGeneratorAction);
+            var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorAction);
             Assert.Equal("GenerateCode method with a model parameter is not found in class: " +
                 "Microsoft.Framework.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithGenerateCodeNoParameters",
                 ex.Message);
@@ -74,7 +74,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 mockServiceProvider.Object);
 
             //Act
-            var ex = Assert.Throws<Exception>(() => descriptor.CodeGeneratorAction);
+            var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorAction);
             Assert.Equal("Multiple GenerateCode methods with a model parameter are found in class: " +
                 "Microsoft.Framework.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+ClassWithMultipleGenerateCodeMethods",
                 ex.Message);
@@ -132,7 +132,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 mockServiceProvider.Object);
 
             //Act & Assert
-            var ex = Assert.Throws<Exception>(() => descriptor.CodeGeneratorInstance);
+            var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorInstance);
             Assert.True(ex.Message.StartsWith("There was an error creating the code generator instance: " +
                 "Microsoft.Framework.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithDependencies"));
         }

@@ -116,7 +116,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
 
-            if (controllerGeneratorModel.GenerateViews)
+            if (!controllerGeneratorModel.NoViews)
             {
                 foreach (var viewTemplate in _views)
                 {

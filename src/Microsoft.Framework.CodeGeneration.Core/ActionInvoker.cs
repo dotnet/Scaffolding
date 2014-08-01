@@ -12,8 +12,6 @@ namespace Microsoft.Framework.CodeGeneration
 {
     public class ActionInvoker
     {
-        private List<ParameterDescriptor> _parameters;
-
         public ActionInvoker([NotNull]ActionDescriptor descriptor)
         {
             ActionDescriptor = descriptor;

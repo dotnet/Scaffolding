@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Framework.CodeGeneration.Templating.Compilation;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
@@ -55,7 +56,18 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
             var loaderEngine = (IAssemblyLoaderEngine)originalProvider.GetService(typeof(IAssemblyLoaderEngine));
             var libManager = (ILibraryManager)originalProvider.GetService(typeof(ILibraryManager));
 
-            return new RoslynCompilationService(appEnvironment, loaderEngine, libManager);
+            var emptyLibExport = new LibraryExport(new List<IMetadataReference>(), new List<ISourceReference>());
+            var mockLibManager = new Mock<ILibraryManager>();
+            mockLibManager
+                .Setup(lm => lm.GetAllExports("Microsoft.Framework.CodeGeneration"))
+                .Returns(emptyLibExport);
+
+            var input = "Microsoft.Framework.CodeGeneration.Templating.Test";
+            mockLibManager
+                .Setup(lm => lm.GetAllExports(input))
+                .Returns(libManager.GetAllExports(input));
+
+            return new RoslynCompilationService(appEnvironment, loaderEngine, mockLibManager.Object);
         }
     }
 

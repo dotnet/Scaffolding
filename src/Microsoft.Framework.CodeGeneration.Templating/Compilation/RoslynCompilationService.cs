@@ -66,23 +66,36 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
         {
             var references = new List<MetadataReference>();
 
-            var export = _libraryManager.GetAllExports(_environment.ApplicationName);
+            // Todo: When the target app references scaffolders as nuget packages rather than project references,
+            // since the target app does not actully use code from scaffolding framework, our dlls
+            // are not in app dependencies closure. However we need them for compiling the
+            // generated razor template. So we are just using the known references for now to make things work.
+            // Note that this model breaks for custom scaffolders because they may be using
+            // some other references which are not available in any of these closures.
+            // As the above comment, the right thing to do here is to use the dependency closure of
+            // the assembly which has the template.
+            var baseProjects = new string[] { _environment.ApplicationName, "Microsoft.Framework.CodeGeneration" };
 
-            foreach (var metadataReference in export.MetadataReferences)
+            foreach (var baseProject in baseProjects)
             {
-                var fileMetadataReference = metadataReference as IMetadataFileReference;
+                var export = _libraryManager.GetAllExports(baseProject);
 
-                if (fileMetadataReference != null)
+                foreach (var metadataReference in export.MetadataReferences)
                 {
-                    references.Add(CreateMetadataFileReference(fileMetadataReference.Path));
-                }
-                else
-                {
-                    var roslynReference = metadataReference as IRoslynMetadataReference;
+                    var fileMetadataReference = metadataReference as IMetadataFileReference;
 
-                    if (roslynReference != null)
+                    if (fileMetadataReference != null)
                     {
-                        references.Add(roslynReference.MetadataReference);
+                        references.Add(CreateMetadataFileReference(fileMetadataReference.Path));
+                    }
+                    else
+                    {
+                        var roslynReference = metadataReference as IRoslynMetadataReference;
+
+                        if (roslynReference != null)
+                        {
+                            references.Add(roslynReference.MetadataReference);
+                        }
                     }
                 }
             }

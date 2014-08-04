@@ -21,8 +21,8 @@ namespace Microsoft.Framework.CodeGeneration
 
         public void Main(string[] args)
         {
-            Console.WriteLine("Attach Debugger");
-            Console.Read();
+            //Console.WriteLine("Attach Debugger");
+            //Console.Read();
 
             var generatorsLocator = _serviceProvider.GetService<ICodeGeneratorLocator>();
 

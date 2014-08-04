@@ -1,11 +1,12 @@
 ﻿{
+    "version": "1.0.0-*",
     "shared": "*.cs",
     "dependencies": {
         "System.Linq": "4.0.0.0",
         "System.Reflection": "4.0.10.0",
         "System.Runtime": "4.0.20.0"
     },
-    "configurations": {
+    "frameworks": {
         "net45": { },
         "k10": {
             "System.Diagnostics.Contracts": "4.0.0.0"

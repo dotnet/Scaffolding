@@ -28,12 +28,5 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DevelopmentServerPort>30817</DevelopmentServerPort>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="Models\ModelWithMatchingShortName.cs" />
-    <Compile Include="Startup.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="project.json" />
-  </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

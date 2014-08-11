@@ -3,7 +3,7 @@
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    internal class ClassNameModel
+    public class ClassNameModel
     {
         public string ClassName { get; set; }
 

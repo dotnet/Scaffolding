@@ -64,17 +64,28 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             string validationMessage;
             ITypeSymbol model, dataContext;
 
-            if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
+            if (controllerGeneratorModel.EmptyController)
             {
-                throw new ArgumentException(validationMessage);
+                await GenerateEmptyController(controllerGeneratorModel);
             }
-
-            if (string.IsNullOrWhiteSpace(controllerGeneratorModel.DataContextClass))
+            else if((string.IsNullOrEmpty(controllerGeneratorModel.ModelClass)) && (string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass)))
             {
-                throw new ArgumentException("Please provide a name for DataContext");
+                await GenerateEmptyController(controllerGeneratorModel);
             }
-            ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
+            else
+            {
+                if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
+                {
+                    throw new ArgumentException(validationMessage);
+                }
 
+                ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
+                await GenerateController(controllerGeneratorModel, model, dataContext);
+            }
+        }
+
+        private async Task GenerateController(ControllerGeneratorModel controllerGeneratorModel, ITypeSymbol model, ITypeSymbol dataContext)
+        {
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
                 //Todo: Pluralize model name
@@ -143,6 +154,37 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                         viewTemplate + ".cshtml", TemplateFolders, viewTemplateModel);
                 }
             }
+        }
+
+        private async Task GenerateEmptyController(ControllerGeneratorModel controllerGeneratorModel)
+        {
+            if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
+            {
+                controllerGeneratorModel.ControllerName = controllerGeneratorModel.ControllerName + Constants.ControllerSuffix;
+            }
+            else
+            {
+                throw new ArgumentException("Controller name is required for an Empty Controller");
+            }
+
+            var templateModel = TypeUtilities.GetTypeNameandNamespace(controllerGeneratorModel.ControllerName);
+            templateModel.NamespaceName = string.IsNullOrWhiteSpace(templateModel.NamespaceName) ? "Controllers" : templateModel.NamespaceName;
+            var templateName = "EmptyController.cshtml";
+
+            var outputPath = Path.Combine(
+                _applicationEnvironment.ApplicationBasePath,
+                Constants.ControllersFolderName,
+                templateModel.ClassName + ".cs");
+
+            if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
+            {
+                throw new Exception(string.Format(
+                    CultureInfo.CurrentCulture,
+                    "View file {0} exists, use -f option to overwrite",
+                    outputPath));
+            }
+
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
         }
     }
 }

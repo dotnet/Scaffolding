@@ -16,5 +16,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         [Option(Name = "controllerName", ShortName = "name", Description = "Name of the controller")]
         public string ControllerName { get; set; }
+
+        [Option(Name = "readWriteController", ShortName = "readwrite", Description = "Switch to generate read write controller actions")]
+        public bool ReadWriteController { get; set; }
+
+        [Option(Name = "emptyController", ShortName = "empty", Description = "Switch to generate empty controller")]
+        public bool EmptyController { get; set; }
     }
 }

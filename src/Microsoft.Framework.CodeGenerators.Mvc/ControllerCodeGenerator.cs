@@ -24,7 +24,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly ILibraryManager _libraryManager;
-
+       
         private readonly List<string> _views = new List<string>()
         {
             "Create",
@@ -64,23 +64,19 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             string validationMessage;
             ITypeSymbol model, dataContext;
 
-            if (controllerGeneratorModel.EmptyController)
+            if(!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass) && !string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass))
             {
-                await GenerateEmptyController(controllerGeneratorModel);
-            }
-            else if((string.IsNullOrEmpty(controllerGeneratorModel.ModelClass)) && (string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass)))
-            {
-                await GenerateEmptyController(controllerGeneratorModel);
-            }
-            else
-            {
-                if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
+               if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
                 {
                     throw new ArgumentException(validationMessage);
                 }
 
                 ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
                 await GenerateController(controllerGeneratorModel, model, dataContext);
+            }
+            else
+            {
+                await GenerateEmptyController(controllerGeneratorModel);
             }
         }
 
@@ -158,15 +154,19 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         private async Task GenerateEmptyController(ControllerGeneratorModel controllerGeneratorModel)
         {
+
             if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
-                controllerGeneratorModel.ControllerName = controllerGeneratorModel.ControllerName + Constants.ControllerSuffix;
+               if (!controllerGeneratorModel.ControllerName.EndsWith(Constants.ControllerSuffix, StringComparison.Ordinal))
+                {
+                    controllerGeneratorModel.ControllerName = controllerGeneratorModel.ControllerName + Constants.ControllerSuffix;
+                }
             }
             else
             {
                 throw new ArgumentException("Controller name is required for an Empty Controller");
             }
-
+             
             var templateModel = TypeUtilities.GetTypeNameandNamespace(controllerGeneratorModel.ControllerName);
             templateModel.NamespaceName = string.IsNullOrWhiteSpace(templateModel.NamespaceName) ? "Controllers" : templateModel.NamespaceName;
             var templateName = "EmptyController.cshtml";

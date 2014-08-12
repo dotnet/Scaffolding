@@ -39,7 +39,7 @@ namespace Microsoft.Framework.CodeGeneration
             if (isBoolProperty || optionAttribute != null)
             {
                 //This is just so that all the below code does not need to
-                //check for null on attribute. A bit of hack that works.
+                //check for null on attribute. Not pure but works.
                 var nullSafeOptionAttribute = optionAttribute ?? new OptionAttribute();
 
                 var template = GetOptionTemplate(nullSafeOptionAttribute);

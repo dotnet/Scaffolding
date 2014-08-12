@@ -41,7 +41,7 @@ namespace TestWebApp
             });
 
             // Enable Browser Link support
-            app.UseBrowserLink();
+            // app.UseBrowserLink();
 
             // Add static files to the request pipeline
             app.UseStaticFiles();

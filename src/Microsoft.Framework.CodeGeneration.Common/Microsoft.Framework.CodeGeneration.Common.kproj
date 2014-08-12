@@ -27,20 +27,5 @@
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <Content Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ClassNameModel.cs" />
-    <Compile Include="CommonUtilities.cs" />
-    <Compile Include="CompilationResult.cs" />
-    <Compile Include="ExceptionUtilities.cs" />
-    <Compile Include="NotNullArgument.cs" />
-    <Compile Include="PlatformHelper.cs" />
-    <Compile Include="RoslynUtilities.cs" />
-    <Compile Include="TemplateFoldersUtilities.cs" />
-    <Compile Include="TypeExtensions.cs" />
-    <Compile Include="TypeUtilities.cs" />
-  </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

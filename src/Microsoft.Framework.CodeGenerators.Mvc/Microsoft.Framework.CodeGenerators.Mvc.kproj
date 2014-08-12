@@ -25,26 +25,5 @@
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <Content Include="project.json" />
-    <Content Include="Templates\ControllerCodeGenerator\ControllerWithContext.cshtml" />
-    <Content Include="Templates\ViewGenerator\Create.cshtml" />
-    <Content Include="Templates\ViewGenerator\Delete.cshtml" />
-    <Content Include="Templates\ViewGenerator\Details.cshtml" />
-    <Content Include="Templates\ViewGenerator\Edit.cshtml" />
-    <Content Include="Templates\ViewGenerator\List.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CommanCommandLineModel.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="ControllerCodeGenerator.cs" />
-    <Compile Include="ControllerGeneratorModel.cs" />
-    <Compile Include="ControllerGeneratorTemplateModel.cs" />
-    <Compile Include="StringUtil.cs" />
-    <Compile Include="ValidationUtil.cs" />
-    <Compile Include="ViewGenerator.cs" />
-    <Compile Include="ViewGeneratorModel.cs" />
-    <Compile Include="ViewGeneratorTemplateModel.cs" />
-  </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

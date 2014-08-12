@@ -11,11 +11,13 @@
     "frameworks" : {
         "net451" : { 
             "dependencies": {
+                "System.Text.Encoding": ""
             }
         },
         "k10" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20.0"
+                "System.Runtime": "4.0.20.0",
+                "System.Text.Encoding": "4.0.20.0"
             }
         }
     }

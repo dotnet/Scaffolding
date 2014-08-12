@@ -166,9 +166,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 throw new ArgumentException("Controller name is required for an Empty Controller");
             }
-             
+
+            var appName = _libraryManager.GetLibraryInformation(_applicationEnvironment.ApplicationName).Name;
+            var buildNameSpace = appName + "." + Constants.ControllersFolderName;
             var templateModel = TypeUtilities.GetTypeNameandNamespace(controllerGeneratorModel.ControllerName);
-            templateModel.NamespaceName = string.IsNullOrWhiteSpace(templateModel.NamespaceName) ? "Controllers" : templateModel.NamespaceName;
+            templateModel.NamespaceName = string.IsNullOrWhiteSpace(templateModel.NamespaceName) ? buildNameSpace : templateModel.NamespaceName;
             var templateName = "EmptyController.cshtml";
 
             var outputPath = Path.Combine(

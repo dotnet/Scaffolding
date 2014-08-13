@@ -9,6 +9,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     {
         public string ViewName { get; set; }
 
+        [Argument(Description = "The view template to use, supported view templates: 'Create|Edit|Delete|Details|List'")]
         public string TemplateName { get; set; }
 
         [Option(Name = "partialView", ShortName = "partial")]

@@ -25,8 +25,15 @@ using Microsoft.Data.Entity.Metadata;
 }
     public class @Model.DbContextTypeName : @baseClassName
     {
+        private static bool _created = false;
+
         public @(Model.DbContextTypeName)()
         {
+            if (!_created)
+            {
+                Database.EnsureCreated();
+                _created = true;
+            }
         }
 
         public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }

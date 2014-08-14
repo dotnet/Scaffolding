@@ -100,12 +100,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 dbContextFullName,
                 model);
 
+            bool isLayoutSelected = viewGeneratorModel.UseDefaultLayout ||
+                !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage);
+
             var templateModel = new ViewGeneratorTemplateModel()
             {
                 ViewDataTypeName = modelTypeFullName,
                 ViewName = viewGeneratorModel.ViewName,
                 LayoutPageFile = viewGeneratorModel.LayoutPage,
-                IsLayoutPageSelected = viewGeneratorModel.UseLayout,
+                IsLayoutPageSelected = isLayoutSelected,
                 IsPartialView = viewGeneratorModel.PartialView,
                 ReferenceScriptLibraries = viewGeneratorModel.ReferenceScriptLibraries,
                 ModelMetadata = modelMetadata,

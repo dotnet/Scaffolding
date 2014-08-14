@@ -127,12 +127,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 {
                     var viewName = viewTemplate == "List" ? "Index" : viewTemplate;
                     // ToDo: This is duplicated from ViewGenerator.
+                    bool isLayoutSelected = controllerGeneratorModel.UseDefaultLayout ||
+                        !String.IsNullOrEmpty(controllerGeneratorModel.LayoutPage);
+
                     var viewTemplateModel = new ViewGeneratorTemplateModel()
                     {
                         ViewDataTypeName = modelTypeFullName,
                         ViewName = viewName,
                         LayoutPageFile = controllerGeneratorModel.LayoutPage,
-                        IsLayoutPageSelected = controllerGeneratorModel.UseLayout,
+                        IsLayoutPageSelected = isLayoutSelected,
                         IsPartialView = false,
                         ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries,
                         ModelMetadata = modelMetadata,

@@ -18,11 +18,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         [Option(Name = "referenceScriptLibraries", ShortName = "scripts")]
         public bool ReferenceScriptLibraries { get; set; }
 
-        [Option(Name = "layout", ShortName = "l", Description = "Layout page to use, pass empty string if set in a Razor _viewStart file")]
+        [Option(Name = "layout", ShortName = "l", Description = "Custom Layout page to use")]
         public string LayoutPage { get; set; }
 
-        [Option(Name = "useLayout", ShortName = "ul", Description = "Switch to specify whether to use a layout or not, if this is not present, --layout is ignored")]
-        public bool UseLayout { get; set; }
+        [Option(Name = "useDefaultLayout", ShortName = "udl", Description = "Switch to specify that default layout should be used for the views")]
+        public bool UseDefaultLayout { get; set; }
 
         [Option(Name = "force", ShortName = "f", Description = "Use this option to overwrite existing files")]
         public bool Force { get; set; }

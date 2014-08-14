@@ -48,11 +48,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> Index()
+        @:public async Task<IActionResult> Index()
     }
     else
     {
-        @:public ActionResult Index()
+        @:public IActionResult Index()
     }
         @:{
     var includeExpressions = "";
@@ -88,11 +88,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> Details(@primaryKeyNullableTypeName id)
+        @:public async Task<IActionResult> Details(@primaryKeyNullableTypeName id)
     }
     else
     {
-        @:public ActionResult Details(@primaryKeyNullableTypeName id)
+        @:public IActionResult Details(@primaryKeyNullableTypeName id)
     }
 }        {
             if (id == null)
@@ -118,7 +118,7 @@ namespace @Model.ControllerNamespace
         }
 
         // GET: @routePrefix/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
 @{
     foreach (var property in relatedProperties.Values)
@@ -134,11 +134,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> Create(@Model.ModelTypeName @Model.ModelVariable)
+        @:public async Task<IActionResult> Create(@Model.ModelTypeName @Model.ModelVariable)
     }
     else
     {
-        @:public ActionResult Create(@Model.ModelTypeName @Model.ModelVariable)
+        @:public IActionResult Create(@Model.ModelTypeName @Model.ModelVariable)
     }
 }        {
             if (ModelState.IsValid)
@@ -172,11 +172,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> Edit(@primaryKeyNullableTypeName id)
+        @:public async Task<IActionResult> Edit(@primaryKeyNullableTypeName id)
     }
     else
     {
-        @:public ActionResult Edit(@primaryKeyNullableTypeName id)
+        @:public IActionResult Edit(@primaryKeyNullableTypeName id)
     }
 }        {
             if (id == null)
@@ -212,11 +212,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> Edit(@Model.ModelTypeName @Model.ModelVariable)
+        @:public async Task<IActionResult> Edit(@Model.ModelTypeName @Model.ModelVariable)
     }
     else
     {
-        @:public ActionResult Edit(@Model.ModelTypeName @Model.ModelVariable)
+        @:public IActionResult Edit(@Model.ModelTypeName @Model.ModelVariable)
     }
 }        {
             if (ModelState.IsValid)
@@ -247,11 +247,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> Delete(@primaryKeyNullableTypeName id)
+        @:public async Task<IActionResult> Delete(@primaryKeyNullableTypeName id)
     }
     else
     {
-        @:public ActionResult Delete(@primaryKeyNullableTypeName id)
+        @:public IActionResult Delete(@primaryKeyNullableTypeName id)
     }
 }        {
             if (id == null)
@@ -282,11 +282,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<ActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
+        @:public async Task<IActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
     }
     else
     {
-        @:public ActionResult DeleteConfirmed(@primaryKeyShortTypeName id)
+        @:public IActionResult DeleteConfirmed(@primaryKeyShortTypeName id)
     }
         @:{
     if (Model.UseAsync)

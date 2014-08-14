@@ -2,7 +2,7 @@
     "dependencies": {
     },
 
-    "configurations" : {
+    "frameworks" : {
         "net451" : { 
             "dependencies": {
             }

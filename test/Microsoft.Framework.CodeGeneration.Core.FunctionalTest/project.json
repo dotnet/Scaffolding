@@ -12,7 +12,7 @@
         "test": "Xunit.KRunner"
     },
 
-    "configurations" : {
+    "frameworks" : {
         "net451" : { 
             "dependencies": {
             }

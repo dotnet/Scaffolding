@@ -3,7 +3,7 @@
         "Microsoft.AspNet.Server.IIS": "1.0.0-*",
         "ModelTypesLocatorTestClassLibrary": ""
     },
-    "configurations" : {
+    "frameworks" : {
         "net451" : { },
         "k10" : { }
     }

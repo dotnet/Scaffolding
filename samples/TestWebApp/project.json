@@ -16,7 +16,7 @@
         "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://localhost:5000",
         "gen": "Microsoft.Framework.CodeGeneration" /*Add this command to you app*/
     },
-    "configurations": {
+    "frameworks": {
         "net451": { },
         "k10": { }
     }

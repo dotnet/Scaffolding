@@ -1,0 +1,13 @@
+﻿{
+    "dependencies": {
+        "Microsoft.Framework.CodeGeneration.EntityFramework": "",
+        "Moq": "4.2.1312.1622",
+        "Xunit.KRunner": "1.0.0-*"
+    },
+    "commands": {
+        "test": "Xunit.KRunner"
+    },
+    "frameworks" : {
+        "net451" : { }
+    }
+}

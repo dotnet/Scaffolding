@@ -57,8 +57,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             string validationMessage;
             ITypeSymbol model, dataContext;
 
-            if (!ValidationUtil.TryValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage) ||
-                !ValidationUtil.TryValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage))
+            if (!ValidationUtil.TryValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
             {
                 throw new ArgumentException(validationMessage);
             }
@@ -73,9 +72,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 throw new ArgumentException("The TemplateName cannot be empty");
             }
 
+            ValidationUtil.TryValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
+
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
-            Contract.Assert(dataContext != null, "Validation succeded but DataContext type not set");
 
             var outputPath = Path.Combine(
                 _applicationEnvironment.ApplicationBasePath,
@@ -93,7 +93,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             var templateName = viewGeneratorModel.TemplateName + ".cshtml";
 
-            var dbContextFullName = dataContext.FullNameForSymbol();
+            var dbContextFullName = dataContext != null ? dataContext.FullNameForSymbol() : viewGeneratorModel.DataContextClass;
             var modelTypeFullName = model.FullNameForSymbol();
 
             var modelMetadata = await _entityFrameworkService.GetModelMetadata(

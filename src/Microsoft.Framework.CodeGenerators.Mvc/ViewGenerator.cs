@@ -68,6 +68,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 throw new ArgumentException("The ViewName cannot be empty");
             }
 
+            if (string.IsNullOrEmpty(viewGeneratorModel.TemplateName))
+            {
+                throw new ArgumentException("The TemplateName cannot be empty");
+            }
+
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
             Contract.Assert(dataContext != null, "Validation succeded but DataContext type not set");

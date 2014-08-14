@@ -64,7 +64,13 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             string validationMessage;
             ITypeSymbol model, dataContext;
 
-            if(!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass) && !string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass))
+            // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
+            // That's not possible in command line scaffolding - the closest we can get is
+            // the name of assembly??
+            var appName = _libraryManager.GetLibraryInformation(_applicationEnvironment.ApplicationName).Name;
+            var controllerNameSpace = appName + "." + Constants.ControllersFolderName;
+
+            if (!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass) && !string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass))
             {
                if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
                 {
@@ -72,15 +78,18 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 }
 
                 ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
-                await GenerateController(controllerGeneratorModel, model, dataContext);
+                await GenerateController(controllerGeneratorModel, model, dataContext, controllerNameSpace);
             }
             else
             {
-                await GenerateEmptyController(controllerGeneratorModel);
+                await GenerateEmptyController(controllerGeneratorModel, controllerNameSpace);
             }
         }
 
-        private async Task GenerateController(ControllerGeneratorModel controllerGeneratorModel, ITypeSymbol model, ITypeSymbol dataContext)
+        private async Task GenerateController(ControllerGeneratorModel controllerGeneratorModel,
+            ITypeSymbol model,
+            ITypeSymbol dataContext,
+            string controllerNameSpace)
         {
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
@@ -91,18 +100,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
 
-            var outputPath = Path.Combine(
-                _applicationEnvironment.ApplicationBasePath,
-                Constants.ControllersFolderName,
-                controllerGeneratorModel.ControllerName + ".cs");
-
-            if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
-            {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    "View file {0} exists, use -f option to overwrite",
-                    outputPath));
-            }
+            string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
 
             var dbContextFullName = dataContext != null ? dataContext.FullNameForSymbol() : controllerGeneratorModel.DataContextClass;
             var modelTypeFullName = model.FullNameForSymbol();
@@ -117,6 +115,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo
                 UseAsync = controllerGeneratorModel.UseAsync,
+                ControllerNamespace = controllerNameSpace,
                 ModelMetadata = modelMetadata
             };
 
@@ -152,7 +151,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        private async Task GenerateEmptyController(ControllerGeneratorModel controllerGeneratorModel)
+        private async Task GenerateEmptyController(ControllerGeneratorModel controllerGeneratorModel,
+            string controllerNamespace)
         {
 
             if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
@@ -167,26 +167,33 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 throw new ArgumentException("Controller name is required for an Empty Controller");
             }
 
-            var appName = _libraryManager.GetLibraryInformation(_applicationEnvironment.ApplicationName).Name;
-            var buildNameSpace = appName + "." + Constants.ControllersFolderName;
-            var templateModel = TypeUtilities.GetTypeNameandNamespace(controllerGeneratorModel.ControllerName);
-            templateModel.NamespaceName = string.IsNullOrWhiteSpace(templateModel.NamespaceName) ? buildNameSpace : templateModel.NamespaceName;
-            var templateName = "EmptyController.cshtml";
+            var templateModel = new ClassNameModel()
+            {
+                ClassName = controllerGeneratorModel.ControllerName,
+                NamespaceName = controllerNamespace
+            };
 
+            var templateName = "EmptyController.cshtml";
+            var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+        }
+
+        private string ValidateAndGetOutputPath(ControllerGeneratorModel controllerGeneratorModel)
+        {
             var outputPath = Path.Combine(
                 _applicationEnvironment.ApplicationBasePath,
                 Constants.ControllersFolderName,
-                templateModel.ClassName + ".cs");
+                controllerGeneratorModel.ControllerName + ".cs");
 
             if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
             {
-                throw new Exception(string.Format(
+                throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
                     "View file {0} exists, use -f option to overwrite",
                     outputPath));
             }
 
-            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+            return outputPath;
         }
     }
 }

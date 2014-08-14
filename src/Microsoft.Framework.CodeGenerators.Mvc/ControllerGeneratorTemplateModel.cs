@@ -29,6 +29,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         public bool UseAsync { get; set; }
 
+        public string ControllerNamespace { get; set; }
+
         public ModelMetadata ModelMetadata { get; set; }
 
         public ITypeSymbol ModelType { get; private set; }
@@ -45,17 +47,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     }
                 }
                 return ControllerName;
-            }
-        }
-
-        public string ControllerNamespace
-        {
-            get
-            {
-                // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
-                // That's not possible in command line scaffolding - the closest we can get is
-                // the name of assembly??
-                return ModelType.ContainingAssembly.Name + "." + Constants.ControllersFolderName;
             }
         }
 

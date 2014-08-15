@@ -18,13 +18,13 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     [Alias("controller")]
     public class ControllerCodeGenerator : ICodeGenerator
     {
-
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IEntityFrameworkService _entityFrameworkService;
         private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly ILibraryManager _libraryManager;
-       
+        private readonly ILogger _logger;
+
         private readonly List<string> _views = new List<string>()
         {
             "Create",
@@ -39,13 +39,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService)
+            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
+            [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
             _applicationEnvironment = environment;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
+            _logger = logger;
         }
 
         public virtual IEnumerable<string> TemplateFolders
@@ -119,7 +121,9 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 ModelMetadata = modelMetadata
             };
 
+            var appBasePath = _applicationEnvironment.ApplicationBasePath;
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+            _logger.LogMessage("Added Controller : " + outputPath.Substring(appBasePath.Length));
 
             if (!controllerGeneratorModel.NoViews)
             {
@@ -143,13 +147,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     };
 
                     var viewOutputPath = Path.Combine(
-                        _applicationEnvironment.ApplicationBasePath,
+                        appBasePath,
                         Constants.ViewsFolderName,
                         model.Name,
                         viewName + ".cshtml");
 
                     await _codeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
                         viewTemplate + ".cshtml", TemplateFolders, viewTemplateModel);
+
+                    _logger.LogMessage("Added View : " + viewOutputPath.Substring(appBasePath.Length));
                 }
             }
         }

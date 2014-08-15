@@ -23,6 +23,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private readonly ILibraryManager _libraryManager;
         private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
+        private readonly ILogger _logger;
 
         // Todo: Instead of each generator taking services, provide them in some base class?
         // However for it to be effective, it should be property dependecy injection rather
@@ -32,13 +33,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService)
+            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
+            [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
             _applicationEnvironment = environment;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
+            _logger = logger;
         }
 
         public virtual IEnumerable<string> TemplateFolders
@@ -77,8 +80,9 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
 
+            var appbasePath = _applicationEnvironment.ApplicationBasePath;
             var outputPath = Path.Combine(
-                _applicationEnvironment.ApplicationBasePath,
+                appbasePath,
                 Constants.ViewsFolderName,
                 model.Name,
                 viewGeneratorModel.ViewName + ".cshtml");
@@ -116,6 +120,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             };
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+            _logger.LogMessage("Added View : " + outputPath.Substring(appbasePath.Length));
         }
     }
 }

@@ -22,6 +22,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly ILibraryManager _libraryManager;
         private readonly IAssemblyLoaderEngine _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
+        private readonly ILogger _logger;
         private static int _counter = 1;
 
         public EntityFrameworkServices(
@@ -29,13 +30,15 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IAssemblyLoaderEngine loader,
             [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IDbContextEditorServices dbContextEditorServices)
+            [NotNull]IDbContextEditorServices dbContextEditorServices,
+            [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
             _environment = environment;
             _loader = loader;
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
+            _logger = logger;
         }
 
         public async Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ITypeSymbol modelTypeSymbol)
@@ -104,8 +107,9 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             SyntaxTree newDbContextTree)
         {
             //ToDo: What's the best place to write the DbContext?
+            var appBasePath = _environment.ApplicationBasePath;
             var outputPath = Path.Combine(
-                _environment.ApplicationBasePath,
+                appBasePath,
                 "Models",
                 dbContextTemplateModel.DbContextTypeName + ".cs");
 
@@ -131,6 +135,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     sourceText.Write(streamWriter);
                 }
             }
+            _logger.LogMessage("Added DbContext : " + outputPath.Substring(appBasePath.Length));
         }
 
         private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType)

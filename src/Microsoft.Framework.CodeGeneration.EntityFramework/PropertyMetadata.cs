@@ -11,10 +11,9 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
     public class PropertyMetadata
     {
         //Todo: Perhaps move the constructor to something line MetadataReader?
-        public PropertyMetadata(
-            [NotNull]IEntityType entityType,
-            [NotNull]IProperty property)
+        public PropertyMetadata([NotNull]IProperty property)
         {
+            var entityType = property.EntityType;
             PropertyName = property.Name;
             TypeName = property.PropertyType.FullName;
             IsEnum = property.PropertyType.GetTypeInfo().IsEnum;

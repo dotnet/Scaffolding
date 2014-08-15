@@ -38,7 +38,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 if (_properties == null)
                 {
                     _properties = EntityType.Properties
-                        .Select(p => new PropertyMetadata(EntityType, p))
+                        .Select(p => new PropertyMetadata(p))
                         .ToArray();
                 }
                 return _properties;
@@ -53,7 +53,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 {
                     _primaryKeys = EntityType.GetKey()
                         .Properties
-                        .Select(p => new PropertyMetadata(EntityType, p))
+                        .Select(p => new PropertyMetadata(p))
                         .ToArray();
                 }
                 return _primaryKeys;

@@ -16,7 +16,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
                 if (_model == null)
                 {
                     _model = new Model();
-                    var builder = new ConventionModelBuilder(_model);
+                    var builder = new ModelBuilder(_model);
 
                     builder.Entity<Product>();
                     builder.Entity<Category>();

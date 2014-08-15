@@ -10,14 +10,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     {
         public string ViewDataTypeName { get; set; }
 
-        public string ViewDataTypeShortName
-        {
-            get
-            {
-                // ToDo:This should do some custom logic to figure out the short name.
-                return ViewDataTypeName;
-            }
-        }
+        public string ViewDataTypeShortName { get; set; }
 
         public string ViewName { get; set; }
 

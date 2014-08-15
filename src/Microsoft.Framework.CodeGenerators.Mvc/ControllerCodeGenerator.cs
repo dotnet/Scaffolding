@@ -137,6 +137,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     var viewTemplateModel = new ViewGeneratorTemplateModel()
                     {
                         ViewDataTypeName = modelTypeFullName,
+                        ViewDataTypeShortName = model.Name,
                         ViewName = viewName,
                         LayoutPageFile = controllerGeneratorModel.LayoutPage,
                         IsLayoutPageSelected = isLayoutSelected,

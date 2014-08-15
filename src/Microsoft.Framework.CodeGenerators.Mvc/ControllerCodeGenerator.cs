@@ -149,7 +149,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     var viewOutputPath = Path.Combine(
                         appBasePath,
                         Constants.ViewsFolderName,
-                        model.Name,
+                        templateModel.ControllerRootName,
                         viewName + ".cshtml");
 
                     await _codeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,

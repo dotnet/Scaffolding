@@ -151,10 +151,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                         appBasePath,
                         Constants.ViewsFolderName,
                         templateModel.ControllerRootName,
-                        viewName + ".cshtml");
+                        viewName + Constants.ViewExtension);
 
                     await _codeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                        viewTemplate + ".cshtml", TemplateFolders, viewTemplateModel);
+                        viewTemplate + Constants.RazorTemplateExtension, TemplateFolders, viewTemplateModel);
 
                     _logger.LogMessage("Added View : " + viewOutputPath.Substring(appBasePath.Length));
                 }
@@ -194,7 +194,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var outputPath = Path.Combine(
                 _applicationEnvironment.ApplicationBasePath,
                 Constants.ControllersFolderName,
-                controllerGeneratorModel.ControllerName + ".cs");
+                controllerGeneratorModel.ControllerName + Constants.CodeFileExtension);
 
             if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
             {

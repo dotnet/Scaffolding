@@ -70,6 +70,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 throw new ArgumentException("The ViewName cannot be empty");
             }
 
+            if (viewGeneratorModel.ViewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                int viewNameLength = viewGeneratorModel.ViewName.Length - Constants.ViewExtension.Length;
+                viewGeneratorModel.ViewName = viewGeneratorModel.ViewName.Substring(0, viewNameLength);
+            }
+
             if (string.IsNullOrEmpty(viewGeneratorModel.TemplateName))
             {
                 throw new ArgumentException("The TemplateName cannot be empty");
@@ -85,7 +91,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 appbasePath,
                 Constants.ViewsFolderName,
                 model.Name,
-                viewGeneratorModel.ViewName + ".cshtml");
+                viewGeneratorModel.ViewName + Constants.ViewExtension);
 
             if (File.Exists(outputPath) && !viewGeneratorModel.Force)
             {
@@ -95,7 +101,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     outputPath));
             }
 
-            var templateName = viewGeneratorModel.TemplateName + ".cshtml";
+            var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
 
             var dbContextFullName = dataContext != null ? dataContext.FullNameForSymbol() : viewGeneratorModel.DataContextClass;
             var modelTypeFullName = model.FullNameForSymbol();

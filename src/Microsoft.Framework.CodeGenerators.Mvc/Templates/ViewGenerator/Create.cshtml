@@ -1,29 +1,27 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @Model.ViewDataTypeName
-
 @{
     if (Model.IsPartialView)
     {
+@:
     }
     else if (Model.IsLayoutPageSelected)
     {
 <text>
 @@{
-    ViewBag.Title = "@Model.ViewName";
-</text>
+    ViewBag.Title = "@Model.ViewName";</text>
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
-
+@:
 <h2>@Model.ViewName</h2>
 
     }
     else
     {
-
 <text>
 @@{
     Layout = null;
@@ -42,15 +40,17 @@
     }
     if (Model.ReferenceScriptLibraries && !Model.IsLayoutPageSelected)
     {
-@:<script src="~/Scripts/jquery-@(Model.JQueryVersion).min.js"></script>
-@:<script src="~/Scripts/jquery.validate.min.js"></script>
-@:<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+@:@@section Scripts {
+    @:<script src="@@Url.Content("~/Scripts/jquery-@(Model.JQueryVersion).min.js")"></script>
+    @:<script src="@@Url.Content("~/Scripts/jquery.validate.min.js")"></script>
+    @:<script src="@@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")"></script>
+@:}
     }
 }
-@@using (Html.BeginForm()) 
+@@using (Html.BeginForm())
 {
     @@Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <h4>@Model.ViewDataTypeShortName</h4>
         <hr />
@@ -124,10 +124,11 @@
 @{
     if (Model.IsLayoutPageSelected && Model.ReferenceScriptLibraries)
     {
-
-@:<script src="~/Scripts/jquery-@(Model.JQueryVersion).min.js"></script>
-@:<script src="~/Scripts/jquery.validate.min.js"></script>
-@:<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+@:@@section Scripts {
+    @:<script src="@@Url.Content("~/Scripts/jquery-@(Model.JQueryVersion).min.js")"></script>
+    @:<script src="@@Url.Content("~/Scripts/jquery.validate.min.js")"></script>
+    @:<script src="@@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")"></script>
+@:}
     }
     // The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)

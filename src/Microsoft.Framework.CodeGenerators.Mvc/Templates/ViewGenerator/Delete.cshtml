@@ -1,29 +1,27 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @Model.ViewDataTypeName
-
 @{
     if (Model.IsPartialView)
     {
+@:
     }
     else if (Model.IsLayoutPageSelected)
     {
 <text>
 @@{
-    ViewBag.Title = "@Model.ViewName";
-</text>
+    ViewBag.Title = "@Model.ViewName";</text>
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
-
+@:
 <h2>@Model.ViewName</h2>
 
     }
     else
     {
-
 <text>
 @@{
     Layout = null;
@@ -67,8 +65,7 @@
 
         }
     }
-}
-    </dl>
+}    </dl>
 
     @@using (Html.BeginForm()) {
         @@Html.AntiForgeryToken()

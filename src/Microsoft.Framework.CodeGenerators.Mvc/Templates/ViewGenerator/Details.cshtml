@@ -1,23 +1,22 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @Model.ViewDataTypeName
-
 @{
     if (Model.IsPartialView)
     {
+@:
     }
     else if (Model.IsLayoutPageSelected)
     {
 <text>
 @@{
-    ViewBag.Title = "@Model.ViewName";
-</text>
+    ViewBag.Title = "@Model.ViewName";</text>
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
-
+@:
 <h2>@Model.ViewName</h2>
 
     }
@@ -66,29 +65,22 @@
 
         }
     }
-}
-    </dl>
+}    </dl>
 </div>
 <p>
 @{
     string pkName = GetPrimaryKeyName();
-
     if (pkName != null)
     {
-<text>
-        @@Html.ActionLink("Edit", "Edit", new { id = Model.@pkName }) |
-        @@Html.ActionLink("Back to List", "Index")
-</text>
+        @:@@Html.ActionLink("Edit", "Edit", new { id = Model.@pkName }) |
+        @:@@Html.ActionLink("Back to List", "Index")
     }
     else
     {
-<text>
-        @@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-        @@Html.ActionLink("Back to List", "Index")
-</text>
+        @:@@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+        @:@@Html.ActionLink("Back to List", "Index")
     }
-}
-</p>
+}</p>
 @{
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {

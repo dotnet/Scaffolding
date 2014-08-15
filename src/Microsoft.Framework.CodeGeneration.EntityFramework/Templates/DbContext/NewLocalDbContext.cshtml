@@ -6,7 +6,7 @@ using Microsoft.Data.Entity.Metadata;
     {
 @:using @namespaceName;
     }
-
+@:
     string baseClassName;
     if (String.Equals(Model.DbContextTypeName, "DbContext", StringComparison.Ordinal))
     {
@@ -22,8 +22,7 @@ using Microsoft.Data.Entity.Metadata;
 @:{
     //PushIndent("    ");
     } 
-}
-    public class @Model.DbContextTypeName : @baseClassName
+}    public class @Model.DbContextTypeName : @baseClassName
     {
         private static bool _created = false;
 

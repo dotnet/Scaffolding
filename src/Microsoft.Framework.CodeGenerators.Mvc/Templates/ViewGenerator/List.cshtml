@@ -9,14 +9,13 @@
     {
 <text>
 @@{
-    ViewBag.Title = "@Model.ViewName";
-</text>
+    ViewBag.Title = "@Model.ViewName";</text>
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
-
+@:
 <h2>@Model.ViewName</h2>
 
     }
@@ -39,15 +38,12 @@
 </text>
         //    PushIndent("    ");
     }
-}
-@{
 <text>
 <p>
     @@Html.ActionLink("Create New", "Create")
 </p>
 <table class="table">
-    <tr>
-</text>
+    <tr></text>
     IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
     foreach (var property in properties)
     {

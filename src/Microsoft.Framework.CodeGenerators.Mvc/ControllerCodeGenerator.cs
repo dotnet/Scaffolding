@@ -185,6 +185,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var templateName = "EmptyController.cshtml";
             var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+            _logger.LogMessage("Added Controller : " + outputPath.Substring(_applicationEnvironment.ApplicationBasePath.Length));
         }
 
         private string ValidateAndGetOutputPath(ControllerGeneratorModel controllerGeneratorModel)

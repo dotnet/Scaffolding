@@ -26,7 +26,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             var generatorsLocator = _serviceProvider.GetService<ICodeGeneratorLocator>();
 
-            if (args == null || args.Length == 0)
+            if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
             {
                 ShowCodeGeneratorList(generatorsLocator.CodeGenerators);
                 return;
@@ -46,17 +46,27 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (codeGenerators.Any())
             {
-                logger.LogMessage("k gen <code generator name>");
+                logger.LogMessage("Usage:  k gen [code generator name]\n");
+                logger.LogMessage("Code Generators:");
 
                 foreach (var generator in codeGenerators)
                 {
                     logger.LogMessage(generator.Name);
                 }
+
+                logger.LogMessage("\nTry k gen [code generator name] -? for help about specific code generator.");
             }
             else
             {
-                logger.LogMessage("There are no code generators installed to run");
+                logger.LogMessage("There are no code generators installed to run.");
             }
+        }
+
+        private bool IsHelpArgument([NotNull]string argument)
+        {
+            return string.Equals("-h", argument, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals("-?", argument, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals("--help", argument, StringComparison.OrdinalIgnoreCase);
         }
 
         private void AddCodeGenerationServices([NotNull]ServiceProvider serviceProvider)

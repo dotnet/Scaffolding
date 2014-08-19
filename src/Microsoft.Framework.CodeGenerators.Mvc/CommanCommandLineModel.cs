@@ -15,7 +15,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]
         public string DataContextClass { get; set; }
 
-        [Option(Name = "referenceScriptLibraries", ShortName = "scripts")]
+        [Option(Name = "referenceScriptLibraries", ShortName = "scripts", Description = "Switch to specify whether to reference script libraries in the generated views")]
         public bool ReferenceScriptLibraries { get; set; }
 
         [Option(Name = "layout", ShortName = "l", Description = "Custom Layout page to use")]

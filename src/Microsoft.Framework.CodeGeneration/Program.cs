@@ -37,7 +37,15 @@ namespace Microsoft.Framework.CodeGeneration
 
             var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
 
-            actionInvoker.Execute(args);
+            try
+            {
+                actionInvoker.Execute(args);
+            }
+            catch (Exception ex)
+            {
+                var logger = _serviceProvider.GetService<ILogger>();
+                logger.LogMessage(ex.Message);
+            }
         }
 
         private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)

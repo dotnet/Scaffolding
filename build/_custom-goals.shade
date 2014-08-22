@@ -22,7 +22,7 @@ use namespace="System.Net"
                     var projectFolder = Path.Combine(baseDir, "src", projectName);
                     var templatesFolder = Path.Combine(projectFolder, "Templates");
 
-                    foreach (var templateFile in Directory.EnumerateFiles(templatesFolder, "*.cshtml", SearchOption.AllDirectories))
+                    foreach (var templateFile in Directory.EnumerateFiles(templatesFolder, "*.*", SearchOption.AllDirectories))
                     {
                         var relativePath = templateFile.Substring(projectFolder.Length + 1);
                         archive.CreateEntryFromFile(templateFile, relativePath);

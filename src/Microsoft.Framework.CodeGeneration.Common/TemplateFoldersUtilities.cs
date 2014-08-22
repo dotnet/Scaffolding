@@ -13,10 +13,17 @@ namespace Microsoft.Framework.CodeGeneration
     {
         public static IEnumerable<string> GetTemplateFolders(
             [NotNull]string containingProject,
+            [NotNull]string applicationBasePath,
             [NotNull]ILibraryManager libraryManager)
         {
             string templatesFolderName = "Templates";
             var templateFolders = new List<string>();
+
+            var applicationTemplateFolders = Path.Combine(applicationBasePath, templatesFolderName);
+            if (Directory.Exists(applicationTemplateFolders))
+            {
+                templateFolders.Add(applicationTemplateFolders);
+            }
 
             var dependency = libraryManager.GetLibraryInformation(containingProject);
 

@@ -62,6 +62,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: "Microsoft.Framework.CodeGeneration.EntityFramework",
+                    applicationBasePath: _environment.ApplicationBasePath,
                     libraryManager: _libraryManager);
             }
         }

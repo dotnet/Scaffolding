@@ -50,7 +50,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
-                    baseFolderName: typeof(ViewGenerator).Name,
+                    baseFolders: new[] { typeof(ViewGenerator).Name },
                     libraryManager: _libraryManager);
             }
         }

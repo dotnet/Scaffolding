@@ -62,7 +62,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: "Microsoft.Framework.CodeGeneration.EntityFramework",
-                    baseFolderName: "DbContext",
+                    baseFolders: new[] { "DbContext" },
                     libraryManager: _libraryManager);
             }
         }

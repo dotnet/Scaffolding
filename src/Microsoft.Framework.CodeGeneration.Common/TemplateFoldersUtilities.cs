@@ -13,7 +13,7 @@ namespace Microsoft.Framework.CodeGeneration
     {
         public static List<string> GetTemplateFolders(
             [NotNull]string containingProject,
-            [NotNull]string baseFolderName,
+            [NotNull]string[] baseFolders,
             [NotNull]ILibraryManager libraryManager)
         {
             string templatesFolderName = "Templates";
@@ -38,10 +38,13 @@ namespace Microsoft.Framework.CodeGeneration
                     Debug.Assert(false, "Unexpected type of library information for template folders");
                 }
 
-                var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, baseFolderName);
-                if (Directory.Exists(candidateTemplateFolders))
+                foreach (var baseFolderName in baseFolders)
                 {
-                    templateFolders.Add(candidateTemplateFolders);
+                    var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, baseFolderName);
+                    if (Directory.Exists(candidateTemplateFolders))
+                    {
+                        templateFolders.Add(candidateTemplateFolders);
+                    }
                 }
             }
             return templateFolders;

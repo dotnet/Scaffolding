@@ -54,18 +54,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         {
             get
             {
-                var controllerGeneratorFolders = TemplateFoldersUtilities.GetTemplateFolders(
+                return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
-                    baseFolderName: typeof(ControllerCodeGenerator).Name,
+                    baseFolders: new[] { typeof(ControllerCodeGenerator).Name, typeof(ViewGenerator).Name },
                     libraryManager: _libraryManager);
-
-                var viewGeneratorFolders = TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: Constants.ThisAssemblyName,
-                    baseFolderName: typeof(ViewGenerator).Name,
-                    libraryManager: _libraryManager);
-
-                controllerGeneratorFolders.AddRange(viewGeneratorFolders);
-                return controllerGeneratorFolders;
             }
         }
 

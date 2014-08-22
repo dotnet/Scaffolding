@@ -11,8 +11,9 @@ namespace Microsoft.Framework.CodeGeneration
 {
     internal static class TemplateFoldersUtilities
     {
-        public static IEnumerable<string> GetTemplateFolders(
+        public static List<string> GetTemplateFolders(
             [NotNull]string containingProject,
+            [NotNull]string baseFolderName,
             [NotNull]ILibraryManager libraryManager)
         {
             string templatesFolderName = "Templates";
@@ -22,22 +23,22 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (dependency != null)
             {
-                string baseFolder = "";
+                string rootFolder = "";
 
                 if (string.Equals("Project", dependency.Type, StringComparison.Ordinal))
                 {
-                    baseFolder = Path.GetDirectoryName(dependency.Path);
+                    rootFolder = Path.GetDirectoryName(dependency.Path);
                 }
                 else if (string.Equals("Package", dependency.Type, StringComparison.Ordinal))
                 {
-                    baseFolder = dependency.Path;
+                    rootFolder = dependency.Path;
                 }
                 else
                 {
                     Debug.Assert(false, "Unexpected type of library information for template folders");
                 }
 
-                var candidateTemplateFolders = Path.Combine(baseFolder, templatesFolderName);
+                var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, baseFolderName);
                 if (Directory.Exists(candidateTemplateFolders))
                 {
                     templateFolders.Add(candidateTemplateFolders);

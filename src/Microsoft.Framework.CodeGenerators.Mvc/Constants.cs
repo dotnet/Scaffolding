@@ -14,5 +14,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         public const string ViewExtension = ".cshtml";
         public const string CodeFileExtension = ".cs";
         public const string RazorTemplateExtension = ".cshtml";
+
+        public const string ThisAssemblyName = "Microsoft.Framework.CodeGenerators.Mvc";
     }
 }

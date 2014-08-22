@@ -49,7 +49,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             get
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: "Microsoft.Framework.CodeGenerators.Mvc",
+                    containingProject: Constants.ThisAssemblyName,
+                    baseFolderName: typeof(ViewGenerator).Name,
                     libraryManager: _libraryManager);
             }
         }

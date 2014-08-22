@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.Runtime;
@@ -13,14 +10,16 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     public class StaticFilesDependencyInstaller : DependencyInstaller
     {
-        public StaticFilesDependencyInstaller([NotNull]ILibraryManager libraryManager)
-            : base(libraryManager)
+        public StaticFilesDependencyInstaller(
+            [NotNull]ILibraryManager libraryManager,
+            [NotNull]IApplicationEnvironment applicationEnvironment)
+            : base(libraryManager, applicationEnvironment)
         {
         }
 
-        public override void Install(IApplicationEnvironment application)
+        public override void Execute()
         {
-            CopyFolderContentsRecursive(application.ApplicationBasePath, TemplateFolders.First());
+            CopyFolderContentsRecursive(ApplicationEnvironment.ApplicationBasePath, TemplateFolders.First());
         }
 
         public override IEnumerable<Dependency> Dependencies

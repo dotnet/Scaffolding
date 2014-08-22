@@ -1,23 +1,28 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using Microsoft.Framework.CodeGeneration;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     public abstract class DependencyInstaller
     {
-        protected DependencyInstaller([NotNull]ILibraryManager libraryManager)
+        protected DependencyInstaller(
+            [NotNull]ILibraryManager libraryManager,
+            [NotNull]IApplicationEnvironment applicationEnvironment)
         {
             LibraryManager = libraryManager;
+            ApplicationEnvironment = applicationEnvironment;
         }
 
-        public abstract void Install(IApplicationEnvironment application);
+        public abstract void Execute();
 
         public virtual IEnumerable<Dependency> Dependencies
         {
@@ -36,9 +41,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     baseFolders: new[] { TemplateFoldersName },
+                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
                     libraryManager: LibraryManager);
             }
         }
+
+        protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
 
         protected ILibraryManager LibraryManager { get; private set; }
 

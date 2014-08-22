@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,8 +11,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     public class MvcLayoutDependencyInstaller : DependencyInstaller
     {
-        public MvcLayoutDependencyInstaller([NotNull]ILibraryManager libraryManager)
-            :base(libraryManager)
+        public MvcLayoutDependencyInstaller(
+            [NotNull]ILibraryManager libraryManager,
+            [NotNull]IApplicationEnvironment applicationEnvironment)
+            : base(libraryManager, applicationEnvironment)
         {
         }
 
@@ -25,15 +26,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        public override void Install(IApplicationEnvironment application)
+        public override void Execute()
         {
-            var destinationPath = Path.Combine(application.ApplicationBasePath, Constants.ViewsFolderName,
+            var destinationPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath, Constants.ViewsFolderName,
                 Constants.SharedViewsFolderName);
 
             CopyFolderContentsRecursive(destinationPath, TemplateFolders.First());
 
-            StaticFilesDependencyInstaller staticFilesInstaller = new StaticFilesDependencyInstaller(LibraryManager);
-            staticFilesInstaller.Install(application);
+            var staticFilesInstaller = new StaticFilesDependencyInstaller(LibraryManager, ApplicationEnvironment);
+            staticFilesInstaller.Execute();
         }
 
         public override IEnumerable<Dependency> Dependencies

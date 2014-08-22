@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
@@ -42,7 +41,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             _applicationEnvironment = applicationEnvironment;
         }
 
-        public void GenerateCode(DependencyGeneratorModel model)
+        public async Task GenerateCode(DependencyGeneratorModel model)
         {
             IEnumerable<Dependency> dependencies = Enumerable.Empty<Dependency>();
 
@@ -59,7 +58,17 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var missingDependencies = dependencies.Where(dep => _libraryManager.GetLibraryInformation(dep.Name) == null);
             if (missingDependencies.Any())
             {
-                _logger.LogMessage(GetReadMe(missingDependencies.Select(md => md.StartupConfiguration)));
+                var readMeGenerator = _typeActivator.CreateInstance<ReadMeGenerator>(_serviceProvider);
+
+                var isReadMe = await readMeGenerator.GenerateStartupOrReadme(missingDependencies
+                    .Select(md => md.StartupConfiguration)
+                    .ToList());
+
+                if (isReadMe)
+                {
+                    _logger.LogMessage("There are probably still some manual steps required");
+                    _logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
+                }
 
                 foreach (var missingDependency in missingDependencies)
                 {
@@ -90,58 +99,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private IEnumerable<Dependency> RunDepdencyInstaller<T>() where T : DependencyInstaller
         {
             var dependencyInstaller = _typeActivator.CreateInstance<T>(_serviceProvider);
-            dependencyInstaller.Install(_applicationEnvironment);
+            dependencyInstaller.Execute();
             return dependencyInstaller.Dependencies;
-        }
-
-        private string GetReadMe(IEnumerable<StartupContent> startupConfigs)
-        {
-            var builder = new StringBuilder();
-            var Indentation4 = "    ";
-
-            builder.AppendLine("Scaffolding has generated all the files and added the required dependencies.");
-            builder.AppendLine();
-            builder.AppendLine("However the Application's Startup code may required additional changes for things to work end to end.");
-            builder.AppendLine();
-            builder.AppendLine("Add the following namespace references if not already added:");
-            builder.AppendLine();
-
-            foreach (var startupConfig in startupConfigs)
-            {
-                foreach (var @namespace in startupConfig.RequiredNamespaces)
-                {
-                    builder.AppendLine(Indentation4 + "using " + @namespace);
-                }
-            }
-
-            builder.AppendLine();
-            builder.AppendLine("Modify the Configure method of Startup class to make these changes:");
-            builder.AppendLine();
-            builder.AppendLine(Indentation4 + "app.UseServices(services =>");
-            builder.AppendLine(Indentation4 + "{");
-
-            foreach (var startupConfig in startupConfigs)
-            {
-                foreach (var serviceStatement in startupConfig.ServiceStatements)
-                {
-                    builder.AppendLine(Indentation4 + Indentation4 + serviceStatement);
-                }
-                builder.AppendLine();
-            }
-
-            builder.AppendLine(Indentation4 + "}");
-            builder.AppendLine();
-
-            foreach (var startupConfig in startupConfigs)
-            {
-                foreach (var useStatement in startupConfig.UseStatements)
-                {
-                    builder.AppendLine(Indentation4 + useStatement);
-                }
-                builder.AppendLine();
-            }
-
-            return builder.ToString();
         }
     }
 }

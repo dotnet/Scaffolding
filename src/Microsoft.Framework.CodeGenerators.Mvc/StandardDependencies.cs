@@ -37,9 +37,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 if (_staticFilesStartUpContent == null)
                 {
                     _staticFilesStartUpContent = new StartupContent();
-                    _staticFilesStartUpContent.AddRequiredNamespace(PackageConstants.StaticFilesNamespace);
-                    _staticFilesStartUpContent.AddUseStatement("// Add static files to the request pipeline"); //Todo: Resources?
-                    _staticFilesStartUpContent.AddUseStatement("app.UseStaticFiles();");
+                    _staticFilesStartUpContent.UseStatements.Add("// Add static files to the request pipeline"); //Todo: Resources?
+                    _staticFilesStartUpContent.UseStatements.Add("app.UseStaticFiles();");
                 }
                 return _staticFilesStartUpContent;
             }
@@ -70,24 +69,24 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 {
                     _mvcStartUpContent = new StartupContent();
 
-                    _mvcStartUpContent.AddRequiredNamespace(PackageConstants.BuilderNamespace);
-                    _mvcStartUpContent.AddRequiredNamespace(PackageConstants.DependencyInjectionNamespace);
+                    _mvcStartUpContent.RequiredNamespaces.Add(PackageConstants.RoutingNamespace);
+                    _mvcStartUpContent.RequiredNamespaces.Add(PackageConstants.DependencyInjectionNamespace);
 
-                    _mvcStartUpContent.AddServiceStatement("// Add MVC services to the services container"); //Todo: Resources?
-                    _mvcStartUpContent.AddServiceStatement("services.AddMvc();");
+                    _mvcStartUpContent.ServiceStatements.Add("// Add MVC services to the services container"); //Todo: Resources?
+                    _mvcStartUpContent.ServiceStatements.Add("services.AddMvc();");
 
-                    _mvcStartUpContent.AddUseStatement("// Add MVC to the request pipeline"); //Todo: Resources?
-                    _mvcStartUpContent.AddUseStatement(@"app.UseMvc(routes =>");
-                    _mvcStartUpContent.AddUseStatement(@"{");
-                    _mvcStartUpContent.AddUseStatement(@"    routes.MapRoute(");
-                    _mvcStartUpContent.AddUseStatement(@"        name: ""default"",");
-                    _mvcStartUpContent.AddUseStatement(@"        template: ""{controller}/{action}/{id?}"",");
-                    _mvcStartUpContent.AddUseStatement(@"        defaults: new { controller = ""Home"", action = ""Index"" });");
-                    _mvcStartUpContent.AddUseStatement("");
-                    _mvcStartUpContent.AddUseStatement(@"    routes.MapRoute(");
-                    _mvcStartUpContent.AddUseStatement(@"        name: ""api"",");
-                    _mvcStartUpContent.AddUseStatement(@"        template: ""{controller}/{id?}"");");
-                    _mvcStartUpContent.AddUseStatement(@"});");
+                    _mvcStartUpContent.UseStatements.Add("// Add MVC to the request pipeline"); //Todo: Resources?
+                    _mvcStartUpContent.UseStatements.Add(@"app.UseMvc(routes =>");
+                    _mvcStartUpContent.UseStatements.Add(@"{");
+                    _mvcStartUpContent.UseStatements.Add(@"    routes.MapRoute(");
+                    _mvcStartUpContent.UseStatements.Add(@"        name: ""default"",");
+                    _mvcStartUpContent.UseStatements.Add(@"        template: ""{controller}/{action}/{id?}"",");
+                    _mvcStartUpContent.UseStatements.Add(@"        defaults: new { controller = ""Home"", action = ""Index"" });");
+                    _mvcStartUpContent.UseStatements.Add("");
+                    _mvcStartUpContent.UseStatements.Add(@"    routes.MapRoute(");
+                    _mvcStartUpContent.UseStatements.Add(@"        name: ""api"",");
+                    _mvcStartUpContent.UseStatements.Add(@"        template: ""{controller}/{id?}"");");
+                    _mvcStartUpContent.UseStatements.Add(@"});");
                 }
                 return _mvcStartUpContent;
             }

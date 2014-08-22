@@ -12,7 +12,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private List<string> _serviceStatements = new List<string>();
         private List<string> _useStatements = new List<string>();
 
-        public IEnumerable<string> RequiredNamespaces
+        public SortedSet<string> RequiredNamespaces
         {
             get
             {
@@ -20,7 +20,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        public IEnumerable<string> ServiceStatements
+        public List<string> ServiceStatements
         {
             get
             {
@@ -28,27 +28,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        public IEnumerable<string> UseStatements
+        public List<string> UseStatements
         {
             get
             {
                 return _useStatements;
             }
-        }
-
-        public void AddRequiredNamespace(string @namespace)
-        {
-            _requiredNamespaces.Add(@namespace);
-        }
-
-        public void AddServiceStatement(string statement)
-        {
-            _serviceStatements.Add(statement);
-        }
-
-        public void AddUseStatement(string statement)
-        {
-            _useStatements.Add(statement);
         }
     }
 }

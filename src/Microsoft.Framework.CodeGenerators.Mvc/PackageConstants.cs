@@ -8,13 +8,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     internal static class PackageConstants
     {
         public const string StaticFilesPackage = "Microsoft.AspNet.StaticFiles";
-        public const string StaticFilesNamespace = "Microsoft.AspNet.StaticFiles";
         public const string StaticFilesVersion = "1.0.0-*";
 
         public const string MvcPackage = "Microsoft.AspNet.Mvc";
         public const string MvcVersion = "6.0.0-*";
 
-        public const string BuilderNamespace = "Microsoft.AspNet.Builder";
+        public const string RoutingNamespace = "Microsoft.AspNet.Routing";
         public const string DependencyInjectionNamespace = "Microsoft.Framework.DependencyInjection";
     }
 }

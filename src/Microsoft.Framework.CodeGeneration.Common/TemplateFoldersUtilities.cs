@@ -20,11 +20,8 @@ namespace Microsoft.Framework.CodeGeneration
             string templatesFolderName = "Templates";
             var templateFolders = new List<string>();
 
-            var applicationTemplateFolders = Path.Combine(applicationBasePath, templatesFolderName);
-            if (Directory.Exists(applicationTemplateFolders))
-            {
-                templateFolders.Add(applicationTemplateFolders);
-            }
+            var rootFolders = new List<string>();
+            rootFolders.Add(applicationBasePath);
 
             var dependency = libraryManager.GetLibraryInformation(containingProject);
 
@@ -44,7 +41,11 @@ namespace Microsoft.Framework.CodeGeneration
                 {
                     Debug.Assert(false, "Unexpected type of library information for template folders");
                 }
+                rootFolders.Add(rootFolder);
+            }
 
+            foreach (var rootFolder in rootFolders)
+            {
                 foreach (var baseFolderName in baseFolders)
                 {
                     var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, baseFolderName);

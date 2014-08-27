@@ -43,21 +43,23 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         public async Task GenerateCode(DependencyGeneratorModel model)
         {
-            IEnumerable<Dependency> dependencies = Enumerable.Empty<Dependency>();
+            DependencyInstaller dependencyInstaller = null;
 
             if (model.AddStaticFiles)
             {
-                dependencies = RunDepdencyInstaller<StaticFilesDependencyInstaller>();
+                dependencyInstaller = _typeActivator.CreateInstance<StaticFilesDependencyInstaller>(_serviceProvider);
             }
 
             if (model.AddMvcLayout)
             {
-                dependencies = RunDepdencyInstaller<MvcLayoutDependencyInstaller>();
+                dependencyInstaller = _typeActivator.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             }
 
-            var missingDependencies = dependencies.Where(dep => _libraryManager.GetLibraryInformation(dep.Name) == null);
-            if (missingDependencies.Any())
+            if (dependencyInstaller.ShouldInstallDependency())
             {
+                dependencyInstaller.Execute();
+                var missingDependencies = dependencyInstaller.MissingDepdencies;
+
                 var readMeGenerator = _typeActivator.CreateInstance<ReadMeGenerator>(_serviceProvider);
 
                 var isReadMe = await readMeGenerator.GenerateStartupOrReadme(missingDependencies
@@ -94,13 +96,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 //    _logger.LogMessage(ex.ToString());
                 //}
             }
-        }
-
-        private IEnumerable<Dependency> RunDepdencyInstaller<T>() where T : DependencyInstaller
-        {
-            var dependencyInstaller = _typeActivator.CreateInstance<T>(_serviceProvider);
-            dependencyInstaller.Execute();
-            return dependencyInstaller.Dependencies;
         }
     }
 }

@@ -46,6 +46,20 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
+        public bool ShouldInstallDependency()
+        {
+            return MissingDepdencies.Any();
+        }
+
+        public IEnumerable<Dependency> MissingDepdencies
+        {
+            get
+            {
+                return Dependencies
+                    .Where(dep => LibraryManager.GetLibraryInformation(dep.Name) == null);
+            }
+        }
+
         protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
 
         protected ILibraryManager LibraryManager { get; private set; }

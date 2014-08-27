@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
@@ -21,8 +22,8 @@ namespace Microsoft.Framework.CodeGeneration
 
         public void Main(string[] args)
         {
-            //Console.WriteLine("Attach Debugger");
-            //Console.Read();
+            //Debugger.Launch();
+            //Debugger.Break();
 
             var generatorsLocator = _serviceProvider.GetService<ICodeGeneratorLocator>();
 

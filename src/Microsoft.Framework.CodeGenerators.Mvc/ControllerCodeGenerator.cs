@@ -95,11 +95,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             ITypeSymbol dataContext,
             string controllerNameSpace)
         {
-            var controllerName = controllerGeneratorModel.ControllerName;
-            if (string.IsNullOrEmpty(controllerName))
+            if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
                 //Todo: Pluralize model name
-                controllerName = model.Name + Constants.ControllerSuffix;
+                controllerGeneratorModel.ControllerName = model.Name + Constants.ControllerSuffix;
             }
 
             // Validation successful
@@ -117,7 +116,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var templateName = "ControllerWithContext.cshtml";
             var templateModel = new ControllerGeneratorTemplateModel(model, dbContextFullName)
             {
-                ControllerName = controllerName,
+                ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo
                 UseAsync = controllerGeneratorModel.UseAsync,
                 ControllerNamespace = controllerNameSpace,

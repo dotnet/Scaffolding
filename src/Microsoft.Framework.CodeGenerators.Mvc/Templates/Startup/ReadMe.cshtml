@@ -21,6 +21,7 @@ Add the following code to the end of Configure method in your Application's Star
 
             // Set up application services
             app.UseServices(services =>
+            {
 @{
     var count = Model.StartupList.Count;
     for (var index = 0; index < count; index++)

@@ -51,7 +51,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             {
                 if (_primaryKeys == null)
                 {
-                    _primaryKeys = EntityType.GetKey()
+                    _primaryKeys = EntityType.GetPrimaryKey()
                         .Properties
                         .Select(p => new PropertyMetadata(p))
                         .ToArray();

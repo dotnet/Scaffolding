@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
@@ -23,7 +24,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         {
         }
 
-        public override string TemplateFoldersName
+        protected override string TemplateFoldersName
         {
             get
             {
@@ -31,7 +32,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        public override void Execute()
+        protected override async Task GenerateCode()
         {
             var destinationPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath, Constants.ViewsFolderName,
                 Constants.SharedViewsFolderName);
@@ -39,10 +40,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             CopyFolderContentsRecursive(destinationPath, TemplateFolders.First());
 
             var staticFilesInstaller = TypeActivator.CreateInstance<StaticFilesDependencyInstaller>(ServiceProvider);
-            staticFilesInstaller.Execute();
+            await staticFilesInstaller.Execute();
         }
 
-        public override IEnumerable<Dependency> Dependencies
+        protected override IEnumerable<Dependency> Dependencies
         {
             get
             {

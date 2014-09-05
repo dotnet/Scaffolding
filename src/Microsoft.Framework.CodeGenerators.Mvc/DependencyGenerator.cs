@@ -16,26 +16,15 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     [Alias("dependency")]
     public class DependencyGenerator : ICodeGenerator
     {
-        private readonly IApplicationEnvironment _applicationEnvironment;
-        private readonly ILibraryManager _libraryManager;
-        private readonly ILogger _logger;
-        private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IServiceProvider _serviceProvider;
         private readonly ITypeActivator _typeActivator;
 
-        public DependencyGenerator([NotNull]ITypeActivator typeActivator,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]ILogger logger,
-            [NotNull]IApplicationEnvironment applicationEnvironment)
+        public DependencyGenerator(
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider)
         {
             _typeActivator = typeActivator;
             _serviceProvider = serviceProvider;
-            _libraryManager = libraryManager;
-            _modelTypesLocator = modelTypesLocator;
-            _logger = logger;
-            _applicationEnvironment = applicationEnvironment;
         }
 
         public async Task GenerateCode(DependencyGeneratorModel model)
@@ -52,11 +41,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 dependencyInstaller = _typeActivator.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             }
 
-            if (dependencyInstaller.ShouldInstallDependency())
-            {
-                dependencyInstaller.Execute();
-                await dependencyInstaller.InstallDependencies();
-            }
+            await dependencyInstaller.Execute();
+            await dependencyInstaller.InstallDependencies();
         }
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
@@ -22,12 +23,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         {
         }
 
-        public override void Execute()
+        protected override async Task GenerateCode()
         {
-            CopyFolderContentsRecursive(ApplicationEnvironment.ApplicationBasePath, TemplateFolders.First());
+            await CopyFolderContentsRecursive(ApplicationEnvironment.ApplicationBasePath, TemplateFolders.First());
         }
 
-        public override IEnumerable<Dependency> Dependencies
+        protected override IEnumerable<Dependency> Dependencies
         {
             get
             {
@@ -38,7 +39,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        public override string TemplateFoldersName
+        protected override string TemplateFoldersName
         {
             get
             {

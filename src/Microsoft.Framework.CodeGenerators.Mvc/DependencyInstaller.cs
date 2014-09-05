@@ -30,84 +30,71 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             ServiceProvider = serviceProvider;
         }
 
-        public abstract void Execute();
-
-        public virtual IEnumerable<Dependency> Dependencies
+        public async Task Execute()
         {
-            get
+            if (MissingDepdencies.Any())
             {
-                return Enumerable.Empty<Dependency>();
-            }
-        }
-
-        public abstract string TemplateFoldersName { get; }
-
-        public bool ShouldInstallDependency()
-        {
-            return MissingDepdencies.Any();
-        }
-
-        public IEnumerable<Dependency> MissingDepdencies
-        {
-            get
-            {
-                return Dependencies
-                    .Where(dep => LibraryManager.GetLibraryInformation(dep.Name) == null);
+                await GenerateCode();
             }
         }
 
         public async Task InstallDependencies()
         {
-            var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
-
-            var isReadMe = await readMeGenerator.GenerateStartupOrReadme(MissingDepdencies
-                .Select(md => md.StartupConfiguration)
-                .ToList());
-
-            if (isReadMe)
+            if (MissingDepdencies.Any())
             {
-                Logger.LogMessage("There are probably still some manual steps required");
-                Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
-            }
+                var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
 
-            var report = new NullReport();
+                var isReadMe = await readMeGenerator.GenerateStartupOrReadme(MissingDepdencies
+                    .Select(md => md.StartupConfiguration)
+                    .ToList());
 
-            foreach (var missingDependency in MissingDepdencies)
-            {
-                AddCommand addComand = new AddCommand()
+                if (isReadMe)
                 {
-                    Name = missingDependency.Name,
-                    Version = missingDependency.Version,
-                    ProjectDir = ApplicationEnvironment.ApplicationBasePath,
-                    Report = report
-                };
+                    Logger.LogMessage("There are probably still some manual steps required");
+                    Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
+                }
 
-                addComand.ExecuteCommand();
-            }
+                var report = new NullReport();
 
-            Logger.LogMessage("Started Restoring dependencies...");
-
-            try
-            {
-                RestoreCommand restore = new RestoreCommand(ApplicationEnvironment);
-                restore.RestoreDirectory = ApplicationEnvironment.ApplicationBasePath;
-                restore.Reports = new Reports()
+                foreach (var missingDependency in MissingDepdencies)
                 {
-                    Information = report,
-                    Verbose = report,
-                    Quiet = report
-                };
+                    AddCommand addComand = new AddCommand()
+                    {
+                        Name = missingDependency.Name,
+                        Version = missingDependency.Version,
+                        ProjectDir = ApplicationEnvironment.ApplicationBasePath,
+                        Report = report
+                    };
 
-                await restore.ExecuteCommand();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogMessage("Error from Restore");
-                Logger.LogMessage(ex.ToString());
-            }
+                    addComand.ExecuteCommand();
+                }
 
-            Logger.LogMessage("Restoring complete");
+                Logger.LogMessage("Started Restoring dependencies...");
+
+                try
+                {
+                    RestoreCommand restore = new RestoreCommand(ApplicationEnvironment);
+                    restore.RestoreDirectory = ApplicationEnvironment.ApplicationBasePath;
+                    restore.Reports = new Reports()
+                    {
+                        Information = report,
+                        Verbose = report,
+                        Quiet = report
+                    };
+
+                    await restore.ExecuteCommand();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogMessage("Error from Restore");
+                    Logger.LogMessage(ex.ToString());
+                }
+
+                Logger.LogMessage("Restoring complete");
+            }
         }
+
+        protected abstract Task GenerateCode();
 
         protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
         protected ITypeActivator TypeActivator { get; private set; }
@@ -126,10 +113,28 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     libraryManager: LibraryManager);
             }
         }
+        protected virtual IEnumerable<Dependency> Dependencies
+        {
+            get
+            {
+                return Enumerable.Empty<Dependency>();
+            }
+        }
+
+        protected abstract string TemplateFoldersName { get; }
+
+        protected IEnumerable<Dependency> MissingDepdencies
+        {
+            get
+            {
+                return Dependencies
+                    .Where(dep => LibraryManager.GetLibraryInformation(dep.Name) == null);
+            }
+        }
 
         // Copies files from given source directory to destination directory recursively
         // Ignores any existing files
-        protected void CopyFolderContentsRecursive(string destinationPath, string sourcePath)
+        protected async Task CopyFolderContentsRecursive(string destinationPath, string sourcePath)
         {
             DirectoryInfo sourceDir = new DirectoryInfo(sourcePath);
             Contract.Assert(sourceDir.Exists);
@@ -150,7 +155,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             // Copy sub folder contents
             foreach (var subDirInfo in sourceDir.GetDirectories())
             {
-                CopyFolderContentsRecursive(Path.Combine(destinationPath, subDirInfo.Name), subDirInfo.FullName);
+                await CopyFolderContentsRecursive(Path.Combine(destinationPath, subDirInfo.Name), subDirInfo.FullName);
             }
         }
 

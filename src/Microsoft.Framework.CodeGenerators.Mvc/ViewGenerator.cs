@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -23,6 +24,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private readonly ILibraryManager _libraryManager;
         private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
+        private readonly ITypeActivator _typeActivator;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
 
         // Todo: Instead of each generator taking services, provide them in some base class?
@@ -34,6 +37,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
@@ -41,6 +46,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
+            _typeActivator = typeActivator;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -112,8 +119,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 dbContextFullName,
                 model);
 
+            var layoutDependencyInstaller = _typeActivator.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
+
             bool isLayoutSelected = viewGeneratorModel.UseDefaultLayout ||
                 !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage);
+
+            await layoutDependencyInstaller.Execute();
 
             var templateModel = new ViewGeneratorTemplateModel()
             {
@@ -130,6 +141,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
             _logger.LogMessage("Added View : " + outputPath.Substring(appbasePath.Length));
+
+            await layoutDependencyInstaller.InstallDependencies();
         }
     }
 }

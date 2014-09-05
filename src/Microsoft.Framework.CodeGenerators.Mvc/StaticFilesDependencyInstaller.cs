@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Framework.CodeGeneration;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -12,8 +14,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     {
         public StaticFilesDependencyInstaller(
             [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment applicationEnvironment)
-            : base(libraryManager, applicationEnvironment)
+            [NotNull]IApplicationEnvironment applicationEnvironment,
+            [NotNull]ILogger logger,
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider)
+            : base(libraryManager, applicationEnvironment, logger, typeActivator, serviceProvider)
         {
         }
 

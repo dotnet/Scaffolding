@@ -2,12 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.PackageManager;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -57,64 +55,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             if (dependencyInstaller.ShouldInstallDependency())
             {
                 dependencyInstaller.Execute();
-                var missingDependencies = dependencyInstaller.MissingDepdencies;
-
-                var readMeGenerator = _typeActivator.CreateInstance<ReadMeGenerator>(_serviceProvider);
-
-                var isReadMe = await readMeGenerator.GenerateStartupOrReadme(missingDependencies
-                    .Select(md => md.StartupConfiguration)
-                    .ToList());
-
-                if (isReadMe)
-                {
-                    _logger.LogMessage("There are probably still some manual steps required");
-                    _logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
-                }
-
-                var report = new NullReport();
-
-                foreach (var missingDependency in missingDependencies)
-                {
-                    AddCommand addComand = new AddCommand()
-                    {
-                        Name = missingDependency.Name,
-                        Version = missingDependency.Version,
-                        ProjectDir = _applicationEnvironment.ApplicationBasePath,
-                        Report = report
-                    };
-
-                    addComand.ExecuteCommand();
-                }
-
-                _logger.LogMessage("Started Restoring dependencies...");
-
-                try
-                {
-                    RestoreCommand restore = new RestoreCommand(_applicationEnvironment);
-                    restore.RestoreDirectory = _applicationEnvironment.ApplicationBasePath;
-                    restore.Reports = new Reports()
-                    {
-                        Information = report,
-                        Verbose = report,
-                        Quiet = report
-                    };
-
-                    await restore.ExecuteCommand();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogMessage("Error from Restore");
-                    _logger.LogMessage(ex.ToString());
-                }
-
-                _logger.LogMessage("Restoring complete");
-            }
-        }
-
-        private class NullReport : IReport
-        {
-            public void WriteLine(string message)
-            {
+                await dependencyInstaller.InstallDependencies();
             }
         }
     }

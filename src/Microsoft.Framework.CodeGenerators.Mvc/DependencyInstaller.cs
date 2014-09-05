@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.PackageManager;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -16,10 +18,16 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     {
         protected DependencyInstaller(
             [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment applicationEnvironment)
+            [NotNull]IApplicationEnvironment applicationEnvironment,
+            [NotNull]ILogger logger,
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider)
         {
             LibraryManager = libraryManager;
             ApplicationEnvironment = applicationEnvironment;
+            TypeActivator = typeActivator;
+            Logger = logger;
+            ServiceProvider = serviceProvider;
         }
 
         public abstract void Execute();
@@ -33,18 +41,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         }
 
         public abstract string TemplateFoldersName { get; }
-
-        protected IEnumerable<string> TemplateFolders
-        {
-            get
-            {
-                return TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: Constants.ThisAssemblyName,
-                    baseFolders: new[] { TemplateFoldersName },
-                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
-                    libraryManager: LibraryManager);
-            }
-        }
 
         public bool ShouldInstallDependency()
         {
@@ -60,9 +56,76 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
+        public async Task InstallDependencies()
+        {
+            var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
 
+            var isReadMe = await readMeGenerator.GenerateStartupOrReadme(MissingDepdencies
+                .Select(md => md.StartupConfiguration)
+                .ToList());
+
+            if (isReadMe)
+            {
+                Logger.LogMessage("There are probably still some manual steps required");
+                Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
+            }
+
+            var report = new NullReport();
+
+            foreach (var missingDependency in MissingDepdencies)
+            {
+                AddCommand addComand = new AddCommand()
+                {
+                    Name = missingDependency.Name,
+                    Version = missingDependency.Version,
+                    ProjectDir = ApplicationEnvironment.ApplicationBasePath,
+                    Report = report
+                };
+
+                addComand.ExecuteCommand();
+            }
+
+            Logger.LogMessage("Started Restoring dependencies...");
+
+            try
+            {
+                RestoreCommand restore = new RestoreCommand(ApplicationEnvironment);
+                restore.RestoreDirectory = ApplicationEnvironment.ApplicationBasePath;
+                restore.Reports = new Reports()
+                {
+                    Information = report,
+                    Verbose = report,
+                    Quiet = report
+                };
+
+                await restore.ExecuteCommand();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogMessage("Error from Restore");
+                Logger.LogMessage(ex.ToString());
+            }
+
+            Logger.LogMessage("Restoring complete");
+        }
+
+        protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
+        protected ITypeActivator TypeActivator { get; private set; }
+        protected ILogger Logger { get; private set; }
+        protected IServiceProvider ServiceProvider { get; private set; }
         protected ILibraryManager LibraryManager { get; private set; }
+
+        protected IEnumerable<string> TemplateFolders
+        {
+            get
+            {
+                return TemplateFoldersUtilities.GetTemplateFolders(
+                    containingProject: Constants.ThisAssemblyName,
+                    baseFolders: new[] { TemplateFoldersName },
+                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
+                    libraryManager: LibraryManager);
+            }
+        }
 
         // Copies files from given source directory to destination directory recursively
         // Ignores any existing files
@@ -88,6 +151,13 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             foreach (var subDirInfo in sourceDir.GetDirectories())
             {
                 CopyFolderContentsRecursive(Path.Combine(destinationPath, subDirInfo.Name), subDirInfo.FullName);
+            }
+        }
+
+        private class NullReport : IReport
+        {
+            public void WriteLine(string message)
+            {
             }
         }
     }

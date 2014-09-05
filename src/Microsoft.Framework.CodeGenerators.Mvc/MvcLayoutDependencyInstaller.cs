@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Framework.CodeGeneration;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -13,8 +15,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     {
         public MvcLayoutDependencyInstaller(
             [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment applicationEnvironment)
-            : base(libraryManager, applicationEnvironment)
+            [NotNull]IApplicationEnvironment applicationEnvironment,
+            [NotNull]ILogger logger,
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider)
+            : base(libraryManager, applicationEnvironment, logger, typeActivator, serviceProvider)
         {
         }
 
@@ -33,7 +38,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             CopyFolderContentsRecursive(destinationPath, TemplateFolders.First());
 
-            var staticFilesInstaller = new StaticFilesDependencyInstaller(LibraryManager, ApplicationEnvironment);
+            var staticFilesInstaller = TypeActivator.CreateInstance<StaticFilesDependencyInstaller>(ServiceProvider);
             staticFilesInstaller.Execute();
         }
 
@@ -43,7 +48,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 return new List<Dependency>()
                 {
-                    StandardDependencies.MvcDependency, //Todo: This is not required here??
+                    StandardDependencies.MvcDependency,
                     StandardDependencies.StaticFilesDependency
                 };
             }

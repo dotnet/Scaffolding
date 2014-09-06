@@ -24,7 +24,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
                     var categoryType = _model.GetEntityType(typeof(Category));
                     var productType = _model.GetEntityType(typeof(Product));
 
-                    var categoryFk = productType.AddForeignKey(categoryType.GetKey(), productType.GetProperty("ProductCategoryId"));
+                    var categoryFk = productType.GetOrAddForeignKey(categoryType.GetPrimaryKey(), productType.GetProperty("ProductCategoryId"));
 
                     categoryType.AddNavigation(new Navigation(categoryFk, "CategoryProducts", pointsToPrincipal: false));
                     productType.AddNavigation(new Navigation(categoryFk, "ProductCategory", pointsToPrincipal: true));

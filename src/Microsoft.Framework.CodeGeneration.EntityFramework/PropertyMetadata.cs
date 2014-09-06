@@ -17,7 +17,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             PropertyName = property.Name;
             TypeName = property.PropertyType.FullName;
             IsEnum = property.PropertyType.GetTypeInfo().IsEnum;
-            IsPrimaryKey = entityType.GetKey().Properties.Contains(property);
+            IsPrimaryKey = entityType.GetPrimaryKey().Properties.Contains(property);
             IsForeignKey = entityType.ForeignKeys
                 .Any(fk => fk.Properties.Contains(property));
 

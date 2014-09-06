@@ -17,7 +17,7 @@
         "gen": "Microsoft.Framework.CodeGeneration" /*Add this command to you app*/
     },
     "frameworks": {
-        "net451": { },
-        "k10": { }
+        "aspnet50": { },
+        "aspnetcore50": { }
     }
 }

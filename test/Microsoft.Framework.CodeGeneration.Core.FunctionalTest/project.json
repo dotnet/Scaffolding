@@ -13,11 +13,11 @@
     },
 
     "frameworks" : {
-        "net451" : { 
+        "aspnet50" : { 
             "dependencies": {
             }
         },
-        "k10" : { 
+        "aspnetcore50" : { 
             "dependencies": {
                 "System.Runtime": "4.0.20.0"
             }

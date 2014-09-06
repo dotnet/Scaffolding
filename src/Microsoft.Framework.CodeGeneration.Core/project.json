@@ -10,10 +10,10 @@
         "System.Runtime": "4.0.20.0"
     },
     "frameworks": {
-        "net45": {
+        "aspnet50": {
             "dependencies": { }
         },
-        "k10": {
+        "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10.0",
                 "System.Console": "4.0.0.0",

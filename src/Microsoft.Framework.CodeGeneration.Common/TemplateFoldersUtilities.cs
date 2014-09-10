@@ -11,43 +11,52 @@ namespace Microsoft.Framework.CodeGeneration
 {
     internal static class TemplateFoldersUtilities
     {
-        public static IEnumerable<string> GetTemplateFolders(
+        public static List<string> GetTemplateFolders(
             [NotNull]string containingProject,
             [NotNull]string applicationBasePath,
+            [NotNull]string[] baseFolders,
             [NotNull]ILibraryManager libraryManager)
         {
-            string templatesFolderName = "Templates";
+            var rootFolders = new List<string>();
             var templateFolders = new List<string>();
 
-            var applicationTemplateFolders = Path.Combine(applicationBasePath, templatesFolderName);
-            if (Directory.Exists(applicationTemplateFolders))
-            {
-                templateFolders.Add(applicationTemplateFolders);
-            }
+            rootFolders.Add(applicationBasePath);
 
             var dependency = libraryManager.GetLibraryInformation(containingProject);
 
             if (dependency != null)
             {
-                string baseFolder = "";
+                string containingProjectPath = "";
 
                 if (string.Equals("Project", dependency.Type, StringComparison.Ordinal))
                 {
-                    baseFolder = Path.GetDirectoryName(dependency.Path);
+                    containingProjectPath = Path.GetDirectoryName(dependency.Path);
                 }
                 else if (string.Equals("Package", dependency.Type, StringComparison.Ordinal))
                 {
-                    baseFolder = dependency.Path;
+                    containingProjectPath = dependency.Path;
                 }
                 else
                 {
                     Debug.Assert(false, "Unexpected type of library information for template folders");
                 }
 
-                var candidateTemplateFolders = Path.Combine(baseFolder, templatesFolderName);
-                if (Directory.Exists(candidateTemplateFolders))
+                if (Directory.Exists(containingProjectPath))
                 {
-                    templateFolders.Add(candidateTemplateFolders);
+                    rootFolders.Add(containingProjectPath);
+                }
+            }
+
+            foreach (var rootFolder in rootFolders)
+            {
+                foreach (var baseFolderName in baseFolders)
+                {
+                    string templatesFolderName = "Templates";
+                    var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, baseFolderName);
+                    if (Directory.Exists(candidateTemplateFolders))
+                    {
+                        templateFolders.Add(candidateTemplateFolders);
+                    }
                 }
             }
             return templateFolders;

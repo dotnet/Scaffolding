@@ -37,7 +37,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var destinationPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath, Constants.ViewsFolderName,
                 Constants.SharedViewsFolderName);
 
-            CopyFolderContentsRecursive(destinationPath, TemplateFolders.First());
+            await CopyFolderContentsRecursive(destinationPath, TemplateFolders.First());
 
             var staticFilesInstaller = TypeActivator.CreateInstance<StaticFilesDependencyInstaller>(ServiceProvider);
             await staticFilesInstaller.Execute();

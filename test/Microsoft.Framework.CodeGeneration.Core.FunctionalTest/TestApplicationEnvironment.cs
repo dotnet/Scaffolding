@@ -45,9 +45,9 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             }
         }
 
-        public FrameworkName TargetFramework
+        public FrameworkName RuntimeFramework
         {
-            get { return _originalAppEnvironment.TargetFramework; }
+            get { return _originalAppEnvironment.RuntimeFramework; }
         }
     }
 }

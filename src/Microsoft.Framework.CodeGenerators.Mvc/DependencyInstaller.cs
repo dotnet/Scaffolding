@@ -58,7 +58,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        private async Task InstallNuGetDependencies(IEnumerable<Dependency> missingDependencies)
+        private async Task InstallNuGetDependencies(IEnumerable<PackageMetadata> missingDependencies)
         {
             var report = new NullReport();
 
@@ -118,17 +118,17 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     libraryManager: LibraryManager);
             }
         }
-        protected virtual IEnumerable<Dependency> Dependencies
+        protected virtual IEnumerable<PackageMetadata> Dependencies
         {
             get
             {
-                return Enumerable.Empty<Dependency>();
+                return Enumerable.Empty<PackageMetadata>();
             }
         }
 
         protected abstract string TemplateFoldersName { get; }
 
-        protected IEnumerable<Dependency> MissingDepdencies
+        protected IEnumerable<PackageMetadata> MissingDepdencies
         {
             get
             {

@@ -10,16 +10,16 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private static StartupContent _staticFilesStartUpContent;
         private static StartupContent _mvcStartUpContent;
 
-        private static Dependency _staticFilesDependency;
-        private static Dependency _mvcDependency;
+        private static PackageMetadata _staticFilesDependency;
+        private static PackageMetadata _mvcDependency;
 
-        public static Dependency StaticFilesDependency
+        public static PackageMetadata StaticFilesDependency
         {
             get
             {
                 if (_staticFilesDependency == null)
                 {
-                    _staticFilesDependency = new Dependency()
+                    _staticFilesDependency = new PackageMetadata()
                     {
                         Name = PackageConstants.StaticFilesPackage,
                         Version = PackageConstants.StaticFilesVersion,
@@ -44,13 +44,13 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
-        public static Dependency MvcDependency
+        public static PackageMetadata MvcDependency
         {
             get
             {
                 if (_mvcDependency == null)
                 {
-                    _mvcDependency = new Dependency()
+                    _mvcDependency = new PackageMetadata()
                     {
                         Name = PackageConstants.MvcPackage,
                         Version = PackageConstants.MvcVersion,

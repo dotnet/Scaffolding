@@ -43,11 +43,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             await staticFilesInstaller.Execute();
         }
 
-        protected override IEnumerable<Dependency> Dependencies
+        protected override IEnumerable<PackageMetadata> Dependencies
         {
             get
             {
-                return new List<Dependency>()
+                return new List<PackageMetadata>()
                 {
                     StandardDependencies.MvcDependency,
                     StandardDependencies.StaticFilesDependency

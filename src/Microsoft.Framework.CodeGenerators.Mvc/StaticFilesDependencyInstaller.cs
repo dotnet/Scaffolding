@@ -28,11 +28,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             await CopyFolderContentsRecursive(ApplicationEnvironment.ApplicationBasePath, TemplateFolders.First());
         }
 
-        protected override IEnumerable<Dependency> Dependencies
+        protected override IEnumerable<PackageMetadata> Dependencies
         {
             get
             {
-                return new List<Dependency>()
+                return new List<PackageMetadata>()
                 {
                     StandardDependencies.StaticFilesDependency
                 };

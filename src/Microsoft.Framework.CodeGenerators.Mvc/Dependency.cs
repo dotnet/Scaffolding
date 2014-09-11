@@ -3,7 +3,7 @@
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
-    public class Dependency
+    public class PackageMetadata
     {
         public string Name { get; set; }
 

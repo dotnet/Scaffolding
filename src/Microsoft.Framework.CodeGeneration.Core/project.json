@@ -7,6 +7,7 @@
         "Microsoft.Framework.CommandLineUtils": "1.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Templating": "",
+        "Microsoft.Framework.PackageManager": "1.0.0-*",
         "System.Runtime": "4.0.20.0"
     },
     "frameworks": {

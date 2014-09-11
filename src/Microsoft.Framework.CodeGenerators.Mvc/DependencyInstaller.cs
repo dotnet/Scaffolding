@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.PackageManager;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -20,6 +19,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment applicationEnvironment,
             [NotNull]ILogger logger,
+            [NotNull]IPackageInstaller packageInstaller,
             [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider)
         {
@@ -27,6 +27,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             ApplicationEnvironment = applicationEnvironment;
             TypeActivator = typeActivator;
             Logger = logger;
+            PackageInstaller = packageInstaller;
             ServiceProvider = serviceProvider;
         }
 
@@ -52,49 +53,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
                 }
 
-                await InstallNuGetDependencies(MissingDepdencies);
+                await PackageInstaller.InstallPackages(MissingDepdencies);
             }
-        }
-
-        private async Task InstallNuGetDependencies(IEnumerable<PackageMetadata> missingDependencies)
-        {
-            var report = new NullReport();
-
-            foreach (var missingDependency in missingDependencies)
-            {
-                AddCommand addComand = new AddCommand()
-                {
-                    Name = missingDependency.Name,
-                    Version = missingDependency.Version,
-                    ProjectDir = ApplicationEnvironment.ApplicationBasePath,
-                    Report = report
-                };
-
-                addComand.ExecuteCommand();
-            }
-
-            Logger.LogMessage("Started Restoring dependencies...");
-
-            try
-            {
-                RestoreCommand restore = new RestoreCommand(ApplicationEnvironment);
-                restore.RestoreDirectory = ApplicationEnvironment.ApplicationBasePath;
-                restore.Reports = new Reports()
-                {
-                    Information = report,
-                    Verbose = report,
-                    Quiet = report
-                };
-
-                await restore.ExecuteCommand();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogMessage("Error from Restore");
-                Logger.LogMessage(ex.ToString());
-            }
-
-            Logger.LogMessage("Restoring complete");
         }
 
         protected abstract Task GenerateCode();
@@ -102,6 +62,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
         protected ITypeActivator TypeActivator { get; private set; }
         protected ILogger Logger { get; private set; }
+        public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }
         protected ILibraryManager LibraryManager { get; private set; }
 

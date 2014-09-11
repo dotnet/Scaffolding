@@ -17,9 +17,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment applicationEnvironment,
             [NotNull]ILogger logger,
+            [NotNull]IPackageInstaller packageInstaller,
             [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider)
-            : base(libraryManager, applicationEnvironment, logger, typeActivator, serviceProvider)
+            : base(libraryManager, applicationEnvironment, logger, packageInstaller, typeActivator, serviceProvider)
         {
         }
 

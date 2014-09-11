@@ -54,44 +54,49 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
                 }
 
-                var report = new NullReport();
-
-                foreach (var missingDependency in MissingDepdencies)
-                {
-                    AddCommand addComand = new AddCommand()
-                    {
-                        Name = missingDependency.Name,
-                        Version = missingDependency.Version,
-                        ProjectDir = ApplicationEnvironment.ApplicationBasePath,
-                        Report = report
-                    };
-
-                    addComand.ExecuteCommand();
-                }
-
-                Logger.LogMessage("Started Restoring dependencies...");
-
-                try
-                {
-                    RestoreCommand restore = new RestoreCommand(ApplicationEnvironment);
-                    restore.RestoreDirectory = ApplicationEnvironment.ApplicationBasePath;
-                    restore.Reports = new Reports()
-                    {
-                        Information = report,
-                        Verbose = report,
-                        Quiet = report
-                    };
-
-                    await restore.ExecuteCommand();
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogMessage("Error from Restore");
-                    Logger.LogMessage(ex.ToString());
-                }
-
-                Logger.LogMessage("Restoring complete");
+                await InstallNuGetDependencies(MissingDepdencies);
             }
+        }
+
+        private async Task InstallNuGetDependencies(IEnumerable<Dependency> missingDependencies)
+        {
+            var report = new NullReport();
+
+            foreach (var missingDependency in missingDependencies)
+            {
+                AddCommand addComand = new AddCommand()
+                {
+                    Name = missingDependency.Name,
+                    Version = missingDependency.Version,
+                    ProjectDir = ApplicationEnvironment.ApplicationBasePath,
+                    Report = report
+                };
+
+                addComand.ExecuteCommand();
+            }
+
+            Logger.LogMessage("Started Restoring dependencies...");
+
+            try
+            {
+                RestoreCommand restore = new RestoreCommand(ApplicationEnvironment);
+                restore.RestoreDirectory = ApplicationEnvironment.ApplicationBasePath;
+                restore.Reports = new Reports()
+                {
+                    Information = report,
+                    Verbose = report,
+                    Quiet = report
+                };
+
+                await restore.ExecuteCommand();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogMessage("Error from Restore");
+                Logger.LogMessage(ex.ToString());
+            }
+
+            Logger.LogMessage("Restoring complete");
         }
 
         protected abstract Task GenerateCode();
@@ -156,13 +161,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             foreach (var subDirInfo in sourceDir.GetDirectories())
             {
                 await CopyFolderContentsRecursive(Path.Combine(destinationPath, subDirInfo.Name), subDirInfo.FullName);
-            }
-        }
-
-        private class NullReport : IReport
-        {
-            public void WriteLine(string message)
-            {
             }
         }
     }

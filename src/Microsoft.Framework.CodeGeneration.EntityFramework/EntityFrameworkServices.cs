@@ -23,6 +23,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly IAssemblyLoaderEngine _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly ILogger _logger;
+        private const string EFSqlServerPackageName = "EntityFramework.SqlServer";
         private static int _counter = 1;
 
         public EntityFrameworkServices(
@@ -52,6 +53,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             if (dbContextSymbols.Count == 0)
             {
                 isNewDbContext = true;
+                ValidateEFSqlServerDependency();
 
                 dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
                 newDbContextTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
@@ -101,6 +103,14 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
 
             return metadata;
+        }
+
+        private void ValidateEFSqlServerDependency()
+        {
+            if (_libraryManager.GetLibraryInformation(EFSqlServerPackageName) == null)
+            {
+                throw new InvalidOperationException("Scaffolding will not be able to add a new DbContext if the application does not reference " + EFSqlServerPackageName + " package, add a dependency to that package and try scaffolding again");
+            }
         }
 
         private async Task WriteDbContext(NewDbContextTemplateModel dbContextTemplateModel,

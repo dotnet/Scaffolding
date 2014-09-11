@@ -10,6 +10,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         public const string ControllerSuffix = "Controller";
         public const string ControllersFolderName = "Controllers";
         public const string ViewsFolderName = "Views";
+        public const string SharedViewsFolderName = "Shared";
+
+        public const string StartupClassName = "Startup";
+        public const string ReadMeOutputFileName = "ScaffoldingReadMe.txt";
 
         public const string ViewExtension = ".cshtml";
         public const string CodeFileExtension = ".cs";

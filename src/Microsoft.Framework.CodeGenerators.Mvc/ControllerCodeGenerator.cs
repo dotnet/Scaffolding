@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
@@ -23,6 +24,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly ILibraryManager _libraryManager;
+        private readonly ITypeActivator _typeActivator;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
 
         private readonly List<string> _views = new List<string>()
@@ -40,6 +43,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
+            [NotNull]ITypeActivator typeActivator,
+            [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
@@ -47,6 +52,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
+            _typeActivator = typeActivator;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -74,6 +81,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var appName = _libraryManager.GetLibraryInformation(_applicationEnvironment.ApplicationName).Name;
             var controllerNameSpace = appName + "." + Constants.ControllersFolderName;
 
+            var layoutDependencyInstaller = _typeActivator.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
+
             if (!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass) && !string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass))
             {
                if (!ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator, out model, out validationMessage))
@@ -82,18 +91,22 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 }
 
                 ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, out dataContext, out validationMessage);
-                await GenerateController(controllerGeneratorModel, model, dataContext, controllerNameSpace);
+                await GenerateController(controllerGeneratorModel, model, dataContext, controllerNameSpace, layoutDependencyInstaller);
             }
             else
             {
+                await layoutDependencyInstaller.Execute();
                 await GenerateEmptyController(controllerGeneratorModel, controllerNameSpace);
             }
+
+            await layoutDependencyInstaller.InstallDependencies();
         }
 
         private async Task GenerateController(ControllerGeneratorModel controllerGeneratorModel,
             ITypeSymbol model,
             ITypeSymbol dataContext,
-            string controllerNameSpace)
+            string controllerNameSpace,
+            MvcLayoutDependencyInstaller layoutDependencyInstaller)
         {
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
@@ -112,6 +125,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
                 model);
+
+            await layoutDependencyInstaller.Execute();
 
             var templateName = "ControllerWithContext.cshtml";
             var templateModel = new ControllerGeneratorTemplateModel(model, dbContextFullName)

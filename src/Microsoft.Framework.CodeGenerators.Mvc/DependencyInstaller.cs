@@ -44,9 +44,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
 
-                var isReadMe = await readMeGenerator.GenerateStartupOrReadme(MissingDepdencies
-                    .Select(md => md.StartupConfiguration)
-                    .ToList());
+                var isReadMe = await readMeGenerator.GenerateStartupOrReadme(StartupContents.ToList());
 
                 if (isReadMe)
                 {
@@ -118,11 +116,20 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     libraryManager: LibraryManager);
             }
         }
+
         protected virtual IEnumerable<PackageMetadata> Dependencies
         {
             get
             {
                 return Enumerable.Empty<PackageMetadata>();
+            }
+        }
+
+        protected virtual IEnumerable<StartupContent> StartupContents
+        {
+            get
+            {
+                return Enumerable.Empty<StartupContent>();
             }
         }
 

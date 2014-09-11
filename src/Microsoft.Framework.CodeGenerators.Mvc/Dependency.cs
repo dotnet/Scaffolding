@@ -8,7 +8,5 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         public string Name { get; set; }
 
         public string Version { get; set; }
-
-        public StartupContent StartupConfiguration { get; set; }
     }
 }

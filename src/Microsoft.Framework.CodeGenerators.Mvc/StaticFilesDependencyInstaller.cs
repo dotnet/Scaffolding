@@ -39,6 +39,17 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             }
         }
 
+        protected override IEnumerable<StartupContent> StartupContents
+        {
+            get
+            {
+                return new List<StartupContent>()
+                {
+                    StandardDependencies.StaticFilesStartupContent
+                };
+            }
+        }
+
         protected override string TemplateFoldersName
         {
             get

@@ -23,7 +23,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     {
                         Name = PackageConstants.StaticFilesPackage,
                         Version = PackageConstants.StaticFilesVersion,
-                        StartupConfiguration = StaticFilesStartupContent
                     };
                 }
                 return _staticFilesDependency;
@@ -54,7 +53,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     {
                         Name = PackageConstants.MvcPackage,
                         Version = PackageConstants.MvcVersion,
-                        StartupConfiguration = MvcStartupContent
                     };
                 }
                 return _mvcDependency;

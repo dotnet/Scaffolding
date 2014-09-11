@@ -26,6 +26,7 @@ namespace Microsoft.Framework.CodeGeneration
             //Debugger.Break();
 
             var generatorsLocator = _serviceProvider.GetService<ICodeGeneratorLocator>();
+            var logger = _serviceProvider.GetService<ILogger>();
 
             if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
             {
@@ -34,17 +35,18 @@ namespace Microsoft.Framework.CodeGeneration
             }
 
             var codeGeneratorName = args[0];
+            logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
             var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
             var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
 
             try
             {
+                logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
                 actionInvoker.Execute(args);
             }
             catch (Exception ex)
             {
-                var logger = _serviceProvider.GetService<ILogger>();
                 logger.LogMessage(ex.Message);
             }
         }

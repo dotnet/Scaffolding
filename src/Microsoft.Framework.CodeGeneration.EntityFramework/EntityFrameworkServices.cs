@@ -59,9 +59,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 isNewDbContext = true;
                 ValidateEFSqlServerDependency();
 
+                _logger.LogMessage("Generating a new DbContext class " + dbContextTypeName);
                 dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
                 newDbContextTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
 
+                _logger.LogMessage("Attempting to compile the application in memory with the added DbContext");
                 var projectCompilation = _libraryManager.GetProject(_environment).Compilation;
                 var newAssemblyName = projectCompilation.AssemblyName + _counter++;
                 var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
@@ -98,6 +100,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 throw new InvalidOperationException("Could not get the reflection type for Model : " + modelTypeName);
             }
 
+            _logger.LogMessage("Attempting to figure out the EntityFramework metadata for the model and DbContext");
             var metadata = GetModelMetadata(dbContextType, modelType);
 
             // Write the DbContext if getting the model metadata is successful

@@ -43,8 +43,9 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         {
             if (MissingDepdencies.Any())
             {
-                var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
+                await PackageInstaller.InstallPackages(MissingDepdencies);
 
+                var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
                 var isReadMe = await readMeGenerator.GenerateStartupOrReadme(StartupContents.ToList());
 
                 if (isReadMe)
@@ -52,8 +53,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                     Logger.LogMessage("There are probably still some manual steps required");
                     Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
                 }
-
-                await PackageInstaller.InstallPackages(MissingDepdencies);
             }
         }
 

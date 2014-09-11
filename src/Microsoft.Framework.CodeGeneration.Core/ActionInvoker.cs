@@ -83,7 +83,7 @@ namespace Microsoft.Framework.CodeGeneration
                         ex = ex.GetBaseException();
                     }
                     
-                    throw new InvalidOperationException("There was an error running the GenerateCode method: " + ex.Message);
+                    throw new InvalidOperationException(ex.Message);
                 }
 
                 return 0;

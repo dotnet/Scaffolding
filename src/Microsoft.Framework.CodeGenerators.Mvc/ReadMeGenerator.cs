@@ -23,8 +23,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     Constants.ThisAssemblyName,
-                    new[] { "Startup" },
                     _environment.ApplicationBasePath,
+                    new[] { "Startup" },
                     _libraryManager);
             }
         }

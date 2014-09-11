@@ -22,9 +22,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly ILibraryManager _libraryManager;
         private readonly IAssemblyLoaderEngine _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
+        private readonly IPackageInstaller _packageInstaller;
         private readonly ILogger _logger;
-        private const string EFSqlServerPackageName = "EntityFramework.SqlServer";
         private static int _counter = 1;
+        private const string EFSqlServerPackageName = "EntityFramework.SqlServer";
+        private const string EFSqlServerPackageVersion = "7.0.0-*";
 
         public EntityFrameworkServices(
             [NotNull]ILibraryManager libraryManager,
@@ -32,6 +34,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             [NotNull]IAssemblyLoaderEngine loader,
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IDbContextEditorServices dbContextEditorServices,
+            [NotNull]IPackageInstaller packageInstaller,
             [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
@@ -39,6 +42,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             _loader = loader;
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
+            _packageInstaller = packageInstaller;
             _logger = logger;
         }
 
@@ -109,7 +113,16 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             if (_libraryManager.GetLibraryInformation(EFSqlServerPackageName) == null)
             {
-                throw new InvalidOperationException("Scaffolding will not be able to add a new DbContext if the application does not reference " + EFSqlServerPackageName + " package, add a dependency to that package and try scaffolding again");
+                _packageInstaller.InstallPackages(new List<PackageMetadata>()
+                {
+                    new PackageMetadata()
+                    {
+                        Name = EFSqlServerPackageName,
+                        Version = EFSqlServerPackageVersion
+                    }
+                });
+
+                throw new InvalidOperationException("Scaffolding should be run again since it needs to reload the application with the added package reference - just run the previous command one more time.");
             }
         }
 

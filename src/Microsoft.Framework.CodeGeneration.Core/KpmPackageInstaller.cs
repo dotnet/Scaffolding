@@ -26,12 +26,15 @@ namespace Microsoft.Framework.CodeGeneration
         {
             var report = new NullReport();
 
-            foreach (var missingDependency in packages)
+            foreach (var package in packages)
             {
+                _logger.LogMessage("Adding dependency " + package.Name + 
+                    " of version " + package.Version + " to the application.");
+
                 AddCommand addComand = new AddCommand()
                 {
-                    Name = missingDependency.Name,
-                    Version = missingDependency.Version,
+                    Name = package.Name,
+                    Version = package.Version,
                     ProjectDir = _environment.ApplicationBasePath,
                     Report = report
                 };

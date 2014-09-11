@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Framework.DependencyInjection;
@@ -34,12 +35,18 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (count == 0)
             {
-                throw new InvalidOperationException("No code generators found with the name " + codeGeneratorName);
+                throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture,
+                        "No code generators found with the name '{0}'",
+                        codeGeneratorName));
             }
 
             if (count > 1)
             {
-                throw new InvalidOperationException("Multiple code generators found matching the name " + codeGeneratorName);
+                throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture,
+                    "Multiple code generators found matching the name '{0}'",
+                    codeGeneratorName));
             }
 
             return candidates.First();

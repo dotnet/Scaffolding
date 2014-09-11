@@ -34,14 +34,15 @@ namespace Microsoft.Framework.CodeGeneration
                 return;
             }
 
-            var codeGeneratorName = args[0];
-            logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
-            var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
-
-            var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
-
             try
             {
+                var codeGeneratorName = args[0];
+
+                logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
+                var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
+
+                var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
+
                 logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
                 actionInvoker.Execute(args);
             }

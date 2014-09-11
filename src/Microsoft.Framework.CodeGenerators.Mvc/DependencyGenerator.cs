@@ -12,9 +12,11 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     /// <summary>
     /// This is create to test the functionality but this should go away perhaps.
+    /// For testing using this just make this class implement ICodeGenerator interface.
+    /// Eventually this class should just be removed.
     /// </summary>
     [Alias("dependency")]
-    public class DependencyGenerator : ICodeGenerator
+    public class DependencyGenerator
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ITypeActivator _typeActivator;

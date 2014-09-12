@@ -1,6 +1,6 @@
 ASP.NET Scaffolding
 ======================
-ASP.NET Scaffolding enables generating boiler plate code for web applications to speed up development.
+ASP.NET Scaffolding enables generating boilerplate code for web applications to speed up development.
 
 To learn more about ASP.NET vNext scaffolding see the resources below.
 

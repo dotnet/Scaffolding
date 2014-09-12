@@ -80,7 +80,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             //Act & Assert
             var ex = Assert.Throws<InvalidOperationException>(() => locator.GetCodeGenerator("NonExistingCodeGenerator"));
-            Assert.Equal("No code generators found with the name NonExistingCodeGenerator", ex.Message);
+            Assert.Equal("No code generators found with the name 'NonExistingCodeGenerator'", ex.Message);
         }
 
         //This should be returned.

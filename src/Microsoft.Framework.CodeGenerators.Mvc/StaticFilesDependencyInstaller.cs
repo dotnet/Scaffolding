@@ -3,11 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
@@ -26,7 +29,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         protected override async Task GenerateCode()
         {
-            await CopyFolderContentsRecursive(ApplicationEnvironment.ApplicationBasePath, TemplateFolders.First());
+            await CopyFolderContentsRecursive(GetWebRoot(), TemplateFolders.First());
         }
 
         protected override IEnumerable<PackageMetadata> Dependencies
@@ -57,6 +60,18 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 return "StaticFiles";
             }
+        }
+
+        private string GetWebRoot()
+        {
+            var projectFile = Path.Combine(ApplicationEnvironment.ApplicationBasePath, "project.json");
+            Contract.Assert(File.Exists(projectFile));
+
+            var jsonContent = JObject.Parse(File.ReadAllText(projectFile));
+            var webRootToken = jsonContent["webroot"];
+
+            var webRootRelativePath = webRootToken != null ? webRootToken.Value<string>() : string.Empty;
+            return Path.Combine(ApplicationEnvironment.ApplicationBasePath, webRootRelativePath);
         }
     }
 }

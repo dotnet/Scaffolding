@@ -5,7 +5,8 @@
         "Microsoft.Framework.CodeGeneration.Common": "",
         "Microsoft.Framework.CodeGeneration.EntityFramework": "",
         "Microsoft.Framework.CodeGeneration.Templating": "",
-        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*"
+        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
+        "Newtonsoft.Json": "6.0.4"
     },
     "frameworks": {
         "aspnet50": {

@@ -7,29 +7,24 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
 {
     public static class TestModel
     {
-        private static Model _model;
-
         public static IModel Model
         {
             get
             {
-                if (_model == null)
-                {
-                    _model = new Model();
-                    var builder = new ModelBuilder(_model);
+                var model = new Model();
+                var builder = new ModelBuilder(model);
 
-                    builder.Entity<Product>();
-                    builder.Entity<Category>();
+                builder.Entity<Product>();
+                builder.Entity<Category>();
 
-                    var categoryType = _model.GetEntityType(typeof(Category));
-                    var productType = _model.GetEntityType(typeof(Product));
+                var categoryType = model.GetEntityType(typeof(Category));
+                var productType = model.GetEntityType(typeof(Product));
 
-                    var categoryFk = productType.GetOrAddForeignKey(categoryType.GetPrimaryKey(), productType.GetProperty("ProductCategoryId"));
+                var categoryFk = productType.GetOrAddForeignKey(categoryType.GetPrimaryKey(), productType.GetProperty("ProductCategoryId"));
 
-                    categoryType.AddNavigation(new Navigation(categoryFk, "CategoryProducts", pointsToPrincipal: false));
-                    productType.AddNavigation(new Navigation(categoryFk, "ProductCategory", pointsToPrincipal: true));
-                }
-                return _model;
+                categoryType.AddNavigation(new Navigation(categoryFk, "CategoryProducts", pointsToPrincipal: false));
+                productType.AddNavigation(new Navigation(categoryFk, "ProductCategory", pointsToPrincipal: true));
+                return model;
             }
         }
     }

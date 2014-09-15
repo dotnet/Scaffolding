@@ -30,6 +30,13 @@ use namespace="System.Net"
                     var projectFolder = Path.Combine(baseDir, "src", projectName);
                     var templatesFolder = Path.Combine(projectFolder, "Templates");
 
+                    var licenceFile = Path.Combine(projectFolder, "THIRDPARTYNOTICE ASP.NET_Preview.rtf");
+                    if (File.Exists(licenceFile))
+                    {
+                        var relativePath = licenceFile.Substring(projectFolder.Length + 1);
+                        archive.CreateEntryFromFile(licenceFile, relativePath);
+                    }
+
                     foreach (var templateFile in Directory.EnumerateFiles(templatesFolder, "*.*", SearchOption.AllDirectories))
                     {
                         var relativePath = templateFile.Substring(projectFolder.Length + 1);

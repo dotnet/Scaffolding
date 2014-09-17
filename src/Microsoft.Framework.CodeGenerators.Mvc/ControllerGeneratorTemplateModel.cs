@@ -84,7 +84,16 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 var requiredNamespaces = new SortedSet<string>(StringComparer.Ordinal);
                 // We add ControllerNamespace first to make other entries not added to the set if they match.
                 requiredNamespaces.Add(ControllerNamespace);
-                requiredNamespaces.Add(ModelType.ContainingNamespace.FullNameForSymbol());
+
+                var modelTypeNamespace = ModelType.ContainingNamespace.IsGlobalNamespace
+                    ? string.Empty
+                    : ModelType.ContainingNamespace.ToDisplayString();
+
+                if (!string.IsNullOrWhiteSpace(modelTypeNamespace))
+                {
+                    requiredNamespaces.Add(modelTypeNamespace);
+                }
+
                 if (!string.IsNullOrWhiteSpace(DbContextNamespace))
                 {
                     requiredNamespaces.Add(DbContextNamespace);

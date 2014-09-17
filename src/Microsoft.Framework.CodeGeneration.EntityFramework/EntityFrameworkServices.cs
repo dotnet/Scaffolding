@@ -92,7 +92,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 }
             }
 
-            var modelTypeName = modelTypeSymbol.FullNameForSymbol();
+            var modelTypeName = modelTypeSymbol.ToDisplayString();
             var modelType = _libraryManager.GetReflectionType(_environment, modelTypeName);
 
             if (modelType == null)

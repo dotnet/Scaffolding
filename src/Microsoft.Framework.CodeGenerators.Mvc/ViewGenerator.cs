@@ -112,8 +112,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
 
-            var dbContextFullName = dataContext != null ? dataContext.FullNameForSymbol() : viewGeneratorModel.DataContextClass;
-            var modelTypeFullName = model.FullNameForSymbol();
+            var dbContextFullName = dataContext != null ? dataContext.ToDisplayString() : viewGeneratorModel.DataContextClass;
+            var modelTypeFullName = model.ToDisplayString();
 
             var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,

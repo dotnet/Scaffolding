@@ -119,8 +119,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
 
-            var dbContextFullName = dataContext != null ? dataContext.FullNameForSymbol() : controllerGeneratorModel.DataContextClass;
-            var modelTypeFullName = model.FullNameForSymbol();
+            var dbContextFullName = dataContext != null ? dataContext.ToDisplayString() : controllerGeneratorModel.DataContextClass;
+            var modelTypeFullName = model.ToDisplayString();
 
             var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,

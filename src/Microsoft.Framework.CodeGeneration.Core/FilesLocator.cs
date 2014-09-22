@@ -10,15 +10,27 @@ namespace Microsoft.Framework.CodeGeneration
 {
     public class FilesLocator : IFilesLocator
     {
+        private readonly IFileSystem _fileSystem;
+
+        public FilesLocator()
+            : this(new DefaultFileSystem())
+        {
+        }
+
+        internal FilesLocator(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem;
+        }
+
         public string GetFilePath(
             [NotNull]string fileName,
             [NotNull]IEnumerable<string> searchPaths)
         {
             foreach (var searchPath in searchPaths)
             {
-                if (Directory.Exists(searchPath))
+                if (_fileSystem.DirectoryExists(searchPath))
                 {
-                    var matchingFiles = Directory.EnumerateFiles(searchPath,
+                    var matchingFiles = _fileSystem.EnumerateFiles(searchPath,
                         searchPattern: fileName,
                         searchOption:  SearchOption.AllDirectories).ToList();
 

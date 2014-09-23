@@ -13,7 +13,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 {
     /// <summary>
     /// A useful helper moq for IFileSystem.
-    /// Use WriteFile, AddFolders/CreateDirectory methods to add file paths
+    /// Use WriteAllText, AddFolders/CreateDirectory methods to add file paths
     /// and folders paths to the file system.
     /// Maintaining the integrity of file system is the responsibility of caller.
     /// (Like creating files and folders in a proper way)
@@ -31,7 +31,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             }
         }
 
-        public void WriteFile(string path, string contents)
+        public void WriteAllText(string path, string contents)
         {
             _files.Add(path, contents);
         }

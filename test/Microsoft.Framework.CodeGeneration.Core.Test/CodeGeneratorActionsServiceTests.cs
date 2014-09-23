@@ -44,7 +44,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             mockFilesLocator.Setup(fl => fl.GetFilePath(templateName, It.IsAny<IEnumerable<string>>()))
                 .Returns(templatePath);
-            mockFileSystem.WriteFile(templatePath, templateContent);
+            mockFileSystem.WriteAllText(templatePath, templateContent);
             mockTemplating.Setup(templating => templating.RunTemplateAsync(templateContent, null))
                 .Returns(Task.FromResult(new TemplateResult()
                 {
@@ -77,7 +77,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             mockFilesLocator.Setup(fl => fl.GetFilePath(templateName, It.IsAny<IEnumerable<string>>()))
                 .Returns(templatePath);
-            mockFileSystem.WriteFile(templatePath, templateContent);
+            mockFileSystem.WriteAllText(templatePath, templateContent);
             mockTemplating.Setup(templating => templating.RunTemplateAsync(templateContent, null))
                 .Returns(Task.FromResult(new TemplateResult()
                 {

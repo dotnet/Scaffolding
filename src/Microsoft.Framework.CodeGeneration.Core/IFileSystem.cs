@@ -20,6 +20,8 @@ namespace Microsoft.Framework.CodeGeneration
 
         string ReadAllText(string path);
 
+        void WriteAllText(string path, string contents);
+
         Task AddFileAsync(string outputPath, Stream sourceStream);
 
         void CreateDirectory(string path);

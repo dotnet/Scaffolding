@@ -15,14 +15,24 @@ namespace Microsoft.Framework.CodeGeneration
     public class CodeGeneratorActionsService : ICodeGeneratorActionsService
     {
         private readonly IFilesLocator _filesLocator;
+        private readonly IFileSystem _fileSystem;
         private readonly ITemplating _templatingService;
 
         public CodeGeneratorActionsService(
             ITemplating templatingService,
             IFilesLocator filesLocator)
+            :this(templatingService, filesLocator, new DefaultFileSystem())
+        {
+        }
+
+        internal CodeGeneratorActionsService(
+            ITemplating templatingService,
+            IFilesLocator filesLocator,
+            IFileSystem fileSystem)
         {
             _templatingService = templatingService;
             _filesLocator = filesLocator;
+            _fileSystem = fileSystem;
         }
 
         public async Task AddFileAsync(string outputPath, string sourceFilePath)
@@ -30,7 +40,7 @@ namespace Microsoft.Framework.CodeGeneration
             ExceptionUtilities.ValidateStringArgument(outputPath, "outputPath");
             ExceptionUtilities.ValidateStringArgument(sourceFilePath, "sourceFilePath");
 
-            if (!File.Exists(sourceFilePath))
+            if (!_fileSystem.FileExists(sourceFilePath))
             {
                 throw new ArgumentException(string.Format(
                     CultureInfo.CurrentCulture,
@@ -60,8 +70,8 @@ namespace Microsoft.Framework.CodeGeneration
                     string.Join(";", templateFolders)));
             }
 
-            Contract.Assert(File.Exists(templatePath));
-            var templateContent = File.ReadAllText(templatePath);
+            Contract.Assert(_fileSystem.FileExists(templatePath));
+            var templateContent = _fileSystem.ReadAllText(templatePath);
 
             var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
 
@@ -81,21 +91,14 @@ namespace Microsoft.Framework.CodeGeneration
 
         private async Task AddFileHelper(string outputPath, Stream sourceStream)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            _fileSystem.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            if (File.Exists(outputPath))
+            if (_fileSystem.FileExists(outputPath))
             {
-                FileAttributes attributes = File.GetAttributes(outputPath);
-                if (attributes.HasFlag(FileAttributes.ReadOnly))
-                {
-                    File.SetAttributes(outputPath, attributes & ~FileAttributes.ReadOnly);
-                }
+                _fileSystem.MakeFileWritable(outputPath);
             }
 
-            using (var writeStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-            {
-                await sourceStream.CopyToAsync(writeStream);
-            }
+            await _fileSystem.AddFileAsync(outputPath, sourceStream);
         }
     }
 }

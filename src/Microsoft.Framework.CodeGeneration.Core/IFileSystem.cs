@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Microsoft.Framework.CodeGeneration
 {
@@ -14,5 +15,13 @@ namespace Microsoft.Framework.CodeGeneration
         bool DirectoryExists(string path);
 
         IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
+
+        void MakeFileWritable(string path);
+
+        string ReadAllText(string path);
+
+        Task AddFileAsync(string outputPath, Stream sourceStream);
+
+        void CreateDirectory(string path);
     }
 }

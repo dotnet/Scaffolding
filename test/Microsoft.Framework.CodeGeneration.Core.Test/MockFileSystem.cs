@@ -6,34 +6,32 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Framework.CodeGeneration.Core.Test
 {
     /// <summary>
     /// A useful helper moq for IFileSystem.
-    /// Use AddFile, AddFolder method to add file paths and folders paths to the file system.
-    /// Maintaining the integrity of file system is the responsibility of caller. (Like creating
-    /// files and folders in a proper way)
+    /// Use WriteFile, AddFolders/CreateDirectory methods to add file paths
+    /// and folders paths to the file system.
+    /// Maintaining the integrity of file system is the responsibility of caller.
+    /// (Like creating files and folders in a proper way)
     /// </summary>
     public class MockFileSystem : IFileSystem
     {
         Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         HashSet<string> _folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        public void AddFolder(string path)
-        {
-            _folders.Add(path);
-        }
-
         public void AddFolders(IEnumerable<string> folders)
         {
             foreach(var folder in folders)
             {
-                _folders.Add(folder);
+                CreateDirectory(folder);
             }
         }
 
-        public void AddFile(string path, string contents)
+        public void WriteFile(string path, string contents)
         {
             _files.Add(path, contents);
         }
@@ -55,6 +53,31 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public bool FileExists(string path)
         {
             return _files.ContainsKey(path);
+        }
+
+        public void MakeFileWritable(string path)
+        {
+        }
+
+        public string ReadAllText(string path)
+        {
+            Contract.Assert(FileExists(path));
+            return _files[path];
+        }
+
+        public async Task AddFileAsync(string outputPath, Stream sourceStream)
+        {
+            // There could be some problems in this implementation if the
+            // length is too much. Hopefully for the tests, that's not the case
+            // and it's mostly ok.
+            byte[] contents = new byte[sourceStream.Length];
+            await sourceStream.ReadAsync(contents, 0, contents.Length);
+            _files[outputPath] = Encoding.UTF8.GetString(contents);
+        }
+
+        public void CreateDirectory(string path)
+        {
+            _folders.Add(path);
         }
     }
 }

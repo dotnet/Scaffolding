@@ -15,8 +15,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             var folders = new[] { @"C:\One", @"C:\Two" };
             fs.AddFolders(folders);
 
-            fs.AddFile(@"C:\One\template.cshtml", "");
-            fs.AddFile(@"C:\Two\template.cshtml", "");
+            fs.WriteFile(@"C:\One\template.cshtml", "");
+            fs.WriteFile(@"C:\Two\template.cshtml", "");
             FilesLocator locator = new FilesLocator(fs);
 
             var result = locator.GetFilePath("template.cshtml", folders);
@@ -31,8 +31,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             var folders = new[] { @"C:\One", @"C:\One\Sub1", @"C:\One\Sub2" };
             fs.AddFolders(folders);
 
-            fs.AddFile(@"C:\One\Sub1\template.cshtml", "");
-            fs.AddFile(@"C:\One\Sub2\template.cshtml", "");
+            fs.WriteFile(@"C:\One\Sub1\template.cshtml", "");
+            fs.WriteFile(@"C:\One\Sub2\template.cshtml", "");
             FilesLocator locator = new FilesLocator(fs);
 
             var ex = Assert.Throws<InvalidOperationException>(() => locator.GetFilePath("template.cshtml", new[] { @"C:\One" }));
@@ -46,8 +46,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             var folders = new[] { @"C:\One", @"C:\Two" };
             fs.AddFolders(folders);
 
-            fs.AddFile(@"C:\One\template1.cshtml", "");
-            fs.AddFile(@"C:\Two\template2.cshtml", "");
+            fs.WriteFile(@"C:\One\template1.cshtml", "");
+            fs.WriteFile(@"C:\Two\template2.cshtml", "");
             FilesLocator locator = new FilesLocator(fs);
 
             var ex = Assert.Throws<InvalidOperationException>(() => locator.GetFilePath("template.cshtml", folders));

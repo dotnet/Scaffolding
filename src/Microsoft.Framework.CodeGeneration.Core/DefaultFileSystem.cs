@@ -3,12 +3,27 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Microsoft.Framework.CodeGeneration
 {
     internal class DefaultFileSystem : IFileSystem
     {
+        public async Task AddFileAsync(string outputPath, Stream sourceStream)
+        {
+            using (var writeStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            {
+                await sourceStream.CopyToAsync(writeStream);
+            }
+        }
+
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
+        }
+
         public bool DirectoryExists(string path)
         {
             return Directory.Exists(path);
@@ -22,6 +37,22 @@ namespace Microsoft.Framework.CodeGeneration
         public bool FileExists(string path)
         {
             return File.Exists(path);
+        }
+
+        public void MakeFileWritable(string path)
+        {
+            Contract.Assert(File.Exists(path));
+
+            FileAttributes attributes = File.GetAttributes(path);
+            if (attributes.HasFlag(FileAttributes.ReadOnly))
+            {
+                File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);
+            }
+        }
+
+        public string ReadAllText(string path)
+        {
+            return File.ReadAllText(path);
         }
     }
 }

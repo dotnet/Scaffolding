@@ -33,7 +33,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
         public void WriteAllText(string path, string contents)
         {
-            _files.Add(path, contents);
+            _files[path] = contents;
         }
 
         public bool DirectoryExists(string path)

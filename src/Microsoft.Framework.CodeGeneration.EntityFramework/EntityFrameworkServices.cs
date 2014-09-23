@@ -57,7 +57,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             if (dbContextSymbols.Count == 0)
             {
                 isNewDbContext = true;
-                ValidateEFSqlServerDependency();
+                await ValidateEFSqlServerDependency();
 
                 _logger.LogMessage("Generating a new DbContext class " + dbContextTypeName);
                 dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
@@ -112,11 +112,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             return metadata;
         }
 
-        private void ValidateEFSqlServerDependency()
+        private async Task ValidateEFSqlServerDependency()
         {
             if (_libraryManager.GetLibraryInformation(EFSqlServerPackageName) == null)
             {
-                _packageInstaller.InstallPackages(new List<PackageMetadata>()
+                await _packageInstaller.InstallPackages(new List<PackageMetadata>()
                 {
                     new PackageMetadata()
                     {

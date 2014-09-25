@@ -49,22 +49,42 @@ namespace Microsoft.Framework.CodeGeneration
         {
             try
             {
-                var kCommandPath = Environment.GetCommandLineArgs()[0];
-                var kpmCommandPath = Path.Combine(Path.GetDirectoryName(kCommandPath), "kpm.cmd");
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FindKpmCommand(),
+                    Arguments = "restore",
+                    WorkingDirectory = _environment.ApplicationBasePath,
+                    UseShellExecute = false
+                };
 
-                Process kpmProcess = new Process();
-                kpmProcess.StartInfo.FileName = kpmCommandPath;
-                kpmProcess.StartInfo.Arguments = "restore";
-                kpmProcess.StartInfo.UseShellExecute = false;
-                kpmProcess.StartInfo.WorkingDirectory = _environment.ApplicationBasePath;
-                var start = kpmProcess.Start();
-                kpmProcess.WaitForExit();
+                var process = Process.Start(startInfo);
+                process.WaitForExit();
             }
             catch (Exception ex)
             {
                 _logger.LogMessage("Error running kpm restore");
                 _logger.LogMessage(ex.ToString());
             }
+        }
+
+        private string FindKpmCommand()
+        {
+            var commandName = "kpm.cmd";
+
+            var pathVariable = Environment.GetEnvironmentVariable("Path");
+            if (!string.IsNullOrEmpty(pathVariable))
+            {
+                foreach(var path in pathVariable.Split(';'))
+                {
+                    var fullPath = Path.Combine(path, commandName);
+                    if (_fileSystem.FileExists(fullPath))
+                    {
+                        return fullPath;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Could not find kpm.cmd on path. Unable to run restore");
         }
 
         // Internal for unit tests.

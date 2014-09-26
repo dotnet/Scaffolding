@@ -16,8 +16,8 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 {
     public class RoslynCompilationService : ICompilationService
     {
-        private static readonly ConcurrentDictionary<string, MetadataReference> _metadataFileCache =
-            new ConcurrentDictionary<string, MetadataReference>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
+            new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private readonly ILibraryManager _libraryManager;
         private readonly IApplicationEnvironment _environment;
@@ -105,15 +105,12 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 
         private MetadataReference CreateMetadataFileReference(string path)
         {
-            return _metadataFileCache.GetOrAdd(path, _ =>
+            var metadata = _metadataFileCache.GetOrAdd(path, _ =>
             {
-                // TODO: What about access to the file system? We need to be able to 
-                // read files from anywhere on disk, not just under the web root
-                using (var stream = File.OpenRead(path))
-                {
-                    return new MetadataImageReference(stream);
-                }
+                return AssemblyMetadata.CreateFromImageStream(File.OpenRead(path));
             });
+
+            return new MetadataImageReference(metadata);
         }
     }
 }

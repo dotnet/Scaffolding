@@ -49,9 +49,23 @@ namespace Microsoft.Framework.CodeGeneration
         {
             try
             {
+                // On non-windows, starting a process with the name
+                // of a bash file works. However on windows, it doesn't.
+                // So we use 'Path' environment variable to find the path
+                // of 'kpm.cmd' and start that.
+                string fileName;
+                if (PlatformHelper.IsMono)
+                {
+                    fileName = "kpm";
+                }
+                else
+                {
+                    fileName = FindKpmCommand();
+                }
+
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = FindKpmCommand(),
+                    FileName = fileName,
                     Arguments = "restore",
                     WorkingDirectory = _environment.ApplicationBasePath,
                     UseShellExecute = false

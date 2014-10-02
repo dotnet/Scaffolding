@@ -45,7 +45,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
             //Assert
             Assert.Equal("", result.GeneratedText);
             Assert.NotNull(result.ProcessingException);
-            Assert.Equal("Template Processing Failed:(1,2): error CS0103: The name 'Invalid' does not exist in the current context",
+            Assert.Equal("Template Processing Failed:(1,7): error CS0103: The name 'Invalid' does not exist in the current context",
                 result.ProcessingException.Message);
         }
 

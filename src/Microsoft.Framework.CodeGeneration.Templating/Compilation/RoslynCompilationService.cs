@@ -82,35 +82,58 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 
                 foreach (var metadataReference in export.MetadataReferences)
                 {
-                    var fileMetadataReference = metadataReference as IMetadataFileReference;
-
-                    if (fileMetadataReference != null)
-                    {
-                        references.Add(CreateMetadataFileReference(fileMetadataReference.Path));
-                    }
-                    else
-                    {
-                        var roslynReference = metadataReference as IRoslynMetadataReference;
-
-                        if (roslynReference != null)
-                        {
-                            references.Add(roslynReference.MetadataReference);
-                        }
-                    }
+                    references.Add(ConvertMetadataReference(metadataReference));
                 }
             }
 
             return references;
         }
 
+        private MetadataReference ConvertMetadataReference(IMetadataReference metadataReference)
+        {
+            var roslynReference = metadataReference as IRoslynMetadataReference;
+
+            if (roslynReference != null)
+            {
+                return roslynReference.MetadataReference;
+            }
+
+            var embeddedReference = metadataReference as IMetadataEmbeddedReference;
+
+            if (embeddedReference != null)
+            {
+                return MetadataReference.CreateFromImage(embeddedReference.Contents);
+            }
+
+            var fileMetadataReference = metadataReference as IMetadataFileReference;
+
+            if (fileMetadataReference != null)
+            {
+                return CreateMetadataFileReference(fileMetadataReference.Path);
+            }
+
+            var projectReference = metadataReference as IMetadataProjectReference;
+            if (projectReference != null)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    projectReference.EmitReferenceAssembly(ms);
+
+                    return MetadataReference.CreateFromImage(ms.ToArray());
+                }
+            }
+
+            throw new NotSupportedException();
+        }
+
         private MetadataReference CreateMetadataFileReference(string path)
         {
             var metadata = _metadataFileCache.GetOrAdd(path, _ =>
             {
-                return AssemblyMetadata.CreateFromImageStream(File.OpenRead(path));
+                return AssemblyMetadata.CreateFromStream(File.OpenRead(path));
             });
 
-            return new MetadataImageReference(metadata);
+            return metadata.GetReference();
         }
     }
 }

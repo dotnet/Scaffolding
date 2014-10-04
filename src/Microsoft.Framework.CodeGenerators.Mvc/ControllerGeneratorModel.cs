@@ -6,7 +6,7 @@ using Microsoft.Framework.CodeGeneration.CommandLine;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
-    public class ControllerGeneratorModel : CommanCommandLineModel
+    public class ControllerGeneratorModel : CommonCommandLineModel
     {
         [Option(Name = "useAsyncActions", ShortName = "async", Description = "Switch to indicate whether to generate async controller actions")]
         public bool UseAsync { get; set; }

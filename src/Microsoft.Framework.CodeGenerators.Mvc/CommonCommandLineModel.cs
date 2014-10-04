@@ -7,7 +7,7 @@ using Microsoft.Framework.CodeGeneration.CommandLine;
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     //Command line parameters common to controller and view scaffolder.
-    public abstract class CommanCommandLineModel
+    public abstract class CommonCommandLineModel
     {
         [Option(Name = "model", ShortName = "m", Description = "Model class to use")]
         public string ModelClass { get; set; }

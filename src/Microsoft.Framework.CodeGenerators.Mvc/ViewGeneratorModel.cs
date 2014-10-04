@@ -5,7 +5,7 @@ using Microsoft.Framework.CodeGeneration.CommandLine;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
-    public class ViewGeneratorModel : CommanCommandLineModel
+    public class ViewGeneratorModel : CommonCommandLineModel
     {
         public string ViewName { get; set; }
 

@@ -17,7 +17,7 @@ using Microsoft.Framework.Runtime;
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     [Alias("controller")]
-    public class ControllerCodeGenerator : ICodeGenerator
+    public class ControllerGenerator : ICodeGenerator
     {
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IEntityFrameworkService _entityFrameworkService;
@@ -37,7 +37,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             "List"
         };
 
-        public ControllerCodeGenerator(
+        public ControllerGenerator(
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IModelTypesLocator modelTypesLocator,
@@ -64,7 +64,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: _applicationEnvironment.ApplicationBasePath,
-                    baseFolders: new[] { typeof(ControllerCodeGenerator).Name, typeof(ViewGenerator).Name },
+                    baseFolders: new[] { typeof(ControllerGenerator).Name, typeof(ViewGenerator).Name },
                     libraryManager: _libraryManager);
             }
         }

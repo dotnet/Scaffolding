@@ -20,10 +20,10 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
                 var categoryType = model.GetEntityType(typeof(Category));
                 var productType = model.GetEntityType(typeof(Product));
 
-                var categoryFk = productType.GetOrAddForeignKey(categoryType.GetPrimaryKey(), productType.GetProperty("ProductCategoryId"));
+                var categoryFk = productType.GetOrAddForeignKey(productType.GetProperty("ProductCategoryId"), categoryType.GetPrimaryKey());
 
-                categoryType.AddNavigation(new Navigation(categoryFk, "CategoryProducts", pointsToPrincipal: false));
-                productType.AddNavigation(new Navigation(categoryFk, "ProductCategory", pointsToPrincipal: true));
+                categoryType.AddNavigation("CategoryProducts", categoryFk, pointsToPrincipal: false);
+                productType.AddNavigation("ProductCategory", categoryFk, pointsToPrincipal: true);
                 return model;
             }
         }

@@ -2,16 +2,16 @@
     "version": "1.0.0-*",
     "dependencies": {
         "EntityFramework": "7.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Common": "",
-        "Microsoft.Framework.CodeGeneration.Core": "",
-        "Microsoft.Framework.CodeGeneration.Templating": "",
+        "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
         "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*"
     },
 
     "frameworks" : {
         "aspnet50" : { 
-            "dependencies": {
-                "System.Text.Encoding": ""
+            "frameworkAssemblies": {
+                "System.Text.Encoding": "4.0.0.0"
             }
         },
         "aspnetcore50" : { 

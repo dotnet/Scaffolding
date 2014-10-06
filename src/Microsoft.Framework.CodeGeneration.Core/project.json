@@ -1,21 +1,19 @@
 ﻿{
     "version": "1.0.0-*",
     "dependencies": {
-        "Microsoft.Framework.CodeGeneration.Common": "",
-        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
+        "Microsoft.Framework.Runtime.Interfaces": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
         "Microsoft.Framework.CommandLineUtils": "1.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Templating": "",
-        "Newtonsoft.Json": "6.0.4",
-        "System.Runtime": "4.0.20.0"
+        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
+        "Newtonsoft.Json": "6.0.4"
     },
     "frameworks": {
-        "aspnet50": {
-            "dependencies": { }
-        },
+        "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
+                "System.Runtime": "4.0.20.0",
                 "System.Diagnostics.Process": "4.0.0.0",
                 "System.Collections": "4.0.10.0",
                 "System.Console": "4.0.0.0",

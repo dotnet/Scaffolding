@@ -1,7 +1,7 @@
 ﻿{
     "dependencies": {
         "Microsoft.AspNet.Server.IIS": "1.0.0-*",
-        "ModelTypesLocatorTestClassLibrary": ""
+        "ModelTypesLocatorTestClassLibrary": "1.0.0"
     },
     "frameworks" : {
         "aspnet50" : { },

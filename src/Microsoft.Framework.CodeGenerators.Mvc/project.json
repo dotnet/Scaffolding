@@ -1,17 +1,15 @@
 ﻿{
     "version": "1.0.0-*",
     "dependencies": {
-        "Microsoft.Framework.CodeGeneration": "",
-        "Microsoft.Framework.CodeGeneration.Common": "",
-        "Microsoft.Framework.CodeGeneration.EntityFramework": "",
-        "Microsoft.Framework.CodeGeneration.Templating": "",
-        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
+        "Microsoft.Framework.CodeGeneration.EntityFramework": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
+        "Microsoft.Framework.Runtime.Interfaces": { "version": "1.0.0-*", "type": "build" },
         "Newtonsoft.Json": "6.0.4"
     },
     "frameworks": {
-        "aspnet50": {
-            "dependencies": { }
-        },
+        "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
                 "System.Runtime": "4.0.20.0"

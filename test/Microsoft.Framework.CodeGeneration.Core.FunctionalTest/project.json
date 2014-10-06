@@ -2,8 +2,8 @@
     "dependencies": {
         "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Core": "",
-        "ModelTypesLocatorTestWebApp": "",
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
+        "ModelTypesLocatorTestWebApp": "1.0.0",
         "Moq": "4.2.1312.1622",
         "Xunit.KRunner": "1.0.0-*"
     },

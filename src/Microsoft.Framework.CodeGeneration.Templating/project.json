@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "dependencies": {
         "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
@@ -11,10 +11,10 @@
         "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.20.0",
-                "System.Dynamic.Runtime": "4.0.0.0",
-                "System.Collections.Concurrent": "4.0.0.0",
-                "System.Reflection.TypeExtensions": "4.0.0.0"
+                "System.Runtime": "4.0.20-beta-*",
+                "System.Dynamic.Runtime": "4.0.0-beta-*",
+                "System.Collections.Concurrent": "4.0.0-beta-*",
+                "System.Reflection.TypeExtensions": "4.0.0-beta-*"
             }
         }
     }

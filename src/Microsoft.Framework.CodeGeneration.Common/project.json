@@ -1,14 +1,14 @@
-﻿{
+{
     "version": "1.0.0-*",
     "shared": "*.cs",
     "frameworks": {
         "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
-                "System.Linq": "4.0.0.0",
-                "System.Reflection": "4.0.10.0",
-                "System.Runtime": "4.0.20.0",
-                "System.Diagnostics.Contracts": "4.0.0.0"
+                "System.Linq": "4.0.0-beta-*",
+                "System.Reflection": "4.0.10-beta-*",
+                "System.Runtime": "4.0.20-beta-*",
+                "System.Diagnostics.Contracts": "4.0.0-beta-*"
             }
         }
     }

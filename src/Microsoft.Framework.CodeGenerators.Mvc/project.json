@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "dependencies": {
         "Microsoft.Framework.CodeGeneration": "1.0.0-*",
@@ -12,7 +12,7 @@
         "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.20.0"
+                "System.Runtime": "4.0.20-beta-*"
             }
         }
     }

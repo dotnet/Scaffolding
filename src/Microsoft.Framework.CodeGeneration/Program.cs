@@ -25,8 +25,8 @@ namespace Microsoft.Framework.CodeGeneration
             //Debugger.Launch();
             //Debugger.Break();
 
-            var generatorsLocator = _serviceProvider.GetService<ICodeGeneratorLocator>();
-            var logger = _serviceProvider.GetService<ILogger>();
+            var generatorsLocator = _serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
+            var logger = _serviceProvider.GetRequiredService<ILogger>();
 
             if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
             {
@@ -54,7 +54,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
-            var logger = _serviceProvider.GetService<ILogger>();
+            var logger = _serviceProvider.GetRequiredService<ILogger>();
 
             if (codeGenerators.Any())
             {
@@ -86,7 +86,7 @@ namespace Microsoft.Framework.CodeGeneration
             //Ordering of services is important here
             ITypeActivator typeActivator = new TypeActivator();
 
-            Contract.Assert(serviceProvider.GetServiceOrDefault<ITypeActivator>() == null);
+            Contract.Assert(serviceProvider.GetService<ITypeActivator>() == null);
             serviceProvider.Add(typeof(ITypeActivator), typeActivator);
 
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());

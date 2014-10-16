@@ -15,7 +15,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
         public static IServiceProvider CreateServices(string testAppName)
         {
             var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
-            var appEnvironment = originalProvider.GetService<IApplicationEnvironment>();
+            var appEnvironment = originalProvider.GetRequiredService<IApplicationEnvironment>();
 
             //When the tests are run the appEnvironment points to test project.
             //Change the app environment to point to the test application to be used

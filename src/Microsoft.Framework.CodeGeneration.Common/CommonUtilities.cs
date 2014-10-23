@@ -13,7 +13,7 @@ namespace Microsoft.Framework.CodeGeneration
     internal static class CommonUtilities
     {
         public static CompilationResult GetAssemblyFromCompilation(
-            IAssemblyLoaderEngine loader,
+            IAssemblyLoadContext loader,
             Compilation compilation)
         {
             EmitResult result;
@@ -45,7 +45,7 @@ namespace Microsoft.Framework.CodeGeneration
                     Assembly assembly;
                     if (PlatformHelper.IsMono)
                     {
-                        assembly = loader.LoadStream(ms, pdbStream: null);
+                        assembly = loader.LoadStream(ms, assemblySymbols: null);
                     }
                     else
                     {

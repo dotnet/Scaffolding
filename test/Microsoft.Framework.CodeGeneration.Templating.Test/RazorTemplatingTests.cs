@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Framework.CodeGeneration.Templating.Compilation;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
@@ -53,9 +54,9 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
         {
             var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
             var appEnvironment = (IApplicationEnvironment)originalProvider.GetService(typeof(IApplicationEnvironment));
-            var loaderEngine = (IAssemblyLoaderEngine)originalProvider.GetService(typeof(IAssemblyLoaderEngine));
+            var loaderAccessor = (IAssemblyLoadContextAccessor)originalProvider.GetService(typeof(IAssemblyLoadContextAccessor));
             var libManager = (ILibraryManager)originalProvider.GetService(typeof(ILibraryManager));
-
+            
             var emptyLibExport = new LibraryExport(new List<IMetadataReference>(), new List<ISourceReference>());
             var mockLibManager = new Mock<ILibraryManager>();
             mockLibManager
@@ -67,7 +68,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
                 .Setup(lm => lm.GetAllExports(input))
                 .Returns(libManager.GetAllExports(input));
 
-            return new RoslynCompilationService(appEnvironment, loaderEngine, mockLibManager.Object);
+            return new RoslynCompilationService(appEnvironment, loaderAccessor, mockLibManager.Object);
         }
     }
 

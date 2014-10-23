@@ -21,14 +21,14 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 
         private readonly ILibraryManager _libraryManager;
         private readonly IApplicationEnvironment _environment;
-        private readonly IAssemblyLoaderEngine _loader;
+        private readonly IAssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationEnvironment environment,
-                                        IAssemblyLoaderEngine loaderEngine,
+                                        IAssemblyLoadContextAccessor accessor,
                                         ILibraryManager libraryManager)
         {
             _environment = environment;
-            _loader = loaderEngine;
+            _loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
             _libraryManager = libraryManager;
         }
 

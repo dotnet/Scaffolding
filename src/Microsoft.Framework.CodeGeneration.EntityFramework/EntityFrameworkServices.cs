@@ -20,7 +20,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly IDbContextEditorServices _dbContextEditorServices;
         private readonly IApplicationEnvironment _environment;
         private readonly ILibraryManager _libraryManager;
-        private readonly IAssemblyLoaderEngine _loader;
+        private readonly IAssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
         private readonly ILogger _logger;
@@ -31,7 +31,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         public EntityFrameworkServices(
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment,
-            [NotNull]IAssemblyLoaderEngine loader,
+            [NotNull]IAssemblyLoadContextAccessor loader,
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IDbContextEditorServices dbContextEditorServices,
             [NotNull]IPackageInstaller packageInstaller,
@@ -39,7 +39,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             _libraryManager = libraryManager;
             _environment = environment;
-            _loader = loader;
+            _loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
             _packageInstaller = packageInstaller;

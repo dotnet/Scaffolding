@@ -3,7 +3,6 @@
     "dependencies": {
         "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.AspNet.Razor": "4.0.0-*",
-        "K.Roslyn": "1.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*"
     },
 
@@ -11,9 +10,7 @@
         "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-*",
                 "System.Dynamic.Runtime": "4.0.0-beta-*",
-                "System.Collections.Concurrent": "4.0.0-beta-*",
                 "System.Reflection.TypeExtensions": "4.0.0-beta-*"
             }
         }

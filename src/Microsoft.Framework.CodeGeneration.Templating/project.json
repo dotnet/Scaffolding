@@ -3,7 +3,6 @@
     "dependencies": {
         "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.AspNet.Razor": "4.0.0-*",
-        "K.Roslyn": "1.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*"
     },
 

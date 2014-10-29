@@ -7,7 +7,7 @@
         "Microsoft.Framework.CommandLineUtils": "1.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
-        "Newtonsoft.Json": "6.0.4"
+        "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {
         "aspnet50": { },

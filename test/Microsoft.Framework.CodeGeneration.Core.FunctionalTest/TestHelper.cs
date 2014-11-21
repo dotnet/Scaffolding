@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.AspNet.Hosting;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.DependencyInjection.Fallback;
 using Microsoft.Framework.Runtime;
@@ -23,12 +24,12 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
 
-            var services = new ServiceCollection();
+            var services = HostingServices.Create(originalProvider);
             services.AddInstance(
                 typeof(IApplicationEnvironment),
                 new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName));
 
-            return services.BuildServiceProvider(originalProvider);
+            return services.BuildServiceProvider();
         }
     }
 }

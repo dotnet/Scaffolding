@@ -15,15 +15,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
                 var builder = new ModelBuilder(model);
 
                 builder.Entity<Product>();
-                builder.Entity<Category>();
 
-                var categoryType = model.GetEntityType(typeof(Category));
-                var productType = model.GetEntityType(typeof(Product));
+                builder.Entity<Category>()
+                    .OneToMany(e => e.CategoryProducts, e => e.ProductCategory)
+                    .ForeignKey(e => e.ProductCategoryId);
 
-                var categoryFk = productType.GetOrAddForeignKey(productType.GetProperty("ProductCategoryId"), categoryType.GetPrimaryKey());
-
-                categoryType.AddNavigation("CategoryProducts", categoryFk, pointsToPrincipal: false);
-                productType.AddNavigation("ProductCategory", categoryFk, pointsToPrincipal: true);
                 return model;
             }
         }

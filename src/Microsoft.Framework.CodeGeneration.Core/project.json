@@ -1,6 +1,7 @@
 {
     "version": "1.0.0-*",
     "dependencies": {
+        "Microsoft.CodeAnalysis.CSharp": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.Framework.Runtime.Interfaces": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",

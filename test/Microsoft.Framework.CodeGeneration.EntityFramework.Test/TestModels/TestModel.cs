@@ -15,10 +15,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
                 var builder = new ModelBuilder(model);
 
                 builder.Entity<Product>();
-
-                builder.Entity<Category>()
-                    .OneToMany(e => e.CategoryProducts, e => e.ProductCategory)
-                    .ForeignKey(e => e.ProductCategoryId);
+                builder.Entity<Category>();
 
                 return model;
             }

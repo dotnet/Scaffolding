@@ -12,7 +12,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
             get
             {
                 var model = new Model();
-                var builder = new ModelBuilder(model);
+                var builder = new ModelBuilderFactory().CreateConventionBuilder(model);
 
                 builder.Entity<Product>();
                 builder.Entity<Category>();

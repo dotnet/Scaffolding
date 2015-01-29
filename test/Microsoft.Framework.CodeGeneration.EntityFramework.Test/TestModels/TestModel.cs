@@ -12,18 +12,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
             get
             {
                 var model = new Model();
-                var builder = new ModelBuilder(model);
+                var builder = new ModelBuilderFactory().CreateConventionBuilder(model);
 
                 builder.Entity<Product>();
                 builder.Entity<Category>();
 
-                var categoryType = model.GetEntityType(typeof(Category));
-                var productType = model.GetEntityType(typeof(Product));
-
-                var categoryFk = productType.GetOrAddForeignKey(productType.GetProperty("ProductCategoryId"), categoryType.GetPrimaryKey());
-
-                categoryType.AddNavigation("CategoryProducts", categoryFk, pointsToPrincipal: false);
-                productType.AddNavigation("ProductCategory", categoryFk, pointsToPrincipal: true);
                 return model;
             }
         }

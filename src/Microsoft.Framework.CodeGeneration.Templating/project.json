@@ -10,7 +10,6 @@
         "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
-                "System.Dynamic.Runtime": "4.0.0-beta-*",
                 "System.Reflection.TypeExtensions": "4.0.0-beta-*"
             }
         }

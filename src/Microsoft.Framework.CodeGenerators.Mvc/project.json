@@ -5,7 +5,7 @@
         "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.Framework.CodeGeneration.EntityFramework": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
-        "Microsoft.Framework.Runtime.Interfaces": { "version": "1.0.0-*", "type": "build" },
+        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
         "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {

@@ -221,7 +221,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (ModelState.IsValid)
             {
-                db.ChangeTracker.Entry(@Model.ModelVariable).State = EntityState.Modified;
+                db.Update(@Model.ModelVariable);
 @{
     if (Model.UseAsync)
     {

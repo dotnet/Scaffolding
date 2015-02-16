@@ -22,3 +22,4 @@ nuget.exe
 *.ipch
 /Scaffolding.sln.ide
 /*.vspx
+project.lock.json

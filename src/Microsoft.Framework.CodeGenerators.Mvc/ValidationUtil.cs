@@ -10,7 +10,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     internal class ValidationUtil
     {
-        public static ITypeSymbol TryValidateType(string typeName,
+        public static ITypeSymbol ValidateType(string typeName,
             string argumentName,
             IModelTypesLocator modelTypesLocator,
             bool throwWhenNotFound = true)
@@ -19,7 +19,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 throw new ArgumentException(string.Format("Please provide a valid {0}", argumentName));
             }
-
 
             var candidateModelTypes = modelTypesLocator.GetType(typeName).ToList();
 

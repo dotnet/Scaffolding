@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22110.0
+VisualStudioVersion = 14.0.22605.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration", "src\Microsoft.Framework.CodeGeneration\Microsoft.Framework.CodeGeneration.kproj", "{BEB0BFF7-79A2-4C9C-8E45-C389161C2925}"
 EndProject
@@ -45,6 +45,8 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGenerators.Mvc", "src\Microsoft.Framework.CodeGenerators.Mvc\Microsoft.Framework.CodeGenerators.Mvc.kproj", "{9387DE6F-2956-4AF3-ABB1-C0647F793DBB}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.EntityFramework.Test", "test\Microsoft.Framework.CodeGeneration.EntityFramework.Test\Microsoft.Framework.CodeGeneration.EntityFramework.Test.kproj", "{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGenerators.Mvc.Test", "test\Microsoft.Framework.CodeGenerators.Mvc.Test\Microsoft.Framework.CodeGenerators.Mvc.Test.kproj", "{2EE4B58A-9D8C-404D-BAF8-9039A726937B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,6 +102,10 @@ Global
 		{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EE4B58A-9D8C-404D-BAF8-9039A726937B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EE4B58A-9D8C-404D-BAF8-9039A726937B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EE4B58A-9D8C-404D-BAF8-9039A726937B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EE4B58A-9D8C-404D-BAF8-9039A726937B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,5 +124,6 @@ Global
 		{8E52113B-F68A-444A-893D-E669ACCB998D} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 		{9387DE6F-2956-4AF3-ABB1-C0647F793DBB} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 		{4276B6C8-724C-4FB3-A74E-FBC188D33FF9} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
+		{2EE4B58A-9D8C-404D-BAF8-9039A726937B} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 	EndGlobalSection
 EndGlobal

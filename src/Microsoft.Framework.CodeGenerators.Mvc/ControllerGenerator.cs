@@ -85,8 +85,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             if (!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass) && !string.IsNullOrEmpty(controllerGeneratorModel.DataContextClass))
             {
-                model = ValidationUtil.TryValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator);
-                dataContext = ValidationUtil.TryValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
+                model = ValidationUtil.ValidateType(controllerGeneratorModel.ModelClass, "model", _modelTypesLocator);
+                dataContext = ValidationUtil.ValidateType(controllerGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
                 await GenerateController(controllerGeneratorModel, model, dataContext, controllerNameSpace, layoutDependencyInstaller);
             }
             else

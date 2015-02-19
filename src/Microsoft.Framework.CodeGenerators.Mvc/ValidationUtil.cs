@@ -10,42 +10,38 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     internal class ValidationUtil
     {
-        public static bool TryValidateType(string typeName,
+        public static ITypeSymbol TryValidateType(string typeName,
             string argumentName,
             IModelTypesLocator modelTypesLocator,
-            out ITypeSymbol type,
-            out string errorMessage)
+            bool throwWhenNotFound = true)
         {
-            errorMessage = string.Empty;
-            type = null;
-
             if (string.IsNullOrEmpty(typeName))
             {
-                //Perhaps for these kind of checks, the validation could be in the API.
-                errorMessage = string.Format("Please provide a valid {0}", argumentName);
-                return false;
+                throw new ArgumentException(string.Format("Please provide a valid {0}", argumentName));
             }
+
 
             var candidateModelTypes = modelTypesLocator.GetType(typeName).ToList();
 
             int count = candidateModelTypes.Count;
             if (count == 0)
             {
-                errorMessage = string.Format("A type with the name {0} does not exist", typeName);
-                return false;
+                if (throwWhenNotFound)
+                {
+                    throw new ArgumentException(string.Format("A type with the name {0} does not exist", typeName));
+                }
+                return null;
             }
 
             if (count > 1)
             {
-                errorMessage = string.Format(
+                throw new ArgumentException(string.Format(
                     "Multiple types matching the name {0} exist:{1}, please use a fully qualified name",
                     typeName,
-                    string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray()));
-                return false;
+                    string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
             }
 
-            type = candidateModelTypes.First();
-            return true;
+            return candidateModelTypes.First();
         }
     }
 }

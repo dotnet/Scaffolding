@@ -71,8 +71,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         public async Task GenerateCode([NotNull]ControllerGeneratorModel controllerGeneratorModel)
         {
-            // Validate model
-            string validationMessage;
             ITypeSymbol model, dataContext;
 
             // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property

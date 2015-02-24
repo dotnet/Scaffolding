@@ -8,7 +8,7 @@ namespace Microsoft.Framework.CodeGeneration
 {
     public interface IModelTypesLocator
     {
-        IEnumerable<ITypeSymbol> GetAllTypes();
+        IEnumerable<ModelType> GetAllTypes();
 
         /// <summary>
         /// Returns the types matching a type name.
@@ -22,6 +22,6 @@ namespace Microsoft.Framework.CodeGeneration
         /// </summary>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        IEnumerable<ITypeSymbol> GetType(string typeName);
+        IEnumerable<ModelType> GetType(string typeName);
     }
 }

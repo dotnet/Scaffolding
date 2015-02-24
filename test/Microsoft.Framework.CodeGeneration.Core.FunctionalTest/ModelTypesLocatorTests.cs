@@ -26,8 +26,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             Assert.Equal(1, types.Count());
             var type = types.First();
             Assert.Equal("ModelWithMatchingShortName", type.Name);
-            Assert.Equal("Models", type.ContainingNamespace.Name);
-            Assert.Equal("ModelTypesLocatorTestWebApp", type.ContainingNamespace.ContainingNamespace.Name);
+            Assert.Equal("ModelTypesLocatorTestWebApp.Models", type.Namespace);
+            Assert.Equal("ModelTypesLocatorTestWebApp.Models.ModelWithMatchingShortName", type.FullName);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             Assert.Equal(1, types.Count());
             var type = types.First();
             Assert.Equal("ModelWithMatchingShortName", type.Name);
-            Assert.Equal("ModelTypesLocatorTestClassLibrary", type.ContainingNamespace.Name);
+            Assert.Equal("ModelTypesLocatorTestClassLibrary", type.Namespace);
         }
 
         [Fact]

@@ -12,7 +12,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     public class ControllerGeneratorTemplateModel
     {
         public ControllerGeneratorTemplateModel(
-            [NotNull]ITypeSymbol modelType,
+            [NotNull]ModelType modelType,
             [NotNull]string dbContextFullTypeName)
         {
             ModelType = modelType;
@@ -33,7 +33,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         public ModelMetadata ModelMetadata { get; set; }
 
-        public ITypeSymbol ModelType { get; private set; }
+        public ModelType ModelType { get; private set; }
 
         public string ControllerRootName
         {
@@ -85,9 +85,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 // We add ControllerNamespace first to make other entries not added to the set if they match.
                 requiredNamespaces.Add(ControllerNamespace);
 
-                var modelTypeNamespace = ModelType.ContainingNamespace.IsGlobalNamespace
-                    ? string.Empty
-                    : ModelType.ContainingNamespace.ToDisplayString();
+                var modelTypeNamespace = ModelType.Namespace;
 
                 if (!string.IsNullOrWhiteSpace(modelTypeNamespace))
                 {

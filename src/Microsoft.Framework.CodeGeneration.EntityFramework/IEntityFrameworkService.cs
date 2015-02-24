@@ -11,6 +11,6 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
     {
         // ToDo: Perhaps this needs to take ITypeSymbol parameters when
         // we need to edit the db context.
-        Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ITypeSymbol modelTypeName);
+        Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ModelType modelTypeName);
     }
 }

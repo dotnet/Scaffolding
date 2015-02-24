@@ -46,7 +46,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             _logger = logger;
         }
 
-        public async Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ITypeSymbol modelTypeSymbol)
+        public async Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ModelType modelTypeSymbol)
         {
             Type dbContextType;
             var dbContextSymbols = _modelTypesLocator.GetType(dbContextTypeName).ToList();
@@ -92,7 +92,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 }
             }
 
-            var modelTypeName = modelTypeSymbol.ToDisplayString();
+            var modelTypeName = modelTypeSymbol.FullName;
             var modelType = _libraryManager.GetReflectionType(_environment, modelTypeName);
 
             if (modelType == null)

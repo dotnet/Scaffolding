@@ -71,7 +71,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         public async Task GenerateCode([NotNull]ControllerGeneratorModel controllerGeneratorModel)
         {
-            ITypeSymbol model, dataContext;
+            ModelType model, dataContext;
 
             // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
             // That's not possible in command line scaffolding - the closest we can get is
@@ -97,8 +97,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         }
 
         private async Task GenerateController(ControllerGeneratorModel controllerGeneratorModel,
-            ITypeSymbol model,
-            ITypeSymbol dataContext,
+            ModelType model,
+            ModelType dataContext,
             string controllerNameSpace,
             MvcLayoutDependencyInstaller layoutDependencyInstaller)
         {
@@ -113,8 +113,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
 
-            var dbContextFullName = dataContext != null ? dataContext.ToDisplayString() : controllerGeneratorModel.DataContextClass;
-            var modelTypeFullName = model.ToDisplayString();
+            var dbContextFullName = dataContext != null ? dataContext.FullName : controllerGeneratorModel.DataContextClass;
+            var modelTypeFullName = model.FullName;
 
             var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,

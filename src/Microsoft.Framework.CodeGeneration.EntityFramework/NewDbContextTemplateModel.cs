@@ -9,11 +9,9 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 {
     public class NewDbContextTemplateModel
     {
-        public NewDbContextTemplateModel([NotNull]string dbContextName, [NotNull]ITypeSymbol modelType)
+        public NewDbContextTemplateModel([NotNull]string dbContextName, [NotNull]ModelType modelType)
         {
-            var modelNamespace = modelType.ContainingNamespace.IsGlobalNamespace
-                ? string.Empty
-                : modelType.ContainingNamespace.ToDisplayString();
+            var modelNamespace = modelType.Namespace;
 
             ModelTypeName = modelType.Name;
             RequiredNamespaces = new HashSet<string>();

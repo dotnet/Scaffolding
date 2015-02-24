@@ -23,15 +23,16 @@ namespace Microsoft.Framework.CodeGeneration
             _application = application;
         }
 
-        public IEnumerable<ITypeSymbol> GetAllTypes()
+        public IEnumerable<ModelType> GetAllTypes()
         {
             return _libraryManager
                 .GetProjectsInApp(_application)
                 .Select(compilation => GetDirectTypesInCompilation(compilation.Compilation))
-                .Aggregate((coll1, coll2) => coll1.Concat(coll2).ToList());
+                .Aggregate((coll1, coll2) => coll1.Concat(coll2).ToList())
+                .Select(ts => ModelType.FromITypeSymbol(ts));
         }
 
-        public IEnumerable<ITypeSymbol> GetType([NotNull]string typeName)
+        public IEnumerable<ModelType> GetType([NotNull]string typeName)
         {
             var exactTypesInAllProjects = _libraryManager
                 .GetProjectsInApp(_application)
@@ -40,7 +41,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (exactTypesInAllProjects.Any())
             {
-                return exactTypesInAllProjects;
+                return exactTypesInAllProjects.Select(ts => ModelType.FromITypeSymbol(ts));
             }
 
             //For short type names, we don't give special preference to types in current app,

@@ -10,7 +10,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 {
     internal class ValidationUtil
     {
-        public static ITypeSymbol ValidateType(string typeName,
+        public static ModelType ValidateType(string typeName,
             string argumentName,
             IModelTypesLocator modelTypesLocator,
             bool throwWhenNotFound = true)

@@ -65,7 +65,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
         public async Task GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
         {
-            ITypeSymbol model = ValidationUtil.ValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator);
+            ModelType model = ValidationUtil.ValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator);
 
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
@@ -83,7 +83,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 throw new ArgumentException("The TemplateName cannot be empty");
             }
 
-            ITypeSymbol dataContext = ValidationUtil.ValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
+            ModelType dataContext = ValidationUtil.ValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
@@ -105,8 +105,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
 
-            var dbContextFullName = dataContext != null ? dataContext.ToDisplayString() : viewGeneratorModel.DataContextClass;
-            var modelTypeFullName = model.ToDisplayString();
+            var dbContextFullName = dataContext != null ? dataContext.FullName : viewGeneratorModel.DataContextClass;
+            var modelTypeFullName = model.FullName;
 
             var modelMetadata = await _entityFrameworkService.GetModelMetadata(
                 dbContextFullName,

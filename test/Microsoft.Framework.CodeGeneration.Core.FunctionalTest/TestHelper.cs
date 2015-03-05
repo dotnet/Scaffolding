@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.DependencyInjection.Fallback;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
 

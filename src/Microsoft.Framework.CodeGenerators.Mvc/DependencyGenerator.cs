@@ -19,13 +19,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
     public class DependencyGenerator
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ITypeActivator _typeActivator;
 
         public DependencyGenerator(
-            [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider)
         {
-            _typeActivator = typeActivator;
             _serviceProvider = serviceProvider;
         }
 
@@ -35,12 +32,12 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             if (model.AddStaticFiles)
             {
-                dependencyInstaller = _typeActivator.CreateInstance<StaticFilesDependencyInstaller>(_serviceProvider);
+                dependencyInstaller = ActivatorUtilities.CreateInstance<StaticFilesDependencyInstaller>(_serviceProvider);
             }
 
             if (model.AddMvcLayout)
             {
-                dependencyInstaller = _typeActivator.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
+                dependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             }
 
             await dependencyInstaller.Execute();

@@ -11,16 +11,13 @@ namespace Microsoft.Framework.CodeGeneration
     public class CodeGeneratorDescriptor
     {
         private readonly TypeInfo _codeGeneratorType;
-        private readonly ITypeActivator _typeActivator;
         private readonly IServiceProvider _serviceProvider;
         private ActionDescriptor _codeGeneratorAction;
 
         public CodeGeneratorDescriptor([NotNull]TypeInfo codeGeneratorType,
-            [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider)
         {
             _codeGeneratorType = codeGeneratorType;
-            _typeActivator = typeActivator;
             _serviceProvider = serviceProvider;
         }
 
@@ -66,7 +63,7 @@ namespace Microsoft.Framework.CodeGeneration
                 object instance;
                 try
                 {
-                    instance = _typeActivator.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
+                    instance = ActivatorUtilities.CreateInstance(_serviceProvider, _codeGeneratorType.AsType());
                 }
                 catch (Exception ex)
                 {

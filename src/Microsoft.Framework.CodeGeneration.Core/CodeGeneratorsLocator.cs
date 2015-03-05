@@ -14,14 +14,11 @@ namespace Microsoft.Framework.CodeGeneration
     {
         private readonly ICodeGeneratorAssemblyProvider _assemblyProvider;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ITypeActivator _typeActivator;
 
         public CodeGeneratorsLocator(
-            [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ICodeGeneratorAssemblyProvider assemblyProvider)
         {
-            _typeActivator = typeActivator;
             _serviceProvider = serviceProvider;
             _assemblyProvider = assemblyProvider;
         }
@@ -72,7 +69,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         private CodeGeneratorDescriptor DescriptorFromTypeInfo([NotNull]TypeInfo typeInfo)
         {
-            return new CodeGeneratorDescriptor(typeInfo, _typeActivator, _serviceProvider);
+            return new CodeGeneratorDescriptor(typeInfo, _serviceProvider);
         }
 
         private bool IsCodeGenerator([NotNull]TypeInfo typeInfo)

@@ -20,12 +20,10 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IApplicationEnvironment applicationEnvironment,
             [NotNull]ILogger logger,
             [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider)
         {
             LibraryManager = libraryManager;
             ApplicationEnvironment = applicationEnvironment;
-            TypeActivator = typeActivator;
             Logger = logger;
             PackageInstaller = packageInstaller;
             ServiceProvider = serviceProvider;
@@ -45,7 +43,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             {
                 await PackageInstaller.InstallPackages(MissingDepdencies);
 
-                var readMeGenerator = TypeActivator.CreateInstance<ReadMeGenerator>(ServiceProvider);
+                var readMeGenerator = ActivatorUtilities.CreateInstance<ReadMeGenerator>(ServiceProvider);
                 var isReadMe = await readMeGenerator.GenerateStartupOrReadme(StartupContents.ToList());
 
                 if (isReadMe)
@@ -59,7 +57,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         protected abstract Task GenerateCode();
 
         protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
-        protected ITypeActivator TypeActivator { get; private set; }
         protected ILogger Logger { get; private set; }
         public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }

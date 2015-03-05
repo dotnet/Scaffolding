@@ -46,10 +46,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
         private Mock<CodeGeneratorDescriptor> GetMockDescriptor(TypeInfo generatorTypeInfo)
         {
-            var typeActivatorMock = new Mock<ITypeActivator>();
             var serviceProviderMock = new Mock<IServiceProvider>();
             return new Mock<CodeGeneratorDescriptor>(generatorTypeInfo,
-                typeActivatorMock.Object,
                 serviceProviderMock.Object);
         }
 

@@ -16,10 +16,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_Name_Uses_Alias_When_Present()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var descriptor = new CodeGeneratorDescriptor(typeof(CodeGeneratorWithAlias).GetTypeInfo(),
-                mockActivator.Object,
                 mockServiceProvider.Object);
 
             //Act
@@ -33,10 +31,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_Name_Uses_TypeName_When_Alias_Not_Present()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var descriptor = new CodeGeneratorDescriptor(typeof(CodeGeneratorWithoutAlias).GetTypeInfo(),
-                mockActivator.Object,
                 mockServiceProvider.Object);
 
             //Act
@@ -50,10 +46,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_CodeGeneratorAction_Throws_When_No_GenerateCode_Method()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var descriptor = new CodeGeneratorDescriptor(typeof(CodeGeneratorWithGenerateCodeNoParameters).GetTypeInfo(),
-                mockActivator.Object,
                 mockServiceProvider.Object);
 
             //Act
@@ -67,10 +61,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_CodeGeneratorAction_Throws_When_Multiple_GenerateCode_Methods()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var descriptor = new CodeGeneratorDescriptor(typeof(ClassWithMultipleGenerateCodeMethods).GetTypeInfo(),
-                mockActivator.Object,
                 mockServiceProvider.Object);
 
             //Act
@@ -84,10 +76,8 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_CodeGeneratorAction_Returns_Valid_GenerateCode_Method()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var descriptor = new CodeGeneratorDescriptor(typeof(ClassWithGenerateCodeMethod).GetTypeInfo(),
-                mockActivator.Object,
                 mockServiceProvider.Object);
 
             //Act
@@ -102,14 +92,12 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_CodeGeneratorInstance_Injects_Dependencies()
         {
             //Arrange
-            var typeActivator = new TypeActivator();
             var mockServiceProvider = new Mock<IServiceProvider>();
             mockServiceProvider
                 .Setup(sp => sp.GetService(typeof(IServiceProvider)))
                 .Returns(mockServiceProvider.Object);
 
             var descriptor = new CodeGeneratorDescriptor(typeof(CodeGeneratorWithDependencies).GetTypeInfo(),
-                typeActivator,
                 mockServiceProvider.Object);
 
             //Act
@@ -124,11 +112,9 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorDescriptor_CodeGeneratorInstance_Throws_When_Not_Able_To_Create_Instance()
         {
             //Arrange
-            var typeActivator = new TypeActivator();
             var mockServiceProvider = new Mock<IServiceProvider>();
 
             var descriptor = new CodeGeneratorDescriptor(typeof(CodeGeneratorWithDependencies).GetTypeInfo(),
-                typeActivator,
                 mockServiceProvider.Object);
 
             //Act & Assert

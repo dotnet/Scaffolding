@@ -19,9 +19,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IApplicationEnvironment applicationEnvironment,
             [NotNull]ILogger logger,
             [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider)
-            : base(libraryManager, applicationEnvironment, logger, packageInstaller, typeActivator, serviceProvider)
+            : base(libraryManager, applicationEnvironment, logger, packageInstaller, serviceProvider)
         {
         }
 
@@ -40,7 +39,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             await CopyFolderContentsRecursive(destinationPath, TemplateFolders.First());
 
-            var staticFilesInstaller = TypeActivator.CreateInstance<StaticFilesDependencyInstaller>(ServiceProvider);
+            var staticFilesInstaller = ActivatorUtilities.CreateInstance<StaticFilesDependencyInstaller>(ServiceProvider);
             await staticFilesInstaller.Execute();
         }
 

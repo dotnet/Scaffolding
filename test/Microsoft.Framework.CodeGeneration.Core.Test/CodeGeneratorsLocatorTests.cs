@@ -18,7 +18,6 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorsLocator_Returns_Correct_Number_Of_Generators()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
 
@@ -26,8 +25,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 .SetupGet(ap => ap.CandidateAssemblies)
                 .Returns(new[] { currentAssembly });
 
-            var locator = new CodeGeneratorsLocator(mockActivator.Object,
-                mockServiceProvider.Object,
+            var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
 
             //Act
@@ -43,7 +41,6 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorsLocator_Returns_Correct_CodeGenerator_For_A_Name()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
 
@@ -51,8 +48,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 .SetupGet(ap => ap.CandidateAssemblies)
                 .Returns(new[] { currentAssembly });
 
-            var locator = new CodeGeneratorsLocator(mockActivator.Object,
-                mockServiceProvider.Object,
+            var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
 
             //Act
@@ -66,7 +62,6 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
         public void CodeGeneratorsLocator_Throws_When_No_CodeGenerator_Found_For_A_Name()
         {
             //Arrange
-            var mockActivator = new Mock<ITypeActivator>();
             var mockServiceProvider = new Mock<IServiceProvider>();
             var mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
 
@@ -74,8 +69,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 .SetupGet(ap => ap.CandidateAssemblies)
                 .Returns(new[] { currentAssembly });
 
-            var locator = new CodeGeneratorsLocator(mockActivator.Object,
-                mockServiceProvider.Object,
+            var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
 
             //Act & Assert

@@ -48,8 +48,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         internal void AddServiceWithDependencies<TService, TImplementation>()
         {
-            var typeActivator = (ITypeActivator)GetService(typeof(ITypeActivator));
-            Add(typeof(TService), typeActivator.CreateInstance<TImplementation>(this));
+            Add(typeof(TService), ActivatorUtilities.CreateInstance<TImplementation>(this));
         }
     }
 }

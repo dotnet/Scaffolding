@@ -23,11 +23,9 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
                 methodCalled = true;
                 invokedModel = model;
             });
-
-            var typeActivatorMock = new Mock<ITypeActivator>();
+            
             var serviceProviderMock = new Mock<IServiceProvider>();
             var generatorMock = new Mock<CodeGeneratorDescriptor>(typeof(CodeGeneratorSample).GetTypeInfo(),
-                typeActivatorMock.Object,
                 serviceProviderMock.Object);
 
             generatorMock

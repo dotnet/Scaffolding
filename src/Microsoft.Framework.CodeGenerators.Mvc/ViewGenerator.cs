@@ -24,7 +24,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
         private readonly ILibraryManager _libraryManager;
         private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
-        private readonly ITypeActivator _typeActivator;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
 
@@ -37,7 +36,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IEntityFrameworkService entityFrameworkService,
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]ITypeActivator typeActivator,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
         {
@@ -46,7 +44,6 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
-            _typeActivator = typeActivator;
             _serviceProvider = serviceProvider;
             _logger = logger;
         }
@@ -112,7 +109,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
                 dbContextFullName,
                 model);
 
-            var layoutDependencyInstaller = _typeActivator.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
+            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
 
             bool isLayoutSelected = viewGeneratorModel.UseDefaultLayout ||
                 !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage);

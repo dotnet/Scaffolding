@@ -84,11 +84,6 @@ namespace Microsoft.Framework.CodeGeneration
         private void AddCodeGenerationServices([NotNull]ServiceProvider serviceProvider)
         {
             //Ordering of services is important here
-            ITypeActivator typeActivator = new TypeActivator();
-
-            Contract.Assert(serviceProvider.GetService<ITypeActivator>() == null);
-            serviceProvider.Add(typeof(ITypeActivator), typeActivator);
-
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
             serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());
 

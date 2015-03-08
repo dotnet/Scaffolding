@@ -68,13 +68,13 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             string initialJson = @"{
   ""webroot"": ""wwwRoot"",
   ""frameworks"": {
-    ""aspnet50"": {}
+    ""dnx451"": {}
   }
 }";
             string expectedJson = @"{
   ""webroot"": ""wwwRoot"",
   ""frameworks"": {
-    ""aspnet50"": {}
+    ""dnx451"": {}
   },
   ""dependencies"": {
     ""Microsoft.Net.Runtime"": ""1.0.0""

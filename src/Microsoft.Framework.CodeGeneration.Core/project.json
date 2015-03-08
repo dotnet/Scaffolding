@@ -1,4 +1,4 @@
-{
+﻿{
     "version": "1.0.0-*",
     "dependencies": {
         "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
@@ -10,8 +10,8 @@
         "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {
-        "aspnet50": { },
-        "aspnetcore50": {
+        "dnx451": { },
+        "dnxcore50": {
             "dependencies": {
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Diagnostics.Process": "4.0.0-beta-*",

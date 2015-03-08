@@ -1,4 +1,4 @@
-{
+﻿{
     "version": "1.0.0-*",
     "dependencies": {
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
@@ -9,8 +9,8 @@
         "Microsoft.Framework.CommandLineUtils": { "version": "1.0.0-*", "type": "build" }
     },
     "frameworks": {
-        "aspnet50": { },
-        "aspnetcore50": {
+        "dnx451": { },
+        "dnxcore50": {
             "dependencies": {
                 "System.Console": "4.0.0-beta-*"
             }

@@ -1,4 +1,4 @@
-{
+﻿{
     "version": "1.0.0-*",
     "dependencies": {
         "EntityFramework": "7.0.0-*",
@@ -9,12 +9,12 @@
     },
 
     "frameworks" : {
-        "aspnet50" : { 
+        "dnx451" : { 
             "frameworkAssemblies": {
                 "System.Text.Encoding": ""
             }
         },
-        "aspnetcore50" : { 
+        "dnxcore50" : { 
             "dependencies": {
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Text.Encoding": "4.0.10-beta-*"

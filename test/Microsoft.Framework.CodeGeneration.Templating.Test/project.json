@@ -1,4 +1,4 @@
-{
+﻿{
     "dependencies": {
         "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
         "Moq": "4.2.1312.1622",
@@ -10,6 +10,6 @@
     },
 
     "frameworks": {
-        "aspnet50": { }
+        "dnx451": { }
     }
 }

@@ -1,4 +1,4 @@
-{
+﻿{
     "dependencies": {
         "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
@@ -13,11 +13,11 @@
     },
 
     "frameworks" : {
-        "aspnet50" : { 
+        "dnx451" : { 
             "dependencies": {
             }
         },
-        "aspnetcore50" : { 
+        "dnxcore50" : { 
             "dependencies": {
                 "System.Runtime": "4.0.20-beta-*"
             }

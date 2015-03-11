@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22605.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration", "src\Microsoft.Framework.CodeGeneration\Microsoft.Framework.CodeGeneration.kproj", "{BEB0BFF7-79A2-4C9C-8E45-C389161C2925}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration", "src\Microsoft.Framework.CodeGeneration\Microsoft.Framework.CodeGeneration.xproj", "{BEB0BFF7-79A2-4C9C-8E45-C389161C2925}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B6CF7723-2947-411F-9AF1-35C09FAE514E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core", "src\Microsoft.Framework.CodeGeneration.Core\Microsoft.Framework.CodeGeneration.Core.kproj", "{A48C047E-8F94-42A5-BD19-97DFF077E6B1}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core", "src\Microsoft.Framework.CodeGeneration.Core\Microsoft.Framework.CodeGeneration.Core.xproj", "{A48C047E-8F94-42A5-BD19-97DFF077E6B1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{24331273-18CC-41BD-BB15-8FEC9CD42FBE}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,31 +22,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Common", "src\Microsoft.Framework.CodeGeneration.Common\Microsoft.Framework.CodeGeneration.Common.kproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Common", "src\Microsoft.Framework.CodeGeneration.Common\Microsoft.Framework.CodeGeneration.Common.xproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{49FBAACE-59AC-4F83-90BA-7300DBA09F11}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core.Test", "test\Microsoft.Framework.CodeGeneration.Core.Test\Microsoft.Framework.CodeGeneration.Core.Test.kproj", "{711EDEE0-E390-4A66-B0FD-AE058383B63A}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core.Test", "test\Microsoft.Framework.CodeGeneration.Core.Test\Microsoft.Framework.CodeGeneration.Core.Test.xproj", "{711EDEE0-E390-4A66-B0FD-AE058383B63A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Templating", "src\Microsoft.Framework.CodeGeneration.Templating\Microsoft.Framework.CodeGeneration.Templating.kproj", "{FC8487B6-D0AA-4121-B23E-9ACDF134520B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Templating", "src\Microsoft.Framework.CodeGeneration.Templating\Microsoft.Framework.CodeGeneration.Templating.xproj", "{FC8487B6-D0AA-4121-B23E-9ACDF134520B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Templating.Test", "test\Microsoft.Framework.CodeGeneration.Templating.Test\Microsoft.Framework.CodeGeneration.Templating.Test.kproj", "{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Templating.Test", "test\Microsoft.Framework.CodeGeneration.Templating.Test\Microsoft.Framework.CodeGeneration.Templating.Test.xproj", "{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core.FunctionalTest", "test\Microsoft.Framework.CodeGeneration.Core.FunctionalTest\Microsoft.Framework.CodeGeneration.Core.FunctionalTest.kproj", "{84B1175D-923C-48E0-982B-3CB66B7C603D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Core.FunctionalTest", "test\Microsoft.Framework.CodeGeneration.Core.FunctionalTest\Microsoft.Framework.CodeGeneration.Core.FunctionalTest.xproj", "{84B1175D-923C-48E0-982B-3CB66B7C603D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestWebApp", "test\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.kproj", "{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestWebApp", "test\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.xproj", "{3BFF833B-6E1B-4A0A-85E3-545DE528B66D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{40F75CAB-26AB-4BC4-8DC3-B401046EA5FC}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestClassLibrary", "test\TestApps\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.kproj", "{F6C4B32C-5F1A-4381-A763-E171F713732B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestClassLibrary", "test\TestApps\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.xproj", "{F6C4B32C-5F1A-4381-A763-E171F713732B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.EntityFramework", "src\Microsoft.Framework.CodeGeneration.EntityFramework\Microsoft.Framework.CodeGeneration.EntityFramework.kproj", "{8E52113B-F68A-444A-893D-E669ACCB998D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.EntityFramework", "src\Microsoft.Framework.CodeGeneration.EntityFramework\Microsoft.Framework.CodeGeneration.EntityFramework.xproj", "{8E52113B-F68A-444A-893D-E669ACCB998D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGenerators.Mvc", "src\Microsoft.Framework.CodeGenerators.Mvc\Microsoft.Framework.CodeGenerators.Mvc.kproj", "{9387DE6F-2956-4AF3-ABB1-C0647F793DBB}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGenerators.Mvc", "src\Microsoft.Framework.CodeGenerators.Mvc\Microsoft.Framework.CodeGenerators.Mvc.xproj", "{9387DE6F-2956-4AF3-ABB1-C0647F793DBB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.EntityFramework.Test", "test\Microsoft.Framework.CodeGeneration.EntityFramework.Test\Microsoft.Framework.CodeGeneration.EntityFramework.Test.kproj", "{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.EntityFramework.Test", "test\Microsoft.Framework.CodeGeneration.EntityFramework.Test\Microsoft.Framework.CodeGeneration.EntityFramework.Test.xproj", "{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGenerators.Mvc.Test", "test\Microsoft.Framework.CodeGenerators.Mvc.Test\Microsoft.Framework.CodeGenerators.Mvc.Test.kproj", "{2EE4B58A-9D8C-404D-BAF8-9039A726937B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGenerators.Mvc.Test", "test\Microsoft.Framework.CodeGenerators.Mvc.Test\Microsoft.Framework.CodeGenerators.Mvc.Test.xproj", "{2EE4B58A-9D8C-404D-BAF8-9039A726937B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

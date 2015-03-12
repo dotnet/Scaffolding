@@ -2,10 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Razor;
+using Microsoft.CodeAnalysis;
 using Microsoft.Framework.CodeGeneration.Templating.Compilation;
 
 namespace Microsoft.Framework.CodeGeneration.Templating
@@ -14,10 +17,13 @@ namespace Microsoft.Framework.CodeGeneration.Templating
     public class RazorTemplating : ITemplating
     {
         private ICompilationService _compilationService;
+        private MetadataReferencesProvider _metadataReferencesProvider;
 
-        public RazorTemplating([NotNull]ICompilationService compilationService)
+        public RazorTemplating([NotNull]ICompilationService compilationService,
+            [NotNull]MetadataReferencesProvider metadataReferencesProvider)
         {
             _compilationService = compilationService;
+            _metadataReferencesProvider = metadataReferencesProvider;
         }
 
         public async Task<TemplateResult> RunTemplateAsync(string content,
@@ -40,7 +46,8 @@ namespace Microsoft.Framework.CodeGeneration.Templating
                     };
                 }
 
-                var templateResult = _compilationService.Compile(generatorResults.GeneratedCode);
+                var references = _metadataReferencesProvider.GetApplicationReferences();
+                var templateResult = _compilationService.Compile(generatorResults.GeneratedCode, references);
                 if (templateResult.Messages.Any())
                 {
                     return new TemplateResult()

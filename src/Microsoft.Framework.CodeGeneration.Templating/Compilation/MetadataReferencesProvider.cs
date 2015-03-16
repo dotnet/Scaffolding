@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Reflection;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Roslyn;
 #endif
@@ -17,20 +16,19 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 {
     public class MetadataReferencesProvider
     {
+        private List<MetadataReference> _references = new List<MetadataReference>();
+
 #if DNX451 || DNXCORE50
         private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private readonly ILibraryManager _libraryManager;
         private readonly IApplicationEnvironment _environment;
-        private readonly IAssemblyLoadContext _loader;
 
         public MetadataReferencesProvider(IApplicationEnvironment environment,
-                                        IAssemblyLoadContextAccessor accessor,
-                                        ILibraryManager libraryManager)
+                                          ILibraryManager libraryManager)
         {
             _environment = environment;
-            _loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
             _libraryManager = libraryManager;
         }
 

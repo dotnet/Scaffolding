@@ -23,7 +23,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                         syntaxTrees: syntaxTrees,
                         references: references);
 
-            var result = CommonUtilities.GetAssemblyFromCompilation(/*_loader, */ compilation);
+            var result = CommonUtilities.GetAssemblyFromCompilation(compilation);
             if (result.Success)
             {
                 var type = result.Assembly.GetExportedTypes()

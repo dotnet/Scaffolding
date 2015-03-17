@@ -8,8 +8,11 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using Microsoft.AspNet.Razor;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Roslyn;
+#else
+using System.Reflection;
 #endif
 
 namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
@@ -115,6 +118,14 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
         public List<MetadataReference> GetApplicationReferences()
         {
             var references = new List<MetadataReference>();
+            references.Add(MetadataReference.CreateFromAssembly(
+                Assembly.Load("mscorlib")));
+            references.Add(MetadataReference.CreateFromAssembly(
+                Assembly.Load("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")));
+            references.Add(MetadataReference.CreateFromAssembly(
+                Assembly.Load("System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")));
+            references.Add(MetadataReference.CreateFromAssembly(
+                Assembly.Load("Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")));
             references.Add(MetadataReference.CreateFromAssembly(typeof(RazorTemplateBase).Assembly));
 
             return references;

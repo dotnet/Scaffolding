@@ -15,7 +15,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating
             "System.Linq",
             "System.Collections.Generic",
             "System.Dynamic",
-            "Microsoft.Framework.CodeGeneration",
+            //"Microsoft.Framework.CodeGeneration",
             "Microsoft.Framework.CodeGeneration.Templating",
         };
 

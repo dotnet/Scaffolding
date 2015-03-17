@@ -7,10 +7,10 @@
     },
 
     "frameworks": {
-        "net451": {
+        "net45": {
             "frameworkAssemblies": {
                 "System.Reflection": "4.0.0.0",
-                "System.Runtime": "4.0.10.0",
+                "System.Runtime": "4.0.0.0",
                 "System.Collections": "4.0.0.0",
                 "System.Text.Encoding": "4.0.0.0",
                 "System.Threading.Tasks": "4.0.0.0"

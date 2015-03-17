@@ -47,15 +47,18 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
             // some other references which are not available in any of these closures.
             // As the above comment, the right thing to do here is to use the dependency closure of
             // the assembly which has the template.
-            var baseProjects = new string[] { _environment.ApplicationName, "Microsoft.Framework.CodeGeneration" };
+            var baseProjects = new string[] { _environment.ApplicationName, "Microsoft.Framework.CodeGeneration.Templating" };
 
             foreach (var baseProject in baseProjects)
             {
                 var export = _libraryManager.GetAllExports(baseProject);
 
-                foreach (var metadataReference in export.MetadataReferences)
+                if (export != null)
                 {
-                    references.Add(ConvertMetadataReference(metadataReference));
+                    foreach (var metadataReference in export.MetadataReferences)
+                    {
+                        references.Add(ConvertMetadataReference(metadataReference));
+                    }
                 }
             }
 

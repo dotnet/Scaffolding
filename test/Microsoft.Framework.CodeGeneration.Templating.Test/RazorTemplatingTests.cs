@@ -54,7 +54,6 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
         {
             var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
             var appEnvironment = (IApplicationEnvironment)originalProvider.GetService(typeof(IApplicationEnvironment));
-            var loaderAccessor = (IAssemblyLoadContextAccessor)originalProvider.GetService(typeof(IAssemblyLoadContextAccessor));
             var libManager = (ILibraryManager)originalProvider.GetService(typeof(ILibraryManager));
 
             var emptyLibExport = new LibraryExport(new List<IMetadataReference>(), new List<ISourceReference>());
@@ -68,7 +67,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
                 .Setup(lm => lm.GetAllExports(input))
                 .Returns(libManager.GetAllExports(input));
 
-            return new MetadataReferencesProvider(appEnvironment, loaderAccessor, mockLibManager.Object);
+            return new MetadataReferencesProvider(appEnvironment, mockLibManager.Object);
         }
     }
 

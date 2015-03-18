@@ -18,12 +18,14 @@
         },
         "dnx451": {
             "dependencies": {
+                "System.Reflection": "4.0.10-*",
                 "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*"
             }
         },
         "dnxcore50": {
             "dependencies": {
                 "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*",
+                "System.Reflection": "4.0.10-*",
                 "System.Reflection.TypeExtensions": "4.0.0-beta-*"
             }
         }

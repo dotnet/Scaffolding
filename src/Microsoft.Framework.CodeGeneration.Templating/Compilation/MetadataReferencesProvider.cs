@@ -4,16 +4,16 @@
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-#if DNX451 || DNXCORE50
-using System;
-using System.Collections.Concurrent;
-using System.IO;
-using Microsoft.AspNet.Razor;
-using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Roslyn;
-#else
+//#if DNX451 || DNXCORE50
+//using System;
+//using System.Collections.Concurrent;
+//using System.IO;
+//using Microsoft.AspNet.Razor;
+//using Microsoft.Framework.Runtime;
+//using Microsoft.Framework.Runtime.Roslyn;
+//#else
 using System.Reflection;
-#endif
+//#endif
 
 namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 {
@@ -21,7 +21,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
     {
         private List<MetadataReference> _references = new List<MetadataReference>();
 
-#if DNX451 || DNXCORE50
+#if NONEXIST
         private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
@@ -119,14 +119,14 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
         {
             var references = new List<MetadataReference>();
             references.Add(MetadataReference.CreateFromAssembly(
-                Assembly.Load("mscorlib")));
+                Assembly.Load(new AssemblyName("mscorlib"))));
             references.Add(MetadataReference.CreateFromAssembly(
-                Assembly.Load("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")));
+                Assembly.Load(new AssemblyName("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"))));
             references.Add(MetadataReference.CreateFromAssembly(
-                Assembly.Load("System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")));
+                Assembly.Load(new AssemblyName("System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"))));
             references.Add(MetadataReference.CreateFromAssembly(
-                Assembly.Load("Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")));
-            references.Add(MetadataReference.CreateFromAssembly(typeof(RazorTemplateBase).Assembly));
+                Assembly.Load(new AssemblyName("Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"))));
+            references.Add(MetadataReference.CreateFromAssembly(typeof(RazorTemplateBase).GetTypeInfo().Assembly));
 
             return references;
         }

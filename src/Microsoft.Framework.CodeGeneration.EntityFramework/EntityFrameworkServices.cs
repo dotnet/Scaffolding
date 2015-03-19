@@ -68,7 +68,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 var newAssemblyName = projectCompilation.AssemblyName + _counter++;
                 var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
 
-                var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
+                var result = CommonUtilities.GetAssemblyFromCompilation(newCompilation);
                 if (result.Success)
                 {
                     dbContextType = result.Assembly.GetType(dbContextTypeName);

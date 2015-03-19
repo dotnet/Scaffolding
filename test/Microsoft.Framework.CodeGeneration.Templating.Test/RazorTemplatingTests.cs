@@ -21,8 +21,8 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
             //Arrange
             var templateContent = "Hello @Model.Name";
             var model = new SimpleModel () { Name = "World" };
-            var compilationService = GetCompilationService();
-            var templatingService = new RazorTemplating(compilationService);
+            var metadataReferencesProvider = GetMetadataReferencesProvider();
+            var templatingService = new RazorTemplating(new RoslynCompilationService(), metadataReferencesProvider);
 
             //Act
             var result = await templatingService.RunTemplateAsync(templateContent, model);
@@ -37,8 +37,8 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
         {
             //Arrange
             var templateContent = "@Invalid";
-            var compilationService = GetCompilationService();
-            var templatingService = new RazorTemplating(compilationService);
+            var metadataReferencesProvider = GetMetadataReferencesProvider();
+            var templatingService = new RazorTemplating(new RoslynCompilationService(), metadataReferencesProvider);
 
             //Act
             var result = await templatingService.RunTemplateAsync(templateContent, templateModel:"DoesNotMatter");
@@ -50,13 +50,12 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
                 result.ProcessingException.Message);
         }
 
-        private ICompilationService GetCompilationService()
+        private MetadataReferencesProvider GetMetadataReferencesProvider()
         {
             var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
             var appEnvironment = (IApplicationEnvironment)originalProvider.GetService(typeof(IApplicationEnvironment));
-            var loaderAccessor = (IAssemblyLoadContextAccessor)originalProvider.GetService(typeof(IAssemblyLoadContextAccessor));
             var libManager = (ILibraryManager)originalProvider.GetService(typeof(ILibraryManager));
-            
+
             var emptyLibExport = new LibraryExport(new List<IMetadataReference>(), new List<ISourceReference>());
             var mockLibManager = new Mock<ILibraryManager>();
             mockLibManager
@@ -68,7 +67,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
                 .Setup(lm => lm.GetAllExports(input))
                 .Returns(libManager.GetAllExports(input));
 
-            return new RoslynCompilationService(appEnvironment, loaderAccessor, mockLibManager.Object);
+            return new MetadataReferencesProvider(appEnvironment, mockLibManager.Object);
         }
     }
 

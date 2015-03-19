@@ -1,7 +1,18 @@
 {
     "version": "1.0.0-*",
+    "dependencies": {
+        "Microsoft.CodeAnalysis.CSharp": "1.0.0-*"
+    },
     "shared": "*.cs",
     "frameworks": {
+        "net45": {
+            "frameworkAssemblies": {
+                "System.IO": "4.0.0.0",
+                "System.Reflection": "4.0.0.0",
+                "System.Runtime": "4.0.0.0",
+                "System.Collections": "4.0.0.0"
+            }
+        },
         "dnx451": { },
         "dnxcore50": {
             "dependencies": {

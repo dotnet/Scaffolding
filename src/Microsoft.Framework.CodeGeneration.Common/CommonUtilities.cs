@@ -6,14 +6,12 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {
     internal static class CommonUtilities
     {
         public static CompilationResult GetAssemblyFromCompilation(
-            IAssemblyLoadContext loader,
             Compilation compilation)
         {
             EmitResult result;
@@ -45,12 +43,29 @@ namespace Microsoft.Framework.CodeGeneration
                     Assembly assembly;
                     if (PlatformHelper.IsMono)
                     {
-                        assembly = loader.LoadStream(ms, assemblySymbols: null);
+                        var assemblyLoadMethod = typeof(Assembly).GetTypeInfo().GetDeclaredMethods("Load")
+                            .First(
+                                m =>
+                                {
+                                    var parameters = m.GetParameters();
+                                    return parameters.Length == 1 && parameters[0].ParameterType == typeof(byte[]);
+                                });
+                        assembly = (Assembly)assemblyLoadMethod.Invoke(null, new[] { ms.ToArray() });
                     }
                     else
                     {
                         pdb.Seek(0, SeekOrigin.Begin);
-                        assembly = loader.LoadStream(ms, pdb);
+
+                        var assemblyLoadMethod = typeof(Assembly).GetTypeInfo().GetDeclaredMethods("Load")
+                            .First(
+                                m =>
+                                {
+                                    var parameters = m.GetParameters();
+                                    return parameters.Length == 2
+                                        && parameters[0].ParameterType == typeof(byte[])
+                                        && parameters[1].ParameterType == typeof(byte[]);
+                                });
+                        assembly = (Assembly)assemblyLoadMethod.Invoke(null, new[] { ms.ToArray(), pdb.ToArray() });
                     }
 
                     return CompilationResult.FromAssembly(assembly);

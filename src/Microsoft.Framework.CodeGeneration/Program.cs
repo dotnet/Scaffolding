@@ -90,6 +90,7 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
 
+            serviceProvider.AddServiceWithDependencies<MetadataReferencesProvider, MetadataReferencesProvider>();
             serviceProvider.AddServiceWithDependencies<ICompilationService, RoslynCompilationService>();
             serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
 

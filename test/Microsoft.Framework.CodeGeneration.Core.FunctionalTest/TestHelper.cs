@@ -23,12 +23,33 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
 
-            var services = HostingServices.Create(originalProvider);
-            services.AddInstance(
-                typeof(IApplicationEnvironment),
-                new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName));
+            var services = new ServiceCollection()
+                .AddInstance(
+                    typeof(IApplicationEnvironment),
+                    new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName));
 
-            return services.BuildServiceProvider();
+            return new WrappingServiceProvider(originalProvider, services);
         }
+
+
+        // REVIEW: UGHHHHH nuke this eventually
+        private class WrappingServiceProvider : IServiceProvider
+        {
+            private readonly IServiceProvider _fallback;
+            private readonly IServiceProvider _override;
+
+            // Need full wrap for generics like IOptions
+            public WrappingServiceProvider(IServiceProvider fallback, IServiceCollection replacedServices)
+            {
+                _fallback = fallback;
+                _override = replacedServices.BuildServiceProvider();
+            }
+
+            public object GetService(Type serviceType)
+            {
+                return _override.GetService(serviceType) ?? _fallback.GetService(serviceType);
+            }
+        }
+
     }
 }

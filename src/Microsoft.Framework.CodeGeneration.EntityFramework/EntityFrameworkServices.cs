@@ -183,7 +183,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     dbContextType.FullName));
             }
 
-            var entityType = dbContextInstance.Model.TryGetEntityType(modelType);
+            var entityType = dbContextInstance.Model.FindEntityType(modelType);
             if (entityType == null)
             {
                 throw new InvalidOperationException(string.Format(

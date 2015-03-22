@@ -15,10 +15,10 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             var entityType = property.EntityType;
             PropertyName = property.Name;
-            TypeName = property.PropertyType.FullName;
-            IsEnum = property.PropertyType.GetTypeInfo().IsEnum;
+            TypeName = property.ClrType.FullName;
+            IsEnum = property.ClrType.GetTypeInfo().IsEnum;
             IsPrimaryKey = entityType.GetPrimaryKey().Properties.Contains(property);
-            IsForeignKey = entityType.ForeignKeys
+            IsForeignKey = entityType.GetForeignKeys()
                 .Any(fk => fk.Properties.Contains(property));
 
             // Todo:we need proper logic for these below.

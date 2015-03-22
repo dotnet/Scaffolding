@@ -22,7 +22,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             EntityType = entityType;
             DbContexType = dbContextType;
-            EntitySetName = GetEntitySetName(DbContexType, EntityType.Type);
+            EntitySetName = GetEntitySetName(DbContexType, EntityType.ClrType);
         }
 
         public IEntityType EntityType { get; private set; }
@@ -37,7 +37,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             {
                 if (_properties == null)
                 {
-                    _properties = EntityType.Properties
+                    _properties = EntityType.GetProperties()
                         .Select(p => new PropertyMetadata(p))
                         .ToArray();
                 }

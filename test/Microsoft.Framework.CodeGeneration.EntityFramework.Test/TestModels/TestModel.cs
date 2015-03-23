@@ -16,8 +16,8 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
                 var builder = new ModelBuilderFactory().CreateConventionBuilder(model);
 
                 builder.Entity<Product>()
-                    .HasOne(p => p.ProductCategory)
-                    .WithMany(c => c.CategoryProducts)
+                    .Reference(p => p.ProductCategory)
+                    .InverseCollection(c => c.CategoryProducts)
                     .ForeignKey(e => e.ProductCategoryId);
 
                 return model;

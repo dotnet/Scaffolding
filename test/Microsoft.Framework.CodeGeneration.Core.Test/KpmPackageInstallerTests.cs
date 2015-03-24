@@ -9,15 +9,15 @@ using Xunit;
 
 namespace Microsoft.Framework.CodeGeneration.Core.Test
 {
-    public class KpmPackageInstallerTests
+    public class PackageInstallerTests
     {
         private Mock<ILogger> _mockLogger;
         private Mock<IApplicationEnvironment> _mockApp;
         private MockFileSystem _mockFileSystem;
-        private KpmPackageInstaller _kpmPackageInstaller;
+        private PackageInstaller _packageInstaller;
         private string _projectJsonPath;
 
-        public KpmPackageInstallerTests()
+        public PackageInstallerTests()
         {
             _mockLogger = new Mock<ILogger>();
             _mockApp = new Mock<IApplicationEnvironment>();
@@ -29,7 +29,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
             _mockApp.Setup(app => app.ApplicationBasePath)
                 .Returns(applicationBasePath);
 
-            _kpmPackageInstaller = new KpmPackageInstaller(_mockLogger.Object, _mockApp.Object, _mockFileSystem);
+            _packageInstaller = new PackageInstaller(_mockLogger.Object, _mockApp.Object, _mockFileSystem);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             _mockFileSystem.WriteAllText(_projectJsonPath, initialJson);
 
-            _kpmPackageInstaller.AddPackages(new[] { new PackageMetadata()
+            _packageInstaller.AddPackages(new[] { new PackageMetadata()
             {
                 Name = "Microsoft.Net.Runtime",
                 Version = "1.0.0"
@@ -83,7 +83,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.Test
 
             _mockFileSystem.WriteAllText(_projectJsonPath, initialJson);
 
-            _kpmPackageInstaller.AddPackages(new[] { new PackageMetadata()
+            _packageInstaller.AddPackages(new[] { new PackageMetadata()
             {
                 Name = "Microsoft.Net.Runtime",
                 Version = "1.0.0"

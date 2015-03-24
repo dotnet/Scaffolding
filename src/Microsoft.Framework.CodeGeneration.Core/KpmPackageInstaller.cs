@@ -12,21 +12,21 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Framework.CodeGeneration
 {
-    public class KpmPackageInstaller : IPackageInstaller
+    public class PackageInstaller : IPackageInstaller
     {
         private readonly IApplicationEnvironment _environment;
         private readonly ILogger _logger;
         private const string DependenciesNodeName = "dependencies";
         private readonly IFileSystem _fileSystem;
 
-        public KpmPackageInstaller(
+        public PackageInstaller(
             [NotNull]ILogger logger,
             [NotNull]IApplicationEnvironment environment)
             : this(logger, environment, new DefaultFileSystem())
         {
         }
 
-        internal KpmPackageInstaller(
+        internal PackageInstaller(
             [NotNull]ILogger logger,
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IFileSystem fileSystem)
@@ -52,15 +52,15 @@ namespace Microsoft.Framework.CodeGeneration
                 // On non-windows, starting a process with the name
                 // of a bash file works. However on windows, it doesn't.
                 // So we use 'Path' environment variable to find the path
-                // of 'kpm.cmd' and start that.
+                // of 'dnu.cmd' and start that.
                 string fileName;
                 if (PlatformHelper.IsMono)
                 {
-                    fileName = "kpm";
+                    fileName = "dnu";
                 }
                 else
                 {
-                    fileName = FindKpmCommand();
+                    fileName = FindDnuCommand();
                 }
 
                 var startInfo = new ProcessStartInfo
@@ -76,14 +76,14 @@ namespace Microsoft.Framework.CodeGeneration
             }
             catch (Exception ex)
             {
-                _logger.LogMessage("Error running kpm restore");
+                _logger.LogMessage("Error running dnu restore");
                 _logger.LogMessage(ex.ToString());
             }
         }
 
-        private string FindKpmCommand()
+        private string FindDnuCommand()
         {
-            var commandName = "kpm.cmd";
+            var commandName = "dnu.cmd";
 
             var pathVariable = Environment.GetEnvironmentVariable("Path");
             if (!string.IsNullOrEmpty(pathVariable))
@@ -98,7 +98,7 @@ namespace Microsoft.Framework.CodeGeneration
                 }
             }
 
-            throw new InvalidOperationException("Could not find kpm.cmd on path. Unable to run restore");
+            throw new InvalidOperationException("Could not find dnu.cmd on path. Unable to run restore");
         }
 
         // Internal for unit tests.

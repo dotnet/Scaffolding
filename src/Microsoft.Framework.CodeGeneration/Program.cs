@@ -93,7 +93,7 @@ namespace Microsoft.Framework.CodeGeneration
             serviceProvider.AddServiceWithDependencies<ICompilationService, RoslynCompilationService>();
             serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
 
-            serviceProvider.AddServiceWithDependencies<IPackageInstaller, KpmPackageInstaller>();
+            serviceProvider.AddServiceWithDependencies<IPackageInstaller, PackageInstaller>();
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();

@@ -5,6 +5,6 @@ for %%1 in (
     Microsoft.Framework.CodeGeneration.EntityFramework.Test
     ) do (
         cd %%1
-        k test
+        dnx . test
         cd ..
     )

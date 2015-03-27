@@ -7,10 +7,16 @@
     },
 
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Runtime": ""
+            }
+        },
         "dnxcore50": {
             "dependencies": {
-                "System.Reflection.TypeExtensions": "4.0.0-beta-*"
+                "System.Dynamic.Runtime": "4.0.0-beta-*",
+                "System.Reflection.TypeExtensions": "4.0.0-beta-*",
+                "System.Runtime": "4.0.20-beta-*"
             }
         }
     }

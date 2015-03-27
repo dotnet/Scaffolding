@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Framework.CodeGeneration.Templating.Compilation;
 using Microsoft.Framework.Runtime;
+using Microsoft.Framework.Runtime.Compilation;
 using Microsoft.Framework.Runtime.Infrastructure;
 using Moq;
 using Xunit;
@@ -56,8 +57,8 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
             var appEnvironment = (IApplicationEnvironment)originalProvider.GetService(typeof(IApplicationEnvironment));
             var loaderAccessor = (IAssemblyLoadContextAccessor)originalProvider.GetService(typeof(IAssemblyLoadContextAccessor));
             var libManager = (ILibraryManager)originalProvider.GetService(typeof(ILibraryManager));
-            
-            var emptyLibExport = new LibraryExport(new List<IMetadataReference>(), new List<ISourceReference>());
+
+            var emptyLibExport = new LibraryExport();
             var mockLibManager = new Mock<ILibraryManager>();
             mockLibManager
                 .Setup(lm => lm.GetAllExports("Microsoft.Framework.CodeGeneration"))
@@ -69,6 +70,18 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
                 .Returns(libManager.GetAllExports(input));
 
             return new RoslynCompilationService(appEnvironment, loaderAccessor, mockLibManager.Object);
+        }
+
+        private class LibraryExport : ILibraryExport
+        {
+            public IList<IMetadataReference> MetadataReferences { get; }
+            public IList<ISourceReference> SourceReferences { get; }
+
+            public LibraryExport()
+            {
+                MetadataReferences = new List<IMetadataReference>();
+                SourceReferences = new List<ISourceReference>();
+            }
         }
     }
 

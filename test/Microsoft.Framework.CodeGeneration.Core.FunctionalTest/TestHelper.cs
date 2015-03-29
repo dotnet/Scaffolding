@@ -3,7 +3,10 @@
 
 using System;
 using System.IO;
+using Microsoft.AspNet.FileProviders;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Hosting.Internal;
+using Microsoft.Framework.ConfigurationModel;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
@@ -23,33 +26,9 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
 
-            var services = new ServiceCollection()
-                .AddInstance(
-                    typeof(IApplicationEnvironment),
-                    new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName));
-
-            return new WrappingServiceProvider(originalProvider, services);
+            return WebApplication.CreateHostingEngine(originalProvider, new Configuration(),
+                services => services.AddInstance<IApplicationEnvironment>(new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName)))
+                .ApplicationServices;
         }
-
-
-        // REVIEW: UGHHHHH nuke this eventually
-        private class WrappingServiceProvider : IServiceProvider
-        {
-            private readonly IServiceProvider _fallback;
-            private readonly IServiceProvider _override;
-
-            // Need full wrap for generics like IOptions
-            public WrappingServiceProvider(IServiceProvider fallback, IServiceCollection replacedServices)
-            {
-                _fallback = fallback;
-                _override = replacedServices.BuildServiceProvider();
-            }
-
-            public object GetService(Type serviceType)
-            {
-                return _override.GetService(serviceType) ?? _fallback.GetService(serviceType);
-            }
-        }
-
     }
 }

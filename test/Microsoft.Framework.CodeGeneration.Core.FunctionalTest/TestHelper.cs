@@ -26,7 +26,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
 
-            return WebHost.CreateHostingEngine(originalProvider, new Configuration(),
+            return WebHost.CreateEngine(originalProvider, new Configuration(),
                 services => services.AddInstance<IApplicationEnvironment>(new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName)))
                 .ApplicationServices;
         }

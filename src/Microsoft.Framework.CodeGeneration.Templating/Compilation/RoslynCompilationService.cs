@@ -114,8 +114,6 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                 return CreateMetadataFileReference(fileMetadataReference.Path);
             }
 
-            /*
-            TODO: Bring this back once we fix https://github.com/aspnet/dnx/issues/922
             var projectReference = metadataReference as IMetadataProjectReference;
             if (projectReference != null)
             {
@@ -126,7 +124,6 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
                     return MetadataReference.CreateFromImage(ms.ToArray());
                 }
             }
-            */
 
             throw new NotSupportedException();
         }

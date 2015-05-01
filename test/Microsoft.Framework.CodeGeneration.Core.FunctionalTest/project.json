@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
+        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-*",
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
         "ModelTypesLocatorTestWebApp": "1.0.0",

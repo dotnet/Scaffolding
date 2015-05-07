@@ -19,7 +19,7 @@ namespace Microsoft.Framework.CodeGeneration
             "Microsoft.Framework.CodeGeneration",
             "Microsoft.Framework.CodeGeneration.Core",
             "Microsoft.Framework.CodeGeneration.Templating",
-            "Microsoft.Framework.CodeGeneration.Common",
+            "Microsoft.Framework.CodeGeneration.Sources",
             "Microsoft.Framework.CodeGenerators.Mvc",
         };
 

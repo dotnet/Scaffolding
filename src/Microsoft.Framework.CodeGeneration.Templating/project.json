@@ -1,7 +1,7 @@
 {
     "version": "1.0.0-*",
     "dependencies": {
-        "Microsoft.Framework.CodeGeneration.Common": { "version": "1.0.0-*", "type": "build" },
+        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.AspNet.Razor": "4.0.0-*",
         "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*"
     },

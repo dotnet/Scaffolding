@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Common", "src\Microsoft.Framework.CodeGeneration.Common\Microsoft.Framework.CodeGeneration.Common.xproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Framework.CodeGeneration.Sources", "src\Microsoft.Framework.CodeGeneration.Sources\Microsoft.Framework.CodeGeneration.Sources.xproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{49FBAACE-59AC-4F83-90BA-7300DBA09F11}"
 EndProject

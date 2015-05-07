@@ -6,7 +6,7 @@
         "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.EntityFramework": "1.0.0-*",
-        "Microsoft.Framework.CommandLineUtils": { "version": "1.0.0-*", "type": "build" }
+        "Microsoft.Framework.CommandLineUtils.Sources": { "version": "1.0.0-*", "type": "build" }
     },
     "frameworks": {
         "dnx451": { },

@@ -37,7 +37,7 @@ using Microsoft.Data.Entity.Metadata;
 
         public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(EntityOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@@"Server=(localdb)\mssqllocaldb;Database=@Model.DbContextTypeName;Trusted_Connection=True;MultipleActiveResultSets=true");
         }

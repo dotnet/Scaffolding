@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.AspNet.Razor;
-using Microsoft.AspNet.Razor.Generator;
+using Microsoft.AspNet.Razor.CodeGenerators;
 
 namespace Microsoft.Framework.CodeGeneration.Templating
 {

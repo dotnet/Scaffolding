@@ -1,8 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Metadata;
-using Microsoft.Data.Entity.Metadata.Builders;
+using Microsoft.Data.Entity.Metadata.ModelConventions;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
 {
@@ -12,15 +13,14 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
         {
             get
             {
-                var model = new Model();
-                var builder = new ModelBuilderFactory().CreateConventionBuilder(model);
+                var builder = new ModelBuilder(new CoreConventionSetBuilder().CreateConventionSet());
 
                 builder.Entity<Product>()
                     .Reference(p => p.ProductCategory)
                     .InverseCollection(c => c.CategoryProducts)
                     .ForeignKey(e => e.ProductCategoryId);
 
-                return model;
+                return builder.Model;
             }
         }
     }

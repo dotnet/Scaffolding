@@ -3,7 +3,7 @@
 
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Metadata;
-using Microsoft.Data.Entity.Metadata.ModelConventions;
+using Microsoft.Data.Entity.Metadata.Conventions.Internal;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework.Test.TestModels
 {

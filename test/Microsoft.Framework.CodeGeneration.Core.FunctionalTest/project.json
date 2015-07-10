@@ -1,11 +1,11 @@
 {
     "dependencies": {
-        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-*",
-        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
+        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-beta5",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-beta5",
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-beta5",
         "ModelTypesLocatorTestWebApp": "1.0.0",
         "Moq": "4.2.1312.1622",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+        "xunit.runner.aspnet": "2.0.0-aspnet-beta5"
     },
 
     "commands": {
@@ -19,7 +19,7 @@
         },
         "dnxcore50" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-*"
+                "System.Runtime": "4.0.20-beta-23019"
             }
         }
     }

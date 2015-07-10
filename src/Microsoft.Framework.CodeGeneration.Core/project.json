@@ -1,24 +1,24 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta5",
     "dependencies": {
-        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
-        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-*",
-        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-        "Microsoft.Framework.CommandLineUtils.Sources": "1.0.0-*",
-        "Microsoft.Framework.Runtime.Roslyn": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
+        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-beta5", "type": "build" },
+        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-beta5",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-beta5",
+        "Microsoft.Framework.CommandLineUtils.Sources": "1.0.0-beta5",
+        "Microsoft.Framework.Runtime.Roslyn": "1.0.0-beta5",
+        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-beta5",
         "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {
         "dnx451": { },
         "dnxcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-*",
-                "System.Reflection.Extensions": "4.0.0-beta-*",
-                "System.Diagnostics.Process": "4.0.0-beta-*",
-                "System.Collections": "4.0.10-beta-*",
-                "System.Console": "4.0.0-beta-*",
-                "System.Diagnostics.Contracts": "4.0.0-beta-*"
+                "System.Runtime": "4.0.20-beta-23019",
+                "System.Reflection.Extensions": "4.0.0-beta-23019",
+                "System.Diagnostics.Process": "4.0.0-beta-23019",
+                "System.Collections": "4.0.10-beta-23019",
+                "System.Console": "4.0.0-beta-23019",
+                "System.Diagnostics.Contracts": "4.0.0-beta-23019"
             }
         }
     }

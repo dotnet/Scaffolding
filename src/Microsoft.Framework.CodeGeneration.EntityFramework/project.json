@@ -1,11 +1,11 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta5",
     "dependencies": {
-        "EntityFramework.Core": "7.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
-        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
-        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-*"
+        "EntityFramework.Core": "7.0.0-beta5",
+        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-beta5", "type": "build" },
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-beta5",
+        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-beta5",
+        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-beta5"
     },
 
     "frameworks" : {
@@ -16,8 +16,8 @@
         },
         "dnxcore50" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-*",
-                "System.Text.Encoding": "4.0.10-beta-*"
+                "System.Runtime": "4.0.20-beta-23019",
+                "System.Text.Encoding": "4.0.10-beta-23019"
             }
         }
     }

@@ -1,7 +1,7 @@
 {
     "version": "1.0.0-*",
     "dependencies": {
-        "EntityFramework.Core": "7.0.0-*",
+        "EntityFramework7.Core": "7.0.0-*",
         "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",

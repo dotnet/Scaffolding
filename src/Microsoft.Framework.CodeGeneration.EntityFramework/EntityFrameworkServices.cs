@@ -25,7 +25,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly IPackageInstaller _packageInstaller;
         private readonly ILogger _logger;
         private static int _counter = 1;
-        private const string EFSqlServerPackageName = "EntityFramework7.SqlServer";
+        private const string EFSqlServerPackageName = "EntityFramework.SqlServer";
         private const string EFSqlServerPackageVersion = "7.0.0-*";
 
         public EntityFrameworkServices(

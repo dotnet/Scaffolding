@@ -12,22 +12,24 @@ namespace Microsoft.Framework.CodeGeneration
     public static class ReflectionUtilities
     {
         public static Type GetReflectionType(
-            [NotNull]this ILibraryManager libraryManager,
+            [NotNull]this ILibraryExporter libraryExporter,
+            [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment,
             string name)
         {
-            return libraryManager
-                .GetProjectAssemblies(environment)
+            return libraryExporter
+                .GetProjectAssemblies(libraryManager, environment)
                 .Select(asm => asm.GetType(name))
                 .Where(type => type != null)
                 .FirstOrDefault();
         }
 
         public static IEnumerable<Assembly> GetProjectAssemblies(
-            [NotNull]this ILibraryManager libraryManager,
+            [NotNull]this ILibraryExporter libraryExporter,
+            [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment)
         {
-            return libraryManager
+            return libraryExporter
                 .GetProjectsInApp(environment)
                 .Select(comp => libraryManager.GetLibraryInformation(comp.Compilation.AssemblyName))
                 .Select(lib => LoadAssembly(lib.Name));

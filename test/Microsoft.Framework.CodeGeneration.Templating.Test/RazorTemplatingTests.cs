@@ -56,32 +56,20 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
             var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
             var appEnvironment = (IApplicationEnvironment)originalProvider.GetService(typeof(IApplicationEnvironment));
             var loaderAccessor = (IAssemblyLoadContextAccessor)originalProvider.GetService(typeof(IAssemblyLoadContextAccessor));
-            var libManager = (ILibraryManager)originalProvider.GetService(typeof(ILibraryManager));
+            var libExporter = (ILibraryExporter)originalProvider.GetService(typeof(ILibraryExporter));
 
-            var emptyLibExport = new LibraryExport();
-            var mockLibManager = new Mock<ILibraryManager>();
-            mockLibManager
+            var emptyLibExport = new LibraryExport(metadataReferences: null);
+            var mockLibExporter = new Mock<ILibraryExporter>();
+            mockLibExporter
                 .Setup(lm => lm.GetAllExports("Microsoft.Framework.CodeGeneration"))
                 .Returns(emptyLibExport);
 
             var input = "Microsoft.Framework.CodeGeneration.Templating.Test";
-            mockLibManager
+            mockLibExporter
                 .Setup(lm => lm.GetAllExports(input))
-                .Returns(libManager.GetAllExports(input));
+                .Returns(libExporter.GetAllExports(input));
 
-            return new RoslynCompilationService(appEnvironment, loaderAccessor, mockLibManager.Object);
-        }
-
-        private class LibraryExport : ILibraryExport
-        {
-            public IList<IMetadataReference> MetadataReferences { get; }
-            public IList<ISourceReference> SourceReferences { get; }
-
-            public LibraryExport()
-            {
-                MetadataReferences = new List<IMetadataReference>();
-                SourceReferences = new List<ISourceReference>();
-            }
+            return new RoslynCompilationService(appEnvironment, loaderAccessor, mockLibExporter.Object);
         }
     }
 

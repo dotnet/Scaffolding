@@ -13,19 +13,19 @@ namespace Microsoft.Framework.CodeGeneration
     public class ModelTypesLocator : IModelTypesLocator
     {
         private IApplicationEnvironment _application;
-        private ILibraryManager _libraryManager;
+        private ILibraryExporter _libraryExporter;
 
         public ModelTypesLocator(
-            [NotNull]ILibraryManager libraryManager,
+            [NotNull]ILibraryExporter libraryExporter,
             [NotNull]IApplicationEnvironment application)
         {
-            _libraryManager = libraryManager;
+            _libraryExporter = libraryExporter;
             _application = application;
         }
 
         public IEnumerable<ModelType> GetAllTypes()
         {
-            return _libraryManager
+            return _libraryExporter
                 .GetProjectsInApp(_application)
                 .Select(compilation => GetDirectTypesInCompilation(compilation.Compilation))
                 .Aggregate((coll1, coll2) => coll1.Concat(coll2).ToList())
@@ -34,7 +34,7 @@ namespace Microsoft.Framework.CodeGeneration
 
         public IEnumerable<ModelType> GetType([NotNull]string typeName)
         {
-            var exactTypesInAllProjects = _libraryManager
+            var exactTypesInAllProjects = _libraryExporter
                 .GetProjectsInApp(_application)
                 .Select(comp => comp.Compilation.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
                 .Where(type => type != null);

@@ -24,10 +24,10 @@ namespace Microsoft.Framework.CodeGeneration
         };
 
         public static CompilationReference GetProject(
-            [NotNull]this ILibraryManager libraryManager,
+            [NotNull]this ILibraryExporter libraryExporter,
             [NotNull]IApplicationEnvironment environment)
         {
-            var export = libraryManager.GetLibraryExport(environment.ApplicationName);
+            var export = libraryExporter.GetLibraryExport(environment.ApplicationName);
 
             var project = export.MetadataReferences
                 .OfType<IMetadataProjectReference>()
@@ -40,10 +40,10 @@ namespace Microsoft.Framework.CodeGeneration
         }
 
         public static IEnumerable<CompilationReference> GetProjectsInApp(
-            [NotNull]this ILibraryManager libraryManager,
+            [NotNull]this ILibraryExporter libraryExporter,
             [NotNull]IApplicationEnvironment environment)
         {
-            var export = libraryManager.GetAllExports(environment.ApplicationName);
+            var export = libraryExporter.GetAllExports(environment.ApplicationName);
 
             return export.MetadataReferences
                 .OfType<IMetadataProjectReference>()

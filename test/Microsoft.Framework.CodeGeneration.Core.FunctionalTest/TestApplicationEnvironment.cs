@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Runtime.Versioning;
 using Microsoft.Framework.Runtime;
 
@@ -27,9 +28,9 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
             get { return _appName; }
         }
 
-        public string Version
+        public string ApplicationVersion
         {
-            get { return _originalAppEnvironment.Version; }
+            get { return _originalAppEnvironment.ApplicationVersion; }
         }
 
         public string ApplicationBasePath
@@ -48,6 +49,16 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
         public FrameworkName RuntimeFramework
         {
             get { return _originalAppEnvironment.RuntimeFramework; }
+        }
+
+        public object GetData(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetData(string name, object value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

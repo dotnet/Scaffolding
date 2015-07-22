@@ -36,7 +36,7 @@ namespace Microsoft.Framework.CodeGeneration
             }
         }
 
-        private bool IsCandidateLibrary(ILibraryInformation library)
+        private bool IsCandidateLibrary(Library library)
         {
             return !_codeGenerationFrameworkAssemblies.Contains(library.Name);
         }

@@ -20,6 +20,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly IDbContextEditorServices _dbContextEditorServices;
         private readonly IApplicationEnvironment _environment;
         private readonly ILibraryManager _libraryManager;
+        private readonly ILibraryExporter _libraryExporter;
         private readonly IAssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
@@ -30,6 +31,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
         public EntityFrameworkServices(
             [NotNull]ILibraryManager libraryManager,
+            [NotNull]ILibraryExporter libraryExporter,
             [NotNull]IApplicationEnvironment environment,
             [NotNull]IAssemblyLoadContextAccessor loader,
             [NotNull]IModelTypesLocator modelTypesLocator,
@@ -37,7 +39,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             [NotNull]IPackageInstaller packageInstaller,
             [NotNull]ILogger logger)
         {
-            _libraryManager = libraryManager;
+            _libraryExporter = libraryExporter;
             _environment = environment;
             _loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);
             _modelTypesLocator = modelTypesLocator;
@@ -64,7 +66,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 newDbContextTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
 
                 _logger.LogMessage("Attempting to compile the application in memory with the added DbContext");
-                var projectCompilation = _libraryManager.GetProject(_environment).Compilation;
+                var projectCompilation = _libraryExporter.GetProject(_environment).Compilation;
                 var newAssemblyName = projectCompilation.AssemblyName + _counter++;
                 var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
 
@@ -84,7 +86,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
             else
             {
-                dbContextType = _libraryManager.GetReflectionType(_environment, dbContextTypeName);
+                dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
 
                 if (dbContextType == null)
                 {
@@ -93,7 +95,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
 
             var modelTypeName = modelTypeSymbol.FullName;
-            var modelType = _libraryManager.GetReflectionType(_environment, modelTypeName);
+            var modelType = _libraryExporter.GetReflectionType(_libraryManager, _environment, modelTypeName);
 
             if (modelType == null)
             {

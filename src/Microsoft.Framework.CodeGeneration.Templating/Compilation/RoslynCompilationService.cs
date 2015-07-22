@@ -21,17 +21,17 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
         private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly ILibraryManager _libraryManager;
+        private readonly ILibraryExporter _libraryExporter;
         private readonly IApplicationEnvironment _environment;
         private readonly IAssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationEnvironment environment,
                                         IAssemblyLoadContextAccessor accessor,
-                                        ILibraryManager libraryManager)
+                                        ILibraryExporter libraryExporter)
         {
             _environment = environment;
             _loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
-            _libraryManager = libraryManager;
+            _libraryExporter = libraryExporter;
         }
 
         public CompilationResult Compile(string content)
@@ -80,7 +80,7 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var export = _libraryManager.GetAllExports(baseProject);
+                var export = _libraryExporter.GetAllExports(baseProject);
 
                 foreach (var metadataReference in export.MetadataReferences)
                 {

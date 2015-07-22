@@ -88,7 +88,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
         private ModelTypesLocator GetModelTypesLocator()
         {
             return new ModelTypesLocator(
-                (ILibraryManager)_serviceProvider.GetRequiredService(typeof(ILibraryManager)),
+                (ILibraryExporter)_serviceProvider.GetRequiredService(typeof(ILibraryExporter)),
                 (IApplicationEnvironment)_serviceProvider.GetRequiredService(typeof(IApplicationEnvironment)));
         }
     }

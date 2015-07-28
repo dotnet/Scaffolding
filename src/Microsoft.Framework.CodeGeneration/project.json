@@ -1,18 +1,24 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta6",
     "dependencies": {
-        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
-        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.EntityFramework": "1.0.0-*",
-        "Microsoft.Framework.CommandLineUtils.Sources": { "version": "1.0.0-*", "type": "build" }
+        "Microsoft.Framework.DependencyInjection": "1.0.0-beta6",
+        "Microsoft.Framework.CodeGeneration.Sources": {
+            "version": "1.0.0-beta6",
+            "type": "build"
+        },
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-beta6",
+        "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-beta6",
+        "Microsoft.Framework.CodeGeneration.EntityFramework": "1.0.0-beta6",
+        "Microsoft.Framework.CommandLineUtils.Sources": {
+            "version": "1.0.0-beta6",
+            "type": "build"
+        }
     },
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {},
         "dnxcore50": {
             "dependencies": {
-                "System.Console": "4.0.0-beta-*"
+                "System.Console": "4.0.0-beta-23109"
             }
         }
     }

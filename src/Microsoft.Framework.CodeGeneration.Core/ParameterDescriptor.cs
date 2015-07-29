@@ -4,8 +4,8 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.Framework.CodeGeneration.CommandLine;
-using Microsoft.Framework.Runtime.Common.CommandLine;
 
 namespace Microsoft.Framework.CodeGeneration
 {

@@ -3,7 +3,7 @@
 
 using System;
 using System.Runtime.Versioning;
-using Microsoft.Framework.Runtime;
+using Microsoft.Dnx.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
 {

@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Roslyn;
+using Microsoft.Dnx.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {

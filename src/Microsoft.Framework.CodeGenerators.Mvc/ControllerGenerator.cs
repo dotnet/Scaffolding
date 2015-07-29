@@ -7,12 +7,11 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
+using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.CodeGeneration;
 using Microsoft.Framework.CodeGeneration.CommandLine;
 using Microsoft.Framework.CodeGeneration.EntityFramework;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGenerators.Mvc
 {

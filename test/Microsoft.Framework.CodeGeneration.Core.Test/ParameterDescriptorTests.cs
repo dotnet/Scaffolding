@@ -1,10 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Linq;
+using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.Framework.CodeGeneration.CommandLine;
-using Microsoft.Framework.Runtime.Common.CommandLine;
 using Xunit;
 
 namespace Microsoft.Framework.CodeGeneration.Core.Test

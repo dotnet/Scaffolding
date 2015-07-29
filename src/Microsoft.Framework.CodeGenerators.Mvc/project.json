@@ -5,7 +5,6 @@
         "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.Framework.CodeGeneration.EntityFramework": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Templating": "1.0.0-*",
-        "Microsoft.Framework.Runtime.Abstractions": "1.0.0-*",
         "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {

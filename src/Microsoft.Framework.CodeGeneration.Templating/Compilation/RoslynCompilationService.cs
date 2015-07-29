@@ -9,10 +9,9 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Compilation;
-using Microsoft.Framework.Runtime.Roslyn;
+using Microsoft.Dnx.Compilation;
+using Microsoft.Dnx.Compilation.CSharp;
+using Microsoft.Dnx.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
 {

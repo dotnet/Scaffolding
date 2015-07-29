@@ -1,14 +1,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Compilation;
-using Microsoft.Framework.Runtime.Roslyn;
+using Microsoft.Dnx.Compilation;
+using Microsoft.Dnx.Compilation.CSharp;
+using Microsoft.Dnx.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
 {

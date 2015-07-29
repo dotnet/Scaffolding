@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.CodeGeneration.Templating;
-using Microsoft.Framework.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
 {

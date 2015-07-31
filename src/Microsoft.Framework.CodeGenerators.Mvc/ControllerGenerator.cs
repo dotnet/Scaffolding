@@ -72,7 +72,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
             // That's not possible in command line scaffolding - the closest we can get is
             // the name of assembly??
-            var appName = _libraryManager.GetLibraryInformation(_applicationEnvironment.ApplicationName).Name;
+            var appName = _libraryManager.GetLibrary(_applicationEnvironment.ApplicationName).Name;
             var controllerNameSpace = appName + "." + Constants.ControllersFolderName;
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);

@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.DependencyInjection;
 using Xunit;
@@ -88,7 +89,7 @@ namespace Microsoft.Framework.CodeGeneration.Core.FunctionalTest
         private ModelTypesLocator GetModelTypesLocator()
         {
             return new ModelTypesLocator(
-                (Dnx.Runtime.ILibraryExporter)_serviceProvider.GetRequiredService(typeof(Dnx.Runtime.ILibraryExporter)),
+                (ILibraryExporter)_serviceProvider.GetRequiredService(typeof(ILibraryExporter)),
                 (IApplicationEnvironment)_serviceProvider.GetRequiredService(typeof(IApplicationEnvironment)));
         }
     }

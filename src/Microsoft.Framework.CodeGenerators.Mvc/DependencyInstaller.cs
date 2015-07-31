@@ -97,7 +97,7 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
             get
             {
                 return Dependencies
-                    .Where(dep => LibraryManager.GetLibraryInformation(dep.Name) == null);
+                    .Where(dep => LibraryManager.GetLibrary(dep.Name) == null);
             }
         }
 

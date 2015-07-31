@@ -22,7 +22,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             rootFolders.Add(applicationBasePath);
 
-            var dependency = libraryManager.GetLibraryInformation(containingProject);
+            var dependency = libraryManager.GetLibrary(containingProject);
 
             if (dependency != null)
             {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration
@@ -31,7 +32,7 @@ namespace Microsoft.Framework.CodeGeneration
         {
             return libraryExporter
                 .GetProjectsInApp(environment)
-                .Select(comp => libraryManager.GetLibraryInformation(comp.Compilation.AssemblyName))
+                .Select(comp => libraryManager.GetLibrary(comp.Compilation.AssemblyName))
                 .Select(lib => LoadAssembly(lib.Name));
         }
 

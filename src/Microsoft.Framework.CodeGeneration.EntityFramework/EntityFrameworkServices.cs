@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.Data.Entity;
+using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
@@ -116,7 +117,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
         private async Task ValidateEFSqlServerDependency()
         {
-            if (_libraryManager.GetLibraryInformation(EFSqlServerPackageName) == null)
+            if (_libraryManager.GetLibrary(EFSqlServerPackageName) == null)
             {
                 await _packageInstaller.InstallPackages(new List<PackageMetadata>()
                 {

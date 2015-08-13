@@ -26,7 +26,7 @@ namespace Microsoft.Framework.CodeGeneration
             [NotNull]this ILibraryExporter libraryExporter,
             [NotNull]IApplicationEnvironment environment)
         {
-            var export = libraryExporter.GetLibraryExport(environment.ApplicationName);
+            var export = libraryExporter.GetExport(environment.ApplicationName);
 
             var project = export.MetadataReferences
                 .OfType<IMetadataProjectReference>()

@@ -40,6 +40,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             [NotNull]IPackageInstaller packageInstaller,
             [NotNull]ILogger logger)
         {
+            _libraryManager = libraryManager;
             _libraryExporter = libraryExporter;
             _environment = environment;
             _loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);

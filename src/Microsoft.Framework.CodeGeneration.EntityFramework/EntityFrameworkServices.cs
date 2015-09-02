@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Data.Entity;
 using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
 {
@@ -88,6 +89,9 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
             else
             {
+                // The last parameter needs pluralization
+                AddModelToContext(dbContextSymbols.First().TypeSymbol, modelTypeSymbol.FullName, modelTypeSymbol.Name);
+
                 dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
 
                 if (dbContextType == null)
@@ -166,6 +170,61 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 }
             }
             _logger.LogMessage("Added DbContext : " + outputPath.Substring(appBasePath.Length));
+        }
+
+        // Todo : Need pluralization for the third parameter.
+        private void AddModelToContext(ITypeSymbol dbContext, string modelTypeName, string propertyName)
+        {
+            if (!IsModelPropertyExists(dbContext, modelTypeName))
+            {
+                // Todo : Need to add model and DbSet namespaces if required
+
+                var dbSetProperty = "public DbSet<" + modelTypeName + "> " + propertyName + " { get; set; }" + Environment.NewLine;
+                var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
+
+                // Todo : Consider using DeclaringSyntaxtReference 
+                var sourceLocation = dbContext.Locations.Where(l => l.IsInSource).FirstOrDefault();
+                if (sourceLocation != null)
+                {
+                    var syntaxTree = sourceLocation.SourceTree;
+                    var rootNode = syntaxTree.GetRoot();
+                    var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
+                    var lastNode = dbContextNode.ChildNodes().Last();
+                    var newNode = rootNode.InsertNodesAfter(lastNode, propertyDeclarationWrapper.GetRoot().ChildNodes());
+
+                    // Todo : Writing logic should be somewhere else
+                    var newText = newNode.SyntaxTree.GetText();
+                    using (var fileStream = new FileStream(syntaxTree.FilePath, FileMode.Open, FileAccess.Write))
+                    {
+                        using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
+                        {
+                            newText.Write(streamWriter);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool IsModelPropertyExists(ITypeSymbol dbContext, string modelTypeFullName)
+        {
+            var propertySymbols = dbContext.GetMembers().Select(m => m as IPropertySymbol).Where(s => s != null);
+            foreach(var pSymbol in propertySymbols)
+            {
+                var namedType = pSymbol.Type as INamedTypeSymbol; //When can this go wrong?
+                if (namedType != null && namedType.IsGenericType && !namedType.IsUnboundGenericType && 
+                    namedType.ContainingAssembly.Name == "EntityFramework.Core" &&
+                    namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Data.Entity" &&
+                    namedType.Name == "DbSet") // What happens if the type is referenced in full in code??
+                {
+                    // Can we check for equality of typeSymbol itself?
+                    if (namedType.TypeArguments.Any(t => t.ToDisplayString() == modelTypeFullName))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType)

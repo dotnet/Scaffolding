@@ -14,6 +14,7 @@ using Microsoft.Data.Entity;
 using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Diagnostics;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
 {
@@ -190,17 +191,24 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     var rootNode = syntaxTree.GetRoot();
                     var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
                     var lastNode = dbContextNode.ChildNodes().Last();
-                    var newNode = rootNode.InsertNodesAfter(lastNode, propertyDeclarationWrapper.GetRoot().ChildNodes());
+                    var newNode = rootNode.InsertNodesAfter(lastNode,
+                            propertyDeclarationWrapper.GetRoot().WithLeadingTrivia(lastNode.GetLeadingTrivia()).ChildNodes());
 
                     // Todo : Writing logic should be somewhere else
-                    var newText = newNode.SyntaxTree.GetText();
-                    using (var fileStream = new FileStream(syntaxTree.FilePath, FileMode.Open, FileAccess.Write))
-                    {
-                        using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
-                        {
-                            newText.Write(streamWriter);
-                        }
-                    }
+                    PersistDbContextChanges(newNode.SyntaxTree.WithFilePath(syntaxTree.FilePath));
+                }
+            }
+        }
+
+        private void PersistDbContextChanges(SyntaxTree newTree)
+        {
+            Debug.Assert(!String.IsNullOrEmpty(newTree.FilePath));
+
+            using (var fileStream = new FileStream(newTree.FilePath, FileMode.Open, FileAccess.Write))
+            {
+                using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
+                {
+                    newTree.GetText().Write(streamWriter);
                 }
             }
         }

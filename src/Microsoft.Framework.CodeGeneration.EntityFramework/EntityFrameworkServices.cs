@@ -89,8 +89,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
             else
             {
-                // The last parameter needs pluralization
-                AddModelToContext(dbContextSymbols.First().TypeSymbol, modelTypeSymbol.FullName, modelTypeSymbol.Name);
+                AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
 
                 dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
 
@@ -173,17 +172,18 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         }
 
         // Todo : Need pluralization for the third parameter.
-        private void AddModelToContext(ITypeSymbol dbContext, string modelTypeName, string propertyName)
+        private void AddModelToContext(ModelType dbContext, ModelType modelType)
         {
-            if (!IsModelPropertyExists(dbContext, modelTypeName))
+            if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
             {
                 // Todo : Need to add model and DbSet namespaces if required
 
-                var dbSetProperty = "public DbSet<" + modelTypeName + "> " + propertyName + " { get; set; }" + Environment.NewLine;
+                // Todo : Need pluralization for modelType.Name below as that's the property name
+                var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
                 var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                 // Todo : Consider using DeclaringSyntaxtReference 
-                var sourceLocation = dbContext.Locations.Where(l => l.IsInSource).FirstOrDefault();
+                var sourceLocation = dbContext.TypeSymbol.Locations.Where(l => l.IsInSource).FirstOrDefault();
                 if (sourceLocation != null)
                 {
                     var syntaxTree = sourceLocation.SourceTree;

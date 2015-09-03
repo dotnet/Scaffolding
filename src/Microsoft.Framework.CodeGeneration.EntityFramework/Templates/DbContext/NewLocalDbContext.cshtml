@@ -24,19 +24,6 @@ using Microsoft.Data.Entity.Metadata;
     } 
 }    public class @Model.DbContextTypeName : @baseClassName
     {
-        private static bool _created = false;
-
-        public @(Model.DbContextTypeName)()
-        {
-            if (!_created)
-            {
-                Database.EnsureCreated();
-                _created = true;
-            }
-        }
-
-        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@@"Server=(localdb)\mssqllocaldb;Database=@Model.DbContextTypeName;Trusted_Connection=True;MultipleActiveResultSets=true");
@@ -45,6 +32,8 @@ using Microsoft.Data.Entity.Metadata;
         protected override void OnModelCreating(ModelBuilder builder)
         {
         }
+
+        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
     }
 @{
     if (!String.IsNullOrEmpty(Model.DbContextNamespace))

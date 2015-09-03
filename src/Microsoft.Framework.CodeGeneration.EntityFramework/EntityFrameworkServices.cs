@@ -3,18 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
 using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Diagnostics;
 
 namespace Microsoft.Framework.CodeGeneration.EntityFramework
 {
@@ -56,47 +55,42 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             Type dbContextType;
             var dbContextSymbols = _modelTypesLocator.GetType(dbContextTypeName).ToList();
-            var isNewDbContext = false;
-            SyntaxTree newDbContextTree = null;
+            bool isNewContext = false;
+            SyntaxTree dbContextSyntaxTree = null;
             NewDbContextTemplateModel dbContextTemplateModel = null;
 
             if (dbContextSymbols.Count == 0)
             {
-                isNewDbContext = true;
+                isNewContext = true;
                 await ValidateEFSqlServerDependency();
 
                 _logger.LogMessage("Generating a new DbContext class " + dbContextTypeName);
                 dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
-                newDbContextTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
+                dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
 
-                _logger.LogMessage("Attempting to compile the application in memory with the added DbContext");
-                var projectCompilation = _libraryExporter.GetProject(_environment).Compilation;
-                var newAssemblyName = projectCompilation.AssemblyName + _counter++;
-                var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
-
-                var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
-                if (result.Success)
-                {
-                    dbContextType = result.Assembly.GetType(dbContextTypeName);
-                    if (dbContextType == null)
-                    {
-                        throw new InvalidOperationException("There was an error creating a DbContext, there was no type returned after compiling the new assembly successfully");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
-                }
+                dbContextType = CompileAndGetDbContext(dbContextTypeName, c => c.AddSyntaxTrees(dbContextSyntaxTree));
             }
             else
             {
-                AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
-
-                dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
-
-                if (dbContextType == null)
+                var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
+                if (addResult.Added)
                 {
-                    throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextTypeName);
+                    dbContextSyntaxTree = addResult.NewTree;
+                    dbContextType = CompileAndGetDbContext(dbContextTypeName, c =>
+                    {
+                        var oldTree = c.SyntaxTrees.FirstOrDefault(t => t.FilePath == addResult.OldTree.FilePath);
+                        Debug.Assert(oldTree != null);
+                        return c.ReplaceSyntaxTree(oldTree, addResult.NewTree);
+                    });
+                }
+                else
+                {
+                    dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
+
+                    if (dbContextType == null)
+                    {
+                        throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextTypeName);
+                    }
                 }
             }
 
@@ -112,12 +106,44 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             var metadata = GetModelMetadata(dbContextType, modelType);
 
             // Write the DbContext if getting the model metadata is successful
-            if (isNewDbContext)
+            if (dbContextSyntaxTree != null)
             {
-                await WriteDbContext(dbContextTemplateModel, newDbContextTree);
+                PersistDbContext(dbContextSyntaxTree);
+                if (isNewContext)
+                {
+                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length));
+                }
             }
 
             return metadata;
+        }
+
+        private Type CompileAndGetDbContext(string dbContextTypeName, Func<Compilation, Compilation> compilationModificationFunc)
+        {
+            Type dbContextType;
+
+            _logger.LogMessage("Attempting to compile the application in memory with the added/modified DbContext");
+            var projectCompilation = _libraryExporter.GetProject(_environment).Compilation;
+            var newAssemblyName = projectCompilation.AssemblyName + _counter++;
+
+            var newCompilation = compilationModificationFunc(projectCompilation).WithAssemblyName(newAssemblyName);
+
+            var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
+
+            if (result.Success)
+            {
+                dbContextType = result.Assembly.GetType(dbContextTypeName);
+                if (dbContextType == null)
+                {
+                    throw new InvalidOperationException("There was an error creating/modifying a DbContext, there was no type returned after compiling the new assembly successfully");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
+            }
+
+            return dbContextType;
         }
 
         private async Task ValidateEFSqlServerDependency()
@@ -137,102 +163,26 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
         }
 
-        private async Task WriteDbContext(NewDbContextTemplateModel dbContextTemplateModel,
-            SyntaxTree newDbContextTree)
+        /// <summary>
+        /// Writes the DbContext to disk using the given Roslyn SyntaxTree.
+        /// The method expects that SyntaxTree has a file path associated with it.
+        /// Handles both writing a new file and editing an existing file.
+        /// </summary>
+        /// <param name="newTree"></param>
+        private void PersistDbContext(SyntaxTree newTree)
         {
-            //ToDo: What's the best place to write the DbContext?
-            var appBasePath = _environment.ApplicationBasePath;
-            var outputPath = Path.Combine(
-                appBasePath,
-                "Models",
-                dbContextTemplateModel.DbContextTypeName + ".cs");
-
-            if (File.Exists(outputPath))
-            {
-                // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
-                // the type defined in that file is different, what should we do in this case?
-                // How likely is the above scenario?
-                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    "There was an error creating a DbContext, the file {0} already exists",
-                    outputPath));
-            }
-
-            var sourceText = await newDbContextTree.GetTextAsync();
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (var fileStream = new FileStream(outputPath, FileMode.CreateNew, FileAccess.Write))
-            {
-                using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
-                {
-                    sourceText.Write(streamWriter);
-                }
-            }
-            _logger.LogMessage("Added DbContext : " + outputPath.Substring(appBasePath.Length));
-        }
-
-        // Todo : Need pluralization for the third parameter.
-        private void AddModelToContext(ModelType dbContext, ModelType modelType)
-        {
-            if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
-            {
-                // Todo : Need to add model and DbSet namespaces if required
-
-                // Todo : Need pluralization for modelType.Name below as that's the property name
-                var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
-                var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
-
-                // Todo : Consider using DeclaringSyntaxtReference 
-                var sourceLocation = dbContext.TypeSymbol.Locations.Where(l => l.IsInSource).FirstOrDefault();
-                if (sourceLocation != null)
-                {
-                    var syntaxTree = sourceLocation.SourceTree;
-                    var rootNode = syntaxTree.GetRoot();
-                    var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
-                    var lastNode = dbContextNode.ChildNodes().Last();
-                    var newNode = rootNode.InsertNodesAfter(lastNode,
-                            propertyDeclarationWrapper.GetRoot().WithLeadingTrivia(lastNode.GetLeadingTrivia()).ChildNodes());
-
-                    // Todo : Writing logic should be somewhere else
-                    PersistDbContextChanges(newNode.SyntaxTree.WithFilePath(syntaxTree.FilePath));
-                }
-            }
-        }
-
-        private void PersistDbContextChanges(SyntaxTree newTree)
-        {
+            Debug.Assert(newTree != null);
             Debug.Assert(!String.IsNullOrEmpty(newTree.FilePath));
 
-            using (var fileStream = new FileStream(newTree.FilePath, FileMode.Open, FileAccess.Write))
+            Directory.CreateDirectory(Path.GetDirectoryName(newTree.FilePath));
+
+            using (var fileStream = new FileStream(newTree.FilePath, FileMode.OpenOrCreate, FileAccess.Write))
             {
                 using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
                 {
                     newTree.GetText().Write(streamWriter);
                 }
             }
-        }
-
-        private bool IsModelPropertyExists(ITypeSymbol dbContext, string modelTypeFullName)
-        {
-            var propertySymbols = dbContext.GetMembers().Select(m => m as IPropertySymbol).Where(s => s != null);
-            foreach(var pSymbol in propertySymbols)
-            {
-                var namedType = pSymbol.Type as INamedTypeSymbol; //When can this go wrong?
-                if (namedType != null && namedType.IsGenericType && !namedType.IsUnboundGenericType && 
-                    namedType.ContainingAssembly.Name == "EntityFramework.Core" &&
-                    namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Data.Entity" &&
-                    namedType.Name == "DbSet") // What happens if the type is referenced in full in code??
-                {
-                    // Can we check for equality of typeSymbol itself?
-                    if (namedType.TypeArguments.Any(t => t.ToDisplayString() == modelTypeFullName))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType)

@@ -9,5 +9,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
     public interface IDbContextEditorServices
     {
         Task<SyntaxTree> AddNewContext(NewDbContextTemplateModel dbContextTemplateModel);
+
+        AddModelResult AddModelToContext(ModelType dbContext, ModelType modelType);
     }
 }

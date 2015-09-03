@@ -1,11 +1,13 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta7",
     "dependencies": {
-        "Microsoft.Framework.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
-        "Microsoft.AspNet.Razor": "4.0.0-*",
-        "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*"
+        "Microsoft.Framework.CodeGeneration.Sources": {
+            "version": "1.0.0-beta7",
+            "type": "build"
+        },
+        "Microsoft.AspNet.Razor": "4.0.0-beta7",
+        "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-beta7"
     },
-
     "frameworks": {
         "dnx451": {
             "frameworkAssemblies": {
@@ -17,9 +19,9 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Dynamic.Runtime": "4.0.11-beta-*",
-                "System.Collections.Concurrent":  "4.0.0",
-                "System.Reflection.TypeExtensions": "4.0.1-beta-*"
+                "System.Dynamic.Runtime": "4.0.11-beta-23225",
+                "System.Collections.Concurrent": "4.0.11-beta-23225",
+                "System.Reflection.TypeExtensions": "4.0.1-beta-23225"
             }
         }
     }

@@ -27,7 +27,7 @@ namespace Microsoft.Framework.CodeGeneration
         {
             return _libraryExporter
                 .GetProjectsInApp(_application)
-                .Select(compilation => GetDirectTypesInCompilation(compilation.Compilation))
+                .Select(compilation => RoslynUtilities.GetDirectTypesInCompilation(compilation.Compilation))
                 .Aggregate((coll1, coll2) => coll1.Concat(coll2).ToList())
                 .Select(ts => ModelType.FromITypeSymbol(ts));
         }
@@ -48,23 +48,6 @@ namespace Microsoft.Framework.CodeGeneration
             //should we do that?
             return GetAllTypes()
                 .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
-        }
-
-        private IEnumerable<ITypeSymbol> GetDirectTypesInCompilation([NotNull]Compilation compilation)
-        {
-            var types = new List<ITypeSymbol>();
-            CollectTypes(compilation.Assembly.GlobalNamespace, types);
-            return types;
-        }
-
-        private static void CollectTypes(INamespaceSymbol ns, List<ITypeSymbol> types)
-        {
-            types.AddRange(ns.GetTypeMembers().Cast<ITypeSymbol>());
-
-            foreach (var nestedNs in ns.GetNamespaceMembers())
-            {
-                CollectTypes(nestedNs, types);
-            }
         }
     }
 }

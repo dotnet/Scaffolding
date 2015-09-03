@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -69,6 +70,9 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
 
                 dbContextType = CompileAndGetDbContext(dbContextTypeName, c => c.AddSyntaxTrees(dbContextSyntaxTree));
+                
+                // Add file information
+                dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTypeName));
             }
             else
             {
@@ -144,6 +148,29 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
 
             return dbContextType;
+        }
+
+        private string GetPathForNewContext(string contextTypeName)
+        {
+            //ToDo: What's the best place to write the DbContext?
+            var appBasePath = _environment.ApplicationBasePath;
+            var outputPath = Path.Combine(
+                appBasePath,
+                "Models",
+                contextTypeName + ".cs");
+
+            if (File.Exists(outputPath))
+            {
+                // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
+                // the type defined in that file is different, what should we do in this case?
+                // How likely is the above scenario?
+                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                    "There was an error creating a DbContext, the file {0} already exists",
+                    outputPath));
+            }
+
+            return outputPath;
         }
 
         private async Task ValidateEFSqlServerDependency()

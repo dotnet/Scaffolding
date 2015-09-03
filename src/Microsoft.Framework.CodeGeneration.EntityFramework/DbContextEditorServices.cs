@@ -56,8 +56,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
 
             var sourceText = SourceText.From(newContextContent);
 
-            return CSharpSyntaxTree.ParseText(sourceText)
-                .WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName));
+            return CSharpSyntaxTree.ParseText(sourceText);
         }
 
         public AddModelResult AddModelToContext(ModelType dbContext, ModelType modelType)
@@ -79,7 +78,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                     var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
                     var lastNode = dbContextNode.ChildNodes().Last();
                     var newNode = rootNode.InsertNodesAfter(lastNode,
-                            propertyDeclarationWrapper.GetRoot().WithLeadingTrivia(lastNode.GetLeadingTrivia()).ChildNodes());
+                            propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
 
                     var modifiedTree = syntaxTree.WithRootAndOptions(newNode, syntaxTree.Options);
 
@@ -96,29 +95,6 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             {
                 Added = false
             };
-        }
-
-        private string GetPathForNewContext(string contextTypeName)
-        {
-            //ToDo: What's the best place to write the DbContext?
-            var appBasePath = _environment.ApplicationBasePath;
-            var outputPath = Path.Combine(
-                appBasePath,
-                "Models",
-                contextTypeName + ".cs");
-
-            if (File.Exists(outputPath))
-            {
-                // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
-                // the type defined in that file is different, what should we do in this case?
-                // How likely is the above scenario?
-                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    "There was an error creating a DbContext, the file {0} already exists",
-                    outputPath));
-            }
-
-            return outputPath;
         }
 
         private bool IsModelPropertyExists(ITypeSymbol dbContext, string modelTypeFullName)

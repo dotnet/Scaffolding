@@ -5,4 +5,5 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Microsoft.Framework.CodeGeneration.Core.Test")]
+[assembly: InternalsVisibleTo("Microsoft.Framework.CodeGeneration.EntityFramework.Test")]
 [assembly: AssemblyMetadata("Serviceable", "True")]

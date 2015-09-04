@@ -1,0 +1,6 @@
+﻿namespace ModelNamespace
+{
+	public class MyModel
+	{
+	}
+}

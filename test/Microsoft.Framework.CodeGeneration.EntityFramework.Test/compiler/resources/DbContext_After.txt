@@ -1,0 +1,10 @@
+﻿namespace ContextNamespace
+{
+	public class MyContext : DbContext
+	{
+		public MyContext() : base()
+		{
+		}
+		public DbSet<ModelNamespace.MyModel> MyModel { get; set; }
+	}
+}

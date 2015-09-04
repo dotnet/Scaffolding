@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
 using Microsoft.Dnx.Compilation;
 using Microsoft.Dnx.Runtime;
@@ -54,45 +56,45 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         {
             Type dbContextType;
             var dbContextSymbols = _modelTypesLocator.GetType(dbContextTypeName).ToList();
-            var isNewDbContext = false;
-            SyntaxTree newDbContextTree = null;
+            bool isNewContext = false;
+            SyntaxTree dbContextSyntaxTree = null;
             NewDbContextTemplateModel dbContextTemplateModel = null;
 
             if (dbContextSymbols.Count == 0)
             {
-                isNewDbContext = true;
+                isNewContext = true;
                 await ValidateEFSqlServerDependency();
 
                 _logger.LogMessage("Generating a new DbContext class " + dbContextTypeName);
                 dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
-                newDbContextTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
+                dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
 
-                _logger.LogMessage("Attempting to compile the application in memory with the added DbContext");
-                var projectCompilation = _libraryExporter.GetProject(_environment).Compilation;
-                var newAssemblyName = projectCompilation.AssemblyName + _counter++;
-                var newCompilation = projectCompilation.AddSyntaxTrees(newDbContextTree).WithAssemblyName(newAssemblyName);
-
-                var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
-                if (result.Success)
-                {
-                    dbContextType = result.Assembly.GetType(dbContextTypeName);
-                    if (dbContextType == null)
-                    {
-                        throw new InvalidOperationException("There was an error creating a DbContext, there was no type returned after compiling the new assembly successfully");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
-                }
+                dbContextType = CompileAndGetDbContext(dbContextTypeName, c => c.AddSyntaxTrees(dbContextSyntaxTree));
+                
+                // Add file information
+                dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTypeName));
             }
             else
             {
-                dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
-
-                if (dbContextType == null)
+                var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
+                if (addResult.Added)
                 {
-                    throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextTypeName);
+                    dbContextSyntaxTree = addResult.NewTree;
+                    dbContextType = CompileAndGetDbContext(dbContextTypeName, c =>
+                    {
+                        var oldTree = c.SyntaxTrees.FirstOrDefault(t => t.FilePath == addResult.OldTree.FilePath);
+                        Debug.Assert(oldTree != null);
+                        return c.ReplaceSyntaxTree(oldTree, addResult.NewTree);
+                    });
+                }
+                else
+                {
+                    dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
+
+                    if (dbContextType == null)
+                    {
+                        throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextTypeName);
+                    }
                 }
             }
 
@@ -108,12 +110,67 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             var metadata = GetModelMetadata(dbContextType, modelType);
 
             // Write the DbContext if getting the model metadata is successful
-            if (isNewDbContext)
+            if (dbContextSyntaxTree != null)
             {
-                await WriteDbContext(dbContextTemplateModel, newDbContextTree);
+                PersistDbContext(dbContextSyntaxTree);
+                if (isNewContext)
+                {
+                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length));
+                }
             }
 
             return metadata;
+        }
+
+        private Type CompileAndGetDbContext(string dbContextTypeName, Func<Compilation, Compilation> compilationModificationFunc)
+        {
+            Type dbContextType;
+
+            _logger.LogMessage("Attempting to compile the application in memory with the added/modified DbContext");
+            var projectCompilation = _libraryExporter.GetProject(_environment).Compilation;
+            var newAssemblyName = projectCompilation.AssemblyName + _counter++;
+
+            var newCompilation = compilationModificationFunc(projectCompilation).WithAssemblyName(newAssemblyName);
+
+            var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
+
+            if (result.Success)
+            {
+                dbContextType = result.Assembly.GetType(dbContextTypeName);
+                if (dbContextType == null)
+                {
+                    throw new InvalidOperationException("There was an error creating/modifying a DbContext, there was no type returned after compiling the new assembly successfully");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("There was an error creating a DbContext :" + string.Join("\n", result.ErrorMessages));
+            }
+
+            return dbContextType;
+        }
+
+        private string GetPathForNewContext(string contextTypeName)
+        {
+            //ToDo: What's the best place to write the DbContext?
+            var appBasePath = _environment.ApplicationBasePath;
+            var outputPath = Path.Combine(
+                appBasePath,
+                "Models",
+                contextTypeName + ".cs");
+
+            if (File.Exists(outputPath))
+            {
+                // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
+                // the type defined in that file is different, what should we do in this case?
+                // How likely is the above scenario?
+                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                    "There was an error creating a DbContext, the file {0} already exists",
+                    outputPath));
+            }
+
+            return outputPath;
         }
 
         private async Task ValidateEFSqlServerDependency()
@@ -133,39 +190,26 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
         }
 
-        private async Task WriteDbContext(NewDbContextTemplateModel dbContextTemplateModel,
-            SyntaxTree newDbContextTree)
+        /// <summary>
+        /// Writes the DbContext to disk using the given Roslyn SyntaxTree.
+        /// The method expects that SyntaxTree has a file path associated with it.
+        /// Handles both writing a new file and editing an existing file.
+        /// </summary>
+        /// <param name="newTree"></param>
+        private void PersistDbContext(SyntaxTree newTree)
         {
-            //ToDo: What's the best place to write the DbContext?
-            var appBasePath = _environment.ApplicationBasePath;
-            var outputPath = Path.Combine(
-                appBasePath,
-                "Models",
-                dbContextTemplateModel.DbContextTypeName + ".cs");
+            Debug.Assert(newTree != null);
+            Debug.Assert(!String.IsNullOrEmpty(newTree.FilePath));
 
-            if (File.Exists(outputPath))
-            {
-                // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
-                // the type defined in that file is different, what should we do in this case?
-                // How likely is the above scenario?
-                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    "There was an error creating a DbContext, the file {0} already exists",
-                    outputPath));
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(newTree.FilePath));
 
-            var sourceText = await newDbContextTree.GetTextAsync();
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (var fileStream = new FileStream(outputPath, FileMode.CreateNew, FileAccess.Write))
+            using (var fileStream = new FileStream(newTree.FilePath, FileMode.OpenOrCreate, FileAccess.Write))
             {
                 using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
                 {
-                    sourceText.Write(streamWriter);
+                    newTree.GetText().Write(streamWriter);
                 }
             }
-            _logger.LogMessage("Added DbContext : " + outputPath.Substring(appBasePath.Length));
         }
 
         private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType)

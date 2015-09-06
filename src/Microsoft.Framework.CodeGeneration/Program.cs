@@ -58,7 +58,7 @@ namespace Microsoft.Framework.CodeGeneration
 
             if (codeGenerators.Any())
             {
-                logger.LogMessage("Usage:  dnx . gen [code generator name]\n");
+                logger.LogMessage("Usage:  dnx gen [code generator name]\n");
                 logger.LogMessage("Code Generators:");
 
                 foreach (var generator in codeGenerators)
@@ -66,7 +66,7 @@ namespace Microsoft.Framework.CodeGeneration
                     logger.LogMessage(generator.Name);
                 }
 
-                logger.LogMessage("\nTry dnx . gen [code generator name] -? for help about specific code generator.");
+                logger.LogMessage("\nTry dnx gen [code generator name] -? for help about specific code generator.");
             }
             else
             {

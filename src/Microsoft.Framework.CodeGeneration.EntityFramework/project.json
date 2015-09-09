@@ -10,7 +10,7 @@
     "frameworks" : {
         "dnx451" : { 
             "frameworkAssemblies": {
-                "System.Text.Encoding": ""
+                "System.Text.Encoding": "4.0.0.0"
             }
         },
         "dnxcore50" : { 

@@ -97,7 +97,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (id == null)
             {
-                return new HttpStatusCodeResult(404);
+                return HttpNotFound();
             }
 
 @{
@@ -111,7 +111,7 @@ namespace @Model.ControllerNamespace
     }
 }            if (@Model.ModelVariable == null)
             {
-                return new HttpStatusCodeResult(404);
+                return HttpNotFound();
             }
 
             return View(@Model.ModelVariable);
@@ -181,7 +181,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (id == null)
             {
-                return new HttpStatusCodeResult(404);
+                return HttpNotFound();
             }
 
 @{
@@ -195,7 +195,7 @@ namespace @Model.ControllerNamespace
     }
 }            if (@Model.ModelVariable == null)
             {
-                return new HttpStatusCodeResult(404);
+                return HttpNotFound();
             }
 @{
     foreach (var property in relatedProperties.Values)
@@ -256,7 +256,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (id == null)
             {
-                return new HttpStatusCodeResult(404);
+                return HttpNotFound();
             }
 
 @{
@@ -270,7 +270,7 @@ namespace @Model.ControllerNamespace
     }
 }            if (@Model.ModelVariable == null)
             {
-                return new HttpStatusCodeResult(404);
+                return HttpNotFound();
             }
 
             return View(@Model.ModelVariable);

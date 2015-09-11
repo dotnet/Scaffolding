@@ -68,22 +68,23 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Compilation
             var references = new List<MetadataReference>();
 
             // Todo: When the target app references scaffolders as nuget packages rather than project references,
-            // since the target app does not actully use code from scaffolding framework, our dlls
-            // are not in app dependencies closure. However we need them for compiling the
-            // generated razor template. So we are just using the known references for now to make things work.
-            // Note that this model breaks for custom scaffolders because they may be using
+            // we need to ensure all dependencies for compiling the generated razor template.
+            // This requires further thinking for custom scaffolders because they may be using
             // some other references which are not available in any of these closures.
             // As the above comment, the right thing to do here is to use the dependency closure of
             // the assembly which has the template.
-            var baseProjects = new string[] { _environment.ApplicationName, "Microsoft.Framework.CodeGeneration" };
+            var baseProjects = new string[] { _environment.ApplicationName };
 
             foreach (var baseProject in baseProjects)
             {
                 var export = _libraryExporter.GetAllExports(baseProject);
 
-                foreach (var metadataReference in export.MetadataReferences)
+                if (export != null)
                 {
-                    references.Add(ConvertMetadataReference(metadataReference));
+                    foreach (var metadataReference in export.MetadataReferences)
+                    {
+                        references.Add(ConvertMetadataReference(metadataReference));
+                    }
                 }
             }
 

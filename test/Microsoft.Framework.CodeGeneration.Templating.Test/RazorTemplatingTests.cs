@@ -57,9 +57,6 @@ namespace Microsoft.Framework.CodeGeneration.Templating.Test
 
             var emptyLibExport = new LibraryExport(metadataReferences: null);
             var mockLibExporter = new Mock<ILibraryExporter>();
-            mockLibExporter
-                .Setup(lm => lm.GetAllExports("Microsoft.Framework.CodeGeneration"))
-                .Returns(emptyLibExport);
 
             var input = "Microsoft.Framework.CodeGeneration.Templating.Test";
             mockLibExporter

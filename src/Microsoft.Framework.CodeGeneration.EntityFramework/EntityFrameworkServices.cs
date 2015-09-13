@@ -52,10 +52,10 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             _logger = logger;
         }
 
-        public async Task<ModelMetadata> GetModelMetadata(string dbContextTypeName, ModelType modelTypeSymbol)
+        public async Task<ModelMetadata> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol)
         {
             Type dbContextType;
-            var dbContextSymbols = _modelTypesLocator.GetType(dbContextTypeName).ToList();
+            var dbContextSymbols = _modelTypesLocator.GetType(dbContextFullTypeName).ToList();
             bool isNewContext = false;
             SyntaxTree dbContextSyntaxTree = null;
             NewDbContextTemplateModel dbContextTemplateModel = null;
@@ -65,14 +65,14 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 isNewContext = true;
                 await ValidateEFSqlServerDependency();
 
-                _logger.LogMessage("Generating a new DbContext class " + dbContextTypeName);
-                dbContextTemplateModel = new NewDbContextTemplateModel(dbContextTypeName, modelTypeSymbol);
+                _logger.LogMessage("Generating a new DbContext class " + dbContextFullTypeName);
+                dbContextTemplateModel = new NewDbContextTemplateModel(dbContextFullTypeName, modelTypeSymbol);
                 dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
 
-                dbContextType = CompileAndGetDbContext(dbContextTypeName, c => c.AddSyntaxTrees(dbContextSyntaxTree));
+                dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c => c.AddSyntaxTrees(dbContextSyntaxTree));
                 
                 // Add file information
-                dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTypeName));
+                dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName));
             }
             else
             {
@@ -80,7 +80,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 if (addResult.Added)
                 {
                     dbContextSyntaxTree = addResult.NewTree;
-                    dbContextType = CompileAndGetDbContext(dbContextTypeName, c =>
+                    dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c =>
                     {
                         var oldTree = c.SyntaxTrees.FirstOrDefault(t => t.FilePath == addResult.OldTree.FilePath);
                         Debug.Assert(oldTree != null);
@@ -89,11 +89,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 }
                 else
                 {
-                    dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextTypeName);
+                    dbContextType = _libraryExporter.GetReflectionType(_libraryManager, _environment, dbContextFullTypeName);
 
                     if (dbContextType == null)
                     {
-                        throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextTypeName);
+                        throw new InvalidOperationException("Could not get the reflection type for DbContext : " + dbContextFullTypeName);
                     }
                 }
             }
@@ -150,14 +150,14 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             return dbContextType;
         }
 
-        private string GetPathForNewContext(string contextTypeName)
+        private string GetPathForNewContext(string contextShortTypeName)
         {
             //ToDo: What's the best place to write the DbContext?
             var appBasePath = _environment.ApplicationBasePath;
             var outputPath = Path.Combine(
                 appBasePath,
                 "Models",
-                contextTypeName + ".cs");
+                contextShortTypeName + ".cs");
 
             if (File.Exists(outputPath))
             {

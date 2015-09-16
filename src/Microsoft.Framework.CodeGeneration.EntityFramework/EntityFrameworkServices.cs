@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
@@ -27,6 +28,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
         private readonly IAssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private static int _counter = 1;
         private const string EFSqlServerPackageName = "EntityFramework.SqlServer";
@@ -40,6 +42,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             [NotNull]IModelTypesLocator modelTypesLocator,
             [NotNull]IDbContextEditorServices dbContextEditorServices,
             [NotNull]IPackageInstaller packageInstaller,
+            [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
         {
             _libraryManager = libraryManager;
@@ -49,6 +52,7 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
             _packageInstaller = packageInstaller;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -115,7 +119,8 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
                 PersistDbContext(dbContextSyntaxTree);
                 if (isNewContext)
                 {
-                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length));
+                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length)
+                        + ", however there may be additional steps required for the generted code to work properly, refer to comments in the generated context.");
                 }
             }
 
@@ -217,7 +222,11 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             DbContext dbContextInstance;
             try
             {
-                dbContextInstance = Activator.CreateInstance(dbContextType) as DbContext;
+                dbContextInstance = TryCreateContextUsingAppCode(dbContextType);
+                if (dbContextInstance == null)
+                {
+                    dbContextInstance = Activator.CreateInstance(dbContextType) as DbContext;
+                }
             }
             catch (Exception ex)
             {
@@ -241,6 +250,14 @@ namespace Microsoft.Framework.CodeGeneration.EntityFramework
             }
 
             return new ModelMetadata(entityType, dbContextType);
+        }
+
+        private DbContext TryCreateContextUsingAppCode(Type dbContextType)
+        {
+            //Todo : This has to be app services rather than scaffolding service provider
+            var hostBuilder = new WebHostBuilder(_serviceProvider);
+            var appServices = hostBuilder.Build().ApplicationServices;
+            return appServices.GetService(dbContextType) as DbContext;
         }
     }
 }

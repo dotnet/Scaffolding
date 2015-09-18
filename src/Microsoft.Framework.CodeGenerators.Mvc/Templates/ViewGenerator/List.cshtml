@@ -40,7 +40,7 @@
     }
 <text>
 <p>
-    @@Html.ActionLink("Create New", "Create")
+    <a asp-action="Create">Create New</a>
 </p>
 <table class="table">
     <tr></text>
@@ -83,11 +83,11 @@
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
     {
-        <td>
-            @@Html.ActionLink("Edit", "Edit", new { id=item.@pkName }) |
-            @@Html.ActionLink("Details", "Details", new { id=item.@pkName }) |
-            @@Html.ActionLink("Delete", "Delete", new { id=item.@pkName })
-        </td>
+        @:<td>
+            @:<a asp-action="Edit" asp-route-id="item.@pkName">Edit</a> |
+            @:<a asp-action="Details" asp-route-id="item.@pkName">Details</a> |
+            @:<a asp-action="Delete" asp-route-id="item.@pkName">Delete</a>
+        @:</td>
     }
     else
     {

@@ -72,13 +72,13 @@
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
     {
-        @:@@Html.ActionLink("Edit", "Edit", new { id = Model.@pkName }) |
-        @:@@Html.ActionLink("Back to List", "Index")
+        @:<a asp-action="Edit" asp-route-id="Model.@pkName">Edit</a> |
+        <a asp-action="Index">Back to List</a>
     }
     else
     {
         @:@@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-        @:@@Html.ActionLink("Back to List", "Index")
+        <a asp-action="Index">Back to List</a>
     }
 }</p>
 @{

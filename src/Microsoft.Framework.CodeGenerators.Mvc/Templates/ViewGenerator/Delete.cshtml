@@ -65,18 +65,15 @@
 
         }
     }
-}    </dl>
+    @:</dl>
 
-    @@using (Html.BeginForm()) {
-        @@Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @@Html.ActionLink("Back to List", "Index")
-        </div>
-    }
-</div>
-@{
+    @:<form asp-action="@Model.ViewName">
+        @:<div class="form-actions no-color">
+            @:<input type="submit" value="Delete" class="btn btn-default" /> |
+            @:<a asp-action="Index">Back to List</a>
+        @:</div>
+    @:</form>
+@:</div>
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {
         //ClearIndent();

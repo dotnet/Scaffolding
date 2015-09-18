@@ -110,8 +110,8 @@ namespace Microsoft.Framework.CodeGenerators.Mvc
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
 
-            bool isLayoutSelected = viewGeneratorModel.UseDefaultLayout ||
-                !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage);
+            bool isLayoutSelected = !viewGeneratorModel.PartialView &&
+                (viewGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage));
 
             await layoutDependencyInstaller.Execute();
 

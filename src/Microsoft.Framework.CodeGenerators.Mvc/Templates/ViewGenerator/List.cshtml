@@ -1,49 +1,45 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @GetEnumerableTypeExpression(Model.ViewDataTypeName)
+
 @{
     if (Model.IsPartialView)
     {
     }
     else if (Model.IsLayoutPageSelected)
     {
-<text>
-@@{
-    ViewBag.Title = "@Model.ViewName";</text>
+@:@@{
+    @:ViewData["Title"] = "@Model.ViewName";
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
 @:
-<h2>@Model.ViewName</h2>
-
+@:<h2>@Model.ViewName</h2>
+@:
     }
     else
     {
-
-<text>
-@@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@Model.ViewName</title>
-</head>
-<body>
-</text>
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
         //    PushIndent("    ");
     }
-<text>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <tr></text>
+@:<p>
+    @:<a asp-action="Create">Create New</a>
+@:</p>
+@:<table class="table">
+    @:<tr>
     IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
     foreach (var property in properties)
     {
@@ -62,6 +58,7 @@
     }
         @:<th></th>
     @:</tr>
+    @:
 @:@@foreach (var item in Model) {
     @:<tr>
     foreach (PropertyMetadata property in properties)
@@ -84,9 +81,9 @@
     if (pkName != null)
     {
         @:<td>
-            @:<a asp-action="Edit" asp-route-id="item.@pkName">Edit</a> |
-            @:<a asp-action="Details" asp-route-id="item.@pkName">Details</a> |
-            @:<a asp-action="Delete" asp-route-id="item.@pkName">Delete</a>
+            @:<a asp-action="Edit" asp-route-id="@@item.@pkName">Edit</a> |
+            @:<a asp-action="Details" asp-route-id="@@item.@pkName">Details</a> |
+            @:<a asp-action="Delete" asp-route-id="@@item.@pkName">Delete</a>
         @:</td>
     }
     else

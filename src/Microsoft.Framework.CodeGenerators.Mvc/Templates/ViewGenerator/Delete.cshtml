@@ -1,41 +1,39 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @Model.ViewDataTypeName
+
 @{
     if (Model.IsPartialView)
     {
-@:
     }
     else if (Model.IsLayoutPageSelected)
     {
-<text>
-@@{
-    ViewBag.Title = "@Model.ViewName";</text>
+@:@@{
+    @:ViewData["Title"] = "@Model.ViewName";
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
 @:
-<h2>@Model.ViewName</h2>
-
+@:<h2>@Model.ViewName</h2>
+@:
     }
     else
     {
-<text>
-@@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@Model.ViewName</title>
-</head>
-<body>
-</text>
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+@:
         //    PushIndent("    ");
     }
 }
@@ -58,15 +56,13 @@
         <dt>
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
         </dt>
-
         <dd>
             @@Html.DisplayFor(model => model.@GetValueExpression(property))
         </dd>
-
         }
     }
     @:</dl>
-
+    @:
     @:<form asp-action="@Model.ViewName">
         @:<div class="form-actions no-color">
             @:<input type="submit" value="Delete" class="btn btn-default" /> |

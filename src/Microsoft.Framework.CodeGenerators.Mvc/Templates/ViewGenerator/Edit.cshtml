@@ -1,60 +1,46 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @Model.ViewDataTypeName
+
 @{
     if (Model.IsPartialView)
     {
-@:
     }
     else if (Model.IsLayoutPageSelected)
     {
-<text>
-@@{
-    ViewBag.Title = "@Model.ViewName";</text>
+@:@@{
+    @:ViewData["Title"] = "@Model.ViewName";
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
 @:
-<h2>@Model.ViewName</h2>
-
+@:<h2>@Model.ViewName</h2>
+@:
     }
     else
     {
-
-<text>
-@@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@Model.ViewName</title>
-</head>
-<body>
-</text>
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+@:
         //    PushIndent("    ");
     }
-    if (Model.ReferenceScriptLibraries && !Model.IsLayoutPageSelected)
-    {
-@:@@section Scripts {
-    @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @:<script src="~/lib/jquery-validation/jquery.validate.min.js"></script>
-    @:<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-@:}
-    }
-
 @:<form asp-action="@Model.ViewName">
-<text>
-    <div class="form-horizontal">
-        <h4>@Model.ViewDataTypeShortName</h4>
-        <hr />
-        <div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger" />
-</text>
+    @:<div class="form-horizontal">
+        @:<h4>@Model.ViewDataTypeShortName</h4>
+        @:<hr />
+        @:<div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger" />
     foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
     {
         if (property.Scaffold && !property.IsAssociation)
@@ -62,41 +48,54 @@
             if (property.IsPrimaryKey)
             {
         @:<input type="hidden" asp-for="@property.PropertyName" />
+                continue;
             }
-            else if (!property.IsReadOnly)
+            if (property.IsReadOnly)
+            {
+                continue;
+            }
+
+            if (property.IsForeignKey)
             {
         @:<div class="form-group">
-                if (property.IsForeignKey)
-                {
             @:<label asp-for="@property.PropertyName" class="control-label col-md-2">@GetAssociationName(property)</label>
-                }
-                else
-                {
-            @:<label asp-for="@property.PropertyName" class="control-label col-md-2" />
-                }
             @:<div class="col-md-10">
-                bool isCheckbox = property.TypeName.Equals("System.Boolean");
-                if (property.IsForeignKey)
-                {
                 @:<select asp-for="@property.PropertyName" class="form-control" />
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
-                }
-                else
-                {
-                    if (isCheckbox)
-                    {
+            @:</div>
+        @:</div>
+                continue;
+            }
+
+            bool isCheckbox = property.TypeName.Equals("System.Boolean");
+            if (isCheckbox)
+            {
+        @:<div class="form-group">
+            @:<div class="col-md-offset-2 col-md-10">
                 @:<div class="checkbox">
-                    //PushIndent("    ");
                     @:<input asp-for="@property.PropertyName" />
-                    @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
+                    @:<label asp-for="@property.PropertyName"></label>
                 @:</div>
-                    }
-                    else if (!property.IsEnum || !property.IsEnumFlags)
-                    {
+            @:</div>
+        @:</div>
+            }
+            else if (property.IsEnum && !property.IsEnumFlags)
+            {
+        @:<div class="form-group">
+            @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
+            @:<div class="col-md-10">
+                @:<select asp-for="@property.PropertyName" class="form-control"></select>
+                @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
+            @:</div>
+        @:</div>
+            }
+            else
+            {
+        @:<div class="form-group">
+            @:<label asp-for="@property.PropertyName" class="control-label col-md-2" />
+            @:<div class="col-md-10">
                 @:<input asp-for="@property.PropertyName" class="form-control" />
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
-                    }
-                }
             @:</div>
         @:</div>
             }
@@ -114,8 +113,9 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
 @{
-    if (Model.IsLayoutPageSelected && Model.ReferenceScriptLibraries)
+    if (Model.ReferenceScriptLibraries && (Model.IsLayoutPageSelected || Model.IsPartialView))
     {
 @:@@section Scripts {
     @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -126,7 +126,15 @@
     // The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {
+        if (Model.ReferenceScriptLibraries)
+        {
+@:@@section Scripts {
+    @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @:<script src="~/lib/jquery-validation/jquery.validate.min.js"></script>
+    @:<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+@:}
         //ClearIndent();
+        }
 @:</body>
 @:</html>
     }

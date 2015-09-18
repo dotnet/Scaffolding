@@ -1,42 +1,39 @@
 ﻿@inherits Microsoft.Framework.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.Framework.CodeGeneration.EntityFramework
 @@model @Model.ViewDataTypeName
+
 @{
     if (Model.IsPartialView)
     {
-@:
     }
     else if (Model.IsLayoutPageSelected)
     {
-<text>
-@@{
-    ViewBag.Title = "@Model.ViewName";</text>
+@:@@{
+    @:ViewData["Title"] = "@Model.ViewName";
         if (!string.IsNullOrEmpty(Model.LayoutPageFile))
         {
     @:Layout = "@Model.LayoutPageFile";
         }
 @:}
 @:
-<h2>@Model.ViewName</h2>
-
+@:<h2>@Model.ViewName</h2>
+@:
     }
     else
     {
-
-<text>
-@@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@Model.ViewName</title>
-</head>
-<body>
-</text>
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+@:
         //    PushIndent("    ");
     }
 }
@@ -58,11 +55,9 @@
         <dt>
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
         </dt>
-
         <dd>
             @@Html.DisplayFor(model => model.@GetValueExpression(property))
         </dd>
-
         }
     }
 }    </dl>
@@ -72,13 +67,13 @@
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
     {
-        @:<a asp-action="Edit" asp-route-id="Model.@pkName">Edit</a> |
-        <a asp-action="Index">Back to List</a>
+    @:<a asp-action="Edit" asp-route-id="@@Model.@pkName">Edit</a> |
+    @:<a asp-action="Index">Back to List</a>
     }
     else
     {
-        @:@@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-        <a asp-action="Index">Back to List</a>
+    @:@@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    @:<a asp-action="Index">Back to List</a>
     }
 }</p>
 @{

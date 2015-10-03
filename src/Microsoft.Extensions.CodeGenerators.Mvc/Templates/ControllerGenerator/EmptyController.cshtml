@@ -1,0 +1,14 @@
+@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+using System.Linq;
+using Microsoft.AspNet.Mvc;
+
+namespace @Model.NamespaceName
+{
+    public class @Model.ClassName : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+    }
+}

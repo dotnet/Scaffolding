@@ -1,8 +1,8 @@
 for %%1 in (
-    Microsoft.Framework.CodeGeneration.Core.FunctionalTest
-    Microsoft.Framework.CodeGeneration.Core.Test
-    Microsoft.Framework.CodeGeneration.Templating.Test
-    Microsoft.Framework.CodeGeneration.EntityFramework.Test
+    Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
+    Microsoft.Extensions.CodeGeneration.Core.Test
+    Microsoft.Extensions.CodeGeneration.Templating.Test
+    Microsoft.Extensions.CodeGeneration.EntityFramework.Test
     ) do (
         cd %%1
         dnx test

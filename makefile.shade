@@ -15,7 +15,7 @@ use namespace="System.Net"
 #add-files target="compile"
     @{
         var baseDir = Directory.GetCurrentDirectory();
-        var projects = new[] { "Microsoft.Framework.CodeGeneration.EntityFramework", "Microsoft.Framework.CodeGenerators.Mvc" };
+        var projects = new[] { "Microsoft.Extensions.CodeGeneration.EntityFramework", "Microsoft.Extensions.CodeGenerators.Mvc" };
 
         foreach (var projectName in projects)
         {

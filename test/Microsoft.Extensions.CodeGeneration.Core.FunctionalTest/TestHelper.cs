@@ -17,14 +17,15 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
             var appEnvironment = originalProvider.GetRequiredService<IApplicationEnvironment>();
 
-            //When the tests are run the appEnvironment points to test project.
-            //Change the app environment to point to the test application to be used
-            //by test.
+            // When the tests are run the appEnvironment points to test project.
+            // Change the app environment to point to the test application to be used
+            // by test.
             var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
+            var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
 
             return new WebHostBuilder(originalProvider)
-                .UseServices(services => services.AddInstance<IApplicationEnvironment>(new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName)))
+                .UseServices(services => services.AddInstance<IApplicationEnvironment>(testEnvironment))
                 .Build()
                 .ApplicationServices;
         }

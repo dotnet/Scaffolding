@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
     {
         private PropertyMetadata[] _properties;
         private PropertyMetadata[] _primaryKeys;
-
+        private PropertyMetadata[] _foreinKeys;
 
         //Todo: Perhaps move the constructor to something line MetadataReader?
         public ModelMetadata([NotNull]IEntityType entityType, [NotNull]Type dbContextType)

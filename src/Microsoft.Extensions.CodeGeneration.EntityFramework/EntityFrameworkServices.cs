@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private static int _counter = 1;
-        private const string EFSqlServerPackageName = "EntityFramework.SqlServer";
+        private const string EFSqlServerPackageName = "EntityFramework.MicrosoftSqlServer";
         private const string EFSqlServerPackageVersion = "7.0.0-*";
 
         public EntityFrameworkServices(

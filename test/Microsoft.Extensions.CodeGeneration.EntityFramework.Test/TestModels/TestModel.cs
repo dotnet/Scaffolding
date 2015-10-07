@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels
                 builder.Entity<Product>()
                     .HasOne(p => p.ProductCategory)
                     .WithMany(c => c.CategoryProducts)
-                    .ForeignKey(e => e.ProductCategoryId);
+                    .HasForeignKey(e => e.ProductCategoryId);
 
                 return builder.Model;
             }

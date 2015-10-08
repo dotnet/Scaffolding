@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 if (_properties == null)
                 {
                     _properties = EntityType.GetProperties()
-                        .Select(p => new PropertyMetadata(p))
+                        .Select(p => new PropertyMetadata(p, DbContexType))
                         .ToArray();
                 }
                 return _properties;
@@ -53,14 +53,14 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 {
                     _primaryKeys = EntityType.GetPrimaryKey()
                         .Properties
-                        .Select(p => new PropertyMetadata(p))
+                        .Select(p => new PropertyMetadata(p, DbContexType))
                         .ToArray();
                 }
                 return _primaryKeys;
             }
         }
 
-        private string GetEntitySetName([NotNull]Type dbContextType, [NotNull]Type modelType)
+        internal static string GetEntitySetName([NotNull]Type dbContextType, [NotNull]Type modelType)
         {
             Type dbSetType = typeof(DbSet<>).MakeGenericType(modelType);
 

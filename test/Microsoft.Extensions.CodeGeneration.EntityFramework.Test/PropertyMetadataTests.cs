@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             var productIdProperty = productEntity.GetProperty("ProductId");
 
             //Act
-            var propertyMetadata = new PropertyMetadata(productIdProperty);
+            var propertyMetadata = new PropertyMetadata(productIdProperty, typeof(TestDbContext));
 
             //Assert
             Assert.Equal("ProductId", propertyMetadata.PropertyName);
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             var productCategoryIdProperty = productEntity.GetProperty("ProductCategoryId");
 
             //Act
-            var propertyMetadata = new PropertyMetadata(productCategoryIdProperty);
+            var propertyMetadata = new PropertyMetadata(productCategoryIdProperty, typeof(TestDbContext));
 
             //Assert
             Assert.Equal("ProductCategoryId", propertyMetadata.PropertyName);
@@ -53,7 +53,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             var productNameProperty = productEntity.GetProperty("ProductName");
 
             //Act
-            var propertyMetadata = new PropertyMetadata(productNameProperty);
+            var propertyMetadata = new PropertyMetadata(productNameProperty, typeof(TestDbContext));
 
             //Assert
             Assert.Equal("ProductName", propertyMetadata.PropertyName);
@@ -71,7 +71,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             var productEnumProperty = productEntity.GetProperty("ProductEnumProperty");
 
             //Act
-            var propertyMetadata = new PropertyMetadata(productEnumProperty);
+            var propertyMetadata = new PropertyMetadata(productEnumProperty, typeof(TestDbContext));
 
             //Assert
             Assert.Equal("ProductEnumProperty", propertyMetadata.PropertyName);

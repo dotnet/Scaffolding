@@ -6,7 +6,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels
 {
     /*
-        Category  --(one)----(many)-->   Product              [foreign key on Product]
+        Category  --(one)----(many)-->   Product  [foreign key on Product] [Read from right to left for many to one relation :-)]
+        Customer  --(zero)---(one)--->   CustomerDetails [Independent Association]
+        Order --has---> Customer [Foreign key relation]
     */
 
     public class Product
@@ -48,7 +50,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels
 
         public string CustomerName { get; set; }
 
-        public CustomerDetails CustomerDetails { get; set; }
+        public CustomerDetails CustomerDetails { get; set; } //Independent Association
     }
 
     public class CustomerDetails

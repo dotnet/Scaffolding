@@ -26,6 +26,22 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             //Act && Assert
             Assert.Equal(2, categoryMetadata.Properties.Length);
             Assert.Equal(0, categoryMetadata.Navigations.Length);
+
+            //Arrange
+            var customerEntity = TestModel.CustomerOrderModel.GetEntityType(typeof(Customer));
+            var customerMetadata = new ModelMetadata(customerEntity, typeof(TestDbContext));
+
+            //Act && Assert
+            Assert.Equal(2, customerMetadata.Properties.Length);
+            Assert.Equal(0, customerMetadata.Navigations.Length);
+
+            //Arrange
+            var orderEntity = TestModel.CustomerOrderModel.GetEntityType(typeof(Order));
+            var orderMetadata = new ModelMetadata(orderEntity, typeof(TestDbContext));
+
+            //Act && Assert
+            Assert.Equal(3, orderMetadata.Properties.Length);
+            Assert.Equal(1, orderMetadata.Navigations.Length);
         }
 
         [Fact]

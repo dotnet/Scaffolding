@@ -38,6 +38,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 if (_properties == null)
                 {
                     _properties = EntityType.GetProperties()
+                        .Where(p => !p.IsShadowProperty)
                         .Select(p => new PropertyMetadata(p, DbContexType))
                         .ToArray();
                 }
@@ -60,6 +61,12 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
         }
 
+        /// <summary>
+        /// Only navigations that are dependent and has all properties defined
+        /// in code (non-shadow properties) are returned as part of this.
+        /// Typically this is used to create code for drop down lists
+        /// to choose values from principal entity.
+        /// </summary>
         public NavigationMetadata[] Navigations
         {
             get

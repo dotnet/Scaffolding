@@ -43,7 +43,7 @@
         @:<div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger" />
     foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
     {
-        if (property.Scaffold && !property.IsAssociation)
+        if (property.Scaffold)
         {
             if (property.IsPrimaryKey)
             {

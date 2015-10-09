@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             TypeName = otherEntityType.ClrType.GetTypeInfo().FullName;
             ShortTypeName = otherEntityType.ClrType.GetTypeInfo().Name;
             PrimaryKeyNames = navigation.ForeignKey.PrincipalKey.Properties.Select(pk => pk.Name).ToArray();
-            FoeignKeyPropertyNames = navigation.ForeignKey.Properties
+            ForeignKeyPropertyNames = navigation.ForeignKey.Properties
                 .Where(p => p.DeclaringEntityType == navigation.DeclaringEntityType)
                 .Select(p => p.Name)
                 .ToArray();
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
         public string EntitySetName { get; set; }
 
-        public string[] FoeignKeyPropertyNames { get; set; }
+        public string[] ForeignKeyPropertyNames { get; set; }
 
         public string[] PrimaryKeyNames { get; set; }
 

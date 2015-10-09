@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
     {
         private PropertyMetadata[] _properties;
         private PropertyMetadata[] _primaryKeys;
-        private PropertyMetadata[] _foreinKeys;
+        private NavigationMetadata[] _navigations;
 
         //Todo: Perhaps move the constructor to something line MetadataReader?
         public ModelMetadata([NotNull]IEntityType entityType, [NotNull]Type dbContextType)
@@ -57,6 +57,21 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                         .ToArray();
                 }
                 return _primaryKeys;
+            }
+        }
+
+        public NavigationMetadata[] Navigations
+        {
+            get
+            {
+                if (_navigations == null)
+                {
+                    _navigations = EntityType.GetNavigations()
+                        .Where(n => n.PointsToPrincipal() == true && n.ForeignKey.Properties.All(p => !p.IsShadowProperty))
+                        .Select(n => new NavigationMetadata(n, DbContexType))
+                        .ToArray();
+                }
+                return _navigations;
             }
         }
 

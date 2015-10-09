@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             ShortTypeName = property.ClrType.FullName;
 
             Scaffold = true;
-            var reflectionProperty = property.ClrType.GetProperty(property.Name);
+            var reflectionProperty = property.DeclaringEntityType.ClrType.GetProperty(property.Name);
             if (reflectionProperty != null)
             {
                 var scaffoldAttr = reflectionProperty.GetCustomAttribute(typeof(ScaffoldColumnAttribute)) as ScaffoldColumnAttribute;

@@ -19,9 +19,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels
 
         public Category Category { get; set; } // Navigation
 
-        public EnumType ProductEnumProperty { get; set; }
+        public EnumType EnumProperty { get; set; }
 
-        public EnumFlagsType ProductEnumFlagsProperty { get; set; }
+        public EnumFlagsType EnumFlagsProperty { get; set; }
 
         [ScaffoldColumn(true)]
         public string ExplicitScaffoldProperty { get; set; }

@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
     {
         private PropertyMetadata[] _properties;
         private PropertyMetadata[] _primaryKeys;
-
+        private NavigationMetadata[] _navigations;
 
         //Todo: Perhaps move the constructor to something line MetadataReader?
         public ModelMetadata([NotNull]IEntityType entityType, [NotNull]Type dbContextType)
@@ -38,7 +38,8 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 if (_properties == null)
                 {
                     _properties = EntityType.GetProperties()
-                        .Select(p => new PropertyMetadata(p))
+                        .Where(p => !p.IsShadowProperty)
+                        .Select(p => new PropertyMetadata(p, DbContexType))
                         .ToArray();
                 }
                 return _properties;
@@ -53,14 +54,35 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 {
                     _primaryKeys = EntityType.GetPrimaryKey()
                         .Properties
-                        .Select(p => new PropertyMetadata(p))
+                        .Select(p => new PropertyMetadata(p, DbContexType))
                         .ToArray();
                 }
                 return _primaryKeys;
             }
         }
 
-        private string GetEntitySetName([NotNull]Type dbContextType, [NotNull]Type modelType)
+        /// <summary>
+        /// Only navigations that are dependent and has all properties defined
+        /// in code (non-shadow properties) are returned as part of this.
+        /// Typically this is used to create code for drop down lists
+        /// to choose values from principal entity.
+        /// </summary>
+        public NavigationMetadata[] Navigations
+        {
+            get
+            {
+                if (_navigations == null)
+                {
+                    _navigations = EntityType.GetNavigations()
+                        .Where(n => n.PointsToPrincipal() == true && n.ForeignKey.Properties.All(p => !p.IsShadowProperty))
+                        .Select(n => new NavigationMetadata(n, DbContexType))
+                        .ToArray();
+                }
+                return _navigations;
+            }
+        }
+
+        internal static string GetEntitySetName([NotNull]Type dbContextType, [NotNull]Type modelType)
         {
             Type dbSetType = typeof(DbSet<>).MakeGenericType(modelType);
 

@@ -9,16 +9,27 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels
 {
     public static class TestModel
     {
-        public static IModel Model
+        public static IModel CategoryProductModel
         {
             get
             {
                 var builder = new ModelBuilder(new CoreConventionSetBuilder().CreateConventionSet());
 
-                builder.Entity<Product>()
-                    .HasOne(p => p.ProductCategory)
-                    .WithMany(c => c.CategoryProducts)
-                    .HasForeignKey(e => e.ProductCategoryId);
+                builder.Entity<Product>();
+                builder.Entity<Category>();
+
+                return builder.Model;
+            }
+        }
+
+        public static IModel CustomerOrderModel
+        {
+            get
+            {
+                var builder = new ModelBuilder(new CoreConventionSetBuilder().CreateConventionSet());
+
+                builder.Entity<Customer>();
+                builder.Entity<Order>();
 
                 return builder.Model;
             }

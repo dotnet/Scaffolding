@@ -46,12 +46,6 @@
     {
         if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
         {
-            // We do not want to show any association properties for which there is
-            // no associated foreign key.
-            if (property.IsAssociation) //Todo: GetRelatedModelMetadata(property) == null
-            {
-                continue;
-            }
         <dt>
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
         </dt>

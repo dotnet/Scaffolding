@@ -45,12 +45,6 @@
     {
         if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
         {
-            // We do not want to show any association properties for which there is
-            // no associated foreign key.
-            if (property.IsAssociation) //Todo: GetRelatedModelMetadata(property) == null
-            {
-                continue;
-            }
         <th>
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
         </th>
@@ -65,12 +59,6 @@
     {
         if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
         {
-            // We do not want to show any association properties for which there is
-            // no associated foreign key.
-            if (property.IsAssociation) //Todo: GetRelatedModelMetadata(property) == null
-            {
-                continue;
-            }
         <td>
             @@Html.DisplayFor(modelItem => item.@GetValueExpression(property))
         </td>

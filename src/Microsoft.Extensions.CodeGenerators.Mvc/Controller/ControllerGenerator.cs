@@ -184,11 +184,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
                 throw new ArgumentException("Controller name is required for an Empty Controller");
             }
 
-            var templateModel = new ClassNameModel()
-            {
-                ClassName = controllerGeneratorModel.ControllerName,
-                NamespaceName = controllerNamespace
-            };
+            var templateModel = new ClassNameModel(className:controllerGeneratorModel.ControllerName, namespaceName:controllerNamespace);
 
             var templateName = "EmptyController.cshtml";
             var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);

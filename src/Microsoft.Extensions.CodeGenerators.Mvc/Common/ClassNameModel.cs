@@ -1,10 +1,20 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework
+using Microsoft.Extensions.CodeGeneration;
+
+namespace Microsoft.Extensions.CodeGenerators.Mvc
 {
     public class ClassNameModel
     {
+        public ClassNameModel(string className, string namespaceName)
+        {
+            ExceptionUtilities.ValidateStringArgument(className, "className");
+
+            ClassName = className;
+            NamespaceName = namespaceName;
+        }
+
         public ClassNameModel(string fullTypeName)
         {
             ExceptionUtilities.ValidateStringArgument(fullTypeName, "fullTypeName");
@@ -22,8 +32,8 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
         }
 
-        public string ClassName { get; set; }
+        public string ClassName { get; private set; }
 
-        public string NamespaceName { get; set; }
+        public string NamespaceName { get; private set; }
     }
 }

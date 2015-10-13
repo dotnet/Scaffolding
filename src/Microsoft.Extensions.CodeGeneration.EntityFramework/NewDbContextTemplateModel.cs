@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             ModelTypeName = modelType.Name;
             RequiredNamespaces = new HashSet<string>();
 
-            var classNameModel = TypeUtilities.GetTypeNameandNamespace(dbContextName);
+            var classNameModel = new ClassNameModel(dbContextName);
 
             DbContextTypeName = classNameModel.ClassName;
             DbContextNamespace = classNameModel.NamespaceName;

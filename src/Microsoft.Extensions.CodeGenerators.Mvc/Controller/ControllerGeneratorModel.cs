@@ -16,5 +16,8 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
 
         [Option(Name = "controllerName", ShortName = "name", Description = "Name of the controller")]
         public string ControllerName { get; set; }
+
+        [Option(Name = "restWithNoViews", ShortName = "api", Description = "When specified, generates a Controller with REST style API, noViews is assumed and any view related options are ignored")]
+        public string IsRestController { get; set; }
     }
 }

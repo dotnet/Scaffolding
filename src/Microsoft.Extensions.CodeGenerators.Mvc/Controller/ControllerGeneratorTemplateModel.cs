@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
         {
             ModelType = modelType;
 
-            var classNameModel = TypeUtilities.GetTypeNameandNamespace(dbContextFullTypeName);
+            var classNameModel = new ClassNameModel(dbContextFullTypeName);
 
             ContextTypeName = classNameModel.ClassName;
             DbContextNamespace = classNameModel.NamespaceName;

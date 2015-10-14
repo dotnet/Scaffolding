@@ -73,7 +73,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             await layoutDependencyInstaller.Execute();
 
             var templateName = "ControllerWithContext.cshtml";
-            var templateModel = new ControllerGeneratorTemplateModel(model, dbContextFullName)
+            var templateModel = new ControllerWithContextTemplateModel(model, dbContextFullName)
             {
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo

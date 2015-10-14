@@ -11,7 +11,7 @@ using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
 {
     public class StaticFilesDependencyInstaller : DependencyInstaller
     {

@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.CodeGeneration;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
 {
     internal static class StandardDependencies
     {

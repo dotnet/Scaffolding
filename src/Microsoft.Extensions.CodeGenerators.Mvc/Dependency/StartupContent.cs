@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
 {
     public class StartupContent
     {

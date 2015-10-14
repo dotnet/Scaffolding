@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
+using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
+using Microsoft.Extensions.CodeGenerators.Mvc.View;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
-    public class MvcControllerWithContext : ControllerGeneratorBase
+    public class MvcControllerWithContext : ControllerWithContextGenerator
     {
         private readonly List<string> _views = new List<string>()
         {
@@ -33,7 +35,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         {
         }
 
-        public override async Task Generate(ControllerGeneratorModel controllerGeneratorModel)
+        public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ModelType model, dataContext;
@@ -46,7 +48,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             await layoutDependencyInstaller.InstallDependencies();
         }
 
-        private async Task GenerateController(ControllerGeneratorModel controllerGeneratorModel,
+        private async Task GenerateController(CommandLineGeneratorModel controllerGeneratorModel,
             ModelType model,
             ModelType dataContext,
             string controllerNameSpace,

@@ -10,7 +10,7 @@ using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
 {
     public class MvcLayoutDependencyInstaller : DependencyInstaller
     {

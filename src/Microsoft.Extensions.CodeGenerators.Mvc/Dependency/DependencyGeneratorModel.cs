@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
 {
     public class DependencyGeneratorModel
     {

@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
     public class ControllerWithContextTemplateModel
     {

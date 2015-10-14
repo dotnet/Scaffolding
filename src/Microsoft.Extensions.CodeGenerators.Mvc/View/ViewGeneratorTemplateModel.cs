@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 {
     public class ViewGeneratorTemplateModel
     {

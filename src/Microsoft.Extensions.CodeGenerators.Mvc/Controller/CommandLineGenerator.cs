@@ -9,16 +9,16 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
     [Alias("controller")]
-    public class ControllerGenerator : ICodeGenerator
+    public class CommandLineGenerator : ICodeGenerator
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public ControllerGenerator([NotNull]IServiceProvider serviceProvider)
+        public CommandLineGenerator([NotNull]IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
-        public async Task GenerateCode([NotNull]ControllerGeneratorModel model)
+        public async Task GenerateCode([NotNull]CommandLineGeneratorModel model)
         {
             ControllerGeneratorBase generator = null;
 

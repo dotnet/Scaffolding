@@ -10,21 +10,10 @@ using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
     public abstract class ControllerGeneratorBase
     {
-        protected IModelTypesLocator ModelTypesLocator
-        {
-            get;
-            private set;
-        }
-
-        protected IEntityFrameworkService EntityFrameworkService
-        {
-            get;
-            private set;
-        }
         protected IApplicationEnvironment ApplicationEnvironment
         {
             get;
@@ -54,8 +43,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
         public ControllerGeneratorBase(
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IEntityFrameworkService entityFrameworkService,
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
@@ -63,8 +50,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
             LibraryManager = libraryManager;
             ApplicationEnvironment = environment;
             CodeGeneratorActionsService = codeGeneratorActionsService;
-            ModelTypesLocator = modelTypesLocator;
-            EntityFrameworkService = entityFrameworkService;
             ServiceProvider = serviceProvider;
             Logger = logger;
         }
@@ -90,9 +75,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
             return appName + "." + Constants.ControllersFolderName;
         }
 
-        public abstract Task Generate(ControllerGeneratorModel controllerGeneratorModel);
+        public abstract Task Generate(CommandLineGeneratorModel controllerGeneratorModel);
 
-        protected string ValidateAndGetOutputPath(ControllerGeneratorModel controllerGeneratorModel)
+        protected string ValidateAndGetOutputPath(CommandLineGeneratorModel controllerGeneratorModel)
         {
             string outputFolder = String.IsNullOrEmpty(controllerGeneratorModel.RelativeFolderPath)
                 ? ApplicationEnvironment.ApplicationBasePath

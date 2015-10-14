@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGeneration.EntityFramework;
+using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
@@ -12,16 +12,14 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         public MvcControllerEmpty(
             [NotNull]ILibraryManager libraryManager,
             [NotNull]IApplicationEnvironment environment,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IEntityFrameworkService entityFrameworkService,
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
-            : base(libraryManager, environment, modelTypesLocator, entityFrameworkService, codeGeneratorActionsService, serviceProvider, logger)
+            : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
 
-        public override async Task Generate(ControllerGeneratorModel controllerGeneratorModel)
+        public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
         {
             if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {

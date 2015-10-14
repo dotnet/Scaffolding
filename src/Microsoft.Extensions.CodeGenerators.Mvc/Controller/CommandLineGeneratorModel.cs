@@ -4,9 +4,9 @@
 using System;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
 
-namespace Microsoft.Extensions.CodeGenerators.Mvc
+namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
-    public class ControllerGeneratorModel : CommonCommandLineModel
+    public class CommandLineGeneratorModel : CommonCommandLineModel
     {
         [Option(Name = "useAsyncActions", ShortName = "async", Description = "Switch to indicate whether to generate async controller actions")]
         public bool UseAsync { get; set; }

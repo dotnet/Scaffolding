@@ -85,11 +85,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
             Contract.Assert(model != null, "Validation succeded but model type not set");
 
             var appbasePath = _applicationEnvironment.ApplicationBasePath;
-            var outputPath = Path.Combine(
-                appbasePath,
-                Constants.ViewsFolderName,
-                model.Name,
-                viewGeneratorModel.ViewName + Constants.ViewExtension);
+            var outputFolder = String.IsNullOrEmpty(viewGeneratorModel.RelativeFolderPath)
+                ? Path.Combine(appbasePath)
+                : Path.Combine(appbasePath, viewGeneratorModel.RelativeFolderPath);
+
+            var outputPath = Path.Combine(outputFolder, viewGeneratorModel.ViewName + Constants.ViewExtension);
 
             if (File.Exists(outputPath) && !viewGeneratorModel.Force)
             {

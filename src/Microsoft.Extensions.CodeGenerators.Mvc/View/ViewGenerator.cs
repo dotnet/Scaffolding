@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: _applicationEnvironment.ApplicationBasePath,
-                    baseFolders: new[] { typeof(ViewGenerator).Name },
+                    baseFolders: new[] { "ViewGenerator" },
                     libraryManager: _libraryManager);
             }
         }
@@ -95,7 +95,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
             {
                 throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
-                    "View file {0} exists, use -f option to overwrite",
+                    "The file {0} exists, use -f option to overwrite",
                     outputPath));
             }
 

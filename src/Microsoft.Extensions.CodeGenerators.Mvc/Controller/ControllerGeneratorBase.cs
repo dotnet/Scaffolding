@@ -94,10 +94,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
 
         protected string ValidateAndGetOutputPath(ControllerGeneratorModel controllerGeneratorModel)
         {
-            var outputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
-                Constants.ControllersFolderName,
-                controllerGeneratorModel.ControllerName + Constants.CodeFileExtension);
+            string outputFolder = String.IsNullOrEmpty(controllerGeneratorModel.RelativeFolderPath)
+                ? ApplicationEnvironment.ApplicationBasePath
+                : Path.Combine(ApplicationEnvironment.ApplicationBasePath, controllerGeneratorModel.RelativeFolderPath);
+
+            var outputPath = Path.Combine(outputFolder, controllerGeneratorModel.ControllerName + Constants.CodeFileExtension);
 
             if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
             {

@@ -108,6 +108,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                         JQueryVersion = "1.10.2"
                     };
 
+                    // Todo: Need logic for areas
                     var viewOutputPath = Path.Combine(
                         appBasePath,
                         Constants.ViewsFolderName,

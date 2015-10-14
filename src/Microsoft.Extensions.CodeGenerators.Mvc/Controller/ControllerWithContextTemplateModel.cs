@@ -9,9 +9,9 @@ using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc
 {
-    public class ControllerGeneratorTemplateModel
+    public class ControllerWithContextTemplateModel
     {
-        public ControllerGeneratorTemplateModel(
+        public ControllerWithContextTemplateModel(
             [NotNull]ModelType modelType,
             [NotNull]string dbContextFullTypeName)
         {

@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                 }
                 else
                 {
-                    generator = GetGenerator<MvcControllerWithContext>();
+                    generator = GetGenerator<ControllerWithContextGenerator>();
                 }
             }
 

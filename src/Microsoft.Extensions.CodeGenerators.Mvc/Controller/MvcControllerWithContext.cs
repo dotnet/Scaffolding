@@ -40,19 +40,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
 
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
-
-            var model = ValidationUtil.ValidateType(controllerGeneratorModel.ModelClass, "model", ModelTypesLocator);
-            var dataContext = ValidationUtil.ValidateType(controllerGeneratorModel.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
-
-            // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
-
-            var dbContextFullName = dataContext != null ? dataContext.FullName : controllerGeneratorModel.DataContextClass;
-            var modelTypeFullName = model.FullName;
-
-            var modelMetadata = await EntityFrameworkService.GetModelMetadata(
-                dbContextFullName,
-                model);
+            var modelTypeAndContextModel = await ValidateModelAndGetMetadata(controllerGeneratorModel);
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
             await layoutDependencyInstaller.Execute();
@@ -60,17 +48,17 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
                 //Todo: Pluralize model name
-                controllerGeneratorModel.ControllerName = model.Name + Constants.ControllerSuffix;
+                controllerGeneratorModel.ControllerName = modelTypeAndContextModel.ModelType.Name + Constants.ControllerSuffix;
             }
 
             var templateName = "ControllerWithContext.cshtml";
-            var templateModel = new ControllerWithContextTemplateModel(model, dbContextFullName)
+            var templateModel = new ControllerWithContextTemplateModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo
                 UseAsync = controllerGeneratorModel.UseAsync,
                 ControllerNamespace = GetControllerNamespace(),
-                ModelMetadata = modelMetadata
+                ModelMetadata = modelTypeAndContextModel.ModelMetadata
             };
 
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
@@ -87,14 +75,14 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
                     var viewTemplateModel = new ViewGeneratorTemplateModel()
                     {
-                        ViewDataTypeName = modelTypeFullName,
-                        ViewDataTypeShortName = model.Name,
+                        ViewDataTypeName = modelTypeAndContextModel.ModelType.FullName,
+                        ViewDataTypeShortName = modelTypeAndContextModel.ModelType.Name,
                         ViewName = viewName,
                         LayoutPageFile = controllerGeneratorModel.LayoutPage,
                         IsLayoutPageSelected = isLayoutSelected,
                         IsPartialView = false,
                         ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries,
-                        ModelMetadata = modelMetadata,
+                        ModelMetadata = modelTypeAndContextModel.ModelMetadata,
                         JQueryVersion = "1.10.2"
                     };
 

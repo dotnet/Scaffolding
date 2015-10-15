@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Globalization;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
@@ -77,19 +75,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             }
 
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
-
-            ModelType model = ValidationUtil.ValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator);
-            ModelType dataContext = ValidationUtil.ValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
-
-            // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
-
-            var dbContextFullName = dataContext != null ? dataContext.FullName : viewGeneratorModel.DataContextClass;
-            var modelTypeFullName = model.FullName;
-
-            var modelMetadata = await _entityFrameworkService.GetModelMetadata(
-                dbContextFullName,
-                model);
+            var modelTypeAndContextModel = await ValidateModelAndGetMetadata(viewGeneratorModel);
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             await layoutDependencyInstaller.Execute();
@@ -105,14 +91,14 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 
             var templateModel = new ViewGeneratorTemplateModel()
             {
-                ViewDataTypeName = modelTypeFullName,
-                ViewDataTypeShortName = model.Name,
+                ViewDataTypeName = modelTypeAndContextModel.ModelType.FullName,
+                ViewDataTypeShortName = modelTypeAndContextModel.ModelType.Name,
                 ViewName = viewGeneratorModel.ViewName,
                 LayoutPageFile = viewGeneratorModel.LayoutPage,
                 IsLayoutPageSelected = isLayoutSelected,
                 IsPartialView = viewGeneratorModel.PartialView,
                 ReferenceScriptLibraries = viewGeneratorModel.ReferenceScriptLibraries,
-                ModelMetadata = modelMetadata,
+                ModelMetadata = modelTypeAndContextModel.ModelMetadata,
                 JQueryVersion = "1.10.2" //Todo
             };
 
@@ -121,6 +107,29 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
 
             await layoutDependencyInstaller.InstallDependencies();
+        }
+
+        // Todo: This method is duplicated with the ControllerWithContext generator.
+        private async Task<ModelTypeAndContextModel> ValidateModelAndGetMetadata(CommonCommandLineModel commandLineModel)
+        {
+            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", _modelTypesLocator);
+            ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
+
+            // Validation successful
+            Contract.Assert(model != null, "Validation succeded but model type not set");
+
+            var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
+
+            var modelMetadata = await _entityFrameworkService.GetModelMetadata(
+                dbContextFullName,
+                model);
+
+            return new ModelTypeAndContextModel()
+            {
+                ModelType = model,
+                DbContextFullName = dbContextFullName,
+                ModelMetadata = modelMetadata
+            };
         }
     }
 }

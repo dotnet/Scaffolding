@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc
 {

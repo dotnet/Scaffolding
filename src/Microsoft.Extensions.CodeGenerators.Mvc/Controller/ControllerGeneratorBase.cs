@@ -3,22 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
-    public abstract class ControllerGeneratorBase
+    public abstract class ControllerGeneratorBase : CommonGeneratorBase
     {
-        protected IApplicationEnvironment ApplicationEnvironment
-        {
-            get;
-            private set;
-        }
         protected ICodeGeneratorActionsService CodeGeneratorActionsService
         {
             get;
@@ -46,9 +38,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
+            : base(environment)
         {
             LibraryManager = libraryManager;
-            ApplicationEnvironment = environment;
             CodeGeneratorActionsService = codeGeneratorActionsService;
             ServiceProvider = serviceProvider;
             Logger = logger;
@@ -75,25 +67,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             return appName + "." + Constants.ControllersFolderName;
         }
 
-        public abstract Task Generate(CommandLineGeneratorModel controllerGeneratorModel);
-
-        protected string ValidateAndGetOutputPath(CommandLineGeneratorModel controllerGeneratorModel)
+        protected string ValidateAndGetOutputPath(CommandLineGeneratorModel generatorModel)
         {
-            string outputFolder = String.IsNullOrEmpty(controllerGeneratorModel.RelativeFolderPath)
-                ? ApplicationEnvironment.ApplicationBasePath
-                : Path.Combine(ApplicationEnvironment.ApplicationBasePath, controllerGeneratorModel.RelativeFolderPath);
-
-            var outputPath = Path.Combine(outputFolder, controllerGeneratorModel.ControllerName + Constants.CodeFileExtension);
-
-            if (File.Exists(outputPath) && !controllerGeneratorModel.Force)
-            {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    "The file {0} exists, use -f option to overwrite",
-                    outputPath));
-            }
-
-            return outputPath;
+            return ValidateAndGetOutputPath(generatorModel, generatorModel.ControllerName + Constants.CodeFileExtension);
         }
+
+        public abstract Task Generate(CommandLineGeneratorModel controllerGeneratorModel);
     }
 }

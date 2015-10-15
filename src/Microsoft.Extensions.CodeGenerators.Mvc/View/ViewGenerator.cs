@@ -16,13 +16,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 {
+    /// <summary>
+    /// Both the command line entry point for View generation (implements ICodeGenerator with Alias attribute)
+    /// and View generator itself (extends CommonGeneratorBase).
+    /// Consider separating if there are going to multiple view generators like Controllers.
+    /// </summary>
     [Alias("view")]
-    public class ViewGenerator : ICodeGenerator
+    public class ViewGenerator : CommonGeneratorBase, ICodeGenerator
     {
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IEntityFrameworkService _entityFrameworkService;
         private readonly ILibraryManager _libraryManager;
-        private readonly IApplicationEnvironment _applicationEnvironment;
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
@@ -38,9 +42,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
             [NotNull]IServiceProvider serviceProvider,
             [NotNull]ILogger logger)
+            : base(environment)
         {
             _libraryManager = libraryManager;
-            _applicationEnvironment = environment;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
@@ -54,7 +58,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
-                    applicationBasePath: _applicationEnvironment.ApplicationBasePath,
+                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
                     baseFolders: new[] { "ViewGenerator" },
                     libraryManager: _libraryManager);
             }
@@ -62,17 +66,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 
         public async Task GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
         {
-            ModelType model = ValidationUtil.ValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator);
-
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
                 throw new ArgumentException("The ViewName cannot be empty");
-            }
-
-            if (viewGeneratorModel.ViewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                int viewNameLength = viewGeneratorModel.ViewName.Length - Constants.ViewExtension.Length;
-                viewGeneratorModel.ViewName = viewGeneratorModel.ViewName.Substring(0, viewNameLength);
             }
 
             if (string.IsNullOrEmpty(viewGeneratorModel.TemplateName))
@@ -80,27 +76,13 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
                 throw new ArgumentException("The TemplateName cannot be empty");
             }
 
+            var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
+
+            ModelType model = ValidationUtil.ValidateType(viewGeneratorModel.ModelClass, "model", _modelTypesLocator);
             ModelType dataContext = ValidationUtil.ValidateType(viewGeneratorModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
-
-            var appbasePath = _applicationEnvironment.ApplicationBasePath;
-            var outputFolder = String.IsNullOrEmpty(viewGeneratorModel.RelativeFolderPath)
-                ? Path.Combine(appbasePath)
-                : Path.Combine(appbasePath, viewGeneratorModel.RelativeFolderPath);
-
-            var outputPath = Path.Combine(outputFolder, viewGeneratorModel.ViewName + Constants.ViewExtension);
-
-            if (File.Exists(outputPath) && !viewGeneratorModel.Force)
-            {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    "The file {0} exists, use -f option to overwrite",
-                    outputPath));
-            }
-
-            var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : viewGeneratorModel.DataContextClass;
             var modelTypeFullName = model.FullName;
@@ -110,11 +92,16 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
                 model);
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
+            await layoutDependencyInstaller.Execute();
+
+            if (viewGeneratorModel.ViewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                int viewNameLength = viewGeneratorModel.ViewName.Length - Constants.ViewExtension.Length;
+                viewGeneratorModel.ViewName = viewGeneratorModel.ViewName.Substring(0, viewNameLength);
+            }
 
             bool isLayoutSelected = !viewGeneratorModel.PartialView &&
                 (viewGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage));
-
-            await layoutDependencyInstaller.Execute();
 
             var templateModel = new ViewGeneratorTemplateModel()
             {
@@ -129,8 +116,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
                 JQueryVersion = "1.10.2" //Todo
             };
 
+            var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-            _logger.LogMessage("Added View : " + outputPath.Substring(appbasePath.Length));
+            _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
 
             await layoutDependencyInstaller.InstallDependencies();
         }

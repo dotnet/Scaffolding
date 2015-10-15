@@ -38,32 +38,14 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
-            ModelType model, dataContext;
 
-            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
-            model = ValidationUtil.ValidateType(controllerGeneratorModel.ModelClass, "model", ModelTypesLocator);
-            dataContext = ValidationUtil.ValidateType(controllerGeneratorModel.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
-            await GenerateController(controllerGeneratorModel, model, dataContext, GetControllerNamespace(), layoutDependencyInstaller);
+            string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
 
-            await layoutDependencyInstaller.InstallDependencies();
-        }
-
-        private async Task GenerateController(CommandLineGeneratorModel controllerGeneratorModel,
-            ModelType model,
-            ModelType dataContext,
-            string controllerNameSpace,
-            MvcLayoutDependencyInstaller layoutDependencyInstaller)
-        {
-            if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
-            {
-                //Todo: Pluralize model name
-                controllerGeneratorModel.ControllerName = model.Name + Constants.ControllerSuffix;
-            }
+            var model = ValidationUtil.ValidateType(controllerGeneratorModel.ModelClass, "model", ModelTypesLocator);
+            var dataContext = ValidationUtil.ValidateType(controllerGeneratorModel.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
             Contract.Assert(model != null, "Validation succeded but model type not set");
-
-            string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : controllerGeneratorModel.DataContextClass;
             var modelTypeFullName = model.FullName;
@@ -72,7 +54,14 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                 dbContextFullName,
                 model);
 
+            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
             await layoutDependencyInstaller.Execute();
+
+            if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
+            {
+                //Todo: Pluralize model name
+                controllerGeneratorModel.ControllerName = model.Name + Constants.ControllerSuffix;
+            }
 
             var templateName = "ControllerWithContext.cshtml";
             var templateModel = new ControllerWithContextTemplateModel(model, dbContextFullName)
@@ -80,13 +69,12 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo
                 UseAsync = controllerGeneratorModel.UseAsync,
-                ControllerNamespace = controllerNameSpace,
+                ControllerNamespace = GetControllerNamespace(),
                 ModelMetadata = modelMetadata
             };
 
-            var appBasePath = ApplicationEnvironment.ApplicationBasePath;
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-            Logger.LogMessage("Added Controller : " + outputPath.Substring(appBasePath.Length));
+            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
 
             if (!controllerGeneratorModel.NoViews)
             {
@@ -112,7 +100,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
                     // Todo: Need logic for areas
                     var viewOutputPath = Path.Combine(
-                        appBasePath,
+                        ApplicationEnvironment.ApplicationBasePath,
                         Constants.ViewsFolderName,
                         templateModel.ControllerRootName,
                         viewName + Constants.ViewExtension);
@@ -120,9 +108,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                     await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
                         viewTemplate + Constants.RazorTemplateExtension, TemplateFolders, viewTemplateModel);
 
-                    Logger.LogMessage("Added View : " + viewOutputPath.Substring(appBasePath.Length));
+                    Logger.LogMessage("Added View : " + viewOutputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
                 }
             }
+
+            await layoutDependencyInstaller.InstallDependencies();
         }
     }
 }

@@ -116,7 +116,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
         private string GetTemplateName(CommandLineGeneratorModel generatorModel)
         {
-            return "ControllerWithContext.cshtml";
+            return generatorModel.IsRestController ? "ApiControllerWithContext.cshtml" : "MvcControllerWithContext.cshtml";
         }
 
         // Todo: This method is duplicated with the ViewGenerator.

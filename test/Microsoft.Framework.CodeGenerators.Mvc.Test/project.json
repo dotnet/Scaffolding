@@ -1,13 +1,13 @@
 {
     "dependencies": {
-        "Microsoft.Framework.CodeGenerators.Mvc": "1.0.0-*",
+        "Microsoft.Framework.CodeGenerators.Mvc": "1.0.0-beta8",
         "Moq": "4.2.1312.1622",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+        "xunit.runner.aspnet": "2.0.0-aspnet-beta8"
     },
     "commands": {
         "test": "xunit.runner.aspnet"
     },
-    "frameworks" : {
-        "dnx451": { }
+    "frameworks": {
+        "dnx451": {}
     }
 }

@@ -1,16 +1,14 @@
 {
     "dependencies": {
-        "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*",
-        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
+        "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-beta8",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-beta8",
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-beta8",
         "ModelTypesLocatorTestWebApp": "1.0.0",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+        "xunit.runner.aspnet": "2.0.0-aspnet-beta8"
     },
-
     "commands": {
         "test": "xunit.runner.aspnet"
     },
-
     "frameworks": {
         "dnx451": {
             "dependencies": {
@@ -19,7 +17,7 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.21-beta-*"
+                "System.Runtime": "4.0.21-beta-23409"
             }
         }
     }

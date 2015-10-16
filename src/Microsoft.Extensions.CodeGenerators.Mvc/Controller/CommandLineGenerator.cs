@@ -23,41 +23,20 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         {
             ControllerGeneratorBase generator = null;
 
-            if (model.IsRestController)
+            if (string.IsNullOrEmpty(model.ModelClass))
             {
-                if (string.IsNullOrEmpty(model.ModelClass))
+                if (model.GenerateReadWriteActions)
                 {
-                    if (model.GenerateReadWriteActions)
-                    {
-                        //WebAPI with Actions
-                    }
-                    else
-                    {
-                        //Empty Web API
-                    }
+                    //Controller with Actions
                 }
                 else
                 {
-                    //WebAPI With Context
+                    generator = GetGenerator<MvcControllerEmpty>(); //This need to handle the WebAPI Empty as well...
                 }
             }
             else
             {
-                if (string.IsNullOrEmpty(model.ModelClass))
-                {
-                    if (model.GenerateReadWriteActions)
-                    {
-                        //Mvc with Actions
-                    }
-                    else
-                    {
-                        generator = GetGenerator<MvcControllerEmpty>();
-                    }
-                }
-                else
-                {
-                    generator = GetGenerator<MvcControllerWithContext>();
-                }
+                generator = GetGenerator<ControllerWithContextGenerator>();
             }
 
             if (generator != null)

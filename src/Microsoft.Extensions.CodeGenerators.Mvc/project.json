@@ -14,5 +14,9 @@
                 "System.Runtime": "4.0.21-beta-*"
             }
         }
+    },
+    "packInclude": {
+        "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
+        "Templates/": "Templates/"
     }
 }

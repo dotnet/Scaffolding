@@ -23,7 +23,6 @@ namespace Microsoft.Extensions.CodeGeneration
         public void Main(string[] args)
         {
             //Debugger.Launch();
-            //Debugger.Break();
 
             var generatorsLocator = _serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
             var logger = _serviceProvider.GetRequiredService<ILogger>();

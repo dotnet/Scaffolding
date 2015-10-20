@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -63,12 +62,6 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         {
             if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
             {
-                // Todo : Need to add model and DbSet namespaces if required
-
-                // Todo : Need pluralization for modelType.Name below as that's the property name
-                var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
-                var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
-
                 // Todo : Consider using DeclaringSyntaxtReference 
                 var sourceLocation = dbContext.TypeSymbol.Locations.Where(l => l.IsInSource).FirstOrDefault();
                 if (sourceLocation != null)
@@ -77,6 +70,14 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     var rootNode = syntaxTree.GetRoot();
                     var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
                     var lastNode = dbContextNode.ChildNodes().Last();
+
+                    rootNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, rootNode);
+                    rootNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.Data.Entity", rootNode); //DbSet namespace
+
+                    // Todo : Need pluralization for property name below.
+                    var dbSetProperty = "public DbSet<" + modelType.Name + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
+                    var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
+
                     var newNode = rootNode.InsertNodesAfter(lastNode,
                             propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
 

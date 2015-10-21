@@ -254,8 +254,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
         private DbContext TryCreateContextUsingAppCode(Type dbContextType)
         {
-            //Todo : This has to be app services rather than scaffolding service provider
-            var hostBuilder = new WebHostBuilder(_serviceProvider);
+            var hostBuilder = new WebHostBuilder();
             var appServices = hostBuilder.Build().ApplicationServices;
             return appServices.GetService(dbContextType) as DbContext;
         }

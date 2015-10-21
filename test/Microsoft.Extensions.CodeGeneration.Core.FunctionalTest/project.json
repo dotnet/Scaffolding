@@ -5,7 +5,9 @@
         "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
         "Microsoft.AspNet.Hosting": "1.0.0-*",
         "ModelTypesLocatorTestWebApp": "1.0.0",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+        "xunit.runner.aspnet": "2.0.0-aspnet-*",
+        "Microsoft.Extensions.Logging" : "1.0.0-*",
+        "Microsoft.Dnx.TestHost": "1.0.0-*"
     },
 
     "commands": {

@@ -1,0 +1,9 @@
+﻿namespace WebAppNamespace
+{
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection servicesVar)
+        {
+        }
+    }
+}

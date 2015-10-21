@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -28,32 +29,26 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         /// child of given rootNode. If the using statement is already present, the rootNode
         /// is returned. Otherwise, a new statement is added at the end of existing
         /// usings and the new node is returned.</returns>
-        public static SyntaxNode AddUsingDirectiveIfNeeded(string namespaceName, SyntaxNode rootNode)
+        public static CompilationUnitSyntax AddUsingDirectiveIfNeeded(string namespaceName, CompilationUnitSyntax rootNode)
         {
             Contract.Assert(rootNode != null);
 
-            UsingDirectiveSyntax lastUsingNode = null;
-            foreach (var usingNode in rootNode.ChildNodes().Where(n => n is UsingDirectiveSyntax))
+            if (String.IsNullOrEmpty(namespaceName))
             {
-                if (((UsingDirectiveSyntax)usingNode).Name.ToString() == namespaceName)
-                {
-                    // Using already present, return this node
-                    return rootNode;
-                }
-                lastUsingNode = (UsingDirectiveSyntax)usingNode;
+                return rootNode;
+            }
+
+            if (rootNode.Usings.Any(usingNode => usingNode.Name.ToString() == namespaceName))
+            {
+                // Using already present, return this node
+                return rootNode;
             }
 
             var insertTree = CSharpSyntaxTree.ParseText("using " + namespaceName + ";" + Environment.NewLine);
+            var usingStatement = insertTree.GetRoot().ChildNodes().First() as UsingDirectiveSyntax;
+            Debug.Assert(usingStatement != null);
 
-            // Using not present, add to the last node
-            if (lastUsingNode != null)
-            {
-                return rootNode.InsertNodesAfter(lastUsingNode, insertTree.GetRoot().ChildNodes());
-            }
-            else
-            {
-                return rootNode.InsertNodesBefore(rootNode.ChildNodes().First(), insertTree.GetRoot().ChildNodes());
-            }
+            return rootNode.AddUsings(usingStatement);
         }
     }
 }

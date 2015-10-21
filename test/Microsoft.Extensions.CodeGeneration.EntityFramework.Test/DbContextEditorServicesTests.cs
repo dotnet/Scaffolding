@@ -43,5 +43,38 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             Assert.True(result.Added);
             Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString());
         }
+
+        [Theory]
+        [InlineData("Startup_RegisterContext_Before.txt", "Startup_RegisterContext_After.txt", "DbContext_Before.txt")]
+        [InlineData("Startup_Empty_Method_RegisterContext_Before.txt", "Startup_Empty_Method_RegisterContext_After.txt", "DbContext_Before.txt")]
+        public void TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices(string beforeStartupResource, string afterStartupResource, string dbContextResource)
+        {
+            string resourcePrefix = "compiler/resources/";
+
+            var beforeStartupText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + beforeStartupResource);
+            var afterStartupText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + afterStartupResource);
+            var dbContextText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + dbContextResource);
+
+            var startupTree = CSharpSyntaxTree.ParseText(beforeStartupText);
+            var contextTree = CSharpSyntaxTree.ParseText(dbContextText);
+            var efReference = MetadataReference.CreateFromFile(typeof(DbContext).Assembly.Location);
+
+            var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference });
+
+            DbContextEditorServices testObj = new DbContextEditorServices(
+                new Mock<ILibraryManager>().Object,
+                new Mock<IApplicationEnvironment>().Object,
+                new Mock<IFilesLocator>().Object,
+                new Mock<ITemplating>().Object);
+
+            var types = RoslynUtilities.GetDirectTypesInCompilation(compilation);
+            var startupType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "Startup").First());
+            var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
+
+            var result = testObj.TryEditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid");
+
+            Assert.True(result.Added);
+            Assert.Equal(afterStartupText, result.NewTree.GetText().ToString());
+        }
     }
 }

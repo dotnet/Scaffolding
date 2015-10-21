@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.CodeGeneration.Templating;
@@ -71,15 +73,15 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
                     var lastNode = dbContextNode.ChildNodes().Last();
 
-                    rootNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, rootNode);
-                    rootNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.Data.Entity", rootNode); //DbSet namespace
-
                     // Todo : Need pluralization for property name below.
                     var dbSetProperty = "public DbSet<" + modelType.Name + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                     var newNode = rootNode.InsertNodesAfter(lastNode,
                             propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
+
+                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.Data.Entity", newNode as CompilationUnitSyntax); //DbSet namespace
+                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, newNode as CompilationUnitSyntax);
 
                     var modifiedTree = syntaxTree.WithRootAndOptions(newNode, syntaxTree.Options);
 
@@ -89,6 +91,80 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                         OldTree = syntaxTree,
                         NewTree = modifiedTree
                     };
+                }
+            }
+
+            return new AddModelResult()
+            {
+                Added = false
+            };
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startUp"></param>
+        /// <returns></returns>
+        public AddModelResult TryEditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName)
+        {
+            Contract.Assert(startUp != null && startUp.TypeSymbol != null);
+            Contract.Assert(!String.IsNullOrEmpty(dbContextTypeName));
+            Contract.Assert(!String.IsNullOrEmpty(dataBaseName));
+
+            var declarationReference = startUp.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+            if (declarationReference != null)
+            {
+                var sourceTree = declarationReference.SyntaxTree;
+                var rootNode = sourceTree.GetRoot();
+
+                var startUpClassNode = rootNode.FindNode(declarationReference.Span);
+
+                var configServicesMethod = startUpClassNode.ChildNodes()
+                    .FirstOrDefault(n => n is MethodDeclarationSyntax
+                        && ((MethodDeclarationSyntax)n).Identifier.ToString() == "ConfigureServices") as MethodDeclarationSyntax;
+
+                if (configServicesMethod != null)
+                {
+                    var servicesParam = configServicesMethod.ParameterList.Parameters
+                        .FirstOrDefault(p => p.Type.ToString() == "IServiceCollection") as ParameterSyntax;
+
+                    if (servicesParam != null)
+                    {
+                        var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
+
+                        string textToAddAtEnd =
+                            statementLeadingTrivia + "{0}.AddEntityFramework()" + Environment.NewLine +
+                            statementLeadingTrivia + "    .AddSqlServer()" + Environment.NewLine +
+                            statementLeadingTrivia + "    .AddDbContext<{1}>(options =>" + Environment.NewLine +
+                            statementLeadingTrivia + "        options.UseSqlServer(@\"Server=(localdb)\\mssqllocaldb;Database={2};Trusted_Connection=True;MultipleActiveResultSets=true\"));" + Environment.NewLine;
+
+                        if (configServicesMethod.Body.Statements.Any())
+                        {
+                            textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
+                        }
+
+                        var expression = SyntaxFactory.ParseStatement(String.Format(textToAddAtEnd,
+                            servicesParam.Identifier,
+                            dbContextTypeName,
+                            dataBaseName));
+
+                        MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
+
+                        var newRoot = rootNode.ReplaceNode(configServicesMethod, newConfigServicesMethod);
+
+                        var namespacesToAdd = new[] { "Microsoft.Data.Entity", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
+                        foreach (var namespaceName in namespacesToAdd)
+                        {
+                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
+                        }
+
+                        return new AddModelResult()
+                        {
+                            Added = true,
+                            OldTree = sourceTree,
+                            NewTree = newRoot.SyntaxTree
+                        };
+                    }
                 }
             }
 

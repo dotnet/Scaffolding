@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {
-    public class AddModelResult
+    public class EditSyntaxTreeResult
     {
-        public bool Added { get; set; }
+        public bool Edited { get; set; }
 
         public SyntaxTree OldTree { get; set; }
 

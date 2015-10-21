@@ -23,16 +23,6 @@ using Microsoft.Data.Entity;
     } 
 }    public class @Model.DbContextTypeName : @baseClassName
     {
-        // Scaffolding generated this DbContext class however it
-        // is not registered using dependency injection. Add these
-        // lines of code to your Startup.cs class in ConfigureServices
-        // method for the DbContext to work properly and available
-        // for Controller through dependency injection.
-        //
-        // services.AddEntityFramework()
-        //     .AddSqlServer()
-        //     .AddDbContext<@Model.DbContextTypeName>();
-
         private static bool _created = false;
 
         public @(Model.DbContextTypeName)()
@@ -46,7 +36,6 @@ using Microsoft.Data.Entity;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@@"Server=(localdb)\mssqllocaldb;Database=@Model.DbContextTypeName;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

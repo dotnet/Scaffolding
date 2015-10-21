@@ -10,8 +10,8 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
     {
         Task<SyntaxTree> AddNewContext(NewDbContextTemplateModel dbContextTemplateModel);
 
-        AddModelResult AddModelToContext(ModelType dbContext, ModelType modelType);
+        EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType);
 
-        AddModelResult TryEditStartupForNewContext(ModelType startup, string dbContextTypeName, string dbContextNamespace, string dataBaseName);
+        EditSyntaxTreeResult EditStartupForNewContext(ModelType startup, string dbContextTypeName, string dbContextNamespace, string dataBaseName);
     }
 }

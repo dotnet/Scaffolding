@@ -56,24 +56,54 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             _logger = logger;
         }
 
-        public async Task<ModelMetadata> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol)
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol)
         {
             Type dbContextType;
-            var dbContextSymbols = _modelTypesLocator.GetType(dbContextFullTypeName).ToList();
-            bool isNewContext = false;
             SyntaxTree dbContextSyntaxTree = null;
-            NewDbContextTemplateModel dbContextTemplateModel = null;
+
+            EditSyntaxTreeResult startUpEditResult = new EditSyntaxTreeResult()
+            {
+                Edited = false
+            };
+
+            ContextProcessingStatus state = ContextProcessingStatus.ContextAvailable;
+
+            var dbContextSymbols = _modelTypesLocator.GetType(dbContextFullTypeName).ToList();
+            var startupType = _modelTypesLocator.GetType("Startup").FirstOrDefault();
 
             if (dbContextSymbols.Count == 0)
             {
-                isNewContext = true;
                 await ValidateEFSqlServerDependency();
 
+                // Create a new Context
                 _logger.LogMessage("Generating a new DbContext class " + dbContextFullTypeName);
-                dbContextTemplateModel = new NewDbContextTemplateModel(dbContextFullTypeName, modelTypeSymbol);
+                var dbContextTemplateModel = new NewDbContextTemplateModel(dbContextFullTypeName, modelTypeSymbol);
                 dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
+                state = ContextProcessingStatus.ContextAdded;
 
-                dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c => c.AddSyntaxTrees(dbContextSyntaxTree));
+                // Edit startup class to register the context using DI
+                if (startupType != null)
+                {
+                    startUpEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType,
+                        dbContextTemplateModel.DbContextTypeName,
+                        dbContextTemplateModel.DbContextNamespace,
+                        dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString());
+                }
+
+                if (!startUpEditResult.Edited)
+                {
+                    state = ContextProcessingStatus.ContextAddedButRequiresConfig;
+                }
+
+                dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c =>
+                {
+                    c = c.AddSyntaxTrees(dbContextSyntaxTree);
+                    if (startUpEditResult.Edited)
+                    {
+                        c = c.ReplaceSyntaxTree(startUpEditResult.OldTree, startUpEditResult.NewTree);
+                    }
+                    return c;
+                });
                 
                 // Add file information
                 dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName));
@@ -81,8 +111,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             else
             {
                 var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
-                if (addResult.Added)
+                if (addResult.Edited)
                 {
+                    state = ContextProcessingStatus.ContextEdited;
                     dbContextSyntaxTree = addResult.NewTree;
                     dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c =>
                     {
@@ -111,20 +142,32 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
 
             _logger.LogMessage("Attempting to figure out the EntityFramework metadata for the model and DbContext");
-            var metadata = GetModelMetadata(dbContextType, modelType);
+            var metadata = GetModelMetadata(dbContextType, modelType, startupType);
 
-            // Write the DbContext if getting the model metadata is successful
+            // Write the DbContext/Startup if getting the model metadata is successful
             if (dbContextSyntaxTree != null)
             {
-                PersistDbContext(dbContextSyntaxTree);
-                if (isNewContext)
+                PersistSyntaxTree(dbContextSyntaxTree);
+                if (state == ContextProcessingStatus.ContextAdded || state == ContextProcessingStatus.ContextAddedButRequiresConfig)
                 {
-                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length)
-                        + ", however there may be additional steps required for the generted code to work properly, refer to comments in the generated context.");
+                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length));
+
+                    if (state != ContextProcessingStatus.ContextAddedButRequiresConfig)
+                    {
+                        PersistSyntaxTree(startUpEditResult.NewTree);
+                    }
+                    else
+                    {
+                        _logger.LogMessage("However there may be additional steps required for the generted code to work properly, refer to documentation <forward_link>.");
+                    }
                 }
             }
 
-            return metadata;
+            return new ContextProcessingResult()
+            {
+                ContextProcessingStatus = state,
+                ModelMetadata = metadata
+            };
         }
 
         private Type CompileAndGetDbContext(string dbContextTypeName, Func<Compilation, Compilation> compilationModificationFunc)
@@ -157,7 +200,6 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
         private string GetPathForNewContext(string contextShortTypeName)
         {
-            //ToDo: What's the best place to write the DbContext?
             var appBasePath = _environment.ApplicationBasePath;
             var outputPath = Path.Combine(
                 appBasePath,
@@ -201,7 +243,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         /// Handles both writing a new file and editing an existing file.
         /// </summary>
         /// <param name="newTree"></param>
-        private void PersistDbContext(SyntaxTree newTree)
+        private void PersistSyntaxTree(SyntaxTree newTree)
         {
             Debug.Assert(newTree != null);
             Debug.Assert(!String.IsNullOrEmpty(newTree.FilePath));
@@ -217,12 +259,12 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
         }
 
-        private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType)
+        private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType, ModelType startupType)
         {
             DbContext dbContextInstance;
             try
             {
-                dbContextInstance = TryCreateContextUsingAppCode(dbContextType);
+                dbContextInstance = TryCreateContextUsingAppCode(dbContextType, startupType);
                 if (dbContextInstance == null)
                 {
                     dbContextInstance = Activator.CreateInstance(dbContextType) as DbContext;
@@ -252,9 +294,17 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             return new ModelMetadata(entityType, dbContextType);
         }
 
-        private DbContext TryCreateContextUsingAppCode(Type dbContextType)
+        private DbContext TryCreateContextUsingAppCode(Type dbContextType, ModelType startupType)
         {
             var hostBuilder = new WebHostBuilder();
+            if (startupType != null)
+            {
+                var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);
+                if (reflectedStartupType != null)
+                {
+                    hostBuilder.UseStartup(reflectedStartupType);
+                }
+            }
             var appServices = hostBuilder.Build().ApplicationServices;
             return appServices.GetService(dbContextType) as DbContext;
         }

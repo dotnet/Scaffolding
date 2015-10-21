@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             return CSharpSyntaxTree.ParseText(sourceText);
         }
 
-        public AddModelResult AddModelToContext(ModelType dbContext, ModelType modelType)
+        public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType)
         {
             if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
             {
@@ -85,18 +85,18 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
                     var modifiedTree = syntaxTree.WithRootAndOptions(newNode, syntaxTree.Options);
 
-                    return new AddModelResult()
+                    return new EditSyntaxTreeResult()
                     {
-                        Added = true,
+                        Edited = true,
                         OldTree = syntaxTree,
                         NewTree = modifiedTree
                     };
                 }
             }
 
-            return new AddModelResult()
+            return new EditSyntaxTreeResult()
             {
-                Added = false
+                Edited = false
             };
         }
 
@@ -105,7 +105,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         /// </summary>
         /// <param name="startUp"></param>
         /// <returns></returns>
-        public AddModelResult TryEditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName)
+        public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName)
         {
             Contract.Assert(startUp != null && startUp.TypeSymbol != null);
             Contract.Assert(!String.IsNullOrEmpty(dbContextTypeName));
@@ -158,19 +158,19 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                             newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
                         }
 
-                        return new AddModelResult()
+                        return new EditSyntaxTreeResult()
                         {
-                            Added = true,
+                            Edited = true,
                             OldTree = sourceTree,
-                            NewTree = newRoot.SyntaxTree
+                            NewTree = sourceTree.WithRootAndOptions(newRoot, sourceTree.Options)
                         };
                     }
                 }
             }
 
-            return new AddModelResult()
+            return new EditSyntaxTreeResult()
             {
-                Added = false
+                Edited = false
             };
         }
 

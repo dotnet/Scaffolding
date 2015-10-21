@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
 
             var result = testObj.AddModelToContext(contextType, modelType);
 
-            Assert.True(result.Added);
+            Assert.True(result.Edited);
             Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString());
         }
 
@@ -71,9 +71,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             var startupType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "Startup").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
-            var result = testObj.TryEditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid");
+            var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid");
 
-            Assert.True(result.Added);
+            Assert.True(result.Edited);
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString());
         }
     }

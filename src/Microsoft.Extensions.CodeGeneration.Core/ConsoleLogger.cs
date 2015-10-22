@@ -15,7 +15,14 @@ namespace Microsoft.Extensions.CodeGeneration
 
         public void LogMessage(string message, LogMessageLevel level)
         {
-            Console.WriteLine(message);
+            if (level == LogMessageLevel.Error)
+            {
+                Console.Error.WriteLine(message);
+            }
+            else
+            {
+                Console.WriteLine(message);
+            }
         }
     }
 }

@@ -93,6 +93,11 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                 if (!startUpEditResult.Edited)
                 {
                     state = ContextProcessingStatus.ContextAddedButRequiresConfig;
+
+                    // The created context would anyway fail to fetch metadata with a crypic message
+                    // It's better to throw with a meaningful message
+                    throw new InvalidOperationException("Scaffolding failed to edit Startup class to register the new Context using Dependency Injection." +
+                        "Make sure there is a Startup class and a ConfigureServices method and Configuration property in it");
                 }
 
                 dbContextType = CompileAndGetDbContext(dbContextFullTypeName, c =>
@@ -272,7 +277,12 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("There was an error creating the DbContext instance to get the model: " + ex);
+                while (ex is TargetInvocationException)
+                {
+                    ex = ex.InnerException;
+                }
+                _logger.LogMessage("There was an error creating the DbContext instance to get the model.", LogMessageLevel.Error);
+                throw ex;
             }
 
             if (dbContextInstance == null)

@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
     {
         public ModelType ModelType { get; set; }
 
-        public ModelMetadata ModelMetadata { get; set; }
+        public ContextProcessingResult ContextProcessingResult { get; set; }
 
         public string DbContextFullName { get; set; }
     }

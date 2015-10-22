@@ -1,0 +1,13 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace WebAppNamespace
+{
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection servicesVar)
+        {
+            // Add EF services to the services container.
+            servicesVar.AddEntityFramework();
+        }
+    }
+}

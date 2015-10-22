@@ -98,7 +98,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
                 IsLayoutPageSelected = isLayoutSelected,
                 IsPartialView = viewGeneratorModel.PartialView,
                 ReferenceScriptLibraries = viewGeneratorModel.ReferenceScriptLibraries,
-                ModelMetadata = modelTypeAndContextModel.ModelMetadata,
+                ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata,
                 JQueryVersion = "1.10.2" //Todo
             };
 
@@ -107,6 +107,12 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
 
             await layoutDependencyInstaller.InstallDependencies();
+
+            if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
+            {
+                throw new Exception("Scaffolding generated all the code but the new context created could be registered using dependency injection." +
+                    "There may be additional steps required for the generated code to work. Refer to <forward-link>");
+            }
         }
 
         // Todo: This method is duplicated with the ControllerWithContext generator.
@@ -128,7 +134,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             {
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
-                ModelMetadata = modelMetadata
+                ContextProcessingResult = modelMetadata
             };
         }
     }

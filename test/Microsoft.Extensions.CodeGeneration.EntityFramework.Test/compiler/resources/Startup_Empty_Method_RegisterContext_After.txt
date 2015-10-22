@@ -1,0 +1,16 @@
+﻿using Microsoft.Data.Entity;
+using Microsoft.Extensions.DependencyInjection;
+using ContextNamespace;
+namespace WebAppNamespace
+{
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection servicesVar)
+        {
+            servicesVar.AddEntityFramework()
+                .AddSqlServer()
+                .AddDbContext<MyContext>(options =>
+                    options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=MyContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true"));
+        }
+    }
+}

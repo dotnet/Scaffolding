@@ -59,13 +59,19 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                 AreaName = string.Empty, //ToDo
                 UseAsync = controllerGeneratorModel.UseAsync,
                 ControllerNamespace = GetControllerNamespace(),
-                ModelMetadata = modelTypeAndContextModel.ModelMetadata
+                ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata
             };
 
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);
             Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
 
             await GenerateViewsIfRequired(controllerGeneratorModel, modelTypeAndContextModel, templateModel.ControllerRootName);
+
+            if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
+            {
+                throw new Exception("Scaffolding generated all the code but the new context created could be registered using dependency injection." +
+                    "There may be additional steps required for the generated code to work. Refer to <forward-link>");
+            }
         }
 
         private async Task GenerateViewsIfRequired(CommandLineGeneratorModel controllerGeneratorModel,
@@ -93,7 +99,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                         IsLayoutPageSelected = isLayoutSelected,
                         IsPartialView = false,
                         ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries,
-                        ModelMetadata = modelTypeAndContextModel.ModelMetadata,
+                        ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata,
                         JQueryVersion = "1.10.2"
                     };
 
@@ -138,7 +144,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             {
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
-                ModelMetadata = modelMetadata
+                ContextProcessingResult = modelMetadata
             };
         }
 

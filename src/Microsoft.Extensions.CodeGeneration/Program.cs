@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
@@ -23,7 +24,6 @@ namespace Microsoft.Extensions.CodeGeneration
         public void Main(string[] args)
         {
             //Debugger.Launch();
-            //Debugger.Break();
 
             var generatorsLocator = _serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
             var logger = _serviceProvider.GetRequiredService<ILogger>();
@@ -48,7 +48,11 @@ namespace Microsoft.Extensions.CodeGeneration
             }
             catch (Exception ex)
             {
-                logger.LogMessage(ex.Message);
+                while (ex is TargetInvocationException)
+                {
+                    ex = ex.InnerException;
+                }
+                logger.LogMessage(ex.Message, LogMessageLevel.Error);
             }
         }
 

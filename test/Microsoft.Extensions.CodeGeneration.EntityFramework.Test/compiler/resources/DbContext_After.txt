@@ -1,10 +1,12 @@
-﻿namespace ContextNamespace
+﻿using Microsoft.Data.Entity;
+using ModelNamespace;
+namespace ContextNamespace
 {
-	public class MyContext : DbContext
-	{
-		public MyContext() : base()
-		{
-		}
-		public DbSet<ModelNamespace.MyModel> MyModel { get; set; }
-	}
+    public class MyContext : DbContext
+    {
+        public MyContext() : base()
+        {
+        }
+        public DbSet<MyModel> MyModel { get; set; }
+    }
 }

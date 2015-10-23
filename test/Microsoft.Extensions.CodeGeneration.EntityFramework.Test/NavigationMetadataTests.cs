@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void ManyToOneRelation_Metadata_Is_Correct()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void ForiengKeyRelation_Metadata_Is_Correct()
         {
             //Arrange
-            var orderEntity = TestModel.CustomerOrderModel.GetEntityType(typeof(Order));
+            var orderEntity = TestModel.CustomerOrderModel.FindEntityType(typeof(Order));
             var modelMetadata = new ModelMetadata(orderEntity, typeof(TestDbContext));
 
             //Act
@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void OneToManyNavigation_Excluded_From_Metadata()
         {
             //Arrange
-            var categoryEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Category));
+            var categoryEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Category));
             var modelMetadata = new ModelMetadata(categoryEntity, typeof(TestDbContext));
 
             //Act
@@ -72,7 +72,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void Independent_Association_Excluded_From_Metadata()
         {
             //Arrange
-            var customerEntity = TestModel.CustomerOrderModel.GetEntityType(typeof(Customer));
+            var customerEntity = TestModel.CustomerOrderModel.FindEntityType(typeof(Customer));
             var modelMetadata = new ModelMetadata(customerEntity, typeof(TestDbContext));
 
             //Act

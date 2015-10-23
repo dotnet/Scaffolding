@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void Primary_Key_Metadata_Is_Correct()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void Foreign_Key_Metadata_Is_Correct()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void String_Property_Metadata_Is_Correct()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -76,7 +76,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void Enum_Property_Metadata_Is_Correct()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -95,7 +95,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void Enum_Flags_Property_Metadata_Is_Correct()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -114,7 +114,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void Scaffold_Attribute_Is_Reflected_In_Metadata()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act
@@ -139,7 +139,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         public void ReadOnly_Attribute_Is_Reflected_In_Metadata()
         {
             //Arrange
-            var productEntity = TestModel.CategoryProductModel.GetEntityType(typeof(Product));
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act

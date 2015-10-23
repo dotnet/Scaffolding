@@ -52,7 +52,13 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             {
                 if (_primaryKeys == null)
                 {
-                    _primaryKeys = EntityType.GetPrimaryKey()
+                    var primaryKey = EntityType.FindPrimaryKey();
+                    if (primaryKey == null)
+                    {
+                        throw new InvalidOperationException("Primary key not found");
+                    }
+                    
+                    _primaryKeys = primaryKey
                         .Properties
                         .Select(p => new PropertyMetadata(p, DbContexType))
                         .ToArray();

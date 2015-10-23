@@ -1,4 +1,3 @@
 {
-    "projects": ["src", "test/TestApps"],
-    "packages": "packages"
+    "projects": ["src", "test/TestApps"]
 }

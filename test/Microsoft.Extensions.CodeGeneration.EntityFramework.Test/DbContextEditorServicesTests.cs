@@ -2,11 +2,10 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
-using Microsoft.Dnx.Runtime;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Moq;
 using Xunit;
-using System.Diagnostics;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
 {

@@ -14,8 +14,9 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
+using Microsoft.Data.Entity.Metadata;
 using Microsoft.Dnx.Compilation;
-using Microsoft.Dnx.Runtime;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {

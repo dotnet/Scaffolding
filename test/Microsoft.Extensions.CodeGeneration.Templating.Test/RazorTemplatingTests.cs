@@ -2,8 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.Dnx.Compilation;
-using Microsoft.Dnx.Runtime;
-using Microsoft.Dnx.Runtime.Infrastructure;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 using Moq;
 using Xunit;
@@ -18,7 +17,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
         {
             //Arrange
             var templateContent = "Hello @Model.Name";
-            var model = new SimpleModel () { Name = "World" };
+            var model = new SimpleModel() { Name = "World" };
             var compilationService = GetCompilationService();
             var templatingService = new RazorTemplating(compilationService);
 
@@ -39,7 +38,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
             var templatingService = new RazorTemplating(compilationService);
 
             //Act
-            var result = await templatingService.RunTemplateAsync(templateContent, templateModel:"DoesNotMatter");
+            var result = await templatingService.RunTemplateAsync(templateContent, templateModel: "DoesNotMatter");
 
             //Assert
             Assert.Equal("", result.GeneratedText);
@@ -50,10 +49,9 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
 
         private ICompilationService GetCompilationService()
         {
-            var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
-            var appEnvironment = (IApplicationEnvironment)originalProvider.GetService(typeof(IApplicationEnvironment));
-            var loaderAccessor = (IAssemblyLoadContextAccessor)originalProvider.GetService(typeof(IAssemblyLoadContextAccessor));
-            var libExporter = (ILibraryExporter)originalProvider.GetService(typeof(ILibraryExporter));
+            var appEnvironment = PlatformServices.Default.Application;
+            var loaderAccessor = PlatformServices.Default.AssemblyLoadContextAccessor;
+            var libExporter = CompilationServices.Default.LibraryExporter;
 
             var emptyLibExport = new LibraryExport(metadataReferences: null);
             var mockLibExporter = new Mock<ILibraryExporter>();

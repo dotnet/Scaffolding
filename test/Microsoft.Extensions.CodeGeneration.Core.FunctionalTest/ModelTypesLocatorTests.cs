@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.Dnx.Compilation;
-using Microsoft.Dnx.Runtime;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

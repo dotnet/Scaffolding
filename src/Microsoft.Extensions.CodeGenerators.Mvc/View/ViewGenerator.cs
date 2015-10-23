@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
-using Microsoft.Dnx.Runtime;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;

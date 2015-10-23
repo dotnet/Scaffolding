@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Dnx.Runtime;
-using Microsoft.Dnx.Runtime.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
@@ -14,8 +13,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
     {
         public static IServiceProvider CreateServices(string testAppName)
         {
-            var originalProvider = CallContextServiceLocator.Locator.ServiceProvider;
-            var appEnvironment = originalProvider.GetRequiredService<IApplicationEnvironment>();
+            var appEnvironment = PlatformServices.Default.Application;
 
             // When the tests are run the appEnvironment points to test project.
             // Change the app environment to point to the test application to be used

@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
         "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
         "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
         "Microsoft.AspNet.Hosting": "1.0.0-*",

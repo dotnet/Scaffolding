@@ -8,21 +8,20 @@ using Microsoft.Extensions.CodeGeneration.EntityFramework;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Dnx.Compilation;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
     public class Program
     {
-        private ServiceProvider _serviceProvider;
+        private static ServiceProvider _serviceProvider;
 
-        public Program(IServiceProvider serviceProvider)
+        public static void Main(string[] args)
         {
-            _serviceProvider = new ServiceProvider(fallbackServiceProvider: serviceProvider);
+            var _serviceProvider = new ServiceProvider();
+
             AddCodeGenerationServices(_serviceProvider);
-        }
-
-        public void Main(string[] args)
-        {
             //Debugger.Launch();
 
             var generatorsLocator = _serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
@@ -56,7 +55,7 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
+        private static void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
             var logger = _serviceProvider.GetRequiredService<ILogger>();
 
@@ -78,15 +77,23 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private bool IsHelpArgument([NotNull]string argument)
+        private static bool IsHelpArgument([NotNull]string argument)
         {
             return string.Equals("-h", argument, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("-?", argument, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("--help", argument, StringComparison.OrdinalIgnoreCase);
         }
 
-        private void AddCodeGenerationServices([NotNull]ServiceProvider serviceProvider)
+        private static void AddCodeGenerationServices([NotNull]ServiceProvider serviceProvider)
         {
+            serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
+            serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
+            serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), PlatformServices.Default.AssemblyLoadContextAccessor);
+            serviceProvider.Add(typeof(IAssemblyLoaderContainer), PlatformServices.Default.AssemblyLoaderContainer);
+            serviceProvider.Add(typeof(ILibraryManager), PlatformServices.Default.LibraryManager);
+            serviceProvider.Add(typeof(ILibraryExporter), CompilationServices.Default.LibraryExporter);
+            serviceProvider.Add(typeof(ICompilerOptionsProvider), CompilationServices.Default.CompilerOptionsProvider);
+
             //Ordering of services is important here
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
             serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());

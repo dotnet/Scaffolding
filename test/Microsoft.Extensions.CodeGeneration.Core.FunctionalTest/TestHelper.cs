@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Dnx.Compilation;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {
@@ -23,7 +24,12 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
 
             return new WebHostBuilder()
-                .UseServices(services => services.AddInstance<IApplicationEnvironment>(testEnvironment))
+                .UseServices(services => 
+                    {
+                        services.AddInstance<IApplicationEnvironment>(testEnvironment);
+                        services.AddInstance(CompilationServices.Default.LibraryExporter);
+                        services.AddInstance(CompilationServices.Default.CompilerOptionsProvider);
+                    })
                 .Build()
                 .ApplicationServices;
         }

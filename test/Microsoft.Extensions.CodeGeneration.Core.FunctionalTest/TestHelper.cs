@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using Microsoft.AspNet.Hosting;
-using Microsoft.Dnx.Runtime;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {

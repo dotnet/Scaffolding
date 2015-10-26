@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Data.Entity.Metadata;
+﻿using System.Linq;
+using Microsoft.Data.Entity;
 using Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels;
 using Xunit;
 

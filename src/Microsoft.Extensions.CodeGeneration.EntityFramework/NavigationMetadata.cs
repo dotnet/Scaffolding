@@ -4,7 +4,9 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Metadata;
+using Microsoft.Data.Entity.Metadata.Internal;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         public NavigationMetadata(INavigation navigation, Type dbContextType)
         {
             Contract.Assert(navigation != null);
-            Contract.Assert(navigation.PointsToPrincipal());
+            Contract.Assert(navigation.IsDependentToPrincipal());
 
             AssociationPropertyName = navigation.Name;
             DisplayPropertyName = AssociationPropertyName; //Needs further implementation

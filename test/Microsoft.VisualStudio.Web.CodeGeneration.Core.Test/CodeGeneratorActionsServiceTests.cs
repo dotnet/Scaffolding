@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
+using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
 using Moq;
 using Xunit;
 

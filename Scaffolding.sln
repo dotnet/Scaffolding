@@ -52,6 +52,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.VisualStudio.Web.
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.VisualStudio.Web.CodeGeneration.Templating", "src\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.xproj", "{ACC58820-0386-4058-BDDC-CA35CDC47DEE}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources", "test\Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources\Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources.xproj", "{79BCB118-B2AE-43E2-BABA-C0DD49C17269}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +120,10 @@ Global
 		{ACC58820-0386-4058-BDDC-CA35CDC47DEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACC58820-0386-4058-BDDC-CA35CDC47DEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACC58820-0386-4058-BDDC-CA35CDC47DEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79BCB118-B2AE-43E2-BABA-C0DD49C17269}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79BCB118-B2AE-43E2-BABA-C0DD49C17269}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79BCB118-B2AE-43E2-BABA-C0DD49C17269}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79BCB118-B2AE-43E2-BABA-C0DD49C17269}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,5 +145,6 @@ Global
 		{7BC55530-323E-48D7-9546-5D95DF57269D} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 		{1F17DCC9-E56F-4008-8337-FEB6A6819A1F} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 		{ACC58820-0386-4058-BDDC-CA35CDC47DEE} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
+		{79BCB118-B2AE-43E2-BABA-C0DD49C17269} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 	EndGlobalSection
 EndGlobal

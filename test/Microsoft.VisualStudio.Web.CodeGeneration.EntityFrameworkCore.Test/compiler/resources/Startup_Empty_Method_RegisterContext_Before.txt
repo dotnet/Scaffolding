@@ -1,9 +1,11 @@
-﻿namespace WebAppNamespace
+﻿using Microsoft.Extensions.Configuration;
+namespace WebAppNamespace
 {
     public class Startup
     {
         public void ConfigureServices(IServiceCollection servicesVar)
         {
         }
+        public IConfigurationRoot ConfigurationProp { get; set; }
     }
 }

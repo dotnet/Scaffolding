@@ -4,6 +4,8 @@ namespace WebAppNamespace
 {
     public class Startup
     {
+        public Microsoft.Extensions.Configuration.IConfigurationRoot ConfigurationProp { get; set; }
+
         public void ConfigureServices(IServiceCollection servicesVar)
         {
             // Add EF services to the services container.

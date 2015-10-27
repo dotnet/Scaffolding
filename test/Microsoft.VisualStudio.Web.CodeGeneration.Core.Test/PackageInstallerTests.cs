@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
+using Microsoft.Extensions.PlatformAbstractions;
 using Moq;
 using Xunit;
 

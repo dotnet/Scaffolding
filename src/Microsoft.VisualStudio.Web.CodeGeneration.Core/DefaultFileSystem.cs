@@ -8,8 +8,14 @@ using System.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
-    internal class DefaultFileSystem : IFileSystem
+    /// <summary>
+    /// Default implementation of <see cref="IFileSystem"/>
+    /// using the real file sytem.
+    /// </summary>
+    public class DefaultFileSystem : IFileSystem
     {
+        public static DefaultFileSystem Instance = new DefaultFileSystem();
+
         public async Task AddFileAsync(string outputPath, Stream sourceStream)
         {
             using (var writeStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))

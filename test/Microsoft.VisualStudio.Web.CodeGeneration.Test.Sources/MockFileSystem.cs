@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
 {
     /// <summary>
     /// A useful helper moq for IFileSystem.

@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
-    internal interface IFileSystem
+    /// <summary>
+    /// An abstraction over common file/disk utilities.
+    /// Intended for mocking the disk operations in unit tests
+    /// by providing an alternate mock implemention.
+    /// </summary>
+    public interface IFileSystem
     {
         bool FileExists(string path);
 

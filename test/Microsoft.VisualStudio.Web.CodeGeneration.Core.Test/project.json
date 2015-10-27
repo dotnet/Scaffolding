@@ -6,6 +6,10 @@
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
     "System.Diagnostics.Contracts": "4.0.1-*",
     "xunit": "2.1.0"
   },

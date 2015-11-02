@@ -24,3 +24,5 @@ nuget.exe
 /*.vspx
 project.lock.json
 /.vs
+launchsettings.json
+test/*/Properties

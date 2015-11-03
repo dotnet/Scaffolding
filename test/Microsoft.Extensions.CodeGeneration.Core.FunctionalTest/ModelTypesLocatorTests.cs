@@ -3,7 +3,7 @@
 
 using System;
 using System.Linq;
-using Microsoft.Dnx.Compilation;
+using Microsoft.Extensions.Compilation;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

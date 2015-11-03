@@ -7,9 +7,9 @@ using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
+using Microsoft.Extensions.Compilation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.Dnx.Compilation;
 
 namespace Microsoft.Extensions.CodeGeneration
 {

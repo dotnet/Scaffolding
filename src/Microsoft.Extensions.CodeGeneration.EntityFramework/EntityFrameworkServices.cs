@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Metadata;
-using Microsoft.Dnx.Compilation;
+using Microsoft.Extensions.Compilation;
 using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
@@ -176,7 +176,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             };
         }
 
-        private Type CompileAndGetDbContext(string dbContextTypeName, Func<Compilation, Compilation> compilationModificationFunc)
+        private Type CompileAndGetDbContext(string dbContextTypeName, Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> compilationModificationFunc)
         {
             Type dbContextType;
 

@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         public static CompilationResult GetAssemblyFromCompilation(
             IAssemblyLoadContext loader,
-            Compilation compilation)
+            CodeAnalysis.Compilation compilation)
         {
             EmitResult result;
             using (var ms = new MemoryStream())

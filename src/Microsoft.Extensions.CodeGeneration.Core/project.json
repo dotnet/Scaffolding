@@ -1,5 +1,9 @@
 {
     "version": "1.0.0-*",
+    "compilationOptions": {
+        "warningsAsErrors": true,
+        "keyFile": "../../tools/Key.snk"
+    },
     "dependencies": {
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
         "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*",

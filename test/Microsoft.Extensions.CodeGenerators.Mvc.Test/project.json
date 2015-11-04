@@ -1,4 +1,8 @@
 {
+    "compilationOptions": {
+        "warningsAsErrors": true,
+        "keyFile": "../../tools/Key.snk"
+    },
     "dependencies": {
         "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*",
         "Moq": "4.2.1312.1622",

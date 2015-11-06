@@ -6,7 +6,7 @@ using System.IO;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.Extensions.Compilation;
+using Microsoft.Extensions.CompilationAbstractions;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {

@@ -1,5 +1,9 @@
 {
     "version": "1.0.0-*",
+    "compilationOptions": {
+        "warningsAsErrors": true,
+        "keyFile": "../../tools/Key.snk"
+    },
     "dependencies": {
         "Microsoft.Extensions.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
         "Microsoft.AspNet.Razor": "4.0.0-*",

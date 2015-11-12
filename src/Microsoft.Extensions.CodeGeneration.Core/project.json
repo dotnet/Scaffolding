@@ -23,8 +23,8 @@
         "dnx451": { },
         "dnxcore50": {
             "dependencies": {
-                "System.Console": "4.0.0-beta-*",
-                "System.Diagnostics.Process": "4.0.0-beta-*"
+                "System.Console": "4.0.0-*",
+                "System.Diagnostics.Process": "4.0.0-*"
             }
         }
     }

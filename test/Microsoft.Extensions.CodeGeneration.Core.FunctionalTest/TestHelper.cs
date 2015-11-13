@@ -26,9 +26,9 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             return new WebHostBuilder()
                 .UseServices(services => 
                     {
-                        services.AddInstance<IApplicationEnvironment>(testEnvironment);
-                        services.AddInstance(CompilationServices.Default.LibraryExporter);
-                        services.AddInstance(CompilationServices.Default.CompilerOptionsProvider);
+                        services.AddSingleton<IApplicationEnvironment>(testEnvironment);
+                        services.AddSingleton(CompilationServices.Default.LibraryExporter);
+                        services.AddSingleton(CompilationServices.Default.CompilerOptionsProvider);
                     })
                 .Build()
                 .ApplicationServices;

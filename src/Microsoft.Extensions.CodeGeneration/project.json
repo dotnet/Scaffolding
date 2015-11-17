@@ -9,7 +9,8 @@
         "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
         "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
         "Microsoft.Extensions.CodeGeneration.EntityFramework": "1.0.0-*",
-        "Microsoft.Extensions.CommandLineUtils.Sources": { "version": "1.0.0-*", "type": "build" }
+        "Microsoft.Extensions.CommandLineUtils.Sources": { "version": "1.0.0-*", "type": "build" },
+        "Microsoft.Extensions.Logging": "1.0.0-*"
     },
     "frameworks": {
         "dnx451": { },

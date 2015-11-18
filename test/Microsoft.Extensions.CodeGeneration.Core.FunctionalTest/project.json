@@ -1,27 +1,25 @@
 {
-    "dependencies": {
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
-        "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-        "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
-        "Microsoft.AspNet.Hosting": "1.0.0-*",
-        "ModelTypesLocatorTestWebApp": "1.0.0",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+  "dependencies": {
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
+    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
+    "ModelTypesLocatorTestWebApp": "1.0.0",
+    "xunit.runner.aspnet": "2.0.0-aspnet-rc1-final"
+  },
+  "commands": {
+    "test": "xunit.runner.aspnet"
+  },
+  "frameworks": {
+    "dnx451": {
+      "dependencies": {
+        "Moq": "4.2.1312.1622"
+      }
     },
-
-    "commands": {
-        "test": "xunit.runner.aspnet"
-    },
-
-    "frameworks": {
-        "dnx451": {
-            "dependencies": {
-                "Moq": "4.2.1312.1622"
-            }
-        },
-        "dnxcore50": {
-            "dependencies": {
-                "System.Runtime": "4.0.21-beta-*"
-            }
-        }
+    "dnxcore50": {
+      "dependencies": {
+        "System.Runtime": "4.0.21-beta-23516"
+      }
     }
+  }
 }

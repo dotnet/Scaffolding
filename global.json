@@ -1,3 +1,9 @@
 {
-    "projects": ["src", "test/TestApps"]
+  "projects": [
+    "src",
+    "test/TestApps"
+  ],
+  "sdk": {
+    "version": "1.0.0-rc1-final"
+  }
 }

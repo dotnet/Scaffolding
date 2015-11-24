@@ -38,14 +38,6 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             get { return _applicationBasePath; }
         }
 
-        public string Configuration
-        {
-            get
-            {
-                return _originalAppEnvironment.Configuration;
-            }
-        }
-
         public FrameworkName RuntimeFramework
         {
             get { return _originalAppEnvironment.RuntimeFramework; }

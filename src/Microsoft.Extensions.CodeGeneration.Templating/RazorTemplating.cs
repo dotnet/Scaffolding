@@ -15,8 +15,13 @@ namespace Microsoft.Extensions.CodeGeneration.Templating
     {
         private ICompilationService _compilationService;
 
-        public RazorTemplating([NotNull]ICompilationService compilationService)
+        public RazorTemplating(ICompilationService compilationService)
         {
+            if (compilationService == null)
+            {
+                throw new ArgumentNullException(nameof(compilationService));
+            }
+
             _compilationService = compilationService;
         }
 

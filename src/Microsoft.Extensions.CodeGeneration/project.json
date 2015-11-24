@@ -1,22 +1,29 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk",
+    "warningsAsErrors": true
+  },
+  "dependencies": {
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
     },
-    "dependencies": {
-        "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-        "Microsoft.Extensions.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
-        "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
-        "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-        "Microsoft.Extensions.CodeGeneration.EntityFramework": "1.0.0-*",
-        "Microsoft.Extensions.CommandLineUtils.Sources": { "version": "1.0.0-*", "type": "build" }
-    },
-    "frameworks": {
-        "dnx451": { },
-        "dnxcore50": {
-            "dependencies": {
-                "System.Console": "4.0.0-*"
-            }
-        }
+    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.EntityFramework": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
     }
+  },
+  "frameworks": {
+    "dnx451": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Console": "4.0.0-*"
+      }
+    }
+  }
 }

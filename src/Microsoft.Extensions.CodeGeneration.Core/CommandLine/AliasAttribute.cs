@@ -11,8 +11,13 @@ namespace Microsoft.Extensions.CodeGeneration.CommandLine
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class AliasAttribute : Attribute
     {
-        public AliasAttribute([NotNull]string alias)
+        public AliasAttribute(string alias)
         {
+            if (alias == null)
+            {
+                throw new ArgumentNullException(nameof(alias));
+            }
+
             Alias = alias;
         }
 

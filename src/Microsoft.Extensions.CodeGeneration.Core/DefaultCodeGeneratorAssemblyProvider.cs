@@ -19,8 +19,13 @@ namespace Microsoft.Extensions.CodeGeneration
 
         private readonly ILibraryManager _libraryManager;
 
-        public DefaultCodeGeneratorAssemblyProvider([NotNull]ILibraryManager libraryManager)
+        public DefaultCodeGeneratorAssemblyProvider(ILibraryManager libraryManager)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
             _libraryManager = libraryManager;
         }
 

@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -14,9 +14,19 @@ namespace Microsoft.Extensions.CodeGeneration
         private Type _actionModel;
         private List<ParameterDescriptor> _parameters;
 
-        public ActionDescriptor([NotNull]CodeGeneratorDescriptor descriptor,
-            [NotNull]MethodInfo method)
+        public ActionDescriptor(CodeGeneratorDescriptor descriptor,
+            MethodInfo method)
         {
+            if (descriptor == null)
+            {
+                throw new ArgumentNullException(nameof(descriptor));
+            }
+
+            if (method == null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             Generator = descriptor;
             ActionMethod = method;
         }
@@ -34,7 +44,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 if (_actionModel == null)
                 {
                     var parameters = ActionMethod.GetParameters();
-                    Contract.Assert(parameters.Count() == 1);
+                    Debug.Assert(parameters.Count() == 1);
 
                     _actionModel = parameters.First().ParameterType;
                 }
@@ -64,8 +74,13 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private bool IsCandidateProperty([NotNull]PropertyInfo property)
+        private bool IsCandidateProperty(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
             return property.CanWrite &&
                 property.GetIndexParameters().Length == 0 &&
                 IsSupportedPropertyType(property.PropertyType);

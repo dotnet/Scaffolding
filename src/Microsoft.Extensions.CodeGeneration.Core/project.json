@@ -1,31 +1,31 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "warningsAsErrors": true,
-        "keyFile": "../../tools/Key.snk"
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
     },
-    "dependencies": {
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
-        "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*",
-        "Microsoft.Extensions.CodeGeneration.Sources": {
-            "version": "1.0.0-*",
-            "type": "build"
-        },
-        "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-        "Microsoft.Extensions.CommandLineUtils.Sources": {
-            "version": "1.0.0-*",
-            "type": "build"
-        },
-        "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-        "Newtonsoft.Json": "6.0.6"
+    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
     },
-    "frameworks": {
-        "dnx451": { },
-        "dnxcore50": {
-            "dependencies": {
-                "System.Console": "4.0.0-*",
-                "System.Diagnostics.Process": "4.0.0-*"
-            }
-        }
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
+    "Newtonsoft.Json": "6.0.6"
+  },
+  "frameworks": {
+    "dnx451": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Console": "4.0.0-*",
+        "System.Diagnostics.Process": "4.1.0-*"
+      }
     }
+  }
 }

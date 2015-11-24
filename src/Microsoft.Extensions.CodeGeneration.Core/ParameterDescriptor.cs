@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
@@ -13,8 +13,13 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         private Func<object> _valueAccessor;
 
-        public ParameterDescriptor([NotNull]PropertyInfo property)
+        public ParameterDescriptor(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
             Property = property;
         }
 
@@ -24,7 +29,7 @@ namespace Microsoft.Extensions.CodeGeneration
         {
             get
             {
-                Contract.Assert(_valueAccessor != null, "Value was accessed too early");
+                Debug.Assert(_valueAccessor != null, "Value was accessed too early");
                 return _valueAccessor();
             }
         }
@@ -73,8 +78,13 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private string GetOptionTemplate([NotNull]OptionAttribute optionAttribute)
+        private string GetOptionTemplate(OptionAttribute optionAttribute)
         {
+            if (optionAttribute == null)
+            {
+                throw new ArgumentNullException(nameof(optionAttribute));
+            }
+
             var longName = !string.IsNullOrWhiteSpace(optionAttribute.Name) ? optionAttribute.Name : Property.Name;
             var template = "--" + longName;
 

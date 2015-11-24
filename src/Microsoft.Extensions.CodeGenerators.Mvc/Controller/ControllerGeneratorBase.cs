@@ -33,13 +33,38 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         }
 
         public ControllerGeneratorBase(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IServiceProvider serviceProvider,
+            ILogger logger)
             : base(environment)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (codeGeneratorActionsService == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             LibraryManager = libraryManager;
             CodeGeneratorActionsService = codeGeneratorActionsService;
             ServiceProvider = serviceProvider;

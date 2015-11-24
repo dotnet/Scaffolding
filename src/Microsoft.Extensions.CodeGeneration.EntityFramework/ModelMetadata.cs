@@ -18,8 +18,18 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private NavigationMetadata[] _navigations;
 
         //Todo: Perhaps move the constructor to something line MetadataReader?
-        public ModelMetadata([NotNull]IEntityType entityType, [NotNull]Type dbContextType)
+        public ModelMetadata(IEntityType entityType, Type dbContextType)
         {
+            if (entityType == null)
+            {
+                throw new ArgumentNullException(nameof(entityType));
+            }
+
+            if (dbContextType == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextType));
+            }
+
             EntityType = entityType;
             DbContexType = dbContextType;
             EntitySetName = GetEntitySetName(DbContexType, EntityType.ClrType);
@@ -57,7 +67,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     {
                         throw new InvalidOperationException("Primary key not found");
                     }
-                    
+
                     _primaryKeys = primaryKey
                         .Properties
                         .Select(p => new PropertyMetadata(p, DbContexType))
@@ -88,8 +98,18 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
         }
 
-        internal static string GetEntitySetName([NotNull]Type dbContextType, [NotNull]Type modelType)
+        internal static string GetEntitySetName(Type dbContextType, Type modelType)
         {
+            if (dbContextType == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextType));
+            }
+
+            if (modelType == null)
+            {
+                throw new ArgumentNullException(nameof(modelType));
+            }
+
             Type dbSetType = typeof(DbSet<>).MakeGenericType(modelType);
 
             var prop = dbContextType.GetRuntimeProperties()

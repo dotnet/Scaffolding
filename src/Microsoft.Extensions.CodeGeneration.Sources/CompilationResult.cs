@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -14,8 +15,13 @@ namespace Microsoft.Extensions.CodeGeneration
 
         public IEnumerable<string> ErrorMessages { get; set; }
 
-        public static CompilationResult FromAssembly([NotNull]Assembly assembly)
+        public static CompilationResult FromAssembly(Assembly assembly)
         {
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             return new CompilationResult()
             {
                 Assembly = assembly,
@@ -23,8 +29,13 @@ namespace Microsoft.Extensions.CodeGeneration
             };
         }
 
-        public static CompilationResult FromErrorMessages([NotNull]IEnumerable<string> errorMessages)
+        public static CompilationResult FromErrorMessages(IEnumerable<string> errorMessages)
         {
+            if (errorMessages == null)
+            {
+                throw new ArgumentNullException(nameof(errorMessages));
+            }
+
             return new CompilationResult()
             {
                 ErrorMessages = errorMessages,

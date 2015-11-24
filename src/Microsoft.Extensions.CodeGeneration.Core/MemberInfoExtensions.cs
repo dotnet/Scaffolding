@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
@@ -9,8 +10,13 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     internal static class MemberInfoExtensions
     {
-        public static AliasAttribute GetAliasAttribute([NotNull]this MemberInfo member)
+        public static AliasAttribute GetAliasAttribute(this MemberInfo member)
         {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
             var aliasAttributeData = member.GetAttributeData<AliasAttribute>();
 
             if (aliasAttributeData != null)
@@ -21,8 +27,13 @@ namespace Microsoft.Extensions.CodeGeneration
             return null;
         }
 
-        public static OptionAttribute GetOptionAttribute([NotNull]this MemberInfo member)
+        public static OptionAttribute GetOptionAttribute(this MemberInfo member)
         {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
             var optionAttributeData = member.GetAttributeData<OptionAttribute>();
 
             if (optionAttributeData != null)
@@ -40,8 +51,13 @@ namespace Microsoft.Extensions.CodeGeneration
             return null;
         }
 
-        public static ArgumentAttribute GetArgumentAttribute([NotNull]this MemberInfo member)
+        public static ArgumentAttribute GetArgumentAttribute(this MemberInfo member)
         {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
             var argumentAttributeData = member.GetAttributeData<ArgumentAttribute>();
 
             if (argumentAttributeData != null)
@@ -54,16 +70,26 @@ namespace Microsoft.Extensions.CodeGeneration
             return null;
         }
 
-        private static CustomAttributeData GetAttributeData<T>([NotNull]this MemberInfo member)
+        private static CustomAttributeData GetAttributeData<T>(this MemberInfo member)
         {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
             return member.CustomAttributes
                 .Where(attr => attr.AttributeType == typeof(T))
                 .FirstOrDefault();
         }
 
-        private static object GetNamedArgumentValue([NotNull]this CustomAttributeData attributeData,
+        private static object GetNamedArgumentValue(this CustomAttributeData attributeData,
             string memberName)
         {
+            if (attributeData == null)
+            {
+                throw new ArgumentNullException(nameof(attributeData));
+            }
+
             return attributeData
                 .NamedArguments
                 .Where(arg => arg.MemberName == memberName)

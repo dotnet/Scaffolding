@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -27,15 +27,50 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         };
 
         public ControllerWithContextGenerator(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
+            IModelTypesLocator modelTypesLocator,
+            IEntityFrameworkService entityFrameworkService,
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IServiceProvider serviceProvider,
+            ILogger logger)
             : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (entityFrameworkService == null)
+            {
+                throw new ArgumentNullException(nameof(entityFrameworkService));
+            }
+
+            if (codeGeneratorActionsService == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             ModelTypesLocator = modelTypesLocator;
             EntityFrameworkService = entityFrameworkService;
         }

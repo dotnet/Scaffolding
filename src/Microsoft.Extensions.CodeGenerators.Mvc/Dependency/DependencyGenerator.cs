@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,8 +19,13 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
         private readonly IServiceProvider _serviceProvider;
 
         public DependencyGenerator(
-            [NotNull]IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             _serviceProvider = serviceProvider;
         }
 

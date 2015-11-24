@@ -19,9 +19,14 @@ namespace Microsoft.Extensions.CodeGeneration.Templating
             "Microsoft.Extensions.CodeGeneration.Templating",
         };
 
-        public RazorTemplatingHost([NotNull]Type baseType)
+        public RazorTemplatingHost(Type baseType)
             : base(new CSharpRazorCodeLanguage())
         {
+            if (baseType == null)
+            {
+                throw new ArgumentNullException(nameof(baseType));
+            }
+
             DefaultBaseClass = baseType.FullName;
 
             //ToDo: Why Do I need templateTypeName? Do I need other parameters?

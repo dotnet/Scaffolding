@@ -15,11 +15,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
     public class MvcLayoutDependencyInstaller : DependencyInstaller
     {
         public MvcLayoutDependencyInstaller(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment applicationEnvironment,
-            [NotNull]ILogger logger,
-            [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]IServiceProvider serviceProvider)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment applicationEnvironment,
+            ILogger logger,
+            IPackageInstaller packageInstaller,
+            IServiceProvider serviceProvider)
             : base(libraryManager, applicationEnvironment, logger, packageInstaller, serviceProvider)
         {
         }

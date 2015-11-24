@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
@@ -15,21 +13,18 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     public class Program
     {
-        private static ServiceProvider _serviceProvider;
-
         public static void Main(string[] args)
         {
-            var _serviceProvider = new ServiceProvider();
+            var serviceProvider = new ServiceProvider();
 
-            AddCodeGenerationServices(_serviceProvider);
-            //Debugger.Launch();
+            AddCodeGenerationServices(serviceProvider);
 
-            var generatorsLocator = _serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
-            var logger = _serviceProvider.GetRequiredService<ILogger>();
+            var generatorsLocator = serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
+            var logger = serviceProvider.GetRequiredService<ILogger>();
 
             if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
             {
-                ShowCodeGeneratorList(generatorsLocator.CodeGenerators);
+                ShowCodeGeneratorList(serviceProvider, generatorsLocator.CodeGenerators);
                 return;
             }
 
@@ -55,9 +50,9 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private static void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
+        private static void ShowCodeGeneratorList(IServiceProvider serviceProvider, IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
-            var logger = _serviceProvider.GetRequiredService<ILogger>();
+            var logger = serviceProvider.GetRequiredService<ILogger>();
 
             if (codeGenerators.Any())
             {
@@ -77,15 +72,25 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private static bool IsHelpArgument([NotNull]string argument)
+        private static bool IsHelpArgument(string argument)
         {
+            if (argument == null)
+            {
+                throw new ArgumentNullException(nameof(argument));
+            }
+
             return string.Equals("-h", argument, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("-?", argument, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("--help", argument, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void AddCodeGenerationServices([NotNull]ServiceProvider serviceProvider)
+        private static void AddCodeGenerationServices(ServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
             serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
             serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), PlatformServices.Default.AssemblyLoadContextAccessor);

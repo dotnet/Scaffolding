@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -20,17 +19,40 @@ namespace Microsoft.Extensions.CodeGeneration
         private readonly IFileSystem _fileSystem;
 
         public PackageInstaller(
-            [NotNull]ILogger logger,
-            [NotNull]IApplicationEnvironment environment)
+            ILogger logger,
+            IApplicationEnvironment environment)
             : this(logger, environment, new DefaultFileSystem())
         {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
         }
 
         internal PackageInstaller(
-            [NotNull]ILogger logger,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IFileSystem fileSystem)
+            ILogger logger,
+            IApplicationEnvironment environment,
+            IFileSystem fileSystem)
         {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (fileSystem == null)
+            {
+                throw new ArgumentNullException(nameof(fileSystem));
+            }
+
             _logger = logger;
             _environment = environment;
             _fileSystem = fileSystem;
@@ -88,7 +110,7 @@ namespace Microsoft.Extensions.CodeGeneration
             var pathVariable = Environment.GetEnvironmentVariable("Path");
             if (!string.IsNullOrEmpty(pathVariable))
             {
-                foreach(var path in pathVariable.Split(';'))
+                foreach (var path in pathVariable.Split(';'))
                 {
                     var fullPath = Path.Combine(path, commandName);
                     if (_fileSystem.FileExists(fullPath))
@@ -136,7 +158,7 @@ namespace Microsoft.Extensions.CodeGeneration
         private string GetProjectJsonFilePath()
         {
             var projectFile = Path.Combine(_environment.ApplicationBasePath, "project.json");
-            Contract.Assert(_fileSystem.FileExists(projectFile));
+            Debug.Assert(_fileSystem.FileExists(projectFile));
             return projectFile;
         }
     }

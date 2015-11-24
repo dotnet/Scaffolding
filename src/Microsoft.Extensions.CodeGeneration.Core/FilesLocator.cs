@@ -23,16 +23,26 @@ namespace Microsoft.Extensions.CodeGeneration
         }
 
         public string GetFilePath(
-            [NotNull]string fileName,
-            [NotNull]IEnumerable<string> searchPaths)
+            string fileName,
+            IEnumerable<string> searchPaths)
         {
+            if (fileName == null)
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+
+            if (searchPaths == null)
+            {
+                throw new ArgumentNullException(nameof(searchPaths));
+            }
+
             foreach (var searchPath in searchPaths)
             {
                 if (_fileSystem.DirectoryExists(searchPath))
                 {
                     var matchingFiles = _fileSystem.EnumerateFiles(searchPath,
                         searchPattern: fileName,
-                        searchOption:  SearchOption.AllDirectories).ToList();
+                        searchOption: SearchOption.AllDirectories).ToList();
 
                     if (matchingFiles.Count > 1)
                     {

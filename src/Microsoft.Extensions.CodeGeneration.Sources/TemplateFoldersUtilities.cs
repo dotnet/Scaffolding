@@ -12,11 +12,31 @@ namespace Microsoft.Extensions.CodeGeneration
     internal static class TemplateFoldersUtilities
     {
         public static List<string> GetTemplateFolders(
-            [NotNull]string containingProject,
-            [NotNull]string applicationBasePath,
-            [NotNull]string[] baseFolders,
-            [NotNull]ILibraryManager libraryManager)
+            string containingProject,
+            string applicationBasePath,
+            string[] baseFolders,
+            ILibraryManager libraryManager)
         {
+            if (containingProject == null)
+            {
+                throw new ArgumentNullException(nameof(containingProject));
+            }
+
+            if (applicationBasePath == null)
+            {
+                throw new ArgumentNullException(nameof(applicationBasePath));
+            }
+
+            if (baseFolders == null)
+            {
+                throw new ArgumentNullException(nameof(baseFolders));
+            }
+
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
             var rootFolders = new List<string>();
             var templateFolders = new List<string>();
 

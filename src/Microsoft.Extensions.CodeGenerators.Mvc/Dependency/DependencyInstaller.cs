@@ -16,12 +16,37 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
     public abstract class DependencyInstaller
     {
         protected DependencyInstaller(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment applicationEnvironment,
-            [NotNull]ILogger logger,
-            [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]IServiceProvider serviceProvider)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment applicationEnvironment,
+            ILogger logger,
+            IPackageInstaller packageInstaller,
+            IServiceProvider serviceProvider)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (applicationEnvironment == null)
+            {
+                throw new ArgumentNullException(nameof(applicationEnvironment));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (packageInstaller == null)
+            {
+                throw new ArgumentNullException(nameof(packageInstaller));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             LibraryManager = libraryManager;
             ApplicationEnvironment = applicationEnvironment;
             Logger = logger;

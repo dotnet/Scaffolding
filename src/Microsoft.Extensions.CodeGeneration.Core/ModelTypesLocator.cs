@@ -16,9 +16,19 @@ namespace Microsoft.Extensions.CodeGeneration
         private ILibraryExporter _libraryExporter;
 
         public ModelTypesLocator(
-            [NotNull]ILibraryExporter libraryExporter,
-            [NotNull]IApplicationEnvironment application)
+            ILibraryExporter libraryExporter,
+            IApplicationEnvironment application)
         {
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (application == null)
+            {
+                throw new ArgumentNullException(nameof(application));
+            }
+
             _libraryExporter = libraryExporter;
             _application = application;
         }
@@ -32,8 +42,13 @@ namespace Microsoft.Extensions.CodeGeneration
                 .Select(ts => ModelType.FromITypeSymbol(ts));
         }
 
-        public IEnumerable<ModelType> GetType([NotNull]string typeName)
+        public IEnumerable<ModelType> GetType(string typeName)
         {
+            if (typeName == null)
+            {
+                throw new ArgumentNullException(nameof(typeName));
+            }
+
             var exactTypesInAllProjects = _libraryExporter
                 .GetProjectsInApp(_application)
                 .Select(comp => comp.Compilation.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)

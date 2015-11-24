@@ -33,15 +33,50 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
         // However for it to be effective, it should be property dependecy injection rather
         // than constructor injection.
         public ViewGenerator(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IEntityFrameworkService entityFrameworkService,
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
+            IModelTypesLocator modelTypesLocator,
+            IEntityFrameworkService entityFrameworkService,
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IServiceProvider serviceProvider,
+            ILogger logger)
             : base(environment)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (entityFrameworkService == null)
+            {
+                throw new ArgumentNullException(nameof(entityFrameworkService));
+            }
+
+            if (codeGeneratorActionsService == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             _libraryManager = libraryManager;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
@@ -62,8 +97,13 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             }
         }
 
-        public async Task GenerateCode([NotNull]ViewGeneratorModel viewGeneratorModel)
+        public async Task GenerateCode(ViewGeneratorModel viewGeneratorModel)
         {
+            if (viewGeneratorModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewGeneratorModel));
+            }
+
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
                 throw new ArgumentException("The ViewName cannot be empty");

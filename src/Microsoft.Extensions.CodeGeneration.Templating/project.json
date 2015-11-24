@@ -1,31 +1,34 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "warningsAsErrors": true,
-        "keyFile": "../../tools/Key.snk"
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "Microsoft.Extensions.CodeGeneration.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
     },
-    "dependencies": {
-        "Microsoft.Extensions.CodeGeneration.Sources": { "version": "1.0.0-*", "type": "build" },
-        "Microsoft.AspNet.Razor": "4.0.0-*",
-        "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*"
-    },
+    "Microsoft.AspNet.Razor": "4.0.0-*",
+    "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*"
+  },
 
-    "frameworks": {
-        "dnx451": {
-            "frameworkAssemblies": {
-                "System.Runtime": "",
-                "System.IO": "4.0.0.0",
-                "System.Text.Encoding": "4.0.0.0",
-                "System.Threading.Tasks": "4.0.0.0"
-            }
-        },
-        "dnxcore50": {
-            "dependencies": {
-                "System.IO": "4.0.11-*",
-                "System.Dynamic.Runtime": "4.0.11-*",
-                "System.Collections.Concurrent":  "4.0.11-*",
-                "System.Reflection.TypeExtensions": "4.0.1-*"
-            }
-        }
+  "frameworks": {
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Runtime": "",
+        "System.IO": "4.0.0.0",
+        "System.Text.Encoding": "4.0.0.0",
+        "System.Threading.Tasks": "4.0.0.0"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "System.IO": "4.0.11-*",
+        "System.Dynamic.Runtime": "4.0.11-*",
+        "System.Collections.Concurrent": "4.0.11-*",
+        "System.Reflection.TypeExtensions": "4.0.1-*"
+      }
     }
+  }
 }

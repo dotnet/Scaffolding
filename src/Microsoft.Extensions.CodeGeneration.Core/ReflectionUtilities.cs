@@ -13,11 +13,26 @@ namespace Microsoft.Extensions.CodeGeneration
     public static class ReflectionUtilities
     {
         public static Type GetReflectionType(
-            [NotNull]this ILibraryExporter libraryExporter,
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment,
+            this ILibraryExporter libraryExporter,
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
             string name)
         {
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
             return libraryExporter
                 .GetProjectAssemblies(libraryManager, environment)
                 .Select(asm => asm.GetType(name))
@@ -26,10 +41,25 @@ namespace Microsoft.Extensions.CodeGeneration
         }
 
         public static IEnumerable<Assembly> GetProjectAssemblies(
-            [NotNull]this ILibraryExporter libraryExporter,
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment)
+            this ILibraryExporter libraryExporter,
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment)
         {
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
             return libraryExporter
                 .GetProjectsInApp(environment)
                 .Select(comp => libraryManager.GetLibrary(comp.Compilation.AssemblyName))

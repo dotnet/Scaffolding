@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 
@@ -12,9 +11,19 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
     public class ControllerWithContextTemplateModel
     {
         public ControllerWithContextTemplateModel(
-            [NotNull]ModelType modelType,
-            [NotNull]string dbContextFullTypeName)
+            ModelType modelType,
+            string dbContextFullTypeName)
         {
+            if (modelType == null)
+            {
+                throw new ArgumentNullException(nameof(modelType));
+            }
+
+            if (dbContextFullTypeName == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextFullTypeName));
+            }
+
             ModelType = modelType;
 
             var classNameModel = new ClassNameModel(dbContextFullTypeName);

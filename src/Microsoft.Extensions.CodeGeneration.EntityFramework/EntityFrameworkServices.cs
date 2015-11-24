@@ -14,7 +14,6 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
-using Microsoft.Data.Entity.Metadata;
 using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.Extensions.PlatformAbstractions;
 
@@ -36,16 +35,61 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private const string EFSqlServerPackageVersion = "7.0.0-*";
 
         public EntityFrameworkServices(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]ILibraryExporter libraryExporter,
-            [NotNull]IApplicationEnvironment environment,
-            [NotNull]IAssemblyLoadContextAccessor loader,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]IDbContextEditorServices dbContextEditorServices,
-            [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ILogger logger)
+            ILibraryManager libraryManager,
+            ILibraryExporter libraryExporter,
+            IApplicationEnvironment environment,
+            IAssemblyLoadContextAccessor loader,
+            IModelTypesLocator modelTypesLocator,
+            IDbContextEditorServices dbContextEditorServices,
+            IPackageInstaller packageInstaller,
+            IServiceProvider serviceProvider,
+            ILogger logger)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            if (loader == null)
+            {
+                throw new ArgumentNullException(nameof(loader));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (dbContextEditorServices == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextEditorServices));
+            }
+
+            if (packageInstaller == null)
+            {
+                throw new ArgumentNullException(nameof(packageInstaller));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             _libraryManager = libraryManager;
             _libraryExporter = libraryExporter;
             _environment = environment;
@@ -110,7 +154,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     }
                     return c;
                 });
-                
+
                 // Add file information
                 dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName));
             }
@@ -265,8 +309,18 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             }
         }
 
-        private ModelMetadata GetModelMetadata([NotNull]Type dbContextType, [NotNull]Type modelType, ModelType startupType)
+        private ModelMetadata GetModelMetadata(Type dbContextType, Type modelType, ModelType startupType)
         {
+            if (dbContextType == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextType));
+            }
+
+            if (modelType == null)
+            {
+                throw new ArgumentNullException(nameof(modelType));
+            }
+
             DbContext dbContextInstance;
             try
             {

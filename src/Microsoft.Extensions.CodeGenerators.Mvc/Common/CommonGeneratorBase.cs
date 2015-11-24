@@ -1,11 +1,10 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Globalization;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.Extensions.CodeGeneration;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc
 {
@@ -14,8 +13,13 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
     /// </summary>
     public abstract class CommonGeneratorBase
     {
-        protected CommonGeneratorBase([NotNull]IApplicationEnvironment applicationEnvironment)
+        protected CommonGeneratorBase(IApplicationEnvironment applicationEnvironment)
         {
+            if (applicationEnvironment == null)
+            {
+                throw new ArgumentNullException(nameof(applicationEnvironment));
+            }
+
             ApplicationEnvironment = applicationEnvironment;
         }
 

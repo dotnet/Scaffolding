@@ -14,9 +14,19 @@ namespace Microsoft.Extensions.CodeGeneration
         private readonly IServiceProvider _serviceProvider;
         private ActionDescriptor _codeGeneratorAction;
 
-        public CodeGeneratorDescriptor([NotNull]TypeInfo codeGeneratorType,
-            [NotNull]IServiceProvider serviceProvider)
+        public CodeGeneratorDescriptor(TypeInfo codeGeneratorType,
+            IServiceProvider serviceProvider)
         {
+            if (codeGeneratorType == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorType));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             _codeGeneratorType = codeGeneratorType;
             _serviceProvider = serviceProvider;
         }

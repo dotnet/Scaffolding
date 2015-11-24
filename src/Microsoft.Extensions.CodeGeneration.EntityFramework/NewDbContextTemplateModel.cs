@@ -3,14 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {
     public class NewDbContextTemplateModel
     {
-        public NewDbContextTemplateModel([NotNull]string dbContextName, [NotNull]ModelType modelType)
+        public NewDbContextTemplateModel(string dbContextName, ModelType modelType)
         {
+            if (dbContextName == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextName));
+            }
+
+            if (modelType == null)
+            {
+                throw new ArgumentNullException(nameof(modelType));
+            }
+
             var modelNamespace = modelType.Namespace;
 
             ModelTypeName = modelType.Name;

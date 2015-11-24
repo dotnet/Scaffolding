@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
@@ -36,8 +35,13 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             _templatingService = templatingService;
         }
 
-        public async Task<SyntaxTree> AddNewContext([NotNull]NewDbContextTemplateModel dbContextTemplateModel)
+        public async Task<SyntaxTree> AddNewContext(NewDbContextTemplateModel dbContextTemplateModel)
         {
+            if (dbContextTemplateModel == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextTemplateModel));
+            }
+
             var templateName = "NewLocalDbContext.cshtml";
             var templatePath = _filesLocator.GetFilePath(templateName, TemplateFolders);
             Contract.Assert(File.Exists(templatePath));

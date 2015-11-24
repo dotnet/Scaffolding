@@ -16,13 +16,33 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
     public class StaticFilesDependencyInstaller : DependencyInstaller
     {
         public StaticFilesDependencyInstaller(
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment applicationEnvironment,
-            [NotNull]ILogger logger,
-            [NotNull]IPackageInstaller packageInstaller,
-            [NotNull]IServiceProvider serviceProvider)
+            ILibraryManager libraryManager,
+            IApplicationEnvironment applicationEnvironment,
+            ILogger logger,
+            IPackageInstaller packageInstaller,
+            IServiceProvider serviceProvider)
             : base(libraryManager, applicationEnvironment, logger, packageInstaller, serviceProvider)
         {
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+            if (applicationEnvironment == null)
+            {
+                throw new ArgumentNullException(nameof(applicationEnvironment));
+            }
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+            if (packageInstaller == null)
+            {
+                throw new ArgumentNullException(nameof(packageInstaller));
+            }
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
         }
 
         protected override async Task GenerateCode()

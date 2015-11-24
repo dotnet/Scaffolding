@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,11 +31,31 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
         }
 
         public ReadMeGenerator(
-            [NotNull]ICodeGeneratorActionsService codeGeneratorActionsService,
-            [NotNull]IModelTypesLocator modelTypesLocator,
-            [NotNull]ILibraryManager libraryManager,
-            [NotNull]IApplicationEnvironment environment)
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IModelTypesLocator modelTypesLocator,
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment)
         {
+            if (codeGeneratorActionsService == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
+            }
+
+            if (modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
+            }
+
+            if (libraryManager == null)
+            {
+                throw new ArgumentNullException(nameof(libraryManager));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _libraryManager = libraryManager;

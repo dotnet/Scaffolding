@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -6,8 +7,13 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     internal static class RoslynUtilities
     {
-        public static IEnumerable<ITypeSymbol> GetDirectTypesInCompilation([NotNull]CodeAnalysis.Compilation compilation)
+        public static IEnumerable<ITypeSymbol> GetDirectTypesInCompilation(CodeAnalysis.Compilation compilation)
         {
+            if (compilation == null)
+            {
+                throw new ArgumentNullException(nameof(compilation));
+            }
+
             var types = new List<ITypeSymbol>();
             CollectTypes(compilation.Assembly.GlobalNamespace, types);
             return types;

@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,8 +32,13 @@ namespace Microsoft.Extensions.CodeGeneration.Templating
             WriteLiteralTo(Output, value);
         }
 
-        public virtual void WriteLiteralTo([NotNull]TextWriter writer, object text)
+        public virtual void WriteLiteralTo(TextWriter writer, object text)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             if (text != null)
             {
                 writer.Write(text.ToString());
@@ -44,8 +50,13 @@ namespace Microsoft.Extensions.CodeGeneration.Templating
             WriteTo(Output, value);
         }
 
-        public virtual void WriteTo([NotNull]TextWriter writer, object content)
+        public virtual void WriteTo(TextWriter writer, object content)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             if (content != null)
             {
                 writer.Write(content.ToString());

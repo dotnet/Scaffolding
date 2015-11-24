@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -16,15 +15,30 @@ namespace Microsoft.Extensions.CodeGeneration
         private readonly IServiceProvider _serviceProvider;
 
         public CodeGeneratorsLocator(
-            [NotNull]IServiceProvider serviceProvider,
-            [NotNull]ICodeGeneratorAssemblyProvider assemblyProvider)
+            IServiceProvider serviceProvider,
+            ICodeGeneratorAssemblyProvider assemblyProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            if (assemblyProvider == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyProvider));
+            }
+
             _serviceProvider = serviceProvider;
             _assemblyProvider = assemblyProvider;
         }
 
-        public CodeGeneratorDescriptor GetCodeGenerator([NotNull]string codeGeneratorName)
+        public CodeGeneratorDescriptor GetCodeGenerator(string codeGeneratorName)
         {
+            if (codeGeneratorName == null)
+            {
+                throw new ArgumentNullException(nameof(codeGeneratorName));
+            }
+
             var candidates = CodeGenerators
                 .Where(gen => string.Equals(gen.Name, codeGeneratorName, StringComparison.OrdinalIgnoreCase));
 
@@ -67,13 +81,23 @@ namespace Microsoft.Extensions.CodeGeneration
             }
         }
 
-        private CodeGeneratorDescriptor DescriptorFromTypeInfo([NotNull]TypeInfo typeInfo)
+        private CodeGeneratorDescriptor DescriptorFromTypeInfo(TypeInfo typeInfo)
         {
+            if (typeInfo == null)
+            {
+                throw new ArgumentNullException(nameof(typeInfo));
+            }
+
             return new CodeGeneratorDescriptor(typeInfo, _serviceProvider);
         }
 
-        private bool IsCodeGenerator([NotNull]TypeInfo typeInfo)
+        private bool IsCodeGenerator(TypeInfo typeInfo)
         {
+            if (typeInfo == null)
+            {
+                throw new ArgumentNullException(nameof(typeInfo));
+            }
+
             if (!typeInfo.IsClass ||
                 typeInfo.IsAbstract ||
                 typeInfo.ContainsGenericParameters)

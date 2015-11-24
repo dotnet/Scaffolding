@@ -1,8 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.Dnx.Compilation.CSharp;
@@ -23,9 +24,19 @@ namespace Microsoft.Extensions.CodeGeneration
         };
 
         public static CompilationReference GetProject(
-            [NotNull]this ILibraryExporter libraryExporter,
-            [NotNull]IApplicationEnvironment environment)
+            this ILibraryExporter libraryExporter,
+            IApplicationEnvironment environment)
         {
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
             var export = libraryExporter.GetExport(environment.ApplicationName);
 
             var project = export.MetadataReferences
@@ -34,14 +45,24 @@ namespace Microsoft.Extensions.CodeGeneration
                 .Select(reference => reference.MetadataReference as CompilationReference)
                 .FirstOrDefault();
 
-            Contract.Assert(project != null);
+            Debug.Assert(project != null);
             return project;
         }
 
         public static IEnumerable<CompilationReference> GetProjectsInApp(
-            [NotNull]this ILibraryExporter libraryExporter,
-            [NotNull]IApplicationEnvironment environment)
+            this ILibraryExporter libraryExporter,
+            IApplicationEnvironment environment)
         {
+            if (libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
+
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
             var export = libraryExporter.GetAllExports(environment.ApplicationName);
 
             return export.MetadataReferences

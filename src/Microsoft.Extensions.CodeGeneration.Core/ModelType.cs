@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Extensions.CodeGeneration
@@ -18,8 +19,13 @@ namespace Microsoft.Extensions.CodeGeneration
         // is a better way.
         public ITypeSymbol TypeSymbol { get; private set; }
 
-        public static ModelType FromITypeSymbol([NotNull]ITypeSymbol typeSymbol)
+        public static ModelType FromITypeSymbol(ITypeSymbol typeSymbol)
         {
+            if (typeSymbol == null)
+            {
+                throw new ArgumentNullException(nameof(typeSymbol));
+            }
+
             // Should we check for typeSymbol.IsType before returning here?
             return new ModelType()
             {

@@ -17,9 +17,9 @@
     "dnx451": {
       "frameworkAssemblies": {
         "System.Runtime": "",
-        "System.IO": "4.0.0.0",
-        "System.Text.Encoding": "4.0.0.0",
-        "System.Threading.Tasks": "4.0.0.0"
+        "System.IO": "",
+        "System.Text.Encoding": "",
+        "System.Threading.Tasks": ""
       }
     },
     "dnxcore50": {
@@ -27,7 +27,7 @@
         "System.IO": "4.0.11-*",
         "System.Dynamic.Runtime": "4.0.11-*",
         "System.Collections.Concurrent": "4.0.11-*",
-        "System.Reflection.TypeExtensions": "4.0.1-*"
+        "System.Reflection.TypeExtensions": "4.1.0-*"
       }
     }
   }

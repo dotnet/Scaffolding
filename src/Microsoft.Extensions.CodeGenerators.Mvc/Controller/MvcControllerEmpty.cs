@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {
-    public class MvcControllerEmpty : ControllerGeneratorBase
+    public class MvcControllerEmpty : MvcController
     {
         public MvcControllerEmpty(
             ILibraryManager libraryManager,
@@ -21,32 +21,16 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
-
-        public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
+        protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)
         {
-            if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
+            return generatorModel.IsRestController ? Constants.ApiEmptyControllerTemplate : Constants.MvcEmptyControllerTemplate;
+        }
+        protected override string GetRequiredNameError
+        {
+            get
             {
-                if (!controllerGeneratorModel.ControllerName.EndsWith(Constants.ControllerSuffix, StringComparison.Ordinal))
-                {
-                    controllerGeneratorModel.ControllerName = controllerGeneratorModel.ControllerName + Constants.ControllerSuffix;
-                }
+                return "Controller name is required for an Empty Controller";
             }
-            else
-            {
-                throw new ArgumentException("Controller name is required for an Empty Controller");
-            }
-
-            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
-            await layoutDependencyInstaller.Execute();
-
-            var templateModel = new ClassNameModel(className: controllerGeneratorModel.ControllerName, namespaceName: GetControllerNamespace());
-
-            var templateName = "EmptyController.cshtml";
-            var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
-            await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
-
-            await layoutDependencyInstaller.InstallDependencies();
         }
     }
 }

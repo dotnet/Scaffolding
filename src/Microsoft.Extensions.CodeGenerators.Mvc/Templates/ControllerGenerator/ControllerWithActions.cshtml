@@ -1,0 +1,88 @@
+﻿@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+using System.Linq;
+using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Http.Internal;
+@{string modelName = (Model.ClassName.EndsWith("Controller")? Model.ClassName.Substring(0,Model.ClassName.Length-10): Model.ClassName);}
+namespace @Model.NamespaceName
+{
+    public class @Model.ClassName : Controller
+    {
+        // GET: @modelName
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        // GET: @modelName/Details/5
+        public ActionResult Details(int id)
+        {
+            return View();
+        }
+
+        // GET: @modelName/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: @modelName/Create
+        [HttpPost]
+        public ActionResult Create(FormCollection collection)
+        {
+            try
+            {
+                // TODO: Add insert logic here
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: @modelName/Edit/5
+        public ActionResult Edit(int id)
+        {
+            return View();
+        }
+
+        // POST: @modelName/Edit/5
+        [HttpPost]
+        public ActionResult Edit(int id, FormCollection collection)
+        {
+            try
+            {
+                // TODO: Add update logic here
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: @modelName/Delete/5
+        public ActionResult Delete(int id)
+        {
+            return View();
+        }
+
+        // POST: @modelName/Delete/5
+        [HttpPost]
+        public ActionResult Delete(int id, FormCollection collection)
+        {
+            try
+            {
+                // TODO: Add delete logic here
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+    }
+}

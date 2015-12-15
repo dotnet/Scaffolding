@@ -20,5 +20,13 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
         public const string RazorTemplateExtension = ".cshtml";
 
         public const string ThisAssemblyName = "Microsoft.Extensions.CodeGenerators.Mvc";
+
+        //Template names
+        public const string ApiEmptyControllerTemplate = "ApiEmptyController.cshtml";
+        public const string ApiControllerWithActionsTemplate = "ApiControllerWithActions.cshtml";
+        public const string ApiControllerWithContextTemplate = "ApiControllerWithContext.cshtml";
+        public const string MvcEmptyControllerTemplate = "EmptyController.cshtml";
+        public const string MvcControllerWithActionsTemplate = "ControllerWithActions.cshtml";
+        public const string MvcControllerWithContextTemplate = "MvcControllerWithContext.cshtml";
     }
 }

@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             {
                 if (model.GenerateReadWriteActions)
                 {
-                    //Controller with Actions
+                    generator = GetGenerator<MvcControllerWithReadWriteActionGenerator>();
                 }
                 else
                 {
@@ -52,11 +52,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             if (generator != null)
             {
                 await generator.Generate(model);
-            }
-            else
-            {
-                // Just throwing as I enable this functionality, should remove it once I fill all the above...
-                throw new Exception("Functionality not yet enabled...");
             }
         }
 

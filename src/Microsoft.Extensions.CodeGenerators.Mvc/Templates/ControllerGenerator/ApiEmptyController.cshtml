@@ -1,0 +1,18 @@
+﻿@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc;
+@{string modelName = (Model.ClassName.EndsWith("Controller") ? Model.ClassName.Substring(0, Model.ClassName.Length - 10) : Model.ClassName);}
+
+namespace @Model.NamespaceName
+{
+@{
+    string routePrefix = "api/" + modelName;
+}
+    [Produces("application/json")]
+    [Route("@routePrefix")]
+    public class @Model.ClassName : Controller
+    {
+    }
+}

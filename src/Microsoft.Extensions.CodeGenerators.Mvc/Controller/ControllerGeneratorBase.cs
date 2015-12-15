@@ -98,5 +98,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         }
 
         public abstract Task Generate(CommandLineGeneratorModel controllerGeneratorModel);
+        protected abstract string GetTemplateName(CommandLineGeneratorModel controllerGeneratorModel);
     }
 }

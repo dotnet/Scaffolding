@@ -73,8 +73,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         {
             get
             {
-                // ToDo: This did CodeDomProvider.CreateEscapedIdentifier in MVC, do we need that?
-                return ModelTypeName.ToLowerInvariantFirstChar();
+                return RoslynUtilities.CreateEscapedIdentifier(ModelTypeName.ToLowerInvariantFirstChar());
             }
         }
 

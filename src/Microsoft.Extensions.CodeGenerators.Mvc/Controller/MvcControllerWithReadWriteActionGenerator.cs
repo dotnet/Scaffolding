@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         {
             get
             {
-                return "Controller Name is required";
+                return CodeGenerators.Mvc.MessageStrings.ControllerNameRequired;
             }
         }
         protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)

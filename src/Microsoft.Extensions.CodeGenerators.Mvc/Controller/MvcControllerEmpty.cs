@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
         {
             get
             {
-                return "Controller name is required for an Empty Controller";
+                return CodeGenerators.Mvc.MessageStrings.EmptyControllerNameRequired;
             }
         }
     }

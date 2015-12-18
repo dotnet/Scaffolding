@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new ArgumentException(String.Format(
                         CultureInfo.CurrentCulture,
-                        "Parameter '{0}' cannot be null or empty.",
+                        Resource.NullParamError,
                         parameterName),
                     parameterName);
             }

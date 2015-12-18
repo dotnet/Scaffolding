@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 }
                 else
                 {
-                    Debug.Assert(false, "Unexpected type of library information for template folders");
+                    Debug.Assert(false, Resource.UnexpectedTypeLibraryForTemplates);
                 }
 
                 if (Directory.Exists(containingProjectPath))

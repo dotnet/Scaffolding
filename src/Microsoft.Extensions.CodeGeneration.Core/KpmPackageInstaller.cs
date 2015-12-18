@@ -120,7 +120,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 }
             }
 
-            throw new InvalidOperationException("Could not find dnu.cmd on path. Unable to run restore");
+            throw new InvalidOperationException(string.Format("{0} {1}", MessageStrings.DnuNotFound, MessageStrings.UnableToRunRestore));
         }
 
         // Internal for unit tests.

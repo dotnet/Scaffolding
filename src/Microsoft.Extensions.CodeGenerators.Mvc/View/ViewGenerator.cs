@@ -106,12 +106,12 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 
             if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
             {
-                throw new ArgumentException("The ViewName cannot be empty");
+                throw new ArgumentException(CodeGenerators.Mvc.MessageStrings.ViewNameRequired);
             }
 
             if (string.IsNullOrEmpty(viewGeneratorModel.TemplateName))
             {
-                throw new ArgumentException("The TemplateName cannot be empty");
+                throw new ArgumentException(CodeGenerators.Mvc.MessageStrings.TemplateNameRequired);
             }
 
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
@@ -150,8 +150,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
             {
-                throw new Exception("Scaffolding generated all the code but the new context created could be registered using dependency injection." +
-                    "There may be additional steps required for the generated code to work. Refer to <forward-link>");
+                throw new Exception(string.Format("{0} {1}", CodeGenerators.Mvc.MessageStrings.ScaffoldingSuccessful_unregistered, CodeGenerators.Mvc.MessageStrings.Scaffolding_additionalSteps));
             }
         }
 
@@ -162,7 +161,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
+            Contract.Assert(model != null, CodeGenerators.Mvc.MessageStrings.ValidationSuccessfull_modelUnset);
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
 

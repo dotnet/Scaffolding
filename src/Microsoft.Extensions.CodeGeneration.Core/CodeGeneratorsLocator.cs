@@ -48,7 +48,7 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.CurrentCulture,
-                        "No code generators found with the name '{0}'",
+                        MessageStrings.CodeGeneratorNotFound,
                         codeGeneratorName));
             }
 
@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.CurrentCulture,
-                    "Multiple code generators found matching the name '{0}'",
+                    MessageStrings.MultipleCodeGeneratorsFound,
                     codeGeneratorName));
             }
 

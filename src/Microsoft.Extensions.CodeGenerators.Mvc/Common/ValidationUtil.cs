@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
         {
             if (string.IsNullOrEmpty(typeName))
             {
-                throw new ArgumentException(string.Format("Please provide a valid {0}", argumentName));
+                throw new ArgumentException(string.Format(CodeGenerators.Mvc.MessageStrings.ProvideValidArgument, argumentName));
             }
 
             var candidateModelTypes = modelTypesLocator.GetType(typeName).ToList();
@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
             {
                 if (throwWhenNotFound)
                 {
-                    throw new ArgumentException(string.Format("A type with the name {0} does not exist", typeName));
+                    throw new ArgumentException(string.Format(CodeGenerators.Mvc.MessageStrings.TypeDoesNotExist, typeName));
                 }
                 return null;
             }

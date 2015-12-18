@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating
         {
             get
             {
-                return "Template Processing Failed:" + FormatMessage(Messages);
+                return string.Format(MessageStrings.TemplateProcessingError,FormatMessage(Messages));
             }
         }
 

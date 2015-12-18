@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new ArgumentException(string.Format(
                     CultureInfo.CurrentCulture,
-                    "The provided file '{0}' does not exist. This method expects a fully qualified path of an existing file.",
+                    MessageStrings.FileNotFound,
                     sourceFilePath));
             }
 
@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.CodeGeneration
             if (string.IsNullOrEmpty(templatePath))
             {
                 throw new InvalidOperationException(string.Format(
-                    "Template file {0} not found within search paths {1}",
+                    MessageStrings.TemplateFileNotFound,
                     templateName,
                     string.Join(";", templateFolders)));
             }
@@ -83,7 +83,7 @@ namespace Microsoft.Extensions.CodeGeneration
             if (templateResult.ProcessingException != null)
             {
                 throw new InvalidOperationException(string.Format(
-                    "There was an error running the template {0}: {1}",
+                    MessageStrings.TemplateProcessingError,
                     templatePath,
                     templateResult.ProcessingException.Message));
             }

@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.CodeGeneration
                     if (matchingFiles.Count > 1)
                     {
                         throw new InvalidOperationException(string.Format(
-                            "Multiple files with name {0} found within {1}",
+                            MessageStrings.MultipleFilesFound,
                             fileName,
                             searchPath));
                     }
@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.CodeGeneration
             }
 
             throw new InvalidOperationException(string.Format(
-                "A file matching the name {0} was not found within any of the folders: {1}",
+                MessageStrings.FileNotFoundInFolders,
                 fileName,
                 string.Join(";", searchPaths)));
         }

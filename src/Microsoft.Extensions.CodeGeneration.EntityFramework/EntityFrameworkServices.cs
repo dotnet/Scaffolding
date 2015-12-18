@@ -361,16 +361,16 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
         private DbContext TryCreateContextUsingAppCode(Type dbContextType, ModelType startupType)
         {
-            var hostBuilder = new WebHostBuilder();
+            var builder = new WebApplicationBuilder();
             if (startupType != null)
             {
                 var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);
                 if (reflectedStartupType != null)
                 {
-                    hostBuilder.UseStartup(reflectedStartupType);
+                    builder.UseStartup(reflectedStartupType);
                 }
             }
-            var appServices = hostBuilder.Build().ApplicationServices;
+            var appServices = builder.Build().Services;
             return appServices.GetService(dbContextType) as DbContext;
         }
     }

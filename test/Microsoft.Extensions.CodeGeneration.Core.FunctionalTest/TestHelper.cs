@@ -4,9 +4,11 @@
 using System;
 using System.IO;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Hosting.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CompilationAbstractions;
+using Microsoft.AspNet.Http.Features;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {
@@ -23,15 +25,31 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
             var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
 
-            return new WebHostBuilder()
-                .UseServices(services => 
+            return new WebApplicationBuilder()
+                .UseServer(new DummyServer())
+                .UseStartup<ModelTypesLocatorTestWebApp.Startup>()
+                .ConfigureServices(services => 
                     {
                         services.AddSingleton<IApplicationEnvironment>(testEnvironment);
                         services.AddSingleton(CompilationServices.Default.LibraryExporter);
                         services.AddSingleton(CompilationServices.Default.CompilerOptionsProvider);
                     })
                 .Build()
-                .ApplicationServices;
+                .Services;
+        }
+
+        private class DummyServer : IServer
+        {
+            IFeatureCollection IServer.Features { get; }
+
+            public void Dispose()
+            {
+            }
+
+            void IServer.Start<TContext>(IHttpApplication<TContext> application)
+            {
+            }
         }
     }
+
 }

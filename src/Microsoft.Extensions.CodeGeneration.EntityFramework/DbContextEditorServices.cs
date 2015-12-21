@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             if (templateResult.ProcessingException != null)
             {
                 throw new InvalidOperationException(string.Format(
-                    "There was an error running the template {0}: {1}",
+                    MessageStrings.TemplateProcessingError,
                     templatePath,
                     templateResult.ProcessingException.Message));
             }

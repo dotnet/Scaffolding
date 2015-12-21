@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
             {
                 throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
-                    "The file {0} exists, use -f option to overwrite",
+                    MessageStrings.FileExists_useforce,
                     outputPath));
             }
 

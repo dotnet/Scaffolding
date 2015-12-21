@@ -104,8 +104,8 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
             {
-                throw new Exception("Scaffolding generated all the code but the new context created could be registered using dependency injection." +
-                    "There may be additional steps required for the generated code to work. Refer to <forward-link>");
+                throw new Exception(string.Format("{0} {1}" ,CodeGenerators.Mvc.MessageStrings.ScaffoldingSuccessful_unregistered,
+                    CodeGenerators.Mvc.MessageStrings.Scaffolding_additionalSteps));
             }
         }
 
@@ -167,7 +167,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
 
             // Validation successful
-            Contract.Assert(model != null, "Validation succeded but model type not set");
+            Contract.Assert(model != null, CodeGenerators.Mvc.MessageStrings.ValidationSuccessfull_modelUnset);
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
 

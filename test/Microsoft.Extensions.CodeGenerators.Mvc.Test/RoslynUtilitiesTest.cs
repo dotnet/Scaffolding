@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Test
         [Theory, MemberData("TestData")]
         public void TestCreateEscapedIdentifier(string identifier, string expectedValue)
         {
-            Assert.Equal(RoslynUtilities.CreateEscapedIdentifier(identifier), expectedValue);
+            Assert.Equal(expectedValue, RoslynUtilities.CreateEscapedIdentifier(identifier));
         }
 
         public static IEnumerable<object[]> TestData
@@ -45,7 +45,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Test
                     new object[] {"event", "@event"},
                     new object[] {"explicit", "@explicit"},
                     new object[] {"extern", "@extern"},
-                    new object[] {"FALSE", "@FALSE"},
                     new object[] {"finally", "@finally"},
                     new object[] {"fixed", "@fixed"},
                     new object[] {"float", "@float"},
@@ -55,7 +54,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Test
                     new object[] {"if", "@if"},
                     new object[] {"implicit", "@implicit"},
                     new object[] {"in", "@in"},
-                    new object[] {"in (generic modifier)", "@in (generic modifier)"},
                     new object[] {"int", "@int"},
                     new object[] {"interface", "@interface"},
                     new object[] {"internal", "@internal"},
@@ -68,7 +66,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Test
                     new object[] {"object", "@object"},
                     new object[] {"operator", "@operator"},
                     new object[] {"out", "@out"},
-                    new object[] {"out (generic modifier)", "@out (generic modifier)"},
                     new object[] {"override", "@override"},
                     new object[] {"params", "@params"},
                     new object[] {"private", "@private"},
@@ -88,7 +85,6 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Test
                     new object[] {"switch", "@switch"},
                     new object[] {"this", "@this"},
                     new object[] {"throw", "@throw"},
-                    new object[] {"TRUE", "@TRUE"},
                     new object[] {"try", "@try"},
                     new object[] {"typeof", "@typeof"},
                     new object[] {"uint", "@uint"},
@@ -104,7 +100,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Test
                     // Non Keywords
                     new object[] {"i", "i"},
                     new object[] {"Class", "Class"},
-                    new object[] {"Model", "Model"}
+                    new object[] {"Model", "Model"},
+                    new object[] {"FALSE", "FALSE"},
+                    new object[] {"TRUE", "TRUE"}
                 };
             }
         }

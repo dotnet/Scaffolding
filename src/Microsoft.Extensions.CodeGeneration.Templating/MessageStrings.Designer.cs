@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to Template Processing Failed: {0}.
+        ///    Looks up a localized string similar to Template Processing Failed:{0}.
         /// </summary>
         internal static string TemplateProcessingError {
             get {

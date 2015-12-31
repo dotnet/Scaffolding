@@ -23,23 +23,9 @@ using Microsoft.Data.Entity;
     } 
 }    public class @Model.DbContextTypeName : @baseClassName
     {
-        private static bool _created = false;
-
         public @(Model.DbContextTypeName)()
         {
-            if (!_created)
-            {
-                _created = true;
-                Database.EnsureCreated();
-            }
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
+            
         }
 
         public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }

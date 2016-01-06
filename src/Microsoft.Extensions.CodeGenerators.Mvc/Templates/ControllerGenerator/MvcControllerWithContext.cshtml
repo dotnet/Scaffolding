@@ -113,11 +113,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleAsync(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).Single(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
 }            if (@Model.ModelVariable == null)
             {
@@ -197,11 +197,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleAsync(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).Single(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
 }            if (@Model.ModelVariable == null)
             {
@@ -272,11 +272,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleAsync(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).Single(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
 }            if (@Model.ModelVariable == null)
             {
@@ -301,11 +301,11 @@ namespace @Model.ControllerNamespace
         @:{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleAsync(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).Single(m => m.@primaryKeyName == id);
+            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
             @:_context.@(entitySetName).Remove(@Model.ModelVariable);
     if (Model.UseAsync)

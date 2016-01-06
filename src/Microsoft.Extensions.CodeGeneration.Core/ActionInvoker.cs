@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.Extensions.CodeGeneration
 {

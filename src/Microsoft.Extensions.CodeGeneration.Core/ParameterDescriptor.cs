@@ -4,8 +4,8 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.Extensions.CodeGeneration
 {

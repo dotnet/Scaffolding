@@ -1,9 +1,24 @@
 @inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
 using Microsoft.Data.Entity;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 @{
+    var minUsings = new HashSet<string>()
+    {
+         "System",
+         "System.Collections.Generic",
+         "System.Linq",
+         "System.Threading.Tasks"
+
+    };
     foreach (var namespaceName in Model.RequiredNamespaces)
     {
+        if (!minUsings.Contains(namespaceName))
+        {
 @:using @namespaceName;
+        }
     }
 @:
     string baseClassName;

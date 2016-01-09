@@ -1,5 +1,8 @@
 ﻿@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Http.Internal;
 @{string modelName = (Model.ClassName.EndsWith("Controller")? Model.ClassName.Substring(0,Model.ClassName.Length-10): Model.ClassName);}

@@ -360,7 +360,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
         private DbContext TryCreateContextUsingAppCode(Type dbContextType, ModelType startupType)
         {
-            var builder = new WebApplicationBuilder();
+            var builder = new WebHostBuilder();
             if (startupType != null)
             {
                 var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);

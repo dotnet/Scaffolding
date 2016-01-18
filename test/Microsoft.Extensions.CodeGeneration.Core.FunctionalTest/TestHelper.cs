@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
             var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
 
-            return new WebApplicationBuilder()
+            return new WebHostBuilder()
                 .UseServer(new DummyServer())
                 .UseStartup<ModelTypesLocatorTestWebApp.Startup>()
                 .ConfigureServices(services => 

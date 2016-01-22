@@ -4,7 +4,7 @@
         "keyFile": "../../tools/Key.snk"
     },
     "dependencies": {
-        "Microsoft.Extensions.CodeGeneration.EntityFramework": "1.0.0-*",
+        "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
         "Microsoft.Extensions.FileProviders.Embedded": "1.0.0-*",
         "Moq": "4.2.1312.1622",
         "xunit.runner.aspnet": "2.0.0-aspnet-*"

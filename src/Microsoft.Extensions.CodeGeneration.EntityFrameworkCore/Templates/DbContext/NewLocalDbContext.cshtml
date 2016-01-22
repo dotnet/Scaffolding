@@ -1,5 +1,5 @@
 @inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +24,7 @@ using System.Threading.Tasks;
     string baseClassName;
     if (String.Equals(Model.DbContextTypeName, "DbContext", StringComparison.Ordinal))
     {
-        baseClassName = "Microsoft.Data.Entity.DbContext";
+        baseClassName = "Microsoft.EntityFrameworkCore.DbContext";
     }
     else
     {

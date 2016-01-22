@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
     public class NewDbContextTemplateModel
     {

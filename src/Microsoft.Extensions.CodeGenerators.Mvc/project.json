@@ -10,7 +10,7 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.CodeGeneration.EntityFramework": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
     "Newtonsoft.Json": "6.0.6"
   },

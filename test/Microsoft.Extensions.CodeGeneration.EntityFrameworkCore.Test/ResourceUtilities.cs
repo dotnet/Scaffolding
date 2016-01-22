@@ -2,7 +2,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.FileProviders;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 {
     internal static class ResourceUtilities
     {
@@ -18,6 +18,6 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
         }
 
         private static EmbeddedFileProvider Instance = new EmbeddedFileProvider(Assembly.GetExecutingAssembly(),
-            "Microsoft.Extensions.CodeGeneration.EntityFramework.Test");
+            "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test");
     }
 }

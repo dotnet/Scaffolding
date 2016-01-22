@@ -10,14 +10,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.Extensions.PlatformAbstractions;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
     public class EntityFrameworkServices : IEntityFrameworkService
     {
@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private static int _counter = 1;
-        private const string EFSqlServerPackageName = "EntityFramework.MicrosoftSqlServer";
+        private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         private const string EFSqlServerPackageVersion = "7.0.0-*";
 
         public EntityFrameworkServices(

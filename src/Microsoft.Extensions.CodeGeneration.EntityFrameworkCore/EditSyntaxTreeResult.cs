@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
     public class EditSyntaxTreeResult
     {

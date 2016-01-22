@@ -40,11 +40,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{40
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ModelTypesLocatorTestClassLibrary", "test\TestApps\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.xproj", "{F6C4B32C-5F1A-4381-A763-E171F713732B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.EntityFramework", "src\Microsoft.Extensions.CodeGeneration.EntityFramework\Microsoft.Extensions.CodeGeneration.EntityFramework.xproj", "{8E52113B-F68A-444A-893D-E669ACCB998D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore", "src\Microsoft.Extensions.CodeGeneration.EntityFrameworkCore\Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.xproj", "{8E52113B-F68A-444A-893D-E669ACCB998D}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGenerators.Mvc", "src\Microsoft.Extensions.CodeGenerators.Mvc\Microsoft.Extensions.CodeGenerators.Mvc.xproj", "{9387DE6F-2956-4AF3-ABB1-C0647F793DBB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.EntityFramework.Test", "test\Microsoft.Extensions.CodeGeneration.EntityFramework.Test\Microsoft.Extensions.CodeGeneration.EntityFramework.Test.xproj", "{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test", "test\Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test\Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test.xproj", "{4276B6C8-724C-4FB3-A74E-FBC188D33FF9}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGenerators.Mvc.Test", "test\Microsoft.Extensions.CodeGenerators.Mvc.Test\Microsoft.Extensions.CodeGenerators.Mvc.Test.xproj", "{2EE4B58A-9D8C-404D-BAF8-9039A726937B}"
 EndProject

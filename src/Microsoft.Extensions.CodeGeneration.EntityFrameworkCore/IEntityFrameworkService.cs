@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
     public interface IEntityFrameworkService
     {

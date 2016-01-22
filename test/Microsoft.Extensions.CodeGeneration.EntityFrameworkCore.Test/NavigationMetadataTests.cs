@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using Microsoft.Data.Entity;
-using Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test.TestModels;
 using Xunit;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 {
     public class NavigationMetadataTests
     {

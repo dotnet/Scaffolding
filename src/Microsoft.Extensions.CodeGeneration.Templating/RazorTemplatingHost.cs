@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNet.Razor;
-using Microsoft.AspNet.Razor.CodeGenerators;
+using Microsoft.AspNetCore.Razor;
+using Microsoft.AspNetCore.Razor.CodeGenerators;
 
 namespace Microsoft.Extensions.CodeGeneration.Templating
 {

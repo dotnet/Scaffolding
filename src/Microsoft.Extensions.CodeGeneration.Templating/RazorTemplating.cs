@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Razor;
+using Microsoft.AspNetCore.Razor;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 
 namespace Microsoft.Extensions.CodeGeneration.Templating

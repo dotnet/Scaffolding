@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGeneration.EntityFramework;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 {

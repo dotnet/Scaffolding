@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test.TestModels
 {
     /*
         Category  --(one)----(many)-->   Product  [foreign key on Product] [Read from right to left for many to one relation :-)]

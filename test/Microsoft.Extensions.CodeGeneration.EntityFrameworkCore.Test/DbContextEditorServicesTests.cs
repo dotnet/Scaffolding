@@ -1,13 +1,13 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 {
     public class DbContextEditorServicesTests
     {

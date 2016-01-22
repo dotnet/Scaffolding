@@ -9,7 +9,7 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.AspNet.Razor": "4.0.0-*",
+    "Microsoft.AspNetCore.Razor": "4.0.0-*",
     "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*"
   },
 

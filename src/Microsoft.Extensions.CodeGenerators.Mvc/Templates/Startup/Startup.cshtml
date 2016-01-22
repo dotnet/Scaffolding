@@ -1,6 +1,6 @@
 @inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
 @using System.Linq;
-using Microsoft.AspNet.Builder;
+using Microsoft.AspNetCore.Builder;
 @{ 
     var allNamespaces = new SortedSet<string>(StringComparer.Ordinal);
     foreach (var list in Model.StartupList)

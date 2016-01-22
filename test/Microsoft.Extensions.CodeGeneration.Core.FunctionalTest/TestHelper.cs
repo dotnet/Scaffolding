@@ -3,12 +3,12 @@
 
 using System;
 using System.IO;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Hosting.Server;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.AspNet.Http.Features;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {

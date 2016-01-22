@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
     public class DbContextEditorServices : IDbContextEditorServices
     {
@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     var newNode = rootNode.InsertNodesAfter(lastNode,
                             propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
 
-                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.Data.Entity", newNode as CompilationUnitSyntax); //DbSet namespace
+                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.EntityFrameworkCore", newNode as CompilationUnitSyntax); //DbSet namespace
                     newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, newNode as CompilationUnitSyntax);
 
                     var modifiedTree = syntaxTree.WithRootAndOptions(newNode, syntaxTree.Options);
@@ -156,7 +156,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 
                         var newRoot = rootNode.ReplaceNode(configServicesMethod, newConfigServicesMethod);
 
-                        var namespacesToAdd = new[] { "Microsoft.Data.Entity", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
+                        var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
                         foreach (var namespaceName in namespacesToAdd)
                         {
                             newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
@@ -185,8 +185,8 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             {
                 var namedType = pSymbol.Type as INamedTypeSymbol; //When can this go wrong?
                 if (namedType != null && namedType.IsGenericType && !namedType.IsUnboundGenericType &&
-                    namedType.ContainingAssembly.Name == "EntityFramework.Core" &&
-                    namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Data.Entity" &&
+                    namedType.ContainingAssembly.Name == "Microsoft.EntityFrameworkCore" &&
+                    namedType.ContainingNamespace.ToDisplayString() == "Microsoft.EntityFrameworkCore" &&
                     namedType.Name == "DbSet") // What happens if the type is referenced in full in code??
                 {
                     // Can we check for equality of typeSymbol itself?
@@ -205,7 +205,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             get
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: "Microsoft.Extensions.CodeGeneration.EntityFramework",
+                    containingProject: "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore",
                     applicationBasePath: _environment.ApplicationBasePath,
                     baseFolders: new[] { "DbContext" },
                     libraryManager: _libraryManager);

@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.Extensions.CodeGeneration.EntityFramework.Test.TestModels;
-using Microsoft.Data.Entity;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test.TestModels;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
+namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 {
     public class ModelMetadataTests
     {

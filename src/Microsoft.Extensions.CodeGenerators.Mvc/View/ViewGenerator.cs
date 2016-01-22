@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGeneration.CommandLine;
-using Microsoft.Extensions.CodeGeneration.EntityFramework;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
 using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
 using Microsoft.Extensions.DependencyInjection;
 

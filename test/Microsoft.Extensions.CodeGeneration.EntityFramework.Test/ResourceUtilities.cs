@@ -1,6 +1,6 @@
 using System.IO;
 using System.Reflection;
-using Microsoft.AspNet.FileProviders;
+using Microsoft.Extensions.FileProviders;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
 {

@@ -6,7 +6,7 @@ using Microsoft.Extensions.CodeGeneration.CommandLine;
 using Microsoft.Extensions.CommandLineUtils;
 using Xunit;
 
-namespace Microsoft.Extensions.CodeGeneration.Core.Test
+namespace Microsoft.Extensions.CodeGeneration.Core
 {
     public class ParameterDescriptorTests
     {

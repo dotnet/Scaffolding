@@ -52,13 +52,14 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
             var references = GetApplicationReferences();
-
+            Console.WriteLine("Compile in RoslynCompilationServices");
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,
                         options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
                         syntaxTrees: syntaxTrees,
                         references: references);
+
 
             var result = CommonUtilities.GetAssemblyFromCompilation(_loader, compilation);
             if (result.Success)
@@ -91,11 +92,11 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var export = _libraryExporter.GetAllExports();
+                var export = _libraryExporter.GetExport(baseProject);
 
                 if (export != null)
                 {
-                    foreach (var metadataReference in export.SelectMany(_=>_.GetMetadataReferences()))
+                    foreach (var metadataReference in export.GetMetadataReferences())
                     {
                         references.Add(metadataReference);
                     }

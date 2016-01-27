@@ -86,6 +86,8 @@ namespace Microsoft.Extensions.CodeGeneration
                         ex = ex.GetBaseException();
                     }
 
+                    //TODO : @prbhosal Cleanup
+                    Console.WriteLine(ex.StackTrace);
                     throw new InvalidOperationException(ex.Message);
                 }
 

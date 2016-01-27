@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-}using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+
 @{
     foreach (var namespaceName in Model.RequiredNamespaces)
     {
@@ -335,7 +336,7 @@ namespace @Model.ControllerNamespace
         catch
         {
         }
-        if (primaryKeyType != null && (primaryKeyType.IsPrimitive || IsGuid(typeName)))
+        if (primaryKeyType != null && (Microsoft.Extensions.CodeGeneration.Templating.TypeUtilities.IsTypePrimitive(primaryKeyType) || IsGuid(typeName)))
         {
             return shortTypeName + "?";
         }

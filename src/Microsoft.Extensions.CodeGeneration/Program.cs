@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
+using System.Diagnostics;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
-using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.DotNet.ProjectModel;
+using System.Runtime.Loader;
+using System.IO;
+using System.Threading;
+using Microsoft.DotNet.ProjectModel.Loader;
+using Microsoft.DotNet.ProjectModel.Workspaces;
+using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -15,73 +23,142 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         public static void Main(string[] args)
         {
-            var serviceProvider = new ServiceProvider();
-
-            AddCodeGenerationServices(serviceProvider);
-
-            var generatorsLocator = serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
-            var logger = serviceProvider.GetRequiredService<ILogger>();
-
-            if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            PrintCommandLine(args);
+            var app = new CommandLineApplication(false)
             {
-                ShowCodeGeneratorList(serviceProvider, generatorsLocator.CodeGenerators);
-                return;
+                Name = "Code Generation",
+                Description = "Code generation for Asp.net"
+            };
+            app.HelpOption("-h|--help");
+            var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
+            var packagesPath = app.Option("-n|--nugetPackageDir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
+            
+            app.OnExecute(() =>
+            {
+                PrintCommandLine(projectPath, app.RemainingArguments);
+                var serviceProvider = new ServiceProvider();
+                var context = CreateProjectContext(projectPath.Value());
+                Directory.SetCurrentDirectory(context.ProjectDirectory);
+                Console.WriteLine("Current Directory: " + Directory.GetCurrentDirectory());
+                AddFrameworkServices(serviceProvider, context, packagesPath.Value());
+                AddCodeGenerationServices(serviceProvider);
+                var codeGenCommand = new CodeGenCommand(serviceProvider);
+                codeGenCommand.Execute(app.RemainingArguments.ToArray());
+                return 0;
+            });
+            
+            app.Execute(args);
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+
+            // Format and display the TimeSpan value.
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("RunTime " + elapsedTime);
+        }
+
+        private static void PrintCommandLine(CommandOption projectPath, List<string> remainingArguments)
+        {
+            Console.WriteLine("Command line After parsing :: ");
+            if(projectPath != null)
+            {
+                Console.WriteLine(string.Format("    Project path: {0}", projectPath.Value()));
             }
-
-            try
+            Console.WriteLine("    Remaining Args :: ");
+            if(remainingArguments != null)
             {
-                var codeGeneratorName = args[0];
-
-                logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
-                var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
-
-                var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
-
-                logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
-                actionInvoker.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                while (ex is TargetInvocationException)
+                foreach (var arg in remainingArguments)
                 {
-                    ex = ex.InnerException;
+                    Console.WriteLine("        "+arg);
                 }
-                logger.LogMessage(ex.Message, LogMessageLevel.Error);
             }
         }
 
-        private static void ShowCodeGeneratorList(IServiceProvider serviceProvider, IEnumerable<CodeGeneratorDescriptor> codeGenerators)
+        private static void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger>();
+            //TODO : Create  two different types of loaders. 
+            // One for loading up code generation assemblies.
+            // Other one for loading project itself.
+            // Maybe better to have a assembly Loader and another one as project compilation workspace. 
+            // Use the workspace to get the compilation of the project and model types. 
+            // Use the loader to figure out which assemblies are installed by the project that can be used as code gen assemblies. 
+            serviceProvider.Add(typeof(IServiceProvider), serviceProvider);
+            serviceProvider.Add(typeof(ProjectContext), context);
+            serviceProvider.Add(typeof(Workspace), context.CreateWorkspace());
+            serviceProvider.Add(typeof(IApplicationEnvironment),new ApplicationEnvironment(context.RootProject.Identity.Name, context.ProjectDirectory));
+            serviceProvider.Add(typeof(ICodeGenAssemblyLoadContext), GetAssemblyLoadContext(context.CreateLoadContext(), nugetPackageDir));
+            serviceProvider.Add(typeof(AssemblyLoadContext), context.CreateLoadContext());
+            serviceProvider.Add(typeof(ILibraryManager), new LibraryManager(context));
+            serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context));
+        }
 
-            if (codeGenerators.Any())
+        private static ICodeGenAssemblyLoadContext GetAssemblyLoadContext(AssemblyLoadContext projectLoadContext, string nugetPackageDir)
+        {
+            List<string> searchPaths = new List<string>();
+            if(Directory.Exists(nugetPackageDir))
             {
-                logger.LogMessage("Usage:  dnx gen [code generator name]\n");
-                logger.LogMessage("Code Generators:");
-
-                foreach (var generator in codeGenerators)
+                Queue<string> queue = new Queue<string>();
+                queue.Enqueue(nugetPackageDir);
+                while(queue.Count > 0)
                 {
-                    logger.LogMessage(generator.Name);
+                    var current = queue.Dequeue();
+                    searchPaths.Add(current);
+                    try
+                    {
+                        var subdirs = Directory.EnumerateDirectories(current);
+                        if(subdirs != null)
+                        {
+                            foreach(var sd in subdirs)
+                            {
+                                queue.Enqueue(sd);
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        continue;
+                    }
                 }
+            }
 
-                logger.LogMessage("\nTry dnx gen [code generator name] -? for help about specific code generator.");
+            return new DefaultAssemblyLoadContext(null, null, searchPaths, projectLoadContext as ProjectLoadContext);
+        }
+
+        private static ProjectContext CreateProjectContext(string projectPath)
+        {
+            projectPath = projectPath ?? Directory.GetCurrentDirectory();
+
+            if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
+            {
+                projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);
+            }
+
+            if (!File.Exists(projectPath))
+            {
+                throw new InvalidOperationException($"{projectPath} does not exist.");
+            }
+
+            return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault();
+        }
+
+        private static void PrintCommandLine(string []args)
+        {
+            Console.WriteLine("Raw command line ::");
+            if(args != null)
+            {
+                foreach(string arg in args)
+                {
+                    Console.WriteLine("    "+arg);
+                }
             }
             else
             {
-                logger.LogMessage("There are no code generators installed to run.");
+                Console.WriteLine("No arguments!!! >-<");
             }
-        }
-
-        private static bool IsHelpArgument(string argument)
-        {
-            if (argument == null)
-            {
-                throw new ArgumentNullException(nameof(argument));
-            }
-
-            return string.Equals("-h", argument, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("-?", argument, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("--help", argument, StringComparison.OrdinalIgnoreCase);
         }
 
         private static void AddCodeGenerationServices(ServiceProvider serviceProvider)
@@ -90,14 +167,6 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
-
-            serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
-            serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
-            serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), DnxPlatformServices.Default.AssemblyLoadContextAccessor);
-            serviceProvider.Add(typeof(IAssemblyLoaderContainer), DnxPlatformServices.Default.AssemblyLoaderContainer);
-            serviceProvider.Add(typeof(ILibraryManager), DnxPlatformServices.Default.LibraryManager);
-            serviceProvider.Add(typeof(ILibraryExporter), CompilationServices.Default.LibraryExporter);
-            serviceProvider.Add(typeof(ICompilerOptionsProvider), CompilationServices.Default.CompilerOptionsProvider);
 
             //Ordering of services is important here
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
@@ -113,6 +182,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();
+            
             serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
             serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }

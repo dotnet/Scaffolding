@@ -5,17 +5,20 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration": {
+      "version": "1.0.0-*"    },
     "Microsoft.Extensions.CodeGeneration.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "version": "1.0.0-*"
     },
-    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": {
+      "version": "1.0.0-*"
+    },
+    "Microsoft.Extensions.CodeGeneration.Templating": {
+      "version": "1.0.0-*"
+    },
     "Newtonsoft.Json": "6.0.6"
   },
   "frameworks": {
-    "dnx451": { },
     "dnxcore50": {
       "dependencies": {
         "System.Runtime": "4.0.21-*"

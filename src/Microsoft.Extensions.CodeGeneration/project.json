@@ -2,7 +2,8 @@
   "version": "1.0.0-*",
   "compilationOptions": {
     "keyFile": "../../tools/Key.snk",
-    "warningsAsErrors": true
+    "warningsAsErrors": true,
+    "emitEntryPoint": true
   },
   "dependencies": {
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
@@ -10,17 +11,27 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
-    "Microsoft.Extensions.PlatformAbstractions.Dnx": "1.0.0-*"
+    "Microsoft.Extensions.CodeGeneration.Core": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.CodeGeneration.Templating": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": {
+      "version": "1.0.0-*",
+      "type": "build"
+    }
   },
   "frameworks": {
-    "dnx451": { },
     "dnxcore50": {
       "dependencies": {
-        "System.Console": "4.0.0-*"
+        "System.Console": "4.0.0-*",
+        "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.2.0-beta1-20160108-01",
+        "System.Linq.Expressions": "4.0.11-rc2-23706",
+        "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01"
       }
     }
   }

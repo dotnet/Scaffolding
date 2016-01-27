@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;

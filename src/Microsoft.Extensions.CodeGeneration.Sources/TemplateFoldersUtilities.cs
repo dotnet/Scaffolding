@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -48,11 +48,11 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 string containingProjectPath = "";
 
-                if (string.Equals("Project", dependency.Type, StringComparison.Ordinal))
+                if (string.Equals("Project", dependency.Identity.Type.Value, StringComparison.Ordinal))
                 {
                     containingProjectPath = Path.GetDirectoryName(dependency.Path);
                 }
-                else if (string.Equals("Package", dependency.Type, StringComparison.Ordinal))
+                else if (string.Equals("Package", dependency.Identity.Type.Value, StringComparison.Ordinal))
                 {
                     containingProjectPath = dependency.Path;
                 }

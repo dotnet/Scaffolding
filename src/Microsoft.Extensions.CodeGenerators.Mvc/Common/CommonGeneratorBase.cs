@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc
 {

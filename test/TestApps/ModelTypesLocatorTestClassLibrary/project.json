@@ -1,10 +1,12 @@
 {
-    "frameworks": {
-        "dnx451": { },
-        "dnxcore50": {
-            "dependencies": {
-                "System.Runtime": "4.0.21-*"
-            }
-        }
+  "dependencies": {
+        "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*"
+  },
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies": {
+        "System.Runtime": "4.0.21-*"
+      }
     }
+  }
 }

@@ -14,8 +14,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         private readonly IApplicationEnvironment _environment;
         private readonly ILibraryManager _libraryManager;
         private readonly ILibraryExporter _libraryExporter;
-        private readonly IAssemblyLoadContext _loader;
+        private readonly ICodeGenAssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
         private readonly IServiceProvider _serviceProvider;

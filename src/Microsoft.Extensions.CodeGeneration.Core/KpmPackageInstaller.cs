@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Extensions.CodeGeneration

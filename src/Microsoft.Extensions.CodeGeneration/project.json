@@ -13,7 +13,8 @@
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*"
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
+    "Microsoft.Extensions.PlatformAbstractions.Dnx": "1.0.0-*"
   },
   "frameworks": {
     "dnx451": { },

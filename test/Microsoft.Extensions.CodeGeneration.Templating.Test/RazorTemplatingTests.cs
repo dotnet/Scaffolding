@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
         private ICompilationService GetCompilationService()
         {
             var appEnvironment = PlatformServices.Default.Application;
-            var loaderAccessor = PlatformServices.Default.AssemblyLoadContextAccessor;
+            var loaderAccessor = DnxPlatformServices.Default.AssemblyLoadContextAccessor;
             var libExporter = CompilationServices.Default.LibraryExporter;
 
             var emptyLibExport = new LibraryExport(metadataReferences: null);

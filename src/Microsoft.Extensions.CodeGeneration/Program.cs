@@ -93,9 +93,9 @@ namespace Microsoft.Extensions.CodeGeneration
 
             serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
             serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
-            serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), PlatformServices.Default.AssemblyLoadContextAccessor);
-            serviceProvider.Add(typeof(IAssemblyLoaderContainer), PlatformServices.Default.AssemblyLoaderContainer);
-            serviceProvider.Add(typeof(ILibraryManager), PlatformServices.Default.LibraryManager);
+            serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), DnxPlatformServices.Default.AssemblyLoadContextAccessor);
+            serviceProvider.Add(typeof(IAssemblyLoaderContainer), DnxPlatformServices.Default.AssemblyLoaderContainer);
+            serviceProvider.Add(typeof(ILibraryManager), DnxPlatformServices.Default.LibraryManager);
             serviceProvider.Add(typeof(ILibraryExporter), CompilationServices.Default.LibraryExporter);
             serviceProvider.Add(typeof(ICompilerOptionsProvider), CompilationServices.Default.CompilerOptionsProvider);
 

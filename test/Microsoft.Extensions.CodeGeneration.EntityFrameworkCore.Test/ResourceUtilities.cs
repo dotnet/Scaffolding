@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
             }
         }
 
-        private static EmbeddedFileProvider Instance = new EmbeddedFileProvider(Assembly.GetExecutingAssembly(),
+        private static EmbeddedFileProvider Instance = new EmbeddedFileProvider(Assembly.Load(new AssemblyName("Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test")),
             "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test");
     }
 }

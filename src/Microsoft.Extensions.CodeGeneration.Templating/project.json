@@ -6,8 +6,7 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "version": "1.0.0-*"
     },
     "Microsoft.AspNetCore.Razor": "1.0.0-*",
     "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",

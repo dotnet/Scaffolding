@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test.TestModel
         [ScaffoldColumn(false)]
         public int ScaffoldFalseProperty { get; set; }
 
-        [ReadOnly(true)]
+        //[ReadOnly(true)]
         public string ReadOnlyProperty { get; set; }
     }
 

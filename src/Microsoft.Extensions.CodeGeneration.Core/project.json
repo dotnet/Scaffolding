@@ -6,12 +6,10 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "version": "1.0.0-*"
     },
     "Microsoft.Extensions.CodeGeneration.Templating": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "version": "1.0.0-*"
     },
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",

@@ -23,7 +23,7 @@
         "dnxcore50": { 
           "dependencies": {
             "System.IO": "4.1.0-rc2-23722",
-            "System.Runtime.Extensions": "4.1.0-*"
+            "System.Runtime.Extensions": "4.1.0-rc2-23706"
           }
         }
     },

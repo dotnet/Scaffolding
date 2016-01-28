@@ -92,11 +92,11 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var export = _libraryExporter.GetExport(baseProject);
+                var exports = _libraryExporter.GetAllExports();
 
-                if (export != null)
+                if (exports != null)
                 {
-                    foreach (var metadataReference in export.GetMetadataReferences())
+                    foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReferences()))
                     {
                         references.Add(metadataReference);
                     }

@@ -7,12 +7,26 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.Test
 {
     public class CodeGeneratorsLocatorTests
     {
-        Assembly currentAssembly = Assembly.GetExecutingAssembly();
+        Mock<Assembly> currentAssembly;
+
+        public CodeGeneratorsLocatorTests()
+        {
+            List<TypeInfo> typeList = new List<TypeInfo>();
+
+            typeList.Add(typeof(SampleCodeGenerator).GetTypeInfo());
+            typeList.Add(typeof(GeneratorDerivingFromInterface).GetTypeInfo());
+            typeList.Add(typeof(InterfaceEndingWithCodeGenerator).GetTypeInfo());
+            typeList.Add(typeof(AbstractClassDerivingFromInterface).GetTypeInfo());
+
+            currentAssembly = new Mock<Assembly>();
+            currentAssembly.Setup(c => c.DefinedTypes).Returns(typeList);
+        }
 
         [Fact]
         public void CodeGeneratorsLocator_Returns_Correct_Number_Of_Generators()
@@ -23,7 +37,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
 
             mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)
-                .Returns(new[] { currentAssembly });
+                .Returns(new[] { currentAssembly.Object });
 
             var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
@@ -31,8 +45,6 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
             //Act
             var generators = locator.CodeGenerators;
 
-            //This is relying on types within this assembly, so a bit fragile,
-            //any time a new type is added matching the naming convention, this test needs to be updated.
             //Assert
             Assert.Equal(2, generators.Count());
         }
@@ -46,7 +58,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
 
             mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)
-                .Returns(new[] { currentAssembly });
+                .Returns(new[] { currentAssembly.Object });
 
             var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
@@ -67,7 +79,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
 
             mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)
-                .Returns(new[] { currentAssembly });
+                .Returns(new[] { currentAssembly.Object });
 
             var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
@@ -77,29 +89,31 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
             Assert.Equal("No code generators found with the name 'NonExistingCodeGenerator'", ex.Message);
         }
 
-        //This should be returned.
-        private class SampleCodeGenerator
-        {
-        }
+        
+        
+    }
+    //This should be returned.
+    public class SampleCodeGenerator
+    {
+    }
 
-        //This should be returned.
-        private class GeneratorDerivingFromInterface : ICodeGenerator
-        {
-        }
+    //This should be returned.
+    public class GeneratorDerivingFromInterface : ICodeGenerator
+    {
+    }
 
-        //This should not be returned.
-        private interface InterfaceEndingWithCodeGenerator
-        {
-        }
+    //This should not be returned.
+    public interface InterfaceEndingWithCodeGenerator
+    {
+    }
 
-        //This should not be returned.
-        private abstract class AbstractClassDerivingFromInterface : ICodeGenerator
-        {
-        }
+    //This should not be returned.
+    public abstract class AbstractClassDerivingFromInterface : ICodeGenerator
+    {
+    }
 
-        //This should not be returned.
-        private class GenericClassCodeGenertor<T> where T : class
-        {
-        }
+    //This should not be returned.
+    public class GenericClassCodeGenertor<T> where T : class
+    {
     }
 }

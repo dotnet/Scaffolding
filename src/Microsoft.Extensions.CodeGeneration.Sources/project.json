@@ -13,7 +13,7 @@
       "dependencies": {
         "System.Runtime": "4.0.21-*",
         "System.AppContext": "4.0.1-*",
-        "Microsoft.DotNet.ProjectModel" : "1.0.0-*",
+        "Microsoft.DotNet.ProjectModel" : "1.0.0-dev-000973",
         "Microsoft.CodeAnalysis.Common": "1.2.0-*",
         "System.Threading.Tasks.Parallel": "4.0.1-rc2-23704"
         

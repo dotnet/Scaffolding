@@ -2,12 +2,16 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating;
+using Microsoft.Extensions.CodeGeneration;
+using System.Reflection;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
+namespace Microsoft.Extensions.CodeGeneration
 {
     public class DbContextEditorServicesTests
     {
@@ -23,7 +27,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 
             var contextTree = CSharpSyntaxTree.ParseText(beforeDbContextText);
             var modelTree = CSharpSyntaxTree.ParseText(modelText);
-            var efReference = MetadataReference.CreateFromFile(typeof(DbContext).Assembly.Location);
+            var efReference = MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location);
 
             var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { contextTree, modelTree }, new[] { efReference });
 
@@ -56,7 +60,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 
             var startupTree = CSharpSyntaxTree.ParseText(beforeStartupText);
             var contextTree = CSharpSyntaxTree.ParseText(dbContextText);
-            var efReference = MetadataReference.CreateFromFile(typeof(DbContext).Assembly.Location);
+            var efReference = MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location);
 
             var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference });
 

@@ -15,12 +15,12 @@
         "xunit.runner.utility": "2.1.0-*",
         "dotnet-test-xunit": "1.0.0-dev-*",        
         "xunit": "2.1.0",
-        "System.Diagnostics.Contracts": "4.0.1-rc2-23727"
+        "System.Diagnostics.Contracts": "4.0.1-rc2-23727",
+        "System.AppContext": "4.0.1-rc2-23706"
     },
     "frameworks": {
         "dnxcore50" : {
             "dependencies": {
-                "xunit.runner.console": "2.1.0"
             }
         }
     },

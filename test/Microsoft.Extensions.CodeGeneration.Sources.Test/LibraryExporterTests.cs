@@ -50,16 +50,14 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
             Assert.Equal("ModelTypesLocatorTestClassLibrary", projecsInApp.First().Library.Identity.Name);
         }
 
-        //[Fact]
+        [Fact]
         public void LibraryExporter_TestGetResolvedPath()
         {
             //Arrange
             LibraryManager manager = new LibraryManager(_projectContext);
             var lib = manager.GetLibrary("Microsoft.Extensions.CodeGenerators.Mvc");
-            Console.WriteLine("Library ::  " + lib.Identity);
             //Act
             var path = _libraryExporter.GetResolvedPathForDependency(lib);
-            Console.WriteLine("Path: " + path);
 
             //Assert
             Assert.True(File.Exists(path));

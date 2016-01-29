@@ -14,7 +14,6 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         private readonly IDictionary<AssemblyName, string> _assemblyPaths;
         private readonly IDictionary<string, string> _nativeLibraries;
         private readonly IEnumerable<string> _searchPaths;
-        private readonly AssemblyLoadContext _fallbackLoadContext;
 
         private static readonly string[] NativeLibraryExtensions;
         private static readonly string[] ManagedAssemblyExtensions = new[]
@@ -49,13 +48,11 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
 
         public DefaultAssemblyLoadContext(IDictionary<AssemblyName, string> assemblyPaths,
                                    IDictionary<string, string> nativeLibraries,
-                                   IEnumerable<string> searchPaths,
-                                   AssemblyLoadContext fallbackLoadContext = null)
+                                   IEnumerable<string> searchPaths)
         {
             _assemblyPaths = assemblyPaths ?? new Dictionary<AssemblyName, string>();
             _nativeLibraries = nativeLibraries ?? new Dictionary<string, string>();
             _searchPaths = searchPaths ?? new List<string>();
-            _fallbackLoadContext = fallbackLoadContext;
         }
 
         protected override Assembly Load(AssemblyName assemblyName)
@@ -110,7 +107,6 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             foreach(var extension in ManagedAssemblyExtensions)
             {
                 var resolvedPath = Path.Combine(path, assemblyName.Name + extension);
-                Console.WriteLine("trying {0}", resolvedPath);
                 if(File.Exists(resolvedPath))
                 {
                     return LoadFromAssemblyPath(resolvedPath);
@@ -144,6 +140,39 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
                 throw new ArgumentNullException(nameof(AssemblyName));
             }
             return Load(AssemblyName);
+        }
+
+        public static ICodeGenAssemblyLoadContext CreateAssemblyLoadContext(string nugetPackageDir)
+        {
+            List<string> searchPaths = new List<string>();
+            if (Directory.Exists(nugetPackageDir))
+            {
+                Queue<string> queue = new Queue<string>();
+                queue.Enqueue(nugetPackageDir);
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    searchPaths.Add(current);
+                    try
+                    {
+                        var subdirs = Directory.EnumerateDirectories(current);
+                        if (subdirs != null)
+                        {
+                            foreach (var sd in subdirs)
+                            {
+                                queue.Enqueue(sd);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Do not want to fail if we cannot access certain directories.
+                        continue;
+                    }
+                }
+            }
+
+            return new DefaultAssemblyLoadContext(null, null, searchPaths);
         }
     }
 }

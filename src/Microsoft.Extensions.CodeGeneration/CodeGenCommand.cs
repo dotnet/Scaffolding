@@ -21,8 +21,6 @@ namespace Microsoft.Extensions.CodeGeneration
 
         public int Execute(string [] args)
         {
-            //var serviceProvider = new ServiceProvider();
-            printargs(args);
             var generatorsLocator = ServiceProvider.GetRequiredService<ICodeGeneratorLocator>();
             var logger = ServiceProvider.GetRequiredService<ILogger>();
 
@@ -31,11 +29,9 @@ namespace Microsoft.Extensions.CodeGeneration
                 ShowCodeGeneratorList(ServiceProvider, generatorsLocator.CodeGenerators);
                 return 0;
             }
-            Console.WriteLine("Execution started...");
             try
             {
                 var codeGeneratorName = args[0];
-                Console.WriteLine("Finding the generator '" + codeGeneratorName + "'...");
                 logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
                 var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
 
@@ -56,20 +52,6 @@ namespace Microsoft.Extensions.CodeGeneration
             return 0;
         }
 
-        private void printargs(string[] args)
-        {
-            if(args == null)
-            {
-                Console.WriteLine("Args were null");
-                return;
-            }
-            Console.WriteLine("Args in Code Gen command :: ");
-            foreach(var a in args)
-            {
-                Console.WriteLine("    " + a);
-            }
-        }
-
         private static bool IsHelpArgument(string argument)
         {
             if (argument == null)
@@ -85,7 +67,6 @@ namespace Microsoft.Extensions.CodeGeneration
         private static void ShowCodeGeneratorList(IServiceProvider serviceProvider, IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
             var logger = serviceProvider.GetRequiredService<ILogger>();
-            Console.WriteLine("Showing Code Gen usage");
             if (codeGenerators.Any())
             {
                 logger.LogMessage("Usage:  dnx gen [code generator name]\n");

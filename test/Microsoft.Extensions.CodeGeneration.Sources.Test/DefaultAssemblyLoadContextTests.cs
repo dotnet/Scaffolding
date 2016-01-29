@@ -24,14 +24,12 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
             var library = new LibraryManager(_projectContext).GetLibrary("ModelTypesLocatorTestClassLibrary");
             var path = new LibraryExporter(_projectContext).GetResolvedPathForDependency(library);
 
-            Console.WriteLine(" **** \n Path: " + path);
             var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "bin", "debug", "dnxcore50");
             //var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
             _defaultAssemblyLoadContext = new DefaultAssemblyLoadContext(
                                                 new Dictionary<AssemblyName, string>(),
                                                 new Dictionary<string, string>(),
                                                 new List<string>() { currentDirectory });
-            Console.WriteLine(currentDirectory);
             Assembly assembly;
             assembly = _defaultAssemblyLoadContext.LoadFromPath(path);
             Assert.NotNull(assembly);

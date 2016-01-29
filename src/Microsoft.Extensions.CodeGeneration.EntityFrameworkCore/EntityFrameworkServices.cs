@@ -397,10 +397,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 
         private DbContext TryCreateContextUsingAppCode(Type dbContextType, ModelType startupType)
         {
-            Console.WriteLine("Current Directory: " + Directory.GetCurrentDirectory());
             try {
                 var builder = new WebHostBuilder();
-                //TODO: @prbhosal Figure out what this should be
+                //TODO: Review 
                 builder.UseServer("Microsoft.AspNet.Server.WebListener")
                         .UseApplicationBasePath(Directory.GetCurrentDirectory());
                         

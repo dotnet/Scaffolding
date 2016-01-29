@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.CodeGeneration
                     ms.Seek(0, SeekOrigin.Begin);
 
                     Assembly assembly;
-                    //TODO: @prbhosal Should consider removing this as Mono is no longer supported.                  
+                    //TODO: Should consider removing this as Mono is no longer supported.                  
                     if (PlatformHelper.IsMono)
                     {
                         assembly = loader.LoadStream(ms, symbols: null);
@@ -58,12 +58,10 @@ namespace Microsoft.Extensions.CodeGeneration
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
                             var v = ex;
                             while (v.InnerException != null)
                             {
                                 v = v.InnerException;
-                                Console.WriteLine(v.Message);
                             }
                             throw ex;
                         }

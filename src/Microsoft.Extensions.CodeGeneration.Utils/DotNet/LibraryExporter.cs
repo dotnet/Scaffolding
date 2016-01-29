@@ -14,14 +14,13 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
     {
         private Microsoft.DotNet.ProjectModel.Compilation.LibraryExporter _libraryExporter;
         private ProjectContext _context;
-        // private DefaultAssemblyLoadContext _loadContext;
+
         public LibraryExporter(ProjectContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            //TODO @prbhosal validate this
             _libraryExporter = context.CreateExporter("Debug");
             _context = context;
         }

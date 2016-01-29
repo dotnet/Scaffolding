@@ -34,7 +34,6 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             {
                 throw new ArgumentNullException(nameof(name));
             }
-            Console.WriteLine("Getting libraries referencing: " + name);
             // Get all libraries where the dependencies of the library contains 'name' as a dependency.
             return _libraryManager.GetLibraries().Where(_ => HasDependency(_, name));
 

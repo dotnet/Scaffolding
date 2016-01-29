@@ -21,15 +21,20 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     public class Program
     {
+        private static ConsoleLogger _logger;
+        private const string APPNAME = "Code Generation";
+        private const string APP_DESC = "Code generation for Asp.net Core";
+
         public static void Main(string[] args)
         {
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            PrintCommandLine(args);
+
+            _logger = new ConsoleLogger();
             var app = new CommandLineApplication(false)
             {
-                Name = "Code Generation",
-                Description = "Code generation for Asp.net"
+                Name = APPNAME,
+                Description = APP_DESC
             };
             app.HelpOption("-h|--help");
             var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
@@ -37,11 +42,9 @@ namespace Microsoft.Extensions.CodeGeneration
             
             app.OnExecute(() =>
             {
-                PrintCommandLine(projectPath, app.RemainingArguments);
                 var serviceProvider = new ServiceProvider();
                 var context = CreateProjectContext(projectPath.Value());
                 Directory.SetCurrentDirectory(context.ProjectDirectory);
-                Console.WriteLine("Current Directory: " + Directory.GetCurrentDirectory());
                 AddFrameworkServices(serviceProvider, context, packagesPath.Value());
                 AddCodeGenerationServices(serviceProvider);
                 var codeGenCommand = new CodeGenCommand(serviceProvider);
@@ -57,77 +60,21 @@ namespace Microsoft.Extensions.CodeGeneration
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
-        }
-
-        private static void PrintCommandLine(CommandOption projectPath, List<string> remainingArguments)
-        {
-            Console.WriteLine("Command line After parsing :: ");
-            if(projectPath != null)
-            {
-                Console.WriteLine(string.Format("    Project path: {0}", projectPath.Value()));
-            }
-            Console.WriteLine("    Remaining Args :: ");
-            if(remainingArguments != null)
-            {
-                foreach (var arg in remainingArguments)
-                {
-                    Console.WriteLine("        "+arg);
-                }
-            }
+            _logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
         }
 
         private static void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
         {
-            //TODO : Create  two different types of loaders. 
-            // One for loading up code generation assemblies.
-            // Other one for loading project itself.
-            // Maybe better to have a assembly Loader and another one as project compilation workspace. 
-            // Use the workspace to get the compilation of the project and model types. 
-            // Use the loader to figure out which assemblies are installed by the project that can be used as code gen assemblies. 
             serviceProvider.Add(typeof(IServiceProvider), serviceProvider);
             serviceProvider.Add(typeof(ProjectContext), context);
             serviceProvider.Add(typeof(Workspace), context.CreateWorkspace());
             serviceProvider.Add(typeof(IApplicationEnvironment),new ApplicationEnvironment(context.RootProject.Identity.Name, context.ProjectDirectory));
-            serviceProvider.Add(typeof(ICodeGenAssemblyLoadContext), GetAssemblyLoadContext(context.CreateLoadContext(), nugetPackageDir));
-            serviceProvider.Add(typeof(AssemblyLoadContext), context.CreateLoadContext());
+            serviceProvider.Add(typeof(ICodeGenAssemblyLoadContext), DefaultAssemblyLoadContext.CreateAssemblyLoadContext(nugetPackageDir));
             serviceProvider.Add(typeof(ILibraryManager), new LibraryManager(context));
             serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context));
         }
 
-        private static ICodeGenAssemblyLoadContext GetAssemblyLoadContext(AssemblyLoadContext projectLoadContext, string nugetPackageDir)
-        {
-            List<string> searchPaths = new List<string>();
-            if(Directory.Exists(nugetPackageDir))
-            {
-                Queue<string> queue = new Queue<string>();
-                queue.Enqueue(nugetPackageDir);
-                while(queue.Count > 0)
-                {
-                    var current = queue.Dequeue();
-                    searchPaths.Add(current);
-                    try
-                    {
-                        var subdirs = Directory.EnumerateDirectories(current);
-                        if(subdirs != null)
-                        {
-                            foreach(var sd in subdirs)
-                            {
-                                queue.Enqueue(sd);
-                            }
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        continue;
-                    }
-                }
-            }
-
-            return new DefaultAssemblyLoadContext(null, null, searchPaths, projectLoadContext as ProjectLoadContext);
-        }
-
+        
         private static ProjectContext CreateProjectContext(string projectPath)
         {
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
@@ -145,22 +92,6 @@ namespace Microsoft.Extensions.CodeGeneration
             return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault();
         }
 
-        private static void PrintCommandLine(string []args)
-        {
-            Console.WriteLine("Raw command line ::");
-            if(args != null)
-            {
-                foreach(string arg in args)
-                {
-                    Console.WriteLine("    "+arg);
-                }
-            }
-            else
-            {
-                Console.WriteLine("No arguments!!! >-<");
-            }
-        }
-
         private static void AddCodeGenerationServices(ServiceProvider serviceProvider)
         {
             if (serviceProvider == null)
@@ -169,7 +100,7 @@ namespace Microsoft.Extensions.CodeGeneration
             }
 
             //Ordering of services is important here
-            serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
+            serviceProvider.Add(typeof(ILogger), _logger);
             serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());
 
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();

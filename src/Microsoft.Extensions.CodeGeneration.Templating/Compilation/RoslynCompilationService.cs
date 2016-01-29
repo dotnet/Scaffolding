@@ -41,8 +41,6 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
                 throw new ArgumentNullException(nameof(libraryExporter));
             }
             _environment = environment;
-            //_loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
-            // TODO @prbhosal fix this
             _loader = loader;
             _libraryExporter = libraryExporter;
         }
@@ -52,7 +50,6 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
             var references = GetApplicationReferences();
-            Console.WriteLine("Compile in RoslynCompilationServices");
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,

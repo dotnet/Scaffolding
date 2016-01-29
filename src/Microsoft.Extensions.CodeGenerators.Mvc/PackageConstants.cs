@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
         public const string StaticFilesVersion = "1.0.0-*";
 
         public const string MvcPackage = "Microsoft.AspNetCore.Mvc";
-        public const string MvcVersion = "6.0.0-*";
+        public const string MvcVersion = "1.0.0-*";
 
         public const string RoutingNamespace = "Microsoft.AspNetCore.Routing";
         public const string DependencyInjectionNamespace = "Microsoft.Extensions.DependencyInjection";

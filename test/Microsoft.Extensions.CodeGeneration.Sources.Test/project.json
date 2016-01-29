@@ -10,8 +10,8 @@
     "moq.netcore": "4.4.0-beta8",
     "xunit.runner.console": "2.1.0",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-23706",
-    "xunit.runner.utility": "2.1.0-*",
-    "dotnet-test-xunit": "1.0.0-dev-*",
+    "xunit.runner.utility": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-dev-23931-51",
     "Microsoft.Extensions.CodeGeneration.Utils": {
       "version": "1.0.0-*"
     },

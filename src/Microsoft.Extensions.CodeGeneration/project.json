@@ -6,11 +6,11 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-15998",
     "Microsoft.Extensions.CodeGeneration.Utils": {
       "version": "1.0.0-*"
     },
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-16051",
     "Microsoft.Extensions.CodeGeneration.Core": {
       "version": "1.0.0-*"
     },

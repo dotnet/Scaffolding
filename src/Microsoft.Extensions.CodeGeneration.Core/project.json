@@ -11,8 +11,8 @@
     "Microsoft.Extensions.CodeGeneration.Templating": {
       "version": "1.0.0-*"
     },
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-16051",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-15998",
     "Newtonsoft.Json": "6.0.6"
   },
   "frameworks": {

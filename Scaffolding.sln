@@ -21,8 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.Sources", "src\Microsoft.Extensions.CodeGeneration.Sources\Microsoft.Extensions.CodeGeneration.Sources.xproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{49FBAACE-59AC-4F83-90BA-7300DBA09F11}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.Core.Test", "test\Microsoft.Extensions.CodeGeneration.Core.Test\Microsoft.Extensions.CodeGeneration.Core.Test.xproj", "{711EDEE0-E390-4A66-B0FD-AE058383B63A}"
@@ -49,6 +47,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGe
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.Sources.Test", "test\Microsoft.Extensions.CodeGeneration.Sources.Test\Microsoft.Extensions.CodeGeneration.Sources.Test.xproj", "{9F954F9C-A0BD-4573-B36B-515F5B9DB282}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.Utils", "src\Microsoft.Extensions.CodeGeneration.Utils\Microsoft.Extensions.CodeGeneration.Utils.xproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,10 +63,6 @@ Global
 		{A48C047E-8F94-42A5-BD19-97DFF077E6B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A48C047E-8F94-42A5-BD19-97DFF077E6B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A48C047E-8F94-42A5-BD19-97DFF077E6B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Release|Any CPU.Build.0 = Release|Any CPU
 		{711EDEE0-E390-4A66-B0FD-AE058383B63A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{711EDEE0-E390-4A66-B0FD-AE058383B63A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{711EDEE0-E390-4A66-B0FD-AE058383B63A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -111,6 +107,10 @@ Global
 		{9F954F9C-A0BD-4573-B36B-515F5B9DB282}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F954F9C-A0BD-4573-B36B-515F5B9DB282}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F954F9C-A0BD-4573-B36B-515F5B9DB282}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,7 +118,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BEB0BFF7-79A2-4C9C-8E45-C389161C2925} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 		{A48C047E-8F94-42A5-BD19-97DFF077E6B1} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
-		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 		{711EDEE0-E390-4A66-B0FD-AE058383B63A} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 		{FC8487B6-D0AA-4121-B23E-9ACDF134520B} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 		{7D5EE65F-3AB5-49CB-AC41-11EF8AAFDC9F} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
@@ -131,5 +130,6 @@ Global
 		{4276B6C8-724C-4FB3-A74E-FBC188D33FF9} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 		{2EE4B58A-9D8C-404D-BAF8-9039A726937B} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
 		{9F954F9C-A0BD-4573-B36B-515F5B9DB282} = {49FBAACE-59AC-4F83-90BA-7300DBA09F11}
+		{0C4475BF-40EA-46A8-B8DA-2FCF3747B773} = {B6CF7723-2947-411F-9AF1-35C09FAE514E}
 	EndGlobalSection
 EndGlobal

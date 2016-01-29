@@ -5,7 +5,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration.Sources": {
+    "Microsoft.Extensions.CodeGeneration.Utils": {
       "version": "1.0.0-*"
     },
     "Microsoft.AspNetCore.Razor": "1.0.0-*",

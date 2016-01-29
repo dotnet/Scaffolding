@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
-    internal static class PlatformHelper
+    public static class PlatformHelper
     {
         private static readonly Lazy<bool> _isMono = new Lazy<bool>(() => Type.GetType("Mono.Runtime") != null);
 

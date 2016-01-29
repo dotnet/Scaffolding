@@ -9,7 +9,7 @@ using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
-    internal static class TemplateFoldersUtilities
+    public static class TemplateFoldersUtilities
     {
         public static List<string> GetTemplateFolders(
             string containingProject,

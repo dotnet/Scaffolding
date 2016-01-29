@@ -1,31 +1,32 @@
 ﻿{
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": false,
-        "keyFile": "..\\..\\tools\\key.snk"
-    },
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": false,
+    "keyFile": "..\\..\\tools\\key.snk"
+  },
 
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-*",
-        "moq.netcore": "4.4.0-beta8",
-        "xunit.runner.console" : "2.1.0-*",
-        "Microsoft.NETCore.TestHost" : "1.0.0-rc2-23704",
-        "xunit.runner.utility": "2.1.0-*",
-        "dotnet-test-xunit": "1.0.0-dev-*",
-        "Microsoft.Extensions.CodeGeneration.Sources": {
-          "type": "build",
-          "version": "1.0.0-*"
-        },
-        "xunit": "2.1.0"
+  "dependencies": {
+    "NETStandard.Library": "1.0.0-rc2-23727",
+    "moq.netcore": "4.4.0-beta8",
+    "xunit.runner.console": "2.1.0",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23706",
+    "xunit.runner.utility": "2.1.0-*",
+    "dotnet-test-xunit": "1.0.0-dev-*",
+    "Microsoft.Extensions.CodeGeneration.Utils": {
+      "version": "1.0.0-*"
     },
+    "xunit": "2.1.0",
+    "System.AppContext": "4.1.0-rc2-23727",
+    "System.IO": "4.1.0-rc2-23722",
+    "System.Runtime.Extensions": "4.1.0-rc2-23727"
+  },
 
-    "frameworks": {
-        "dnxcore50": { 
-          "dependencies": {
-            "System.IO": "4.1.0-rc2-23722",
-            "System.Runtime.Extensions": "4.1.0-rc2-23706"
-          }
-        }
-    },
-    "testRunner" :  "xunit"
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies": {
+
+      }
+    }
+  },
+  "testRunner": "xunit"
 }

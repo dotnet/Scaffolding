@@ -11,7 +11,7 @@ using System;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
-    internal static class CommonUtilities
+    public static class CommonUtilities
     {
         public static CompilationResult GetAssemblyFromCompilation(
             ICodeGenAssemblyLoadContext loader,

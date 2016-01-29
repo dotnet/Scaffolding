@@ -7,7 +7,7 @@
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration": {
       "version": "1.0.0-*"    },
-    "Microsoft.Extensions.CodeGeneration.Sources": {
+    "Microsoft.Extensions.CodeGeneration.Utils": {
       "version": "1.0.0-*"
     },
     "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": {
@@ -21,7 +21,7 @@
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
-        "System.Runtime": "4.0.21-*"
+        "System.Runtime": "4.0.21-rc2-23727"
       }
     }
   },

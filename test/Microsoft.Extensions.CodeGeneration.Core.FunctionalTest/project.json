@@ -1,20 +1,20 @@
 {
     "dependencies": {
-    "Microsoft.Extensions.CodeGeneration.Sources" : "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Utils" : "1.0.0-rc2-15995",
 		"Microsoft.Extensions.DependencyInjection": "1.0.0-*",
 		"Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
-		"Microsoft.AspNetCore.Hosting": "1.0.0-*",
+		"Microsoft.AspNetCore.Hosting": "1.0.0-rc2-16270",
 		"ModelTypesLocatorTestWebApp": "1.0.0",
 
-    "NETStandard.Library": "1.0.0-rc2-*",
+    "NETStandard.Library": "1.0.0-rc2-23727",
     "moq.netcore": "4.4.0-beta8",
-    "xunit.runner.console" : "2.1.0-*",
-    "Microsoft.NETCore.TestHost" : "1.0.0-rc2-23704",
-    "xunit.runner.utility": "2.1.0-*",
+    "xunit.runner.console" : "2.1.0",
+    "Microsoft.NETCore.TestHost" : "1.0.0-rc2-23706",
+    "xunit.runner.utility": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-*",        
     "xunit": "2.1.0",
     "System.Diagnostics.Contracts": "4.0.1-rc2-23727",
-    "System.AppContext": "4.0.1-rc2-23706",
+    "System.AppContext": "4.1.0-rc2-23727",
     "System.Linq.Expressions": "4.0.11-beta-23516"
 
     },

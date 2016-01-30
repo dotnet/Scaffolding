@@ -1,14 +1,14 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
+using System;
+using System.IO;
+using System.Linq;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 using Moq;
 using Xunit;
-using System.IO;
-using Microsoft.DotNet.ProjectModel;
-using System;
-using System.Linq;
 
 namespace Microsoft.Extensions.CodeGeneration.Templating.Test
 {
@@ -54,22 +54,12 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
         private ICompilationService GetCompilationService()
         {
             ProjectContext context = CreateProjectContext(null);
-            //ProjectContext context = CreateProjectContext(@"C:\users\prbhosal\documents\projects\webapplication5\src\webapplication5");
-            //ProjectContext context = CreateProjectContext(@"..\TestApps\ModelTypesLocatorTestClassLibrary");
             var appEnvironment = new ApplicationEnvironment("", context.ProjectDirectory);
-            //var loaderAccessor = DnxPlatformServices.Default.AssemblyLoadContextAccessor;
             ICodeGenAssemblyLoadContext loader = new DefaultAssemblyLoadContext(null, null, null);
 
             
 
             ILibraryExporter libExporter = new LibraryExporter(context);
-
-            //var mockLibExporter = new Mock<ILibraryExporter>();
-
-            //var input = "Microsoft.Extensions.CodeGeneration.Templating.Test";
-            //mockLibExporter
-            //    .Setup(lm => lm.GetExport(input))
-            //    .Returns(libExporter.GetExport(input));
 
             return new RoslynCompilationService(appEnvironment, loader, libExporter);
         }

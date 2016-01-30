@@ -1,14 +1,14 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.Extensions.CodeGeneration.DotNet;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Reflection;
-using Xunit;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Xunit;
 
 namespace Microsoft.Extensions.CodeGeneration.Sources.Test
 {

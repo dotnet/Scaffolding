@@ -3,10 +3,10 @@
 
 using System;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using Microsoft.Extensions.CodeGeneration.DotNet;
-using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {

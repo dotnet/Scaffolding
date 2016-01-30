@@ -1,23 +1,24 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
-using System.Diagnostics;
-using Microsoft.Extensions.CodeGeneration.Templating;
-using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.CodeGeneration.DotNet;
-using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.DotNet.ProjectModel;
 using System.Runtime.Loader;
-using System.IO;
 using System.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Loader;
 using Microsoft.DotNet.ProjectModel.Workspaces;
-using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
+using Microsoft.Extensions.CodeGeneration.Templating;
+using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
+using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGeneration
 {

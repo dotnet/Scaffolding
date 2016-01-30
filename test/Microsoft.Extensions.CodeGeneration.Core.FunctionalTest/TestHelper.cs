@@ -6,12 +6,12 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.CodeGeneration.DotNet;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Workspaces;
-using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {

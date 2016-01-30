@@ -2,17 +2,17 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration;
-using System.Reflection;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test;
+using Microsoft.Extensions.CodeGeneration.Templating;
 using Moq;
 using Xunit;
-using Microsoft.Extensions.CodeGeneration.DotNet;
-using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test;
-using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.CodeGeneration
 {

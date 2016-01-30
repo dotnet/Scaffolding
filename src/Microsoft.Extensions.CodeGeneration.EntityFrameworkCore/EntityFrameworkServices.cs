@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -16,7 +17,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.CodeGeneration.DotNet;
-using System.Runtime.Loader;
+
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {

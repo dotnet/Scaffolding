@@ -3,13 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.CodeGeneration.DotNet;
-using Microsoft.DotNet.ProjectModel;
 using System.Runtime.Loader;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
-using System.IO;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
         private bool IsCandidateLibrary(LibraryDescription library)
         {
-            return !_codeGenerationFrameworkAssemblies.Contains(library.Identity.Name) && ("Project" != library.Identity.Type.Value);
+            return !_codeGenerationFrameworkAssemblies.Contains(library.Identity.Name) && (!"Project".Equals(library.Identity.Type.Value, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

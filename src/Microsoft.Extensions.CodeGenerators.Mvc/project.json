@@ -5,25 +5,15 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration": {
-      "version": "1.0.0-*"    },
-    "Microsoft.Extensions.CodeGeneration.Utils": {
-      "version": "1.0.0-*"
-    },
-    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": {
-      "version": "1.0.0-*"
-    },
-    "Microsoft.Extensions.CodeGeneration.Templating": {
-      "version": "1.0.0-*"
-    },
-    "Newtonsoft.Json": "6.0.6"
+    "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
+    "Newtonsoft.Json": "6.0.6",
+    "System.Runtime": "4.0.21-rc2-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "dependencies": {
-        "System.Runtime": "4.0.21-rc2-23727"
-      }
-    }
+    "dnxcore50": { }
   },
   "packInclude": {
     "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",

@@ -6,27 +6,21 @@
   },
 
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23727",
+    "NETStandard.Library": "1.0.0-*",
     "moq.netcore": "4.4.0-beta8",
     "xunit.runner.console": "2.1.0",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23706",
+    "Microsoft.NETCore.TestHost": "1.0.0-*",
     "xunit.runner.utility": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-23931-51",
-    "Microsoft.Extensions.CodeGeneration.Utils": {
-      "version": "1.0.0-*"
-    },
+    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
     "xunit": "2.1.0",
-    "System.AppContext": "4.1.0-rc2-23727",
-    "System.IO": "4.1.0-rc2-23722",
-    "System.Runtime.Extensions": "4.1.0-rc2-23727"
+    "System.AppContext": "4.1.0-rc2-*",
+    "System.IO": "4.1.0-rc2-*",
+    "System.Runtime.Extensions": "4.1.0-rc2-*"
   },
 
   "frameworks": {
-    "dnxcore50": {
-      "dependencies": {
-
-      }
-    }
+    "dnxcore50": {}    
   },
   "testRunner": "xunit"
 }

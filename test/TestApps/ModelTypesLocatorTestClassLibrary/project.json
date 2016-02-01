@@ -1,16 +1,12 @@
 {
   "dependencies": {
-        "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*",
-        "System.Runtime": "4.0.21-rc2-23727",
-        "System.Threading.Tasks": "4.0.11-rc2-23727",
-        "System.Linq": "4.0.1-beta-23516",
-        "System.Dynamic.Runtime": "4.0.11-rc2-23727"
+    "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*",
+    "System.Runtime": "4.0.21-rc2-*",
+    "System.Threading.Tasks": "4.0.11-rc2-*",
+    "System.Linq": "4.0.1-*",
+    "System.Dynamic.Runtime": "4.0.11-rc2-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "dependencies": {
-        
-      }
-    }
+    "dnxcore50": { }
   }
 }

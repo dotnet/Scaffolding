@@ -4,19 +4,15 @@
   },
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
-    "Microsoft.CodeAnalysis.Csharp.Workspaces": "1.2.0-beta1-20160108-01"
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-*",
+    "Microsoft.CodeAnalysis.Csharp.Workspaces": "1.2.0-*",
+    "System.Runtime": "4.0.21-rc2-*",
+    "System.AppContext": "4.1.0-rc2-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.CodeAnalysis.Common": "1.2.0-*",
+    "System.Threading.Tasks.Parallel": "4.0.1-rc2-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "dependencies": {
-        "System.Runtime": "4.0.21-rc2-23727",
-        "System.AppContext": "4.1.0-rc2-23727",
-        "Microsoft.DotNet.ProjectModel": "1.0.0-dev-000973",
-        "Microsoft.CodeAnalysis.Common": "1.2.0-*",
-        "System.Threading.Tasks.Parallel": "4.0.1-rc2-23704"
-
-      }
-    }
+    "dnxcore50": {}
   }
 }

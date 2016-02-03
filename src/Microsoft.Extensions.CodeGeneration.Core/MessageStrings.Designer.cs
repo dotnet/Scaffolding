@@ -78,7 +78,7 @@ namespace Microsoft.Extensions.CodeGeneration {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to Could not find dnu.cmd on path. .
+        ///    Looks up a localized string similar to Could not find dotnet.exe on path. .
         /// </summary>
         internal static string DnuNotFound {
             get {

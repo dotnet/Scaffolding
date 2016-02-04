@@ -14,7 +14,7 @@
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
-    "Newtonsoft.Json": "6.0.6"
+    "Newtonsoft.Json": "8.0.2"
   },
   "frameworks": {
     "dnx451": { },

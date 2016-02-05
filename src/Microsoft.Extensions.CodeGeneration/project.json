@@ -14,7 +14,8 @@
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
-    "Microsoft.Extensions.PlatformAbstractions.Dnx": "1.0.0-*"
+    "Microsoft.Extensions.PlatformAbstractions.Dnx": "1.0.0-*",
+    "Microsoft.NETCore.Platforms": "1.0.1-*"
   },
   "frameworks": {
     "dnx451": { },

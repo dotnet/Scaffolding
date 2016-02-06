@@ -23,7 +23,6 @@
     },
     "dnxcore50": {
       "dependencies": {
-        "System.Runtime": "4.0.21-*",
         "System.Text.Encoding": "4.0.11-*"
       }
     }

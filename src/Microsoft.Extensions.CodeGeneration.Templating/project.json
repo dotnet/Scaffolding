@@ -26,7 +26,7 @@
       "dependencies": {
         "System.IO": "4.1.0-*",
         "System.Dynamic.Runtime": "4.0.11-*",
-        "System.Collections.Concurrent": "4.0.11-*",
+        "System.Collections.Concurrent": "4.0.12-*",
         "System.Reflection.TypeExtensions": "4.1.0-*"
       }
     }

@@ -1,13 +1,20 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
+using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
+namespace Microsoft.Extensions.CodeGeneration
 {
     public class DbContextEditorServicesTests
     {
@@ -23,7 +30,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 
             var contextTree = CSharpSyntaxTree.ParseText(beforeDbContextText);
             var modelTree = CSharpSyntaxTree.ParseText(modelText);
-            var efReference = MetadataReference.CreateFromFile(typeof(DbContext).Assembly.Location);
+            var efReference = MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location);
 
             var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { contextTree, modelTree }, new[] { efReference });
 
@@ -56,7 +63,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test
 
             var startupTree = CSharpSyntaxTree.ParseText(beforeStartupText);
             var contextTree = CSharpSyntaxTree.ParseText(dbContextText);
-            var efReference = MetadataReference.CreateFromFile(typeof(DbContext).Assembly.Location);
+            var efReference = MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location);
 
             var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference });
 

@@ -3,12 +3,15 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Workspaces;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {
@@ -16,7 +19,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
     {
         public static IServiceProvider CreateServices(string testAppName)
         {
-            var appEnvironment = PlatformServices.Default.Application;
+            var appEnvironment = new ApplicationEnvironment("TestApp",Directory.GetCurrentDirectory());
 
             // When the tests are run the appEnvironment points to test project.
             // Change the app environment to point to the test application to be used
@@ -25,14 +28,18 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
             var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
 
+            ProjectContext context = ProjectContext.CreateContextForEachFramework(testAppPath).First();
+            LibraryExporter exporter = new LibraryExporter(context);
+            Workspace workspace = new ProjectJsonWorkspace(context);
             return new WebHostBuilder()
                 .UseServer(new DummyServer())
                 .UseStartup<ModelTypesLocatorTestWebApp.Startup>()
                 .ConfigureServices(services => 
                     {
                         services.AddSingleton<IApplicationEnvironment>(testEnvironment);
-                        services.AddSingleton(CompilationServices.Default.LibraryExporter);
-                        services.AddSingleton(CompilationServices.Default.CompilerOptionsProvider);
+                        services.AddSingleton<ILibraryExporter>(exporter);
+                        //services.AddSingleton(CompilationServices.Default.CompilerOptionsProvider);
+                        services.AddSingleton<Workspace>(workspace);
                     })
                 .Build()
                 .Services;

@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
-    internal class CompilationResult
+    public class CompilationResult
     {
         public bool Success { get; set; }
 

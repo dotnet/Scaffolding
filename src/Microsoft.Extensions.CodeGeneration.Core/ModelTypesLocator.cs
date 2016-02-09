@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.ProjectModel.Workspaces;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -14,10 +14,12 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         private IApplicationEnvironment _application;
         private ILibraryExporter _libraryExporter;
+        private Workspace _projectWorkspace;
 
         public ModelTypesLocator(
             ILibraryExporter libraryExporter,
-            IApplicationEnvironment application)
+            IApplicationEnvironment application,
+            Workspace projectWorkspace)
         {
             if (libraryExporter == null)
             {
@@ -29,17 +31,25 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(application));
             }
 
+            if (projectWorkspace == null)
+            {
+                throw new ArgumentNullException(nameof(projectWorkspace));
+            }
+
             _libraryExporter = libraryExporter;
             _application = application;
+            _projectWorkspace = projectWorkspace;
         }
 
         public IEnumerable<ModelType> GetAllTypes()
         {
-            return _libraryExporter
-                .GetProjectsInApp(_application)
-                .Select(compilation => RoslynUtilities.GetDirectTypesInCompilation(compilation.Compilation))
-                .Aggregate((coll1, coll2) => coll1.Concat(coll2).ToList())
-                .Select(ts => ModelType.FromITypeSymbol(ts));
+
+            return _projectWorkspace.CurrentSolution.Projects
+                              .Select(project => project.GetCompilationAsync().Result)
+                              .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
+                              .Aggregate((col1, col2) => col1.Concat(col2).ToList())
+                              .Select(ts => ModelType.FromITypeSymbol(ts));
+
         }
 
         public IEnumerable<ModelType> GetType(string typeName)
@@ -49,16 +59,16 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(typeName));
             }
 
-            var exactTypesInAllProjects = _libraryExporter
-                .GetProjectsInApp(_application)
-                .Select(comp => comp.Compilation.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
-                .Where(type => type != null);
+            IEnumerable<ITypeSymbol> exactTypesInAllProjects = _projectWorkspace.CurrentSolution.Projects
+                                                                    .Select(project => project.GetCompilationAsync().Result)
+                                                                    .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
+                                                                    .Where(type => type != null);
+                
 
             if (exactTypesInAllProjects.Any())
             {
                 return exactTypesInAllProjects.Select(ts => ModelType.FromITypeSymbol(ts));
             }
-
             //For short type names, we don't give special preference to types in current app,
             //should we do that?
             return GetAllTypes()

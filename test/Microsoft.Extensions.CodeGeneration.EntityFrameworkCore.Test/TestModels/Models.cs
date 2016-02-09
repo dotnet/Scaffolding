@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,7 +34,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore.Test.TestModel
         [ScaffoldColumn(false)]
         public int ScaffoldFalseProperty { get; set; }
 
-        [ReadOnly(true)]
+        //[ReadOnly(true)]
         public string ReadOnlyProperty { get; set; }
     }
 

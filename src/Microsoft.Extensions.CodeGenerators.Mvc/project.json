@@ -6,20 +6,12 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
-    },
-    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*",
-    "Newtonsoft.Json": "8.0.2"
+    "Newtonsoft.Json": "8.0.2",
+    "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "dnx451": { },
     "dnxcore50": {
-      "dependencies": {
-      }
+      "imports": "portable-net45+win8"
     }
   },
   "packInclude": {

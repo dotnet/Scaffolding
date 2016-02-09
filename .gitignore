@@ -26,3 +26,6 @@ project.lock.json
 /.vs
 launchsettings.json
 test/*/Properties
+.build/
+.testpublish
+.vs

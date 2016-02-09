@@ -1,27 +1,31 @@
 {
-    "dependencies": {
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
-        "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-        "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
-        "Microsoft.AspNetCore.Hosting": "1.0.0-*",
-        "Microsoft.NETCore.Platforms": "1.0.1-*",
-        "ModelTypesLocatorTestWebApp": "1.0.0",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+  "dependencies": {
+    "dotnet-test-xunit": "1.0.0-*",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Core": {
+      "type": "build",
+      "version": "1.0.0-*"
     },
-
-    "commands": {
-        "test": "xunit.runner.aspnet"
+    "Microsoft.Extensions.CodeGeneration.Utils": {
+      "type": "build",
+      "version": "1.0.0-*"
     },
-
-    "frameworks": {
-        "dnx451": {
-            "dependencies": {
-                "Moq": "4.2.1312.1622"
-            }
-        },
-        "dnxcore50": {
-            "dependencies": {
-            }
-        }
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23728",
+    "ModelTypesLocatorTestWebApp": "1.0.0",        
+    "moq.netcore": "4.4.0-beta8",
+    "NETStandard.Library": "1.0.0-rc2-23728",
+    "System.Diagnostics.Contracts": "4.0.1-*",
+    "System.AppContext": "4.1.0-*",
+    "System.Linq.Expressions": "4.0.11-*",
+    "System.Runtime" :  "4.1.0-*",
+    "xunit": "2.1.0",
+    "xunit.runner.console": "2.1.0"
+  },
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
     }
+  },
+  "testRunner": "xunit"
 }

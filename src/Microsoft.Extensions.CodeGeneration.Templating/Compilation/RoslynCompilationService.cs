@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Dnx.Compilation.CSharp;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
+
 
 namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 {
@@ -22,14 +22,26 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
         private readonly ILibraryExporter _libraryExporter;
         private readonly IApplicationEnvironment _environment;
-        private readonly IAssemblyLoadContext _loader;
+        private readonly ICodeGenAssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationEnvironment environment,
-                                        IAssemblyLoadContextAccessor accessor,
+                                        ICodeGenAssemblyLoadContext loader,
                                         ILibraryExporter libraryExporter)
         {
+            if(loader == null)
+            {
+                throw new ArgumentNullException(nameof(loader));
+            }
+            if(environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+            if(libraryExporter == null)
+            {
+                throw new ArgumentNullException(nameof(libraryExporter));
+            }
             _environment = environment;
-            _loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
+            _loader = loader;
             _libraryExporter = libraryExporter;
         }
 
@@ -38,13 +50,13 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
             var references = GetApplicationReferences();
-
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,
                         options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
                         syntaxTrees: syntaxTrees,
                         references: references);
+
 
             var result = CommonUtilities.GetAssemblyFromCompilation(_loader, compilation);
             if (result.Success)
@@ -77,65 +89,18 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var export = _libraryExporter.GetAllExports(baseProject);
+                var exports = _libraryExporter.GetAllExports();
 
-                if (export != null)
+                if (exports != null)
                 {
-                    foreach (var metadataReference in export.MetadataReferences)
+                    foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReferences()))
                     {
-                        references.Add(ConvertMetadataReference(metadataReference));
+                        references.Add(metadataReference);
                     }
                 }
             }
 
             return references;
-        }
-
-        private MetadataReference ConvertMetadataReference(IMetadataReference metadataReference)
-        {
-            var roslynReference = metadataReference as IRoslynMetadataReference;
-
-            if (roslynReference != null)
-            {
-                return roslynReference.MetadataReference;
-            }
-
-            var embeddedReference = metadataReference as IMetadataEmbeddedReference;
-
-            if (embeddedReference != null)
-            {
-                return MetadataReference.CreateFromImage(embeddedReference.Contents);
-            }
-
-            var fileMetadataReference = metadataReference as IMetadataFileReference;
-
-            if (fileMetadataReference != null)
-            {
-                return CreateMetadataFileReference(fileMetadataReference.Path);
-            }
-
-            var projectReference = metadataReference as IMetadataProjectReference;
-            if (projectReference != null)
-            {
-                using (var ms = new MemoryStream())
-                {
-                    projectReference.EmitReferenceAssembly(ms);
-
-                    return MetadataReference.CreateFromImage(ms.ToArray());
-                }
-            }
-
-            throw new NotSupportedException();
-        }
-
-        private MetadataReference CreateMetadataFileReference(string path)
-        {
-            var metadata = _metadataFileCache.GetOrAdd(path, _ =>
-            {
-                return AssemblyMetadata.CreateFromStream(File.OpenRead(path));
-            });
-
-            return metadata.GetReference();
         }
     }
 }

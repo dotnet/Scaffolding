@@ -5,30 +5,17 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
-    },
     "Microsoft.AspNetCore.Razor": "1.0.0-*",
-    "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*"
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
+    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
+    "System.Collections.Concurrent": "4.0.11-*",
+    "System.Dynamic.Runtime": "4.0.11-*",
+    "System.IO": "4.0.0-*",
+    "System.Reflection.TypeExtensions": "4.1.0-*"
   },
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Runtime": "",
-        "System.IO": "",
-        "System.Text.Encoding": "",
-        "System.Threading.Tasks": ""
-      }
-    },
     "dnxcore50": {
-      "dependencies": {
-        "System.IO": "4.1.0-*",
-        "System.Dynamic.Runtime": "4.0.11-*",
-        "System.Collections.Concurrent": "4.0.12-*",
-        "System.Reflection.TypeExtensions": "4.1.0-*"
-      }
+      "imports": "portable-net45+win8"
     }
   }
 }

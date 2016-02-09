@@ -3,7 +3,7 @@
 
 using System;
 using System.Runtime.Versioning;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {
@@ -28,20 +28,20 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             get { return _appName; }
         }
 
-        public string ApplicationVersion
-        {
-            get { return _originalAppEnvironment.ApplicationVersion; }
-        }
+        //public string ApplicationVersion
+        //{
+        //    get { return _originalAppEnvironment.ApplicationVersion; }
+        //}
 
         public string ApplicationBasePath
         {
             get { return _applicationBasePath; }
         }
 
-        public FrameworkName RuntimeFramework
-        {
-            get { return _originalAppEnvironment.RuntimeFramework; }
-        }
+        //public FrameworkName RuntimeFramework
+        //{
+        //    get { return _originalAppEnvironment.RuntimeFramework; }
+        //}
 
         public object GetData(string name)
         {

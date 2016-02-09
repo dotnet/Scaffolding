@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Extensions.CodeGeneration
@@ -74,15 +74,16 @@ namespace Microsoft.Extensions.CodeGeneration
                 // On non-windows, starting a process with the name
                 // of a bash file works. However on windows, it doesn't.
                 // So we use 'Path' environment variable to find the path
-                // of 'dnu.cmd' and start that.
+                // of 'dotnet.exe' and start that.
                 string fileName;
+                //TODO: Consider removing this
                 if (PlatformHelper.IsMono)
                 {
-                    fileName = "dnu";
+                    fileName = "dotnet";
                 }
                 else
                 {
-                    fileName = FindDnuCommand();
+                    fileName = FindDotnetExe();
                 }
 
                 var startInfo = new ProcessStartInfo
@@ -98,14 +99,14 @@ namespace Microsoft.Extensions.CodeGeneration
             }
             catch (Exception ex)
             {
-                _logger.LogMessage("Error running dnu restore");
+                _logger.LogMessage("Error running dotnet restore");
                 _logger.LogMessage(ex.ToString());
             }
         }
 
-        private string FindDnuCommand()
+        private string FindDotnetExe()
         {
-            var commandName = "dnu.cmd";
+            var commandName = "dotnet.exe";
 
             var pathVariable = Environment.GetEnvironmentVariable("Path");
             if (!string.IsNullOrEmpty(pathVariable))

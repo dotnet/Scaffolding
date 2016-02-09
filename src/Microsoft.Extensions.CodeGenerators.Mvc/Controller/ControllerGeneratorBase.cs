@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using Microsoft.Extensions.CodeGeneration;
 
 namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
@@ -88,7 +88,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
             // That's not possible in command line scaffolding - the closest we can get is
             // the name of assembly??
-            var appName = LibraryManager.GetLibrary(ApplicationEnvironment.ApplicationName).Name;
+            var appName = ApplicationEnvironment.ApplicationName;
             return appName + "." + Constants.ControllersFolderName;
         }
 

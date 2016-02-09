@@ -124,7 +124,7 @@
     <value>No code generators found with the name '{0}'</value>
   </data>
   <data name="DnuNotFound" xml:space="preserve">
-    <value>Could not find dnu.cmd on path. </value>
+    <value>Could not find dotnet.exe on path. </value>
   </data>
   <data name="FileNotFound" xml:space="preserve">
     <value>The provided file '{0}' does not exist. This method expects a fully qualified path of an existing file.</value>

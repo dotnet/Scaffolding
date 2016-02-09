@@ -3,8 +3,8 @@
 
 using System;
 using System.Linq;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -90,7 +90,8 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
         {
             return new ModelTypesLocator(
                 (ILibraryExporter)_serviceProvider.GetRequiredService(typeof(ILibraryExporter)),
-                (IApplicationEnvironment)_serviceProvider.GetRequiredService(typeof(IApplicationEnvironment)));
+                (IApplicationEnvironment)_serviceProvider.GetRequiredService(typeof(IApplicationEnvironment)),
+                (Workspace)_serviceProvider.GetRequiredService(typeof(Workspace)));
         }
     }
 }

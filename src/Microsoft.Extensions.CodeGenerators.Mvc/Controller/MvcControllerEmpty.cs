@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 using Microsoft.Extensions.CodeGeneration;
 using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
 using Microsoft.Extensions.DependencyInjection;

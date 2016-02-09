@@ -5,26 +5,19 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
+    "Microsoft.AspNetCore.Hosting": "1.0.0-*",
+    "Microsoft.AspNetCore.Server.WebListener": "0.1.0-*",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
     "Microsoft.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
-    },
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.AspNetCore.Hosting": "1.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*"
+    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
+    "System.AppContext": "4.1.0-*",
+    "System.Runtime" :  "4.1.0-*"
   },
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Text.Encoding": "4.0.0.0"
-      }
-    },
     "dnxcore50": {
-      "dependencies": {
-        "System.Text.Encoding": "4.0.11-*"
-      }
+      "imports": "portable-net45+win8"
     }
   },
   "packInclude": {

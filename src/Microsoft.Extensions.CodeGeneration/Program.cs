@@ -11,7 +11,6 @@ using System.Runtime.Loader;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Loader;
 using Microsoft.DotNet.ProjectModel.Workspaces;
 using Microsoft.Extensions.CodeGeneration.DotNet;
 using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;

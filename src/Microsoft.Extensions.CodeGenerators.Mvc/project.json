@@ -6,14 +6,13 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Newtonsoft.Json": "6.0.6",
-    "System.Runtime": "4.0.21-rc2-*"
+    "Newtonsoft.Json": "8.0.2",
+    "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "dnxcore50": { }
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
+    }
   },
   "packInclude": {
     "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",

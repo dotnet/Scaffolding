@@ -5,15 +5,18 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-*",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-*",
-    "Newtonsoft.Json": "6.0.6",
+    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Newtonsoft.Json": "8.0.2",
     "System.Console": "4.0.0-*",
-    "System.Diagnostics.Process": "4.1.0-*"
+    "System.Diagnostics.Process": "4.1.0-*",
+    "System.Runtime" :  "4.1.0-*"
   },
   "frameworks": {
-    "dnxcore50": { }
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
+    }
   }
 }

@@ -38,4 +38,4 @@ IF NOT EXIST %KOREBUILD_FOLDER% (
 	%BUILD_FOLDER%\nuget.exe install KoreBuild-dotnet -ExcludeVersion -o %BUILD_FOLDER% -nocache -pre %KOREBUILD_DOWNLOAD_ARGS%
 )
 
-"%KOREBUILD_FOLDER%\build\KoreBuild.cmd"
+"%KOREBUILD_FOLDER%\build\KoreBuild.cmd" %*

@@ -6,11 +6,11 @@
   },
   "dependencies": {
     "Microsoft.AspNetCore.Razor": "1.0.0-*",
-    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-*",
     "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
-    "System.Collections.Concurrent": "4.0.11-*",
+    "System.Collections.Concurrent": "4.0.12-*",
     "System.Dynamic.Runtime": "4.0.11-*",
-    "System.IO": "4.0.0-*",
+    "System.IO": "4.1.0-*",
     "System.Reflection.TypeExtensions": "4.1.0-*"
   },
   "frameworks": {

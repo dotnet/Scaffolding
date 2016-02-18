@@ -6,7 +6,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-*",
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",

@@ -106,7 +106,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (id == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
 @{
@@ -120,7 +120,7 @@ namespace @Model.ControllerNamespace
     }
 }            if (@Model.ModelVariable == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return View(@Model.ModelVariable);
@@ -190,7 +190,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (id == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
 @{
@@ -204,7 +204,7 @@ namespace @Model.ControllerNamespace
     }
 }            if (@Model.ModelVariable == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 @{
     foreach (var property in relatedProperties.Values)
@@ -265,7 +265,7 @@ namespace @Model.ControllerNamespace
 }        {
             if (id == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
 @{
@@ -279,7 +279,7 @@ namespace @Model.ControllerNamespace
     }
 }            if (@Model.ModelVariable == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return View(@Model.ModelVariable);

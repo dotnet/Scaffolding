@@ -10,5 +10,6 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
     {
         string ApplicationBasePath { get; }
         string ApplicationName { get; }
+        string ApplicationConfiguration { get; }
     }
 }

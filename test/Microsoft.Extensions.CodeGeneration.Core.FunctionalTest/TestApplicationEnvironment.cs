@@ -14,13 +14,15 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
         private readonly IApplicationEnvironment _originalAppEnvironment;
         private readonly string _applicationBasePath;
         private readonly string _appName;
-
+        private readonly string _appConfiguration;
+        
         public TestApplicationEnvironment(IApplicationEnvironment originalAppEnvironment,
             string appBasePath, string appName)
         {
             _originalAppEnvironment = originalAppEnvironment;
             _applicationBasePath = appBasePath;
             _appName = appName;
+            _appConfiguration = originalAppEnvironment.ApplicationConfiguration;
         }
 
         public string ApplicationName
@@ -42,7 +44,11 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
         //{
         //    get { return _originalAppEnvironment.RuntimeFramework; }
         //}
-
+        
+        public string ApplicationConfiguration 
+        {
+            get { return _appConfiguration; }    
+        }
         public object GetData(string name)
         {
             throw new NotImplementedException();

@@ -20,17 +20,13 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         private Microsoft.DotNet.ProjectModel.Compilation.LibraryExporter _libraryExporter;
         private ProjectContext _context;
 
-        public LibraryExporter(ProjectContext context)
+        public LibraryExporter(ProjectContext context, IApplicationEnvironment environment)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
-#if RELEASE
-            _libraryExporter = context.CreateExporter("Release");
-#else
-            _libraryExporter = context.CreateExporter("Debug");
-#endif
+            _libraryExporter = context.CreateExporter(environment.ApplicationConfiguration);
             _context = context;
         }
 

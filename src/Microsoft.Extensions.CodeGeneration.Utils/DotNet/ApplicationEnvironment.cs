@@ -10,6 +10,12 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
     public class ApplicationEnvironment : IApplicationEnvironment
     {
         public ApplicationEnvironment(string appName, string appBasePath)
+            : this(appName, appBasePath, "Debug")
+        {
+
+        }
+        
+        public ApplicationEnvironment(string appName, string appBasePath, string appConfiguration) 
         {
             if(appName == null)
             {
@@ -19,17 +25,25 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             {
                 throw new ArgumentNullException(nameof(appBasePath));
             }
-
+            if(appConfiguration == null) 
+            {
+                throw new ArgumentNullException(nameof(appConfiguration));
+            }
             ApplicationName = appName;
             ApplicationBasePath = appBasePath;
+            ApplicationConfiguration = appConfiguration;
         }
-
         public string ApplicationBasePath
         {
             get; private set;
         }
 
         public string ApplicationName
+        {
+            get; private set;
+        }
+        
+        public string ApplicationConfiguration
         {
             get; private set;
         }

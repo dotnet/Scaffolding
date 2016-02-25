@@ -18,9 +18,15 @@ namespace Microsoft.Extensions.CodeGeneration
     public class CommonUtilitiesTests : TestBase
     {
         ICodeGenAssemblyLoadContext loadContext;
-
+        IApplicationEnvironment _environment;
         public CommonUtilitiesTests() : base(@"..\TestApps\ModelTypesLocatorTestClassLibrary")
         {
+#if RELEASE 
+            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
+#else
+            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
+#endif
+
             loadContext = new DefaultAssemblyLoadContext(
                              new Dictionary<AssemblyName, string>(),
                              new Dictionary<string, string>(),
@@ -30,7 +36,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
 
-            LibraryExporter exporter = new LibraryExporter(_projectContext);
+            LibraryExporter exporter = new LibraryExporter(_projectContext, _environment);
             LibraryManager manager = new LibraryManager(_projectContext);
             IEnumerable<MetadataReference> references = exporter.GetAllExports().SelectMany(export => export.GetMetadataReferences());
             string code = @"using System;
@@ -51,7 +57,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public void CommonUtilities_TestGetAssemblyFromCompilation_Failure()
         {
 
-            LibraryExporter exporter = new LibraryExporter(_projectContext);
+            LibraryExporter exporter = new LibraryExporter(_projectContext, _environment);
             LibraryManager manager = new LibraryManager(_projectContext);
 
             string code = @"using System;

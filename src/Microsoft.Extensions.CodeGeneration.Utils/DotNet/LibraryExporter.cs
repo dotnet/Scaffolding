@@ -26,7 +26,11 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             {
                 throw new ArgumentNullException(nameof(context));
             }
+#if RELEASE
+            _libraryExporter = context.CreateExporter("Release");
+#else
             _libraryExporter = context.CreateExporter("Debug");
+#endif
             _context = context;
         }
 

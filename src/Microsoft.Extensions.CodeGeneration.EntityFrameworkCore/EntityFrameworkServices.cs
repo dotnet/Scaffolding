@@ -144,7 +144,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                         dbContextTemplateModel.DbContextNamespace,
                         dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString());
                 }
-
+                
                 if (!startUpEditResult.Edited)
                 {
                     state = ContextProcessingStatus.ContextAddedButRequiresConfig;
@@ -401,7 +401,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             try {
                 var builder = new WebHostBuilder();
                 //TODO: Review 
-                builder.UseServer("Microsoft.AspNet.Server.WebListener")
+                builder.UseServer("Microsoft.AspNetCore.Server.WebListener")
                         .UseApplicationBasePath(Directory.GetCurrentDirectory());
                         
                 if (startupType != null)

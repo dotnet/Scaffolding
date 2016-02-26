@@ -9,9 +9,9 @@
       "type": "build",
       "version": "1.0.0-*"
     },
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23728",
+    "Microsoft.NETCore.TestHost": "1.0.0-*",
     "moq.netcore": "4.4.0-beta8",
-    "NETStandard.Library": "1.0.0-rc2-23728",
+    "NETStandard.Library": "1.0.0-rc2-*",
     "System.AppContext": "4.1.0-*",
     "System.Diagnostics.Contracts": "4.0.1-*",
     "xunit": "2.1.0"

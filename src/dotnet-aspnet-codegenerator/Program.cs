@@ -79,7 +79,7 @@ namespace Microsoft.Extensions.CodeGeneration
         
         private static ProjectContext CreateProjectContext(string projectPath)
         {
-            projectPath = projectPath ?? Directory.GetCurrentDirectory();
+            projectPath = Path.GetFullPath(projectPath ?? Directory.GetCurrentDirectory());
 
             if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
             {

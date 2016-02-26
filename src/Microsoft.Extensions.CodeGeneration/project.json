@@ -3,7 +3,7 @@
   "compilationOptions": {
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true,
-    "emitEntryPoint": true
+    "emitEntryPoint": false
   },
   "dependencies": {
     "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",

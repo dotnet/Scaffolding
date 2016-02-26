@@ -15,14 +15,9 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     public class DefaultAssemblyLoadContextTests : TestBase
     {
         DefaultAssemblyLoadContext _defaultAssemblyLoadContext;
-        IApplicationEnvironment _environment;
+
         public DefaultAssemblyLoadContextTests() : base(@"..\TestApps\ModelTypesLocatorTestClassLibrary")
         {
-#if RELEASE 
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
-#else
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
-#endif
 
         }
 

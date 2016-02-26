@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
         public static IServiceProvider CreateServices(string testAppName)
         {
 #if RELEASE
-            var appEnvironment = new ApplicationEnvironment("TestApp",Directory.GetCurrentDirectory(), "Release");
+            var appEnvironment = new ApplicationEnvironment("TestApp", Directory.GetCurrentDirectory(), "Release");
 #else
             var appEnvironment = new ApplicationEnvironment("TestApp", Directory.GetCurrentDirectory(), "Debug");
 #endif

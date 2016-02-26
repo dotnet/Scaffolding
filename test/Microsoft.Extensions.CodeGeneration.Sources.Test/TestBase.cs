@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration.Sources.Test
 {
@@ -13,11 +14,19 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     {
         protected ProjectContext _projectContext;
         protected string _projectPath;
+        protected IApplicationEnvironment _environment;
+        
         public TestBase(string projectPath)
         {
             _projectPath = projectPath;
             //TODO : how to decide which framework to use? 
             _projectContext = ProjectContext.CreateContextForEachFramework(_projectPath).First();
+            
+#if RELEASE 
+            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
+#else
+            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Debug");
+#endif
         }
     }
 }

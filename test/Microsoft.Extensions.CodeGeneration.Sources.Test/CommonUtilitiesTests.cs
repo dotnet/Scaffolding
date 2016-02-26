@@ -18,15 +18,9 @@ namespace Microsoft.Extensions.CodeGeneration
     public class CommonUtilitiesTests : TestBase
     {
         ICodeGenAssemblyLoadContext loadContext;
-        IApplicationEnvironment _environment;
+
         public CommonUtilitiesTests() : base(@"..\TestApps\ModelTypesLocatorTestClassLibrary")
         {
-#if RELEASE 
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
-#else
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
-#endif
-
             loadContext = new DefaultAssemblyLoadContext(
                              new Dictionary<AssemblyName, string>(),
                              new Dictionary<string, string>(),

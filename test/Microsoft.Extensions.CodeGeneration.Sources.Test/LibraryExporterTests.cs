@@ -18,15 +18,10 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     {
 
         LibraryExporter _libraryExporter;
-        IApplicationEnvironment _environment;
+
 
         public LibraryExporterTests() : base (@"..\TestApps\ModelTypesLocatorTestClassLibrary")
         {
-#if RELEASE 
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
-#else
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
-#endif
             _libraryExporter = new LibraryExporter(_projectContext, _environment);         
         }
 

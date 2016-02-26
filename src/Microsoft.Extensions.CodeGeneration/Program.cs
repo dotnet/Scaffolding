@@ -48,10 +48,10 @@ namespace Microsoft.Extensions.CodeGeneration
                 var serviceProvider = new ServiceProvider();
                 var context = CreateProjectContext(projectPath.Value());
                 
-                var configuration = appConfiguration.Value()??"Debug";
+                var configuration = appConfiguration.Value() ?? "Debug";
                 if(configuration != null && !configuration.Equals("Release") && !configuration.Equals("Debug")) 
                 {
-                    throw new ArgumentException($"Invalid value for configuration: {configuration}. "+appConfiguration.Description);
+                    throw new ArgumentException($"Invalid value for configuration: {configuration}. {appConfiguration.Description}");
                 }
                 Directory.SetCurrentDirectory(context.ProjectDirectory);
                 AddFrameworkServices(serviceProvider, context, packagesPath.Value());

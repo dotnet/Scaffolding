@@ -19,15 +19,16 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
 
         LibraryExporter _libraryExporter;
 
+
         public LibraryExporterTests() : base (@"..\TestApps\ModelTypesLocatorTestClassLibrary")
         {
-            _libraryExporter = new LibraryExporter(_projectContext);
+            _libraryExporter = new LibraryExporter(_projectContext, _environment);         
         }
 
         [Fact]
         public void LibraryExporter_TestGetAllExports()
         {
-            _libraryExporter = new LibraryExporter(_projectContext);
+            _libraryExporter = new LibraryExporter(_projectContext, _environment);
 
             var exports = _libraryExporter.GetAllExports();
 

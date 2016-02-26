@@ -19,8 +19,11 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
     {
         public static IServiceProvider CreateServices(string testAppName)
         {
-            var appEnvironment = new ApplicationEnvironment("TestApp",Directory.GetCurrentDirectory());
-
+#if RELEASE
+            var appEnvironment = new ApplicationEnvironment("TestApp", Directory.GetCurrentDirectory(), "Release");
+#else
+            var appEnvironment = new ApplicationEnvironment("TestApp", Directory.GetCurrentDirectory(), "Debug");
+#endif
             // When the tests are run the appEnvironment points to test project.
             // Change the app environment to point to the test application to be used
             // by test.
@@ -29,7 +32,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
 
             ProjectContext context = ProjectContext.CreateContextForEachFramework(testAppPath).First();
-            LibraryExporter exporter = new LibraryExporter(context);
+            LibraryExporter exporter = new LibraryExporter(context, testEnvironment);
             Workspace workspace = new ProjectJsonWorkspace(context);
             return new WebHostBuilder()
                 .UseServer(new DummyServer())

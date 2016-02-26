@@ -41,11 +41,18 @@ namespace Microsoft.Extensions.CodeGeneration
             app.HelpOption("-h|--help");
             var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
             var packagesPath = app.Option("-n|--nugetPackageDir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
+            var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
             
             app.OnExecute(() =>
             {
                 var serviceProvider = new ServiceProvider();
                 var context = CreateProjectContext(projectPath.Value());
+                
+                var configuration = appConfiguration.Value() ?? "Debug";
+                if(configuration != null && !configuration.Equals("Release") && !configuration.Equals("Debug")) 
+                {
+                    throw new ArgumentException($"Invalid value for configuration: {configuration}. {appConfiguration.Description}");
+                }
                 Directory.SetCurrentDirectory(context.ProjectDirectory);
                 AddFrameworkServices(serviceProvider, context, packagesPath.Value());
                 AddCodeGenerationServices(serviceProvider);
@@ -67,13 +74,14 @@ namespace Microsoft.Extensions.CodeGeneration
 
         private static void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
         {
+            var applicationEnvironment = new ApplicationEnvironment(context.RootProject.Identity.Name, context.ProjectDirectory);
             serviceProvider.Add(typeof(IServiceProvider), serviceProvider);
             serviceProvider.Add(typeof(ProjectContext), context);
             serviceProvider.Add(typeof(Workspace), context.CreateWorkspace());
-            serviceProvider.Add(typeof(IApplicationEnvironment),new ApplicationEnvironment(context.RootProject.Identity.Name, context.ProjectDirectory));
+            serviceProvider.Add(typeof(IApplicationEnvironment), applicationEnvironment);
             serviceProvider.Add(typeof(ICodeGenAssemblyLoadContext), DefaultAssemblyLoadContext.CreateAssemblyLoadContext(nugetPackageDir));
             serviceProvider.Add(typeof(ILibraryManager), new LibraryManager(context));
-            serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context));
+            serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context, applicationEnvironment));
         }
 
         

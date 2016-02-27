@@ -30,25 +30,18 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             get { return _appName; }
         }
 
-        //public string ApplicationVersion
-        //{
-        //    get { return _originalAppEnvironment.ApplicationVersion; }
-        //}
 
         public string ApplicationBasePath
         {
             get { return _applicationBasePath; }
         }
 
-        //public FrameworkName RuntimeFramework
-        //{
-        //    get { return _originalAppEnvironment.RuntimeFramework; }
-        //}
         
         public string ApplicationConfiguration 
         {
             get { return _appConfiguration; }    
         }
+        
         public object GetData(string name)
         {
             throw new NotImplementedException();

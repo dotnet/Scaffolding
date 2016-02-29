@@ -4,9 +4,9 @@
   },
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.CodeAnalysis.Common": "1.2.0-beta1-*",
-    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-*",
-    "Microsoft.CodeAnalysis.Csharp.Workspaces": "1.2.0-beta1-*",
+    "Microsoft.CodeAnalysis.Common": "1.2.0-beta1-20160108-01",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
+    "Microsoft.CodeAnalysis.Csharp.Workspaces": "1.2.0-beta1-20160108-01",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "System.AppContext": "4.1.0-*",
     "System.Runtime": "4.1.0-*",

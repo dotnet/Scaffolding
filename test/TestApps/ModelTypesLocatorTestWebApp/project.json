@@ -2,11 +2,14 @@
   "dependencies": {
     "Microsoft.AspNetCore.Http.Abstractions": "1.0.0-*",
     "ModelTypesLocatorTestClassLibrary": "1.0.0",
-    "System.Runtime" :  "4.1.0-*"
+    "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }

@@ -13,14 +13,16 @@ namespace Microsoft.Extensions.CodeGeneration
         private readonly ILogger _logger;
         private readonly ICodeGeneratorLocator _locator;
 
-        public IServiceProvider ServiceProvider { get; set; }
-        public CodeGenCommand(IServiceProvider serviceProvider, ILogger logger, ICodeGeneratorLocator locator)
+        public CodeGenCommand(ILogger logger, ICodeGeneratorLocator locator)
         {
-            if(serviceProvider == null)
+            if(logger == null)
             {
-                throw new ArgumentNullException(nameof(serviceProvider));
+                throw new ArgumentNullException(nameof(logger));
             }
-            ServiceProvider = serviceProvider;
+            if(locator == null)
+            {
+                throw new ArgumentNullException(nameof(locator));
+            }
             _locator = locator;
             _logger = logger;
         }

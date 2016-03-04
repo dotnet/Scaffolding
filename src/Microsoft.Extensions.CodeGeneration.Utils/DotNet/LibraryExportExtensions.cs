@@ -30,7 +30,16 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
                     }
                 }
                 catch (Exception ex) 
+                    when (ex is FileNotFoundException 
+                            || ex is DirectoryNotFoundException
+                            || ex is NotSupportedException
+                            || ex is ArgumentException
+                            || ex is ArgumentOutOfRangeException
+                            || ex is BadImageFormatException
+                            || ex is IOException
+                            || ex is ArgumentNullException)
                 {
+                    // TODO: Log this
                     if(throwOnError) 
                     {
                         throw ex;

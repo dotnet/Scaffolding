@@ -7,7 +7,6 @@
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
-    "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
     "moq.netcore": "4.4.0-beta8",
     "NETStandard.Library": "1.0.0-rc2-*",

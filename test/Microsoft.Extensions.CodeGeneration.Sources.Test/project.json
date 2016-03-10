@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "compilationOptions": {
     "emitEntryPoint": false,
-    "keyFile": "../../tools/key.snk"
+    "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",

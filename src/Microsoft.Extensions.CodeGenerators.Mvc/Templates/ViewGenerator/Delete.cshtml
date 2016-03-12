@@ -57,7 +57,7 @@
     }
     @:</dl>
     @:
-    @:<form asp-action="@Model.ViewName">
+    @:<form asp-action="@Model.ViewName" asp-antiforgery="true">
         @:<div class="form-actions no-color">
             @:<input type="submit" value="Delete" class="btn btn-default" /> |
             @:<a asp-action="Index">Back to List</a>

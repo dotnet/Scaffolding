@@ -9,7 +9,7 @@
     "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-    "Newtonsoft.Json": "8.0.2",
+    "Newtonsoft.Json": "8.0.3",
     "System.Console": "4.0.0-*",
     "System.Diagnostics.Process": "4.1.0-*",
     "System.Runtime": "4.1.0-*"

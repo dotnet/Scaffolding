@@ -132,7 +132,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", typeof(@property.EntitySetName).GetProperties().Where(p=>p.Name!= "@property.PrimaryKeyNames[0]").FirstOrDefault().Name);
     }
 }            return View();
         }
@@ -171,7 +171,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", typeof(@property.EntitySetName).GetProperties().Where(p=>p.Name!= "@property.PrimaryKeyNames[0]").FirstOrDefault().Name, @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
     }
 }
             return View(@Model.ModelVariable);
@@ -209,7 +209,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", typeof(@property.EntitySetName).GetProperties().Where(p=>p.Name!= "@property.PrimaryKeyNames[0]").FirstOrDefault().Name, @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
     }
 }
             return View(@Model.ModelVariable);
@@ -245,7 +245,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", typeof(@property.EntitySetName).GetProperties().Where(p=>p.Name!= "@property.PrimaryKeyNames[0]").FirstOrDefault().Name, @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
     }
 }
             return View(@Model.ModelVariable);

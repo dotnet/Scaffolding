@@ -11,10 +11,8 @@
       "version": "1.0.0-*"
     },
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
     "ModelTypesLocatorTestWebApp": "1.0.0",
     "moq.netcore": "4.4.0-beta8",
-    "NETStandard.Library": "1.0.0-rc2-*",
     "System.Diagnostics.Contracts": "4.0.1-*",
     "System.AppContext": "4.1.0-*",
     "System.Linq.Expressions": "4.0.11-*",

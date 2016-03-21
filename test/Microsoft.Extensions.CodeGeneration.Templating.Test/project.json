@@ -6,9 +6,7 @@
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-dev-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
     "moq.netcore": "4.4.0-beta8",
-    "NETStandard.Library": "1.0.0-rc2-*",
     "xunit": "2.1.0"
   },
   "frameworks": {

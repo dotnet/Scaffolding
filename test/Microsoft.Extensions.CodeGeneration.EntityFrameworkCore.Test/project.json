@@ -6,12 +6,8 @@
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0-rc2-*",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
+    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0-*",
     "moq.netcore": "4.4.0-beta8",
-    "NETStandard.Library": "1.0.0-rc2-*",
-    "System.AppContext": "4.1.0-*",
-    "System.Linq.Expressions": "4.0.11-*",
     "xunit": "2.1.0"
   },
   "frameworks": {

@@ -6,12 +6,15 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
-    "Newtonsoft.Json": "8.0.2",
+    "Newtonsoft.Json": "8.0.3",
     "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   },
   "packInclude": {

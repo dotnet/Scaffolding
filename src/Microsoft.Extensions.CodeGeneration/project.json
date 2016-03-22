@@ -6,7 +6,7 @@
     "emitEntryPoint": false
   },
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160108-01",
+    "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
@@ -15,11 +15,14 @@
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
     "System.Console": "4.0.0-*",
     "System.Linq.Expressions": "4.0.11-*",
-    "System.Runtime" :  "4.1.0-*"
+    "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }

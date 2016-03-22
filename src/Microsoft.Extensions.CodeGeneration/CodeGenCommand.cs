@@ -5,42 +5,44 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
     public class CodeGenCommand
     {
-        public IServiceProvider ServiceProvider { get; set; }
-        public CodeGenCommand(IServiceProvider serviceProvider)
+        private readonly ILogger _logger;
+        private readonly ICodeGeneratorLocator _locator;
+
+        public CodeGenCommand(ILogger logger, ICodeGeneratorLocator locator)
         {
-            if(serviceProvider == null)
+            if(logger == null)
             {
-                throw new ArgumentNullException(nameof(serviceProvider));
+                throw new ArgumentNullException(nameof(logger));
             }
-            ServiceProvider = serviceProvider;
+            if(locator == null)
+            {
+                throw new ArgumentNullException(nameof(locator));
+            }
+            _locator = locator;
+            _logger = logger;
         }
 
         public int Execute(string [] args)
         {
-            var generatorsLocator = ServiceProvider.GetRequiredService<ICodeGeneratorLocator>();
-            var logger = ServiceProvider.GetRequiredService<ILogger>();
-
             if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
             {
-                ShowCodeGeneratorList(ServiceProvider, generatorsLocator.CodeGenerators);
+                ShowCodeGeneratorList(_locator.CodeGenerators);
                 return 0;
             }
             try
             {
                 var codeGeneratorName = args[0];
-                logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
-                var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
+                _logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
+                var generatorDescriptor = _locator.GetCodeGenerator(codeGeneratorName);
 
                 var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
 
-                logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
+                _logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
                 actionInvoker.Execute(args);
             }
             catch (Exception ex)
@@ -49,8 +51,8 @@ namespace Microsoft.Extensions.CodeGeneration
                 {
                     ex = ex.InnerException;
                 }
-                logger.LogMessage(ex.Message, LogMessageLevel.Error);
-                logger.LogMessage(ex.StackTrace, LogMessageLevel.Error);
+                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage(ex.StackTrace, LogMessageLevel.Error);
             }
             return 0;
         }
@@ -67,24 +69,23 @@ namespace Microsoft.Extensions.CodeGeneration
                 string.Equals("--help", argument, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void ShowCodeGeneratorList(IServiceProvider serviceProvider, IEnumerable<CodeGeneratorDescriptor> codeGenerators)
+        private void ShowCodeGeneratorList(IEnumerable<CodeGeneratorDescriptor> codeGenerators)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger>();
             if (codeGenerators.Any())
             {
-                logger.LogMessage("Usage:  dnx gen [code generator name]\n");
-                logger.LogMessage("Code Generators:");
+                _logger.LogMessage("Usage:  dnx gen [code generator name]\n");
+                _logger.LogMessage("Code Generators:");
 
                 foreach (var generator in codeGenerators)
                 {
-                    logger.LogMessage(generator.Name);
+                    _logger.LogMessage(generator.Name);
                 }
 
-                logger.LogMessage("\nTry dnx gen [code generator name] -? for help about specific code generator.");
+                _logger.LogMessage("\nTry dnx gen [code generator name] -? for help about specific code generator.");
             }
             else
             {
-                logger.LogMessage("There are no code generators installed to run.");
+                _logger.LogMessage("There are no code generators installed to run.");
             }
         }
     }

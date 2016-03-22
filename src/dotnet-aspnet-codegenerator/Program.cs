@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 Directory.SetCurrentDirectory(context.ProjectDirectory);
                 AddFrameworkServices(serviceProvider, context, packagesPath.Value());
                 AddCodeGenerationServices(serviceProvider);
-                var codeGenCommand = new CodeGenCommand(serviceProvider);
+                var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
                 codeGenCommand.Execute(app.RemainingArguments.ToArray());
                 return 0;
             });
@@ -115,6 +115,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
+            serviceProvider.AddServiceWithDependencies<CodeGenCommand, CodeGenCommand>();
 
             serviceProvider.AddServiceWithDependencies<ICompilationService, RoslynCompilationService>();
             serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();

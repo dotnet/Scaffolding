@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         ICodeGenAssemblyLoadContext loadContext;
 
-        public CommonUtilitiesTests() : base(@"..\TestApps\ModelTypesLocatorTestClassLibrary")
+        public CommonUtilitiesTests() : base(@"../TestApps/ModelTypesLocatorTestClassLibrary")
         {
             loadContext = new DefaultAssemblyLoadContext(
                              new Dictionary<AssemblyName, string>(),

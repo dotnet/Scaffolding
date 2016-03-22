@@ -1,14 +1,13 @@
 {
   "dependencies": {
-    "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*",
-    "System.Dynamic.Runtime": "4.0.11-*",
-    "System.Linq": "4.0.1-beta-23516",
-    "System.Runtime": "4.1.0-*",
-    "System.Threading.Tasks": "4.0.11-*"
+    "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*"
   },
   "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }

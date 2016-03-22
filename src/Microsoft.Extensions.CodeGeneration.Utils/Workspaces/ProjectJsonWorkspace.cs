@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
 
                 foreach (var file in dependency.SourceReferences)
                 {
-                    AddSourceFile(projectInfo, file);
+                    AddSourceFile(projectInfo, file.ResolvedPath);
                 }
             }
 

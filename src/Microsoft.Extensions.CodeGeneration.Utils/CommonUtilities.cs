@@ -20,55 +20,36 @@ namespace Microsoft.Extensions.CodeGeneration
             EmitResult result;
             using (var ms = new MemoryStream())
             {
-                using (var pdb = new MemoryStream())
+                result = compilation.Emit(ms, pdbStream: null);
+
+                if (!result.Success)
                 {
-                    if (PlatformHelper.IsMono)
-                    {
-                        result = compilation.Emit(ms, pdbStream: null);
-                    }
-                    else
-                    {
-                        result = compilation.Emit(ms, pdbStream: pdb);
-                    }
+                    var formatter = new DiagnosticFormatter();
+                    var errorMessages = result.Diagnostics
+                                            .Where(IsError)
+                                            .Select(d => formatter.Format(d));
 
-                    if (!result.Success)
-                    {
-                        var formatter = new DiagnosticFormatter();
-                        var errorMessages = result.Diagnostics
-                                             .Where(IsError)
-                                             .Select(d => formatter.Format(d));
-
-                        return CompilationResult.FromErrorMessages(errorMessages);
-                    }
-
-                    ms.Seek(0, SeekOrigin.Begin);
-
-                    Assembly assembly;
-                    //TODO: Should consider removing this as Mono is no longer supported.                  
-                    if (PlatformHelper.IsMono)
-                    {
-                        assembly = loader.LoadStream(ms, symbols: null);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            pdb.Seek(0, SeekOrigin.Begin);
-                            assembly = loader.LoadStream(ms, pdb);
-                        }
-                        catch (Exception ex)
-                        {
-                            var v = ex;
-                            while (v.InnerException != null)
-                            {
-                                v = v.InnerException;
-                            }
-                            throw ex;
-                        }
-                    }
-
-                    return CompilationResult.FromAssembly(assembly);
+                    return CompilationResult.FromErrorMessages(errorMessages);
                 }
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                Assembly assembly;
+                try
+                {
+                    assembly = loader.LoadStream(ms, symbols: null);
+                }
+                catch (Exception ex)
+                {
+                    var v = ex;
+                    while (v.InnerException != null)
+                    {
+                        v = v.InnerException;
+                    }
+                    throw ex;
+                }
+
+                return CompilationResult.FromAssembly(assembly);
             }
         }
 

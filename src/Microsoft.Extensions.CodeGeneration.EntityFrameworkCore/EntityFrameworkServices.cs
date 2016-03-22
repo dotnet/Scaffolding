@@ -402,7 +402,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                 var builder = new WebHostBuilder();
                 //TODO: Review 
                 builder.UseServer("Microsoft.AspNetCore.Server.WebListener")
-                        .UseApplicationBasePath(Directory.GetCurrentDirectory());
+                        .UseContentRoot(Directory.GetCurrentDirectory());
                         
                 if (startupType != null)
                 {

@@ -93,7 +93,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
                 if (exports != null)
                 {
-                    foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReferences()))
+                    foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReferences(throwOnError: false)))
                     {
                         references.Add(metadataReference);
                     }

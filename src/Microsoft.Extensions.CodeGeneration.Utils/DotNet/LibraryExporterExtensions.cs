@@ -25,13 +25,13 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             }
             
             var exports = _libraryExporter.GetAllExports();
-            var assets = exports.SelectMany(_ => _.RuntimeAssemblies)
+            var assets = exports.SelectMany(_ => _.RuntimeAssemblyGroups.GetDefaultGroup().Assets)
                                     .Where(_ => _.Name == library.Identity.Name);
             if(assets.Any())  
             {
                 return assets.First().ResolvedPath;
             }
-            assets = exports.SelectMany(_ => _.NativeLibraries)
+            assets = exports.SelectMany(_ => _.NativeLibraryGroups.GetDefaultGroup().Assets)
                                 .Where(_ => _.Name == library.Identity.Name);
             if(assets.Any())  
             {

@@ -30,8 +30,10 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
             var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
+            var rid = Microsoft.Extensions.PlatformAbstractions.RuntimeEnvironmentExtensions.GetRuntimeIdentifier(
+                Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Runtime);
 
-            ProjectContext context = ProjectContext.CreateContextForEachFramework(testAppPath).First();
+            ProjectContext context = ProjectContext.CreateContextForEachFramework(testAppPath, null, new [] { rid }).First();
             LibraryExporter exporter = new LibraryExporter(context, testEnvironment);
             Workspace workspace = new ProjectJsonWorkspace(context);
             return new WebHostBuilder()

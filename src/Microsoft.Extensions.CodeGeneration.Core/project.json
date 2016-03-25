@@ -12,7 +12,8 @@
     "Newtonsoft.Json": "8.0.3",
     "System.Console": "4.0.0-*",
     "System.Diagnostics.Process": "4.1.0-*",
-    "System.Runtime": "4.1.0-*"
+    "System.Runtime": "4.1.0-*",
+    "System.Runtime.Serialization.Primitives": "4.1.1-*"
   },
   "frameworks": {
     "netstandard1.5": {

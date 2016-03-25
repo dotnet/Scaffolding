@@ -19,30 +19,37 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
     {
         public static string GetResolvedPathForDependency(this ILibraryExporter _libraryExporter, LibraryDescription library)
         {
-            if(library == null) 
+            if (library == null)
             {
                 throw new ArgumentNullException(nameof(library));
             }
-            
+
             var exports = _libraryExporter.GetAllExports();
-            var assets = exports.SelectMany(_ => _.RuntimeAssemblies)
-                                    .Where(_ => _.Name == library.Identity.Name);
-            if(assets.Any())  
+            var assets = exports
+                .SelectMany(export => export.RuntimeAssemblyGroups.GetDefaultGroup().Assets)
+                .Where(asset => asset.Name == library.Identity.Name);
+
+            if (assets.Any())
             {
                 return assets.First().ResolvedPath;
             }
-            assets = exports.SelectMany(_ => _.NativeLibraries)
-                                .Where(_ => _.Name == library.Identity.Name);
-            if(assets.Any())  
+
+            assets = exports
+                .SelectMany(export => export.NativeLibraryGroups.GetDefaultGroup().Assets)
+                .Where(asset => asset.Name == library.Identity.Name);
+            if (assets.Any())
             {
                 return assets.First().ResolvedPath;
             }
-            assets = exports.SelectMany(_ => _.CompilationAssemblies)
-                                .Where(_ => _.Name == library.Identity.Name);
-            if(assets.Any()) 
+
+            assets = exports
+                .SelectMany(export => export.CompilationAssemblies)
+                .Where(asset => asset.Name == library.Identity.Name);
+            if (assets.Any())
             {
                 return assets.First().ResolvedPath;
             }
+
             return string.Empty;
         }
     }

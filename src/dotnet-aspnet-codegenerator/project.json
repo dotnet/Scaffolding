@@ -7,15 +7,20 @@
     "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-    "NETStandard.Library": "1.5.0-*",
     "System.Diagnostics.Process": "4.1.0-*"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netstandard1.5": {
       "imports": [
         "dnxcore50",
         "portable-net45+win8"
-      ]
+      ],
+      "dependencies": {
+          "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc2-*"
+        }
+      }
     }
   }
 }

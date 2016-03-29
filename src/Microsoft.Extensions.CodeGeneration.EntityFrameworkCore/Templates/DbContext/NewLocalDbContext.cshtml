@@ -1,16 +1,17 @@
 @inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 @{
     var minUsings = new HashSet<string>()
     {
          "System",
          "System.Collections.Generic",
          "System.Linq",
-         "System.Threading.Tasks"
+         "System.Threading.Tasks",
+         "Microsoft.EntityFrameworkCore"
 
     };
     foreach (var namespaceName in Model.RequiredNamespaces)
@@ -39,6 +40,11 @@ using System.Threading.Tasks;
 }    public class @Model.DbContextTypeName : @baseClassName
     {
         public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
+        
+        public @Model.DbContextTypeName (DbContextOptions<@Model.DbContextTypeName> options)
+            : base(options)
+        {
+        }
     }
 @{
     if (!String.IsNullOrEmpty(Model.DbContextNamespace))

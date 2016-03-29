@@ -36,11 +36,12 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             //arrange
             var libraryExporter = GetInvalidLibraryExporter();
             _export = libraryExporter.GetAllExports().Last();
-            
+
             //act
             try 
             {
                 var references = LibraryExportExtensions.GetMetadataReferences(_export);
+                GC.KeepAlive(references); // prevent the previous call from being optimized out in Release configuration
                 Assert.True(false, "Expected to get an exception");
             }
             catch (Exception ex)

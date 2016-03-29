@@ -137,9 +137,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                         var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
 
                         string textToAddAtEnd =
-                            statementLeadingTrivia + "{0}.AddEntityFramework()" + Environment.NewLine +
-                            statementLeadingTrivia + "    .AddSqlServer()" + Environment.NewLine +
-                            statementLeadingTrivia + "    .AddDbContext<{1}>(options =>" + Environment.NewLine +
+                            statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
                             statementLeadingTrivia + "        options.UseSqlServer(@\"Server=(localdb)\\mssqllocaldb;Database={2};Trusted_Connection=True;MultipleActiveResultSets=true\"));" + Environment.NewLine;
 
                         if (configServicesMethod.Body.Statements.Any())

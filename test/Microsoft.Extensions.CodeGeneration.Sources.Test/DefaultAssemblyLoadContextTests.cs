@@ -16,9 +16,9 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     {
         DefaultAssemblyLoadContext _defaultAssemblyLoadContext;
 
-        public DefaultAssemblyLoadContextTests() : base(@"..\TestApps\ModelTypesLocatorTestClassLibrary")
+        public DefaultAssemblyLoadContextTests()
+            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
         {
-
         }
 
         //[Fact]

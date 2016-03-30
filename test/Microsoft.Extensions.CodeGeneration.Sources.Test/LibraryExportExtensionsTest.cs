@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
     {
         LibraryExport _export;
         public LibraryExportExtensionsTest()  
-            : base(@"..\TestApps\ModelTypesLocatorTestClassLibrary")
+            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
         {
             var _libraryExporter = new LibraryExporter(_projectContext, _environment);
             _export = _libraryExporter.GetAllExports().First();

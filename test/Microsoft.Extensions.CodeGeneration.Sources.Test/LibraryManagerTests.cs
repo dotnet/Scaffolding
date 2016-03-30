@@ -18,7 +18,8 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     {
         LibraryManager _libraryManager;
 
-        public LibraryManagerTests() : base(@"../TestApps/ModelTypesLocatorTestClassLibrary")
+        public LibraryManagerTests()
+            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
         {
         }
 

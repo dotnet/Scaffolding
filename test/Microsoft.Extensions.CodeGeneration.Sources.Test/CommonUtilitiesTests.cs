@@ -19,13 +19,15 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         ICodeGenAssemblyLoadContext loadContext;
 
-        public CommonUtilitiesTests() : base(@"../TestApps/ModelTypesLocatorTestClassLibrary")
+        public CommonUtilitiesTests()
+            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
         {
             loadContext = new DefaultAssemblyLoadContext(
                              new Dictionary<AssemblyName, string>(),
                              new Dictionary<string, string>(),
                              new List<string>());
         }
+        
         [Fact]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {

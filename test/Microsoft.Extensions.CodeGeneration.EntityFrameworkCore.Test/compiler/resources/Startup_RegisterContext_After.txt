@@ -11,9 +11,7 @@ namespace WebAppNamespace
             // Add EF services to the services container.
             servicesVar.AddEntityFramework();
 
-            servicesVar.AddEntityFramework()
-                .AddSqlServer()
-                .AddDbContext<MyContext>(options =>
+            servicesVar.AddDbContext<MyContext>(options =>
                     options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=MyContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true"));
         }
     }

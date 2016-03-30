@@ -7,9 +7,7 @@ namespace WebAppNamespace
     {
         public void ConfigureServices(IServiceCollection servicesVar)
         {
-            servicesVar.AddEntityFramework()
-                .AddSqlServer()
-                .AddDbContext<MyContext>(options =>
+            servicesVar.AddDbContext<MyContext>(options =>
                     options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=MyContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true"));
         }
     }

@@ -37,26 +37,15 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             var libraryExporter = GetInvalidLibraryExporter();
             _export = libraryExporter.GetAllExports().Last();
 
-            //act
-            try 
-            {
-                var references = LibraryExportExtensions.GetMetadataReferences(_export);
-                GC.KeepAlive(references); // prevent the previous call from being optimized out in Release configuration
-                Assert.True(false, "Expected to get an exception");
-            }
-            catch (Exception ex)
-                when (ex is FileNotFoundException 
+            var ex = Assert.ThrowsAny<Exception>(() => LibraryExportExtensions.GetMetadataReferences(_export));
+            Assert.True(ex is FileNotFoundException
                             || ex is DirectoryNotFoundException
                             || ex is NotSupportedException
                             || ex is ArgumentException
                             || ex is ArgumentOutOfRangeException
                             || ex is BadImageFormatException
                             || ex is IOException
-                            || ex is ArgumentNullException)
-            {
-                //We want to be here
-                return;
-            }
+                            || ex is ArgumentNullException);
         }
         
         [Fact]
@@ -83,11 +72,7 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         private LibraryExporter GetInvalidLibraryExporter()
         {
             IApplicationEnvironment applicationEnvironment;
-#if RELEASE 
-            applicationEnvironment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Debug");
-#else
-            applicationEnvironment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
-#endif
+            applicationEnvironment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "NonExistent");
             return new LibraryExporter(_projectContext, applicationEnvironment);
         }
     }

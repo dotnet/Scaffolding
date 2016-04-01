@@ -2,13 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.Extensions.CodeGeneration.Sources.Test;
-using Moq;
 using Xunit;
 
 namespace Microsoft.Extensions.CodeGeneration.DotNet
@@ -29,13 +27,12 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             var refList = _export.GetMetadataReferences();
             Assert.True(refList.Any());
         }
-        
+
         [Fact]
         public void LibraryExportExtensions_GetMetadataReferences_throwException()
         {
-            //arrange
             var libraryExporter = GetInvalidLibraryExporter();
-            _export = libraryExporter.GetAllExports().Last();
+            _export = libraryExporter.GetExport("ModelTypesLocatorTestClassLibrary");
 
             var ex = Assert.ThrowsAny<Exception>(() => LibraryExportExtensions.GetMetadataReferences(_export));
             Assert.True(ex is FileNotFoundException
@@ -51,22 +48,10 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         [Fact]
         public void LibraryExportExtensions_GetMetadataReferences_doNotThrowException()
         {
-            //arrange
             var libraryExporter = GetInvalidLibraryExporter();
-            _export = libraryExporter.GetAllExports().Last();
-            
-            //act
-            try 
-            {
-                var references = LibraryExportExtensions.GetMetadataReferences(_export, throwOnError: false);
-            }
-            catch
-            {
-                Assert.True(false, "Exception while getting Metadata references even when throwOnError is set to false");
-                //We want to be here
-                return;
-            }
-            return;
+            _export = libraryExporter.GetExport("ModelTypesLocatorTestClassLibrary");
+
+            LibraryExportExtensions.GetMetadataReferences(_export, throwOnError: false);
         }
         
         private LibraryExporter GetInvalidLibraryExporter()

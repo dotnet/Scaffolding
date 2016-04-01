@@ -43,30 +43,31 @@
         @:<div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
     foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
     {
+        if (property.IsPrimaryKey)
+        {
+    @:<input type="hidden" asp-for="@property.PropertyName" />
+            continue;
+        }
+        
         if (property.Scaffold)
         {
-            if (property.IsPrimaryKey)
-            {
-        @:<input type="hidden" asp-for="@property.PropertyName" />
-                continue;
-            }
             if (property.IsReadOnly)
             {
                 continue;
             }
-
+            
             if (property.IsForeignKey)
             {
         @:<div class="form-group">
             @:<label asp-for="@property.PropertyName" class="control-label col-md-2">@GetAssociationName(property)</label>
             @:<div class="col-md-10">
-                @:<select asp-for="@property.PropertyName" class="form-control" />
+                @:<select asp-for="@property.PropertyName" class="form-control" asp-items="@property.PropertyName"></select>
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
             @:</div>
         @:</div>
                 continue;
             }
-
+            
             bool isCheckbox = property.TypeName.Equals("System.Boolean");
             if (isCheckbox)
             {
@@ -100,6 +101,12 @@
         @:</div>
             }
         }
+        // Ideally we shouldn't be here  but if the user marks the foreign key as [ScaffoldColumn(false)], we want to atleast try to make it work. 
+        else if (property.IsForeignKey)
+        {
+    @:<input type="hidden" asp-for="@property.PropertyName" />
+            continue;
+        }
     }
 }
         <div class="form-group">
@@ -115,26 +122,15 @@
 </div>
 
 @{
-    if (Model.ReferenceScriptLibraries && (Model.IsLayoutPageSelected || Model.IsPartialView))
+    if (Model.ReferenceScriptLibraries)
     {
 @:@@section Scripts {
-    @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @:<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    @:<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    @:@@{await Html.RenderPartialAsync("_ValidationScriptsPartial")}
 @:}
     }
     // The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {
-        if (Model.ReferenceScriptLibraries)
-        {
-@:@@section Scripts {
-    @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @:<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    @:<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-@:}
-        //ClearIndent();
-        }
 @:</body>
 @:</html>
     }

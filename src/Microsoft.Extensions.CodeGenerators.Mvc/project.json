@@ -5,9 +5,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
-    "Newtonsoft.Json": "8.0.3",
-    "System.Runtime": "4.1.0-*"
+    "Microsoft.Extensions.CodeGeneration": "1.0.0-*"
   },
   "frameworks": {
     "netstandard1.5": {

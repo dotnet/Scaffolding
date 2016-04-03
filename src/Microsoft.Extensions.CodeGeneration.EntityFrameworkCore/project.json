@@ -7,19 +7,16 @@
   "dependencies": {
     "Microsoft.AspNetCore.Hosting": "1.0.0-*",
     "Microsoft.AspNetCore.Server.WebListener": "0.1.0-*",
-    "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
     "Microsoft.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
-    "System.AppContext": "4.1.0-*",
-    "System.Runtime": "4.1.0-*"
+    "System.AppContext": "4.1.0-*"
   },
   "frameworks": {
     "netstandard1.5": {
       "imports": [
-        "dotnet5.6",
         "dnxcore50",
         "portable-net45+win8"
       ]

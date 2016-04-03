@@ -17,10 +17,9 @@ namespace Microsoft.Extensions.CodeGeneration
             ICodeGenAssemblyLoadContext loader,
             CodeAnalysis.Compilation compilation)
         {
-            EmitResult result;
             using (var ms = new MemoryStream())
             {
-                result = compilation.Emit(ms, pdbStream: null);
+                var result = compilation.Emit(ms, pdbStream: null);
 
                 if (!result.Success)
                 {

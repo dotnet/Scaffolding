@@ -11,8 +11,6 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
 
-
-
 namespace Microsoft.Extensions.CodeGeneration.DotNet
 {
     public static class LibraryExporterExtensions

@@ -51,13 +51,12 @@
             {
                 continue;
             }
-
             if (property.IsForeignKey)
             {
         @:<div class="form-group">
             @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
-                @:<select asp-for="@property.PropertyName" class ="form-control"></select>
+                @:<select asp-for="@property.PropertyName" class ="form-control" asp-items="@property.PropertyName"></select>
             @:</div>
         @:</div>
                 continue;
@@ -111,26 +110,15 @@
 </div>
 
 @{
-    if (Model.ReferenceScriptLibraries && (Model.IsLayoutPageSelected || Model.IsPartialView))
+    if (Model.ReferenceScriptLibraries)
     {
 @:@@section Scripts {
-    @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @:<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    @:<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    @:@@{await Html.RenderPartialAsync("_ValidationScriptsPartial")}
 @:}
     }
     // The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {
-        if (Model.ReferenceScriptLibraries)
-        {
-@:@@section Scripts {
-    @:<script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @:<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    @:<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-@:}
-        //ClearIndent();
-        }
 @:</body>
 @:</html>
     }

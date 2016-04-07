@@ -14,6 +14,7 @@ using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
+using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Extensions.CodeGeneration
         private static ConsoleLogger _logger;
         private const string APPNAME = "Code Generation";
         private const string APP_DESC = "Code generation for Asp.net Core";
-
+        private static bool invokeProjectDependencyCommand = false;
         public static void Main(string[] args)
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -39,11 +40,16 @@ namespace Microsoft.Extensions.CodeGeneration
             var packagesPath = app.Option("-n|--nugetPackageDir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
             var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
             
+            var context = CreateProjectContext(projectPath.Value());
+            if(invokeProjectDependencyCommand) 
+            {
+                    
+            }
             app.OnExecute(() =>
             {
                 var serviceProvider = new ServiceProvider();
-                var context = CreateProjectContext(projectPath.Value());
                 
+
                 var configuration = appConfiguration.Value() ?? "Debug";
                 if(configuration != null && !configuration.Equals("Release") && !configuration.Equals("Debug")) 
                 {
@@ -80,7 +86,6 @@ namespace Microsoft.Extensions.CodeGeneration
             serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context, applicationEnvironment));
         }
 
-        
         private static ProjectContext CreateProjectContext(string projectPath)
         {
             projectPath = Path.GetFullPath(projectPath ?? Directory.GetCurrentDirectory());
@@ -94,8 +99,20 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new InvalidOperationException($"{projectPath} does not exist.");
             }
-
-            return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault();
+            var contexts = ProjectContext.CreateContextForEachFramework(projectPath);
+            var frameworks = contexts.Select(c => c.TargetFramework);
+            var nearestNugetFramework = NuGetFrameworkUtility.GetNearest(frameworks, FrameworkConstants.CommonFrameworks.NetStandardApp15, f => new NuGetFramework(f));
+            if(nearestNugetFramework == null) 
+            {
+                nearestNugetFramework = NuGetFrameworkUtility.GetNearest(frameworks, FrameworkConstants.CommonFrameworks.Net451, f => new NuGetFramework(f));
+                invokeProjectDependencyCommand = true;
+            }
+            
+            if(nearestNugetFramework != null) 
+            {
+                return contexts.Where(c => c.TargetFramework == nearestNugetFramework).First();
+            }
+            throw new Exception("The project does not target any frameworks compatible with 'netstandard1.5'");
         }
 
         private static void AddCodeGenerationServices(ServiceProvider serviceProvider)

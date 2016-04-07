@@ -214,7 +214,11 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             {
                 keyFile = Path.GetFullPath(Path.Combine(projectDirectory, compilerOptions.KeyFile));
 
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || useOssSigning)
+                if (
+#if !NET451                    
+                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || 
+#endif                    
+                    useOssSigning)
                 {
                     return options.WithCryptoPublicKey(
                         SnkUtils.ExtractPublicKey(File.ReadAllBytes(keyFile)));

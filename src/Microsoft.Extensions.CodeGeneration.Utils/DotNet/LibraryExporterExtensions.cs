@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
 
             var exports = _libraryExporter.GetAllExports();
             var assets = exports
-                .SelectMany(export => export.RuntimeAssemblyGroups.GetDefaultGroup().Assets)
+                .SelectMany(export => export?.RuntimeAssemblyGroups?.GetDefaultGroup()?.Assets)
                 .Where(asset => asset.Name == library.Identity.Name);
 
             if (assets.Any())

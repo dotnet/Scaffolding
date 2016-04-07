@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if NET451
+using System.ComponentModel;
+#endif
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;

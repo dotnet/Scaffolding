@@ -33,6 +33,11 @@ namespace Microsoft.Extensions.CodeGeneration
             _instances[type] = instance;
         }
 
+        public void Add<T>(object instance)
+        {
+            _instances[typeof(T)] = instance;
+        }
+
         public object GetService(Type serviceType)
         {
             object instance;

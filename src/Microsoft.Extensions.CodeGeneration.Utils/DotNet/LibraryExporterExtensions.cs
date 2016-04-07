@@ -21,21 +21,23 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             {
                 throw new ArgumentNullException(nameof(library));
             }
-
             var exports = _libraryExporter.GetAllExports();
+            if(exports == null)
+            {
+                return string.Empty;
+            }
             var assets = exports
-                .SelectMany(export => export?.RuntimeAssemblyGroups?.GetDefaultGroup()?.Assets)
+                .SelectMany(export => export.RuntimeAssemblyGroups?.GetDefaultGroup()?.Assets)
                 .Where(asset => asset.Name == library.Identity.Name);
-
-            if (assets.Any())
+            if (assets != null && assets.Any())
             {
                 return assets.First().ResolvedPath;
             }
 
             assets = exports
-                .SelectMany(export => export.NativeLibraryGroups.GetDefaultGroup().Assets)
+                .SelectMany(export => export.NativeLibraryGroups?.GetDefaultGroup()?.Assets)
                 .Where(asset => asset.Name == library.Identity.Name);
-            if (assets.Any())
+            if (assets != null && assets.Any())
             {
                 return assets.First().ResolvedPath;
             }
@@ -43,7 +45,7 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             assets = exports
                 .SelectMany(export => export.CompilationAssemblies)
                 .Where(asset => asset.Name == library.Identity.Name);
-            if (assets.Any())
+            if (assets != null && assets.Any())
             {
                 return assets.First().ResolvedPath;
             }

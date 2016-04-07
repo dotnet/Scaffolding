@@ -6,14 +6,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Workspaces;
-using Microsoft.Extensions.CodeGeneration.DotNet;
-using Microsoft.Extensions.CodeGeneration.EntityFrameworkCore;
-using Microsoft.Extensions.CodeGeneration.Templating;
-using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.CodeGeneration
@@ -21,125 +18,206 @@ namespace Microsoft.Extensions.CodeGeneration
     public class Program
     {
         private static ConsoleLogger _logger;
+
         private const string APPNAME = "Code Generation";
         private const string APP_DESC = "Code generation for Asp.net Core";
-        private static bool invokeProjectDependencyCommand = false;
+
+        private static bool isProjectDependencyCommand;
+
         public static void Main(string[] args)
         {
+
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-
             _logger = new ConsoleLogger();
+            // We don't want to expose this flag, as it only needs to be used for identifying self invocation. 
+            isProjectDependencyCommand = args.Contains("--no-dispatch");
+            _logger.LogMessage($"Is Dependency COmmand: {isProjectDependencyCommand}");
+            try
+            {
+                Execute(args);
+            }
+            finally
+            {
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.Milliseconds / 10);
+                if (!isProjectDependencyCommand)
+                {
+                    // Check is needed so we don't show the runtime twice (once for the portable process and once for the dependency process)
+                    _logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The execution is done in 2 phases. 
+        /// Phase 1 ::
+        ///    1. Determine if the tool is running as a project dependency or not. 
+        ///    2. Try getting the project context for the project (use netcoreapp1.0 as the tfm if not running as dependency command or else use the tfm passed in)
+        ///    3. If not running as dependency command and project context cannot be built using netcoreapp1.0, invoke project dependency command with the first tfm found in the project.json
+        ///    
+        /// Phase 2 ::
+        ///     1. After successfully getting the Project context, invoke the CodeGenCommandExecutor.
+        /// </summary>
+        private static void Execute(string[] args)
+        {
             var app = new CommandLineApplication(false)
             {
                 Name = APPNAME,
                 Description = APP_DESC
             };
+
+            // Define app Options;
             app.HelpOption("-h|--help");
             var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
             var packagesPath = app.Option("-n|--nugetPackageDir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
             var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
-            
-            var context = CreateProjectContext(projectPath.Value());
-            if(invokeProjectDependencyCommand) 
-            {
-                    
-            }
+            var framework = app.Option("-tfm|--targetFramework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
+            var buildBasePath = app.Option("-b|--buildBasePath", "", CommandOptionType.SingleValue);
+            var dependencyCommand = app.Option("-nd|--no-dispatch", "", CommandOptionType.NoValue);
+
             app.OnExecute(() =>
             {
-                var serviceProvider = new ServiceProvider();
-                
-
-                var configuration = appConfiguration.Value() ?? "Debug";
-                if(configuration != null && !configuration.Equals("Release") && !configuration.Equals("Debug")) 
+                string project = projectPath.Value();
+                if (string.IsNullOrEmpty(project))
                 {
-                    throw new ArgumentException($"Invalid value for configuration: {configuration}. {appConfiguration.Description}");
+                    project = Directory.GetCurrentDirectory();
                 }
-                Directory.SetCurrentDirectory(context.ProjectDirectory);
-                AddFrameworkServices(serviceProvider, context, packagesPath.Value());
-                AddCodeGenerationServices(serviceProvider);
-                var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
-                codeGenCommand.Execute(app.RemainingArguments.ToArray());
-                return 0;
+                var configuration = appConfiguration.Value() ?? "Debug";
+                var projectFile = ProjectReader.GetProject(project);
+                var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
+
+                var nugetFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
+
+                if (!isProjectDependencyCommand)
+                {
+                    // Invoke the tool from the project's build directory. 
+                    return BuildAndDispatchDependencyCommand(
+                        args, 
+                        frameworksInProject.FirstOrDefault(), 
+                        project, 
+                        buildBasePath.Value(), 
+                        configuration);
+                }
+                else
+                {
+                    if (!TryGetNugetFramework(framework.Value(), out nugetFramework))
+                    {
+                        throw new ArgumentException($"Could not understand the NuGetFramework information. Framework short folder name passed in was: {framework.Value()}");
+                    }
+
+                    var nearestNugetFramework = NuGetFrameworkUtility.GetNearest(
+                        frameworksInProject,
+                        nugetFramework,
+                        f => new NuGetFramework(f));
+
+                    if(nearestNugetFramework == null)
+                    {
+                        // This should never happen as long as we dispatch correctly.
+                        var msg = "Could not find a compatible framework to execute."
+                            + Environment.NewLine
+                            +$"Available frameworks in project:{string.Join($"{Environment.NewLine} -", frameworksInProject.Select(f => f.GetShortFolderName()))}";
+                        throw new InvalidOperationException(msg);
+                    }
+
+                    ProjectContext context = new ProjectContextBuilder()
+                        .WithProject(projectFile)
+                        .WithTargetFramework(nearestNugetFramework)
+                        .Build();
+
+                    Debug.Assert(context != null);
+
+                    var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
+
+                    CodeGenCommandExecutor executor = new CodeGenCommandExecutor(
+                        context,
+                        codeGenArgs,
+                        configuration,
+                        packagesPath.Value(),
+                        _logger);
+
+                    return executor.Execute();
+                }
             });
-            
+
             app.Execute(args);
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-
-            // Format and display the TimeSpan value.
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            _logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
         }
 
-        private static void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
+        private static int BuildAndDispatchDependencyCommand(
+            string[] args,
+            NuGetFramework frameworkToUse,
+            string projectPath, 
+            string buildBasePath, 
+            string configuration)
         {
-            var applicationEnvironment = new ApplicationInfo(context.RootProject.Identity.Name, context.ProjectDirectory);
-            serviceProvider.Add(typeof(IServiceProvider), serviceProvider);
-            serviceProvider.Add(typeof(ProjectContext), context);
-            serviceProvider.Add(typeof(Workspace), context.CreateWorkspace());
-            serviceProvider.Add(typeof(IApplicationInfo), applicationEnvironment);
-            serviceProvider.Add(typeof(ICodeGenAssemblyLoadContext), DefaultAssemblyLoadContext.CreateAssemblyLoadContext(nugetPackageDir));
-            serviceProvider.Add(typeof(ILibraryManager), new LibraryManager(context));
-            serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context, applicationEnvironment));
-        }
-
-        private static ProjectContext CreateProjectContext(string projectPath)
-        {
-            projectPath = Path.GetFullPath(projectPath ?? Directory.GetCurrentDirectory());
-
-            if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
+            if(frameworkToUse == null)
             {
-                projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);
+                throw new ArgumentNullException(nameof(frameworkToUse));
+            }
+            if(string.IsNullOrEmpty(projectPath))
+            {
+                throw new ArgumentNullException(nameof(projectPath));
             }
 
-            if (!File.Exists(projectPath))
+            var buildExitCode = DotNetBuildCommandHelper.Build(
+                projectPath,
+                configuration,
+                frameworkToUse,
+                buildBasePath);
+
+            if (buildExitCode != 0)
             {
-                throw new InvalidOperationException($"{projectPath} does not exist.");
+                //Build failed. 
+                // Stop the process here. 
+                return buildExitCode;
             }
-            var contexts = ProjectContext.CreateContextForEachFramework(projectPath);
-            var frameworks = contexts.Select(c => c.TargetFramework);
-            var nearestNugetFramework = NuGetFrameworkUtility.GetNearest(frameworks, FrameworkConstants.CommonFrameworks.NetStandardApp15, f => new NuGetFramework(f));
-            if(nearestNugetFramework == null) 
-            {
-                nearestNugetFramework = NuGetFrameworkUtility.GetNearest(frameworks, FrameworkConstants.CommonFrameworks.Net451, f => new NuGetFramework(f));
-                invokeProjectDependencyCommand = true;
-            }
+
+            // Invoke the dependency command
+            var projectFilePath = projectPath.EndsWith("project.json") 
+                ? projectPath 
+                : Path.Combine(projectPath, "project.json");
+
+            var projectDirectory = Directory.GetParent(projectFilePath).FullName;
             
-            if(nearestNugetFramework != null) 
-            {
-                return contexts.Where(c => c.TargetFramework == nearestNugetFramework).First();
-            }
-            throw new Exception("The project does not target any frameworks compatible with 'netstandard1.5'");
+            var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
+                     args,
+                     frameworkToUse.GetShortFolderName());
+
+            var exitCode = new ProjectDependenciesCommandFactory(
+                 frameworkToUse,
+                 configuration,
+                 null,
+                 buildBasePath,
+                 projectDirectory)
+             .Create(
+                 PlatformServices.Default.Application.ApplicationName,
+                 dependencyArgs,
+                 frameworkToUse,
+                 configuration)
+            .ForwardStdErr()
+            .ForwardStdOut()
+            .Execute()
+            .ExitCode;
+
+            return exitCode;
         }
 
-        private static void AddCodeGenerationServices(ServiceProvider serviceProvider)
+        private static bool TryGetNugetFramework(string folderName, out NuGetFramework nugetFramework)
         {
-            if (serviceProvider == null)
+            if (!string.IsNullOrEmpty(folderName))
             {
-                throw new ArgumentNullException(nameof(serviceProvider));
+                NuGetFramework tfm = NuGetFramework.Parse(folderName);
+                if (tfm != null)
+                {
+                    nugetFramework = tfm;
+                    return true;
+                }
             }
-
-            //Ordering of services is important here
-            serviceProvider.Add(typeof(ILogger), _logger);
-            serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());
-
-            serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
-            serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
-            serviceProvider.AddServiceWithDependencies<CodeGenCommand, CodeGenCommand>();
-
-            serviceProvider.AddServiceWithDependencies<ICompilationService, RoslynCompilationService>();
-            serviceProvider.AddServiceWithDependencies<ITemplating, RazorTemplating>();
-
-            serviceProvider.AddServiceWithDependencies<IPackageInstaller, PackageInstaller>();
-
-            serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
-            serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();
-            
-            serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
-            serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
+            nugetFramework = null;
+            return false;
         }
     }
 }

@@ -31,7 +31,6 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         private readonly IPackageInstaller _packageInstaller;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
-        private static int _counter = 1;
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         private const string EFSqlServerPackageVersion = "7.0.0-*";
         private readonly Workspace _workspace;
@@ -244,12 +243,10 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             out Type dbContextType, 
             out Type modelType)
         {
-            //TODO: @prbhosal Figure out how to lookup the correct project here.             
             var projectCompilation = _workspace.CurrentSolution.Projects
-                //.Where(project => project.Name == _applicationInfo.ApplicationName)
-                .FirstOrDefault()
+                .FirstOrDefault(project => project.AssemblyName == _environment.ApplicationName)
                 .GetCompilationAsync().Result;
-            var newAssemblyName = projectCompilation.AssemblyName + _counter++;
+            var newAssemblyName = projectCompilation.AssemblyName;
 
             var newCompilation = compilationModificationFunc(projectCompilation).WithAssemblyName(newAssemblyName);
 
@@ -399,10 +396,10 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         {
             try {
                 var builder = new WebHostBuilder();
-                //TODO: Review 
-                builder.UseServer("Microsoft.AspNetCore.Server.WebListener")
-                        .UseContentRoot(Directory.GetCurrentDirectory());
-                        
+                builder.UseKestrel()
+                        .UseContentRoot(Directory.GetCurrentDirectory())
+                        .UseIISIntegration();
+
                 if (startupType != null)
                 {
                     var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);
@@ -416,7 +413,11 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             }
             catch(Exception ex)
             {
-                _logger.LogMessage(ex.Message);
+                while (ex != null)
+                {
+                    _logger.LogMessage($"{ex.Message} StackTrace:{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}");
+                    ex = ex.InnerException;
+                }
                 return null;
             }
         }

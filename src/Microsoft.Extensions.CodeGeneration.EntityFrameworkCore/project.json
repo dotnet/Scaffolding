@@ -6,17 +6,14 @@
   },
   "dependencies": {
     "Microsoft.AspNetCore.Hosting": "1.0.0-*",
-    "Microsoft.AspNetCore.Server.WebListener": "0.1.0-*",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-*",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-*",
     "Microsoft.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*"
   },
   "frameworks": {
-    "net451": {
-        "dependencies": {
-            "System.Threading.Tasks": "4.0.0-*"
-        }
-    },
+    "net451": { },
     "netstandard1.5": {
       "imports": [
         "dnxcore50",

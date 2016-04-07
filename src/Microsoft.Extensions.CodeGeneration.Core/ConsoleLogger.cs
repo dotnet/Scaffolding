@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -17,11 +18,15 @@ namespace Microsoft.Extensions.CodeGeneration
         {
             if (level == LogMessageLevel.Error)
             {
-                Console.Error.WriteLine(message);
+                Reporter.Error.WriteLine(message);
+            }
+            else if (level == LogMessageLevel.Trace)
+            {
+                Reporter.Verbose.WriteLine(message);
             }
             else
             {
-                Console.WriteLine(message);
+                Reporter.Output.WriteLine(message);
             }
         }
     }

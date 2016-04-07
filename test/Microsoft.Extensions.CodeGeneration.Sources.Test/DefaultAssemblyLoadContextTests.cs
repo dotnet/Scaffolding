@@ -19,22 +19,19 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
         {
         }
 
-        //[Fact]
+        [Fact(Skip ="Functionality broken")]
         public void DefaultAssemblyLoadContext_Test()
         {
             var library = new LibraryManager(_projectContext).GetLibrary("ModelTypesLocatorTestClassLibrary");
             var path = new LibraryExporter(_projectContext, _applicationInfo).GetResolvedPathForDependency(library);
 
-            var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "bin", "debug", "dnxcore50");
-            //var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
-            _defaultAssemblyLoadContext = new DefaultAssemblyLoadContext(
-                                                new Dictionary<AssemblyName, string>(),
-                                                new Dictionary<string, string>(),
-                                                new List<string>() { currentDirectory });
-            Assembly assembly;
-            assembly = _defaultAssemblyLoadContext.LoadFromPath(path);
-            Assert.NotNull(assembly);
-            Assert.True(assembly.DefinedTypes.Where(_ => _.Name == "ModelWithMatchingShortName").Any());
+            //var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "bin", "debug", "dnxcore50");
+            ////var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
+            //_defaultAssemblyLoadContext = DefaultAssemblyLoadContext.CreateAssemblyLoadContext();
+            //Assembly assembly;
+            //assembly = _defaultAssemblyLoadContext.LoadFromPath(path);
+            //Assert.NotNull(assembly);
+            //Assert.True(assembly.DefinedTypes.Where(_ => _.Name == "ModelWithMatchingShortName").Any());
         }
     }
 }

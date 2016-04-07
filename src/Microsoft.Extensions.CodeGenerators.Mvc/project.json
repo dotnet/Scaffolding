@@ -6,7 +6,6 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
-    "Newtonsoft.Json": "8.0.3",
     "System.Runtime": "4.1.0-*"
   },
   "frameworks": {

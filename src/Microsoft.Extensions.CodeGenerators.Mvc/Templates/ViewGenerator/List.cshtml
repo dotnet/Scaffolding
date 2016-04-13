@@ -39,51 +39,55 @@
     @:<a asp-action="Create">Create New</a>
 @:</p>
 @:<table class="table">
-    @:<tr>
-    IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
-    foreach (var property in properties)
-    {
-        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+    @:<thead>
+        @:<tr>
+     
+        IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
+        foreach (var property in properties)
         {
-        <th>
-            @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
-        </th>
+            if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+            {
+            <th>
+                @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+            </th>
+            }
         }
-    }
-        @:<th></th>
-    @:</tr>
-    @:
+            @:<th></th>
+        @:</tr>
+    @:</thead>
+    @:<tbody>
 @:@@foreach (var item in Model) {
-    @:<tr>
-    foreach (PropertyMetadata property in properties)
-    {
-        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+        @:<tr>
+        foreach (PropertyMetadata property in properties)
         {
-        <td>
-            @@Html.DisplayFor(modelItem => item.@GetValueExpression(property))
-        </td>
+            if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+            {
+            <td>
+                @@Html.DisplayFor(modelItem => item.@GetValueExpression(property))
+            </td>
+            }
         }
-    }
 
-    string pkName = GetPrimaryKeyName();
-    if (pkName != null)
-    {
-        @:<td>
-            @:<a asp-action="Edit" asp-route-id="@@item.@pkName">Edit</a> |
-            @:<a asp-action="Details" asp-route-id="@@item.@pkName">Details</a> |
-            @:<a asp-action="Delete" asp-route-id="@@item.@pkName">Delete</a>
-        @:</td>
-    }
-    else
-    {
-        <td>
-            @@Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-        </td>
-    }
-    @:</tr>
+        string pkName = GetPrimaryKeyName();
+        if (pkName != null)
+        {
+            @:<td>
+                @:<a asp-action="Edit" asp-route-id="@@item.@pkName">Edit</a> |
+                @:<a asp-action="Details" asp-route-id="@@item.@pkName">Details</a> |
+                @:<a asp-action="Delete" asp-route-id="@@item.@pkName">Delete</a>
+            @:</td>
+        }
+        else
+        {
+            <td>
+                @@Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        }
+        @:</tr>
 @:}
+    @:</tbody>
 
 @:</table>
     if(!Model.IsPartialView && !Model.IsLayoutPageSelected)

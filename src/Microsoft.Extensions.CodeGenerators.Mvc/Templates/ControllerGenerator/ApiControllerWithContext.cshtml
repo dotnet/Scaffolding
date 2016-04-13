@@ -27,7 +27,7 @@ namespace @Model.ControllerNamespace
     [Route("@routePrefix")]
     public class @Model.ControllerName : Controller
     {
-        private @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName _context;
 
         public @(Model.ControllerName)(@Model.ContextTypeName context)
         {
@@ -42,7 +42,7 @@ namespace @Model.ControllerNamespace
         }
 
         // GET: @routePrefix/5
-        [HttpGet("{id}", Name = "Get@(Model.ModelTypeName)")]
+        [HttpGet("{id}")]
 @{
     if (Model.UseAsync)
     {
@@ -128,7 +128,7 @@ namespace @Model.ControllerNamespace
                 }
             }
 
-            return new StatusCodeResult(StatusCodes.Status204NoContent);
+            return NoContent();
         }
 
         // POST: @routePrefix
@@ -189,7 +189,7 @@ namespace @Model.ControllerNamespace
     }
 }
 
-            return CreatedAtRoute("Get@(Model.ModelTypeName)", new { id = @(Model.ModelVariable).@primaryKeyName }, @Model.ModelVariable);
+            return CreatedAtAction("Get@(Model.ModelTypeName)", new { id = @(Model.ModelVariable).@primaryKeyName }, @Model.ModelVariable);
         }
 
         // DELETE: @routePrefix/5
@@ -240,18 +240,9 @@ namespace @Model.ControllerNamespace
             return Ok(@Model.ModelVariable);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _context.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            return _context.@(entitySetName).Count(e => e.@primaryKeyName == id) > 0;
+            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
     }
 }

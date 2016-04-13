@@ -56,7 +56,7 @@
     }
 }    </dl>
 </div>
-<p>
+<div>
 @{
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
@@ -69,7 +69,7 @@
     @:@@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
     @:<a asp-action="Index">Back to List</a>
     }
-}</p>
+}</div>
 @{
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {

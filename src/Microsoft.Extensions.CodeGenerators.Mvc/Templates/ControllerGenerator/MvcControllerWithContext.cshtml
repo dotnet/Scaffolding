@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-
 @{
     foreach (var namespaceName in Model.RequiredNamespaces)
     {
@@ -26,6 +25,15 @@ namespace @Model.ControllerNamespace
     {
         routePrefix = Model.AreaName + "/" + Model.ControllerRootName;
     }
+    var modelProperties = new List<string>();
+    foreach(var property in Model.ModelMetadata.Properties)
+    {
+        if (property.Scaffold)
+        {
+            modelProperties.Add(property.PropertyName);
+        }
+    }
+    var bindString = string.Join(",", modelProperties);
     var contextTypeName = Model.ContextTypeName;
     var entitySetName = Model.ModelMetadata.EntitySetName;
     var entitySetVar = Model.EntitySetVariable ??
@@ -46,7 +54,7 @@ namespace @Model.ControllerNamespace
 }
     public class @Model.ControllerName : Controller
     {
-        private @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName _context;
 
         public @(Model.ControllerName)(@Model.ContextTypeName context)
         {
@@ -112,11 +120,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
 }            if (@Model.ModelVariable == null)
             {
@@ -138,26 +146,28 @@ namespace @Model.ControllerNamespace
         }
 
         // POST: @routePrefix/Create
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<IActionResult> Create(@Model.ModelTypeName @Model.ModelVariable)
+        @:public async Task<IActionResult> Create([Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
     }
     else
     {
-        @:public IActionResult Create(@Model.ModelTypeName @Model.ModelVariable)
+        @:public IActionResult Create([Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
     }
 }        {
             if (ModelState.IsValid)
             {
 @{
-    if(!string.IsNullOrEmpty(primaryKeyType) && IsGuid(primaryKeyType))
+    if (!string.IsNullOrEmpty(primaryKeyType) && IsGuid(primaryKeyType))
     {
                 @:@(Model.ModelVariable).@primaryKeyName = Guid.NewGuid();
     }
-                @:_context.@(entitySetName).Add(@Model.ModelVariable);
+                @:_context.Add(@Model.ModelVariable);
     if (Model.UseAsync)
     {
                 @:await _context.SaveChangesAsync();
@@ -196,11 +206,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
 }            if (@Model.ModelVariable == null)
             {
@@ -216,31 +226,53 @@ namespace @Model.ControllerNamespace
         }
 
         // POST: @routePrefix/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
 @{
     if (Model.UseAsync)
     {
-        @:public async Task<IActionResult> Edit(@Model.ModelTypeName @Model.ModelVariable)
+        @:public async Task<IActionResult> Edit(@primaryKeyShortTypeName id, [Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
     }
     else
     {
-        @:public IActionResult Edit(@Model.ModelTypeName @Model.ModelVariable)
+        @:public IActionResult Edit(@primaryKeyShortTypeName id, [Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
     }
 }        {
+            if (id != @Model.ModelVariable.@primaryKeyName)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Update(@Model.ModelVariable);
+                try
+                {
+                    _context.Update(@Model.ModelVariable);
 @{
     if (Model.UseAsync)
     {
-                @:await _context.SaveChangesAsync();
+                    @:await _context.SaveChangesAsync();
     }
     else
     {
-                @:_context.SaveChanges();
+                    @:_context.SaveChanges();
     }
-}                return RedirectToAction("Index");
+
+    }           }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!@(Model.ModelTypeName)Exists(@Model.ModelVariable.@primaryKeyName))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction("Index");
             }
 @{
     foreach (var property in relatedProperties.Values)
@@ -252,7 +284,6 @@ namespace @Model.ControllerNamespace
         }
 
         // GET: @routePrefix/Delete/5
-        [ActionName("Delete")]
 @{
     if (Model.UseAsync)
     {
@@ -271,11 +302,11 @@ namespace @Model.ControllerNamespace
 @{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
 }            if (@Model.ModelVariable == null)
             {
@@ -300,11 +331,11 @@ namespace @Model.ControllerNamespace
         @:{
     if (Model.UseAsync)
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
     }
     else
     {
-            @:@Model.ModelTypeName @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
+            @:var @Model.ModelVariable = _context.@(entitySetName).SingleOrDefault(m => m.@primaryKeyName == id);
     }
             @:_context.@(entitySetName).Remove(@Model.ModelVariable);
     if (Model.UseAsync)
@@ -317,6 +348,11 @@ namespace @Model.ControllerNamespace
     }
 }
             return RedirectToAction("Index");
+        }
+
+        private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
+        {
+            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
     }
 }

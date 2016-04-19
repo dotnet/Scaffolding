@@ -4,7 +4,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "dotnet-test-xunit": "1.0.0-dev-*",
+    "dotnet-test-xunit": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
     "moq.netcore": "4.4.0-beta8",
     "xunit": "2.1.0"

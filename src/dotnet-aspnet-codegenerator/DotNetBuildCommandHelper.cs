@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
@@ -26,8 +27,10 @@ namespace Microsoft.Extensions.CodeGeneration
                 "--framework", framework.GetShortFolderName(),
             };
 
-            if (buildBasePath != null)
+            if (buildBasePath != null && !Path.IsPathRooted(buildBasePath))
             {
+                // ProjectDependenciesCommandFactory cannot handle relative build base paths.
+                buildBasePath = Path.Combine(Directory.GetCurrentDirectory(), buildBasePath);
                 args.Add("--build-base-path");
                 args.Add(buildBasePath);
             }

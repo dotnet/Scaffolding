@@ -1,16 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-#if !NET451
-using System.Runtime.Loader;
-#endif
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.CodeGeneration.DotNet
 {
@@ -30,13 +22,8 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
                 return Assembly.Load(ms.ToArray());
             }
 #else
-            return AssemblyLoadContext.Default.LoadFromStream(assembly);
+            return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(assembly);
 #endif
-        }
-
-        public static DefaultAssemblyLoadContext CreateAssemblyLoadContext()
-        {
-            return new DefaultAssemblyLoadContext();
         }
     }
 }

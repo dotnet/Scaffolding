@@ -18,12 +18,12 @@ namespace Microsoft.Extensions.CodeGeneration
         ICodeGenAssemblyLoadContext loadContext;
 
         public CommonUtilitiesTests()
-            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base(Path.Combine("..","TestApps","ModelTypesLocatorTestClassLibrary"))
         {
-            loadContext = DefaultAssemblyLoadContext.CreateAssemblyLoadContext();
+            loadContext = new DefaultAssemblyLoadContext();
         }
         
-        [Fact (Skip ="Functionality broken")]
+        [Fact]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
             LibraryExporter exporter = new LibraryExporter(_projectContext, _applicationInfo);
@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.CodeGeneration
                                 } 
                             }";
             
-            Compilation compilation = GetCompilation(code, "TestAssembly", references);
+            Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), references);
             CompilationResult result = CommonUtilities.GetAssemblyFromCompilation(loadContext, compilation);
 
             Assert.True(result.Success);
@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.CodeGeneration
                                 } 
                             }";
 
-            Compilation compilation = GetCompilation(code, "TestAssembly", null);
+            Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), null);
             CompilationResult result = CommonUtilities.GetAssemblyFromCompilation(loadContext, compilation);
 
             Assert.False(result.Success);

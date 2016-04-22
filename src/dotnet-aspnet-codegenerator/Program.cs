@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.CodeGeneration
             _logger = new ConsoleLogger();
             // We don't want to expose this flag, as it only needs to be used for identifying self invocation. 
             isProjectDependencyCommand = args.Contains("--no-dispatch");
-            _logger.LogMessage($"Is Dependency COmmand: {isProjectDependencyCommand}");
+            _logger.LogMessage($"Is Dependency Command: {isProjectDependencyCommand}", LogMessageLevel.Trace);
             try
             {
                 Execute(args);
@@ -73,11 +73,11 @@ namespace Microsoft.Extensions.CodeGeneration
             // Define app Options;
             app.HelpOption("-h|--help");
             var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
-            var packagesPath = app.Option("-n|--nugetPackageDir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
+            var packagesPath = app.Option("-n|--nuget-package-dir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
             var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
-            var framework = app.Option("-tfm|--targetFramework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
-            var buildBasePath = app.Option("-b|--buildBasePath", "", CommandOptionType.SingleValue);
-            var dependencyCommand = app.Option("-nd|--no-dispatch", "", CommandOptionType.NoValue);
+            var framework = app.Option("-tfm|--target-framework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
+            var buildBasePath = app.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
+            var dependencyCommand = app.Option("--no-dispatch", "", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -86,7 +86,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 {
                     project = Directory.GetCurrentDirectory();
                 }
-                var configuration = appConfiguration.Value() ?? "Debug";
+                var configuration = appConfiguration.Value() ?? Constants.DefaultConfiguration;
                 var projectFile = ProjectReader.GetProject(project);
                 var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
 

@@ -244,11 +244,18 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             out Type modelType)
         {
             var projectCompilation = _workspace.CurrentSolution.Projects
-                .FirstOrDefault(project => project.AssemblyName == _environment.ApplicationName)
+                .First(project => project.AssemblyName == _applicationInfo.ApplicationName)
                 .GetCompilationAsync().Result;
+            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream. 
+            // On NET451 if the assembly name is different, MVC fails to load the assembly as it is not found on disk. 
+#if NET451
             var newAssemblyName = projectCompilation.AssemblyName;
-
-            var newCompilation = compilationModificationFunc(projectCompilation).WithAssemblyName(newAssemblyName);
+#else
+            var newAssemblyName = Path.GetRandomFileName();
+#endif
+            var newCompilation = compilationModificationFunc(projectCompilation)
+                .WithAssemblyName(newAssemblyName)
+                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
 
@@ -361,7 +368,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                 {
                     ex = ex.InnerException;
                 }
-                _logger.LogMessage("There was an error creating the DbContext instance to get the model." + ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage($"There was an error creating the DbContext instance to get the model. {ex.Message}", LogMessageLevel.Error);
                 throw ex;
             }
 
@@ -397,8 +404,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             try {
                 var builder = new WebHostBuilder();
                 builder.UseKestrel()
-                        .UseContentRoot(Directory.GetCurrentDirectory())
-                        .UseIISIntegration();
+                        .UseContentRoot(Directory.GetCurrentDirectory());
 
                 if (startupType != null)
                 {

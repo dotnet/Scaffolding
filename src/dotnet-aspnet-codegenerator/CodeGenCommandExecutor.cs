@@ -53,7 +53,6 @@ namespace Microsoft.Extensions.CodeGeneration
         public int Execute()
         {
             var serviceProvider = new ServiceProvider();
-            Directory.SetCurrentDirectory(_projectContext.ProjectDirectory);
             AddFrameworkServices(serviceProvider, _projectContext, _nugetPackageDir);
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
@@ -63,13 +62,13 @@ namespace Microsoft.Extensions.CodeGeneration
         
         private void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
         {
-            var applicationEnvironment = new ApplicationEnvironment(context.RootProject.Identity.Name, context.ProjectDirectory);
+            var applicationInfo = new ApplicationInfo(context.RootProject.Identity.Name, context.ProjectDirectory);
             serviceProvider.Add<ProjectContext>(context);
             serviceProvider.Add<Workspace>(context.CreateWorkspace());
-            serviceProvider.Add<IApplicationEnvironment>(applicationEnvironment);
-            serviceProvider.Add<ICodeGenAssemblyLoadContext>(DefaultAssemblyLoadContext.CreateAssemblyLoadContext());
+            serviceProvider.Add<IApplicationInfo>(applicationInfo);
+            serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
             serviceProvider.Add<ILibraryManager>(new LibraryManager(context));
-            serviceProvider.Add<ILibraryExporter>(new LibraryExporter(context, applicationEnvironment));
+            serviceProvider.Add<ILibraryExporter>(new LibraryExporter(context, applicationInfo));
         }
 
         private void AddCodeGenerationServices(ServiceProvider serviceProvider)

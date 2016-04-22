@@ -55,9 +55,8 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
         {
             ProjectContext context = CreateProjectContext(null);
             var applicationInfo = new ApplicationInfo("", context.ProjectDirectory);
-            ICodeGenAssemblyLoadContext loader = DefaultAssemblyLoadContext.CreateAssemblyLoadContext();
+            ICodeGenAssemblyLoadContext loader = new DefaultAssemblyLoadContext();
             IApplicationInfo _applicationInfo;
-
 
 #if RELEASE 
             _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");

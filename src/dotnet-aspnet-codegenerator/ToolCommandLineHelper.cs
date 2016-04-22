@@ -13,10 +13,10 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         private const string NO_DISPATCH_FLAG = "--no-dispatch";
         private const string CONFIGURATION = "--configuration";
-        private const string TARGET_FRAMEWORK = "--targetFramework";
+        private const string TARGET_FRAMEWORK = "--target-framework";
         private const string PROJECT = "--project";
-        private const string NUGET_PACKAGE_DIR = "--nugetPackageDir";
-        private const string BUILD_BASE_PATH = "--buildBasePath";
+        private const string NUGET_PACKAGE_DIR = "--nuget-package-dir";
+        private const string BUILD_BASE_PATH = "--build-base-path";
 
         private const string NO_DISPATCH_FLAG_SHORT = "-nd";
         private const string CONFIGURATION_SHORT = "-c";

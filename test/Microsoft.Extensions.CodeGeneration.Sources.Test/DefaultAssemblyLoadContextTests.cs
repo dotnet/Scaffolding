@@ -15,23 +15,18 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
         DefaultAssemblyLoadContext _defaultAssemblyLoadContext;
 
         public DefaultAssemblyLoadContextTests()
-            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base(Directory.GetCurrentDirectory())
         {
         }
 
-        [Fact(Skip ="Functionality broken")]
+        [Fact]
         public void DefaultAssemblyLoadContext_Test()
         {
-            var library = new LibraryManager(_projectContext).GetLibrary("ModelTypesLocatorTestClassLibrary");
-            var path = new LibraryExporter(_projectContext, _applicationInfo).GetResolvedPathForDependency(library);
-
-            //var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "bin", "debug", "dnxcore50");
-            ////var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
-            //_defaultAssemblyLoadContext = DefaultAssemblyLoadContext.CreateAssemblyLoadContext();
-            //Assembly assembly;
-            //assembly = _defaultAssemblyLoadContext.LoadFromPath(path);
-            //Assert.NotNull(assembly);
-            //Assert.True(assembly.DefinedTypes.Where(_ => _.Name == "ModelWithMatchingShortName").Any());
+            var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
+            _defaultAssemblyLoadContext = new DefaultAssemblyLoadContext();
+            Assembly assembly = _defaultAssemblyLoadContext.LoadFromName(new AssemblyName(assemblyName));
+            Assert.NotNull(assembly);
+            Assert.True(assembly.DefinedTypes.Where(_ => _.Name == "DefaultAssemblyLoadContextTests").Any());
         }
     }
 }

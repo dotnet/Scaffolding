@@ -1,6 +1,7 @@
 {
   "version": "1.0.0-*",
   "compilationOptions": {
+    "outputName": "dotnet-aspnet-codegenerator",
     "emitEntryPoint": true
   },
   "dependencies": {

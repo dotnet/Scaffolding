@@ -19,7 +19,7 @@ using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.CodeGeneration
+namespace Microsoft.Extensions.CodeGeneration.Tools
 {
     public class Program
     {
@@ -42,14 +42,14 @@ namespace Microsoft.Extensions.CodeGeneration
             var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
             var packagesPath = app.Option("-n|--nugetPackageDir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
             var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
-            
+
             app.OnExecute(() =>
             {
                 var serviceProvider = new ServiceProvider();
                 var context = CreateProjectContext(projectPath.Value());
-                
+
                 var configuration = appConfiguration.Value() ?? "Debug";
-                if(configuration != null && !configuration.Equals("Release") && !configuration.Equals("Debug")) 
+                if(configuration != null && !configuration.Equals("Release") && !configuration.Equals("Debug"))
                 {
                     throw new ArgumentException($"Invalid value for configuration: {configuration}. {appConfiguration.Description}");
                 }
@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 codeGenCommand.Execute(app.RemainingArguments.ToArray());
                 return 0;
             });
-            
+
             app.Execute(args);
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.CodeGeneration
             serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context, applicationEnvironment));
         }
 
-        
+
         private static ProjectContext CreateProjectContext(string projectPath)
         {
             projectPath = Path.GetFullPath(projectPath ?? Directory.GetCurrentDirectory());
@@ -124,7 +124,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();
-            
+
             serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
             serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }

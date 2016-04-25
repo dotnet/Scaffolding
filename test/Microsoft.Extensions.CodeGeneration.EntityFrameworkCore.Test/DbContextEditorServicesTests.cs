@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
             DbContextEditorServices testObj = new DbContextEditorServices(
                 new Mock<ILibraryManager>().Object,
-                new Mock<IApplicationEnvironment>().Object,
+                new Mock<IApplicationInfo>().Object,
                 new Mock<IFilesLocator>().Object,
                 new Mock<ITemplating>().Object);
 
@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
             DbContextEditorServices testObj = new DbContextEditorServices(
                 new Mock<ILibraryManager>().Object,
-                new Mock<IApplicationEnvironment>().Object,
+                new Mock<IApplicationInfo>().Object,
                 new Mock<IFilesLocator>().Object,
                 new Mock<ITemplating>().Object);
 

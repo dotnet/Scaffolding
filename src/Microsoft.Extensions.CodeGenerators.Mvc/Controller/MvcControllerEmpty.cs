@@ -14,11 +14,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
     {
         public MvcControllerEmpty(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
+            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
         protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)

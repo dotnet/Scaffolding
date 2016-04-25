@@ -21,10 +21,10 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private readonly ILibraryExporter _libraryExporter;
-        private readonly IApplicationEnvironment _environment;
+        private readonly IApplicationInfo _applicationInfo;
         private readonly ICodeGenAssemblyLoadContext _loader;
 
-        public RoslynCompilationService(IApplicationEnvironment environment,
+        public RoslynCompilationService(IApplicationInfo applicationInfo,
                                         ICodeGenAssemblyLoadContext loader,
                                         ILibraryExporter libraryExporter)
         {
@@ -32,15 +32,15 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             {
                 throw new ArgumentNullException(nameof(loader));
             }
-            if(environment == null)
+            if(applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
             if(libraryExporter == null)
             {
                 throw new ArgumentNullException(nameof(libraryExporter));
             }
-            _environment = environment;
+            _applicationInfo = applicationInfo;
             _loader = loader;
             _libraryExporter = libraryExporter;
         }
@@ -85,7 +85,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             // some other references which are not available in any of these closures.
             // As the above comment, the right thing to do here is to use the dependency closure of
             // the assembly which has the template.
-            var baseProjects = new string[] { _environment.ApplicationName };
+            var baseProjects = new string[] { _applicationInfo.ApplicationName };
 
             foreach (var baseProject in baseProjects)
             {

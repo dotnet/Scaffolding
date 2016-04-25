@@ -20,16 +20,16 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
         public static IServiceProvider CreateServices(string testAppName)
         {
 #if RELEASE
-            var appEnvironment = new ApplicationEnvironment("TestApp", Directory.GetCurrentDirectory(), "Release");
+            var applicationInfo = new ApplicationInfo("TestApp", Directory.GetCurrentDirectory(), "Release");
 #else
-            var appEnvironment = new ApplicationEnvironment("TestApp", Directory.GetCurrentDirectory(), "Debug");
+            var applicationInfo = new ApplicationInfo("TestApp", Directory.GetCurrentDirectory(), "Debug");
 #endif
-            // When the tests are run the appEnvironment points to test project.
-            // Change the app environment to point to the test application to be used
+            // When the tests are run the applicationInfo points to test project.
+            // Change the app applicationInfo to point to the test application to be used
             // by test.
-            var originalAppBase = appEnvironment.ApplicationBasePath; ////Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
+            var originalAppBase = applicationInfo.ApplicationBasePath; ////Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
-            var testEnvironment = new TestApplicationEnvironment(appEnvironment, testAppPath, testAppName);
+            var testEnvironment = new TestApplicationInfo(applicationInfo, testAppPath, testAppName);
             var rid = Microsoft.Extensions.PlatformAbstractions.RuntimeEnvironmentExtensions.GetRuntimeIdentifier(
                 Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Runtime);
 
@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
                 .UseStartup<ModelTypesLocatorTestWebApp.Startup>()
                 .ConfigureServices(services => 
                     {
-                        services.AddSingleton<IApplicationEnvironment>(testEnvironment);
+                        services.AddSingleton<IApplicationInfo>(testEnvironment);
                         services.AddSingleton<ILibraryExporter>(exporter);
                         services.AddSingleton<Workspace>(workspace);
                     })

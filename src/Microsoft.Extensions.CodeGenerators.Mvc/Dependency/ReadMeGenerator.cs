@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
     public class ReadMeGenerator
     {
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
-        private readonly IApplicationEnvironment _environment;
+        private readonly IApplicationInfo _applicationInfo;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly ILibraryManager _libraryManager;
 
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     Constants.ThisAssemblyName,
-                    _environment.ApplicationBasePath,
+                    _applicationInfo.ApplicationBasePath,
                     new[] { "Startup" },
                     _libraryManager);
             }
@@ -34,7 +34,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IModelTypesLocator modelTypesLocator,
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment)
+            IApplicationInfo applicationInfo)
         {
             if (codeGeneratorActionsService == null)
             {
@@ -51,15 +51,15 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
                 throw new ArgumentNullException(nameof(libraryManager));
             }
 
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
             _libraryManager = libraryManager;
-            _environment = environment;
+            _applicationInfo = applicationInfo;
         }
 
         public async Task<bool> GenerateStartupOrReadme(List<StartupContent> startupList)
@@ -81,8 +81,8 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
         private async Task GenerateStartup(List<StartupContent> startupList)
         {
             var templateName = "Startup" + Constants.RazorTemplateExtension;
-            var applicationName = _environment.ApplicationName;
-            var outputPath = Path.Combine(_environment.ApplicationBasePath,
+            var applicationName = _applicationInfo.ApplicationName;
+            var outputPath = Path.Combine(_applicationInfo.ApplicationBasePath,
                 "Startup" + Constants.CodeFileExtension);
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath,
@@ -98,7 +98,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
         private async Task GenerateReadMe(List<StartupContent> startupList)
         {
             var templateName = "ReadMe" + Constants.RazorTemplateExtension;
-            var outputPath = Path.Combine(_environment.ApplicationBasePath,
+            var outputPath = Path.Combine(_applicationInfo.ApplicationBasePath,
                 Constants.ReadMeOutputFileName);
 
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath,

@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
 
-            LibraryExporter exporter = new LibraryExporter(_projectContext, _environment);
+            LibraryExporter exporter = new LibraryExporter(_projectContext, _applicationInfo);
             LibraryManager manager = new LibraryManager(_projectContext);
             IEnumerable<MetadataReference> references = exporter.GetAllExports().SelectMany(export => export.GetMetadataReferences());
             string code = @"using System;
@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public void CommonUtilities_TestGetAssemblyFromCompilation_Failure()
         {
 
-            LibraryExporter exporter = new LibraryExporter(_projectContext, _environment);
+            LibraryExporter exporter = new LibraryExporter(_projectContext, _applicationInfo);
             LibraryManager manager = new LibraryManager(_projectContext);
 
             string code = @"using System;

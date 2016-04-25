@@ -18,19 +18,19 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 {
     public class DbContextEditorServices : IDbContextEditorServices
     {
-        private readonly IApplicationEnvironment _environment;
+        private readonly IApplicationInfo _applicationInfo;
         private readonly ILibraryManager _libraryManager;
         private readonly ITemplating _templatingService;
         private readonly IFilesLocator _filesLocator;
 
         public DbContextEditorServices(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
             ITemplating templatingService)
         {
             _libraryManager = libraryManager;
-            _environment = environment;
+            _applicationInfo = applicationInfo;
             _filesLocator = filesLocator;
             _templatingService = templatingService;
         }
@@ -204,7 +204,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: "Microsoft.Extensions.CodeGeneration.EntityFrameworkCore",
-                    applicationBasePath: _environment.ApplicationBasePath,
+                    applicationBasePath: _applicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "DbContext" },
                     libraryManager: _libraryManager);
             }

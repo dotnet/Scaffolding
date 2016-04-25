@@ -34,20 +34,20 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
         public ControllerGeneratorBase(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(environment)
+            : base(applicationInfo)
         {
             if (libraryManager == null)
             {
                 throw new ArgumentNullException(nameof(libraryManager));
             }
 
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             if (codeGeneratorActionsService == null)
@@ -77,7 +77,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
-                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
+                    applicationBasePath: ApplicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "ControllerGenerator", "ViewGenerator" },
                     libraryManager: LibraryManager);
             }
@@ -88,7 +88,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
             // That's not possible in command line scaffolding - the closest we can get is
             // the name of assembly??
-            var appName = ApplicationEnvironment.ApplicationName;
+            var appName = ApplicationInfo.ApplicationName;
             return appName + "." + Constants.ControllersFolderName;
         }
 

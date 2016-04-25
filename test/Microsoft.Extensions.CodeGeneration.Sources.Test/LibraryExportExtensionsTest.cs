@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         public LibraryExportExtensionsTest()  
             : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
         {
-            var _libraryExporter = new LibraryExporter(_projectContext, _environment);
+            var _libraryExporter = new LibraryExporter(_projectContext, _applicationInfo);
             _export = _libraryExporter.GetAllExports().First();
         }
         
@@ -56,9 +56,9 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         
         private LibraryExporter GetInvalidLibraryExporter()
         {
-            IApplicationEnvironment applicationEnvironment;
-            applicationEnvironment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "NonExistent");
-            return new LibraryExporter(_projectContext, applicationEnvironment);
+            IApplicationInfo applicationInfo;
+            applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", _projectPath, "NonExistent");
+            return new LibraryExporter(_projectContext, applicationInfo);
         }
     }
 }

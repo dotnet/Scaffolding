@@ -7,15 +7,15 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.CodeGeneration.DotNet
 {
-    public class ApplicationEnvironment : IApplicationEnvironment
+    public class ApplicationInfo : IApplicationInfo
     {
-        public ApplicationEnvironment(string appName, string appBasePath)
+        public ApplicationInfo(string appName, string appBasePath)
             : this(appName, appBasePath, "Debug")
         {
 
         }
         
-        public ApplicationEnvironment(string appName, string appBasePath, string appConfiguration) 
+        public ApplicationInfo(string appName, string appBasePath, string appConfiguration) 
         {
             if(appName == null)
             {

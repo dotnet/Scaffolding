@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.CodeGeneration.DotNet
 {
-    public interface IApplicationEnvironment
+    public interface IApplicationInfo
     {
         string ApplicationBasePath { get; }
         string ApplicationName { get; }

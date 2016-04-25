@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
     {
         protected DependencyInstaller(
             ILibraryManager libraryManager,
-            IApplicationEnvironment applicationEnvironment,
+            IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider)
@@ -27,9 +27,9 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
                 throw new ArgumentNullException(nameof(libraryManager));
             }
 
-            if (applicationEnvironment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(applicationEnvironment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             if (logger == null)
@@ -48,7 +48,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
             }
 
             LibraryManager = libraryManager;
-            ApplicationEnvironment = applicationEnvironment;
+            ApplicationEnvironment = applicationInfo;
             Logger = logger;
             PackageInstaller = packageInstaller;
             ServiceProvider = serviceProvider;
@@ -81,7 +81,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Dependency
 
         protected abstract Task GenerateCode();
 
-        protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
+        protected IApplicationInfo ApplicationEnvironment { get; private set; }
         protected ILogger Logger { get; private set; }
         public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }

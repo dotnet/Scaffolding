@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     {
         protected ProjectContext _projectContext;
         protected string _projectPath;
-        protected IApplicationEnvironment _environment;
+        protected IApplicationInfo _applicationInfo;
         
         public TestBase(string projectPath)
         {
@@ -23,9 +23,9 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
             _projectContext = ProjectContext.CreateContextForEachFramework(_projectPath).First();
             
 #if RELEASE 
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
+            _applicationInfo = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
 #else
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Debug");
+            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", _projectPath, "Debug");
 #endif
         }
     }

@@ -34,22 +34,22 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
         // than constructor injection.
         public ViewGenerator(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(environment)
+            : base(applicationInfo)
         {
             if (libraryManager == null)
             {
                 throw new ArgumentNullException(nameof(libraryManager));
             }
 
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             if (modelTypesLocator == null)
@@ -91,7 +91,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
-                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
+                    applicationBasePath: ApplicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "ViewGenerator" },
                     libraryManager: _libraryManager);
             }
@@ -144,7 +144,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.View
 
             var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-            _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
+            _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
 
             await layoutDependencyInstaller.InstallDependencies();
 

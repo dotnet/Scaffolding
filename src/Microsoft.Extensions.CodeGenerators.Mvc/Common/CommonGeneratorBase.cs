@@ -13,17 +13,17 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
     /// </summary>
     public abstract class CommonGeneratorBase
     {
-        protected CommonGeneratorBase(IApplicationEnvironment applicationEnvironment)
+        protected CommonGeneratorBase(IApplicationInfo applicationInfo)
         {
-            if (applicationEnvironment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(applicationEnvironment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
-            ApplicationEnvironment = applicationEnvironment;
+            ApplicationInfo = applicationInfo;
         }
 
-        protected IApplicationEnvironment ApplicationEnvironment
+        protected IApplicationInfo ApplicationInfo
         {
             get;
             private set;
@@ -32,8 +32,8 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc
         protected string ValidateAndGetOutputPath(CommonCommandLineModel commandLineModel, string outputFileName)
         {
             string outputFolder = String.IsNullOrEmpty(commandLineModel.RelativeFolderPath)
-                ? ApplicationEnvironment.ApplicationBasePath
-                : Path.Combine(ApplicationEnvironment.ApplicationBasePath, commandLineModel.RelativeFolderPath);
+                ? ApplicationInfo.ApplicationBasePath
+                : Path.Combine(ApplicationInfo.ApplicationBasePath, commandLineModel.RelativeFolderPath);
 
             var outputPath = Path.Combine(outputFolder, outputFileName);
 

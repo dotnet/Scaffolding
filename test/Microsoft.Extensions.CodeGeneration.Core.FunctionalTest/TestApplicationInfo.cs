@@ -2,21 +2,20 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Runtime.Versioning;
 using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 {
-    // Represents an application environment that overrides the base path of the original
-    // application environment in order to make it point to the test application folder.
-    public class TestApplicationEnvironment : IApplicationEnvironment
+    // Represents an application applicationInfo that overrides the base path of the original
+    // application applicationInfo in order to make it point to the test application folder.
+    public class TestApplicationInfo : IApplicationInfo
     {
-        private readonly IApplicationEnvironment _originalAppEnvironment;
+        private readonly IApplicationInfo _originalAppEnvironment;
         private readonly string _applicationBasePath;
         private readonly string _appName;
         private readonly string _appConfiguration;
-        
-        public TestApplicationEnvironment(IApplicationEnvironment originalAppEnvironment,
+
+        public TestApplicationInfo(IApplicationInfo originalAppEnvironment,
             string appBasePath, string appName)
         {
             _originalAppEnvironment = originalAppEnvironment;
@@ -30,18 +29,16 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             get { return _appName; }
         }
 
-
         public string ApplicationBasePath
         {
             get { return _applicationBasePath; }
         }
 
-        
-        public string ApplicationConfiguration 
+        public string ApplicationConfiguration
         {
-            get { return _appConfiguration; }    
+            get { return _appConfiguration; }
         }
-        
+
         public object GetData(string name)
         {
             throw new NotImplementedException();

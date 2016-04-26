@@ -13,9 +13,15 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
 {
     public class LibraryExportExtensionsTest : TestBase
     {
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#else
+        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#endif
+
         LibraryExport _export;
         public LibraryExportExtensionsTest()  
-            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base(testAppPath)
         {
             var _libraryExporter = new LibraryExporter(_projectContext, _applicationInfo);
             _export = _libraryExporter.GetAllExports().First();

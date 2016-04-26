@@ -59,9 +59,9 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
             IApplicationInfo _applicationInfo;
 
 #if RELEASE 
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
+            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Directory.GetCurrentDirectory(), "Release");
 #else
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
+            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Directory.GetCurrentDirectory(), "Debug");
 #endif
 
             ILibraryExporter libExporter = new LibraryExporter(context, _applicationInfo);
@@ -71,8 +71,13 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
 
         private static ProjectContext CreateProjectContext(string projectPath)
         {
+#if NET451
+            projectPath = projectPath ?? Path.Combine("..", "..", "..", "..");
+            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net451.GetShortFolderName();
+#else
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
-
+            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
+#endif
             if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
             {
                 projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);
@@ -82,8 +87,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
             {
                 throw new InvalidOperationException($"{projectPath} does not exist.");
             }
-
-            return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault();
+            return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault(c => c.TargetFramework.GetShortFolderName() == framework);
         }
     }
 

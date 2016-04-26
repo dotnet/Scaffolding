@@ -14,7 +14,8 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
         [Fact]
         public void CompilationResult_TestFromAssembly()
         {
-            Assembly assembly = new Mock<Assembly>().Object;
+
+            Assembly assembly = Assembly.GetEntryAssembly();
 
             var result =  CompilationResult.FromAssembly(assembly);
 

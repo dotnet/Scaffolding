@@ -12,10 +12,15 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
 {
     public class DefaultAssemblyLoadContextTests : TestBase
     {
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..");
+#else
+        static string testAppPath = Directory.GetCurrentDirectory();
+#endif
         DefaultAssemblyLoadContext _defaultAssemblyLoadContext;
 
         public DefaultAssemblyLoadContextTests()
-            : base(Directory.GetCurrentDirectory())
+            : base(testAppPath)
         {
         }
 

@@ -11,10 +11,15 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
     public class LibraryExporterTests : TestBase
     {
 
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#else
+        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#endif
         LibraryExporter _libraryExporter;
 
         public LibraryExporterTests()
-            : base (Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base (testAppPath)
         {
             _libraryExporter = new LibraryExporter(_projectContext, _applicationInfo);
         }

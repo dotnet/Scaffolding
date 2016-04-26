@@ -15,10 +15,15 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     public class CommonUtilitiesTests : TestBase
     {
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#else
+        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#endif
         ICodeGenAssemblyLoadContext loadContext;
 
         public CommonUtilitiesTests()
-            : base(Path.Combine("..","TestApps","ModelTypesLocatorTestClassLibrary"))
+            : base(Path.Combine(testAppPath))
         {
             loadContext = new DefaultAssemblyLoadContext();
         }
@@ -47,9 +52,6 @@ namespace Microsoft.Extensions.CodeGeneration
         [Fact]
         public void CommonUtilities_TestGetAssemblyFromCompilation_Failure()
         {
-
-            LibraryExporter exporter = new LibraryExporter(_projectContext, _applicationInfo);
-            LibraryManager manager = new LibraryManager(_projectContext);
 
             string code = @"using System;
                             namespace Sample { 

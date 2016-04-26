@@ -13,10 +13,20 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
 {
     public class CodeGeneratorsLocatorTests
     {
-        Mock<Assembly> currentAssembly;
 
+        Mock<IServiceProvider> mockServiceProvider;
+        Mock<ICodeGeneratorAssemblyProvider> mockAssemblyProvider;
         public CodeGeneratorsLocatorTests()
         {
+
+            mockServiceProvider = new Mock<IServiceProvider>();
+            mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
+#if NET451
+            Assembly currentAssembly = typeof(CodeGeneratorsLocatorTests).Assembly;
+            mockAssemblyProvider
+                .SetupGet(ap => ap.CandidateAssemblies)
+                .Returns(new[] { currentAssembly });
+#else
             List<TypeInfo> typeList = new List<TypeInfo>();
 
             typeList.Add(typeof(SampleCodeGenerator).GetTypeInfo());
@@ -24,21 +34,19 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
             typeList.Add(typeof(InterfaceEndingWithCodeGenerator).GetTypeInfo());
             typeList.Add(typeof(AbstractClassDerivingFromInterface).GetTypeInfo());
 
-            currentAssembly = new Mock<Assembly>();
+            Mock<Assembly> currentAssembly = new Mock<Assembly>();
             currentAssembly.Setup(c => c.DefinedTypes).Returns(typeList);
+
+             mockAssemblyProvider
+                .SetupGet(ap => ap.CandidateAssemblies)
+                .Returns(new[] { currentAssembly.Object });
+#endif
         }
 
         [Fact]
         public void CodeGeneratorsLocator_Returns_Correct_Number_Of_Generators()
         {
             //Arrange
-            var mockServiceProvider = new Mock<IServiceProvider>();
-            var mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
-
-            mockAssemblyProvider
-                .SetupGet(ap => ap.CandidateAssemblies)
-                .Returns(new[] { currentAssembly.Object });
-
             var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
 
@@ -53,13 +61,6 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
         public void CodeGeneratorsLocator_Returns_Correct_CodeGenerator_For_A_Name()
         {
             //Arrange
-            var mockServiceProvider = new Mock<IServiceProvider>();
-            var mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
-
-            mockAssemblyProvider
-                .SetupGet(ap => ap.CandidateAssemblies)
-                .Returns(new[] { currentAssembly.Object });
-
             var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
 
@@ -74,13 +75,6 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
         public void CodeGeneratorsLocator_Throws_When_No_CodeGenerator_Found_For_A_Name()
         {
             //Arrange
-            var mockServiceProvider = new Mock<IServiceProvider>();
-            var mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
-
-            mockAssemblyProvider
-                .SetupGet(ap => ap.CandidateAssemblies)
-                .Returns(new[] { currentAssembly.Object });
-
             var locator = new CodeGeneratorsLocator(mockServiceProvider.Object,
                 mockAssemblyProvider.Object);
 
@@ -88,9 +82,6 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
             var ex = Assert.Throws<InvalidOperationException>(() => locator.GetCodeGenerator("NonExistingCodeGenerator"));
             Assert.Equal("No code generators found with the name 'NonExistingCodeGenerator'", ex.Message);
         }
-
-        
-        
     }
     //This should be returned.
     public class SampleCodeGenerator

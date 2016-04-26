@@ -22,7 +22,6 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
                 throw new ArgumentNullException(nameof(library));
             }
             var exports = _libraryExporter.GetAllExports();
-
             var assets = exports
                 .SelectMany(export => GetAssets(export.RuntimeAssemblyGroups))
                 .Where(asset => asset.Name == library.Identity.Name);

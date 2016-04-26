@@ -2,31 +2,27 @@
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
     "Microsoft.AspNetCore.Hosting": "1.0.0-*",
-    "Microsoft.Extensions.CodeGeneration.Core": {
-      "type": "build",
-      "version": "1.0.0-*"
-    },
-    "Microsoft.Extensions.CodeGeneration.Utils": {
-      "type": "build",
-      "version": "1.0.0-*"
-    },
+    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Utils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
     "ModelTypesLocatorTestWebApp": "1.0.0",
-    "moq.netcore": "4.4.0-beta8",
     "System.Diagnostics.Contracts": "4.0.1-*",
-    "System.AppContext": "4.1.0-*",
     "System.Linq.Expressions": "4.0.11-*",
     "xunit": "2.1.0"
   },
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": [
-        "dnxcore50",
-        "portable-net451+win8"
+    "net451": { },
+    "netcoreapp1.0": {
+      "imports": [ 
+        "dnxcore50", 
+        "portable-net451+win8" 
       ],
       "dependencies": {
-        "NETStandard.Library": "1.5.0-*",
-        "System.Diagnostics.Process": "4.1.0-*"
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        },
+        "System.AppContext": "4.1.0-*"
       }
     }
   },

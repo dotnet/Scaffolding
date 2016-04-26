@@ -5,11 +5,16 @@
     "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "net451": { },
+    "netstandard1.5": {
       "imports": [
         "dnxcore50",
-        "portable-net45+win8"
-      ]
+        "portable-net451+win8"
+      ],
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-*",
+        "System.Diagnostics.Process": "4.1.0-*"
+      }
     }
   }
 }

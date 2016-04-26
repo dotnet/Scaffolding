@@ -11,7 +11,6 @@
     "xunit": "2.1.0"
   },
   "frameworks": {
-    "net451": { },
     "netcoreapp1.0": {
       "imports": [ 
         "dnxcore50", 

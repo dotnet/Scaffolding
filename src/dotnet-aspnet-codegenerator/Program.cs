@@ -2,13 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Workspaces;
@@ -74,11 +70,11 @@ namespace Microsoft.Extensions.CodeGeneration
 
         private static void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
         {
-            var applicationEnvironment = new ApplicationEnvironment(context.RootProject.Identity.Name, context.ProjectDirectory);
+            var applicationEnvironment = new ApplicationInfo(context.RootProject.Identity.Name, context.ProjectDirectory);
             serviceProvider.Add(typeof(IServiceProvider), serviceProvider);
             serviceProvider.Add(typeof(ProjectContext), context);
             serviceProvider.Add(typeof(Workspace), context.CreateWorkspace());
-            serviceProvider.Add(typeof(IApplicationEnvironment), applicationEnvironment);
+            serviceProvider.Add(typeof(IApplicationInfo), applicationEnvironment);
             serviceProvider.Add(typeof(ICodeGenAssemblyLoadContext), DefaultAssemblyLoadContext.CreateAssemblyLoadContext(nugetPackageDir));
             serviceProvider.Add(typeof(ILibraryManager), new LibraryManager(context));
             serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context, applicationEnvironment));

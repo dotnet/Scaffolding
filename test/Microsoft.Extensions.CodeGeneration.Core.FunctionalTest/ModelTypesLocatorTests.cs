@@ -90,7 +90,6 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
         {
             return new ModelTypesLocator(
                 (ILibraryExporter)_serviceProvider.GetRequiredService(typeof(ILibraryExporter)),
-                (IApplicationEnvironment)_serviceProvider.GetRequiredService(typeof(IApplicationEnvironment)),
                 (Workspace)_serviceProvider.GetRequiredService(typeof(Workspace)));
         }
     }

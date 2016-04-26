@@ -13,29 +13,29 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     public class PackageInstaller : IPackageInstaller
     {
-        private readonly IApplicationEnvironment _environment;
+        private readonly IApplicationInfo _applicationInfo;
         private readonly ILogger _logger;
         private const string DependenciesNodeName = "dependencies";
         private readonly IFileSystem _fileSystem;
 
         public PackageInstaller(
             ILogger logger,
-            IApplicationEnvironment environment)
-            : this(logger, environment, new DefaultFileSystem())
+            IApplicationInfo applicationInfo)
+            : this(logger, applicationInfo, new DefaultFileSystem())
         {
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
             }
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
         }
 
         internal PackageInstaller(
             ILogger logger,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             IFileSystem fileSystem)
         {
             if (logger == null)
@@ -43,9 +43,9 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             if (fileSystem == null)
@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.CodeGeneration
             }
 
             _logger = logger;
-            _environment = environment;
+            _applicationInfo = applicationInfo;
             _fileSystem = fileSystem;
         }
 
@@ -73,7 +73,7 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 // On non-windows, starting a process with the name
                 // of a bash file works. However on windows, it doesn't.
-                // So we use 'Path' environment variable to find the path
+                // So we use 'Path' applicationInfo variable to find the path
                 // of 'dotnet.exe' and start that.
                 string fileName;
                 //TODO: Consider removing this
@@ -90,7 +90,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 {
                     FileName = fileName,
                     Arguments = "restore",
-                    WorkingDirectory = _environment.ApplicationBasePath,
+                    WorkingDirectory = _applicationInfo.ApplicationBasePath,
                     UseShellExecute = false
                 };
 
@@ -158,7 +158,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
         private string GetProjectJsonFilePath()
         {
-            var projectFile = Path.Combine(_environment.ApplicationBasePath, "project.json");
+            var projectFile = Path.Combine(_applicationInfo.ApplicationBasePath, "project.json");
             Debug.Assert(_fileSystem.FileExists(projectFile));
             return projectFile;
         }

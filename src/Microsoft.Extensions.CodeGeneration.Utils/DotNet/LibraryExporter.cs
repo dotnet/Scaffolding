@@ -11,8 +11,6 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
 
-
-
 namespace Microsoft.Extensions.CodeGeneration.DotNet
 {
     public class LibraryExporter : ILibraryExporter
@@ -20,13 +18,13 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
         private Microsoft.DotNet.ProjectModel.Compilation.LibraryExporter _libraryExporter;
         private ProjectContext _context;
 
-        public LibraryExporter(ProjectContext context, IApplicationEnvironment environment)
+        public LibraryExporter(ProjectContext context, IApplicationInfo applicationInfo)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            _libraryExporter = context.CreateExporter(environment.ApplicationConfiguration);
+            _libraryExporter = context.CreateExporter(applicationInfo.ApplicationConfiguration);
             _context = context;
         }
 

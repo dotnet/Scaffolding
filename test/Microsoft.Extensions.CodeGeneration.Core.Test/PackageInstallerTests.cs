@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
     public class PackageInstallerTests
     {
         private Mock<ILogger> _mockLogger;
-        private Mock<IApplicationEnvironment> _mockApp;
+        private Mock<IApplicationInfo> _mockApp;
         private MockFileSystem _mockFileSystem;
         private PackageInstaller _packageInstaller;
         private string _projectJsonPath;
@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
         public PackageInstallerTests()
         {
             _mockLogger = new Mock<ILogger>();
-            _mockApp = new Mock<IApplicationEnvironment>();
+            _mockApp = new Mock<IApplicationInfo>();
             _mockFileSystem = new MockFileSystem();
 
             var applicationBasePath = @"C:\App";

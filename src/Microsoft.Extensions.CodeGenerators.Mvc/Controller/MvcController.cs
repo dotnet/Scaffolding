@@ -20,11 +20,11 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
     {
         public MvcController(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
+            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
         public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
@@ -48,7 +48,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
             var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);
-            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
+            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
 
             await layoutDependencyInstaller.InstallDependencies();
         }

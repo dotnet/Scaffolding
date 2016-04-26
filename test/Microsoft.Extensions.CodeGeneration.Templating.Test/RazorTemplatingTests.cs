@@ -54,18 +54,18 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
         private ICompilationService GetCompilationService()
         {
             ProjectContext context = CreateProjectContext(null);
-            var appEnvironment = new ApplicationEnvironment("", context.ProjectDirectory);
+            var applicationInfo = new ApplicationInfo("", context.ProjectDirectory);
             ICodeGenAssemblyLoadContext loader = new DefaultAssemblyLoadContext(null, null, null);
-            IApplicationEnvironment _environment;
+            IApplicationInfo _applicationInfo;
 #if RELEASE 
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
+            _applicationInfo = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Release");
 #else
-            _environment = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
+            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Path.GetDirectoryName(@"..\TestApps\ModelTypesLocatorTestClassLibrary"), "Debug");
 #endif
 
-            ILibraryExporter libExporter = new LibraryExporter(context, _environment);
+            ILibraryExporter libExporter = new LibraryExporter(context, _applicationInfo);
 
-            return new RoslynCompilationService(appEnvironment, loader, libExporter);
+            return new RoslynCompilationService(applicationInfo, loader, libExporter);
         }
 
         private static ProjectContext CreateProjectContext(string projectPath)

@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
     public class EntityFrameworkServices : IEntityFrameworkService
     {
         private readonly IDbContextEditorServices _dbContextEditorServices;
-        private readonly IApplicationEnvironment _environment;
+        private readonly IApplicationInfo _applicationInfo;
         private readonly ILibraryManager _libraryManager;
         private readonly ILibraryExporter _libraryExporter;
         private readonly ICodeGenAssemblyLoadContext _loader;
@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         public EntityFrameworkServices(
             ILibraryManager libraryManager,
             ILibraryExporter libraryExporter,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             ICodeGenAssemblyLoadContext loader,
             IModelTypesLocator modelTypesLocator,
             IDbContextEditorServices dbContextEditorServices,
@@ -59,9 +59,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(libraryExporter));
             }
 
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             if (loader == null)
@@ -101,7 +101,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 
             _libraryManager = libraryManager;
             _libraryExporter = libraryExporter;
-            _environment = environment;
+            _applicationInfo = applicationInfo;
             _loader = loader;
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
@@ -220,7 +220,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                 PersistSyntaxTree(dbContextSyntaxTree);
                 if (state == ContextProcessingStatus.ContextAdded || state == ContextProcessingStatus.ContextAddedButRequiresConfig)
                 {
-                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_environment.ApplicationBasePath.Length));
+                    _logger.LogMessage("Added DbContext : " + dbContextSyntaxTree.FilePath.Substring(_applicationInfo.ApplicationBasePath.Length));
 
                     if (state != ContextProcessingStatus.ContextAddedButRequiresConfig)
                     {
@@ -247,7 +247,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         {
             //TODO: @prbhosal Figure out how to lookup the correct project here.             
             var projectCompilation = _workspace.CurrentSolution.Projects
-                //.Where(project => project.Name == _environment.ApplicationName)
+                //.Where(project => project.Name == _applicationInfo.ApplicationName)
                 .FirstOrDefault()
                 .GetCompilationAsync().Result;
             var newAssemblyName = projectCompilation.AssemblyName + _counter++;
@@ -278,7 +278,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
 
         private string GetPathForNewContext(string contextShortTypeName)
         {
-            var appBasePath = _environment.ApplicationBasePath;
+            var appBasePath = _applicationInfo.ApplicationBasePath;
             var outputPath = Path.Combine(
                 appBasePath,
                 "Models",

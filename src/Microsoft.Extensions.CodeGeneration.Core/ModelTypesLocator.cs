@@ -5,30 +5,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ProjectModel.Workspaces;
 using Microsoft.Extensions.CodeGeneration.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
     public class ModelTypesLocator : IModelTypesLocator
     {
-        private IApplicationEnvironment _application;
         private ILibraryExporter _libraryExporter;
         private Workspace _projectWorkspace;
 
         public ModelTypesLocator(
             ILibraryExporter libraryExporter,
-            IApplicationEnvironment application,
             Workspace projectWorkspace)
         {
             if (libraryExporter == null)
             {
                 throw new ArgumentNullException(nameof(libraryExporter));
-            }
-
-            if (application == null)
-            {
-                throw new ArgumentNullException(nameof(application));
             }
 
             if (projectWorkspace == null)
@@ -37,7 +29,6 @@ namespace Microsoft.Extensions.CodeGeneration
             }
 
             _libraryExporter = libraryExporter;
-            _application = application;
             _projectWorkspace = projectWorkspace;
         }
 
@@ -45,10 +36,10 @@ namespace Microsoft.Extensions.CodeGeneration
         {
 
             return _projectWorkspace.CurrentSolution.Projects
-                              .Select(project => project.GetCompilationAsync().Result)
-                              .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
-                              .Aggregate((col1, col2) => col1.Concat(col2).ToList())
-                              .Select(ts => ModelType.FromITypeSymbol(ts));
+                .Select(project => project.GetCompilationAsync().Result)
+                .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
+                .Aggregate((col1, col2) => col1.Concat(col2).ToList())
+                .Select(ts => ModelType.FromITypeSymbol(ts));
 
         }
 
@@ -59,10 +50,11 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(typeName));
             }
 
-            IEnumerable<ITypeSymbol> exactTypesInAllProjects = _projectWorkspace.CurrentSolution.Projects
-                                                                    .Select(project => project.GetCompilationAsync().Result)
-                                                                    .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
-                                                                    .Where(type => type != null);
+            var exactTypesInAllProjects = _projectWorkspace
+                .CurrentSolution.Projects
+                .Select(project => project.GetCompilationAsync().Result)
+                .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
+                .Where(type => type != null);
                 
 
             if (exactTypesInAllProjects.Any())

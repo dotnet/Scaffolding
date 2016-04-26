@@ -28,22 +28,22 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
         public ControllerWithContextGenerator(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
+            IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, environment, codeGeneratorActionsService, serviceProvider, logger)
+            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
             if (libraryManager == null)
             {
                 throw new ArgumentNullException(nameof(libraryManager));
             }
 
-            if (environment == null)
+            if (applicationInfo == null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(applicationInfo));
             }
 
             if (modelTypesLocator == null)
@@ -98,7 +98,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             };
 
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);
-            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
+            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
 
             await GenerateViewsIfRequired(controllerGeneratorModel, modelTypeAndContextModel, templateModel.ControllerRootName);
 
@@ -140,7 +140,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
 
                     // Todo: Need logic for areas
                     var viewOutputPath = Path.Combine(
-                        ApplicationEnvironment.ApplicationBasePath,
+                        ApplicationInfo.ApplicationBasePath,
                         Constants.ViewsFolderName,
                         controllerRootName,
                         viewName + Constants.ViewExtension);
@@ -148,7 +148,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
                     await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
                         viewTemplate + Constants.RazorTemplateExtension, TemplateFolders, viewTemplateModel);
 
-                    Logger.LogMessage("Added View : " + viewOutputPath.Substring(ApplicationEnvironment.ApplicationBasePath.Length));
+                    Logger.LogMessage("Added View : " + viewOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
                 }
 
                 await layoutDependencyInstaller.InstallDependencies();

@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
             _projectContext = ProjectContext.CreateContextForEachFramework(_projectPath).First();
             
 #if RELEASE 
-            _applicationInfo = new ApplicationEnvironment("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
+            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
 #else
             _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", _projectPath, "Debug");
 #endif

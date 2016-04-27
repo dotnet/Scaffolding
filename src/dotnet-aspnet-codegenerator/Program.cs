@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
@@ -18,11 +19,10 @@ namespace Microsoft.Extensions.CodeGeneration
     public class Program
     {
         private static ConsoleLogger _logger;
+        private static bool _isDispatcher;
 
         private const string APPNAME = "Code Generation";
         private const string APP_DESC = "Code generation for Asp.net Core";
-
-        private static bool isProjectDependencyCommand;
 
         public static void Main(string[] args)
         {
@@ -30,11 +30,13 @@ namespace Microsoft.Extensions.CodeGeneration
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             _logger = new ConsoleLogger();
-            // We don't want to expose this flag, as it only needs to be used for identifying self invocation. 
-            isProjectDependencyCommand = args.Contains("--no-dispatch");
-            _logger.LogMessage($"Is Dependency Command: {isProjectDependencyCommand}", LogMessageLevel.Trace);
+            _logger.LogMessage($"Command Line: {string.Join(" ", args)}");
+
+            _isDispatcher = DotnetToolDispatcher.IsDispatcher(args);
+            _logger.LogMessage($"Is Dispatcher: {_isDispatcher}", LogMessageLevel.Trace);
             try
             {
+                DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
                 Execute(args);
             }
             finally
@@ -44,7 +46,7 @@ namespace Microsoft.Extensions.CodeGeneration
                 string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
-                if (!isProjectDependencyCommand)
+                if (_isDispatcher)
                 {
                     // Check is needed so we don't show the runtime twice (once for the portable process and once for the dependency process)
                     _logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
@@ -92,7 +94,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
                 var nugetFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
-                if (!isProjectDependencyCommand)
+                if (_isDispatcher)
                 {
                     // Invoke the tool from the project's build directory. 
                     return BuildAndDispatchDependencyCommand(
@@ -187,22 +189,17 @@ namespace Microsoft.Extensions.CodeGeneration
                      args,
                      frameworkToUse.GetShortFolderName());
 
-            var exitCode = new ProjectDependenciesCommandFactory(
-                 frameworkToUse,
-                 configuration,
-                 null,
-                 buildBasePath,
-                 projectDirectory)
-             .Create(
-                 PlatformServices.Default.Application.ApplicationName,
-                 dependencyArgs,
-                 frameworkToUse,
-                 configuration)
-            .ForwardStdErr()
-            .ForwardStdOut()
-            .Execute()
-            .ExitCode;
-
+            var exitCode = DotnetToolDispatcher.CreateDispatchCommand(
+                    dependencyArgs, 
+                    frameworkToUse, 
+                    configuration, 
+                    null, 
+                    buildBasePath, 
+                    projectDirectory)
+                .ForwardStdErr()
+                .ForwardStdOut()
+                .Execute()
+                .ExitCode;
             return exitCode;
         }
 

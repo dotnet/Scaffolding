@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.CodeGeneration
         private const string PROJECT = "--project";
         private const string NUGET_PACKAGE_DIR = "--nuget-package-dir";
         private const string BUILD_BASE_PATH = "--build-base-path";
+        private const string DISPATCHER_VERSION = "--dispatcher-version";
 
         private const string NO_DISPATCH_FLAG_SHORT = "-nd";
         private const string CONFIGURATION_SHORT = "-c";
@@ -50,6 +51,7 @@ namespace Microsoft.Extensions.CodeGeneration
                     case NUGET_PACKAGE_DIR_SHORT:
                     case BUILD_BASE_PATH:
                     case BUILD_BASE_PATH_SHORT:
+                    case DISPATCHER_VERSION:
                         i++;
                         break;
 

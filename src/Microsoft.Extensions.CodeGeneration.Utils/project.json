@@ -5,14 +5,13 @@
   "version": "1.0.0-*",
   "dependencies": {
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0-*",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "System.Threading.Tasks.Parallel": "4.0.1-*"
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*"
   },
   "frameworks": {
     "net451": {
-        "dependencies": {
-            "System.Threading.Tasks":"4.0.0-*"
-        }
+      "frameworkAssemblies": {
+         "System.Threading.Tasks": { "type": "build" }
+      }
     },
     "netstandard1.5": {
       "imports": [
@@ -21,8 +20,9 @@
         "portable-net45+win8"
       ], 
       "dependencies": {
-          "System.AppContext": "4.1.0-*", 
-          "System.Security.Cryptography.Algorithms": "4.1.0-*"
+          "System.AppContext": "4.1.0-*",
+          "System.Security.Cryptography.Algorithms": "4.1.0-*",
+          "System.Threading.Tasks.Parallel": "4.0.1-*"
       }
     }
   }

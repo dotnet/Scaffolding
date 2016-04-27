@@ -9,20 +9,19 @@
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-    "Newtonsoft.Json": "8.0.3",
-    "System.Runtime.Serialization.Primitives": "4.1.1-*"
+    "Newtonsoft.Json": "8.0.3"
   },
   "frameworks": {
     "net451": {},
     "netstandard1.5": {
       "imports": [
-        "dotnet5.6",
-        "dnxcore50",
+        "portable-dnxcore50+net45+win8+wp8+wpa81",
         "portable-net45+win8"
       ], 
       "dependencies": {
           "System.Console": "4.0.0-*",
-          "System.Diagnostics.Process": "4.1.0-*"
+          "System.Diagnostics.Process": "4.1.0-*",
+          "System.Runtime.Serialization.Primitives": "4.1.1-*"
       }
     }
   }

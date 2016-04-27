@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     internal class DotNetBuildCommandHelper
     {
-        internal static int Build(
+        internal static CommandResult Build(
             string project,
             string configuration,
             NuGetFramework framework,
@@ -27,10 +27,13 @@ namespace Microsoft.Extensions.CodeGeneration
                 "--framework", framework.GetShortFolderName(),
             };
 
-            if (buildBasePath != null && !Path.IsPathRooted(buildBasePath))
+            if (buildBasePath != null)
             {
                 // ProjectDependenciesCommandFactory cannot handle relative build base paths.
-                buildBasePath = Path.Combine(Directory.GetCurrentDirectory(), buildBasePath);
+                buildBasePath = (!Path.IsPathRooted(buildBasePath)) 
+                    ? Path.Combine(Directory.GetCurrentDirectory(), buildBasePath)
+                    : buildBasePath;
+
                 args.Add("--build-base-path");
                 args.Add(buildBasePath);
             }
@@ -39,12 +42,10 @@ namespace Microsoft.Extensions.CodeGeneration
                     "build",
                     args,
                     framework,
-                    configuration)
-                .ForwardStdErr();
+                    configuration);
 
             var result = command.Execute();
-
-            return result.ExitCode;
+            return result;
         }
     }
 }

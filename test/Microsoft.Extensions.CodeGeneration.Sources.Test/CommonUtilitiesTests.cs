@@ -15,22 +15,24 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     public class CommonUtilitiesTests : TestBase
     {
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#else
+        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#endif
         ICodeGenAssemblyLoadContext loadContext;
 
         public CommonUtilitiesTests()
-            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base(Path.Combine(testAppPath))
         {
-            loadContext = new DefaultAssemblyLoadContext(
-                             new Dictionary<AssemblyName, string>(),
-                             new Dictionary<string, string>(),
-                             new List<string>());
+            loadContext = new DefaultAssemblyLoadContext();
         }
         
         [Fact]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
-
             LibraryExporter exporter = new LibraryExporter(_projectContext, _applicationInfo);
+
             LibraryManager manager = new LibraryManager(_projectContext);
             IEnumerable<MetadataReference> references = exporter.GetAllExports().SelectMany(export => export.GetMetadataReferences());
             string code = @"using System;
@@ -40,7 +42,7 @@ namespace Microsoft.Extensions.CodeGeneration
                                 } 
                             }";
             
-            Compilation compilation = GetCompilation(code, "TestAssembly", references);
+            Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), references);
             CompilationResult result = CommonUtilities.GetAssemblyFromCompilation(loadContext, compilation);
 
             Assert.True(result.Success);
@@ -51,9 +53,6 @@ namespace Microsoft.Extensions.CodeGeneration
         public void CommonUtilities_TestGetAssemblyFromCompilation_Failure()
         {
 
-            LibraryExporter exporter = new LibraryExporter(_projectContext, _applicationInfo);
-            LibraryManager manager = new LibraryManager(_projectContext);
-
             string code = @"using System;
                             namespace Sample { 
                                 public class SampleClass 
@@ -61,7 +60,7 @@ namespace Microsoft.Extensions.CodeGeneration
                                 } 
                             }";
 
-            Compilation compilation = GetCompilation(code, "TestAssembly", null);
+            Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), null);
             CompilationResult result = CommonUtilities.GetAssemblyFromCompilation(loadContext, compilation);
 
             Assert.False(result.Success);

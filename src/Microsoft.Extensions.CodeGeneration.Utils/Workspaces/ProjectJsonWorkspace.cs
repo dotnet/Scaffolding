@@ -1,6 +1,5 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -89,10 +88,9 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
                 if (projectDependency != null)
                 {
                     var projectDependencyContext = ProjectContext.Create(projectDependency.Project.ProjectFilePath, projectDependency.Framework);
-
                     var id = AddProject(projectDependencyContext);
 
-                    OnProjectReferenceAdded(projectInfo.Id, new ProjectReference(id));
+                    OnProjectReferenceAdded(projectInfo.Id, new Microsoft.CodeAnalysis.ProjectReference(id));
                 }
                 else
                 {
@@ -214,7 +212,11 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             {
                 keyFile = Path.GetFullPath(Path.Combine(projectDirectory, compilerOptions.KeyFile));
 
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || useOssSigning)
+                if (
+#if !NET451                    
+                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || 
+#endif                    
+                    useOssSigning)
                 {
                     return options.WithCryptoPublicKey(
                         SnkUtils.ExtractPublicKey(File.ReadAllBytes(keyFile)));

@@ -12,29 +12,26 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
 {
     public class DefaultAssemblyLoadContextTests : TestBase
     {
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..");
+#else
+        static string testAppPath = Directory.GetCurrentDirectory();
+#endif
         DefaultAssemblyLoadContext _defaultAssemblyLoadContext;
 
         public DefaultAssemblyLoadContextTests()
-            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base(testAppPath)
         {
         }
 
-        //[Fact]
+        [Fact]
         public void DefaultAssemblyLoadContext_Test()
         {
-            var library = new LibraryManager(_projectContext).GetLibrary("ModelTypesLocatorTestClassLibrary");
-            var path = new LibraryExporter(_projectContext, _applicationInfo).GetResolvedPathForDependency(library);
-
-            var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "bin", "debug", "dnxcore50");
-            //var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
-            _defaultAssemblyLoadContext = new DefaultAssemblyLoadContext(
-                                                new Dictionary<AssemblyName, string>(),
-                                                new Dictionary<string, string>(),
-                                                new List<string>() { currentDirectory });
-            Assembly assembly;
-            assembly = _defaultAssemblyLoadContext.LoadFromPath(path);
+            var assemblyName = "Microsoft.Extensions.CodeGeneration.Sources.Test";
+            _defaultAssemblyLoadContext = new DefaultAssemblyLoadContext();
+            Assembly assembly = _defaultAssemblyLoadContext.LoadFromName(new AssemblyName(assemblyName));
             Assert.NotNull(assembly);
-            Assert.True(assembly.DefinedTypes.Where(_ => _.Name == "ModelWithMatchingShortName").Any());
+            Assert.True(assembly.DefinedTypes.Where(_ => _.Name == "DefaultAssemblyLoadContextTests").Any());
         }
     }
 }

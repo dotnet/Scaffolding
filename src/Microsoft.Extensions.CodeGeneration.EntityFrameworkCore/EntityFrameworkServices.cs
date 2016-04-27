@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -32,7 +31,6 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         private readonly IPackageInstaller _packageInstaller;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
-        private static int _counter = 1;
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         private const string EFSqlServerPackageVersion = "7.0.0-*";
         private readonly Workspace _workspace;
@@ -245,14 +243,19 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             out Type dbContextType, 
             out Type modelType)
         {
-            //TODO: @prbhosal Figure out how to lookup the correct project here.             
             var projectCompilation = _workspace.CurrentSolution.Projects
-                //.Where(project => project.Name == _applicationInfo.ApplicationName)
-                .FirstOrDefault()
+                .First(project => project.AssemblyName == _applicationInfo.ApplicationName)
                 .GetCompilationAsync().Result;
-            var newAssemblyName = projectCompilation.AssemblyName + _counter++;
-
-            var newCompilation = compilationModificationFunc(projectCompilation).WithAssemblyName(newAssemblyName);
+            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream. 
+            // On NET451 if the assembly name is different, MVC fails to load the assembly as it is not found on disk. 
+#if NET451
+            var newAssemblyName = projectCompilation.AssemblyName;
+#else
+            var newAssemblyName = Path.GetRandomFileName();
+#endif
+            var newCompilation = compilationModificationFunc(projectCompilation)
+                .WithAssemblyName(newAssemblyName)
+                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
 
@@ -365,7 +368,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
                 {
                     ex = ex.InnerException;
                 }
-                _logger.LogMessage("There was an error creating the DbContext instance to get the model." + ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage($"There was an error creating the DbContext instance to get the model. {ex.Message}", LogMessageLevel.Error);
                 throw ex;
             }
 
@@ -400,10 +403,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
         {
             try {
                 var builder = new WebHostBuilder();
-                //TODO: Review 
-                builder.UseServer("Microsoft.AspNetCore.Server.WebListener")
+                builder.UseKestrel()
                         .UseContentRoot(Directory.GetCurrentDirectory());
-                        
+
                 if (startupType != null)
                 {
                     var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);
@@ -417,7 +419,11 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFrameworkCore
             }
             catch(Exception ex)
             {
-                _logger.LogMessage(ex.Message);
+                while (ex != null)
+                {
+                    _logger.LogMessage($"{ex.Message} StackTrace:{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}");
+                    ex = ex.InnerException;
+                }
                 return null;
             }
         }

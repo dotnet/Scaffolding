@@ -10,10 +10,15 @@ namespace Microsoft.Extensions.CodeGeneration.Sources.Test
 {
     public class LibraryManagerTests : TestBase
     {
+#if NET451
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#else
+        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+#endif
         LibraryManager _libraryManager;
 
         public LibraryManagerTests()
-            : base(Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary"))
+            : base(Path.Combine(testAppPath))
         {
         }
 

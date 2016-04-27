@@ -28,7 +28,11 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
             // Change the app applicationInfo to point to the test application to be used
             // by test.
             var originalAppBase = applicationInfo.ApplicationBasePath; ////Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
+#if NET451
+            var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..","..","..","..","..","TestApps", testAppName));
+#else
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
+#endif
             var testEnvironment = new TestApplicationInfo(applicationInfo, testAppPath, testAppName);
             var rid = Microsoft.Extensions.PlatformAbstractions.RuntimeEnvironmentExtensions.GetRuntimeIdentifier(
                 Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Runtime);

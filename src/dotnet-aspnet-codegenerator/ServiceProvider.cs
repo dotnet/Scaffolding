@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if NET451
+using System.ComponentModel;
+#endif
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +31,11 @@ namespace Microsoft.Extensions.CodeGeneration
         public void Add(Type type, object instance)
         {
             _instances[type] = instance;
+        }
+
+        public void Add<T>(object instance)
+        {
+            _instances[typeof(T)] = instance;
         }
 
         public object GetService(Type serviceType)

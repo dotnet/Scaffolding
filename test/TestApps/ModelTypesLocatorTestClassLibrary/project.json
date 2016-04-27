@@ -3,11 +3,15 @@
     "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-*"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "net451": { },
+    "netstandard1.5": {
       "imports": [
         "dnxcore50",
         "portable-net45+win8"
-      ]
+      ],
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-*"
+      }
     }
   }
 }

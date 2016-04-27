@@ -21,19 +21,17 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             {
                 throw new ArgumentNullException(nameof(library));
             }
-
             var exports = _libraryExporter.GetAllExports();
             var assets = exports
-                .SelectMany(export => export.RuntimeAssemblyGroups.GetDefaultGroup().Assets)
+                .SelectMany(export => GetAssets(export.RuntimeAssemblyGroups))
                 .Where(asset => asset.Name == library.Identity.Name);
-
             if (assets.Any())
             {
                 return assets.First().ResolvedPath;
             }
 
             assets = exports
-                .SelectMany(export => export.NativeLibraryGroups.GetDefaultGroup().Assets)
+                .SelectMany(export => GetAssets(export.NativeLibraryGroups))
                 .Where(asset => asset.Name == library.Identity.Name);
             if (assets.Any())
             {
@@ -49,6 +47,15 @@ namespace Microsoft.Extensions.CodeGeneration.DotNet
             }
 
             return string.Empty;
+        }
+
+        private static IEnumerable<LibraryAsset> GetAssets(IEnumerable<LibraryAssetGroup> group)
+        {
+            if (group?.GetDefaultGroup() == null)
+            {
+                return Enumerable.Empty<LibraryAsset>();
+            }
+            return group.GetDefaultGroup().Assets;
         }
     }
 }

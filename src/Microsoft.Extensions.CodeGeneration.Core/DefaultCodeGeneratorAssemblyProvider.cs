@@ -3,13 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.Extensions.CodeGeneration.DotNet;
+using System.Diagnostics;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -19,6 +17,12 @@ namespace Microsoft.Extensions.CodeGeneration
             new HashSet<string>(StringComparer.Ordinal)
             {
                 "Microsoft.Extensions.CodeGeneration",
+            };
+        private static readonly HashSet<string> _exclusions =
+            new HashSet<string>(StringComparer.Ordinal)
+            {
+                "dotnet-aspnet-codegenerator",
+                "Microsoft.Extensions.CodeGeneration"
             };
 
         private readonly ILibraryManager _libraryManager;
@@ -54,14 +58,15 @@ namespace Microsoft.Extensions.CodeGeneration
                     .SelectMany(_libraryManager.GetReferencingLibraries)
                     .Distinct()
                     .Where(IsCandidateLibrary);
-                
-                return list.Select(lib => _assemblyLoadContext.LoadFromPath(_libraryExporter.GetResolvedPathForDependency(lib)));
+                return list.Select(lib => _assemblyLoadContext.LoadFromName(new AssemblyName(lib.Identity.Name)));
             }
         }
 
         private bool IsCandidateLibrary(LibraryDescription library)
         {
-            return !_codeGenerationFrameworkAssemblies.Contains(library.Identity.Name) && (!"Project".Equals(library.Identity.Type.Value, StringComparison.OrdinalIgnoreCase));
+            return !_exclusions.Contains(library.Identity.Name)
+                && (!"Project".Equals(library.Identity.Type.Value, StringComparison.OrdinalIgnoreCase));
+
         }
     }
 }

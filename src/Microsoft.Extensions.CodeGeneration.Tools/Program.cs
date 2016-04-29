@@ -14,7 +14,7 @@ using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.CodeGeneration
+namespace Microsoft.Extensions.CodeGeneration.Tools
 {
     public class Program
     {
@@ -55,12 +55,12 @@ namespace Microsoft.Extensions.CodeGeneration
         }
 
         /// <summary>
-        /// The execution is done in 2 phases. 
+        /// The execution is done in 2 phases.
         /// Phase 1 ::
-        ///    1. Determine if the tool is running as a project dependency or not. 
+        ///    1. Determine if the tool is running as a project dependency or not.
         ///    2. Try getting the project context for the project (use netcoreapp1.0 as the tfm if not running as dependency command or else use the tfm passed in)
         ///    3. If not running as dependency command and project context cannot be built using netcoreapp1.0, invoke project dependency command with the first tfm found in the project.json
-        ///    
+        ///
         /// Phase 2 ::
         ///     1. After successfully getting the Project context, invoke the CodeGenCommandExecutor.
         /// </summary>
@@ -96,12 +96,12 @@ namespace Microsoft.Extensions.CodeGeneration
 
                 if (_isDispatcher)
                 {
-                    // Invoke the tool from the project's build directory. 
+                    // Invoke the tool from the project's build directory.
                     return BuildAndDispatchDependencyCommand(
-                        args, 
-                        frameworksInProject.FirstOrDefault(), 
-                        project, 
-                        buildBasePath.Value(), 
+                        args,
+                        frameworksInProject.FirstOrDefault(),
+                        project,
+                        buildBasePath.Value(),
                         configuration);
                 }
                 else
@@ -151,8 +151,8 @@ namespace Microsoft.Extensions.CodeGeneration
         private static int BuildAndDispatchDependencyCommand(
             string[] args,
             NuGetFramework frameworkToUse,
-            string projectPath, 
-            string buildBasePath, 
+            string projectPath,
+            string buildBasePath,
             string configuration)
         {
             if(frameworkToUse == null)
@@ -179,12 +179,12 @@ namespace Microsoft.Extensions.CodeGeneration
             }
 
             // Invoke the dependency command
-            var projectFilePath = projectPath.EndsWith("project.json") 
-                ? projectPath 
+            var projectFilePath = projectPath.EndsWith("project.json")
+                ? projectPath
                 : Path.Combine(projectPath, "project.json");
 
             var projectDirectory = Directory.GetParent(projectFilePath).FullName;
-            
+
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,
                      frameworkToUse.GetShortFolderName());

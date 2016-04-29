@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.CodeGeneration
+namespace Microsoft.Extensions.CodeGeneration.Tools
 {
     internal class DotNetBuildCommandHelper
     {

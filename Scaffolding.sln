@@ -49,7 +49,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGe
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.Utils", "src\Microsoft.Extensions.CodeGeneration.Utils\Microsoft.Extensions.CodeGeneration.Utils.xproj", "{0C4475BF-40EA-46A8-B8DA-2FCF3747B773}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-aspnet-codegenerator", "src\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.xproj", "{CD7FDF00-6D1D-4DA7-BEAD-1EAA361327DE}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.CodeGeneration.Tools", "src\Microsoft.Extensions.CodeGeneration.Tools\Microsoft.Extensions.CodeGeneration.Tools.xproj", "{CD7FDF00-6D1D-4DA7-BEAD-1EAA361327DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

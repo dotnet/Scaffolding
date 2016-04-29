@@ -19,19 +19,19 @@ using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.CodeGeneration
+namespace Microsoft.Extensions.CodeGeneration.Tools
 {
-    public class CodeGenCommandExecutor 
+    public class CodeGenCommandExecutor
     {
         private ProjectContext _projectContext;
         private string[] _codeGenArguments;
         private string _configuration;
         private string _nugetPackageDir;
         private ILogger _logger;
-        
+
         public CodeGenCommandExecutor(ProjectContext projectContext, string[] codeGenArguments, string configuration, string nugetPackageDir, ILogger logger)
         {
-            if(projectContext == null) 
+            if(projectContext == null)
             {
                 throw new ArgumentNullException(nameof(projectContext));
             }
@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.CodeGeneration
             _logger = logger;
             _nugetPackageDir = nugetPackageDir;
         }
-        
+
         public int Execute()
         {
             var serviceProvider = new ServiceProvider();
@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.CodeGeneration
             codeGenCommand.Execute(_codeGenArguments);
             return 0;
         }
-        
+
         private void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
         {
             var applicationInfo = new ApplicationInfo(context.RootProject.Identity.Name, context.ProjectDirectory);
@@ -93,7 +93,7 @@ namespace Microsoft.Extensions.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();
-            
+
             serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
             serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }

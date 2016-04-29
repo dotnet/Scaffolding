@@ -7,7 +7,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.CodeGeneration
+namespace Microsoft.Extensions.CodeGeneration.Tools
 {
     internal class ToolCommandLineHelper
     {

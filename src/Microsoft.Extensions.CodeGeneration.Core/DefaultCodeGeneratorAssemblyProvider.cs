@@ -21,14 +21,14 @@ namespace Microsoft.Extensions.CodeGeneration
         private static readonly HashSet<string> _exclusions =
             new HashSet<string>(StringComparer.Ordinal)
             {
-                "dotnet-aspnet-codegenerator",
+                "Microsoft.Extensions.CodeGeneration.Tools",
                 "Microsoft.Extensions.CodeGeneration"
             };
 
         private readonly ILibraryManager _libraryManager;
         private readonly ICodeGenAssemblyLoadContext _assemblyLoadContext;
         private readonly ILibraryExporter _libraryExporter;
-        
+
         public DefaultCodeGeneratorAssemblyProvider(ILibraryManager libraryManager, ICodeGenAssemblyLoadContext loadContext, ILibraryExporter libraryExporter)
         {
             if (libraryManager == null)
@@ -39,14 +39,14 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new ArgumentNullException(nameof(loadContext));
             }
-            if(libraryExporter == null) 
+            if(libraryExporter == null)
             {
                 throw new ArgumentNullException(nameof(libraryExporter));
             }
             _libraryManager = libraryManager;
             _assemblyLoadContext = loadContext;
             _libraryExporter = libraryExporter;
-            
+
         }
 
         public IEnumerable<Assembly> CandidateAssemblies
@@ -66,7 +66,6 @@ namespace Microsoft.Extensions.CodeGeneration
         {
             return !_exclusions.Contains(library.Identity.Name)
                 && (!"Project".Equals(library.Identity.Type.Value, StringComparison.OrdinalIgnoreCase));
-
         }
     }
 }

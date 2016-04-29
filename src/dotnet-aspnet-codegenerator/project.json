@@ -5,7 +5,10 @@
   },
   "dependencies": {
     "Microsoft.Extensions.CodeGeneration": "1.0.0-*",
-    "Microsoft.Extensions.DotnetToolDispatcher.Sources": "1.0.0-*"
+    "Microsoft.Extensions.DotnetToolDispatcher.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    }
   },
   "frameworks": {
     "net451": { },

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
@@ -17,11 +17,11 @@
       "imports": [
         "portable-dnxcore50+net45+win8+wp8+wpa81",
         "portable-net45+win8"
-      ], 
+      ],
       "dependencies": {
-          "System.Console": "4.0.0-*",
-          "System.Diagnostics.Process": "4.1.0-*",
-          "System.Runtime.Serialization.Primitives": "4.1.1-*"
+        "System.Console": "4.0.0-*",
+        "System.Diagnostics.Process": "4.1.0-*",
+        "System.Runtime.Serialization.Primitives": "4.1.1-*"
       }
     }
   }

@@ -5,7 +5,7 @@
     "System.Runtime": "4.1.0-*"
   },
   "frameworks": {
-    "net451": { },
+    "net451": {},
     "netstandard1.5": {
       "imports": [
         "dnxcore50",

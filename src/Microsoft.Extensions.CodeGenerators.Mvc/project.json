@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
@@ -16,8 +16,12 @@
       ]
     }
   },
-  "packInclude": {
-    "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
-    "Templates/": "Templates/"
+  "packOptions": {
+    "files": {
+      "mappings": {
+        "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
+        "Templates/": "Templates/"
+      }
+    }
   }
 }

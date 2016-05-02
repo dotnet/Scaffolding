@@ -39,12 +39,12 @@ using Microsoft.EntityFrameworkCore;
     } 
 }    public class @Model.DbContextTypeName : @baseClassName
     {
-        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
-        
         public @Model.DbContextTypeName (DbContextOptions<@Model.DbContextTypeName> options)
             : base(options)
         {
         }
+
+        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
     }
 @{
     if (!String.IsNullOrEmpty(Model.DbContextNamespace))

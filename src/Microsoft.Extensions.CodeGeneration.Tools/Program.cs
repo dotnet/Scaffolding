@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             _logger = new ConsoleLogger();
-            _logger.LogMessage($"Command Line: {string.Join(" ", args)}");
+            _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
 
             _isDispatcher = DotnetToolDispatcher.IsDispatcher(args);
             _logger.LogMessage($"Is Dispatcher: {_isDispatcher}", LogMessageLevel.Trace);
@@ -88,6 +88,7 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
                 {
                     project = Directory.GetCurrentDirectory();
                 }
+                project = Path.GetFullPath(project);
                 var configuration = appConfiguration.Value() ?? Constants.DefaultConfiguration;
                 var projectFile = ProjectReader.GetProject(project);
                 var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
@@ -174,6 +175,7 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
             {
                 //Build failed. 
                 // Stop the process here. 
+                _logger.LogMessage(buildResult.StdOut, LogMessageLevel.Error);
                 _logger.LogMessage(buildResult.StdErr, LogMessageLevel.Error);
                 return buildResult.ExitCode;
             }

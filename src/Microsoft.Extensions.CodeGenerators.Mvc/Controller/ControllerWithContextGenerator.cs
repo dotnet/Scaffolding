@@ -92,7 +92,7 @@ namespace Microsoft.Extensions.CodeGenerators.Mvc.Controller
             {
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo
-                UseAsync = controllerGeneratorModel.UseAsync,
+                UseAsync = controllerGeneratorModel.UseAsync, // This is no longer used for controllers with context.
                 ControllerNamespace = GetControllerNamespace(),
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata
             };

@@ -40,7 +40,7 @@
     @:<div class="form-horizontal">
         @:<h4>@Model.ViewDataTypeShortName</h4>
         @:<hr />
-        @:<div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
+        @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>
     foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
     {
         if (property.IsPrimaryKey)
@@ -59,9 +59,9 @@
             if (property.IsForeignKey)
             {
         @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="control-label col-md-2">@GetAssociationName(property)</label>
+            @:<label asp-for="@property.PropertyName" class="control-label col-md-2"></label>
             @:<div class="col-md-10">
-                @:<select asp-for="@property.PropertyName" class="form-control" asp-items="@property.PropertyName"></select>
+                @:<select asp-for="@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
             @:</div>
         @:</div>
@@ -125,7 +125,7 @@
     if (Model.ReferenceScriptLibraries)
     {
 @:@@section Scripts {
-    @:@@{await Html.RenderPartialAsync("_ValidationScriptsPartial")}
+    @:@@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 @:}
     }
     // The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page

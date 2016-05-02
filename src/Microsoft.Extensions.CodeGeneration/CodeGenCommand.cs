@@ -10,6 +10,8 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     public class CodeGenCommand
     {
+        private const string codeGenCommandUsagePrefix = "dotnet aspnet-codegenerator --project [projectname]";
+
         private readonly ILogger _logger;
         private readonly ICodeGeneratorLocator _locator;
 
@@ -73,7 +75,7 @@ namespace Microsoft.Extensions.CodeGeneration
         {
             if (codeGenerators.Any())
             {
-                _logger.LogMessage("Usage:  dnx gen [code generator name]\n");
+                _logger.LogMessage($"Usage: {codeGenCommandUsagePrefix} [code generator name]\n");
                 _logger.LogMessage("Code Generators:");
 
                 foreach (var generator in codeGenerators)
@@ -81,7 +83,7 @@ namespace Microsoft.Extensions.CodeGeneration
                     _logger.LogMessage(generator.Name);
                 }
 
-                _logger.LogMessage("\nTry dnx gen [code generator name] -? for help about specific code generator.");
+                _logger.LogMessage($"\nTry {codeGenCommandUsagePrefix} [code generator name] -? for help about specific code generator.");
             }
             else
             {

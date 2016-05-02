@@ -43,14 +43,14 @@ namespace @Model.ControllerNamespace
 
         // GET: @routePrefix/5
         [HttpGet("{id}")]
-        @:public async Task<IActionResult> Get@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id)
+        public async Task<IActionResult> Get@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            @Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
 
             if (@Model.ModelVariable == null)
             {
@@ -62,7 +62,7 @@ namespace @Model.ControllerNamespace
 
         // PUT: @routePrefix/5
         [HttpPut("{id}")]
-        @:public async Task<IActionResult> Put@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id, [FromBody] @Model.ModelTypeName @Model.ModelVariable)
+        public async Task<IActionResult> Put@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id, [FromBody] @Model.ModelTypeName @Model.ModelVariable)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace @Model.ControllerNamespace
 
             try
             {
-                @:await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -97,7 +97,7 @@ namespace @Model.ControllerNamespace
 
         // POST: @routePrefix
         [HttpPost]
-        @:public async Task<IActionResult> Post@(Model.ModelTypeName)([FromBody] @Model.ModelTypeName @Model.ModelVariable)
+        public async Task<IActionResult> Post@(Model.ModelTypeName)([FromBody] @Model.ModelTypeName @Model.ModelVariable)
         {
             if (!ModelState.IsValid)
             {
@@ -135,21 +135,21 @@ namespace @Model.ControllerNamespace
 
         // DELETE: @routePrefix/5
         [HttpDelete("{id}")]
-        @:public async Task<IActionResult> Delete@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id)
+        public async Task<IActionResult> Delete@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            @:@Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            @Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
             }
 
             _context.@(entitySetName).Remove(@Model.ModelVariable);
-            @:await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return Ok(@Model.ModelVariable);
         }

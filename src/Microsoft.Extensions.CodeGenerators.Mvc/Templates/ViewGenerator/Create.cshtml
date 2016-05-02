@@ -56,7 +56,7 @@
         @:<div class="form-group">
             @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
-                @:<select asp-for="@property.PropertyName" class ="form-control" asp-items="@property.PropertyName"></select>
+                @:<select asp-for="@property.PropertyName" class ="form-control" asp-items="ViewBag.@property.PropertyName"></select>
             @:</div>
         @:</div>
                 continue;

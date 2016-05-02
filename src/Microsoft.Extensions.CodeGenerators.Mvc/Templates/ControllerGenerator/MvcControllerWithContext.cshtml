@@ -81,14 +81,14 @@ namespace @Model.ControllerNamespace
 }        }
 
         // GET: @routePrefix/Details/5
-        @:public async Task<IActionResult> Details(@primaryKeyNullableTypeName id)
+        public async Task<IActionResult> Details(@primaryKeyNullableTypeName id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -113,7 +113,7 @@ namespace @Model.ControllerNamespace
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        @:public async Task<IActionResult> Create([Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
+        public async Task<IActionResult> Create([Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
         {
             if (ModelState.IsValid)
             {
@@ -136,14 +136,14 @@ namespace @Model.ControllerNamespace
         }
 
         // GET: @routePrefix/Edit/5
-        @:public async Task<IActionResult> Edit(@primaryKeyNullableTypeName id)
+        public async Task<IActionResult> Edit(@primaryKeyNullableTypeName id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -162,7 +162,7 @@ namespace @Model.ControllerNamespace
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        @:public async Task<IActionResult> Edit(@primaryKeyShortTypeName id, [Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
+        public async Task<IActionResult> Edit(@primaryKeyShortTypeName id, [Bind("@bindString")] @Model.ModelTypeName @Model.ModelVariable)
         {
             if (id != @Model.ModelVariable.@primaryKeyName)
             {
@@ -174,7 +174,7 @@ namespace @Model.ControllerNamespace
                 try
                 {
                     _context.Update(@Model.ModelVariable);
-                    @:await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -199,14 +199,14 @@ namespace @Model.ControllerNamespace
         }
 
         // GET: @routePrefix/Delete/5
-        @:public async Task<IActionResult> Delete(@primaryKeyNullableTypeName id)
+        public async Task<IActionResult> Delete(@primaryKeyNullableTypeName id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -218,11 +218,11 @@ namespace @Model.ControllerNamespace
         // POST: @routePrefix/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        @:public async Task<IActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
-        @:{
-            @:var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
-            @:_context.@(entitySetName).Remove(@Model.ModelVariable);
-            @:await _context.SaveChangesAsync();
+        public async Task<IActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
+        {
+            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            _context.@(entitySetName).Remove(@Model.ModelVariable);
+            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 

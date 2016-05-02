@@ -1,5 +1,5 @@
 {
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
@@ -19,7 +19,7 @@
         "Microsoft.NETCore.App": {
           "version": "1.0.0-*",
           "type": "platform"
-         },
+        },
         "moq.netcore": "4.4.0-beta8",
         "System.Diagnostics.TraceSource": "4.0.0-*"
       }

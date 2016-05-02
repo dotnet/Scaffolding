@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
@@ -12,18 +12,22 @@
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*"
   },
   "frameworks": {
-    "net451": { },
+    "net451": {},
     "netstandard1.5": {
       "imports": [
         "dnxcore50",
         "portable-net45+win8"
-      ], 
+      ],
       "dependencies": {
-          "System.AppContext": "4.1.0-*"
+        "System.AppContext": "4.1.0-*"
       }
     }
   },
-  "packInclude": {
-    "Templates/": "Templates/"
+  "packOptions": {
+    "files": {
+      "mappings": {
+        "Templates/": "Templates/"
+      }
+    }
   }
 }

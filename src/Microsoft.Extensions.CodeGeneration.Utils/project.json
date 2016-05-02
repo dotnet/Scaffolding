@@ -1,5 +1,5 @@
 {
-  "compilationOptions": {
+  "buildOptions": {
     "keyFile": "../../tools/Key.snk"
   },
   "version": "1.0.0-*",
@@ -10,7 +10,9 @@
   "frameworks": {
     "net451": {
       "frameworkAssemblies": {
-         "System.Threading.Tasks": { "type": "build" }
+        "System.Threading.Tasks": {
+          "type": "build"
+        }
       }
     },
     "netstandard1.5": {
@@ -18,11 +20,11 @@
         "dotnet5.6",
         "dnxcore50",
         "portable-net45+win8"
-      ], 
+      ],
       "dependencies": {
-          "System.AppContext": "4.1.0-*",
-          "System.Security.Cryptography.Algorithms": "4.1.0-*",
-          "System.Threading.Tasks.Parallel": "4.0.1-*"
+        "System.AppContext": "4.1.0-*",
+        "System.Security.Cryptography.Algorithms": "4.1.0-*",
+        "System.Threading.Tasks.Parallel": "4.0.1-*"
       }
     }
   }

@@ -39,7 +39,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
 
             ProjectContext context = ProjectContext.CreateContextForEachFramework(testAppPath, null, new [] { rid }).First();
             LibraryExporter exporter = new LibraryExporter(context, testEnvironment);
-            Workspace workspace = new ProjectJsonWorkspace(context);
+            var workspace = new ProjectJsonWorkspace(context);
             return new WebHostBuilder()
                 .UseServer(new DummyServer())
                 .UseStartup<ModelTypesLocatorTestWebApp.Startup>()
@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.FunctionalTest
                     {
                         services.AddSingleton<IApplicationInfo>(testEnvironment);
                         services.AddSingleton<ILibraryExporter>(exporter);
-                        services.AddSingleton<Workspace>(workspace);
+                        services.AddSingleton<CodeAnalysis.Workspace>(workspace);
                     })
                 .Build()
                 .Services;

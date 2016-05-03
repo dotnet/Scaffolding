@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
         {
             var applicationInfo = new ApplicationInfo(context.RootProject.Identity.Name, context.ProjectDirectory);
             serviceProvider.Add<ProjectContext>(context);
-            serviceProvider.Add<Workspace>(context.CreateWorkspace());
+            serviceProvider.Add<CodeAnalysis.Workspace>(context.CreateWorkspace());
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
             serviceProvider.Add<ILibraryManager>(new LibraryManager(context));

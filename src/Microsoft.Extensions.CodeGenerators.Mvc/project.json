@@ -16,12 +16,8 @@
       ]
     }
   },
-  "packOptions": {
-    "files": {
-      "mappings": {
-        "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
-        "Templates/": "Templates/"
-      }
-    }
+  "packInclude": {
+    "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
+    "Templates/": "Templates/"
   }
 }

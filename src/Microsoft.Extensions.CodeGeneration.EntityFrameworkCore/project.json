@@ -23,7 +23,11 @@
       }
     }
   },
-  "packInclude": {
-    "Templates/": "Templates/"
+  "packOptions": {
+    "files": {
+      "mappings": {
+        "Templates/": "Templates/"
+      }
+    }
   }
 }

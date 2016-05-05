@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
 {
     internal class DotNetBuildCommandHelper
     {
-        internal static CommandResult Build(
+        internal static BuildResult Build(
             string project,
             string configuration,
             NuGetFramework framework,
@@ -38,14 +38,31 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
                 args.Add(buildBasePath);
             }
 
+            var stdOutMsgs = new List<string>();
+            var stdErrorMsgs = new List<string>();
+
             var command = Command.CreateDotNet(
                     "build",
                     args,
                     framework,
-                    configuration);
+                    configuration)
+                    .OnErrorLine((str) => stdOutMsgs.Add(str))
+                    .OnOutputLine((str) => stdErrorMsgs.Add(str));
 
             var result = command.Execute();
-            return result;
+            return new BuildResult()
+            {
+                Result = result,
+                StdErr = stdErrorMsgs,
+                StdOut = stdOutMsgs
+            };
         }
+    }
+
+    internal class BuildResult
+    {
+        public CommandResult Result { get; set; }
+        public List<string> StdErr { get; set; }
+        public List<string> StdOut { get; set; }
     }
 }

@@ -164,20 +164,19 @@ namespace Microsoft.Extensions.CodeGeneration.Tools
             {
                 throw new ArgumentNullException(nameof(projectPath));
             }
-
             var buildResult = DotNetBuildCommandHelper.Build(
                 projectPath,
                 configuration,
                 frameworkToUse,
                 buildBasePath);
 
-            if (buildResult.ExitCode != 0)
+            if (buildResult.Result.ExitCode != 0)
             {
                 //Build failed. 
                 // Stop the process here. 
-                _logger.LogMessage(buildResult.StdOut, LogMessageLevel.Error);
-                _logger.LogMessage(buildResult.StdErr, LogMessageLevel.Error);
-                return buildResult.ExitCode;
+                _logger.LogMessage("Build Failed");
+                _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
+                return buildResult.Result.ExitCode;
             }
 
             // Invoke the dependency command

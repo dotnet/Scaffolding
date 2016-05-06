@@ -1,5 +1,4 @@
 {
-  "version": "1.0.0-*",
   "buildOptions": {
     "emitEntryPoint": false,
     "keyFile": "../../tools/Key.snk"

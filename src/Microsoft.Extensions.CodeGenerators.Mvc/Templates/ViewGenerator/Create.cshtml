@@ -36,7 +36,7 @@
 @:
         //    PushIndent("    ");
     }
-@:<form asp-action="@Model.ViewName">
+@:<form asp-action="@Model.ViewName" asp-antiforgery="true">
     @:<div class="form-horizontal">
         @:<h4>@Model.ViewDataTypeShortName</h4>
         @:<hr />

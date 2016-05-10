@@ -1,8 +1,13 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
     "outputName": "dotnet-aspnet-codegenerator",
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
   },
   "dependencies": {
     "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*",

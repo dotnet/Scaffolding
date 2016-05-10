@@ -3,7 +3,10 @@
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true,
-    "emitEntryPoint": false
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
   },
   "dependencies": {
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",

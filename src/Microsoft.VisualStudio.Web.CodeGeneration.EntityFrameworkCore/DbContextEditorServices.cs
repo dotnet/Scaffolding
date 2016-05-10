@@ -104,11 +104,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             };
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="startUp"></param>
-        /// <returns></returns>
         public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName)
         {
             Contract.Assert(startUp != null && startUp.TypeSymbol != null);

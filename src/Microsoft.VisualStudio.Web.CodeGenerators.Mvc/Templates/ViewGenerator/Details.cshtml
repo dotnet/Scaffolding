@@ -1,0 +1,95 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
+@@model @Model.ViewDataTypeName
+
+@{
+    if (Model.IsPartialView)
+    {
+    }
+    else if (Model.IsLayoutPageSelected)
+    {
+@:@@{
+    @:ViewData["Title"] = "@Model.ViewName";
+        if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+        {
+    @:Layout = "@Model.LayoutPageFile";
+        }
+@:}
+@:
+@:<h2>@Model.ViewName</h2>
+@:
+    }
+    else
+    {
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+@:
+        //    PushIndent("    ");
+    }
+}
+<div>
+    <h4>@Model.ViewDataTypeShortName</h4>
+    <hr />
+    <dl class="dl-horizontal">
+@{
+    foreach (var property in Model.ModelMetadata.Properties)
+    {
+        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+        {
+        <dt>
+            @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+        </dt>
+        <dd>
+            @@Html.DisplayFor(model => model.@GetValueExpression(property))
+        </dd>
+        }
+    }
+}    </dl>
+</div>
+<div>
+@{
+    string pkName = GetPrimaryKeyName();
+    if (pkName != null)
+    {
+    @:<a asp-action="Edit" asp-route-id="@@Model.@pkName">Edit</a> |
+    @:<a asp-action="Index">Back to List</a>
+    }
+    else
+    {
+    @:@@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    @:<a asp-action="Index">Back to List</a>
+    }
+}</div>
+@{
+    if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
+    {
+        //ClearIndent();
+@:</body>
+@:</html>
+    }
+}
+@functions
+{
+    string GetPrimaryKeyName()
+    {
+        return (Model.ModelMetadata.PrimaryKeys != null && Model.ModelMetadata.PrimaryKeys.Length == 1)
+        ? Model.ModelMetadata.PrimaryKeys[0].PropertyName
+        : null;
+    }
+
+    string GetValueExpression(PropertyMetadata property)
+    {
+        //Todo: Get the association for the property and use that.
+        return property.PropertyName;
+    }
+}

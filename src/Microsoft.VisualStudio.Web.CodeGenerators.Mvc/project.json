@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk",
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
+  },
+  "dependencies": {
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*"
+  },
+  "frameworks": {
+    "net451": {},
+    "netstandard1.5": {
+      "imports": [
+        "portable-dnxcore50+net45+win8+wp8+wpa81",
+        "portable-net45+win8"
+      ]
+    }
+  },
+  "packInclude": {
+    "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
+    "Templates/": "Templates/"
+  }
+}

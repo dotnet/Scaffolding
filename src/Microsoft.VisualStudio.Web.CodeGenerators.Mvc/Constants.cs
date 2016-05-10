@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Reflection;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -19,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public const string CodeFileExtension = ".cs";
         public const string RazorTemplateExtension = ".cshtml";
 
-        public const string ThisAssemblyName = "Microsoft.VisualStudio.Web.CodeGenerators";
+        public static readonly string ThisAssemblyName = typeof(Constants).GetTypeInfo().Assembly.GetName().Name;
 
         //Template names
         public const string ApiEmptyControllerTemplate = "ApiEmptyController.cshtml";

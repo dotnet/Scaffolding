@@ -1,4 +1,4 @@
-@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -248,7 +248,7 @@ namespace @Model.ControllerNamespace
         catch
         {
         }
-        if (primaryKeyType != null && (Microsoft.Extensions.CodeGeneration.Templating.TypeUtilities.IsTypePrimitive(primaryKeyType) || IsGuid(typeName)))
+        if (primaryKeyType != null && (Microsoft.VisualStudio.Web.CodeGeneration.Templating.TypeUtilities.IsTypePrimitive(primaryKeyType) || IsGuid(typeName)))
         {
             return shortTypeName + "?";
         }

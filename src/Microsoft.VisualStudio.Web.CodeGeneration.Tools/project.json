@@ -9,6 +9,18 @@
     ],
     "xmlDoc": true
   },
+  "configurations": {
+    "debug_x86": {
+      "buildOptions": {
+        "platform": "anycpu32bitpreferred"
+      }
+    },
+    "release_x86": {
+      "buildOptions": {
+        "platform": "anycpu32bitpreferred"
+      }
+    }
+  },
   "dependencies": {
     "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*",
     "Microsoft.Extensions.DotnetToolDispatcher.Sources": {

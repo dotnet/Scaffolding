@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-preview1-final",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -9,10 +9,10 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-002702",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-preview1-final",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-final",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final",
     "Newtonsoft.Json": "8.0.3"
   },
   "frameworks": {
@@ -23,9 +23,9 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Console": "4.0.0-*",
-        "System.Diagnostics.Process": "4.1.0-*",
-        "System.Runtime.Serialization.Primitives": "4.1.1-*"
+        "System.Console": "4.0.0-rc2-24027",
+        "System.Diagnostics.Process": "4.1.0-rc2-24027",
+        "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24027"
       }
     }
   }

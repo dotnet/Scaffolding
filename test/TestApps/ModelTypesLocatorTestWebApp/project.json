@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0-*",
+    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0-rc2-final",
     "ModelTypesLocatorTestClassLibrary": "1.0.0"
   },
   "frameworks": {
@@ -11,8 +11,8 @@
         "portable-net451+win8"
       ],
       "dependencies": {
-        "NETStandard.Library": "1.5.0-*",
-        "System.Diagnostics.Process": "4.1.0-*"
+        "NETStandard.Library": "1.5.0-rc2-24027",
+        "System.Diagnostics.Process": "4.1.0-rc2-24027"
       }
     }
   }

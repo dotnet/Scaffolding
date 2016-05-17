@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-preview1-final",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true,
@@ -9,15 +9,15 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview1-final",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-final",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final"
   },
   "frameworks": {
     "net451": {},
     "netstandard1.5": {
       "dependencies": {
-        "System.Linq.Expressions": "4.0.11-*"
+        "System.Linq.Expressions": "4.0.11-rc2-24027"
       },
       "imports": [
         "portable-net45+win8"

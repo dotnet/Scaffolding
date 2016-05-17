@@ -5,8 +5,8 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
-    "System.Diagnostics.Contracts": "4.0.1-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview1-final",
+    "System.Diagnostics.Contracts": "4.0.1-rc2-24027",
     "xunit": "2.1.0"
   },
   "frameworks": {
@@ -17,11 +17,11 @@
       ],
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.0.0-rc2-3002702",
           "type": "platform"
         },
         "moq.netcore": "4.4.0-beta8",
-        "System.Diagnostics.TraceSource": "4.0.0-*"
+        "System.Diagnostics.TraceSource": "4.0.0-rc2-24027"
       }
     }
   },

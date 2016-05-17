@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-preview1-final",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -9,7 +9,7 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview1-final"
   },
   "frameworks": {
     "net451": {},

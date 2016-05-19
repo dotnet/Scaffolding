@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test;
@@ -46,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString());
         }
 
-        [Theory(Skip = "Test broken?")]
+        [Theory]
         [InlineData("Startup_RegisterContext_Before.txt", "Startup_RegisterContext_After.txt", "DbContext_Before.txt")]
         [InlineData("Startup_Empty_Method_RegisterContext_Before.txt", "Startup_Empty_Method_RegisterContext_After.txt", "DbContext_Before.txt")]
         public void TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices(string beforeStartupResource, string afterStartupResource, string dbContextResource)
@@ -56,12 +57,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var beforeStartupText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + beforeStartupResource);
             var afterStartupText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + afterStartupResource);
             var dbContextText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + dbContextResource);
-            while (!System.Diagnostics.Debugger.IsAttached) { }
             var startupTree = CSharpSyntaxTree.ParseText(beforeStartupText);
             var contextTree = CSharpSyntaxTree.ParseText(dbContextText);
-            var efReference = MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location);
+            var testAssembly =
+                Assembly.Load(new AssemblyName("Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test"));
+            var configAssembly =
+                Assembly.Load(new AssemblyName("Microsoft.Extensions.Configuration.Abstractions"));
+            var efReference = MetadataReference.CreateFromFile(testAssembly.Location);
+            
+            var configReference = MetadataReference.CreateFromFile(configAssembly.Location);
 
-            var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference });
+            
+            var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference, configReference });
 
             DbContextEditorServices testObj = GetTestObject();
 

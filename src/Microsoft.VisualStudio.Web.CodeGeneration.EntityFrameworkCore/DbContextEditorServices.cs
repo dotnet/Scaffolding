@@ -199,7 +199,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 if (namedType != null &&
                     namedType.ContainingAssembly.Name == "Microsoft.Extensions.Configuration.Abstractions" &&
                     namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Extensions.Configuration" &&
-                    namedType.Name == "IConfigurationRoot") // What happens if the type is referenced in full in code??
+                    namedType.Name == "IConfigurationRoot") 
                 {
                     return pSymbol;
                 }
@@ -244,7 +244,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 writeContent = true;
                 content[dataNodeName][connectionStringName][connectionStringNodeName] =
-                    String.Format("Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true",
+                    string.Format("Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true",
                         dataBaseName);
             }
             
@@ -266,7 +266,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 if (namedType != null && namedType.IsGenericType && !namedType.IsUnboundGenericType &&
                     namedType.ContainingAssembly.Name == "Microsoft.EntityFrameworkCore" &&
                     namedType.ContainingNamespace.ToDisplayString() == "Microsoft.EntityFrameworkCore" &&
-                    namedType.Name == "DbSet") // What happens if the type is referenced in full in code??
+                    namedType.Name == "DbSet")
                 {
                     // Can we check for equality of typeSymbol itself?
                     if (namedType.TypeArguments.Any(t => t.ToDisplayString() == modelTypeFullName))

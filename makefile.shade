@@ -17,8 +17,8 @@ var AUTHORS='Microsoft'
 use-standard-lifecycle
 k-standard-goals
 
-#repack-x86 target='compile'
-    @{    
+#repack-x86 target='compile' if='Directory.Exists("src")'
+    @{
         if (string.IsNullOrEmpty(CONFIGURATION_LOCAL))
         {
             CONFIGURATION_LOCAL = "Debug";

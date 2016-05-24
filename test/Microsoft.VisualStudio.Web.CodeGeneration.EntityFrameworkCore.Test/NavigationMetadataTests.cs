@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.NotNull(navigationMetadata);
             Assert.Equal(nameof(Product.Category), navigationMetadata.AssociationPropertyName);
             Assert.Equal(nameof(TestDbContext.Categories), navigationMetadata.EntitySetName);
-            Assert.Equal(nameof(Product.Category), navigationMetadata.DisplayPropertyName); //Todo
+            Assert.Equal(nameof(Category.CategoryName), navigationMetadata.DisplayPropertyName);
             Assert.Equal(1, navigationMetadata.ForeignKeyPropertyNames.Count());
             Assert.Equal(nameof(Product.CategoryId), navigationMetadata.ForeignKeyPropertyNames[0]);
             Assert.Equal(1, navigationMetadata.PrimaryKeyNames.Count());
@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.NotNull(navigationMetadata);
             Assert.Equal(nameof(Order.Customer), navigationMetadata.AssociationPropertyName);
             Assert.Equal(nameof(TestDbContext.Customers), navigationMetadata.EntitySetName);
-            Assert.Equal(nameof(Order.Customer), navigationMetadata.DisplayPropertyName); //Todo
+            Assert.Equal(nameof(Customer.CustomerId), navigationMetadata.DisplayPropertyName); //Todo
             Assert.Equal(1, navigationMetadata.ForeignKeyPropertyNames.Count());
             Assert.Equal(nameof(Order.CustomerId), navigationMetadata.ForeignKeyPropertyNames[0]);
             Assert.Equal(1, navigationMetadata.PrimaryKeyNames.Count());

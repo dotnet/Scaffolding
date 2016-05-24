@@ -21,7 +21,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Contract.Assert(navigation.IsDependentToPrincipal());
 
             AssociationPropertyName = navigation.Name;
-            DisplayPropertyName = AssociationPropertyName; //Needs further implementation
 
             var otherEntityType = navigation.ForeignKey.ResolveOtherEntityType(navigation.DeclaringEntityType);
             EntitySetName = ModelMetadata.GetEntitySetName(dbContextType, otherEntityType.ClrType);
@@ -32,6 +31,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 .Where(p => p.DeclaringEntityType == navigation.DeclaringEntityType)
                 .Select(p => p.Name)
                 .ToArray();
+
+            // The default for the display property is the primary key of the navigation. 
+            DisplayPropertyName = PrimaryKeyNames[0];
+
+            // If there is a non nullable string property in the navigation's target type, we use that instead. 
+            var displayPropertyCandidate = navigation
+                .GetTargetType()
+                .GetProperties()
+                .FirstOrDefault(p => !p.IsNullable && p.ClrType == typeof(string));
+
+            if (displayPropertyCandidate != null)
+            {
+                DisplayPropertyName = displayPropertyCandidate.Name;
+            }
         }
 
         public string AssociationPropertyName { get; set; }

@@ -38,11 +38,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
         public string ReadOnlyProperty { get; set; }
     }
 
-    public class Category
+    public class CategoryBase
+    {
+        [Required]
+        public string CategoryName { get; set; }
+    }
+
+    public class Category : CategoryBase
     {
         public int CategoryId { get; set; }
-
-        public string CategoryName { get; set; }
 
         public ICollection<Product> Products { get; set; }
     }

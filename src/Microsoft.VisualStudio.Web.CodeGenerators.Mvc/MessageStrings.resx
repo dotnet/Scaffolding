@@ -126,6 +126,9 @@
   <data name="FileExists_useforce" xml:space="preserve">
     <value>The file {0} exists, use -f option to overwrite</value>
   </data>
+  <data name="InvalidNamespaceName" xml:space="preserve">
+    <value>The namespace name '{0}' is not valid.</value>
+  </data>
   <data name="ProvideValidArgument" xml:space="preserve">
     <value>Please provide a valid {0}</value>
   </data>

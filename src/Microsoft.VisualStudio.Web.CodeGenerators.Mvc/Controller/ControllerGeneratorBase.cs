@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -83,13 +84,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             }
         }
 
-        protected string GetControllerNamespace()
+        protected string GetDefaultControllerNamespace(string relativeFolderPath)
         {
-            // Review: MVC scaffolding used ActiveProject's MSBuild RootNamespace property
-            // That's not possible in command line scaffolding - the closest we can get is
-            // the name of assembly??
-            var appName = ApplicationInfo.ApplicationName;
-            return appName + "." + Constants.ControllersFolderName;
+            return NameSpaceUtilities.GetSafeNameSpaceFromPath(relativeFolderPath, ApplicationInfo.ApplicationName);
+        }
+
+        protected void ValidateNameSpaceName(CommandLineGeneratorModel generatorModel)
+        {
+            if (!string.IsNullOrEmpty(generatorModel.ControllerNamespace) &&
+                !RoslynUtilities.IsValidNamespace(generatorModel.ControllerNamespace))
+            {
+                throw new InvalidOperationException(string.Format(
+                    CultureInfo.CurrentCulture,
+                    MessageStrings.InvalidNamespaceName,
+                    generatorModel.ControllerNamespace));
+            }
         }
 
         protected string ValidateAndGetOutputPath(CommandLineGeneratorModel generatorModel)

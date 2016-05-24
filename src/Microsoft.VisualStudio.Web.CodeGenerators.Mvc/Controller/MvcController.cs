@@ -38,11 +38,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 throw new ArgumentException(GetRequiredNameError);
             }
-
+            ValidateNameSpaceName(controllerGeneratorModel);
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
             await layoutDependencyInstaller.Execute();
-
-            var templateModel = new ClassNameModel(className: controllerGeneratorModel.ControllerName, namespaceName: GetControllerNamespace());
+            var namespaceName = string.IsNullOrEmpty(controllerGeneratorModel.ControllerNamespace)
+                ? GetDefaultControllerNamespace(controllerGeneratorModel.RelativeFolderPath)
+                : controllerGeneratorModel.ControllerNamespace;
+            var templateModel = new ClassNameModel(className: controllerGeneratorModel.ControllerName, namespaceName: namespaceName);
 
             var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);

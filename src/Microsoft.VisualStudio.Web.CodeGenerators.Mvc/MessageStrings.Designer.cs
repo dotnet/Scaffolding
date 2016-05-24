@@ -87,6 +87,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///    Looks up a localized string similar to The namespace name &apos;{0}&apos; is not valid..
+        /// </summary>
+        internal static string InvalidNamespaceName {
+            get {
+                return ResourceManager.GetString("InvalidNamespaceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///    Looks up a localized string similar to Please provide a valid {0}.
         /// </summary>
         internal static string ProvideValidArgument {

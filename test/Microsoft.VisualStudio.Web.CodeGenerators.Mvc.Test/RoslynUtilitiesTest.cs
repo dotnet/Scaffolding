@@ -104,5 +104,33 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             }
         }
 
+        [Theory, MemberData("NameSpaceTestData")]
+        public void TestCreateValidNameSpace(string identifier, bool expectedValue)
+        {
+            Assert.Equal(expectedValue, RoslynUtilities.IsValidNamespace(identifier));
+        }
+
+        public static IEnumerable<object[]> NameSpaceTestData
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] {"dotnet-aspnet-codegenerator", false},
+                    new object[] {"abc def", false },
+                    new object[] {"abc.def ghi.xyz", false},
+                    new object[] {"..abc",false},
+                    new object[] {"abc.@xyz", false},
+                    new object[] {"$abd", false}, 
+                    new object[] {"namespace", false},
+                    new object[] {"class", false},
+                    new object[] {"9abc", false},
+                    new object[] {"9.abc", false},
+                    new object[] {"ab.c9.de", true},  
+                    new object[] {"abc.def", true},
+                    new object[] {"validnamespace", true}
+                };
+            }
+        }
     }
 }

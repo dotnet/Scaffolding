@@ -30,5 +30,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
             return IsKeyWord(identifier) ? $"@{identifier}" : identifier;
         }
+
+        public static bool IsValidNamespace(string namespaceName)
+        {
+            if (namespaceName == null)
+            {
+                throw new ArgumentNullException(nameof(namespaceName));
+            }
+
+            if (IsKeyWord(namespaceName))
+            {
+                return false;
+            }
+
+            var parts = namespaceName.Split('.');
+            foreach (var part in parts)
+            {
+                if (!SyntaxFacts.IsValidIdentifier(part))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

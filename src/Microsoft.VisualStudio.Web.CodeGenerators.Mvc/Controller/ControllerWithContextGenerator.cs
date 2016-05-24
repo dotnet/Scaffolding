@@ -78,7 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
-
+            ValidateNameSpaceName(controllerGeneratorModel);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             var modelTypeAndContextModel = await ValidateModelAndGetMetadata(controllerGeneratorModel);
 
@@ -87,13 +87,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 //Todo: Pluralize model name
                 controllerGeneratorModel.ControllerName = modelTypeAndContextModel.ModelType.Name + Constants.ControllerSuffix;
             }
-
+            var namespaceName = string.IsNullOrEmpty(controllerGeneratorModel.ControllerNamespace)
+                ? GetDefaultControllerNamespace(controllerGeneratorModel.RelativeFolderPath)
+                : controllerGeneratorModel.ControllerNamespace;
             var templateModel = new ControllerWithContextTemplateModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {
                 ControllerName = controllerGeneratorModel.ControllerName,
                 AreaName = string.Empty, //ToDo
                 UseAsync = controllerGeneratorModel.UseAsync, // This is no longer used for controllers with context.
-                ControllerNamespace = GetControllerNamespace(),
+                ControllerNamespace = namespaceName,
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata
             };
 

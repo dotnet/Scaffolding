@@ -50,7 +50,7 @@ namespace @Model.ControllerNamespace
                 return BadRequest(ModelState);
             }
 
-            @Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
 
             if (@Model.ModelVariable == null)
             {
@@ -142,7 +142,7 @@ namespace @Model.ControllerNamespace
                 return BadRequest(ModelState);
             }
 
-            @Model.ModelTypeName @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();

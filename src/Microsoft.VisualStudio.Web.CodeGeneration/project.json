@@ -8,6 +8,7 @@
     ],
     "xmlDoc": true
   },
+  "description": "Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.",
   "dependencies": {
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
@@ -23,5 +24,13 @@
         "portable-net45+win8"
       ]
     }
+  },
+  "packOptions": {
+    "tags": [
+      "aspnetcore",
+      "codegenerator",
+      "scaffolding",
+      "visualstudioweb"
+    ]
   }
 }

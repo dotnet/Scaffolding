@@ -7,6 +7,7 @@
     "xmlDoc": true
   },
   "version": "1.0.0-*",
+  "description": "Contains utilities used by ASP.NET Core Code Generation packages.",
   "dependencies": {
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
@@ -32,5 +33,13 @@
         "System.Threading.Tasks.Parallel": "4.0.1-*"
       }
     }
+  },
+  "packOptions": {
+    "tags": [
+      "aspnetcore",
+      "codegenerator",
+      "scaffolding",
+      "visualstudioweb"
+    ]
   }
 }

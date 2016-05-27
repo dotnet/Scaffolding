@@ -8,6 +8,7 @@
     ],
     "xmlDoc": true
   },
+  "description": "Contains the core infrastructure used by ASP.NET Core Code Generators.",
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-*",
@@ -28,5 +29,13 @@
         "System.Runtime.Serialization.Primitives": "4.1.1-*"
       }
     }
+  },
+  "packOptions": {
+    "tags": [
+      "aspnetcore",
+      "codegenerator",
+      "scaffolding",
+      "visualstudioweb"
+    ]
   }
 }

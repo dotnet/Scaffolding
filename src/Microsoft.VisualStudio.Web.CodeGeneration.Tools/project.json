@@ -9,6 +9,7 @@
     ],
     "xmlDoc": true
   },
+  "description": "Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. ",
   "configurations": {
     "debug_x86": {
       "buildOptions": {
@@ -42,5 +43,13 @@
         }
       }
     }
+  },
+  "packOptions": {
+    "tags": [
+      "aspnetcore",
+      "codegenerator",
+      "scaffolding",
+      "visualstudioweb"
+    ]
   }
 }

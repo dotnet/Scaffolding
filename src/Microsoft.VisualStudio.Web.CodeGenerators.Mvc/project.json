@@ -1,5 +1,6 @@
 {
   "version": "1.0.0-*",
+  "description": "Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -20,8 +21,19 @@
       ]
     }
   },
-  "packInclude": {
-    "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
-    "Templates/": "Templates/"
+  "packOptions": {
+    "files": {
+      "mappings": {
+        "/": "THIRDPARTYNOTICE ASP.NET_Preview.rtf",
+        "Templates/": "Templates/"
+      }
+    },
+    "tags": [
+      "aspnetcore",
+      "aspnetcoremvc",
+      "codegenerator",
+      "scaffolding",
+      "visualstudioweb"
+    ]
   }
 }

@@ -28,7 +28,7 @@
       ],
       "dependencies": {
         "System.AppContext": "4.1.0-*",
-        "System.Security.Cryptography.Algorithms": "4.1.0-*",
+        "System.Security.Cryptography.Algorithms": "4.2.0-*",
         "System.Threading.Tasks.Parallel": "4.0.1-*"
       }
     }

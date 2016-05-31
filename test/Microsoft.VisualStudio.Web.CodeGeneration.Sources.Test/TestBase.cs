@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 #if NET451
         NuGetFramework framework = FrameworkConstants.CommonFrameworks.Net451;
 #else
-        NuGetFramework framework = FrameworkConstants.CommonFrameworks.NetStandard15;
+        NuGetFramework framework = FrameworkConstants.CommonFrameworks.NetStandard16;
 #endif
         protected ProjectContext _projectContext;
         protected string _projectPath;

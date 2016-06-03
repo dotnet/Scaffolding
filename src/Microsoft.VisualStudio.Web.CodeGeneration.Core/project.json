@@ -14,7 +14,7 @@
     "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-    "Newtonsoft.Json": "8.0.3"
+    "Newtonsoft.Json": "9.0.1-beta1"
   },
   "frameworks": {
     "net451": {},

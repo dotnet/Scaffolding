@@ -22,7 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
         public bool ReferenceScriptLibraries { get; set; }
 
-        public ModelMetadata ModelMetadata { get; set; }
+        public IModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }
     }

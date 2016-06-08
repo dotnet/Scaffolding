@@ -114,8 +114,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 throw new ArgumentException(MessageStrings.TemplateNameRequired);
             }
 
+            ModelTypeAndContextModel modelTypeAndContextModel;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
-            var modelTypeAndContextModel = await ValidateModelAndGetMetadata(viewGeneratorModel);
+            if (string.IsNullOrEmpty(viewGeneratorModel.DataContextClass))
+            {
+                modelTypeAndContextModel = await ValidateModelAndGetCodeModelMetadata(viewGeneratorModel);
+            }
+            else
+            {
+                modelTypeAndContextModel = await ValidateModelAndGetMetadata(viewGeneratorModel);
+            }
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             await layoutDependencyInstaller.Execute();
@@ -152,6 +160,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered, MessageStrings.Scaffolding_additionalSteps));
             }
+        }
+
+        private async Task<ModelTypeAndContextModel> ValidateModelAndGetCodeModelMetadata(CommonCommandLineModel commandLineModel)
+        {
+            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", _modelTypesLocator);
+
+            Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
+            var result = await _entityFrameworkService.GetModelMetadata(model);
+
+            return new ModelTypeAndContextModel()
+            {
+                ModelType = model,
+                ContextProcessingResult = result
+            };
         }
 
         // Todo: This method is duplicated with the ControllerWithContext generator.

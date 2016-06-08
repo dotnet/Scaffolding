@@ -25,5 +25,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <param name="modelTypeName">Model type for which the EF metadata has to be returned.</param>
         /// <returns>Returns <see cref="ContextProcessingResult"/>.</returns>
         Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName);
+
+        /// <summary>
+        /// Gets the metadata for a given model without using the Datacontext.
+        /// Without the datacontext, the metadata will consist of no Navigations/ Primary keys.
+        /// </summary>
+        /// <param name="modelType">Model type for the EF metadata has to be returned.</param>
+        /// <returns>Returns <see cref="ContextProcessingResult"/>.</returns>
+        Task<ContextProcessingResult> GetModelMetadata(ModelType modelType);
     }
 }

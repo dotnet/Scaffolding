@@ -243,9 +243,57 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             out Type dbContextType, 
             out Type modelType)
         {
+            CompilationResult result = GetCompilation(compilationModificationFunc);
+
+            if (result.Success)
+            {
+                dbContextType = string.IsNullOrEmpty(dbContextTypeName)
+                    ? null
+                    : result.Assembly.GetType(dbContextTypeName);
+                if (dbContextType == null)
+                {
+                    throw new InvalidOperationException(MessageStrings.DbContextCreationError_noTypeReturned);
+                }
+                modelType = result.Assembly.GetType(modelTypeName);
+                if (modelType == null)
+                {
+                    throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
+            }
+            return true;
+        }
+
+        private bool CompileAndGetModelType(
+            string modelTypeName,
+            Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> compilationModificationFunc,
+            out Type modelType)
+        {
+            CompilationResult result = GetCompilation(compilationModificationFunc);
+
+            if (result.Success)
+            {
+                modelType = result.Assembly.GetType(modelTypeName);
+                if (modelType == null)
+                {
+                    throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
+            }
+            return true;
+        }
+
+        private CompilationResult GetCompilation(Func<Compilation, Compilation> compilationModificationFunc)
+        {
             var projectCompilation = _workspace.CurrentSolution.Projects
-                .First(project => project.AssemblyName == _applicationInfo.ApplicationName)
-                .GetCompilationAsync().Result;
+                            .First(project => project.AssemblyName == _applicationInfo.ApplicationName)
+                            .GetCompilationAsync().Result;
             // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream. 
             // On NET451 if the assembly name is different, MVC fails to load the assembly as it is not found on disk. 
 #if NET451
@@ -258,25 +306,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
-
-            if (result.Success)
-            {
-                dbContextType = result.Assembly.GetType(dbContextTypeName);
-                if (dbContextType == null)
-                {
-                    throw new InvalidOperationException(MessageStrings.DbContextCreationError_noTypeReturned);
-                }
-                modelType = result.Assembly.GetType(modelTypeName);
-                if(modelType == null)
-                {
-                    throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
-            }
-            return true;
+            return result;
         }
 
         private string GetPathForNewContext(string contextShortTypeName)
@@ -426,6 +456,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 }
                 return null;
             }
+        }
+
+        public Task<ContextProcessingResult> GetModelMetadata(ModelType modelType)
+        {
+            Type modelReflectionType;
+            CompileAndGetModelType(
+                modelType.FullName,
+                (c) => c,
+                out modelReflectionType);
+            var modelMetadata = new CodeModelMetadata(modelReflectionType);
+            return Task.FromResult(new ContextProcessingResult()
+            {
+                ContextProcessingStatus = ContextProcessingStatus.ContextAvailable,
+                ModelMetadata = modelMetadata
+            });
         }
     }
 }

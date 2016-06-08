@@ -40,7 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         public string ControllerNamespace { get; set; }
 
-        public ModelMetadata ModelMetadata { get; set; }
+        public IModelMetadata ModelMetadata { get; set; }
 
         public ModelType ModelType { get; private set; }
 

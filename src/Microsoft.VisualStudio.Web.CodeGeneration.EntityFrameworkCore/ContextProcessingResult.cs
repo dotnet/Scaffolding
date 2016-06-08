@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <summary>
         /// EF metadata to be used for generating views / controller code.
         /// </summary>
-        public ModelMetadata ModelMetadata { get; set; }
+        public IModelMetadata ModelMetadata { get; set; }
     }
 
     /// <summary>

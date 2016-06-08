@@ -11,7 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     // ToDo: This takes depedency on EF, that will conflict with
     // app's EF dependency
-    public class ModelMetadata
+    public class ModelMetadata : IModelMetadata
     {
         private PropertyMetadata[] _properties;
         private PropertyMetadata[] _primaryKeys;

@@ -8,6 +8,7 @@ default BUILD_DIR_LOCAL='${Path.Combine(BASE_DIR_LOCAL, "artifacts", "build")}'
 default TOOL_PROJECT_NAME='Microsoft.VisualStudio.Web.CodeGeneration.Tools'
 default TOOL_EXE_NAME='dotnet-aspnet-codegenerator.exe'
 default TOOL_NUPKG_NAME= '${TOOL_PROJECT_NAME+".1.*.nupkg"}'
+default NUGET_EXE_PATH='${E("KOREBUILD_NUGET_EXE") ?? Path.Combine(BASE_DIR_LOCAL, ".build", "nuget.exe")}'
 
 var VERSION='0.1'
 var FULL_VERSION='0.1'
@@ -63,7 +64,7 @@ k-standard-goals
         
         var nugetExePath = Path.Combine(BASE_DIR_LOCAL, ".build", "nuget.exe");
         var nuspecPath = Path.Combine(extractToDirectory, TOOL_PROJECT_NAME + ".nuspec");
-        ExecClr(nugetExePath, "pack " + nuspecPath + " -OutputDirectory " + BUILD_DIR_LOCAL);
+        ExecClr(NUGET_EXE_PATH, "pack " + nuspecPath + " -OutputDirectory " + BUILD_DIR_LOCAL);
         
         try
         {

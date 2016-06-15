@@ -10,10 +10,10 @@
   },
   "description": "Contains Entity Framework Core Services used by ASP.NET Core Code Generators.",
   "dependencies": {
-    "Microsoft.AspNetCore.Hosting": "1.0.0-*",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-*",
-    "Microsoft.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-*",
+    "Microsoft.AspNetCore.Hosting": "1.1.0-*",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.1.0-*",
+    "Microsoft.EntityFrameworkCore": "1.1.0-*",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*"
   },
   "frameworks": {

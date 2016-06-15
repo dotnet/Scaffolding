@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
-    "Microsoft.AspNetCore.Hosting": "1.0.0-*",
+    "Microsoft.AspNetCore.Hosting": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
+    "Microsoft.Extensions.DependencyInjection": "1.1.0-*",
     "ModelTypesLocatorTestWebApp": "1.0.0",
     "System.Diagnostics.Contracts": "4.0.1-*",
     "System.Linq.Expressions": "4.1.0-*",

@@ -10,8 +10,8 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0-*",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-*",
+    "Microsoft.Extensions.FileProviders.Embedded": "1.1.0-*",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.1.0-*",
     "xunit": "2.1.0"
   },
   "frameworks": {

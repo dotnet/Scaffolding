@@ -254,7 +254,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     throw new InvalidOperationException(MessageStrings.DbContextCreationError_noTypeReturned);
                 }
-                modelType = result.Assembly.GetType(modelTypeName);
+                modelType = GetModelTypeFromAssembly(modelTypeName, result.Assembly);
                 if (modelType == null)
                 {
                     throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
@@ -276,7 +276,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (result.Success)
             {
-                modelType = result.Assembly.GetType(modelTypeName);
+                modelType = GetModelTypeFromAssembly(modelTypeName, result.Assembly);
+
                 if (modelType == null)
                 {
                     throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
@@ -287,6 +288,56 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
             }
             return true;
+        }
+
+        // Look for the model type in the current project. 
+        // If its not found in the current project, look in the dependencies.
+        private Type GetModelTypeFromAssembly(string modelTypeName, Assembly assembly)
+        {
+            if(string.IsNullOrEmpty(modelTypeName))
+            {
+                throw new ArgumentNullException(nameof(modelTypeName));
+            }
+
+            if(assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
+            Type modelType = null;
+
+            try
+            {
+                modelType = assembly.GetType(modelTypeName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+            }
+
+            if (modelType == null)
+            {
+                // Need to look in the dependencies of this project now.
+                var dependencies = assembly.GetReferencedAssemblies().GetEnumerator();
+                while (modelType == null && dependencies.MoveNext())
+                {
+                    try
+                    {
+                        var dAssembly = _loader.LoadFromName(dependencies.Current as AssemblyName);
+                        modelType = dAssembly.GetType(modelTypeName);
+                    }
+                    catch (Exception ex)
+                    {
+                        // This is a best effort approach. If we cannot load an assembly for any reason, 
+                        // just ignore it and look for the type in the next one.
+                        _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
+                        continue;
+                    }
+                    
+                }
+            }
+
+            return modelType;
         }
 
         private CompilationResult GetCompilation(Func<Compilation, Compilation> compilationModificationFunc)
@@ -460,6 +511,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public Task<ContextProcessingResult> GetModelMetadata(ModelType modelType)
         {
+            if (modelType == null)
+            {
+                throw new ArgumentNullException(nameof(modelType));
+            }
+
             Type modelReflectionType;
             CompileAndGetModelType(
                 modelType.FullName,

@@ -4,14 +4,14 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "dotnet-test-xunit": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
+    "dotnet-test-xunit": "1.0.0-rc3-000000-00",
+    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0-*",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-*",
+    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
     "xunit": "2.1.0"
   },
   "frameworks": {
@@ -22,11 +22,11 @@
       ],
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.0.0",
           "type": "platform"
         },
         "moq.netcore": "4.4.0-beta8",
-        "System.Diagnostics.TraceSource": "4.0.0-*"
+        "System.Diagnostics.TraceSource": "4.0.0"
       }
     }
   },

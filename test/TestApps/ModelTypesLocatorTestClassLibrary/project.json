@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-final"
   },
   "frameworks": {
     "net451": {},
@@ -10,7 +10,7 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "NETStandard.Library": "1.5.0-*"
+        "NETStandard.Library": "1.6.0"
       }
     }
   }

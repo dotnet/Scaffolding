@@ -4,13 +4,13 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "dotnet-test-xunit": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "dotnet-test-xunit": "1.0.0-rc3-000000-00",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
       "version": "1.0.0-*",
       "type": "build"
     },
-    "System.Diagnostics.Contracts": "4.0.1-*",
+    "System.Diagnostics.Contracts": "4.0.1",
     "xunit": "2.1.0"
   },
   "frameworks": {
@@ -21,11 +21,11 @@
       ],
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.0.0",
           "type": "platform"
         },
         "moq.netcore": "4.4.0-beta8",
-        "System.Diagnostics.TraceSource": "4.0.0-*"
+        "System.Diagnostics.TraceSource": "4.0.0"
       }
     }
   },

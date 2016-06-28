@@ -19,9 +19,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
         public static IServiceProvider CreateServices(string testAppName)
         {
 #if RELEASE
-            var applicationInfo = new ApplicationInfo("TestApp", Directory.GetCurrentDirectory(), "Release");
+            var applicationInfo = new ApplicationInfo(testAppName, Directory.GetCurrentDirectory(), "Release");
 #else
-            var applicationInfo = new ApplicationInfo("TestApp", Directory.GetCurrentDirectory(), "Debug");
+            var applicationInfo = new ApplicationInfo(testAppName, Directory.GetCurrentDirectory(), "Debug");
 #endif
             // When the tests are run the applicationInfo points to test project.
             // Change the app applicationInfo to point to the test application to be used

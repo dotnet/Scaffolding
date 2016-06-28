@@ -34,13 +34,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public IEnumerable<ModelType> GetAllTypes()
         {
-
             return _projectWorkspace.CurrentSolution.Projects
                 .Select(project => project.GetCompilationAsync().Result)
                 .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
                 .Aggregate((col1, col2) => col1.Concat(col2).ToList())
+                .Distinct(new TypeSymbolEqualityComparer())
                 .Select(ts => ModelType.FromITypeSymbol(ts));
-
         }
 
         public IEnumerable<ModelType> GetType(string typeName)
@@ -54,8 +53,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 .CurrentSolution.Projects
                 .Select(project => project.GetCompilationAsync().Result)
                 .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
-                .Where(type => type != null);
-                
+                .Where(type => type != null)
+                .Distinct(new TypeSymbolEqualityComparer());
 
             if (exactTypesInAllProjects.Any())
             {
@@ -65,6 +64,48 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             //should we do that?
             return GetAllTypes()
                 .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
+        }
+
+        private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>
+        {
+            public bool Equals(ITypeSymbol x, ITypeSymbol y)
+            {
+                if (Object.ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+                
+                //Check for namespace to be the same.
+                var isNamespaceEqual = (Object.ReferenceEquals(x.ContainingNamespace, y.ContainingNamespace)
+                        || ((x.ContainingNamespace != null && y.ContainingNamespace != null)
+                            && (x.ContainingNamespace.Name == y.ContainingNamespace.Name)));
+                //Check for assembly to be the same.
+                var isAssemblyEqual = (object.ReferenceEquals(x.ContainingAssembly, y.ContainingAssembly)
+                        || ((x.ContainingAssembly != null && y.ContainingAssembly != null)
+                            && (x.ContainingAssembly.Name == y.ContainingAssembly.Name)));
+
+                return x.Name == y.Name
+                    && isNamespaceEqual
+                    && isAssemblyEqual;
+
+            }
+
+            public int GetHashCode(ITypeSymbol obj)
+            {
+                if(Object.ReferenceEquals(obj, null))
+                {
+                    return 0;
+                }
+                var hashName = obj.Name == null ? 0 : obj.Name.GetHashCode();
+                var hashNamespace = obj.ContainingNamespace?.Name == null ? 0 : obj.ContainingNamespace.Name.GetHashCode();
+                var hashAssembly = obj.ContainingAssembly?.Name == null ? 0 : obj.ContainingAssembly.Name.GetHashCode();
+
+                return hashName ^ hashNamespace ^ hashAssembly;
+            }
         }
     }
 }

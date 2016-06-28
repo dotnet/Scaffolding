@@ -119,7 +119,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             if (!controllerGeneratorModel.IsRestController && !controllerGeneratorModel.NoViews)
             {
                 var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
-                var viewGenerator = ActivatorUtilities.CreateInstance<ViewGenerator>(ServiceProvider);
+                var viewGenerator = ActivatorUtilities.CreateInstance<ModelBasedViewScaffolder>(ServiceProvider);
 
                 await layoutDependencyInstaller.Execute();
                 var viewGeneratorModel = new ViewGeneratorModel()

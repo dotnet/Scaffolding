@@ -9,7 +9,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
     {
         public string ViewName { get; set; }
 
-        [Argument(Description = "The view template to use, supported view templates: 'Create|Edit|Delete|Details|List'")]
+        [Argument(Description = "The view template to use, supported view templates: 'Empty|Create|Edit|Delete|Details|List'")]
         public string TemplateName { get; set; }
 
         [Option(Name = "partialView", ShortName = "partial", Description = "Generate a partial view, other layout options (-l and -udl) are ignored if this is specified")]

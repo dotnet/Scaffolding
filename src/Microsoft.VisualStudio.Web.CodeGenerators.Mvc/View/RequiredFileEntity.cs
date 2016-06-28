@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
-    internal class RequiredFileEntity
+    public class RequiredFileEntity
     {
 
-        internal RequiredFileEntity(string outputPath, string templateName)
+        public RequiredFileEntity(string outputPath, string templateName)
         {
             if (string.IsNullOrEmpty(outputPath))
             {

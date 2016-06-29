@@ -20,6 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
     {
         private static ConsoleLogger _logger;
         private static bool _isDispatcher;
+        private static bool _isNoBuild;
 
         private const string APPNAME = "Code Generation";
         private const string APP_DESC = "Code generation for Asp.net Core";
@@ -33,6 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
 
             _isDispatcher = DotnetToolDispatcher.IsDispatcher(args);
+            _isNoBuild = ToolCommandLineHelper.IsNoBuild(args);
             _logger.LogMessage($"Is Dispatcher: {_isDispatcher}", LogMessageLevel.Trace);
             try
             {
@@ -80,6 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var framework = app.Option("-tfm|--target-framework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
             var buildBasePath = app.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
             var dependencyCommand = app.Option("--no-dispatch", "", CommandOptionType.NoValue);
+            var noBuild = app.Option("--no-build","", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -92,7 +95,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 var configuration = appConfiguration.Value() ?? Constants.DefaultConfiguration;
                 var projectFile = ProjectReader.GetProject(project);
                 var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
-
                 var nugetFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
                 if (_isDispatcher)
@@ -103,7 +105,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         frameworksInProject.FirstOrDefault(),
                         project,
                         buildBasePath.Value(),
-                        configuration);
+                        configuration,
+                        _isNoBuild);
                 }
                 else
                 {
@@ -154,7 +157,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             NuGetFramework frameworkToUse,
             string projectPath,
             string buildBasePath,
-            string configuration)
+            string configuration,
+            bool noBuild)
         {
             if(frameworkToUse == null)
             {
@@ -164,20 +168,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 throw new ArgumentNullException(nameof(projectPath));
             }
-            var buildResult = DotNetBuildCommandHelper.Build(
-                projectPath,
-                configuration,
-                frameworkToUse,
-                buildBasePath);
 
-            if (buildResult.Result.ExitCode != 0)
+            if (!noBuild)
             {
-                //Build failed. 
-                // Stop the process here. 
-                _logger.LogMessage("Build Failed");
-                _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
-                _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
-                return buildResult.Result.ExitCode;
+                _logger.LogMessage("Building project ...");
+                var buildResult = DotNetBuildCommandHelper.Build(
+                    projectPath,
+                    configuration,
+                    frameworkToUse,
+                    buildBasePath);
+
+                if (buildResult.Result.ExitCode != 0)
+                {
+                    //Build failed. 
+                    // Stop the process here. 
+                    _logger.LogMessage("Build Failed");
+                    _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
+                    _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
+                    return buildResult.Result.ExitCode;
+                }
             }
 
             // Invoke the dependency command

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
+using System.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
@@ -18,6 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private const string NUGET_PACKAGE_DIR = "--nuget-package-dir";
         private const string BUILD_BASE_PATH = "--build-base-path";
         private const string DISPATCHER_VERSION = "--dispatcher-version";
+        private const string NO_BUILD = "--no-build";
 
         private const string NO_DISPATCH_FLAG_SHORT = "-nd";
         private const string CONFIGURATION_SHORT = "-c";
@@ -40,6 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     case NO_DISPATCH_FLAG:
                     case NO_DISPATCH_FLAG_SHORT:
+                    case NO_BUILD:
                         break;
                     case CONFIGURATION:
                     case CONFIGURATION_SHORT:
@@ -76,5 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             cmdArgs.AddRange(args);
             return cmdArgs.ToArray();
         }
+
+        internal static bool IsNoBuild(string[] args) => args.Contains(NO_BUILD, StringComparer.OrdinalIgnoreCase);
     }
 }

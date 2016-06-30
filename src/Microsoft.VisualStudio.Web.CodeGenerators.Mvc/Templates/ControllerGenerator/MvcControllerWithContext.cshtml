@@ -51,6 +51,12 @@ namespace @Model.ControllerNamespace
         relatedProperties.Add(nav.AssociationPropertyName, nav);
 
     }
+
+    var inlineIncludes = "";
+    foreach(var property in relatedProperties.Values)
+    {
+        inlineIncludes += string.Format("{0}                .Include({1} => {1}.{2})", Environment.NewLine, lambdaVar, property.AssociationPropertyName);
+    }
 }
     public class @Model.ControllerName : Controller
     {
@@ -88,7 +94,8 @@ namespace @Model.ControllerNamespace
                 return NotFound();
             }
 
-            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName)@inlineIncludes
+                .SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -206,7 +213,8 @@ namespace @Model.ControllerNamespace
                 return NotFound();
             }
 
-            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName)@inlineIncludes
+                .SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();

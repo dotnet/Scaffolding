@@ -55,6 +55,15 @@
         </dd>
         }
     }
+    foreach (var navigation in Model.ModelMetadata.Navigations)
+    {
+        <dt>
+            @@Html.DisplayNameFor(model => model.@GetValueExpression(navigation))
+        </dt>
+        <dd>
+            @@Html.DisplayFor(model => model.@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+        </dd>
+    }
     @:</dl>
     @:
     @:<form asp-action="@Model.ViewName">
@@ -75,7 +84,11 @@
 {
     string GetValueExpression(PropertyMetadata property)
     {
-        //Todo: Get the association for the property and use that.
         return property.PropertyName;
+    }
+
+    string GetValueExpression(NavigationMetadata navigation)
+    {
+        return navigation.AssociationPropertyName;
     }
 }

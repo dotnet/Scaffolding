@@ -41,16 +41,22 @@
 @:<table class="table">
     @:<thead>
         @:<tr>
-     
+
         IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
         foreach (var property in properties)
         {
             if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
             {
-            <th>
-                @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
-            </th>
+                <th>
+                    @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+                </th>
             }
+        }
+        foreach (var navigation in Model.ModelMetadata.Navigations)
+        {
+            <th>
+                @@Html.DisplayNameFor(model => model.@GetValueExpression(navigation))
+            </th>
         }
             @:<th></th>
         @:</tr>
@@ -67,7 +73,12 @@
             </td>
             }
         }
-
+        foreach (var navigation in Model.ModelMetadata.Navigations)
+        {
+            <td>
+                @@Html.DisplayFor(modelItem => item.@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+            </td>
+        }
         string pkName = GetPrimaryKeyName();
         if (pkName != null)
         {
@@ -108,8 +119,12 @@
 
     string GetValueExpression(PropertyMetadata property)
     {
-        //Todo: Get the association for the property and use that.
         return property.PropertyName;
+    }
+
+    string GetValueExpression(NavigationMetadata navigation)
+    {
+        return navigation.AssociationPropertyName;
     }
 
     string GetEnumerableTypeExpression(string typeName)

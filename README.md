@@ -7,9 +7,6 @@ Travis:   [![Travis](https://travis-ci.org/aspnet/Scaffolding.svg?branch=dev)](h
 
 ASP.NET Scaffolding enables generating boilerplate code for web applications to speed up development.
 
-To learn more about ASP.NET Scaffolding see the resources below:
-
- 1. [Command line scaffolding for ASP.NET vNext](http://blogs.msdn.com/b/webdev/archive/2014/08/21/command-line-scaffolding-for-asp-net-vnext.aspx) 
- 2. [How to customize scaffolding templates for ASP.NET vNext](http://blogs.msdn.com/b/webdev/archive/2014/08/23/how-to-customize-scaffolding-templates-for-asp-net-vnext.aspx)
+To learn more about ASP.NET Scaffolding see http://go.microsoft.com/fwlink/?LinkId=820629
 
 This project is part of ASP.NET Core. You can find samples, documentation and getting started instructions for ASP.NET Core at the [Home](https://github.com/aspnet/home) repo.

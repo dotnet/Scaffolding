@@ -48,7 +48,7 @@
     @:<input type="hidden" asp-for="@property.PropertyName" />
             continue;
         }
-        
+
         if (property.Scaffold)
         {
             if (property.IsReadOnly)
@@ -62,7 +62,7 @@
             @:<label asp-for="@property.PropertyName" class="control-label col-md-2"></label>
             @:<div class="col-md-10">
                 @:<select asp-for="@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
-                @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
+                @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
             @:</div>
         @:</div>
                 continue;
@@ -86,7 +86,7 @@
             @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
                 @:<select asp-for="@property.PropertyName" class="form-control"></select>
-                @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
+                @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
             @:</div>
         @:</div>
             }
@@ -96,12 +96,12 @@
             @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
                 @:<input asp-for="@property.PropertyName" class="form-control" />
-                @:<span asp-validation-for="@property.PropertyName" class="text-danger" />
+                @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
             @:</div>
         @:</div>
             }
         }
-        // Ideally we shouldn't be here  but if the user marks the foreign key as [ScaffoldColumn(false)], we want to atleast try to make it work. 
+        // Ideally we shouldn't be here  but if the user marks the foreign key as [ScaffoldColumn(false)], we want to atleast try to make it work.
         else if (property.IsForeignKey)
         {
     @:<input type="hidden" asp-for="@property.PropertyName" />

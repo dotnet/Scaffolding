@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "dotnet-test-xunit": "1.0.0-rc3-000000-00",
+    "dotnet-test-xunit": "1.0.0-rc3-000000-01",
     "Microsoft.AspNetCore.Hosting": "1.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-preview2-final",

@@ -175,6 +175,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 //Build failed. 
                 // Stop the process here. 
                 _logger.LogMessage("Build Failed");
+                _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
                 _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
                 return buildResult.Result.ExitCode;
             }

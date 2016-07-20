@@ -1,13 +1,11 @@
 {
   "shared": "*.cs",
   "dependencies": {
-    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*"
-    
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*"
   },
   "frameworks": {
-    "netstandard1.5": {
+    "netstandard1.6": {
       "imports": [
-        "dnxcore50",
         "portable-net451+win8"
       ]
     }

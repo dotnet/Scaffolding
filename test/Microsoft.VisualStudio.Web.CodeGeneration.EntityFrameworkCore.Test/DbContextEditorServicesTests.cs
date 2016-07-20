@@ -94,10 +94,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             //Assert
             string expected = @"{
-  ""Data"": {
-    ""MyDbContext"": {
-      ""ConnectionString"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-    }
+  ""ConnectionStrings"": {
+    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
   }
 }";
             var appSettingsPath = Path.Combine(AppBase, "appsettings.json"); 
@@ -112,52 +110,30 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         // Empty file with valid json token
         [InlineData("{}",
                     @"{
-  ""Data"": {
-    ""MyDbContext"": {
-      ""ConnectionString"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-    }
+  ""ConnectionStrings"": {
+    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
   }
 }")]
         // File with no node for connection name
         [InlineData(@"{
-  ""Data"": {
+  ""ConnectionStrings"": {
   }
 }",
                     @"{
-  ""Data"": {
-    ""MyDbContext"": {
-      ""ConnectionString"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-    }
-  }
-}")]
-        // File with node for connection name but no ConnectionString property
-        [InlineData(@"{
-  ""Data"": {
-    ""MyDbContext"": {
-    }
-  }
-}",
-                    @"{
-  ""Data"": {
-    ""MyDbContext"": {
-      ""ConnectionString"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-    }
+  ""ConnectionStrings"": {
+    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
   }
 }")]
         // File with node for connection name and also existing ConnectionString property
         // modification should be skipped in this case
         [InlineData(@"{
-  ""Data"": {
-    ""MyDbContext"": {
-      ""ConnectionString"": ""SomeExistingValue""
-    }
+  ""ConnectionStrings"": {
+    ""MyDbContext"": ""SomeExistingValue""
   }
 }",
-                    @"{
-  ""Data"": {
-    ""MyDbContext"": {
-      ""ConnectionString"": ""SomeExistingValue""
-    }
+                     @"{
+  ""ConnectionStrings"": {
+    ""MyDbContext"": ""SomeExistingValue""
   }
 }")]
         public void AddConnectionString_Modifies_App_Settings_File_As_Required(string previousContent, string newContent)

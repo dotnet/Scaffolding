@@ -14,7 +14,7 @@ namespace WebAppNamespace
             servicesVar.AddEntityFramework();
 
             servicesVar.AddDbContext<MyContext>(options =>
-                    options.UseSqlServer(ConfigurationProp["Data:MyContext:ConnectionString"]));
+                    options.UseSqlServer(ConfigurationProp.GetConnectionString("MyContext")));
         }
     }
 }

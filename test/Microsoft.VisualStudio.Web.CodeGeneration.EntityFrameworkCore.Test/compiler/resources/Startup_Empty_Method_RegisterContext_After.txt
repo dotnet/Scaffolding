@@ -9,7 +9,7 @@ namespace WebAppNamespace
         public void ConfigureServices(IServiceCollection servicesVar)
         {
             servicesVar.AddDbContext<MyContext>(options =>
-                    options.UseSqlServer(ConfigurationProp["Data:MyContext:ConnectionString"]));
+                    options.UseSqlServer(ConfigurationProp.GetConnectionString("MyContext")));
         }
         public IConfigurationRoot ConfigurationProp { get; set; }
     }

@@ -149,7 +149,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                         string textToAddAtEnd =
                             statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
-                            statementLeadingTrivia + "        options.UseSqlServer({2}[\"Data:{1}:ConnectionString\"]));" + Environment.NewLine;
+                            statementLeadingTrivia + "        options.UseSqlServer({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
 
                         if (configServicesMethod.Body.Statements.Any())
                         {
@@ -225,25 +225,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 content = JObject.Parse(_fileSystem.ReadAllText(appSettingsFile));
             }
 
-            string dataNodeName = "Data";
-            string connectionStringNodeName = "ConnectionString";
+            string connectionStringNodeName = "ConnectionStrings";
 
-            if (content[dataNodeName] == null)
+            if (content[connectionStringNodeName] == null)
             {
                 writeContent = true;
-                content[dataNodeName] = new JObject();
+                content[connectionStringNodeName] = new JObject();
             }
 
-            if (content[dataNodeName][connectionStringName] == null)
+            if (content[connectionStringNodeName][connectionStringName] == null)
             {
                 writeContent = true;
-                content[dataNodeName][connectionStringName] = new JObject();
-            }
-
-            if (content[dataNodeName][connectionStringName][connectionStringNodeName] == null)
-            {
-                writeContent = true;
-                content[dataNodeName][connectionStringName][connectionStringNodeName] =
+                content[connectionStringNodeName][connectionStringName] =
                     string.Format("Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true",
                         dataBaseName);
             }

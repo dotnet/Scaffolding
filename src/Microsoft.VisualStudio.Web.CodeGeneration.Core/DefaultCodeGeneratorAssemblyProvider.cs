@@ -63,8 +63,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         private bool IsCandidateLibrary(LibraryDescription library)
         {
-            return !_exclusions.Contains(library.Identity.Name)
-                && (!"Project".Equals(library.Identity.Type.Value, StringComparison.OrdinalIgnoreCase));
+            return !_exclusions.Contains(library.Identity.Name);
         }
     }
 }

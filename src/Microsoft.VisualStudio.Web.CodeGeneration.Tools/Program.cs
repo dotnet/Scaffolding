@@ -24,6 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
         private const string APPNAME = "Code Generation";
         private const string APP_DESC = "Code generation for Asp.net Core";
+        private const string TOOL_NAME = "dotnet-aspnet-codegenerator";
 
         public static void Main(string[] args)
         {
@@ -39,7 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             try
             {
                 DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
-                Execute(args);
+                Execute(args, _isDispatcher, _isNoBuild, _logger);
             }
             finally
             {
@@ -66,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         /// Phase 2 ::
         ///     1. After successfully getting the Project context, invoke the CodeGenCommandExecutor.
         /// </summary>
-        private static void Execute(string[] args)
+        private static void Execute(string[] args, bool isDispatcher, bool isNoBuild, ILogger logger)
         {
             var app = new CommandLineApplication(false)
             {
@@ -97,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
                 var nugetFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
-                if (_isDispatcher)
+                if (isDispatcher)
                 {
                     // Invoke the tool from the project's build directory.
                     return BuildAndDispatchDependencyCommand(
@@ -106,7 +107,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         project,
                         buildBasePath.Value(),
                         configuration,
-                        _isNoBuild);
+                        isNoBuild,
+                        logger);
                 }
                 else
                 {
@@ -143,7 +145,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         codeGenArgs,
                         configuration,
                         packagesPath.Value(),
-                        _logger);
+                        logger);
 
                     return executor.Execute();
                 }
@@ -158,7 +160,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             string projectPath,
             string buildBasePath,
             string configuration,
-            bool noBuild)
+            bool noBuild,
+            ILogger logger)
         {
             if(frameworkToUse == null)
             {
@@ -171,7 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             if (!noBuild)
             {
-                _logger.LogMessage("Building project ...");
+                logger.LogMessage("Building project ...");
                 var buildResult = DotNetBuildCommandHelper.Build(
                     projectPath,
                     configuration,
@@ -182,9 +185,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     //Build failed. 
                     // Stop the process here. 
-                    _logger.LogMessage("Build Failed");
-                    _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
-                    _logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
+                    logger.LogMessage("Build Failed");
+                    logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
+                    logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
                     return buildResult.Result.ExitCode;
                 }
             }
@@ -206,7 +209,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     configuration, 
                     null, 
                     buildBasePath, 
-                    projectDirectory)
+                    projectDirectory,
+                    TOOL_NAME)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute()

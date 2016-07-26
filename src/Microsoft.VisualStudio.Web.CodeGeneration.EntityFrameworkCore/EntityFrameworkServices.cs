@@ -17,7 +17,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
-
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class EntityFrameworkServices : IEntityFrameworkService
@@ -182,7 +181,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         c =>
                         {
                             var oldTree = c.SyntaxTrees.FirstOrDefault(t => t.FilePath == addResult.OldTree.FilePath);
-                            Debug.Assert(oldTree != null);
+                            if (oldTree == null)
+                            {
+                                throw new InvalidOperationException(string.Format(
+                                        MessageStrings.ModelTypeCouldNotBeAdded,
+                                        modelTypeSymbol.FullName,
+                                        dbContextFullTypeName));
+                            }
                             return c.ReplaceSyntaxTree(oldTree, addResult.NewTree);
                         },
                         out dbContextType,

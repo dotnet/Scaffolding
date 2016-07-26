@@ -135,6 +135,9 @@
   <data name="FailedToEditStartup" xml:space="preserve">
     <value>Scaffolding failed to edit Startup class to register the new Context using Dependency Injection.</value>
   </data>
+  <data name="ModelTypeCouldNotBeAdded" xml:space="preserve">
+    <value>Could not add Model type '{0}' to DbContext '{1}'. Please make sure that '{1}' has a DbSet property for '{0}'.</value>
+  </data>
   <data name="ModelTypeNotFound" xml:space="preserve">
     <value>Could not get the reflection type for Model : {0}</value>
   </data>

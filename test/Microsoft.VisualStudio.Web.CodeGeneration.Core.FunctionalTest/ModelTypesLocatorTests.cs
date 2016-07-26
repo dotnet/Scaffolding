@@ -80,11 +80,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             Assert.Equal(2, types.Count());
         }
 
-        [Fact(Skip = "this test now 39 types including all the Hosting services added and internal not null attribute??")]
+        [Fact]
         public void GetAllTypes_Gets_All_Types_Including_ReferencedProjects()
         {
+
+            var services = TestHelper.CreateServices("ClassLibrary2");
+
             //Arrange
-            var locator = GetModelTypesLocator();
+            //var locator = GetModelTypesLocator();
+            var locator = new ModelTypesLocator((ILibraryExporter)services.GetRequiredService(typeof(ILibraryExporter)),
+                (Workspace)services.GetRequiredService(typeof(Workspace)));
 
             //Act
             var types = locator.GetAllTypes();

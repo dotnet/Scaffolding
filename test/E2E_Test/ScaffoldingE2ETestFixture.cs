@@ -12,7 +12,7 @@ namespace E2E_Test
         public ScaffoldingE2ETestFixture()
         {
             FilesToCleanUp = new List<string>();
-            BaseLineFilesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "BaseLine");
+            BaseLineFilesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Baseline");
             TestProjectDirectory = Path.GetFullPath(@"../TestApps/WebApplication1");
         }
 

@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -11,6 +13,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
+
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
@@ -118,16 +121,27 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
             if (string.IsNullOrEmpty(viewGeneratorModel.DataContextClass))
             {
-                modelTypeAndContextModel = await ValidateModelAndGetCodeModelMetadata(viewGeneratorModel);
+                modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetCodeModelMetadata(viewGeneratorModel, _entityFrameworkService, _modelTypesLocator);
             }
             else
             {
-                modelTypeAndContextModel = await ValidateModelAndGetMetadata(viewGeneratorModel);
+                modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetMetadata(viewGeneratorModel, _entityFrameworkService, _modelTypesLocator);
             }
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             await layoutDependencyInstaller.Execute();
 
+            await GenerateView(viewGeneratorModel, modelTypeAndContextModel, outputPath);
+            await layoutDependencyInstaller.InstallDependencies();
+
+            if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
+            {
+                throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered, MessageStrings.Scaffolding_additionalSteps));
+            }
+        }
+
+        internal async Task GenerateView(ViewGeneratorModel viewGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string outputPath)
+        {
             if (viewGeneratorModel.ViewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
             {
                 int viewNameLength = viewGeneratorModel.ViewName.Length - Constants.ViewExtension.Length;
@@ -152,51 +166,100 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-            _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+            _logger.LogMessage($"Added View : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
 
-            await layoutDependencyInstaller.InstallDependencies();
+            await GenerateRequiredFiles(viewGeneratorModel);
+        }
 
-            if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
+        /// <summary>
+        /// Method exposed for adding multiple views in one operation.
+        /// Utilised by the ControllerWithContextGenerator which generates 5 views for a MVC controller with context.
+        /// </summary>
+        /// <param name="viewsAndTemplates">Names of views and the corresponding template names</param>
+        /// <param name="viewGeneratorModel">Model for View Generator</param>
+        /// <param name="modelTypeAndContextModel">Model Type and DbContext metadata</param>
+        /// <param name="baseOutputPath">Folder where all views will be generated</param>
+        internal async Task GenerateViews(Dictionary<string, string> viewsAndTemplates, ViewGeneratorModel viewGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string baseOutputPath)
+        {
+
+            if (viewsAndTemplates == null)
             {
-                throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered, MessageStrings.Scaffolding_additionalSteps));
+                throw new ArgumentNullException(nameof(viewsAndTemplates));
             }
+
+            if(viewGeneratorModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewsAndTemplates));
+            }
+
+            if(modelTypeAndContextModel == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypeAndContextModel));
+            }
+
+            if(string.IsNullOrEmpty(baseOutputPath))
+            {
+                baseOutputPath = ApplicationInfo.ApplicationBasePath;
+            }
+
+            foreach (var entry in viewsAndTemplates)
+            {
+                var viewName = entry.Key;
+                var templateName = entry.Value;
+                if (viewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    int viewNameLength = viewName.Length - Constants.ViewExtension.Length;
+                    viewName = viewName.Substring(0, viewNameLength);
+                }
+
+                var outputPath = Path.Combine(baseOutputPath, viewName + Constants.ViewExtension);
+                bool isLayoutSelected = !viewGeneratorModel.PartialView &&
+                    (viewGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage));
+
+                var templateModel = new ViewGeneratorTemplateModel()
+                {
+                    ViewDataTypeName = modelTypeAndContextModel.ModelType.FullName,
+                    ViewDataTypeShortName = modelTypeAndContextModel.ModelType.Name,
+                    ViewName = viewName,
+                    LayoutPageFile = viewGeneratorModel.LayoutPage,
+                    IsLayoutPageSelected = isLayoutSelected,
+                    IsPartialView = viewGeneratorModel.PartialView,
+                    ReferenceScriptLibraries = viewGeneratorModel.ReferenceScriptLibraries,
+                    ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata,
+                    JQueryVersion = "1.10.2" //Todo
+                };
+
+                templateName = templateName + Constants.RazorTemplateExtension;
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+                _logger.LogMessage($"Added View : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
+            }
+            await GenerateRequiredFiles(viewGeneratorModel);
         }
 
-        private async Task<ModelTypeAndContextModel> ValidateModelAndGetCodeModelMetadata(CommonCommandLineModel commandLineModel)
+        private async Task GenerateRequiredFiles(ViewGeneratorModel viewGeneratorModel)
         {
-            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", _modelTypesLocator);
+            List<RequiredFileEntity> requiredFiles = new List<RequiredFileEntity>();
 
-            Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
-            var result = await _entityFrameworkService.GetModelMetadata(model);
-
-            return new ModelTypeAndContextModel()
+            if (viewGeneratorModel.ReferenceScriptLibraries)
             {
-                ModelType = model,
-                ContextProcessingResult = result
-            };
+                requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
+            }
+
+            await AddRequiredFiles(requiredFiles);
         }
 
-        // Todo: This method is duplicated with the ControllerWithContext generator.
-        private async Task<ModelTypeAndContextModel> ValidateModelAndGetMetadata(CommonCommandLineModel commandLineModel)
+        private async Task AddRequiredFiles(IEnumerable<RequiredFileEntity> requiredFiles)
         {
-            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", _modelTypesLocator);
-            ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", _modelTypesLocator, throwWhenNotFound: false);
-
-            // Validation successful
-            Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
-
-            var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
-
-            var modelMetadata = await _entityFrameworkService.GetModelMetadata(
-                dbContextFullName,
-                model);
-
-            return new ModelTypeAndContextModel()
+            foreach (var file in requiredFiles)
             {
-                ModelType = model,
-                DbContextFullName = dbContextFullName,
-                ContextProcessingResult = modelMetadata
-            };
+                if (!File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath)))
+                {
+                    await _codeGeneratorActionsService.AddFileAsync(
+                        Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
+                        Path.Combine(TemplateFolders.First(), file.TemplateName));
+                    _logger.LogMessage($"Added additional file :{file.OutputPath}");
+                }
+            }
         }
     }
 }

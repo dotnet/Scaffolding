@@ -80,7 +80,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
-            var modelTypeAndContextModel = await ValidateModelAndGetMetadata(controllerGeneratorModel);
+
+            var modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetMetadata(controllerGeneratorModel, EntityFrameworkService, ModelTypesLocator);
 
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
@@ -118,41 +119,36 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             if (!controllerGeneratorModel.IsRestController && !controllerGeneratorModel.NoViews)
             {
                 var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
+                var viewGenerator = ActivatorUtilities.CreateInstance<ViewGenerator>(ServiceProvider);
+
                 await layoutDependencyInstaller.Execute();
+                var viewGeneratorModel = new ViewGeneratorModel()
+                {
+                    UseDefaultLayout = controllerGeneratorModel.UseDefaultLayout,
+                    PartialView = false,
+                    LayoutPage = controllerGeneratorModel.LayoutPage,
+                    Force = controllerGeneratorModel.Force,
+                    RelativeFolderPath = Path.Combine(
+                        ApplicationInfo.ApplicationBasePath,
+                        Constants.ViewsFolderName,
+                        controllerRootName),
+                    ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries
+                };
+
+                var viewAndTemplateNames = new Dictionary<string, string>();
+
+                //TODO need logic for areas
+                var viewBaseOutputPath = Path.Combine(
+                        ApplicationInfo.ApplicationBasePath,
+                        Constants.ViewsFolderName,
+                        controllerRootName);
 
                 foreach (var viewTemplate in _views)
                 {
                     var viewName = viewTemplate == "List" ? "Index" : viewTemplate;
-                    // ToDo: This is duplicated from ViewGenerator.
-                    bool isLayoutSelected = controllerGeneratorModel.UseDefaultLayout ||
-                        !String.IsNullOrEmpty(controllerGeneratorModel.LayoutPage);
-
-                    var viewTemplateModel = new ViewGeneratorTemplateModel()
-                    {
-                        ViewDataTypeName = modelTypeAndContextModel.ModelType.FullName,
-                        ViewDataTypeShortName = modelTypeAndContextModel.ModelType.Name,
-                        ViewName = viewName,
-                        LayoutPageFile = controllerGeneratorModel.LayoutPage,
-                        IsLayoutPageSelected = isLayoutSelected,
-                        IsPartialView = false,
-                        ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries,
-                        ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata,
-                        JQueryVersion = "1.10.2"
-                    };
-
-                    // Todo: Need logic for areas
-                    var viewOutputPath = Path.Combine(
-                        ApplicationInfo.ApplicationBasePath,
-                        Constants.ViewsFolderName,
-                        controllerRootName,
-                        viewName + Constants.ViewExtension);
-
-                    await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                        viewTemplate + Constants.RazorTemplateExtension, TemplateFolders, viewTemplateModel);
-
-                    Logger.LogMessage("Added View : " + viewOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+                    viewAndTemplateNames.Add(viewName, viewTemplate);
                 }
-
+                await viewGenerator.GenerateViews(viewAndTemplateNames, viewGeneratorModel, modelTypeAndContextModel, viewBaseOutputPath);
                 await layoutDependencyInstaller.InstallDependencies();
             }
         }
@@ -160,29 +156,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)
         {
             return generatorModel.IsRestController ? Constants.ApiControllerWithContextTemplate : Constants.MvcControllerWithContextTemplate;
-        }
-
-        // Todo: This method is duplicated with the ViewGenerator.
-        private async Task<ModelTypeAndContextModel> ValidateModelAndGetMetadata(CommonCommandLineModel commandLineModel)
-        {
-            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", ModelTypesLocator);
-            ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
-
-            // Validation successful
-            Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
-
-            var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
-
-            var modelMetadata = await EntityFrameworkService.GetModelMetadata(
-                dbContextFullName,
-                model);
-
-            return new ModelTypeAndContextModel()
-            {
-                ModelType = model,
-                DbContextFullName = dbContextFullName,
-                ContextProcessingResult = modelMetadata
-            };
         }
 
         protected IModelTypesLocator ModelTypesLocator

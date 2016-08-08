@@ -16,16 +16,13 @@
     },
     "Microsoft.Extensions.FileProviders.Embedded": "1.1.0-*",
     "Microsoft.Extensions.Configuration.Abstractions": "1.1.0-*",
-    "Moq": "4.6.25-*",
+    "Moq": "4.6.36-*",
     "System.Diagnostics.TraceSource": "4.0.0-*",
     "xunit": "2.2.0-*"
   },
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": [
-        "dotnet5.4",
-        "portable-net451+win8"
-      ]
+      "imports": "portable-net451+win8"
     }
   },
   "testRunner": "xunit"

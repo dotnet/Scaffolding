@@ -14,17 +14,14 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Moq": "4.6.25-*",
+    "Moq": "4.6.36-*",
     "System.Diagnostics.Contracts": "4.0.1-*",
     "System.Diagnostics.TraceSource": "4.0.0-*",
     "xunit": "2.2.0-*"
   },
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": [
-        "dotnet5.4",
-        "portable-net451+win8"
-      ]
+      "imports": "portable-net451+win8"
     }
   },
   "testRunner": "xunit"

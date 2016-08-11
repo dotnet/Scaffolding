@@ -1,0 +1,24 @@
+﻿@model WebApplication1.Models.Car
+
+<div>
+    <h4>Car</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ModelName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.ModelName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.CarID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

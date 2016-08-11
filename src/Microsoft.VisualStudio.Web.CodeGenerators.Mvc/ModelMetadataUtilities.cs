@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             };
         }
 
-        internal static async Task<ModelTypeAndContextModel> ValidateModelAndGetMetadata(
+        internal static async Task<ModelTypeAndContextModel> ValidateModelAndGetEFMetadata(
             CommonCommandLineModel commandLineModel, 
             IEntityFrameworkService entityFrameworkService, 
             IModelTypesLocator modelTypesLocator)

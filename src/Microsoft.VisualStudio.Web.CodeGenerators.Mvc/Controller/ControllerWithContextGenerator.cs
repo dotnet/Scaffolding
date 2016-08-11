@@ -81,7 +81,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             ValidateNameSpaceName(controllerGeneratorModel);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
 
-            var modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetMetadata(controllerGeneratorModel, EntityFrameworkService, ModelTypesLocator);
+            var modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(controllerGeneratorModel, EntityFrameworkService, ModelTypesLocator);
 
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
@@ -120,6 +120,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
                 var viewGenerator = ActivatorUtilities.CreateInstance<ModelBasedViewScaffolder>(ServiceProvider);
+                
+                //TODO need logic for areas
+                var viewBaseOutputPath = Path.Combine(
+                    ApplicationInfo.ApplicationBasePath,
+                    Constants.ViewsFolderName,
+                    controllerRootName);
 
                 await layoutDependencyInstaller.Execute();
                 var viewGeneratorModel = new ViewGeneratorModel()
@@ -128,21 +134,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                     PartialView = false,
                     LayoutPage = controllerGeneratorModel.LayoutPage,
                     Force = controllerGeneratorModel.Force,
-                    RelativeFolderPath = Path.Combine(
-                        ApplicationInfo.ApplicationBasePath,
-                        Constants.ViewsFolderName,
-                        controllerRootName),
+                    RelativeFolderPath = viewBaseOutputPath,
                     ReferenceScriptLibraries = controllerGeneratorModel.ReferenceScriptLibraries
                 };
 
                 var viewAndTemplateNames = new Dictionary<string, string>();
-
-                //TODO need logic for areas
-                var viewBaseOutputPath = Path.Combine(
-                        ApplicationInfo.ApplicationBasePath,
-                        Constants.ViewsFolderName,
-                        controllerRootName);
-
                 foreach (var viewTemplate in _views)
                 {
                     var viewName = viewTemplate == "List" ? "Index" : viewTemplate;

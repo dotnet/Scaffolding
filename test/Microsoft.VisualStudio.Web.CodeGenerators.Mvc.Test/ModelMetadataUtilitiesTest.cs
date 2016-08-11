@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
-            var result = await ModelMetadataUtilities.ValidateModelAndGetMetadata(
+            var result = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                     model,
                     efService.Object,
                     modelTypesLocator.Object);
@@ -133,7 +133,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
-            result = await ModelMetadataUtilities.ValidateModelAndGetMetadata(
+            result = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                     model,
                     efService.Object,
                     modelTypesLocator.Object);

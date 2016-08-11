@@ -59,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             }
 
             ViewScaffolderBase scaffolder = null;
-            if (viewGeneratorModel.ModelClass == null)
+            if (string.IsNullOrEmpty(viewGeneratorModel.ModelClass))
             {
                 scaffolder = ActivatorUtilities.CreateInstance<EmptyViewScaffolder>(_serviceProvider);
             }

@@ -78,7 +78,8 @@ namespace E2E_Test
                 "--model",
                 "WebApplication1.Models.Car",
                 "--dataContext",
-                "WebApplication1.Models.CarContext"
+                "WebApplication1.Models.CarContext",
+                "--referenceScriptLibraries"
             };
 
             Scaffold(args);
@@ -92,6 +93,7 @@ namespace E2E_Test
             VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("CarViews", "Details.cshtml"));
             VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("CarViews", "Edit.cshtml"));
             VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("CarViews", "Index.cshtml"));
+            VerifyFileAndContent(Path.Combine(testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
 
             _fixture.FilesToCleanUp.Add(generatedFilePath);
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Create.cshtml"));
@@ -100,6 +102,7 @@ namespace E2E_Test
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Details.cshtml"));
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Edit.cshtml"));
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Index.cshtml"));
+            _fixture.FilesToCleanUp.Add(Path.Combine(testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"));
         }
 
         [Fact]

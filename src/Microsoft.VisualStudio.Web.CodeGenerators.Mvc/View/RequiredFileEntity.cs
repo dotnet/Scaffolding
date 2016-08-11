@@ -7,7 +7,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
     public class RequiredFileEntity
     {
-
         public RequiredFileEntity(string outputPath, string templateName)
         {
             if (string.IsNullOrEmpty(outputPath))

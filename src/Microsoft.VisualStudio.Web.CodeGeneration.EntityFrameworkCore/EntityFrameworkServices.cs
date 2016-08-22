@@ -32,6 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private readonly ILogger _logger;
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         private const string EFSqlServerPackageVersion = "7.0.0-*";
+        private const string NewDbContextFolderName = "Data";
         private readonly Workspace _workspace;
 
         public EntityFrameworkServices(
@@ -370,7 +371,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var appBasePath = _applicationInfo.ApplicationBasePath;
             var outputPath = Path.Combine(
                 appBasePath,
-                "Models",
+                NewDbContextFolderName,
                 contextShortTypeName + ".cs");
 
             if (File.Exists(outputPath))

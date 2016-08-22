@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -47,13 +48,46 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 if (_properties == null)
                 {
-                    _properties = EntityType.GetProperties()
-                        .Where(p => !p.IsShadowProperty)
-                        .Select(p => new PropertyMetadata(p, DbContexType))
-                        .ToArray();
+                    _properties = GetSortedProperties(EntityType);
                 }
                 return _properties;
             }
+        }
+
+        /// <summary>
+        /// Sort properties according to reflection order.
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <returns></returns>
+        private PropertyMetadata[] GetSortedProperties(IEntityType entityType)
+        {
+            if(entityType == null)
+            {
+                throw new ArgumentNullException(nameof(entityType));
+            }
+
+            var properties = new Dictionary<string, PropertyMetadata>();
+            var entityProperties = entityType.GetProperties()
+                .Where(p => !p.IsShadowProperty)
+                .Select(p => new PropertyMetadata(p, DbContexType));
+
+            foreach(var p in entityProperties)
+            {
+                properties.Add(p.PropertyName, p);
+            }
+
+            var reflectedProperties = entityType.ClrType.GetProperties();
+            var sortedProperties = new PropertyMetadata[entityProperties.Count()];
+            int i = 0;
+            foreach(var r in reflectedProperties)
+            {
+                if(properties.ContainsKey(r.Name))
+                {
+                    sortedProperties[i++] = properties[r.Name];
+                }
+            }
+
+            return sortedProperties;
         }
 
         public PropertyMetadata[] PrimaryKeys

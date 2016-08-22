@@ -88,5 +88,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             //Assert
             Assert.Equal("Set<Product>()", entitySetName);
         }
+
+        [Fact]
+        public void Properties_Are_Sorted_According_To_Reflection_order()
+        {
+            // Arrange
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
+            var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
+
+            // Act
+            var properties = modelMetadata.Properties;
+
+            // Assert
+            Assert.Equal(properties[0].PropertyName, "ProductId");
+            Assert.Equal(properties[1].PropertyName, "ProductName");
+            Assert.Equal(properties[2].PropertyName, "CategoryId");
+            Assert.Equal(properties[3].PropertyName, "EnumProperty");
+        }
     }
 }

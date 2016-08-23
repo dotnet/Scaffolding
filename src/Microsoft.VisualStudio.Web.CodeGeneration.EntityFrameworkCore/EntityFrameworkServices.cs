@@ -439,25 +439,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(modelType));
             }
 
-            DbContext dbContextInstance;
-            try
-            {
-                dbContextInstance = TryCreateContextUsingAppCode(dbContextType, startupType);
-                if (dbContextInstance == null)
-                {
-                    var dbCon = Activator.CreateInstance(dbContextType);
-                    dbContextInstance = dbCon as DbContext;
-                }
-            }
-            catch (Exception ex)
-            {
-                while (ex is TargetInvocationException)
-                {
-                    ex = ex.InnerException;
-                }
-                _logger.LogMessage($"There was an error creating the DbContext instance to get the model. {ex.Message}", LogMessageLevel.Error);
-                throw ex;
-            }
+            DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, startupType);
 
             if (dbContextInstance == null)
             {
@@ -506,12 +488,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             catch(Exception ex)
             {
-                while (ex != null)
-                {
-                    _logger.LogMessage($"{ex.Message} StackTrace:{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}");
-                    ex = ex.InnerException;
-                }
-                return null;
+                throw ex.Unwrap(_logger);
             }
         }
 

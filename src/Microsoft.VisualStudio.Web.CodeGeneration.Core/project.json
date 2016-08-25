@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview2-final",
+  "version": "1.0.0-preview2-update1",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -11,7 +11,7 @@
   "description": "Contains the core infrastructure used by ASP.NET Core Code Generators.",
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-preview2-final",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-preview2-update1",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.Extensions.DependencyInjection": "1.0.0",
     "Newtonsoft.Json": "9.0.1"

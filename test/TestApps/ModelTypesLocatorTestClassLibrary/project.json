@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-final"
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-update1"
   },
   "frameworks": {
     "net451": {},

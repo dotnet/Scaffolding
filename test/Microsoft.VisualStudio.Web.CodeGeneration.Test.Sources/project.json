@@ -1,7 +1,7 @@
 {
   "shared": "*.cs",
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final"
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-update1"
   },
   "frameworks": {
     "netstandard1.6": {

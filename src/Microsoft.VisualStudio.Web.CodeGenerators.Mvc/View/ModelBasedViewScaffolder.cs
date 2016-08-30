@@ -68,7 +68,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             }
             else
             {
-                modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(viewGeneratorModel, _entityFrameworkService, _modelTypesLocator);
+                modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
+                    viewGeneratorModel,
+                    _entityFrameworkService,
+                    _modelTypesLocator,
+                    string.Empty);
             }
 
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);

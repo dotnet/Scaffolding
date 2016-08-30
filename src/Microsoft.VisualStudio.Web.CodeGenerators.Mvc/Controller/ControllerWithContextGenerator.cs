@@ -17,6 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
     public class ControllerWithContextGenerator : ControllerGeneratorBase
     {
+        private string _areaName = string.Empty;
         private readonly List<string> _views = new List<string>()
         {
             "Create",
@@ -80,8 +81,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
+            _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
-            var modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(controllerGeneratorModel, EntityFrameworkService, ModelTypesLocator);
+            var modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
+                controllerGeneratorModel,
+                EntityFrameworkService,
+                ModelTypesLocator,
+                _areaName);
 
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
             {
@@ -94,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             var templateModel = new ControllerWithContextTemplateModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {
                 ControllerName = controllerGeneratorModel.ControllerName,
-                AreaName = string.Empty, //ToDo
+                AreaName = _areaName,
                 UseAsync = controllerGeneratorModel.UseAsync, // This is no longer used for controllers with context.
                 ControllerNamespace = namespaceName,
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata
@@ -120,10 +126,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
                 var viewGenerator = ActivatorUtilities.CreateInstance<ModelBasedViewScaffolder>(ServiceProvider);
-                
-                //TODO need logic for areas
+
+                var areaPath = string.IsNullOrEmpty(_areaName) ? string.Empty : Path.Combine("Areas", _areaName);
                 var viewBaseOutputPath = Path.Combine(
                     ApplicationInfo.ApplicationBasePath,
+                    areaPath,
                     Constants.ViewsFolderName,
                     controllerRootName);
 

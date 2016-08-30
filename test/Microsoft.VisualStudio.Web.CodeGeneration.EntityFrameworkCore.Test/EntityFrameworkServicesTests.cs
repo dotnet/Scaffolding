@@ -105,7 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             // So we need to have an assembly which gets loaded for retrieving the type.
             BuildProject(path);
             var modelType = _modelTypesLocator.GetType("ModelTypesLocatorTestClassLibrary.Car").First();
-            var metadata = await efServices.GetModelMetadata("ModelTypesLocatorTestWebApp.Models.CarContext", modelType);
+            var metadata = await efServices.GetModelMetadata("ModelTypesLocatorTestWebApp.Models.CarContext", modelType, string.Empty);
 
             Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
             Assert.Equal(3, metadata.ModelMetadata.Properties.Length);

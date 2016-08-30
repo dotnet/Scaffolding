@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -104,6 +106,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         protected string ValidateAndGetOutputPath(CommandLineGeneratorModel generatorModel)
         {
             return ValidateAndGetOutputPath(generatorModel, generatorModel.ControllerName + Constants.CodeFileExtension);
+        }
+
+        private bool IsInArea(string appBasePath, string outputPath)
+        {
+            return outputPath.StartsWith(Path.Combine(appBasePath, "Areas") + Path.DirectorySeparatorChar);
+        }
+
+        protected string GetAreaName(string appBasePath, string outputPath)
+        {
+            if (IsInArea(appBasePath, outputPath))
+            {
+                var relativePath = outputPath.Substring(Path.Combine(appBasePath, "Areas").Length);
+                return relativePath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            }
+            return string.Empty;
         }
 
         public abstract Task Generate(CommandLineGeneratorModel controllerGeneratorModel);

@@ -108,14 +108,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType))
+            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
             var result = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                     model,
                     efService.Object,
-                    modelTypesLocator.Object);
+                    modelTypesLocator.Object,
+                    string.Empty);
 
             //Assert
             Assert.Equal(contextProcessingResult.ContextProcessingStatus, result.ContextProcessingResult.ContextProcessingStatus);
@@ -129,14 +130,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
             result = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                     model,
                     efService.Object,
-                    modelTypesLocator.Object);
+                    modelTypesLocator.Object,
+                    string.Empty);
 
             //Assert
             Assert.Equal(contextProcessingResult.ContextProcessingStatus, result.ContextProcessingResult.ContextProcessingStatus);

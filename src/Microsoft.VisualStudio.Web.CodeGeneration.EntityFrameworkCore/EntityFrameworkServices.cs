@@ -109,7 +109,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _workspace = workspace;
         }
 
-        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol)
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName)
         {
             Type dbContextType;
             SyntaxTree dbContextSyntaxTree = null;
@@ -167,7 +167,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     out modelReflectionType);
 
                 // Add file information
-                dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName));
+                dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName, areaName));
             }
             else
             {
@@ -366,11 +366,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return result;
         }
 
-        private string GetPathForNewContext(string contextShortTypeName)
+        private string GetPathForNewContext(string contextShortTypeName, string areaName)
         {
+            var areaPath = string.IsNullOrEmpty(areaName) ? string.Empty : Path.Combine("Areas", areaName);
             var appBasePath = _applicationInfo.ApplicationBasePath;
             var outputPath = Path.Combine(
                 appBasePath,
+                areaPath,
                 NewDbContextFolderName,
                 contextShortTypeName + ".cs");
 

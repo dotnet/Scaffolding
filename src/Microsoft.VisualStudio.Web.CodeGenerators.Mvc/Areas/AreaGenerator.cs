@@ -64,12 +64,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas
             }
 
             EnsureFolderLayout(model);
-            //RegisterAreaInStartup(model.Name, startupType);
 
             var readmeGenerator = ActivatorUtilities.CreateInstance<ReadMeGenerator>(_serviceProvider);
             try
             {
-                await readmeGenerator.GenerateReadmeForArea(model.Name);
+                await readmeGenerator.GenerateReadmeForArea();
             }
             catch (Exception ex)
             {

@@ -78,7 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
             }
         }
 
-        public async Task GenerateReadmeForArea(string areaName)
+        public async Task GenerateReadmeForArea()
         {
             var templateName = "ReadMe" + Constants.RazorTemplateExtension;
             var outputPath = Path.Combine(_applicationInfo.ApplicationBasePath,

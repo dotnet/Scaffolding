@@ -33,7 +33,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         internal static async Task<ModelTypeAndContextModel> ValidateModelAndGetEFMetadata(
             CommonCommandLineModel commandLineModel, 
             IEntityFrameworkService entityFrameworkService, 
-            IModelTypesLocator modelTypesLocator)
+            IModelTypesLocator modelTypesLocator,
+            string areaName)
         {
             ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
             ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
@@ -45,7 +46,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             var modelMetadata = await entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
-                model);
+                model,
+                areaName);
 
             return new ModelTypeAndContextModel()
             {

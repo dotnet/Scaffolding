@@ -79,13 +79,15 @@ namespace E2E_Test
                 "WebApplication1.Models.Car",
                 "--dataContext",
                 "WebApplication1.Models.CarContext",
-                "--referenceScriptLibraries"
+                "--referenceScriptLibraries",
+                "--relativeFolderPath",
+                Path.Combine("Areas", "Test", "Controllers")
             };
 
             Scaffold(args);
 
-            var generatedFilePath = Path.Combine(testProjectPath, "CarsWithViewController.cs");
-            var viewFolder = Path.Combine(testProjectPath, "Views", "CarsWithView");
+            var generatedFilePath = Path.Combine(testProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
+            var viewFolder = Path.Combine(testProjectPath, "Areas", "Test", "Views", "CarsWithView");
 
             VerifyFileAndContent(generatedFilePath, "CarsWithViewController.txt");
             VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("CarViews", "Create.cshtml"));

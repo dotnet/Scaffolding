@@ -26,7 +26,7 @@ namespace @Model.ControllerNamespace
         routePrefix = Model.AreaName + "/" + Model.ControllerRootName;
     }
     var modelProperties = new List<string>();
-    foreach(var property in Model.ModelMetadata.Properties)
+    foreach (var property in Model.ModelMetadata.Properties)
     {
         if (property.Scaffold)
         {
@@ -46,16 +46,21 @@ namespace @Model.ControllerNamespace
     var primaryKeyNullableTypeName = GetNullableTypeName(primaryKeyType, primaryKeyShortTypeName);
     var lambdaVar = Model.ModelVariable[0];
     var relatedProperties = new Dictionary<string, dynamic>();
-    foreach(var nav in Model.ModelMetadata.Navigations)
+    foreach (var nav in Model.ModelMetadata.Navigations)
     {
         relatedProperties.Add(nav.AssociationPropertyName, nav);
 
     }
 
     var inlineIncludes = "";
-    foreach(var property in relatedProperties.Values)
+    foreach (var property in relatedProperties.Values)
     {
         inlineIncludes += string.Format("{0}                .Include({1} => {1}.{2})", Environment.NewLine, lambdaVar, property.AssociationPropertyName);
+    }
+
+    if (!string.IsNullOrEmpty(Model.AreaName))
+    {
+    @:@string.Format("[Area(\"{0}\")]", Model.AreaName)
     }
 }
     public class @Model.ControllerName : Controller

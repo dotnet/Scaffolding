@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 
-namespace WebApplication1
+namespace WebApplication1.Areas.Test.Controllers
 {
+    [Area("Test")]
     public class CarsWithViewController : Controller
     {
         private readonly CarContext _context;
@@ -18,13 +19,13 @@ namespace WebApplication1
             _context = context;    
         }
 
-        // GET: CarsWithView
+        // GET: Test/CarsWithView
         public async Task<IActionResult> Index()
         {
             return View(await _context.Car.ToListAsync());
         }
 
-        // GET: CarsWithView/Details/5
+        // GET: Test/CarsWithView/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,13 +43,13 @@ namespace WebApplication1
             return View(car);
         }
 
-        // GET: CarsWithView/Create
+        // GET: Test/CarsWithView/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: CarsWithView/Create
+        // POST: Test/CarsWithView/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -64,7 +65,7 @@ namespace WebApplication1
             return View(car);
         }
 
-        // GET: CarsWithView/Edit/5
+        // GET: Test/CarsWithView/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,7 +81,7 @@ namespace WebApplication1
             return View(car);
         }
 
-        // POST: CarsWithView/Edit/5
+        // POST: Test/CarsWithView/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -115,7 +116,7 @@ namespace WebApplication1
             return View(car);
         }
 
-        // GET: CarsWithView/Delete/5
+        // GET: Test/CarsWithView/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,7 +134,7 @@ namespace WebApplication1
             return View(car);
         }
 
-        // POST: CarsWithView/Delete/5
+        // POST: Test/CarsWithView/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

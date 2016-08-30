@@ -3,10 +3,11 @@
 Scaffolding has generated all the files and added the required dependencies.
 
 However the Application's Startup code may required additional changes for things to work end to end.
+@{if(!Model.IsAreaReadMe)
+{
 
-Add the following namespace usings if not already added:
+@:Add the following namespace usings if not already added:
 
-@{
     var allNamespaces = new SortedSet<string>(StringComparer.Ordinal);
     foreach (var list in Model.StartupList)
     {
@@ -16,13 +17,13 @@ Add the following namespace usings if not already added:
     {
 @:using @namespaceName;
     }
-}
-Add the following code to the end of Configure method in your Application's Startup class if not already done:
 
+@:Add the following code to the end of Configure method in your Application's Startup class if not already done:
+@:
             // Set up application services
-            app.UseServices(services =>
-            {
-@{
+            @:app.UseServices(services =>
+            @:{
+
     var count = Model.StartupList.Count;
     for (var index = 0; index < count; index++)
     {
@@ -38,9 +39,8 @@ Add the following code to the end of Configure method in your Application's Star
 @:
         }
     }
-}            });
+@:}            });
 
-@{
     for (var index = 0; index < count; index++)
     {
         var list = Model.StartupList[index];
@@ -54,5 +54,19 @@ Add the following code to the end of Configure method in your Application's Star
         {
 @:
         }
+        }
+
     }
+    else
+    {
+@:Add the following code to the Configure method in your Application's Startup class if not already done:
+@:
+        @:app.UseMvc(routes =>
+        @:{
+        @:  route.MapRoute(
+        @:    name : "areas",
+        @:    template : "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+        @:  );
+        @:});
 }
+    }

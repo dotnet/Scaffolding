@@ -78,6 +78,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
             }
         }
 
+        public async Task GenerateReadmeForArea(string areaName)
+        {
+            var templateName = "ReadMe" + Constants.RazorTemplateExtension;
+            var outputPath = Path.Combine(_applicationInfo.ApplicationBasePath,
+                Constants.ReadMeOutputFileName);
+
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath,
+                templateName,
+                TemplateFolders,
+                new ReadMeTemplateModel()
+                {
+                    StartupList = null,
+                    RootNamespace = string.Empty, //Does not matter.
+                    IsAreaReadMe = true
+                });
+        }
+
         private async Task GenerateStartup(List<StartupContent> startupList)
         {
             var templateName = "Startup" + Constants.RazorTemplateExtension;
@@ -107,7 +124,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 new ReadMeTemplateModel()
                 {
                     StartupList = startupList,
-                    RootNamespace = string.Empty //Does not matter.
+                    RootNamespace = string.Empty, //Does not matter.
+                    IsAreaReadMe = false
                 });
         }
     }
@@ -117,5 +135,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         public List<StartupContent> StartupList { get; set; }
 
         public string RootNamespace { get; set; }
+
+        public bool IsAreaReadMe { get; set; }
     }
 }

@@ -12,12 +12,13 @@ namespace E2E_Test
         public ScaffoldingE2ETestFixture()
         {
             FilesToCleanUp = new List<string>();
+            FoldersToCleanUp = new List<string>();
             BaseLineFilesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Baseline");
             TestProjectDirectory = Path.GetFullPath(@"../TestApps/WebApplication1");
         }
 
         public List<string> FilesToCleanUp { get; private set; }
-
+        public List<string> FoldersToCleanUp { get; private set; }
         public string BaseLineFilesDirectory { get; private set; }
 
         public string TestProjectDirectory { get; private set; }
@@ -30,6 +31,13 @@ namespace E2E_Test
             {
                 Console.WriteLine($"     {file}");
                 File.Delete(Path.GetFullPath(file));
+            }
+
+            Console.WriteLine("Cleaning up generated folders");
+            foreach(var folder in FoldersToCleanUp)
+            {
+                Console.WriteLine($"    {folder}");
+                Directory.Delete(folder);
             }
         }
     }

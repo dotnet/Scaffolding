@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
-    internal class ValidationUtil
+    public class ValidationUtil
     {
         public static ModelType ValidateType(string typeName,
             string argumentName,
@@ -17,6 +17,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             if (string.IsNullOrEmpty(typeName))
             {
                 throw new ArgumentException(string.Format(MessageStrings.ProvideValidArgument, argumentName));
+            }
+
+            if(modelTypesLocator == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypesLocator));
             }
 
             var candidateModelTypes = modelTypesLocator.GetType(typeName).ToList();

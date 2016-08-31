@@ -15,13 +15,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             var inner = ex;
+            if (logger != null)
+            {
+                logger.LogMessage($"{inner.Message} StackTrace:{Environment.NewLine}{inner.StackTrace}{Environment.NewLine}");
+            }
+
             while (inner.InnerException != null)
             {
-                if(logger != null)
-                {
-                    logger.LogMessage($"{ex.Message} StackTrace:{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}");
-                }
                 inner = inner.InnerException;
+                if (logger != null)
+                {
+                    logger.LogMessage($"{inner.Message} StackTrace:{Environment.NewLine}{inner.StackTrace}{Environment.NewLine}");
+                }
             }
 
             return inner;

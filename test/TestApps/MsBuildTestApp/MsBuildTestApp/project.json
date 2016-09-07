@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "Microsoft.NETCore.Sdk": {
+      "version": "1.0.0-alpha-20160902-5"
+    }    
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "portable-net45+win8+wp8+wpa81"
+    }
+  }
+}

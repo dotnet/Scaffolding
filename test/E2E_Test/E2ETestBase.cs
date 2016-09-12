@@ -10,8 +10,6 @@ namespace E2E_Test
 {
     public class E2ETestBase
     {
-        protected static string testProjectPath = Path.GetFullPath(@"../../TestApps/WebApplication1");
-
         protected ScaffoldingE2ETestFixture _fixture;
         protected string _testProjectPath;
 
@@ -19,6 +17,7 @@ namespace E2E_Test
         {
             _fixture = fixture;
             Directory.SetCurrentDirectory(_fixture.TestProjectDirectory);
+            _testProjectPath = fixture.TestProjectDirectory;
         }
 
         protected void Scaffold(string[] args)

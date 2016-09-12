@@ -20,21 +20,21 @@ namespace E2E_Test
             var args = new string[]
             {
                 "-p",
-                testProjectPath,
+                _testProjectPath,
                 "area",
                 "Admin"
             };
 
             Scaffold(args);
-            var generatedFilePath = Path.Combine(testProjectPath, "ScaffoldingReadme.txt");
+            var generatedFilePath = Path.Combine(_testProjectPath, "ScaffoldingReadMe.txt");
             var baselinePath = Path.Combine("ReadMe", "Readme.txt");
 
             var foldersToVerify = new string[]
             {
-                Path.Combine(testProjectPath, "Areas", "Admin", "Controllers"),
-                Path.Combine(testProjectPath, "Areas", "Admin", "Data"),
-                Path.Combine(testProjectPath, "Areas", "Admin", "Models"),
-                Path.Combine(testProjectPath, "Areas", "Admin", "Views")
+                Path.Combine(_testProjectPath, "Areas", "Admin", "Controllers"),
+                Path.Combine(_testProjectPath, "Areas", "Admin", "Data"),
+                Path.Combine(_testProjectPath, "Areas", "Admin", "Models"),
+                Path.Combine(_testProjectPath, "Areas", "Admin", "Views")
             };
 
             VerifyFileAndContent(generatedFilePath, baselinePath);

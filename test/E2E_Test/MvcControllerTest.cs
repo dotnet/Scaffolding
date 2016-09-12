@@ -10,9 +10,9 @@ namespace E2E_Test
     [Collection("ScaffoldingE2ECollection")]
     public class MvcControllerTest : E2ETestBase
     {
-        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-p", testProjectPath, "controller", "--controllerName", "EmptyController" };
-        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-p", testProjectPath, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
-        private static string[] READ_WRITE_CONTROLLER = new string[] { "-p", testProjectPath, "controller", "--controllerName", "ActionsController", "--readWriteActions" };
+        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-p", ".", "controller", "--controllerName", "EmptyController" };
+        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-p", ".", "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
+        private static string[] READ_WRITE_CONTROLLER = new string[] { "-p", ".", "controller", "--controllerName", "ActionsController", "--readWriteActions" };
 
         public MvcControllerTest(ScaffoldingE2ETestFixture fixture) : base(fixture)
         {
@@ -24,9 +24,9 @@ namespace E2E_Test
             {
                 return new[]
                 {
-                    new object[] { "EmptyController.txt", Path.Combine(testProjectPath, "EmptyController.cs"), EMPTY_CONTROLLER_ARGS },
-                    new object[] { "EmptyController_withrelativepath.txt", Path.Combine(testProjectPath, "Controllers", "EmptyController.cs"), EMPTY_CONTROLLER_WITH_RELATIVE_PATH },
-                    new object[] { "ReadWriteController.txt", Path.Combine(testProjectPath, "ActionsController.cs"), READ_WRITE_CONTROLLER }
+                    new object[] { "EmptyController.txt", "EmptyController.cs", EMPTY_CONTROLLER_ARGS },
+                    new object[] { "EmptyController_withrelativepath.txt", Path.Combine("Controllers", "EmptyController.cs"), EMPTY_CONTROLLER_WITH_RELATIVE_PATH },
+                    new object[] { "ReadWriteController.txt", "ActionsController.cs", READ_WRITE_CONTROLLER }
                 };
             }
         }
@@ -36,6 +36,7 @@ namespace E2E_Test
         {
             Scaffold(args);
 
+            generatedFilePath = Path.Combine(_testProjectPath, generatedFilePath);
             VerifyFileAndContent(generatedFilePath, baselineFile);
 
             _fixture.FilesToCleanUp.Add(generatedFilePath);
@@ -47,7 +48,7 @@ namespace E2E_Test
             var args = new string[]
             {
                 "-p",
-                testProjectPath,
+                _testProjectPath,
                 "controller",
                 "--controllerName",
                 "CarsController",
@@ -59,7 +60,7 @@ namespace E2E_Test
             };
 
             Scaffold(args);
-            var generatedFilePath = Path.Combine(testProjectPath, "CarsController.cs");
+            var generatedFilePath = Path.Combine(_testProjectPath, "CarsController.cs");
             VerifyFileAndContent(generatedFilePath, "CarsController.txt");
 
             _fixture.FilesToCleanUp.Add(generatedFilePath);
@@ -71,7 +72,7 @@ namespace E2E_Test
             var args = new string[]
             {
                 "-p",
-                testProjectPath,
+                _testProjectPath,
                 "controller",
                 "--controllerName",
                 "CarsWithViewController",
@@ -86,8 +87,8 @@ namespace E2E_Test
 
             Scaffold(args);
 
-            var generatedFilePath = Path.Combine(testProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
-            var viewFolder = Path.Combine(testProjectPath, "Areas", "Test", "Views", "CarsWithView");
+            var generatedFilePath = Path.Combine(_testProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
+            var viewFolder = Path.Combine(_testProjectPath, "Areas", "Test", "Views", "CarsWithView");
 
             VerifyFileAndContent(generatedFilePath, "CarsWithViewController.txt");
             VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("CarViews", "Create.cshtml"));
@@ -95,7 +96,7 @@ namespace E2E_Test
             VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("CarViews", "Details.cshtml"));
             VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("CarViews", "Edit.cshtml"));
             VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("CarViews", "Index.cshtml"));
-            VerifyFileAndContent(Path.Combine(testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
+            VerifyFileAndContent(Path.Combine(_testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
 
             _fixture.FilesToCleanUp.Add(generatedFilePath);
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Create.cshtml"));
@@ -104,7 +105,7 @@ namespace E2E_Test
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Details.cshtml"));
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Edit.cshtml"));
             _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Index.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"));
+            _fixture.FilesToCleanUp.Add(Path.Combine(_testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"));
         }
 
         [Fact]
@@ -113,7 +114,7 @@ namespace E2E_Test
             var args = new string[]
             {
                 "-p",
-                testProjectPath,
+                _testProjectPath,
                 "controller",
                 "--controllerName",
                 "ProductsController",
@@ -125,8 +126,8 @@ namespace E2E_Test
 
             Scaffold(args);
 
-            var generatedFilePath = Path.Combine(testProjectPath, "ProductsController.cs");
-            var viewFolder = Path.Combine(testProjectPath, "Views", "Products");
+            var generatedFilePath = Path.Combine(_testProjectPath, "ProductsController.cs");
+            var viewFolder = Path.Combine(_testProjectPath, "Views", "Products");
 
             VerifyFileAndContent(generatedFilePath, "ProductsController.txt");
             VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("ProductViews", "Create.cshtml"));

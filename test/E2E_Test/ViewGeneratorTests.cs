@@ -13,9 +13,9 @@ namespace E2E_Test
     [Collection("ScaffoldingE2ECollection")]
     public class ViewGeneratorTests : E2ETestBase
     {
-        private static string[] EMPTY_VIEW_ARGS = new string[] { "-p", testProjectPath, "view", "EmptyView", "Empty" };
-        private static string[] VIEW_WITH_DATACONTEXT = new string[] { "-p", testProjectPath, "view", "CarCreate", "Create", "--model", "WebApplication1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
-        private static string[] VIEW_NO_DATACONTEXT = new string[] { "-p", testProjectPath, "view", "CarDetails", "Details", "--model", "WebApplication1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--partialView" };
+        private static string[] EMPTY_VIEW_ARGS = new string[] { "-p", ".", "view", "EmptyView", "Empty" };
+        private static string[] VIEW_WITH_DATACONTEXT = new string[] { "-p", ".", "view", "CarCreate", "Create", "--model", "WebApplication1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
+        private static string[] VIEW_NO_DATACONTEXT = new string[] { "-p", ".", "view", "CarDetails", "Details", "--model", "WebApplication1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--partialView" };
 
         public ViewGeneratorTests(ScaffoldingE2ETestFixture fixture) : base(fixture)
         {
@@ -27,9 +27,9 @@ namespace E2E_Test
             {
                 return new[]
                 {
-                    new object[] { Path.Combine("Views", "EmptyView.txt"), Path.Combine(testProjectPath, "EmptyView.cshtml"), EMPTY_VIEW_ARGS },
-                    new object[] { Path.Combine("Views", "CarCreate.txt"), Path.Combine(testProjectPath, "CarCreate.cshtml"), VIEW_WITH_DATACONTEXT },
-                    new object[] { Path.Combine("Views", "CarDetails.txt"), Path.Combine(testProjectPath, "CarDetails.cshtml"), VIEW_NO_DATACONTEXT }
+                    new object[] { Path.Combine("Views", "EmptyView.txt"), "EmptyView.cshtml", EMPTY_VIEW_ARGS },
+                    new object[] { Path.Combine("Views", "CarCreate.txt"), "CarCreate.cshtml", VIEW_WITH_DATACONTEXT },
+                    new object[] { Path.Combine("Views", "CarDetails.txt"),"CarDetails.cshtml", VIEW_NO_DATACONTEXT }
                 };
             }
         }
@@ -38,7 +38,7 @@ namespace E2E_Test
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
             Scaffold(args);
-
+            generatedFilePath = Path.Combine(_testProjectPath, generatedFilePath);
             VerifyFileAndContent(generatedFilePath, baselineFile);
             _fixture.FilesToCleanUp.Add(generatedFilePath);
         }

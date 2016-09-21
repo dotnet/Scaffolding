@@ -8,7 +8,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.Test
 {
     public class RoslynWorkspaceTests
     {
-        [Fact]
+        //[Fact]
         public void TestRoslynWorkspaceCreation()
         {
             var context = new MsBuildProjectContext(@"../TestApps/MsBuildTestApp/MsBuildTestApp/MsBuildTestApp.csproj", "debug");

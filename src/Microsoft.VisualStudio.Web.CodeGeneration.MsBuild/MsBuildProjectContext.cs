@@ -7,6 +7,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
@@ -42,16 +43,32 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         private BuildResult RunDesignTimeBuild(Project project)
         {
             var projectInstance = project.CreateProjectInstance();
-            var buildRequest = new BuildRequestData(projectInstance, new[] { "Build" });
+            EnsureTargetDirectoryExists(projectInstance);
+
+            // The Build target currently fails. There is some versioning and target issues that still need to be worked on.
+            var buildRequest = new BuildRequestData(projectInstance, new[] { /*"Build",*/ "GenerateBuildDependencyFile" }, null, BuildRequestDataFlags.ProvideProjectStateAfterBuild);
             var buildParams = new BuildParameters(project.ProjectCollection);
 
+            // Add a logger so that if the deps json generation fails,we see the errors on the console.
+            buildParams.Loggers = new List<Build.Framework.ILogger>() { new Build.Logging.ConsoleLogger(LoggerVerbosity.Quiet) };
             var result = BuildManager.DefaultBuildManager.Build(buildParams, buildRequest);
 
-            // this is a hack for failed project builds. ProjectStateAfterBuild == null after a failed build
-            // But the properties are still available to be read
-            result.ProjectStateAfterBuild = projectInstance;
-
+            if (result.ProjectStateAfterBuild == null)
+            {
+                // this is a hack for failed project builds. ProjectStateAfterBuild == null after a failed build
+                // But the properties are still available to be read
+                result.ProjectStateAfterBuild = projectInstance;
+            }
             return result;
+        }
+
+        private void EnsureTargetDirectoryExists(ProjectInstance projectInstance)
+        {
+            var targetDir = FindProperty(projectInstance, "TargetDir");
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
         }
 
         private static Project CreateProject(string filePath, string configuration)
@@ -68,7 +85,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
                 { "Configuration", configuration },
                 { "GenerateDependencyFile", "true" },
                 { "DesignTimeBuild", "true" },
-                { "MSBuildExtensionsPath", sdkPath }
+                { "MSBuildExtensionsPath", sdkPath },
+                { "DotNetHostPath", new DotNet.Cli.Utils.Muxer().MuxerPath },
+                {"AutoGenerateBindingRedirects", "true" }
             };
 
             var xmlReader = XmlReader.Create(new FileStream(filePath, FileMode.Open));
@@ -98,4 +117,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         public string TargetDirectory { get; }
         public MsBuildProjectFile ProjectFile => new MsBuildProjectFile(_project);
     }
+
+    //internal class BuildLogger : Build.Framework.ILogger
+    //{
+    //    public string Parameters
+    //    {
+    //        get;
+    //        set;
+    //    }
+
+    //    public LoggerVerbosity Verbosity
+    //    {
+    //        get;
+    //        set;
+    //    }
+
+    //    public void Initialize(IEventSource eventSource)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+
+    //    public void Shutdown()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }

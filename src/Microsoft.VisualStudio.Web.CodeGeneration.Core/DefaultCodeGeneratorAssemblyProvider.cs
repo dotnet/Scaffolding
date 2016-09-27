@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {

@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
-using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {

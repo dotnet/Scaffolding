@@ -14,9 +14,17 @@
     "Microsoft.DotNet.ProjectModel.Workspaces": "1.0.0-*",
     "Microsoft.Extensions.PlatformAbstractions": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo": "1.0.0-*",
     "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Threading.Tasks": {
+          "type": "build"
+        }
+      }
+    },
     "netstandard1.6": {
       "imports": [
         "dotnet5.6",

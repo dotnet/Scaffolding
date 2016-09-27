@@ -23,6 +23,8 @@
     }
   },
   "dependencies": {
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
     "Microsoft.Extensions.DotnetToolDispatcher.Sources": {
       "version": "1.1.0-*",
       "type": "build"

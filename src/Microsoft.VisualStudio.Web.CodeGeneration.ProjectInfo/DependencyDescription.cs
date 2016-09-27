@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Framework;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
+namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
     public class DependencyDescription
     {
@@ -50,38 +49,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             }
         }
 
-        internal void AddDependency(Dependency d)
+        public void AddDependency(Dependency d)
         {
             Requires.NotNull(d);
             if (!_dependencies.Contains(d))
             {
                 _dependencies.Add(d);
             }
-        }
-
-        public static DependencyDescription FromTaskItem(ITaskItem item)
-        {
-            Requires.NotNull(item);
-
-            
-            var version = item.GetMetadata("Version");
-            var path = item.GetMetadata("Path");
-            var type = item.GetMetadata("Type");
-            var resolved = item.GetMetadata("Resolved");
-            var itemSpec = item.ItemSpec;
-
-            // For type == Target, we do not get Name in the metadata. This is a special node where the dependencies are 
-            // the direct dependencies of the project.
-            var name = ("Target".Equals(type, StringComparison.OrdinalIgnoreCase))
-                ? itemSpec
-                : item.GetMetadata("Name");
-
-            if (string.IsNullOrEmpty(name))
-            {
-                return null;
-            }
-
-            return new DependencyDescription(name, path, itemSpec, version, type, resolved);
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using NuGet.Frameworks;
 using Microsoft.Build.Evaluation;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 {
@@ -128,7 +129,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         private ResolvedReference BuildResolvedReference(ProjectItemInstance i)
         {
-            return ResolvedReference.FromProjectItem(i);
+            return ProjectUtilities.CreateResolvedReferenceFromProjectItem(i);
         }
 
         private void ProcessDependencyResolutionResult(TargetResult result)
@@ -182,7 +183,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         private DependencyDescription ProcessDependencyResolutionItem(ITaskItem item)
         {
-            return DependencyDescription.FromTaskItem(item);
+            return ProjectUtilities.CreateDependencyDescriptionFromTaskItem(item);
         }
 
         private void SetProjectProperties(ProjectInstance projectInstance)
@@ -209,15 +210,43 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         public MsBuildProjectContext CreateMsBuildProjectContext()
         {
+            var rootProjectMsBuildFile = new MsBuildProjectFile(_project.FullPath,
+                _project.GetItems("Compile").Select(i => i.EvaluatedInclude),
+                _project.GetItems("ProjectReferences").Select(i => i.EvaluatedInclude),
+                _project.GetItems("Reference").Select(i => i.EvaluatedInclude),
+                _project.GlobalProperties
+                );
+
+            var dependencyProjectFiles = GetDependencyProjectFiles(_project);
+
             return new MsBuildProjectContext(ProjectName,
                 Configuration,
                 ProjectFullPath,
-                new MsBuildProjectFile(_project),
+                rootProjectMsBuildFile,
                 TargetFramework,
                 Platform,
                 Config,
                 DepsJson,
-                RootNamespace);
+                RootNamespace,
+                dependencyProjectFiles);
+        }
+
+        private IEnumerable<MsBuildProjectFile> GetDependencyProjectFiles(Project _project)
+        {
+            List<MsBuildProjectFile> files = new List<MsBuildProjectFile>();
+
+            //foreach (var proj in _project.GetItems("ProjectReferences"))
+            //{
+            //    var path = proj.EvaluatedInclude;
+            //    if (!Path.IsPathRooted(path))
+            //    {
+            //        path = Path.Combine(_project.FullPath, path);
+            //    }
+
+            //    var dependencyProject = ProjectUtilities.CreateProject(path, _project.GlobalProperties);
+            //}
+
+            return files;
         }
 
         public ProjectDependencyProvider CreateDependencyProvider()
@@ -227,13 +256,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
     }
 
-    public enum DependencyType
-    {
-        Target,
-        Package,
-        Assembly,
-        Project,
-        AnalyzerAssembly,
-        Unknown
-    }
+    
 }

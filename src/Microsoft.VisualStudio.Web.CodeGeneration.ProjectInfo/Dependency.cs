@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
+namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
     public class Dependency
     {

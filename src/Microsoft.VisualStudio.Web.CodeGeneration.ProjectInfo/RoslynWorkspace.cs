@@ -7,14 +7,14 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
+using PInfo = Microsoft.CodeAnalysis.ProjectInfo;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
+namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
     public class RoslynWorkspace : Workspace
     {
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
-        private HashSet<string> _projectReferences = new HashSet<string>();
-        //MsBuildProjectContext _context;
+
         public RoslynWorkspace(MsBuildProjectContext context,
             ProjectDependencyProvider projectDependencyProvider,
             string configuration = "debug")
@@ -23,8 +23,61 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             Requires.NotNull(context);
             Requires.NotNull(projectDependencyProvider);
 
-            var id = AddProject(context.ProjectFile, configuration, context.ProjectFullPath);
+            var id = AddProject(context.ProjectFile, configuration);
+
+            // Since we have resolved all references, we can directly use them as MetadataReferences.
+            // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
+
+            //foreach (var file in context.DependencyProjectFiles)
+            //{
+            //    AddProjectReference(file, configuration);
+            //}
+
             AddMetadataReferences(projectDependencyProvider, id);
+        }
+
+        private ProjectId AddProject(MsBuildProjectFile projectFile, string configuration)
+        {
+            var fullPath = projectFile.FullPath;
+
+            var projectName = Path.GetFileNameWithoutExtension(fullPath);
+            var projectInfo = PInfo.Create(
+                ProjectId.CreateNewId(),
+                VersionStamp.Create(),
+                projectName,
+                projectName,
+                LanguageNames.CSharp,
+                fullPath);
+
+            OnProjectAdded(projectInfo);
+
+            foreach (var file in projectFile.SourceFiles)
+            {
+                var filePath = Path.IsPathRooted(file)
+                    ? file :
+                    Path.Combine(Path.GetDirectoryName(fullPath), file);
+                AddSourceFile(projectInfo, filePath);
+            }
+
+            return projectInfo.Id;
+        }
+
+        private void AddSourceFile(PInfo projectInfo, string file)
+        {
+            if(!File.Exists(file))
+            {
+                return;
+            }
+
+            using (var stream = File.OpenRead(file))
+            {
+                var sourceText = SourceText.From(stream, Encoding.UTF8);
+                var id = DocumentId.CreateNewId(projectInfo.Id);
+                var version = VersionStamp.Create();
+
+                var loader = TextLoader.From(TextAndVersion.Create(sourceText, version));
+                OnDocumentAdded(DocumentInfo.Create(id, file, filePath: file, loader: loader));
+            }
         }
 
         private void AddMetadataReferences(ProjectDependencyProvider projectDependencyProvider, ProjectId id)
@@ -43,61 +96,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
                 {
                     OnMetadataReferenceAdded(id, metadataRef);
                 }
-            }
-        }
-
-        private ProjectId AddProject(MsBuildProjectFile projectFile, string configuration, string fullPath)
-        {
-            var projectName = Path.GetFileNameWithoutExtension(fullPath);
-            var projectInfo = ProjectInfo.Create(
-                ProjectId.CreateNewId(),
-                VersionStamp.Create(),
-                projectName,
-                projectName,
-                LanguageNames.CSharp,
-                fullPath);
-
-            OnProjectAdded(projectInfo);
-
-            foreach (var file in projectFile.SourceFiles)
-            {
-                var filePath = Path.IsPathRooted(file.EvaluatedInclude)
-                    ? file.EvaluatedInclude :
-                    Path.Combine(Path.GetDirectoryName(fullPath), file.EvaluatedInclude);
-                AddSourceFile(projectInfo, filePath);
-            }
-
-            foreach(var project in projectFile.ProjectReferences)
-            {
-                var projPath = project.EvaluatedInclude;
-                if (!Path.IsPathRooted(projPath))
-                {
-                    Path.Combine(Path.GetDirectoryName(fullPath), projPath);
-                }
-                var id = AddProject(MsBuildProjectFile.FromProjectFilePath(projPath, configuration, projectFile.GlobalProperties),
-                    configuration,
-                    projPath);
-                OnProjectReferenceAdded(id, new ProjectReference(id));
-            }
-
-            return projectInfo.Id;
-        }
-
-        private void AddSourceFile(ProjectInfo projectInfo, string file)
-        {
-            if(!File.Exists(file))
-            {
-                return;
-            }
-
-            using (var stream = File.OpenRead(file))
-            {
-                var sourceText = SourceText.From(stream, Encoding.UTF8);
-                var id = DocumentId.CreateNewId(projectInfo.Id);
-                var version = VersionStamp.Create();
-
-                var loader = TextLoader.From(TextAndVersion.Create(sourceText, version));
-                OnDocumentAdded(DocumentInfo.Create(id, file, filePath: file, loader: loader));
             }
         }
 

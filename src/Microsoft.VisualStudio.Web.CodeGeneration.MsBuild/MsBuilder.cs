@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Xml;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 
@@ -76,14 +74,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             FillInDefaultProperties(globalProperties);
 
             return ProjectUtilities.CreateProject(filePath, configuration, globalProperties);
-
-            //var xmlReader = XmlReader.Create(new FileStream(filePath, FileMode.Open));
-            //var projectCollection = new ProjectCollection();
-            //var xml = ProjectRootElement.Create(xmlReader, projectCollection);
-            //xml.FullPath = filePath;
-
-            //var project = new Project(xml, globalProperties, /*toolsVersion*/ null, projectCollection);
-            //return project;
         }
 
         private static void FillInDefaultProperties(Dictionary<string, string> globalProperties)

@@ -1,6 +1,7 @@
 using NuGet.Frameworks;
+using System.Collections.Generic;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
+namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
     public class MsBuildProjectContext
     {
@@ -13,10 +14,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             string platform,
             string configFile,
             string depsJson,
-            string rootNameSpace)
+            string rootNameSpace,
+            IEnumerable<MsBuildProjectFile> dependencyProjects)
         {
             Requires.NotNull(targetFramework);
-            //Requires.NotNull(projectFile);
+            Requires.NotNull(projectFile);
             Requires.NotNullOrEmpty(configuration);
             Requires.NotNullOrEmpty(fullpath);
 
@@ -43,6 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         public string RootNamespace { get; private set; }
         public string TargetDirectory { get; private set; }
         public MsBuildProjectFile ProjectFile { get; private set; }
+        public IEnumerable<MsBuildProjectFile> DependencyProjectFiles { get; private set; }
 
     }
 }

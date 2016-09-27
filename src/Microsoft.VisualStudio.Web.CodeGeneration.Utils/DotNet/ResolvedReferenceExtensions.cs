@@ -1,11 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection.PortableExecutable;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 {

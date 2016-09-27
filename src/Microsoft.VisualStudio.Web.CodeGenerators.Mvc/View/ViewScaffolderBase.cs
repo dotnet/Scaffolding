@@ -9,27 +9,28 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using System.IO;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
     public abstract class ViewScaffolderBase: CommonGeneratorBase
     {
-        protected readonly ILibraryManager _libraryManager;
+        protected readonly ProjectDependencyProvider _projectDependencyProvider;
         protected readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
         public ViewScaffolderBase(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
             : base(applicationInfo)
         {
-            if (libraryManager == null)
+            if (projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryManager));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
 
             if (applicationInfo == null)
@@ -52,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            _libraryManager = libraryManager;
+            _projectDependencyProvider = projectDependencyProvider;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -66,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "ViewGenerator" },
-                    libraryManager: _libraryManager);
+                    projectDependencyProvider: _projectDependencyProvider);
             }
         }
 

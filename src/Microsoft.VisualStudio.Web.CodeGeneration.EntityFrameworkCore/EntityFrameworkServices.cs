@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -23,8 +24,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     {
         private readonly IDbContextEditorServices _dbContextEditorServices;
         private readonly IApplicationInfo _applicationInfo;
-        private readonly ILibraryManager _libraryManager;
-        private readonly ILibraryExporter _libraryExporter;
+        //private readonly ILibraryManager _libraryManager;
+        //private readonly ILibraryExporter _libraryExporter;
         private readonly ICodeGenAssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
@@ -34,10 +35,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string EFSqlServerPackageVersion = "7.0.0-*";
         private const string NewDbContextFolderName = "Data";
         private readonly Workspace _workspace;
+        private readonly ProjectDependencyProvider _projectDependencyProvider;
+
 
         public EntityFrameworkServices(
-            ILibraryManager libraryManager,
-            ILibraryExporter libraryExporter,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGenAssemblyLoadContext loader,
             IModelTypesLocator modelTypesLocator,
@@ -47,14 +49,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Workspace workspace,
             ILogger logger)
         {
-            if (libraryManager == null)
+            if (projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryManager));
-            }
-
-            if (libraryExporter == null)
-            {
-                throw new ArgumentNullException(nameof(libraryExporter));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
 
             if (applicationInfo == null)
@@ -97,8 +94,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(workspace));
             }
 
-            _libraryManager = libraryManager;
-            _libraryExporter = libraryExporter;
+            _projectDependencyProvider = projectDependencyProvider;
             _applicationInfo = applicationInfo;
             _loader = loader;
             _modelTypesLocator = modelTypesLocator;
@@ -392,7 +388,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private async Task ValidateEFSqlServerDependency()
         {
-            if (_libraryManager.GetLibrary(EFSqlServerPackageName) == null)
+            if (_projectDependencyProvider.GetPackage(EFSqlServerPackageName) == null)
             {
                 await _packageInstaller.InstallPackages(new List<PackageMetadata>()
                 {

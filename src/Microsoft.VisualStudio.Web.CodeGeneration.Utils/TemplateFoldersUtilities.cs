@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             string containingProject,
             string applicationBasePath,
             string[] baseFolders,
-            ILibraryManager libraryManager)
+            ProjectDependencyProvider projectDependencyProvider)
         {
             if (containingProject == null)
             {
@@ -33,9 +33,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 throw new ArgumentNullException(nameof(baseFolders));
             }
 
-            if (libraryManager == null)
+            if (projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryManager));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
 
             var rootFolders = new List<string>();
@@ -43,17 +43,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             rootFolders.Add(applicationBasePath);
 
-            var dependency = libraryManager.GetLibrary(containingProject);
+            var dependency = projectDependencyProvider.GetPackage(containingProject);
 
             if (dependency != null)
             {
                 string containingProjectPath = "";
 
-                if (string.Equals("Project", dependency.Identity.Type.Value, StringComparison.Ordinal))
+                if (dependency.Type == DependencyType.Project)
                 {
                     containingProjectPath = Path.GetDirectoryName(dependency.Path);
                 }
-                else if (string.Equals("Package", dependency.Identity.Type.Value, StringComparison.Ordinal))
+                else if (dependency.Type == DependencyType.Package)
                 {
                     containingProjectPath = dependency.Path;
                 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
@@ -16,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly IApplicationInfo _applicationInfo;
         private readonly IModelTypesLocator _modelTypesLocator;
-        private readonly ILibraryManager _libraryManager;
+        private readonly ProjectDependencyProvider _projectDependencyProvider;
 
         public IEnumerable<string> TemplateFolders
         {
@@ -26,14 +27,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                     Constants.ThisAssemblyName,
                     _applicationInfo.ApplicationBasePath,
                     new[] { "Startup" },
-                    _libraryManager);
+                    _projectDependencyProvider);
             }
         }
 
         public ReadMeGenerator(
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IModelTypesLocator modelTypesLocator,
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo)
         {
             if (codeGeneratorActionsService == null)
@@ -46,9 +47,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 throw new ArgumentNullException(nameof(modelTypesLocator));
             }
 
-            if (libraryManager == null)
+            if (projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryManager));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
 
             if (applicationInfo == null)
@@ -58,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
-            _libraryManager = libraryManager;
+            _projectDependencyProvider = projectDependencyProvider;
             _applicationInfo = applicationInfo;
         }
 

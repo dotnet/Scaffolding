@@ -23,13 +23,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             _buildProcessor = buildProcessor;
             _buildProcessor.Init();
             _project = CreateProject(filePath, _buildProcessor.Configuration);
-            
         }
 
         public void RunMsBuild()
         {
             var result = RunMsBuild(_project);
-            _buildProcessor.ProcessBuildResult(result.ProjectStateAfterBuild, result.ResultsByTarget);
+            _buildProcessor.ProcessBuildResult(_project, result.ProjectStateAfterBuild, result.ResultsByTarget);
         }
 
         private T BuildProcessor
@@ -76,13 +75,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
             FillInDefaultProperties(globalProperties);
 
-            var xmlReader = XmlReader.Create(new FileStream(filePath, FileMode.Open));
-            var projectCollection = new ProjectCollection();
-            var xml = ProjectRootElement.Create(xmlReader, projectCollection);
-            xml.FullPath = filePath;
+            return ProjectUtilities.CreateProject(filePath, configuration, globalProperties);
 
-            var project = new Project(xml, globalProperties, /*toolsVersion*/ null, projectCollection);
-            return project;
+            //var xmlReader = XmlReader.Create(new FileStream(filePath, FileMode.Open));
+            //var projectCollection = new ProjectCollection();
+            //var xml = ProjectRootElement.Create(xmlReader, projectCollection);
+            //xml.FullPath = filePath;
+
+            //var project = new Project(xml, globalProperties, /*toolsVersion*/ null, projectCollection);
+            //return project;
         }
 
         private static void FillInDefaultProperties(Dictionary<string, string> globalProperties)

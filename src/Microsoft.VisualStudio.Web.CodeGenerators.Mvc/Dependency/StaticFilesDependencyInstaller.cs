@@ -10,18 +10,19 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Newtonsoft.Json.Linq;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
     public class StaticFilesDependencyInstaller : DependencyInstaller
     {
         public StaticFilesDependencyInstaller(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider)
-            : base(libraryManager, applicationInfo, logger, packageInstaller, serviceProvider)
+            : base(projectDependencyProvider, applicationInfo, logger, packageInstaller, serviceProvider)
         {
         }
 

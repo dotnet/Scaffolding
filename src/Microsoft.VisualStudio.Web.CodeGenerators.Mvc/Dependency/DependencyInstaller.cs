@@ -10,21 +10,22 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
     public abstract class DependencyInstaller
     {
         protected DependencyInstaller(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider)
         {
-            if (libraryManager == null)
+            if (projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryManager));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
 
             if (applicationInfo == null)
@@ -47,7 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            LibraryManager = libraryManager;
+            ProjectDependencyProvider = projectDependencyProvider;
             ApplicationEnvironment = applicationInfo;
             Logger = logger;
             PackageInstaller = packageInstaller;
@@ -85,7 +86,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         protected ILogger Logger { get; private set; }
         public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }
-        protected ILibraryManager LibraryManager { get; private set; }
+        protected ProjectDependencyProvider ProjectDependencyProvider { get; private set; }
 
         protected IEnumerable<string> TemplateFolders
         {
@@ -95,7 +96,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                     containingProject: Constants.ThisAssemblyName,
                     baseFolders: new[] { TemplateFoldersName },
                     applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
-                    libraryManager: LibraryManager);
+                    projectDependencyProvider: ProjectDependencyProvider);
             }
         }
 
@@ -122,7 +123,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
             get
             {
                 return Dependencies
-                    .Where(dep => LibraryManager.GetLibrary(dep.Name) == null);
+                    .Where(dep => ProjectDependencyProvider.GetPackage(dep.Name) == null);
             }
         }
 

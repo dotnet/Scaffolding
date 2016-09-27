@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
@@ -28,24 +29,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         };
 
         public ControllerWithContextGenerator(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
-            if (libraryManager == null)
-            {
-                throw new ArgumentNullException(nameof(libraryManager));
-            }
-
-            if (applicationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(applicationInfo));
-            }
 
             if (modelTypesLocator == null)
             {
@@ -55,21 +47,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             if (entityFrameworkService == null)
             {
                 throw new ArgumentNullException(nameof(entityFrameworkService));
-            }
-
-            if (codeGeneratorActionsService == null)
-            {
-                throw new ArgumentNullException(nameof(codeGeneratorActionsService));
-            }
-
-            if (serviceProvider == null)
-            {
-                throw new ArgumentNullException(nameof(serviceProvider));
-            }
-
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
             }
 
             ModelTypesLocator = modelTypesLocator;

@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
@@ -15,12 +16,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
     {
         private static IEnumerable<RequiredFileEntity> RequiredFiles = new List<RequiredFileEntity>();
         public EmptyViewScaffolder(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
 
         }

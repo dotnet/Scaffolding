@@ -6,29 +6,31 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class ModelTypesLocator : IModelTypesLocator
     {
-        private ILibraryExporter _libraryExporter;
+        //private ILibraryExporter _libraryExporter;
         private Workspace _projectWorkspace;
+        //private ProjectDependencyProvider _projectDependencyProvider;
 
         public ModelTypesLocator(
-            ILibraryExporter libraryExporter,
+            /*ProjectDependencyProvider projectDependencyProvider,*/
             Workspace projectWorkspace)
         {
-            if (libraryExporter == null)
-            {
-                throw new ArgumentNullException(nameof(libraryExporter));
-            }
+            //if (projectDependencyProvider == null)
+            //{
+            //    throw new ArgumentNullException(nameof(projectDependencyProvider));
+            //}
 
             if (projectWorkspace == null)
             {
                 throw new ArgumentNullException(nameof(projectWorkspace));
             }
 
-            _libraryExporter = libraryExporter;
+            //_projectDependencyProvider = projectDependencyProvider;
             _projectWorkspace = projectWorkspace;
         }
 

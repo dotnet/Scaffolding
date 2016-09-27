@@ -4,17 +4,18 @@
 using System;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
     public class MvcControllerWithReadWriteActionGenerator : MvcController
     {
-        public MvcControllerWithReadWriteActionGenerator(ILibraryManager libraryManager,
+        public MvcControllerWithReadWriteActionGenerator(ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
         protected override string GetRequiredNameError

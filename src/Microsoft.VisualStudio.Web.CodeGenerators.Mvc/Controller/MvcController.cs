@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
@@ -17,12 +18,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
     public abstract class MvcController : ControllerGeneratorBase
     {
         public MvcController(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
         public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)

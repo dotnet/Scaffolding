@@ -9,7 +9,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
 {
@@ -18,13 +18,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
         private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly ILibraryExporter _libraryExporter;
+        private readonly ProjectDependencyProvider _libraryExporter;
         private readonly IApplicationInfo _applicationInfo;
         private readonly ICodeGenAssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationInfo applicationInfo,
                                         ICodeGenAssemblyLoadContext loader,
-                                        ILibraryExporter libraryExporter)
+                                        ProjectDependencyProvider libraryExporter)
         {
             if(loader == null)
             {
@@ -87,11 +87,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var exports = _libraryExporter.GetAllExports();
+                var exports = _libraryExporter.GetAllResolvedReferences();
 
                 if (exports != null)
                 {
-                    foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReferences(throwOnError: false)))
+                    foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReference(throwOnError: false)))
                     {
                         references.Add(metadataReference);
                     }

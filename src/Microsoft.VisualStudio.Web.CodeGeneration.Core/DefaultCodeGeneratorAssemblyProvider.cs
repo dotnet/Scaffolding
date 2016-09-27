@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -24,27 +25,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 "Microsoft.VisualStudio.Web.CodeGeneration"
             };
 
-        private readonly ILibraryManager _libraryManager;
         private readonly ICodeGenAssemblyLoadContext _assemblyLoadContext;
-        private readonly ILibraryExporter _libraryExporter;
-
-        public DefaultCodeGeneratorAssemblyProvider(ILibraryManager libraryManager, ICodeGenAssemblyLoadContext loadContext, ILibraryExporter libraryExporter)
+        private ProjectDependencyProvider _projectDependencyProvider;
+         
+        public DefaultCodeGeneratorAssemblyProvider(ProjectDependencyProvider projectDependencyProvider, ICodeGenAssemblyLoadContext loadContext)
         {
-            if (libraryManager == null)
-            {
-                throw new ArgumentNullException(nameof(libraryManager));
-            }
             if(loadContext == null)
             {
                 throw new ArgumentNullException(nameof(loadContext));
             }
-            if(libraryExporter == null)
+            if(projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryExporter));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
-            _libraryManager = libraryManager;
+            _projectDependencyProvider = projectDependencyProvider;
             _assemblyLoadContext = loadContext;
-            _libraryExporter = libraryExporter;
 
         }
 
@@ -54,16 +49,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
 
                 var list = _codeGenerationFrameworkAssemblies
-                    .SelectMany(_libraryManager.GetReferencingLibraries)
+                    .SelectMany(_projectDependencyProvider.GetReferencingPackages)
                     .Distinct()
                     .Where(IsCandidateLibrary);
-                return list.Select(lib => _assemblyLoadContext.LoadFromName(new AssemblyName(lib.Identity.Name)));
+                return list.Select(lib => _assemblyLoadContext.LoadFromName(new AssemblyName(lib.Name)));
             }
         }
 
-        private bool IsCandidateLibrary(LibraryDescription library)
+        private bool IsCandidateLibrary(DependencyDescription library)
         {
-            return !_exclusions.Contains(library.Identity.Name);
+            return !_exclusions.Contains(library.Name);
         }
     }
 }

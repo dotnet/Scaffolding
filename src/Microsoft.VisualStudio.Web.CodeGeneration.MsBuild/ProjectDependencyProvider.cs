@@ -21,8 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         public DependencyDescription GetPackage(string name)
         {
             var dependency = NugetPackages
-                ?.Where(p => p.Value.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
+                ?.FirstOrDefault(p => p.Value.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             return dependency?.Value;
         }
 
@@ -31,5 +30,30 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             return NugetPackages
                 ?.Select(p => p.Value);
         }
+
+        public IEnumerable<DependencyDescription> GetReferencingPackages(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            return NugetPackages
+                ?.Select(p => p.Value)
+                .Where(p => p.Dependencies.Any(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        public IEnumerable<ResolvedReference> GetAllResolvedReferences()
+        {
+            return ResolvedReferences;
+        }
+
+        public ResolvedReference GetResolvedReference(string name)
+        {
+            return ResolvedReferences
+                ?.FirstOrDefault(r => r.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+
     }
 }

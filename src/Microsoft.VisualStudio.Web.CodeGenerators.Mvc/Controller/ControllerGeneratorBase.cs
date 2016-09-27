@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
@@ -19,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             get;
             private set;
         }
-        protected ILibraryManager LibraryManager
+        protected ProjectDependencyProvider ProjectDependencyProvider
         {
             get;
             private set;
@@ -36,16 +37,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         }
 
         public ControllerGeneratorBase(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
             : base(applicationInfo)
         {
-            if (libraryManager == null)
+            if (projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryManager));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
 
             if (applicationInfo == null)
@@ -68,7 +69,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            LibraryManager = libraryManager;
+            ProjectDependencyProvider = projectDependencyProvider;
             CodeGeneratorActionsService = codeGeneratorActionsService;
             ServiceProvider = serviceProvider;
             Logger = logger;
@@ -82,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "ControllerGenerator", "ViewGenerator" },
-                    libraryManager: LibraryManager);
+                    projectDependencyProvider: ProjectDependencyProvider);
             }
         }
 

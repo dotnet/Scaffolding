@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
@@ -20,14 +21,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         private IModelTypesLocator _modelTypesLocator;
 
         public ModelBasedViewScaffolder(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger) 
-            : base(libraryManager, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
             if (modelTypesLocator == null)
             {

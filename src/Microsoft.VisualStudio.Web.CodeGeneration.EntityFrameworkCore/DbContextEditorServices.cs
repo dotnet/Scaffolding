@@ -14,34 +14,36 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Newtonsoft.Json.Linq;
+using Microsoft.VisualStudio.Web.CodeGeneration.MsBuild;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class DbContextEditorServices : IDbContextEditorServices
     {
         private readonly IApplicationInfo _applicationInfo;
-        private readonly ILibraryManager _libraryManager;
+        //private readonly ILibraryManager _libraryManager;
         private readonly ITemplating _templatingService;
         private readonly IFilesLocator _filesLocator;
         private readonly IFileSystem _fileSystem;
+        private readonly ProjectDependencyProvider _projectDependencyProvider;
 
         public DbContextEditorServices(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
             ITemplating templatingService)
-            : this (libraryManager, applicationInfo, filesLocator, templatingService, DefaultFileSystem.Instance)
+            : this (projectDependencyProvider, applicationInfo, filesLocator, templatingService, DefaultFileSystem.Instance)
         {
         }
 
         internal DbContextEditorServices(
-            ILibraryManager libraryManager,
+            ProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
             ITemplating templatingService,
             IFileSystem fileSystem)
         {
-            _libraryManager = libraryManager;
+            _projectDependencyProvider = projectDependencyProvider;
             _applicationInfo = applicationInfo;
             _filesLocator = filesLocator;
             _templatingService = templatingService;
@@ -280,7 +282,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     containingProject: "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore",
                     applicationBasePath: _applicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "DbContext" },
-                    libraryManager: _libraryManager);
+                    projectDependencyProvider: _projectDependencyProvider);
             }
         }
     }

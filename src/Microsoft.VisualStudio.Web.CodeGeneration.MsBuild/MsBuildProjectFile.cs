@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Tools.Common;
 using System.IO;
@@ -30,6 +29,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             get
             {
                 return _project.GetItems("ProjectReference");
+            }
+        }
+
+        public ICollection<ProjectItem> AssemblyReferences
+        {
+            get
+            {
+                return _project.GetItems("Reference");
+            }
+        }
+
+        public IDictionary<string, string> GlobalProperties
+        {
+            get
+            {
+                return _project?.GlobalProperties;
             }
         }
 
@@ -68,5 +83,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         private static bool PathsEqual(string left, string right)
             => left.Equals(right, StringComparison.OrdinalIgnoreCase);
+
+        public static MsBuildProjectFile FromProjectFilePath(string path, string configuration, IDictionary<string, string> properties)
+        {
+            return new MsBuildProjectFile(ProjectUtilities.CreateProject(path, configuration, properties));
+        }
     }
 }

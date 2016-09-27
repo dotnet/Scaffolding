@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection.PortableExecutable;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
-using System.IO;
 using Microsoft.CodeAnalysis.Text;
-using System.Text;
-using System.Reflection.PortableExecutable;
-using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 {
@@ -17,64 +15,68 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
         private HashSet<string> _projectReferences = new HashSet<string>();
         //MsBuildProjectContext _context;
-        public RoslynWorkspace(MsBuildProjectContext context, string configuration = "debug") : base(MefHostServices.DefaultHost, "Custom")
+        public RoslynWorkspace(MsBuildProjectContext context,
+            ProjectDependencyProvider projectDependencyProvider,
+            string configuration = "debug")
+            : base(MefHostServices.DefaultHost, "Custom")
         {
-            var id = AddProject(context, configuration);
-            AddMetadataReferences(context, id);
+            Requires.NotNull(context);
+            Requires.NotNull(projectDependencyProvider);
+
+            var id = AddProject(context.ProjectFile, configuration, context.ProjectFullPath);
+            AddMetadataReferences(projectDependencyProvider, id);
         }
 
-        private void AddMetadataReferences(MsBuildProjectContext context, ProjectId id)
+        private void AddMetadataReferences(ProjectDependencyProvider projectDependencyProvider, ProjectId id)
         {
-            var libraryExporter = context.CreateLibraryExporter();
-            var exports = libraryExporter.GetExports() ?? new List<Library>();
-            
-            foreach(var export in exports)
+            var resolvedReferences = projectDependencyProvider.GetAllResolvedReferences();
+
+            foreach (var reference in resolvedReferences)
             {
-                if(!_projectReferences.Contains(export.Name))
+                if (!reference.IsResolved)
                 {
-                    var compLibrary = export as CompilationLibrary;
-                    if(compLibrary != null)
-                    {
-                        // TODO How to get resolved path ?
-                        OnMetadataReferenceAdded(id, GetMetadataReference(""));
-                    }
+                    continue;
+                }
+
+                var metadataRef = GetMetadataReference(reference.ResolvedPath);
+                if (metadataRef != null)
+                {
+                    OnMetadataReferenceAdded(id, metadataRef);
                 }
             }
         }
 
-        private ProjectId AddProject(MsBuildProjectContext context, string configuration)
+        private ProjectId AddProject(MsBuildProjectFile projectFile, string configuration, string fullPath)
         {
+            var projectName = Path.GetFileNameWithoutExtension(fullPath);
             var projectInfo = ProjectInfo.Create(
                 ProjectId.CreateNewId(),
                 VersionStamp.Create(),
-                context.ProjectName,
-                context.ProjectName,
+                projectName,
+                projectName,
                 LanguageNames.CSharp,
-                context.ProjectFullPath);
-
-            _projectReferences.Add(context.ProjectName);
+                fullPath);
 
             OnProjectAdded(projectInfo);
 
-            foreach (var file in context.ProjectFile.SourceFiles)
+            foreach (var file in projectFile.SourceFiles)
             {
                 var filePath = Path.IsPathRooted(file.EvaluatedInclude)
                     ? file.EvaluatedInclude :
-                    Path.Combine(Path.GetDirectoryName(context.ProjectFullPath), file.EvaluatedInclude);
+                    Path.Combine(Path.GetDirectoryName(fullPath), file.EvaluatedInclude);
                 AddSourceFile(projectInfo, filePath);
             }
 
-            //TODO: Look at project dependencies, and add metadata references
-            // Also need to figure out how to add the shared sources.
-
-            foreach(var project in context.ProjectFile.ProjectReferences)
+            foreach(var project in projectFile.ProjectReferences)
             {
                 var projPath = project.EvaluatedInclude;
                 if (!Path.IsPathRooted(projPath))
                 {
-                    Path.Combine(Path.GetDirectoryName(context.ProjectFullPath), projPath);
+                    Path.Combine(Path.GetDirectoryName(fullPath), projPath);
                 }
-                var id = AddProject(new MsBuildProjectContext(projPath, configuration), configuration);
+                var id = AddProject(MsBuildProjectFile.FromProjectFilePath(projPath, configuration, projectFile.GlobalProperties),
+                    configuration,
+                    projPath);
                 OnProjectReferenceAdded(id, new ProjectReference(id));
             }
 
@@ -99,20 +101,44 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             }
         }
 
-        private MetadataReference GetMetadataReference(string path)
+        private MetadataReference GetMetadataReference(string assetPath)
         {
-            AssemblyMetadata assemblyMetadata;
-            if (!_cache.TryGetValue(path, out assemblyMetadata))
+            var extension = Path.GetExtension(assetPath);
+
+            string path = assetPath;
+            if (string.IsNullOrEmpty(extension) || !ValidExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
             {
-                using (var stream = File.OpenRead(path))
+                foreach (var ext in ValidExtensions)
                 {
-                    var moduleMetadata = ModuleMetadata.CreateFromStream(stream, PEStreamOptions.PrefetchMetadata);
-                    assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
-                    _cache[path] = assemblyMetadata;
+                    path = assetPath + ext;
+                    if (File.Exists(path))
+                    {
+                        break;
+                    }
                 }
             }
 
-            return assemblyMetadata.GetReference();
+            AssemblyMetadata assemblyMetadata = null;
+            if (!_cache.TryGetValue(path, out assemblyMetadata))
+            {
+                if (File.Exists(path))
+                {
+                    using (var stream = File.OpenRead(path))
+                    {
+                        var moduleMetadata = ModuleMetadata.CreateFromStream(stream, PEStreamOptions.PrefetchMetadata);
+                        assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
+                        _cache[path] = assemblyMetadata;
+                    }
+                }
+            }
+
+            return assemblyMetadata?.GetReference();
         }
+
+        private static List<string> ValidExtensions = new List<string>()
+        {
+            ".dll",
+            ".exe"
+        };
     }
 }

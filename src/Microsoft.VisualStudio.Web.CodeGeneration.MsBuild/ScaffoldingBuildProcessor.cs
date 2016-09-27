@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using NuGet.Frameworks;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 {
@@ -15,6 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         private const string ResolveReferenceTarget = "ResolveReferences";
         private Dictionary<string, DependencyDescription> _packages;
         private IEnumerable<ResolvedReference> _resolvedReferences;
+        private Project _project;
 
         public ScaffoldingBuildProcessor()
         {
@@ -89,10 +91,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             // Do nothing for now.
         }
 
-        public void ProcessBuildResult(ProjectInstance projectInstance, IDictionary<string, TargetResult> targetResults)
+        public void ProcessBuildResult(Project project, ProjectInstance projectInstance, IDictionary<string, TargetResult> targetResults)
         {
             SetProjectProperties(projectInstance);
-
+            _project = project;
             TargetResult packageDependencyResolutionResult = null;
             if (targetResults.TryGetValue(PackageDependencyResolverTarget, out packageDependencyResolutionResult))
             {
@@ -204,6 +206,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         private string FindProperty(ProjectInstance project, string propertyName)
              => project.Properties.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))?.EvaluatedValue;
+
+        public MsBuildProjectContext CreateMsBuildProjectContext()
+        {
+            return new MsBuildProjectContext(ProjectName,
+                Configuration,
+                ProjectFullPath,
+                new MsBuildProjectFile(_project),
+                TargetFramework,
+                Platform,
+                Config,
+                DepsJson,
+                RootNamespace);
+        }
+
+        public ProjectDependencyProvider CreateDependencyProvider()
+        {
+            return new ProjectDependencyProvider(Packages, ResolvedReferences);
+        }
+
     }
 
     public enum DependencyType

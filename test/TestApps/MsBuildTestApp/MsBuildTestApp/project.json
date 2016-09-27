@@ -5,8 +5,10 @@
       "version": "1.0.0"
     },
     "Microsoft.NETCore.Sdk": {
-      "version": "1.0.0-alpha-20160902-5"
-    }    
+      "version": "1.0.0-alpha-*"
+    },
+	"Microsoft.VisualStudio.Web.CodeGenerators.Mvc": { "version": "1.0.0-preview2-final", "target": "package" },
+	"Microsoft.VisualStudio.Web.CodeGeneration.Tools": { "version": "1.0.0-preview2-final", "target": "package" },
   },
   "frameworks": {
     "netcoreapp1.0": {

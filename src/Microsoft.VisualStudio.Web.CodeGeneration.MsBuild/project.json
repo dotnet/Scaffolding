@@ -1,6 +1,10 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
+    "nowarn": [
+      "CS1591"
+    ],
     "debugType": "portable",
     "emitEntryPoint": false
   },
@@ -13,15 +17,15 @@
     "Microsoft.CodeAnalysis.Workspaces.Common": "1.3.0",
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "NETStandard.Library": "1.6.0",
-    "NuGet.Versioning": "3.6.0-*",
-    "NuGet.Frameworks": "3.6.0-*",
-    "NuGet.Packaging": "3.6.0-*",
-    "NuGet.ProjectModel": "3.6.0-*"
+    "NETStandard.Library": "1.6.0"
   },
+
   "frameworks": {
     "netstandard1.6": {
-      "imports": "portable-net45+win8"
+      "imports": "portable-net45+win8",
+      "dependencies": {
+
+      }
     }
   }
 }

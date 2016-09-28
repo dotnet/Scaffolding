@@ -10,9 +10,9 @@
   },
   "description": "Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.",
   "dependencies": {
-    "Microsoft.Extensions.CommandLineUtils": "1.1.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
     "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {

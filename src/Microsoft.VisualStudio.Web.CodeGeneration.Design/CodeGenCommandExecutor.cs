@@ -2,29 +2,29 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Workspaces;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class CodeGenCommandExecutor
     {
-        private ProjectContext _projectContext;
+        private MsBuildProjectContext _projectContext;
+        private ProjectDependencyProvider _projectDependencyProvider;
         private string[] _codeGenArguments;
         private string _configuration;
-        private string _nugetPackageDir;
         private ILogger _logger;
 
-        public CodeGenCommandExecutor(ProjectContext projectContext, string[] codeGenArguments, string configuration, string nugetPackageDir, ILogger logger)
+        public CodeGenCommandExecutor(ProjectInfoContainer projectInfo, string[] codeGenArguments, string configuration, ILogger logger)
         {
-            if (projectContext == null)
+            if (projectInfo == null)
             {
-                throw new ArgumentNullException(nameof(projectContext));
+                throw new ArgumentNullException(nameof(projectInfo));
             }
             if (codeGenArguments == null)
             {
@@ -34,32 +34,32 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 throw new ArgumentNullException(nameof(logger));
             }
-            _projectContext = projectContext;
+            _projectContext = projectInfo.ProjectContext;
+            _projectDependencyProvider = projectInfo.ProjectDependencyProvider;
             _codeGenArguments = codeGenArguments;
             _configuration = configuration;
             _logger = logger;
-            _nugetPackageDir = nugetPackageDir;
         }
 
         public int Execute()
         {
             var serviceProvider = new ServiceProvider();
-            AddFrameworkServices(serviceProvider, _projectContext, _nugetPackageDir);
+            AddFrameworkServices(serviceProvider, _projectContext, _projectDependencyProvider);
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
             codeGenCommand.Execute(_codeGenArguments);
             return 0;
         }
 
-        private void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context, string nugetPackageDir)
+        private void AddFrameworkServices(ServiceProvider serviceProvider, MsBuildProjectContext context, ProjectDependencyProvider projectDependencyProvider)
         {
-            var applicationInfo = new ApplicationInfo(context.RootProject.Identity.Name, context.ProjectDirectory);
-            serviceProvider.Add<ProjectContext>(context);
-            serviceProvider.Add<CodeAnalysis.Workspace>(context.CreateRoslynWorkspace());
+            var applicationInfo = new ApplicationInfo(context.ProjectName, Path.GetDirectoryName(context.ProjectFullPath));
+            serviceProvider.Add<MsBuildProjectContext>(context);
+            serviceProvider.Add<ProjectDependencyProvider>(projectDependencyProvider);
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
-            serviceProvider.Add<ILibraryManager>(new LibraryManager(context));
-            serviceProvider.Add<ILibraryExporter>(new LibraryExporter(context, applicationInfo));
+
+            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(context, projectDependencyProvider, context.Configuration));
         }
 
         private void AddCodeGenerationServices(ServiceProvider serviceProvider)

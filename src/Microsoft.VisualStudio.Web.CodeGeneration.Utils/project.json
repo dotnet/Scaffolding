@@ -9,13 +9,11 @@
   "version": "1.0.0-*",
   "description": "Contains utilities used by ASP.NET Core Code Generation packages.",
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.ProjectModel.Workspaces": "1.0.0-*",
-    "Microsoft.Extensions.PlatformAbstractions": "1.1.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
+    "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0-*",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo": "1.0.0-*",
-    "NETStandard.Library": "1.6.1-*"
+    "NETStandard.Library": "1.6.1-*",
+    "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
     "net451": {
@@ -32,7 +30,10 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Threading.Tasks.Parallel": "4.3.0-*"
+        "System.AppContext": "4.3.0-*",
+        "System.Security.Cryptography.Algorithms": "4.3.0-*",
+        "System.Threading.Tasks.Parallel": "4.3.0-*",
+        "System.Runtime.Loader": "4.3.0-*"
       }
     }
   },

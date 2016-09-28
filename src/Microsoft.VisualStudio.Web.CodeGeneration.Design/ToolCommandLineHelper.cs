@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using NuGet.Frameworks;
 using System.Linq;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     internal class ToolCommandLineHelper
     {

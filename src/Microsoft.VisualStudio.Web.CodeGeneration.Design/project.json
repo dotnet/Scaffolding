@@ -1,0 +1,28 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
+    "outputName": "dotnet-aspnet-codegenerator-design",
+    "emitEntryPoint": true,
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
+  },
+  "dependencies": {
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "net451": {},
+    "netcoreapp1.0": {
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        }
+      }
+    }
+  }
+}

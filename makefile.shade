@@ -6,8 +6,11 @@ default CONFIGURATION_LOCAL='${E("Configuration")}'
 default BASE_DIR_LOCAL='${Directory.GetCurrentDirectory()}'
 default BUILD_DIR_LOCAL='${Path.Combine(BASE_DIR_LOCAL, "artifacts", "build")}'
 default TOOL_PROJECT_NAME='Microsoft.VisualStudio.Web.CodeGeneration.Tools'
+default DESIGN_PROJECT_NAME='Microsoft.VisualStudio.Web.CodeGeneration.Design'
 default TOOL_EXE_NAME='dotnet-aspnet-codegenerator.exe'
+default DESIGN_EXE_NAME='dotnet-aspnet-codegenerator-design.exe'
 default TOOL_NUPKG_NAME= '${TOOL_PROJECT_NAME+".1.*.nupkg"}'
+default DESIGN_NUPKG_NAME= '${DESIGN_PROJECT_NAME +".1.*.nupkg"}'
 default NUGET_EXE_PATH='${E("KOREBUILD_NUGET_EXE") ?? Path.Combine(BASE_DIR_LOCAL, ".build", "nuget.exe")}'
 
 var VERSION='0.1'
@@ -27,9 +30,9 @@ k-standard-goals
         
         // Forcing to lower to match the entry in the sources project.json.
         var configurationX86 = CONFIGURATION_LOCAL.ToLower() + "_x86";
-        Log.Info(TOOL_NUPKG_NAME+"     "+Path.Combine(BUILD_DIR_LOCAL, TOOL_NUPKG_NAME));
+        Log.Info(DESIGN_NUPKG_NAME+"     "+Path.Combine(BUILD_DIR_LOCAL, DESIGN_NUPKG_NAME));
         var projectNupkg = Files
-            .Include(Path.Combine(BUILD_DIR_LOCAL, TOOL_NUPKG_NAME))
+            .Include(Path.Combine(BUILD_DIR_LOCAL, DESIGN_NUPKG_NAME))
             .Where(path => !path.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(f=>f)    // On local builds multiple nupkgs are generated.
             .First();
@@ -38,7 +41,7 @@ k-standard-goals
         var extractToDirectory = projectNupkg + "-temp";
         ZipFile.ExtractToDirectory(projectNupkg, extractToDirectory);
 
-        var projectDirectory = Path.Combine(BASE_DIR_LOCAL, "src", TOOL_PROJECT_NAME);
+        var projectDirectory = Path.Combine(BASE_DIR_LOCAL, "src", DESIGN_PROJECT_NAME);
         var projectFilePath = Path.Combine(projectDirectory, "project.json");
         var projectFile = Files.Include(projectFilePath).Single();
         
@@ -53,17 +56,17 @@ k-standard-goals
         
         var binDirectory = Path.Combine(projectDirectory, "bin");
         var x86OutputPath = Path.Combine(binDirectory, configurationX86, "net451");
-        var x86ExePath = Path.Combine(x86OutputPath, TOOL_EXE_NAME);
-        var x86ExeDestinationPath = Path.Combine(win7x86Directory, TOOL_EXE_NAME);
+        var x86ExePath = Path.Combine(x86OutputPath, DESIGN_EXE_NAME);
+        var x86ExeDestinationPath = Path.Combine(win7x86Directory, DESIGN_EXE_NAME);
         File.Copy(x86ExePath, x86ExeDestinationPath);
         
         var x64OutputPath = Path.Combine(binDirectory, CONFIGURATION_LOCAL, "net451");
-        var x64ExePath = Path.Combine(x64OutputPath, TOOL_EXE_NAME);
-        var x64ExeDestinationPath = Path.Combine(win7x64Directory, TOOL_EXE_NAME);
+        var x64ExePath = Path.Combine(x64OutputPath, DESIGN_EXE_NAME);
+        var x64ExeDestinationPath = Path.Combine(win7x64Directory, DESIGN_EXE_NAME);
         File.Copy(x64ExePath, x64ExeDestinationPath);
         
         var nugetExePath = Path.Combine(BASE_DIR_LOCAL, ".build", "nuget.exe");
-        var nuspecPath = Path.Combine(extractToDirectory, TOOL_PROJECT_NAME + ".nuspec");
+        var nuspecPath = Path.Combine(extractToDirectory, DESIGN_PROJECT_NAME + ".nuspec");
         ExecClr(NUGET_EXE_PATH, "pack " + nuspecPath + " -OutputDirectory " + BUILD_DIR_LOCAL);
         
         try

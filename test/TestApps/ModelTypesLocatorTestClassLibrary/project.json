@@ -1,7 +1,8 @@
 {
   "dependencies": {
+    "ClassLibrary1": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*",
-    "ClassLibrary1": "1.0.0-*"
+    "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {
     "net451": {},
@@ -9,10 +10,7 @@
       "imports": [
         "dnxcore50",
         "portable-net45+win8"
-      ],
-      "dependencies": {
-        "NETStandard.Library": "1.6.0-*"
-      }
+      ]
     }
   }
 }

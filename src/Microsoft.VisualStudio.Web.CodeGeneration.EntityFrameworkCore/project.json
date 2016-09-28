@@ -14,7 +14,8 @@
     "Microsoft.AspNetCore.Server.Kestrel": "1.1.0-*",
     "Microsoft.EntityFrameworkCore": "1.1.0-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {
     "net451": {},
@@ -22,10 +23,7 @@
       "imports": [
         "dnxcore50",
         "portable-net45+win8"
-      ],
-      "dependencies": {
-        "System.AppContext": "4.1.0-*"
-      }
+      ]
     }
   },
   "packOptions": {

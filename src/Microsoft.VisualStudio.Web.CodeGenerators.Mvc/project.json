@@ -10,7 +10,8 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*",
+    "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {
     "net451": {},

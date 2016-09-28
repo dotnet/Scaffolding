@@ -5,8 +5,10 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.1.0-*",
+    "Microsoft.Extensions.FileProviders.Embedded": "1.1.0-*",
     "Microsoft.NETCore.App": {
-      "version": "1.0.0-*",
+      "version": "1.1.0-*",
       "type": "platform"
     },
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
@@ -14,10 +16,8 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.FileProviders.Embedded": "1.1.0-*",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.1.0-*",
     "Moq": "4.6.36-*",
-    "System.Diagnostics.TraceSource": "4.0.0-*",
+    "System.Diagnostics.TraceSource": "4.3.0-*",
     "xunit": "2.2.0-*"
   },
   "frameworks": {

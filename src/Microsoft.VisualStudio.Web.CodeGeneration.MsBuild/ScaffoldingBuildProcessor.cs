@@ -27,6 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         {
             ILogger logger = new Build.Logging.ConsoleLogger(LoggerVerbosity.Quiet);
             Loggers = new ILogger[] { logger };
+            _configuration = configuration;
             Properties = new Dictionary<string, string>
             {
                 { "Configuration", Configuration },
@@ -35,8 +36,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
                 { "DesignTimeBuild", "true" },
                 { "AutoGenerateBindingRedirects", "true" }      // BindingRedirects
             };
-
-            _configuration = configuration;
         }
 
         public string Configuration

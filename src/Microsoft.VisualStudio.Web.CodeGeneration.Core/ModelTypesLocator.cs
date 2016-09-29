@@ -12,25 +12,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class ModelTypesLocator : IModelTypesLocator
     {
-        //private ILibraryExporter _libraryExporter;
         private Workspace _projectWorkspace;
-        //private ProjectDependencyProvider _projectDependencyProvider;
 
         public ModelTypesLocator(
-            /*ProjectDependencyProvider projectDependencyProvider,*/
             Workspace projectWorkspace)
         {
-            //if (projectDependencyProvider == null)
-            //{
-            //    throw new ArgumentNullException(nameof(projectDependencyProvider));
-            //}
-
             if (projectWorkspace == null)
             {
                 throw new ArgumentNullException(nameof(projectWorkspace));
             }
 
-            //_projectDependencyProvider = projectDependencyProvider;
             _projectWorkspace = projectWorkspace;
         }
 

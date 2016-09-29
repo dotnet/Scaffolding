@@ -34,7 +34,7 @@ namespace E2E_Test
             }
         }
 
-        [Theory, MemberData("TestData")]
+        [Theory(Skip = "Disabling E2E test"), MemberData("TestData")]
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
             Scaffold(args);

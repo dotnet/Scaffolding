@@ -31,7 +31,7 @@ namespace E2E_Test
             }
         }
 
-        [Theory, MemberData("TestData")]
+        [Theory(Skip="Disabling E2E test"), MemberData("TestData")]
         public void TestControllerGenerators(string baselineFile, string generatedFilePath, string[] args)
         {
             Scaffold(args);
@@ -42,7 +42,7 @@ namespace E2E_Test
             _fixture.FilesToCleanUp.Add(generatedFilePath);
         }
 
-        [Fact]
+        [Fact(Skip = "Disabling E2E test")]
         public void TestControllerWithContext()
         {
             var args = new string[]
@@ -66,7 +66,7 @@ namespace E2E_Test
             _fixture.FilesToCleanUp.Add(generatedFilePath);
         }
 
-        [Fact]
+        [Fact(Skip = "Disabling E2E test")]
         public void TestControllerWithContext_WithViews()
         {
             var args = new string[]
@@ -108,7 +108,7 @@ namespace E2E_Test
             _fixture.FilesToCleanUp.Add(Path.Combine(_testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"));
         }
 
-        [Fact]
+        [Fact(Skip = "Disabling E2E test")]
         public void TestControllerWithContext_WithForeignKey()
         {
             var args = new string[]

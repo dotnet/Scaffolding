@@ -25,9 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             };
 
         private readonly ICodeGenAssemblyLoadContext _assemblyLoadContext;
-        private ProjectDependencyProvider _projectDependencyProvider;
+        private IProjectDependencyProvider _projectDependencyProvider;
          
-        public DefaultCodeGeneratorAssemblyProvider(ProjectDependencyProvider projectDependencyProvider, ICodeGenAssemblyLoadContext loadContext)
+        public DefaultCodeGeneratorAssemblyProvider(IProjectDependencyProvider projectDependencyProvider, ICodeGenAssemblyLoadContext loadContext)
         {
             if(loadContext == null)
             {

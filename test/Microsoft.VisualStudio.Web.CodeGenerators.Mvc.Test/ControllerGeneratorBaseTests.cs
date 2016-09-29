@@ -1,10 +1,11 @@
-﻿using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
 using Moq;
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 {
     public class ControllerGeneratorBaseTests
     {
-        protected Mock<ILibraryManager> _libraryManager;
+        protected Mock<IProjectDependencyProvider> _projectDependencyProviderMock;
         protected Mock<ICodeGeneratorActionsService> _codeGenActionService;
         protected Mock<IServiceProvider> _serviceProvider;
         protected ILogger _logger;
@@ -20,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 
         public ControllerGeneratorBaseTests()
         {
-            _libraryManager = new Mock<ILibraryManager>();
+            _projectDependencyProviderMock = new Mock<IProjectDependencyProvider>();
             _codeGenActionService = new Mock<ICodeGeneratorActionsService>();
             _serviceProvider = new Mock<IServiceProvider>();
             _logger = new ConsoleLogger();
@@ -31,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         public void Test_ValidateNameSpace_ThrowsException()
         {
             var generator = new MockControllerGenerator(
-                _libraryManager.Object,
+                _projectDependencyProviderMock.Object,
                 _applicationInfo,
                 _codeGenActionService.Object,
                 _serviceProvider.Object,
@@ -57,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         public void Test_ValidateNameSpace()
         {
             var generator = new MockControllerGenerator(
-                _libraryManager.Object,
+                _projectDependencyProviderMock.Object,
                 _applicationInfo,
                 _codeGenActionService.Object,
                 _serviceProvider.Object,

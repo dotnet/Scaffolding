@@ -14,8 +14,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class CodeGenCommandExecutor
     {
-        private MsBuildProjectContext _projectContext;
-        private ProjectDependencyProvider _projectDependencyProvider;
+        private IMsBuildProjectContext _projectContext;
+        private IProjectDependencyProvider _projectDependencyProvider;
         private string[] _codeGenArguments;
         private string _configuration;
         private ILogger _logger;
@@ -51,11 +51,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             return 0;
         }
 
-        private void AddFrameworkServices(ServiceProvider serviceProvider, MsBuildProjectContext context, ProjectDependencyProvider projectDependencyProvider)
+        private void AddFrameworkServices(ServiceProvider serviceProvider, IMsBuildProjectContext context, IProjectDependencyProvider projectDependencyProvider)
         {
             var applicationInfo = new ApplicationInfo(context.ProjectName, Path.GetDirectoryName(context.ProjectFullPath));
-            serviceProvider.Add<MsBuildProjectContext>(context);
-            serviceProvider.Add<ProjectDependencyProvider>(projectDependencyProvider);
+            serviceProvider.Add<IMsBuildProjectContext>(context);
+            serviceProvider.Add<IProjectDependencyProvider>(projectDependencyProvider);
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
 

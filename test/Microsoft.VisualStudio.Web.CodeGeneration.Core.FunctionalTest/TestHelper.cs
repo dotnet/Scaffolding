@@ -7,10 +7,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Workspaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
 {
@@ -33,16 +32,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "TestApps", testAppName));
 #endif
             var testEnvironment = new TestApplicationInfo(applicationInfo, testAppPath, testAppName);
-            var context = ProjectContext.CreateContextForEachFramework(testAppPath).First();
-            var exporter = new LibraryExporter(context, testEnvironment);
-            var workspace = new ProjectJsonWorkspace(context);
+
+            IProjectDependencyProvider provider = null;
+            RoslynWorkspace workspace = null; 
             return new WebHostBuilder()
                 .UseServer(new DummyServer())
                 .UseStartup<ModelTypesLocatorTestWebApp.Startup>()
                 .ConfigureServices(services => 
                     {
                         services.AddSingleton<IApplicationInfo>(testEnvironment);
-                        services.AddSingleton<ILibraryExporter>(exporter);
+                        services.AddSingleton<IProjectDependencyProvider>(provider);
                         services.AddSingleton<CodeAnalysis.Workspace>(workspace);
                     })
                 .Build()

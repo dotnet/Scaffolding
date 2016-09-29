@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
     public abstract class DependencyInstaller
     {
         protected DependencyInstaller(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
@@ -86,7 +86,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         protected ILogger Logger { get; private set; }
         public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }
-        protected ProjectDependencyProvider ProjectDependencyProvider { get; private set; }
+        protected IProjectDependencyProvider ProjectDependencyProvider { get; private set; }
 
         protected IEnumerable<string> TemplateFolders
         {

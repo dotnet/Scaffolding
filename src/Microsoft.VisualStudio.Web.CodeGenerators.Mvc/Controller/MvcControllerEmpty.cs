@@ -11,7 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
     public class MvcControllerEmpty : MvcController
     {
         public MvcControllerEmpty(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,

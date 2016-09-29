@@ -18,7 +18,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
     public abstract class MvcController : ControllerGeneratorBase
     {
         public MvcController(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,

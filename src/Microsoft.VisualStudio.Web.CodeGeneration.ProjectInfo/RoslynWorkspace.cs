@@ -15,8 +15,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
     {
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
 
-        public RoslynWorkspace(MsBuildProjectContext context,
-            ProjectDependencyProvider projectDependencyProvider,
+        public RoslynWorkspace(IMsBuildProjectContext context,
+            IProjectDependencyProvider projectDependencyProvider,
             string configuration = "debug")
             : base(MefHostServices.DefaultHost, "Custom")
         {
@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             }
         }
 
-        private void AddMetadataReferences(ProjectDependencyProvider projectDependencyProvider, ProjectId id)
+        private void AddMetadataReferences(IProjectDependencyProvider projectDependencyProvider, ProjectId id)
         {
             var resolvedReferences = projectDependencyProvider.GetAllResolvedReferences();
 

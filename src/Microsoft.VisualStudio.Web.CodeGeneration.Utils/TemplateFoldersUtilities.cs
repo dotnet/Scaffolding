@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             string containingProject,
             string applicationBasePath,
             string[] baseFolders,
-            ProjectDependencyProvider projectDependencyProvider)
+            IProjectDependencyProvider projectDependencyProvider)
         {
             if (containingProject == null)
             {

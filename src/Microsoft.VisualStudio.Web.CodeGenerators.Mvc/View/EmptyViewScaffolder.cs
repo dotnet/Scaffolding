@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
     {
         private static IEnumerable<RequiredFileEntity> RequiredFiles = new List<RequiredFileEntity>();
         public EmptyViewScaffolder(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,

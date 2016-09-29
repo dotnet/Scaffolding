@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         };
 
         public ControllerWithContextGenerator(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,

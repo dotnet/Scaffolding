@@ -10,6 +10,7 @@
       "type": "platform"
     },
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
     "Moq": "4.6.36-*",
     "System.Diagnostics.TraceSource": "4.3.0-*",
     "xunit": "2.2.0-*"

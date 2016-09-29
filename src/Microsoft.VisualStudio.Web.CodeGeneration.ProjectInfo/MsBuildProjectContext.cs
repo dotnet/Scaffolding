@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
-    public class MsBuildProjectContext
+    public class MsBuildProjectContext: IMsBuildProjectContext
     {
         public MsBuildProjectContext(string projectName,
             string configuration,

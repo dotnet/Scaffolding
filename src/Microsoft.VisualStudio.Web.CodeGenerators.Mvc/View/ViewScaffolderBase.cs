@@ -15,13 +15,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
     public abstract class ViewScaffolderBase: CommonGeneratorBase
     {
-        protected readonly ProjectDependencyProvider _projectDependencyProvider;
+        protected readonly IProjectDependencyProvider _projectDependencyProvider;
         protected readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
         public ViewScaffolderBase(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,

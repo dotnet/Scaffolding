@@ -1,29 +1,27 @@
-﻿using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
     public class TestAssemblyLoadContext : ICodeGenAssemblyLoadContext
     {
         private ICodeGenAssemblyLoadContext _defaultContext;
-        ILibraryManager _manager;
-        ILibraryExporter _exporter;
-        public TestAssemblyLoadContext(ILibraryExporter exporter, ILibraryManager manager)
+        private readonly IProjectDependencyProvider _projectDependencyProvider;
+
+        public TestAssemblyLoadContext(IProjectDependencyProvider projectDependencyProvider)
         {
-            _manager = manager;
-            _exporter = exporter;
+            _projectDependencyProvider = projectDependencyProvider;
             _defaultContext = new DefaultAssemblyLoadContext();
         }
         public Assembly LoadFromName(AssemblyName AssemblyName)
         {
-            var library = _manager.GetLibrary(AssemblyName.Name);
-            var path = _exporter.GetResolvedPathForDependency(library);
+            var path = _projectDependencyProvider.GetResolvedReference(AssemblyName.Name).ResolvedPath;
             return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
         }
 

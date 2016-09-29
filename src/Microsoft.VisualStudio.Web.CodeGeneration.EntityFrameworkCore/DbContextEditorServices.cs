@@ -25,10 +25,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private readonly ITemplating _templatingService;
         private readonly IFilesLocator _filesLocator;
         private readonly IFileSystem _fileSystem;
-        private readonly ProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectDependencyProvider _projectDependencyProvider;
 
         public DbContextEditorServices(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
             ITemplating templatingService)
@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         }
 
         internal DbContextEditorServices(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
             ITemplating templatingService,

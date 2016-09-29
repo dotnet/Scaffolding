@@ -10,17 +10,13 @@ using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 {
-    public class DefaultAssemblyLoadContextTests : TestBase
+    [Collection("CodeGeneration.Utils")]
+    public class DefaultAssemblyLoadContextTests //: TestBase
     {
-#if NET451
-        static string testAppPath = Path.Combine("..", "..", "..", "..");
-#else
-        static string testAppPath = Directory.GetCurrentDirectory();
-#endif
         DefaultAssemblyLoadContext _defaultAssemblyLoadContext;
 
         public DefaultAssemblyLoadContextTests()
-            : base(testAppPath)
+            //: base(testFixture)
         {
         }
 

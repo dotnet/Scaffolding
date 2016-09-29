@@ -20,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             get;
             private set;
         }
-        protected ProjectDependencyProvider ProjectDependencyProvider
+        protected IProjectDependencyProvider ProjectDependencyProvider
         {
             get;
             private set;
@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         }
 
         public ControllerGeneratorBase(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,

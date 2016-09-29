@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         internal static BuildResult Build(
             string project,
             string configuration,
-            NuGetFramework framework,
+            //NuGetFramework framework,
             string buildBasePath)
         {
             // TODO: Specify --runtime?
@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 project,
                 "--configuration", configuration,
-                "--framework", framework.GetShortFolderName(),
+                //"--framework", framework.GetShortFolderName(),
             };
 
             if (buildBasePath != null)
@@ -44,8 +44,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var command = Command.CreateDotNet(
                     "build",
                     args,
-                    framework,
-                    configuration)
+                    //framework,
+                    configuration:configuration)
                     .OnErrorLine((str) => stdOutMsgs.Add(str))
                     .OnOutputLine((str) => stdErrorMsgs.Add(str));
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,8 +21,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         private Dictionary<string, DependencyDescription> _packages;
         private IEnumerable<ResolvedReference> _resolvedReferences;
         private Project _project;
+        private string _configuration;
 
-        public ScaffoldingBuildProcessor()
+        public ScaffoldingBuildProcessor(string configuration = "Debug")
         {
             ILogger logger = new Build.Logging.ConsoleLogger(LoggerVerbosity.Quiet);
             Loggers = new ILogger[] { logger };
@@ -31,13 +35,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
                 { "DesignTimeBuild", "true" },
                 { "AutoGenerateBindingRedirects", "true" }      // BindingRedirects
             };
+
+            _configuration = configuration;
         }
 
         public string Configuration
         {
             get
             {
-                return "Debug";
+                return _configuration;
             }
         }
 
@@ -208,7 +214,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         private string FindProperty(ProjectInstance project, string propertyName)
              => project.Properties.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))?.EvaluatedValue;
 
-        public MsBuildProjectContext CreateMsBuildProjectContext()
+        public IMsBuildProjectContext CreateMsBuildProjectContext()
         {
             var rootProjectMsBuildFile = new MsBuildProjectFile(_project.FullPath,
                 _project.GetItems("Compile").Select(i => i.EvaluatedInclude),
@@ -249,7 +255,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             return files;
         }
 
-        public ProjectDependencyProvider CreateDependencyProvider()
+        public IProjectDependencyProvider CreateDependencyProvider()
         {
             return new ProjectDependencyProvider(Packages, ResolvedReferences);
         }

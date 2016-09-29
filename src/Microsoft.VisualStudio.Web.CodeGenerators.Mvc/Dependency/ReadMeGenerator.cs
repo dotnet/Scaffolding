@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly IApplicationInfo _applicationInfo;
         private readonly IModelTypesLocator _modelTypesLocator;
-        private readonly ProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectDependencyProvider _projectDependencyProvider;
 
         public IEnumerable<string> TemplateFolders
         {
@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         public ReadMeGenerator(
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IModelTypesLocator modelTypesLocator,
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo)
         {
             if (codeGeneratorActionsService == null)

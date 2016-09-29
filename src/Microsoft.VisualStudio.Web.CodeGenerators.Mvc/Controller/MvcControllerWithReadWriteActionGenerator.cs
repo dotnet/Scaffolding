@@ -10,7 +10,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
     public class MvcControllerWithReadWriteActionGenerator : MvcController
     {
-        public MvcControllerWithReadWriteActionGenerator(ProjectDependencyProvider projectDependencyProvider,
+        public MvcControllerWithReadWriteActionGenerator(IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,

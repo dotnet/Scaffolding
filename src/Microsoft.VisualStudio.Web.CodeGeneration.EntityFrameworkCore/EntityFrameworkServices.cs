@@ -35,11 +35,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string EFSqlServerPackageVersion = "7.0.0-*";
         private const string NewDbContextFolderName = "Data";
         private readonly Workspace _workspace;
-        private readonly ProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectDependencyProvider _projectDependencyProvider;
 
 
         public EntityFrameworkServices(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGenAssemblyLoadContext loader,
             IModelTypesLocator modelTypesLocator,

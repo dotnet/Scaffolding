@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
     public class MvcLayoutDependencyInstaller : DependencyInstaller
     {
         public MvcLayoutDependencyInstaller(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,

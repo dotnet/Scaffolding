@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         private IModelTypesLocator _modelTypesLocator;
 
         public ModelBasedViewScaffolder(
-            ProjectDependencyProvider projectDependencyProvider,
+            IProjectDependencyProvider projectDependencyProvider,
             IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,

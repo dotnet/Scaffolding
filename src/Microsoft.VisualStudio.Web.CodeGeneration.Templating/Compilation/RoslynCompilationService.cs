@@ -18,13 +18,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
         private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly ProjectDependencyProvider _libraryExporter;
+        private readonly IProjectDependencyProvider _projectDependencyProvider;
         private readonly IApplicationInfo _applicationInfo;
         private readonly ICodeGenAssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationInfo applicationInfo,
                                         ICodeGenAssemblyLoadContext loader,
-                                        ProjectDependencyProvider libraryExporter)
+                                        IProjectDependencyProvider projectDependencyProvider)
         {
             if(loader == null)
             {
@@ -34,13 +34,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
             {
                 throw new ArgumentNullException(nameof(applicationInfo));
             }
-            if(libraryExporter == null)
+            if(projectDependencyProvider == null)
             {
-                throw new ArgumentNullException(nameof(libraryExporter));
+                throw new ArgumentNullException(nameof(projectDependencyProvider));
             }
             _applicationInfo = applicationInfo;
             _loader = loader;
-            _libraryExporter = libraryExporter;
+            _projectDependencyProvider = projectDependencyProvider;
         }
 
         public CompilationResult Compile(string content)
@@ -87,7 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var exports = _libraryExporter.GetAllResolvedReferences();
+                var exports = _projectDependencyProvider.GetAllResolvedReferences();
 
                 if (exports != null)
                 {

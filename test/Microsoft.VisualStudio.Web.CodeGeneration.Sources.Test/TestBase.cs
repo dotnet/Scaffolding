@@ -1,39 +1,33 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using NuGet.Frameworks;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 {
     public class TestBase
     {
-#if NET451
-        NuGetFramework framework = FrameworkConstants.CommonFrameworks.Net451;
-#else
-        NuGetFramework framework = FrameworkConstants.CommonFrameworks.NetStandard16;
-#endif
-        protected ProjectContext _projectContext;
-        protected string _projectPath;
-        protected IApplicationInfo _applicationInfo;
-        
-        public TestBase(string projectPath)
+        protected TestFixture _fixture;
+        protected IMsBuildProjectContext ProjectContext { get; }
+        protected IProjectDependencyProvider ProjectDependencyProvider { get; }
+        protected IApplicationInfo ApplicationInfo { get; }
+
+        public TestBase(TestFixture testFixture)
         {
-            _projectPath = projectPath;
+            this._fixture = testFixture;
 
-            _projectContext = new ProjectContextBuilder().WithProjectDirectory(_projectPath).WithTargetFramework(framework).Build();
+//            _fixture.RunBuild();
+//            ProjectContext = _fixture.ProjectInfo.ProjectContext;
+//            string configuration = "Debug";
+//#if RELEASE
+//            configuration = "Release";
+//#endif
+//            ApplicationInfo = new ApplicationInfo(_fixture.ProjectInfo.ProjectContext.ProjectName,
+//                ProjectContext.ProjectFullPath,
+//                configuration);
 
-            
-#if RELEASE
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", _projectPath, "Release");
-#else
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", _projectPath, "Debug");
-#endif
+
         }
     }
 }

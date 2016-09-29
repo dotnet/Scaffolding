@@ -14,7 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         public const string TOOL_NAME = "dotnet-aspnet-codegenerator-design";
 
         private static ConsoleLogger _logger;
-        private static bool _isNoBuild;
 
         private const string APPNAME = "Code Generation";
         private const string APP_DESC = "Code generation for Asp.net Core";

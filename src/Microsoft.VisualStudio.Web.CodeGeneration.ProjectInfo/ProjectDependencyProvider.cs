@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
-    public class ProjectDependencyProvider
+    public class ProjectDependencyProvider: IProjectDependencyProvider
     {
         public ProjectDependencyProvider(Dictionary<string, DependencyDescription> nugetPackages, IEnumerable<ResolvedReference> resolvedReferences)
         {

@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +16,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
     public class RoslynWorkspace : Workspace
     {
+        private static List<string> ValidExtensions = new List<string>()
+        {
+            ".dll",
+            ".exe"
+        };
+
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
 
         public RoslynWorkspace(IMsBuildProjectContext context,
@@ -20,8 +29,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             string configuration = "debug")
             : base(MefHostServices.DefaultHost, "Custom")
         {
-            Requires.NotNull(context);
-            Requires.NotNull(projectDependencyProvider);
+            Requires.NotNull(context, nameof(context));
+            Requires.NotNull(projectDependencyProvider, nameof(projectDependencyProvider));
 
             var id = AddProject(context.ProjectFile, configuration);
 
@@ -54,8 +63,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             foreach (var file in projectFile.SourceFiles)
             {
                 var filePath = Path.IsPathRooted(file)
-                    ? file :
-                    Path.Combine(Path.GetDirectoryName(fullPath), file);
+                    ? file
+                    : Path.Combine(Path.GetDirectoryName(fullPath), file);
                 AddSourceFile(projectInfo, filePath);
             }
 
@@ -132,11 +141,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 
             return assemblyMetadata?.GetReference();
         }
-
-        private static List<string> ValidExtensions = new List<string>()
-        {
-            ".dll",
-            ".exe"
-        };
     }
 }

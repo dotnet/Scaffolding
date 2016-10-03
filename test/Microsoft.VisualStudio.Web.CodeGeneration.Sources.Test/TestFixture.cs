@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
         {
             ScaffoldingBuildProcessor processor = new ScaffoldingBuildProcessor();
             MsBuilder<ScaffoldingBuildProcessor> builder = new MsBuilder<ScaffoldingBuildProcessor>(_projectPath, processor);
-            builder.RunMsBuild();
+            builder.RunMsBuild(FrameworkConstants.CommonFrameworks.NetCoreApp10);
             ProjectInfo = new CodeGeneration.ProjectInfo.ProjectInfoContainer()
             {
                 ProjectContext = processor.CreateMsBuildProjectContext(),

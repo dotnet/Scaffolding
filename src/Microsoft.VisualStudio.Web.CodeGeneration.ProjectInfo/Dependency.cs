@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
@@ -7,16 +10,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
     {
         public Dependency(string name, string version, string itemSpec)
         {
-            Requires.NotNullOrEmpty(name);
-            Requires.NotNullOrEmpty(itemSpec);
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNullOrEmpty(itemSpec, nameof(itemSpec));
             Name = name;
             Version = version;
-            ItemSpec = itemSpec;
         }
 
         public string Name { get; }
         public string Version { get; }
-        public string ItemSpec { get; }
 
         public override int GetHashCode()
         {

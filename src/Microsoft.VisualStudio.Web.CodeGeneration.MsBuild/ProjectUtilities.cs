@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -16,15 +19,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
         private const string NugetSourceTypeKey = "NugetSourceType";
         private const string VersionKey = "Version";
 
-        public static Microsoft.Build.Evaluation.Project CreateProject(string filePath, string configuration, IDictionary<string, string> globalProperties)
+        public static Microsoft.Build.Evaluation.Project CreateProject(string filePath, IDictionary<string, string> globalProperties)
         {
-            var xmlReader = XmlReader.Create(new FileStream(filePath, FileMode.Open));
-            var projectCollection = new ProjectCollection();
-            var xml = ProjectRootElement.Create(xmlReader, projectCollection, preserveFormatting: true);
-            //var xml = ProjectRootElement.Create()
-            xml.FullPath = filePath;
+            Microsoft.Build.Evaluation.Project project = null;
+            using (var fileStream = new FileStream(filePath, FileMode.Open))
+            {
+                var xmlReader = XmlReader.Create(fileStream);
+                var projectCollection = new ProjectCollection();
+                var xml = ProjectRootElement.Create(xmlReader, projectCollection, preserveFormatting: true);
+                xml.FullPath = filePath;
 
-            var project = new Microsoft.Build.Evaluation.Project(xml, globalProperties, /*toolsVersion*/ null, projectCollection);
+                project = new Microsoft.Build.Evaluation.Project(xml, globalProperties, /*toolsVersion*/ null, projectCollection);
+            }
+
             return project;
         }
 
@@ -65,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         public static DependencyDescription CreateDependencyDescriptionFromTaskItem(ITaskItem item)
         {
-            Requires.NotNull(item);
+            Requires.NotNull(item, nameof(item));
 
 
             var version = item.GetMetadata("Version");

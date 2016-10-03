@@ -1,7 +1,9 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 {
@@ -9,13 +11,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
     {
         public ProjectDependencyProvider(Dictionary<string, DependencyDescription> nugetPackages, IEnumerable<ResolvedReference> resolvedReferences)
         {
-            Requires.NotNull(nugetPackages);
-            Requires.NotNull(resolvedReferences);
+            Requires.NotNull(nugetPackages, nameof(nugetPackages));
+            Requires.NotNull(resolvedReferences, nameof(resolvedReferences));
 
             NugetPackages = nugetPackages;
             ResolvedReferences = resolvedReferences;
         }
-        private Dictionary<string,DependencyDescription> NugetPackages { get; }
+        private Dictionary<string, DependencyDescription> NugetPackages { get; }
         private IEnumerable<ResolvedReference> ResolvedReferences { get; }
 
         public DependencyDescription GetPackage(string name)
@@ -53,7 +55,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             return ResolvedReferences
                 ?.FirstOrDefault(r => r.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
-
-
     }
 }

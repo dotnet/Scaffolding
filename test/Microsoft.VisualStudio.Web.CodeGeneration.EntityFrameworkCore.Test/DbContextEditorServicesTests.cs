@@ -20,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class DbContextEditorServicesTests
     {
-        [Theory(Skip ="Disable tests that need projectInfo")]
+        [Theory]
         [InlineData("DbContext_Before.txt", "MyModel.txt", "DbContext_After.txt")]
         public void AddModelToContext_Adds_Model_From_Same_Project_To_Context(string beforeContextResource, string modelResource, string afterContextResource)
         {
@@ -45,10 +45,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var result = testObj.AddModelToContext(contextType, modelType);
 
             Assert.True(result.Edited);
+
             Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString());
         }
 
-        [Theory(Skip ="Disable tests that need projectInfo")]
+        [Theory]
         [InlineData("Startup_RegisterContext_Before.txt", "Startup_RegisterContext_After.txt", "DbContext_Before.txt")]
         [InlineData("Startup_Empty_Method_RegisterContext_Before.txt", "Startup_Empty_Method_RegisterContext_After.txt", "DbContext_Before.txt")]
         public void TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices(string beforeStartupResource, string afterStartupResource, string dbContextResource)
@@ -83,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString());
         }
 
-        [Fact(Skip ="Disable tests that need projectInfo")]
+        [Fact]
         public void AddConnectionString_Creates_App_Settings_File()
         {
             //Arrange
@@ -104,7 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.Equal(expected, fs.ReadAllText(appSettingsPath));
         }
 
-        [Theory(Skip ="Disable tests that need projectInfo")]
+        [Theory]
         // Empty invalid json file - should this be supported?
         //[InlineData("",
         //    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"@\\\"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\\\"\"\r\n    }\r\n  }\r\n}")]

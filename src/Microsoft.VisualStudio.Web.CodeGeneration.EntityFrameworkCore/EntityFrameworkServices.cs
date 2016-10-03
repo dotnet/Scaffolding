@@ -24,8 +24,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     {
         private readonly IDbContextEditorServices _dbContextEditorServices;
         private readonly IApplicationInfo _applicationInfo;
-        //private readonly ILibraryManager _libraryManager;
-        //private readonly ILibraryExporter _libraryExporter;
         private readonly ICodeGenAssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;

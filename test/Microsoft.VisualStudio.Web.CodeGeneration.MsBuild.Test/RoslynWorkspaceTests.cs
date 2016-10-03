@@ -5,13 +5,14 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using NuGet.Frameworks;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.Test
 {
     public class RoslynWorkspaceTests
     {
-        [Fact(Skip ="Disable tests that need projectInfo")]
+        [Fact(Skip = "Disable tests that need projectInfo")]
         public void TestRoslynWorkspaceCreation()
         {
             // Arrange
@@ -20,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.Test
             ScaffoldingBuildProcessor processor = new ScaffoldingBuildProcessor();
             MsBuilder<ScaffoldingBuildProcessor> builder = new MsBuilder<ScaffoldingBuildProcessor>(path, processor);
 
-            builder.RunMsBuild();
+            builder.RunMsBuild(FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var dependencyProvider = processor.CreateDependencyProvider();
             var context = processor.CreateMsBuildProjectContext();
 

@@ -7,6 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class ConsoleLogger : ILogger
     {
+        private object _syncObject = new object();
 
         public void LogMessage(string message)
         {
@@ -15,17 +16,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public void LogMessage(string message, LogMessageLevel level)
         {
-            if (level == LogMessageLevel.Error)
+            lock (_syncObject)
             {
-                Console.Error.WriteLine(message);
-            }
-            else if (level == LogMessageLevel.Trace)
-            {
-                Console.Out.WriteLine(message);
-            }
-            else
-            {
-                Console.Out.WriteLine(message);
+                if (level == LogMessageLevel.Error)
+                {
+                    Console.Error.WriteLine(message);
+                }
+                else if (level == LogMessageLevel.Trace)
+                {
+                    Console.Out.WriteLine(message);
+                }
+                else
+                {
+                    Console.Out.WriteLine(message);
+                }
             }
         }
     }

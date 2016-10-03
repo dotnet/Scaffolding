@@ -215,13 +215,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
         public IMsBuildProjectContext CreateMsBuildProjectContext()
         {
-            var rootProjectMsBuildFile = new MsBuildProjectFile(_project.FullPath,
-                _project.GetItems("Compile").Select(i => i.EvaluatedInclude),
-                _project.GetItems("ProjectReferences").Select(i => i.EvaluatedInclude),
-                _project.GetItems("Reference").Select(i => i.EvaluatedInclude),
-                _project.GlobalProperties
-                );
-
+            var rootProjectMsBuildFile = MsBuildProjectFileReader.CreateProjectFileFromProject(_project)
+;
             var dependencyProjectFiles = GetDependencyProjectFiles(_project);
 
             return new MsBuildProjectContext(ProjectName,

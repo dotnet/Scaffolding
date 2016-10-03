@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using NuGet.Frameworks;
 using System.Collections.Generic;
 
@@ -17,10 +20,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             string rootNameSpace,
             IEnumerable<MsBuildProjectFile> dependencyProjects)
         {
-            Requires.NotNull(targetFramework);
-            Requires.NotNull(projectFile);
-            Requires.NotNullOrEmpty(configuration);
-            Requires.NotNullOrEmpty(fullpath);
+            Requires.NotNull(targetFramework, nameof(targetFramework));
+            Requires.NotNull(projectFile, nameof(projectFile));
+            Requires.NotNullOrEmpty(configuration, nameof(configuration));
+            Requires.NotNullOrEmpty(fullpath, nameof(fullpath));
 
             ProjectName = projectName;
             TargetFramework = targetFramework;

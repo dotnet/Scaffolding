@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,8 +12,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
         private HashSet<Dependency> _dependencies;
         public DependencyDescription(string name, string path, string itemSpec, string version, string type, string resolved)
         {
-            Requires.NotNullOrEmpty(name);
-            Requires.NotNullOrEmpty(itemSpec);
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNullOrEmpty(itemSpec, nameof(itemSpec));
 
             Name = name;
             Path = path;
@@ -26,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             _dependencies = new HashSet<Dependency>();
         }
 
-        public string TFM
+        public string TargetFramework
         {
             get
             {
@@ -49,12 +52,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             }
         }
 
-        public void AddDependency(Dependency d)
+        public void AddDependency(Dependency dependency)
         {
-            Requires.NotNull(d);
-            if (!_dependencies.Contains(d))
+            Requires.NotNull(dependency, nameof(dependency));
+            if (!_dependencies.Contains(dependency))
             {
-                _dependencies.Add(d);
+                _dependencies.Add(dependency);
             }
         }
     }

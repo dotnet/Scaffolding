@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection.PortableExecutable;
@@ -23,14 +26,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
                 }
             }
             catch (Exception ex)
-                when (ex is FileNotFoundException
-                        || ex is DirectoryNotFoundException
-                        || ex is NotSupportedException
+                when (ex is NotSupportedException
                         || ex is ArgumentException
-                        || ex is ArgumentOutOfRangeException
                         || ex is BadImageFormatException
-                        || ex is IOException
-                        || ex is ArgumentNullException)
+                        || ex is IOException)
             {
                 // TODO: Log this
                 if (throwOnError)

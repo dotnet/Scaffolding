@@ -32,3 +32,4 @@ test/*/Properties
 project.fragment.lock.json
 **/bower_components/*
 **/*.nuget.props
+**/*.nuget.targets

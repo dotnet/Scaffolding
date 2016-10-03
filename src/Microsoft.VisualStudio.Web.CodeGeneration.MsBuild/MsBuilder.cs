@@ -1,35 +1,38 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using NuGet.Frameworks;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 {
     public class MsBuilder<T> where T : IMsBuildProcessor
     {
-        private readonly Project _project;
+        private readonly string _projectFilePath;
         private T _buildProcessor;
 
         public MsBuilder(string filePath, T buildProcessor)
         {
-            if (buildProcessor == null)
-            {
-                throw new ArgumentNullException(nameof(buildProcessor));
-            }
+            Requires.NotNull(buildProcessor, nameof(buildProcessor));
+
             _buildProcessor = buildProcessor;
             _buildProcessor.Init();
-            _project = CreateProject(filePath, _buildProcessor.Configuration);
+            _projectFilePath = filePath;
         }
 
-        public void RunMsBuild()
+        public void RunMsBuild(NuGetFramework framework)
         {
-            var result = RunMsBuild(_project);
-            _buildProcessor.ProcessBuildResult(_project, result.ProjectStateAfterBuild, result.ResultsByTarget);
+            var project = CreateProject(_projectFilePath, framework);
+            var result = RunMsBuild(project, framework);
+            _buildProcessor.ProcessBuildResult(project, result.ProjectStateAfterBuild, result.ResultsByTarget);
         }
 
-        private T BuildProcessor
+        public T BuildProcessor
         {
             get
             {
@@ -37,10 +40,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             }
         }
 
-        private BuildResult RunMsBuild(Project project)
+        private BuildResult RunMsBuild(Project project, NuGetFramework framework)
         {
             var projectInstance = project.CreateProjectInstance();
-            //EnsureTargetDirectoryExists(projectInstance);
+            projectInstance.SetProperty("TargetFramework", framework.Framework);
 
             var targets = BuildProcessor.Targets;
 
@@ -61,19 +64,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             return result;
         }
 
-        private Project CreateProject(string filePath, string configuration)
+        private Project CreateProject(string filePath, NuGetFramework framework)
         {
             var sdkPath = new DotNetSdkResolver().ResolveLatest();
-            var msBuildFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "MSBuild.exe"
-                : "MSBuild";
+            var msBuildFile = "MSBuild.exe";
 
             Environment.SetEnvironmentVariable("MSBUILD_EXE_PATH", Path.Combine(sdkPath, msBuildFile));
-            var globalProperties = BuildProcessor.Properties;
+            var globalProperties = BuildProcessor.Properties ?? new Dictionary<string, string>();
+            if (globalProperties.ContainsKey("TargetFramework"))
+            {
+                globalProperties.Remove("TargetFramework");
+            }
+
+            globalProperties.Add("TargetFramework", framework.GetShortFolderName());
 
             FillInDefaultProperties(globalProperties);
 
-            return ProjectUtilities.CreateProject(filePath, configuration, globalProperties);
+            return ProjectUtilities.CreateProject(filePath, globalProperties);
         }
 
         private static void FillInDefaultProperties(Dictionary<string, string> globalProperties)

@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             Execute(args, _logger);
         }
 
-        private static void Execute(string[] args, ConsoleLogger _logger)
+        private static void Execute(string[] args, ConsoleLogger logger)
         {
             var app = new CommandLineApplication(false)
             {
@@ -38,7 +38,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             // Define app Options;
             app.HelpOption("-h|--help");
             var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
-            var packagesPath = app.Option("-n|--nuget-package-dir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
             var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
             var framework = app.Option("-tfm|--target-framework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
             var buildBasePath = app.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
@@ -61,8 +60,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var portNumber = int.Parse(port.Value());
                 try
                 {
-                    client = ScaffoldingClient.Connect(portNumber, _logger);
-                    var messageHandler = new ScaffoldingMessageHandler(_logger, "ScaffoldingClient");
+                    client = ScaffoldingClient.Connect(portNumber, logger);
+                    var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
                     client.MessageReceived += messageHandler.HandleMessages;
 
                     var message = new Message()
@@ -76,15 +75,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                     var projectInfo = messageHandler.ProjectInfo;
                     ValidateProjectInfo(projectInfo);
 
-                    _logger.LogMessage($"Received Project Info, now need to chew on it.");
-                    _logger.LogMessage($"ProjectInfo: {projectInfo}");
+                    logger.LogMessage($"Received Project Info, now need to chew on it.");
+                    logger.LogMessage($"ProjectInfo: {projectInfo}");
 
                     var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
 
                     CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInfo,
                         codeGenArgs,
                         configuration,
-                        _logger);
+                        logger);
 
                     return executor.Execute();
                 }

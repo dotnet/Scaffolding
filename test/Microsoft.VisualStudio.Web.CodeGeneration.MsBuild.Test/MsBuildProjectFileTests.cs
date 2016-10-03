@@ -1,13 +1,11 @@
-using System;
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Xml;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
-using Xunit;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 using System.Linq;
+using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 {
@@ -22,16 +20,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
             {
                 "Program.cs"
             };
-            IEnumerable<string> projectReferences = new List<string>()
+
+            var projectReferences = new List<string>()
             {
                 "../abc.csproj"
             };
-            IEnumerable<string> assemblyReferences = new List<string>()
+
+            var assemblyReferences = new List<string>()
             {
                 "C:\test.dll"
             };
-            IDictionary<string, string> properties = new Dictionary<string,string>();
-            _projectFile = new MsBuildProjectFile(path, sourceFiles, projectReferences, assemblyReferences, properties);
+
+            var properties = new Dictionary<string,string>();
+            var targetFrameworkStr = "netcoreapp1.0;net451";
+            _projectFile = new MsBuildProjectFile(path, sourceFiles, projectReferences, assemblyReferences, properties, targetFrameworkStr);
         }
 
         [Fact]
@@ -42,6 +44,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MsBuild
 
             var references = _projectFile.AssemblyReferences;
             Assert.Equal(1, references.Count());
+
+            var targetFrameworks = _projectFile.TargetFrameworks;
+            Assert.Equal(2, targetFrameworks.Count());
         }
     }
 }

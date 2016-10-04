@@ -13,6 +13,7 @@
     },
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
       "version": "1.0.0-*",
       "type": "build"

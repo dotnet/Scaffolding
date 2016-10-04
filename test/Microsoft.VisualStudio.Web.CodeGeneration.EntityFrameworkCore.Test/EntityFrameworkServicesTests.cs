@@ -14,6 +14,7 @@ using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
+    [Collection("CodeGeneration.EF")]
     public class EntityFrameworkServicesTests
     {
         private IApplicationInfo _appInfo;
@@ -25,9 +26,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         private CodeAnalysis.Workspace _workspace;
         private ILogger _logger;
         private IProjectDependencyProvider _projectDependencyProvider;
+        private EFTestFixture _testFixture;
 
-        public EntityFrameworkServicesTests()
+        public EntityFrameworkServicesTests(EFTestFixture testFixture)
         {
+            _testFixture = testFixture;
         }
 
         private EntityFrameworkServices GetEfServices(string path, string applicationName)
@@ -37,8 +40,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             _packageInstaller = new Mock<IPackageInstaller>();
             _serviceProvider = new Mock<IServiceProvider>();
 
-            _workspace = null;
-            _projectDependencyProvider = null;
+            _workspace = _testFixture.Workspace;
+            _projectDependencyProvider = _testFixture.ProjectInfo.ProjectDependencyProvider;
             _loader = new TestAssemblyLoadContext(_projectDependencyProvider);
             _modelTypesLocator = new ModelTypesLocator(_workspace);
             var dbContextMock = new Mock<IDbContextEditorServices>();
@@ -70,10 +73,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         }
 
-        [Fact(Skip ="Disable tests that need projectInfo")]
+        [Fact]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
-            var appName = "ModelTypesLocatorTestClassLibrary";
+            var appName = "ModelTypesTestLibrary";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
             var efServices = GetEfServices(path, appName);
 
@@ -83,7 +86,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Null(metadata.ModelMetadata.Navigations);
             Assert.False(metadata.ModelMetadata.Properties.Any());
 
-            modelType = _modelTypesLocator.GetType("ModelTypesLocatorTestClassLibrary.Car").First();
+            modelType = _modelTypesLocator.GetType("ModelTypesTestLibrary.Car").First();
             metadata = await efServices.GetModelMetadata(modelType);
             Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
             Assert.Null(metadata.ModelMetadata.Navigations);
@@ -91,10 +94,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
         }
 
-        [Fact(Skip ="Disable tests that need projectInfo")]
+        [Fact(Skip ="Disable test because of https://github.com/dotnet/sdk/issues/200")]
         public async void TestGetModelMetadata_WithDbContext()
         {
-            var appName = "ModelTypesLocatorTestWebApp";
+            var appName = "ModelTypesTestLibrary";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
             var efServices = GetEfServices(path, appName);
 

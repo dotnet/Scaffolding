@@ -14,7 +14,7 @@ namespace E2E_Test
         {
         }
 
-        [Fact]
+        [Fact (Skip = "Disabling E2E test")]
         public void TestAreaGenerator()
         {
             var args = new string[]

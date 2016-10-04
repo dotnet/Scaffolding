@@ -16,13 +16,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
     //This is more of an integration test.
     public class RazorTemplatingTests
     {
-        [Fact(Skip = "Disable Test that requires dependencyProvider")]
+        [Fact]
         public async void RunTemplateAsync_Generates_Text_For_Template_With_A_Model()
         {
             //Arrange
             var templateContent = @"Hello @Model.Name";
             var model = new SimpleModel() { Name = "World" };
-            var compilationService = GetCompilationService();
+            var compilationService = new TestCompilationService();
             var templatingService = new RazorTemplating(compilationService);
 
             //Act
@@ -33,12 +33,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
             Assert.Equal("Hello World", result.GeneratedText);
         }
 
-        [Fact(Skip = "Disable Test that requires dependencyProvider")]
+        [Fact]
         public async void RunTemplateAsync_Returns_Error_For_Invalid_Template()
         {
             //Arrange
             var templateContent = "@Invalid";
-            var compilationService = GetCompilationService();
+            var compilationService = new TestCompilationService();
             var templatingService = new RazorTemplating(compilationService);
 
             //Act
@@ -52,44 +52,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
                 result.ProcessingException.Message);
         }
 
-        private ICompilationService GetCompilationService()
-        {
-            ProjectContext context = CreateProjectContext(null);
-            var applicationInfo = new ApplicationInfo("", context.ProjectDirectory);
-            ICodeGenAssemblyLoadContext loader = new DefaultAssemblyLoadContext();
-            IApplicationInfo _applicationInfo;
-
-#if RELEASE 
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Directory.GetCurrentDirectory(), "Release");
-#else
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Directory.GetCurrentDirectory(), "Debug");
-#endif
-
-            //ILibraryExporter libExporter = new LibraryExporter(context, _applicationInfo);
-            IProjectDependencyProvider projectDependencyProvider = null;
-            return new RoslynCompilationService(applicationInfo, loader, projectDependencyProvider);
-        }
-
-        private static ProjectContext CreateProjectContext(string projectPath)
-        {
-#if NET451
-            projectPath = projectPath ?? Path.Combine("..", "..", "..", "..");
-            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net451.GetShortFolderName();
-#else
-            projectPath = projectPath ?? Directory.GetCurrentDirectory();
-            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
-#endif
-            if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
-            {
-                projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);
-            }
-
-            if (!File.Exists(projectPath))
-            {
-                throw new InvalidOperationException($"{projectPath} does not exist.");
-            }
-            return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault(c => c.TargetFramework.GetShortFolderName() == framework);
-        }
     }
 
     //If i make this a private class inside the above class,

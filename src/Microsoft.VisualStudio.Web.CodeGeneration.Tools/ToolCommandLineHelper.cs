@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         }
 
         /// <summary>
-        /// Adds the --dependencyCommand flag and --targetFramework option
+        /// Adds the --dependencyCommand flag, --port-number option and --targetFramework option
         /// </summary>
         internal static string[] GetProjectDependencyCommandArgs(string[] args, string frameworkName, string portNumber)
         {
@@ -78,6 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             cmdArgs.Add(frameworkName);
             cmdArgs.Add(PORT_NUMBER);
             cmdArgs.Add(portNumber);
+
             cmdArgs.AddRange(args);
             return cmdArgs.ToArray();
         }

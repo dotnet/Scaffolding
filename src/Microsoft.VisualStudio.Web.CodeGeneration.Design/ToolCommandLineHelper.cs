@@ -52,6 +52,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                     case BUILD_BASE_PATH:
                     case BUILD_BASE_PATH_SHORT:
                     case DISPATCHER_VERSION:
+                    case PORT_NUMBER:
                         i++;
                         break;
 
@@ -63,22 +64,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             return filteredArgs.ToArray();
         }
-
-        /// <summary>
-        /// Adds the --dependencyCommand flag and --targetFramework option
-        /// </summary>
-        internal static string[] GetProjectDependencyCommandArgs(string[] args, string frameworkName, string portNumber)
-        {
-            List<string> cmdArgs = new List<string>();
-            cmdArgs.Add(NO_DISPATCH_FLAG);
-            cmdArgs.Add(TARGET_FRAMEWORK);
-            cmdArgs.Add(frameworkName);
-            cmdArgs.Add(PORT_NUMBER);
-            cmdArgs.Add(portNumber);
-            cmdArgs.AddRange(args);
-            return cmdArgs.ToArray();
-        }
-
-        internal static bool IsNoBuild(string[] args) => args.Contains(NO_BUILD, StringComparer.OrdinalIgnoreCase);
     }
 }

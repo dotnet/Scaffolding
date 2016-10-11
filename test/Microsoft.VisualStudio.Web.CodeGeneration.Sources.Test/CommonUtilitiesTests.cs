@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
-    [Collection("CodeGeneration.Utils")]
     public class CommonUtilitiesTests : TestBase
     {
 #if NET451
@@ -22,23 +21,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 #endif
         ICodeGenAssemblyLoadContext loadContext;
 
-        public CommonUtilitiesTests(TestFixture testFixture)
-            : base(testFixture)
+        public CommonUtilitiesTests()
         {
             loadContext = new DefaultAssemblyLoadContext();
         }
         
-        [Fact(Skip ="Disable tests that need projectInfo")]
+        [Fact]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
-            IEnumerable<MetadataReference> references = ProjectDependencyProvider.GetAllResolvedReferences().SelectMany(r => r.GetMetadataReference());
+            var projectContext = GetProjectContext(testAppPath, false);
+            IEnumerable<MetadataReference> references = projectContext.CompilationAssemblies.SelectMany(c => c.GetMetadataReference());
             string code = @"using System;
                             namespace Sample { 
                                 public class SampleClass 
                                 {
                                 } 
                             }";
-            
+
             Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), references);
             CompilationResult result = CommonUtilities.GetAssemblyFromCompilation(loadContext, compilation);
 

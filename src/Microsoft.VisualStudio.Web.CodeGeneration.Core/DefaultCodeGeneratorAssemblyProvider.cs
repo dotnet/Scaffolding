@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.ProjectModel;
+using Microsoft.Extensions.ProjectModel.Resolution;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -25,19 +27,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             };
 
         private readonly ICodeGenAssemblyLoadContext _assemblyLoadContext;
-        private IProjectDependencyProvider _projectDependencyProvider;
+        private IProjectContext _projectContext;
          
-        public DefaultCodeGeneratorAssemblyProvider(IProjectDependencyProvider projectDependencyProvider, ICodeGenAssemblyLoadContext loadContext)
+        public DefaultCodeGeneratorAssemblyProvider(IProjectContext projectContext, ICodeGenAssemblyLoadContext loadContext)
         {
             if(loadContext == null)
             {
                 throw new ArgumentNullException(nameof(loadContext));
             }
-            if(projectDependencyProvider == null)
+            if(projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectDependencyProvider));
+                throw new ArgumentNullException(nameof(projectContext));
             }
-            _projectDependencyProvider = projectDependencyProvider;
+            _projectContext = projectContext;
             _assemblyLoadContext = loadContext;
 
         }
@@ -48,7 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
 
                 var list = _codeGenerationFrameworkAssemblies
-                    .SelectMany(_projectDependencyProvider.GetReferencingPackages)
+                    .SelectMany(_projectContext.GetReferencingPackages)
                     .Distinct()
                     .Where(IsCandidateLibrary);
                 return list.Select(lib => _assemblyLoadContext.LoadFromName(new AssemblyName(lib.Name)));

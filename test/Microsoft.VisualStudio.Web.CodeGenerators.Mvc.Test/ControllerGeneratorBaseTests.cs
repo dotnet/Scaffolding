@@ -2,18 +2,19 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
 using Moq;
 using Xunit;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 {
     public class ControllerGeneratorBaseTests
     {
-        protected Mock<IProjectDependencyProvider> _projectDependencyProviderMock;
+        protected Mock<IProjectContext> _projectContextMock;
         protected Mock<ICodeGeneratorActionsService> _codeGenActionService;
         protected Mock<IServiceProvider> _serviceProvider;
         protected ILogger _logger;
@@ -21,7 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 
         public ControllerGeneratorBaseTests()
         {
-            _projectDependencyProviderMock = new Mock<IProjectDependencyProvider>();
+            _projectContextMock = new Mock<IProjectContext>();
             _codeGenActionService = new Mock<ICodeGeneratorActionsService>();
             _serviceProvider = new Mock<IServiceProvider>();
             _logger = new ConsoleLogger();
@@ -32,7 +33,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         public void Test_ValidateNameSpace_ThrowsException()
         {
             var generator = new MockControllerGenerator(
-                _projectDependencyProviderMock.Object,
+                _projectContextMock.Object,
                 _applicationInfo,
                 _codeGenActionService.Object,
                 _serviceProvider.Object,
@@ -58,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         public void Test_ValidateNameSpace()
         {
             var generator = new MockControllerGenerator(
-                _projectDependencyProviderMock.Object,
+                _projectContextMock.Object,
                 _applicationInfo,
                 _codeGenActionService.Object,
                 _serviceProvider.Object,

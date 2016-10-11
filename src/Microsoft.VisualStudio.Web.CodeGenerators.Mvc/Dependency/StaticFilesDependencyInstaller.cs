@@ -7,22 +7,22 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Newtonsoft.Json.Linq;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
     public class StaticFilesDependencyInstaller : DependencyInstaller
     {
         public StaticFilesDependencyInstaller(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider)
-            : base(projectDependencyProvider, applicationInfo, logger, packageInstaller, serviceProvider)
+            : base(projectContext, applicationInfo, logger, packageInstaller, serviceProvider)
         {
         }
 

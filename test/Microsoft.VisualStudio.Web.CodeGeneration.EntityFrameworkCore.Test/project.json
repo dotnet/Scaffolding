@@ -5,16 +5,25 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.1.0-*",
-    "Microsoft.Extensions.FileProviders.Embedded": "1.1.0-*",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-*",
+    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0-*",
     "Microsoft.NETCore.App": {
-      "version": "1.1.0-*",
+      "version": "1.0.0-*",
       "type": "platform"
     },
+    "Microsoft.Build.Runtime": "15.1.319-preview5",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.Extensions.FileProviders.Physical": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.ProjectModel.DotNet.Sources": {
       "version": "1.0.0-*",
       "type": "build"
     },

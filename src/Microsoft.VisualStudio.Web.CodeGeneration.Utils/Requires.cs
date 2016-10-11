@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
     public static class Requires
     {

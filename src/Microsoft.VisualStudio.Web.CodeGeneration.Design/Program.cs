@@ -4,8 +4,9 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
@@ -47,7 +48,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             app.OnExecute(() =>
             {
-                ScaffoldingClient client = null;
 
                 string project = projectPath.Value();
                 if (string.IsNullOrEmpty(project))
@@ -58,67 +58,47 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var configuration = appConfiguration.Value();
 
                 var portNumber = int.Parse(port.Value());
-                try
-                {
-                    client = ScaffoldingClient.Connect(portNumber, logger);
-                    var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
-                    client.MessageReceived += messageHandler.HandleMessages;
+                IProjectContext projectContext = GetProjectContextFromServer(logger, portNumber);
 
-                    var message = new Message()
-                    {
-                        MessageType = MessageTypes.ProjectInfoRequest
-                    };
+                var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
 
-                    client.Send(message);
-                    // Read the project Information
-                    client.ReadMessage();
-                    var projectInfo = messageHandler.ProjectInfo;
-                    ValidateProjectInfo(projectInfo);
+                CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectContext,
+                    codeGenArgs,
+                    configuration,
+                    logger);
 
-                    logger.LogMessage($"Received Project Info, now need to chew on it.");
-                    logger.LogMessage($"ProjectInfo: {projectInfo}");
-
-                    var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
-
-                    CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInfo,
-                        codeGenArgs,
-                        configuration,
-                        logger);
-
-                    return executor.Execute();
-                }
-                finally
-                {
-                    if (client != null)
-                    {
-                        // Free the connection.
-                        client.Dispose();
-                    }
-                }
+                return executor.Execute();
             });
 
             app.Execute(args);
         }
 
-        private static void ValidateProjectInfo(ProjectInfoContainer projectInfo)
+        private static IProjectContext GetProjectContextFromServer(ILogger logger, int portNumber)
         {
-            if (projectInfo == null)
+            using (var client = ScaffoldingClient.Connect(portNumber, logger))
             {
-                throw new ArgumentNullException(nameof(projectInfo));
-            }
+                var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
+                client.MessageReceived += messageHandler.HandleMessages;
 
-            if (projectInfo.ProjectContext == null
-                || string.IsNullOrEmpty(projectInfo.ProjectContext.ProjectName)
-                || projectInfo.ProjectContext.ProjectFile == null)
-            {
-                throw new Exception("Project context received from the tool is invalid/ incomplete.");
-            }
+                var message = new Message()
+                {
+                    MessageType = MessageTypes.ProjectInfoRequest
+                };
 
-            if (projectInfo.ProjectDependencyProvider == null
-                || projectInfo.ProjectDependencyProvider.GetAllResolvedReferences() == null
-                || projectInfo.ProjectDependencyProvider.GetAllPackages() == null)
-            {
-                throw new Exception("Dependency information received from the tool is invalid/ incomplete.");
+                client.Send(message);
+                // Read the project Information
+                client.ReadMessage();
+
+                var projectInfo = messageHandler.ProjectInfo;
+                if (projectInfo == null)
+                {
+                    throw new InvalidOperationException($"Could not get ProjectInformation.");
+                }
+
+                logger.LogMessage($"Received Project Info, now need to chew on it.");
+                logger.LogMessage($"ProjectInfo: {projectInfo}");
+
+                return projectInfo;
             }
         }
     }

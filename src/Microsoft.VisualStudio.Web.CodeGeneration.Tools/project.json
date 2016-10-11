@@ -23,19 +23,28 @@
     }
   },
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.MsBuild": "1.0.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Design": "1.0.0-*",
+    "Microsoft.Build.Runtime": "15.1.319-preview5",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.1.0-*",
     "Microsoft.Extensions.DotnetToolDispatcher.Sources": {
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-*"
+    "Microsoft.Extensions.FileProviders.Physical": "1.1.0-*",
+    "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.ProjectModel.DotNet.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",
+    "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [
-        "dnxcore50",
         "portable-net45+win8"
       ],
       "dependencies": {

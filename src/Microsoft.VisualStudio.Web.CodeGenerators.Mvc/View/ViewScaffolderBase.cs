@@ -3,25 +3,25 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using System.IO;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
     public abstract class ViewScaffolderBase: CommonGeneratorBase
     {
-        protected readonly IProjectDependencyProvider _projectDependencyProvider;
+        protected readonly IProjectContext _projectContext;
         protected readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
         public ViewScaffolderBase(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectDependencyProvider,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            _projectDependencyProvider = projectDependencyProvider;
+            _projectContext = projectDependencyProvider;
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -67,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
                     baseFolders: new[] { "ViewGenerator" },
-                    projectDependencyProvider: _projectDependencyProvider);
+                    projectContext: _projectContext);
             }
         }
 

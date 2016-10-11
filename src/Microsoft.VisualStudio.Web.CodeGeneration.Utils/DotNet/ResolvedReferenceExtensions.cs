@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection.PortableExecutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.Extensions.ProjectModel.Resolution;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 {

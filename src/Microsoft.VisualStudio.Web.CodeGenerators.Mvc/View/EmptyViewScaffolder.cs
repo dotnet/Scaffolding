@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
@@ -16,12 +16,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
     {
         private static IEnumerable<RequiredFileEntity> RequiredFiles = new List<RequiredFileEntity>();
         public EmptyViewScaffolder(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
 
         }

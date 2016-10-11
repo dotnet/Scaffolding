@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
@@ -29,14 +29,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         };
 
         public ControllerWithContextGenerator(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
 
             if (modelTypesLocator == null)

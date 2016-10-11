@@ -6,22 +6,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
     public class MvcLayoutDependencyInstaller : DependencyInstaller
     {
         public MvcLayoutDependencyInstaller(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider)
-            : base(projectDependencyProvider, applicationInfo, logger, packageInstaller, serviceProvider)
+            : base(projectContext, applicationInfo, logger, packageInstaller, serviceProvider)
         {
         }
 

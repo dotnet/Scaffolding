@@ -2,26 +2,27 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
     public class TestAssemblyLoadContext : ICodeGenAssemblyLoadContext
     {
         private ICodeGenAssemblyLoadContext _defaultContext;
-        private readonly IProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectContext _projectContext;
 
-        public TestAssemblyLoadContext(IProjectDependencyProvider projectDependencyProvider)
+        public TestAssemblyLoadContext(IProjectContext projectDependencyProvider)
         {
-            _projectDependencyProvider = projectDependencyProvider;
+            _projectContext = projectDependencyProvider;
             _defaultContext = new DefaultAssemblyLoadContext();
         }
         public Assembly LoadFromName(AssemblyName AssemblyName)
         {
-            var path = _projectDependencyProvider.GetResolvedReference(AssemblyName.Name).ResolvedPath;
+            var path = _projectContext.CompilationAssemblies.First(c => c.Name == AssemblyName.Name).ResolvedPath;
             return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
         }
 

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test;
@@ -14,7 +14,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
 using Moq;
 using Xunit;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -158,7 +157,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var app = new Mock<IApplicationInfo>();
             app.Setup(a => a.ApplicationBasePath).Returns(AppBase);
             return new DbContextEditorServices(
-                new Mock<IProjectDependencyProvider>().Object,
+                new Mock<IProjectContext>().Object,
                 app.Object,
                 new Mock<IFilesLocator>().Object,
                 new Mock<ITemplating>().Object,

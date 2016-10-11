@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         private readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
         private readonly IApplicationInfo _applicationInfo;
         private readonly IModelTypesLocator _modelTypesLocator;
-        private readonly IProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectContext _projectContext;
 
         public IEnumerable<string> TemplateFolders
         {
@@ -27,14 +27,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                     Constants.ThisAssemblyName,
                     _applicationInfo.ApplicationBasePath,
                     new[] { "Startup" },
-                    _projectDependencyProvider);
+                    _projectContext);
             }
         }
 
         public ReadMeGenerator(
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IModelTypesLocator modelTypesLocator,
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo)
         {
             if (codeGeneratorActionsService == null)
@@ -47,9 +47,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 throw new ArgumentNullException(nameof(modelTypesLocator));
             }
 
-            if (projectDependencyProvider == null)
+            if (projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectDependencyProvider));
+                throw new ArgumentNullException(nameof(projectContext));
             }
 
             if (applicationInfo == null)
@@ -59,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 
             _codeGeneratorActionsService = codeGeneratorActionsService;
             _modelTypesLocator = modelTypesLocator;
-            _projectDependencyProvider = projectDependencyProvider;
+            _projectContext = projectContext;
             _applicationInfo = applicationInfo;
         }
 

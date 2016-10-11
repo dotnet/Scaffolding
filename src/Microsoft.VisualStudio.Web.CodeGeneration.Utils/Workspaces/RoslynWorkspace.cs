@@ -10,9 +10,11 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Extensions.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using PInfo = Microsoft.CodeAnalysis.ProjectInfo;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
     public class RoslynWorkspace : Workspace
     {
@@ -24,15 +26,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
 
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
 
-        public RoslynWorkspace(IMsBuildProjectContext context,
-            IProjectDependencyProvider projectDependencyProvider,
+        public RoslynWorkspace(IProjectContext context,
             string configuration = "debug")
             : base(MefHostServices.DefaultHost, "Custom")
         {
             Requires.NotNull(context, nameof(context));
-            Requires.NotNull(projectDependencyProvider, nameof(projectDependencyProvider));
 
-            var id = AddProject(context.ProjectFile, configuration);
+            var id = AddProject(context, configuration);
 
             // Since we have resolved all references, we can directly use them as MetadataReferences.
             // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
@@ -42,25 +42,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             //    AddProjectReference(file, configuration);
             //}
 
-            AddMetadataReferences(projectDependencyProvider, id);
+            AddMetadataReferences(context, id);
         }
 
-        private ProjectId AddProject(MsBuildProjectFile projectFile, string configuration)
+        private ProjectId AddProject(IProjectContext context, string configuration)
         {
-            var fullPath = projectFile.FullPath;
+            var fullPath = context.ProjectFullPath;
 
-            var projectName = Path.GetFileNameWithoutExtension(fullPath);
             var projectInfo = PInfo.Create(
                 ProjectId.CreateNewId(),
                 VersionStamp.Create(),
-                projectName,
-                projectName,
+                context.ProjectName,
+                context.AssemblyName,
                 LanguageNames.CSharp,
                 fullPath);
 
             OnProjectAdded(projectInfo);
 
-            foreach (var file in projectFile.SourceFiles)
+            foreach (var file in context.CompilationItems)
             {
                 var filePath = Path.IsPathRooted(file)
                     ? file
@@ -89,17 +88,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo
             }
         }
 
-        private void AddMetadataReferences(IProjectDependencyProvider projectDependencyProvider, ProjectId id)
+        private void AddMetadataReferences(IProjectContext projectContext, ProjectId id)
         {
-            var resolvedReferences = projectDependencyProvider.GetAllResolvedReferences();
+            var resolvedReferences = projectContext.CompilationAssemblies;
 
             foreach (var reference in resolvedReferences)
             {
-                if (!reference.IsResolved)
-                {
-                    continue;
-                }
-
                 var metadataRef = GetMetadataReference(reference.ResolvedPath);
                 if (metadataRef != null)
                 {

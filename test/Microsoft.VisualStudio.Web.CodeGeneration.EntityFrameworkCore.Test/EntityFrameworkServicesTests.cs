@@ -7,14 +7,16 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
-    [Collection("CodeGeneration.EF")]
+    //[Collection("CodeGeneration.EF")]
     public class EntityFrameworkServicesTests
     {
         private IApplicationInfo _appInfo;
@@ -25,13 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         private Mock<IServiceProvider> _serviceProvider;
         private CodeAnalysis.Workspace _workspace;
         private ILogger _logger;
-        private IProjectDependencyProvider _projectDependencyProvider;
-        private EFTestFixture _testFixture;
-
-        public EntityFrameworkServicesTests(EFTestFixture testFixture)
-        {
-            _testFixture = testFixture;
-        }
+        private IProjectContext _projectContext;
 
         private EntityFrameworkServices GetEfServices(string path, string applicationName)
         {
@@ -40,15 +36,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             _packageInstaller = new Mock<IPackageInstaller>();
             _serviceProvider = new Mock<IServiceProvider>();
 
-            _workspace = _testFixture.Workspace;
-            _projectDependencyProvider = _testFixture.ProjectInfo.ProjectDependencyProvider;
-            _loader = new TestAssemblyLoadContext(_projectDependencyProvider);
+            _projectContext = GetProjectContext(path, false);
+            _workspace = new RoslynWorkspace(_projectContext);
+            _loader = new TestAssemblyLoadContext(_projectContext);
             _modelTypesLocator = new ModelTypesLocator(_workspace);
             var dbContextMock = new Mock<IDbContextEditorServices>();
             var editSyntaxTreeResult = new EditSyntaxTreeResult()
             {
                 Edited = true
             };
+
             dbContextMock.Setup(db => db.EditStartupForNewContext(It.IsAny<ModelType>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -56,12 +53,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 .Returns(editSyntaxTreeResult);
 
             var filesLocator = new FilesLocator();
-            var compilationService = new RoslynCompilationService(_appInfo, _loader, _projectDependencyProvider);
+            var compilationService = new RoslynCompilationService(_appInfo, _loader, _projectContext);
             var templatingService = new Templating.RazorTemplating(compilationService);
-            _dbContextEditorServices = new DbContextEditorServices(_projectDependencyProvider, _appInfo, filesLocator, templatingService);
+            _dbContextEditorServices = new DbContextEditorServices(_projectContext, _appInfo, filesLocator, templatingService);
 
             return new EntityFrameworkServices(
-                _projectDependencyProvider,
+                _projectContext,
                 _appInfo,
                 _loader,
                 _modelTypesLocator,
@@ -73,10 +70,27 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         }
 
-        [Fact]
+        private IProjectContext GetProjectContext(string path, bool isMsBuild)
+        {
+            if (isMsBuild)
+            {
+                return new MsBuildProjectContextBuilder()
+                    .AsDesignTimeBuild()
+                    .WithTargetFramework(FrameworkConstants.CommonFrameworks.NetCoreApp10)
+                    .WithConfiguration("Debug")
+                    .Build();
+            }
+            else
+            {
+                var context = Microsoft.DotNet.ProjectModel.ProjectContext.Create(path, FrameworkConstants.CommonFrameworks.NetStandard16);
+                return new Microsoft.Extensions.ProjectModel.DotNetProjectContext(context, "Debug", null);
+            }
+        }
+
+        [Fact(Skip ="Need to update workspace creation for this to work.")]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
-            var appName = "ModelTypesTestLibrary";
+            var appName = "ModelTypesLocatorTestClassLibrary";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
             var efServices = GetEfServices(path, appName);
 
@@ -97,7 +111,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         [Fact(Skip ="Disable test because of https://github.com/dotnet/sdk/issues/200")]
         public async void TestGetModelMetadata_WithDbContext()
         {
-            var appName = "ModelTypesTestLibrary";
+            var appName = "ModelTypesLocatorTestClassLibrary";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
             var efServices = GetEfServices(path, appName);
 

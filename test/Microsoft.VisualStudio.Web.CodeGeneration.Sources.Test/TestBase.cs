@@ -1,33 +1,29 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 {
     public class TestBase
     {
-        protected TestFixture _fixture;
-        protected IMsBuildProjectContext ProjectContext { get; }
-        protected IProjectDependencyProvider ProjectDependencyProvider { get; }
-        protected IApplicationInfo ApplicationInfo { get; }
-
-        public TestBase(TestFixture testFixture)
+        protected IProjectContext GetProjectContext(string path, bool isMsBuild)
         {
-            this._fixture = testFixture;
-
-//            _fixture.RunBuild();
-//            ProjectContext = _fixture.ProjectInfo.ProjectContext;
-//            string configuration = "Debug";
-//#if RELEASE
-//            configuration = "Release";
-//#endif
-//            ApplicationInfo = new ApplicationInfo(_fixture.ProjectInfo.ProjectContext.ProjectName,
-//                ProjectContext.ProjectFullPath,
-//                configuration);
-
-
+            if (isMsBuild)
+            {
+                return new MsBuildProjectContextBuilder()
+                    .AsDesignTimeBuild()
+                    .WithTargetFramework(FrameworkConstants.CommonFrameworks.NetCoreApp10)
+                    .WithConfiguration("Debug")
+                    .Build();
+            }
+            else
+            {
+                var context = Microsoft.DotNet.ProjectModel.ProjectContext.Create(path, FrameworkConstants.CommonFrameworks.NetStandard16);
+                return new Microsoft.Extensions.ProjectModel.DotNetProjectContext(context, "Debug", null);
+            }
         }
     }
 }

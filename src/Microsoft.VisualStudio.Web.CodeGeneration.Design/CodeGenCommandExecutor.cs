@@ -4,27 +4,27 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class CodeGenCommandExecutor
     {
-        private IMsBuildProjectContext _projectContext;
-        private IProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectContext _projectContext;
         private string[] _codeGenArguments;
         private string _configuration;
         private ILogger _logger;
 
-        public CodeGenCommandExecutor(ProjectInfoContainer projectInfo, string[] codeGenArguments, string configuration, ILogger logger)
+        public CodeGenCommandExecutor(IProjectContext projectContext, string[] codeGenArguments, string configuration, ILogger logger)
         {
-            if (projectInfo == null)
+            if (projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectInfo));
+                throw new ArgumentNullException(nameof(projectContext));
             }
             if (codeGenArguments == null)
             {
@@ -34,8 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             {
                 throw new ArgumentNullException(nameof(logger));
             }
-            _projectContext = projectInfo.ProjectContext;
-            _projectDependencyProvider = projectInfo.ProjectDependencyProvider;
+            _projectContext = projectContext;
             _codeGenArguments = codeGenArguments;
             _configuration = configuration;
             _logger = logger;
@@ -44,22 +43,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         public int Execute()
         {
             var serviceProvider = new ServiceProvider();
-            AddFrameworkServices(serviceProvider, _projectContext, _projectDependencyProvider);
+            AddFrameworkServices(serviceProvider, _projectContext);
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
             codeGenCommand.Execute(_codeGenArguments);
             return 0;
         }
 
-        private void AddFrameworkServices(ServiceProvider serviceProvider, IMsBuildProjectContext context, IProjectDependencyProvider projectDependencyProvider)
+        private void AddFrameworkServices(ServiceProvider serviceProvider, IProjectContext context)
         {
             var applicationInfo = new ApplicationInfo(context.ProjectName, Path.GetDirectoryName(context.ProjectFullPath));
-            serviceProvider.Add<IMsBuildProjectContext>(context);
-            serviceProvider.Add<IProjectDependencyProvider>(projectDependencyProvider);
+            serviceProvider.Add<IProjectContext>(context);
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
 
-            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(context, projectDependencyProvider, context.Configuration));
+            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(context, context.Configuration));
         }
 
         private void AddCodeGenerationServices(ServiceProvider serviceProvider)

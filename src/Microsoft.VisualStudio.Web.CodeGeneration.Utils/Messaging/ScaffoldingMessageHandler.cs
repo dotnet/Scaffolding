@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.Extensions.ProjectModel;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
@@ -23,7 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
             _hostId = hostId;
         }
 
-        public ProjectInfoContainer ProjectInfo { get; set; }
+        public IProjectContext ProjectInfo { get; set; }
 
         public void HandleMessages(object sender, Message e)
         {
@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
         {
             try
             {
-                ProjectInfo = msg.Payload.ToObject<ProjectInfoContainer>();
+                ProjectInfo = msg.Payload.ToObject<IProjectContext>();
             }
             catch (Exception ex)
             {
@@ -61,10 +61,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
                 throw new ArgumentNullException(nameof(sender));
             }
 
-            if (ProjectInfo == null)
-            {
-                ProjectInfo = new ProjectInfoContainer();
-            }
             try
             {
                 var message = new Message()

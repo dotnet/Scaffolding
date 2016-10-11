@@ -2,20 +2,20 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
     public class MvcControllerWithReadWriteActionGenerator : MvcController
     {
-        public MvcControllerWithReadWriteActionGenerator(IProjectDependencyProvider projectDependencyProvider,
+        public MvcControllerWithReadWriteActionGenerator(IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(projectDependencyProvider, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+            : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
         protected override string GetRequiredNameError

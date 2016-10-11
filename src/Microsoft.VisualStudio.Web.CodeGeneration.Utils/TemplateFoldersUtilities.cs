@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.Extensions.ProjectModel.Resolution;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -16,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             string containingProject,
             string applicationBasePath,
             string[] baseFolders,
-            IProjectDependencyProvider projectDependencyProvider)
+            IProjectContext projectContext)
         {
             if (containingProject == null)
             {
@@ -33,9 +34,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 throw new ArgumentNullException(nameof(baseFolders));
             }
 
-            if (projectDependencyProvider == null)
+            if (projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectDependencyProvider));
+                throw new ArgumentNullException(nameof(projectContext));
             }
 
             var rootFolders = new List<string>();
@@ -43,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             rootFolders.Add(applicationBasePath);
 
-            var dependency = projectDependencyProvider.GetPackage(containingProject);
+            var dependency = projectContext.GetPackage(containingProject);
 
             if (dependency != null)
             {

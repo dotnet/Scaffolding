@@ -8,8 +8,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
 {
@@ -18,13 +18,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
         private static readonly ConcurrentDictionary<string, AssemblyMetadata> _metadataFileCache =
             new ConcurrentDictionary<string, AssemblyMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly IProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectContext _projectContext;
         private readonly IApplicationInfo _applicationInfo;
         private readonly ICodeGenAssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationInfo applicationInfo,
                                         ICodeGenAssemblyLoadContext loader,
-                                        IProjectDependencyProvider projectDependencyProvider)
+                                        IProjectContext projectContext)
         {
             if(loader == null)
             {
@@ -34,13 +34,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
             {
                 throw new ArgumentNullException(nameof(applicationInfo));
             }
-            if(projectDependencyProvider == null)
+            if(projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectDependencyProvider));
+                throw new ArgumentNullException(nameof(projectContext));
             }
             _applicationInfo = applicationInfo;
             _loader = loader;
-            _projectDependencyProvider = projectDependencyProvider;
+            _projectContext = projectContext;
         }
 
         public CompilationResult Compile(string content)
@@ -87,7 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var exports = _projectDependencyProvider.GetAllResolvedReferences();
+                var exports = _projectContext.CompilationAssemblies;
 
                 if (exports != null)
                 {

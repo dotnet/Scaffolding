@@ -15,8 +15,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -33,11 +34,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string EFSqlServerPackageVersion = "7.0.0-*";
         private const string NewDbContextFolderName = "Data";
         private readonly Workspace _workspace;
-        private readonly IProjectDependencyProvider _projectDependencyProvider;
+        private readonly IProjectContext _projectContext;
 
 
         public EntityFrameworkServices(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             ICodeGenAssemblyLoadContext loader,
             IModelTypesLocator modelTypesLocator,
@@ -47,9 +48,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Workspace workspace,
             ILogger logger)
         {
-            if (projectDependencyProvider == null)
+            if (projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectDependencyProvider));
+                throw new ArgumentNullException(nameof(projectContext));
             }
 
             if (applicationInfo == null)
@@ -92,7 +93,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(workspace));
             }
 
-            _projectDependencyProvider = projectDependencyProvider;
+            _projectContext = projectContext;
             _applicationInfo = applicationInfo;
             _loader = loader;
             _modelTypesLocator = modelTypesLocator;
@@ -386,7 +387,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private async Task ValidateEFSqlServerDependency()
         {
-            if (_projectDependencyProvider.GetPackage(EFSqlServerPackageName) == null)
+            if (_projectContext.GetPackage(EFSqlServerPackageName) == null)
             {
                 await _packageInstaller.InstallPackages(new List<PackageMetadata>()
                 {

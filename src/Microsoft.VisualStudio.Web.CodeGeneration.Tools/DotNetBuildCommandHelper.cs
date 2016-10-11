@@ -1,11 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 
@@ -16,7 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         internal static BuildResult Build(
             string project,
             string configuration,
-            //NuGetFramework framework,
+            NuGetFramework framework,
             string buildBasePath)
         {
             // TODO: Specify --runtime?
@@ -24,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 project,
                 "--configuration", configuration,
-                //"--framework", framework.GetShortFolderName(),
+                "--framework", framework.GetShortFolderName(),
             };
 
             if (buildBasePath != null)

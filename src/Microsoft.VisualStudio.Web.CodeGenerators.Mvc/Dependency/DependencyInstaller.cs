@@ -7,25 +7,26 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.Web.CodeGeneration.ProjectInfo;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
     public abstract class DependencyInstaller
     {
         protected DependencyInstaller(
-            IProjectDependencyProvider projectDependencyProvider,
+            IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             ILogger logger,
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider)
         {
-            if (projectDependencyProvider == null)
+            if (projectContext == null)
             {
-                throw new ArgumentNullException(nameof(projectDependencyProvider));
+                throw new ArgumentNullException(nameof(projectContext));
             }
 
             if (applicationInfo == null)
@@ -48,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            ProjectDependencyProvider = projectDependencyProvider;
+            ProjectContext = projectContext;
             ApplicationEnvironment = applicationInfo;
             Logger = logger;
             PackageInstaller = packageInstaller;
@@ -86,7 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         protected ILogger Logger { get; private set; }
         public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }
-        protected IProjectDependencyProvider ProjectDependencyProvider { get; private set; }
+        protected IProjectContext ProjectContext { get; private set; }
 
         protected IEnumerable<string> TemplateFolders
         {
@@ -96,7 +97,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                     containingProject: Constants.ThisAssemblyName,
                     baseFolders: new[] { TemplateFoldersName },
                     applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
-                    projectDependencyProvider: ProjectDependencyProvider);
+                    projectContext: ProjectContext);
             }
         }
 
@@ -123,7 +124,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
             get
             {
                 return Dependencies
-                    .Where(dep => ProjectDependencyProvider.GetPackage(dep.Name) == null);
+                    .Where(dep => ProjectContext.GetPackage(dep.Name) == null);
             }
         }
 

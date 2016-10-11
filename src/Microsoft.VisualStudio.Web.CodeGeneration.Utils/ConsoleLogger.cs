@@ -3,7 +3,7 @@
 
 ﻿using System;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
     public class ConsoleLogger : ILogger
     {

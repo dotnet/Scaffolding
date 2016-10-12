@@ -15,16 +15,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class CodeGenCommandExecutor
     {
-        private readonly IProjectContext _projectContext;
+        private readonly ProjectInformation _projectInformation;
         private string[] _codeGenArguments;
         private string _configuration;
         private ILogger _logger;
 
-        public CodeGenCommandExecutor(IProjectContext projectContext, string[] codeGenArguments, string configuration, ILogger logger)
+        public CodeGenCommandExecutor(ProjectInformation projectInformation, string[] codeGenArguments, string configuration, ILogger logger)
         {
-            if (projectContext == null)
+            if (projectInformation == null)
             {
-                throw new ArgumentNullException(nameof(projectContext));
+                throw new ArgumentNullException(nameof(projectInformation));
             }
             if (codeGenArguments == null)
             {
@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             {
                 throw new ArgumentNullException(nameof(logger));
             }
-            _projectContext = projectContext;
+            _projectInformation = projectInformation;
             _codeGenArguments = codeGenArguments;
             _configuration = configuration;
             _logger = logger;
@@ -43,21 +43,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         public int Execute()
         {
             var serviceProvider = new ServiceProvider();
-            AddFrameworkServices(serviceProvider, _projectContext);
+            AddFrameworkServices(serviceProvider, _projectInformation);
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
             codeGenCommand.Execute(_codeGenArguments);
             return 0;
         }
 
-        private void AddFrameworkServices(ServiceProvider serviceProvider, IProjectContext context)
+        private void AddFrameworkServices(ServiceProvider serviceProvider, ProjectInformation projectInformation)
         {
-            var applicationInfo = new ApplicationInfo(context.ProjectName, Path.GetDirectoryName(context.ProjectFullPath));
-            serviceProvider.Add<IProjectContext>(context);
+            var applicationInfo = new ApplicationInfo(
+                projectInformation.RootProject.ProjectName,
+                Path.GetDirectoryName(projectInformation.RootProject.ProjectFullPath));
+            serviceProvider.Add<IProjectContext>(projectInformation.RootProject);
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
 
-            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(context, context.Configuration));
+            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(projectInformation, projectInformation.RootProject.Configuration));
         }
 
         private void AddCodeGenerationServices(ServiceProvider serviceProvider)

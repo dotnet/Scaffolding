@@ -4,6 +4,9 @@
     "nowarn": [
       "CS1591"
     ],
+    "compile": {
+      "include": "../Shared/**/*.cs"
+    },
     "xmlDoc": true
   },
   "version": "1.0.0-*",

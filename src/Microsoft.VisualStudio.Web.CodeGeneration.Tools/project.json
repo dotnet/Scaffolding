@@ -7,6 +7,9 @@
     "nowarn": [
       "CS1591"
     ],
+    "compile": {
+      "include": "../Shared/**/*.cs"
+    },
     "xmlDoc": true
   },
   "description": "Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. ",
@@ -30,7 +33,12 @@
       "version": "1.0.0-*",
       "type": "build"
     },
+    "Microsoft.Extensions.PlatformAbstractions": "1.1.0-*",
     "Microsoft.Extensions.FileProviders.Physical": "1.1.0-*",
+    "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
     "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {
       "version": "1.0.0-*",
       "type": "build"
@@ -39,13 +47,11 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",
     "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [
-        "portable-net45+win8"
       ],
       "dependencies": {
         "Microsoft.NETCore.App": {

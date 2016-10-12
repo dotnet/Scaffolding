@@ -50,5 +50,31 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             return tfms.Select(tfm => NuGetFramework.Parse(tfm));
         }
+
+        public static NuGetFramework GetSuitableFrameworkFromProject(System.Collections.Generic.IEnumerable<NuGetFramework> frameworksInProject)
+        {
+            var nearestFramework = NuGetFrameworkUtility.GetNearest(
+                                frameworksInProject,
+                                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                                 f => new NuGetFramework(f));
+
+            if (nearestFramework == null)
+            {
+                nearestFramework = NuGetFrameworkUtility.GetNearest(
+                    frameworksInProject,
+                FrameworkConstants.CommonFrameworks.Net451,
+                f => new NuGetFramework(f));
+            }
+            if (nearestFramework == null)
+            {
+                // This should never happen as long as we dispatch correctly.
+                var msg = "Could not find a compatible framework to execute."
+                    + Environment.NewLine
+                    + $"Available frameworks in project:{string.Join($"{Environment.NewLine} -", frameworksInProject.Select(f => f.GetShortFolderName()))}";
+                throw new InvalidOperationException(msg);
+            }
+
+            return nearestFramework;
+        }
     }
 }

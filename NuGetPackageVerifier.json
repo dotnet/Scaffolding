@@ -6,9 +6,12 @@
         "packages": {
             "Microsoft.VisualStudio.Web.CodeGeneration": { },
             "Microsoft.VisualStudio.Web.CodeGeneration.Core": { },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": { },
             "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": { },
             "Microsoft.VisualStudio.Web.CodeGeneration.Templating": { },
-            "Microsoft.VisualStudio.Web.CodeGeneration.Tools": { },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Tools": {
+                "packageTypes": [ "DotnetCliTool" ]
+            },
             "Microsoft.VisualStudio.Web.CodeGeneration.Utils": { },
             "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": { }
         }

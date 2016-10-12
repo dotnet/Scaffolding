@@ -4,12 +4,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using NuGet.Frameworks;
@@ -121,7 +119,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 throw new ArgumentNullException(nameof(projectPath));
             }
 
-            IProjectContext context = GetProjectContext(projectPath);
+            var projectInformation = GetProjectInformation(projectPath);
+            var context = projectInformation.RootProject;
 
             if (!_isNoBuild)
             {
@@ -133,7 +132,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             // Start server
-            var server = StartServer(logger, context);
+            var server = StartServer(logger, projectInformation);
 
             var frameworkToUse = context.TargetFramework;
             var projectDirectory = Directory.GetParent(context.ProjectFullPath).FullName;
@@ -157,68 +156,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return exitCode;
         }
 
-        private static IProjectContext GetProjectContext(string projectPath)
+        private static ProjectInformation GetProjectInformation(string projectPath)
         {
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
             {
-                var frameworksInProject = TargetFrameworkFinder.GetAvailableTargetFrameworks(projectFileFinder.ProjectFilePath);
-
-                var nearestFramework = GetSuitableFrameworkFromProject(frameworksInProject);
-
-                return new MsBuildProjectContextBuilder()
-                    .AsDesignTimeBuild()
-                    .WithConfiguration("Debug")
-                    .WithProjectFile(projectFileFinder.ProjectFilePath)
-                    .WithTargetFramework(nearestFramework)
+                return new MsBuildProjectInformationBuilder(projectFileFinder.ProjectFilePath)
                     .Build();
             }
             else
             {
-                // Read Project.json file and generate projectContext
-
-                var projectFile = ProjectReader.GetProject(projectFileFinder.ProjectFilePath);
-                var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
-                var nearestFramework = GetSuitableFrameworkFromProject(frameworksInProject);
-
-                var context = new ProjectContextBuilder()
-                    .WithProject(projectFile)
-                    .WithTargetFramework(nearestFramework)
+                return new DotNetProjectInformationBuilder(projectFileFinder.ProjectFilePath)
                     .Build();
-
-                if (context == null)
-                {
-                    throw new Exception("Failed to get Project Context Information.");
-                }
-
-                return new DotNetProjectContext(context, "Debug", "");
             }
-        }
-
-        private static NuGetFramework GetSuitableFrameworkFromProject(System.Collections.Generic.IEnumerable<NuGetFramework> frameworksInProject)
-        {
-            var nearestFramework = NuGetFrameworkUtility.GetNearest(
-                                frameworksInProject,
-                                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                                 f => new NuGetFramework(f));
-
-            if (nearestFramework == null)
-            {
-                nearestFramework = NuGetFrameworkUtility.GetNearest(
-                    frameworksInProject,
-                FrameworkConstants.CommonFrameworks.Net451,
-                f => new NuGetFramework(f));
-            }
-            if (nearestFramework == null)
-            {
-                // This should never happen as long as we dispatch correctly.
-                var msg = "Could not find a compatible framework to execute."
-                    + Environment.NewLine
-                    + $"Available frameworks in project:{string.Join($"{Environment.NewLine} -", frameworksInProject.Select(f => f.GetShortFolderName()))}";
-                throw new InvalidOperationException(msg);
-            }
-
-            return nearestFramework;
         }
 
         private static int Build(ILogger logger, string projectPath, string configuration, NuGetFramework frameworkToUse, string buildBasePath)
@@ -243,11 +193,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return buildResult.Result.ExitCode;
         }
 
-        private static ScaffoldingServer StartServer(ILogger logger, IProjectContext projectContext)
+        private static ScaffoldingServer StartServer(ILogger logger, ProjectInformation projectInformation)
         {
             server = ScaffoldingServer.Listen(logger);
             var messageHandler = new ScaffoldingMessageHandler(logger, "Scaffolding_server");
-            messageHandler.ProjectInfo = projectContext;
+            messageHandler.ProjectInfo = projectInformation;
             server.MessageReceived += messageHandler.HandleMessages;
             server.Accept();
             return server;

@@ -58,11 +58,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var configuration = appConfiguration.Value();
 
                 var portNumber = int.Parse(port.Value());
-                IProjectContext projectContext = GetProjectContextFromServer(logger, portNumber);
+                var projectInformation = GetProjectInformationFromServer(logger, portNumber);
 
                 var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
 
-                CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectContext,
+                CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,
                     codeGenArgs,
                     configuration,
                     logger);
@@ -73,7 +73,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             app.Execute(args);
         }
 
-        private static IProjectContext GetProjectContextFromServer(ILogger logger, int portNumber)
+        private static ProjectInformation GetProjectInformationFromServer(ILogger logger, int portNumber)
         {
             using (var client = ScaffoldingClient.Connect(portNumber, logger))
             {

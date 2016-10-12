@@ -1,4 +1,4 @@
-{
+﻿{
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
@@ -9,15 +9,13 @@
       "version": "1.0.0-*",
       "type": "platform"
     },
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Tools": "1.0.0-*",
     "Moq": "4.6.36-*",
     "System.Diagnostics.TraceSource": "4.3.0-*",
     "xunit": "2.2.0-*"
   },
   "frameworks": {
-    "netcoreapp1.0": {
-      "imports": "portable-net451+win8"
-    }
+    "netcoreapp1.0": { }
   },
   "testRunner": "xunit"
 }

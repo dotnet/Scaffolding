@@ -21,7 +21,7 @@
     "xunit": "2.2.0-*"
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": "portable-net451+win8"
     }
   },

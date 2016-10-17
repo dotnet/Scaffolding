@@ -16,6 +16,14 @@
             "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": { }
         }
     },
+    "adx-nonshipping": {
+        "rules": [],
+        "packages": {
+            "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {},
+            "Microsoft.Extensions.ProjectModel.DotNet.Sources": {},
+            "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {}
+        }
+    },
     "Default": { // Rules to run for packages not listed in any other set.
         "rules": [
             "DefaultCompositeRule"

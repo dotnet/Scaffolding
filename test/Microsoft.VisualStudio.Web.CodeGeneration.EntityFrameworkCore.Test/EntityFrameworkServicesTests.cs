@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Moq;
 using NuGet.Frameworks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
@@ -27,6 +28,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         private CodeAnalysis.Workspace _workspace;
         private ILogger _logger;
         private ProjectInformation _projectInformation;
+        private ITestOutputHelper _output;
+
+        public EntityFrameworkServicesTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         private EntityFrameworkServices GetEfServices(string path, string applicationName)
         {
@@ -35,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             _packageInstaller = new Mock<IPackageInstaller>();
             _serviceProvider = new Mock<IServiceProvider>();
 
-            _projectInformation = GetProjectInformation(path, false);
+            _projectInformation = GetProjectInformation(path);
             _workspace = new RoslynWorkspace(_projectInformation);
             _loader = new TestAssemblyLoadContext(_projectInformation.RootProject);
             _modelTypesLocator = new ModelTypesLocator(_workspace);
@@ -69,55 +76,78 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         }
 
-        private ProjectInformation GetProjectInformation(string path, bool isMsBuild)
+        private ProjectInformation GetProjectInformation(string path)
         {
-            if (isMsBuild)
-            {
-                var rootContext = new MsBuildProjectContextBuilder()
-                    .AsDesignTimeBuild()
-                    .WithTargetFramework(FrameworkConstants.CommonFrameworks.NetCoreApp10)
-                    .WithConfiguration("Debug")
-                    .Build();
-                // TODO needs to be fixed to get all dependent Projects as well.
-                return new ProjectInformation(rootContext, null);
-            }
-            else
-            {
-                var context = Microsoft.DotNet.ProjectModel.ProjectContext.Create(path, FrameworkConstants.CommonFrameworks.NetStandard16);
-                var dotnetContext = new DotNetProjectContext(context, "Debug", null);
-                var dependencyProjectContexts = new List<Microsoft.DotNet.ProjectModel.ProjectContext>();
-                foreach (var dependency in dotnetContext.ProjectReferences)
-                {
-                    var dependencyContext = Microsoft.DotNet.ProjectModel.ProjectContext.Create(dependency, FrameworkConstants.CommonFrameworks.NetStandard16);
-                    dependencyProjectContexts.Add(dependencyContext);
-                }
-
-                return new ProjectInformation(dotnetContext,
-                    dependencyProjectContexts.Select(d => new DotNetProjectContext(d, "Debug", null)));
-            }
+            var rootContext = new MsBuildProjectContextBuilder()
+                .AsDesignTimeBuild()
+                .WithTargetFramework(FrameworkConstants.CommonFrameworks.NetCoreApp10)
+                .WithConfiguration("Debug")
+                .Build();
+            // TODO needs to be fixed to get all dependent Projects as well.
+            return new ProjectInformation(rootContext, null);
         }
 
         [Fact]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
-            var appName = "ModelTypesLocatorTestClassLibrary";
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
-            var efServices = GetEfServices(path, appName);
-            var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
-            var metadata = await efServices.GetModelMetadata(modelType);
-            Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-            Assert.Null(metadata.ModelMetadata.Navigations);
-            Assert.False(metadata.ModelMetadata.Properties.Any());
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                SetupProjects(fileProvider);
 
-            modelType = _modelTypesLocator.GetType("ModelTypesLocatorTestClassLibrary.Car").First();
-            metadata = await efServices.GetModelMetadata(modelType);
-            Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-            Assert.Null(metadata.ModelMetadata.Navigations);
-            Assert.Null(metadata.ModelMetadata.PrimaryKeys);
-            Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
+                var appName = "ModelTypesLocatorTestClassLibrary";
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
+                var efServices = GetEfServices(path, appName);
+                var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
+                var metadata = await efServices.GetModelMetadata(modelType);
+                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
+                Assert.Null(metadata.ModelMetadata.Navigations);
+                Assert.False(metadata.ModelMetadata.Properties.Any());
+
+                modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
+                metadata = await efServices.GetModelMetadata(modelType);
+                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
+                Assert.Null(metadata.ModelMetadata.Navigations);
+                Assert.Null(metadata.ModelMetadata.PrimaryKeys);
+                Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
+            }
         }
 
-        [Fact/*(Skip ="Need to update workspace creation for this to work.")*/]
+        private void SetupProjects(TemporaryFileProvider fileProvider)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+            fileProvider.Add("Nuget.config", MsBuildProjectStrings.NugetConfigTxt);
+
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.RootProjectTxt);
+            fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
+
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);
+            fileProvider.Add($"Library1/ModelWithMatchingShortName.cs", "namespace Library1.Models { public class ModelWithMatchingShortName { } }");
+            fileProvider.Add($"Library1/Car.cs", @"namespace Library1.Models
+{
+    public class Car
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public int ManufacturerID { get; set; }
+        public Manufacturer Manufacturer { get; set; }
+    }
+
+    public class Manufacturer
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public virtual ICollection<Car> Cars { get; set; }
+    }
+}");
+            var result = Command.CreateDotNet("restore3",
+                new[] { Path.Combine(fileProvider.Root, "Root", "test.csproj") })
+                .OnErrorLine(l => _output.WriteLine(l))
+                .OnOutputLine(l => _output.WriteLine(l))
+                .Execute();
+        }
+
+        [Fact]
         public async void TestGetModelMetadata_WithDbContext()
         {
             var appName = "ModelTypesLocatorTestWebApp";
@@ -129,22 +159,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
             Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
             Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
-        }
-
-        private int BuildProject(string project)
-        {
-            var args = new List<string>()
-            {
-                project,
-                "--configuration", "Debug"
-            };
-            var command = Command.CreateDotNet(
-                    "build",
-                    args);
-
-            var result = command.Execute();
-
-            return result.ExitCode;
         }
     }
 }

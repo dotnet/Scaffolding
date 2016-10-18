@@ -1,0 +1,23 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "compile": {
+      "include": "../Shared/**/*.cs"
+    },
+  },
+  "dependencies": {
+    "Microsoft.Build.Runtime": "15.1.319-preview5",
+    "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "NETStandard.Library": "1.6.0-*",
+    "Newtonsoft.Json": "9.0.1",
+    "NuGet.Frameworks": "3.6.0-*"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+    }
+  }
+}

@@ -14,15 +14,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         [Fact]
         public void GetAliasAttribute_Returns_Correct_Value()
         {
-            //TODO @prbhosal Fix this test
-            ////Arrange
-            //MemberInfo testType = typeof(ClassWithAlias);
+            //Arrange
+            MemberInfo testType = typeof(ClassWithAlias).GetTypeInfo();
 
-            ////Act
-            //var attribute = testType.GetAliasAttribute();
+            //Act
+            var attribute = testType.GetAliasAttribute();
 
-            ////Assert
-            //Assert.Equal("CoolClass", attribute.Alias);
+            //Assert
+            Assert.Equal("CoolClass", attribute.Alias);
         }
 
         [Fact]

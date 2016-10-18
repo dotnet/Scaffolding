@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal
 
             var nearestFramework = TargetFrameworkFinder.GetSuitableFrameworkFromProject(contexts.Select(c => c.TargetFramework));
 
-            return contexts.First(c => c.TargetFramework == nearestFramework);
+            return contexts.First(c => c.TargetFramework.DotNetFrameworkName.Equals(nearestFramework.DotNetFrameworkName));
         }
     }
 }

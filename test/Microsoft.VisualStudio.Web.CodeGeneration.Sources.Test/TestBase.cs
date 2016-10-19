@@ -17,8 +17,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
             }
             else
             {
-                var context = DotNetProjectContextBuilder.Create(path, FrameworkConstants.CommonFrameworks.NetStandard16);
-                return new Microsoft.Extensions.ProjectModel.DotNetProjectContext(context, "Debug", null, null);
+                return new DotNetProjectContextBuilder(path, FrameworkConstants.CommonFrameworks.NetStandard16)
+                    .Build();
             }
         }
     }

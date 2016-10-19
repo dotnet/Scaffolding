@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test
+namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class TemporaryFileProvider : PhysicalFileProvider
     {

@@ -25,5 +25,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(assembly);
 #endif
         }
+
+        public Assembly LoadFromPath(string path)
+        {
+#if NET451
+            return Assembly.LoadFrom(path);
+#else
+            return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+#endif
+            }
     }
 }

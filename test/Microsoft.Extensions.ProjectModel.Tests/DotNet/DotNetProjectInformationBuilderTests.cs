@@ -4,10 +4,10 @@
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal;
 using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test
 {

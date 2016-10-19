@@ -7,8 +7,6 @@ using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Internal;
-using Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using NuGet.Frameworks;
 using Microsoft.Extensions.ProjectModel;

@@ -319,12 +319,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             if (modelType == null)
             {
                 // Need to look in the dependencies of this project now.
-                var dependencies = assembly.GetReferencedAssemblies().GetEnumerator();
+                var dependencies = _projectContext.CompilationAssemblies.GetEnumerator();
                 while (modelType == null && dependencies.MoveNext())
                 {
                     try
                     {
-                        var dAssembly = _loader.LoadFromName(dependencies.Current as AssemblyName);
+                        var dAssembly = _loader.LoadFromPath(dependencies.Current.ResolvedPath);
                         modelType = dAssembly.GetType(modelTypeName);
                     }
                     catch (Exception ex)
@@ -344,7 +344,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private CompilationResult GetCompilation(Func<Compilation, Compilation> compilationModificationFunc)
         {
             var projectCompilation = _workspace.CurrentSolution.Projects
-                            .First(project => project.AssemblyName == _applicationInfo.ApplicationName)
+                            .First(project => project.AssemblyName == _projectContext.AssemblyName)
                             .GetCompilationAsync().Result;
             // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream. 
             // On NET451 if the assembly name is different, MVC fails to load the assembly as it is not found on disk. 

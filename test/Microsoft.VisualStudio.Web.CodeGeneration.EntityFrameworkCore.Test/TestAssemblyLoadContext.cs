@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.Extensions.ProjectModel;
+using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
@@ -23,6 +24,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         public Assembly LoadFromName(AssemblyName AssemblyName)
         {
             var path = _projectContext.CompilationAssemblies.First(c => c.Name == AssemblyName.Name).ResolvedPath;
+            return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+        }
+
+        public Assembly LoadFromPath(string path)
+        {
             return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
         }
 

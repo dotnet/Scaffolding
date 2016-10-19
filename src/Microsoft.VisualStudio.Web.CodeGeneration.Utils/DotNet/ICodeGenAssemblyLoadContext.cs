@@ -14,5 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
     {
         Assembly LoadStream(Stream assembly, Stream symbols);
         Assembly LoadFromName(AssemblyName AssemblyName);
+        Assembly LoadFromPath(string path);
     }
 }

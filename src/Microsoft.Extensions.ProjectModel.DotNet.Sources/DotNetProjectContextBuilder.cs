@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal
+namespace Microsoft.Extensions.ProjectModel
 {
     public class DotNetProjectContextBuilder
     {
@@ -18,8 +16,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal
 
         public DotNetProjectContextBuilder(string projectPath, NuGetFramework targetFramework)
         {
-            Requires.NotNull(projectPath, nameof(projectPath));
-            Requires.NotNull(targetFramework, nameof(targetFramework));
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                throw new ArgumentNullException(nameof(projectPath));
+            }
+
+            if (targetFramework == null)
+            {
+                throw new ArgumentNullException(nameof(targetFramework));
+            }
+
             _projectPath = projectPath;
             _targetFramework = targetFramework;
         }

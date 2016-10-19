@@ -213,7 +213,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         // Internal for unit tests.
         internal void AddConnectionString(string connectionStringName, string dataBaseName)
         {
-            var appSettingsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "appsettings.json");
+            var appSettingsFile = Path.Combine(Path.GetDirectoryName(_applicationInfo.ApplicationBasePath), "appsettings.json");
             JObject content;
             bool writeContent = false;
 

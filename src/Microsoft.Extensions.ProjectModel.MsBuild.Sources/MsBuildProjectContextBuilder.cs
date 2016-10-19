@@ -28,9 +28,11 @@ namespace Microsoft.Extensions.ProjectModel
         public IProjectContext Build()
         {
             var tmpFile = Path.GetTempFileName();
-            var result = Command.CreateDotNet("msbuild",
+            var result = Command.Create("dotnet",
                 new string[] 
                 {
+                    "msbuild",
+                    _projectPath,
                     $"/t:EvaluateProjectInfoForCodeGeneration", 
                     $"/p:TargetFramework={_targetFramework.GetShortFolderName()};OutputFile={tmpFile}"
                 })

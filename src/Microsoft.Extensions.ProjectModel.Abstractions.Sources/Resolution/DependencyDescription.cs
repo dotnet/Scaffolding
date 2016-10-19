@@ -12,25 +12,30 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
     {
         private readonly List<Dependency> _dependencies;
 
-        public DependencyDescription(string name, string version, string path, string framework, string type, bool isResolved)
+        public DependencyDescription(
+            string name, 
+            string version, 
+            string path, 
+            string targetFramework, 
+            DependencyType type, 
+            bool resolved)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
             }
 
-            if (string.IsNullOrEmpty(framework))
+            if (string.IsNullOrEmpty(targetFramework))
             {
-                throw new ArgumentNullException(nameof(framework));
+                throw new ArgumentNullException(nameof(targetFramework));
             }
 
             Name = name;
             Version = version;
-            TargetFramework = framework;
-            Resolved = isResolved;
+            TargetFramework = targetFramework;
+            Resolved = resolved;
             Path = path;
-            DependencyType dt;
-            Type = Enum.TryParse(type, ignoreCase: true , result: out dt) ? dt : DependencyType.Unknown;
+            Type = type;
 
             _dependencies = new List<Dependency>();
         }

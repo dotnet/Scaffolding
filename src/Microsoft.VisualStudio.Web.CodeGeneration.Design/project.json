@@ -27,11 +27,17 @@
     }
   },
   "packOptions": {
-    "tags": [
-      "aspnetcore",
-      "codegenerator",
-      "scaffolding",
-      "visualstudioweb"
-    ]
+      "files": {
+        "mappings": {
+          "build/Microsoft.VisualStudio.Web.CodeGeneration.Design.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
+          "tools/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/bin/Debug/netstandard1.6/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll"
+        }
+      },
+      "tags": [
+        "aspnetcore",
+        "codegenerator",
+        "scaffolding",
+        "visualstudioweb"
+      ]
+    }
   }
-}

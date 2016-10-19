@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal;
+using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -90,14 +91,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test
 
                 Assert.Equal(0, result.ExitCode);
 
-                var projectInformation = new DotNetProjectInformationBuilder(Path.Combine(fileProvider.Root, "demo", "project.json"))
+                var projectInformation = new DotNetProjectContextBuilder(Path.Combine(fileProvider.Root, "demo", "project.json"), FrameworkConstants.CommonFrameworks.NetCoreApp10)
                     .Build();
 
                 Assert.NotNull(projectInformation);
-                Assert.NotNull(projectInformation.RootProject);
-                Assert.NotNull(projectInformation.DependencyProjects);
-                Assert.Equal("demo", projectInformation.RootProject.AssemblyName);
-                Assert.Equal("demoLib", projectInformation.DependencyProjects.First().AssemblyName);
+                Assert.Equal("demo", projectInformation.AssemblyName);
+                Assert.Equal("demoLib", projectInformation.ProjectReferenceInformation.First().AssemblyName);
             }
         }
     }

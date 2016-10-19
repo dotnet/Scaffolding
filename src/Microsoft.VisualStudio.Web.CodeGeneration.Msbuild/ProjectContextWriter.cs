@@ -3,16 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.Extensions.ProjectModel.Resolution;
-using Newtonsoft.Json;
-using System.IO;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+using Newtonsoft.Json;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 {
-    public class WriteReferencesToFile : Build.Utilities.Task
+    public class ProjectContextWriter : Build.Utilities.Task
     {
         #region Inputs
         [Build.Framework.Required]
@@ -57,7 +58,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         [Build.Framework.Required]
         public string AssemblyFullPath { get; set; }
 
-        [Build.Framework.Required]
         public string AssemblyName { get; set; }
 
         [Build.Framework.Required]
@@ -71,26 +71,26 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         {
             var msBuildContext = new MsBuildProjectContext(
                 assemblyFullPath: AssemblyFullPath,
-                assemblyName: AssemblyName,
+                assemblyName: string.IsNullOrEmpty(AssemblyName) ? Path.GetFileName(AssemblyFullPath) : AssemblyName,
                 compilationAssemblies: GetCompilationAssemblies(ResolvedReferences),
                 compilationItems:  CompilationItems.Select(i => i.ItemSpec),
                 config: "Debug",
                 configuration: Configuration,
-                depsJson: "...",
                 embededItems: EmbeddedItems.Select(i => i.ItemSpec),
                 isClassLibrary: "Library".Equals(OutputType, StringComparison.OrdinalIgnoreCase),
                 packageDependencies: GetPackageDependencies(PackageDependencies),
-                packageLockFile: "packagelockfile",
                 packagesDirectory: PackagesDirectory,
                 platform: Platform,
                 projectFullPath: ProjectFullPath,
                 projectName: Name,
                 projectReferences: ProjectReferences.Select(i => i.ItemSpec),
                 rootNamespace: RootNamespace,
-                runtimeConfigJson: "runtimeConfigJson",
                 targetDirectory: TargetDirectory,
-                targetFramework: NuGet.Frameworks.NuGetFramework.Parse(TargetFramework));
+                targetFramework: TargetFramework);
 
+            var projectReferences = msBuildContext.ProjectReferences;
+            var projReferenceInformation = GetProjectDependency(projectReferences, msBuildContext.ProjectFullPath);
+            msBuildContext.ProjectReferenceInformation = projReferenceInformation;
             using(var streamWriter = new StreamWriter(File.Create(OutputFile)))
             {
                 var json = JsonConvert.SerializeObject(msBuildContext);
@@ -98,6 +98,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             }
 
             return true;
+        }
+
+        private IEnumerable<ProjectReferenceInformation> GetProjectDependency(
+            IEnumerable<string> projectReferences,
+            string rootProjectFullpath)
+        {
+            return ProjectReferenceInformationProvider.GetProjectReferenceInformation(
+                rootProjectFullpath,
+                projectReferences);
         }
 
         private IEnumerable<DependencyDescription> GetPackageDependencies(ITaskItem[] packageDependecyItems)
@@ -120,20 +129,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         {
             Requires.NotNull(packageMap, nameof(packageMap));
             Requires.NotNull(packageDependecyItems, nameof(packageDependecyItems));
-
             foreach (var item in packageDependecyItems)
             {
                 var depSpecs = item.GetMetadata("Dependencies")
                     ?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 DependencyDescription current = null;
-                if (depSpecs == null || !packageMap.TryGetValue(item.GetMetadata("ItemSpec"), out current))
+                if (depSpecs == null || !packageMap.TryGetValue(item.ItemSpec, out current))
                 {
                     return;
                 }
 
                 foreach (var depSpec in depSpecs)
                 {
-                    var spec = item.GetMetadata("ItemSpec").Split('/').FirstOrDefault() + depSpec;
+                    var spec = item.ItemSpec.Split('/').FirstOrDefault() +"/"+ depSpec;
                     DependencyDescription d = null;
                     if (packageMap.TryGetValue(spec, out d))
                     {
@@ -164,8 +172,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             bool.TryParse(resolved, out isResolved);
 
             var framework = item.ItemSpec.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).First();
+            DependencyType dt;
+            dt = Enum.TryParse(type, out dt)
+                ? dt
+                : DependencyType.Unknown;
 
-            return new DependencyDescription(name, version, path, framework, type, isResolved);
+            return new DependencyDescription(name, version, path, framework, dt, isResolved);
         }
 
         private IEnumerable<ResolvedReference> GetCompilationAssemblies(ITaskItem[] resolvedReferences)

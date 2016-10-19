@@ -3,6 +3,7 @@
 
 using System;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
 {
@@ -22,7 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
             _hostId = hostId;
         }
 
-        public ProjectInformation ProjectInfo { get; set; }
+        public IProjectContext ProjectInfo { get; set; }
 
         public void HandleMessages(object sender, Message e)
         {
@@ -44,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
         {
             try
             {
-                ProjectInfo = msg.Payload.ToObject<ProjectInformation>();
+                ProjectInfo = msg.Payload.ToObject<IProjectContext>();
             }
             catch (Exception ex)
             {

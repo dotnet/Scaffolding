@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.ProjectModel
         private IEnumerable<ResolvedReference> _compilationAssemblies;
         private IEnumerable<string> _projectReferences;
 
-        public DotNetProjectContext(ProjectContext projectContext, string configuration, string outputPath)
+        public DotNetProjectContext(ProjectContext projectContext, string configuration, string outputPath, IEnumerable<ProjectReferenceInformation> projectReferenceInformation)
         {
             if (projectContext == null)
             {
@@ -57,16 +57,14 @@ namespace Microsoft.Extensions.ProjectModel
                     ?? projectContext.ProjectFile.GetCompilerOptions(null, configuration).EmitEntryPoint.GetValueOrDefault());
 
             _dependencyProvider = new Lazy<DotNetDependencyProvider>(() => new DotNetDependencyProvider(_projectContext));
+            ProjectReferenceInformation = projectReferenceInformation;
         }
 
         public bool IsClassLibrary { get; }
 
         public NuGetFramework TargetFramework => _projectContext.TargetFramework;
         public string Config => _paths.RuntimeFiles.Config;
-        public string DepsJson => _paths.RuntimeFiles.DepsJson;
-        public string RuntimeConfigJson => _paths.RuntimeFiles.RuntimeConfigJson;
         public string PackagesDirectory => _projectContext.PackagesDirectory;
-        public string PackageLockFile => Path.Combine(Path.GetDirectoryName(ProjectFullPath), "project.lock.json");
         public string AssemblyName => string.IsNullOrEmpty(AssemblyFullPath)
             ? ProjectName
             : Path.GetFileNameWithoutExtension(AssemblyFullPath);
@@ -132,24 +130,6 @@ namespace Microsoft.Extensions.ProjectModel
             }
         }
 
-        /// <summary>
-        /// Returns string values of top-level keys in the project.json file
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public string FindProperty(string propertyName) => FindProperty<string>(propertyName);
-
-        public TProperty FindProperty<TProperty>(string propertyName)
-        {
-            foreach (var item in _rawProject.Value)
-            {
-                if (item.Key.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return item.Value.Value<TProperty>();
-                }
-            }
-
-            return default(TProperty);
-        }
+        public IEnumerable<ProjectReferenceInformation> ProjectReferenceInformation { get; set; }
     }
 }

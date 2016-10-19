@@ -15,12 +15,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class CodeGenCommandExecutor
     {
-        private readonly ProjectInformation _projectInformation;
+        private readonly IProjectContext _projectInformation;
         private string[] _codeGenArguments;
         private string _configuration;
         private ILogger _logger;
 
-        public CodeGenCommandExecutor(ProjectInformation projectInformation, string[] codeGenArguments, string configuration, ILogger logger)
+        public CodeGenCommandExecutor(IProjectContext projectInformation, string[] codeGenArguments, string configuration, ILogger logger)
         {
             if (projectInformation == null)
             {
@@ -50,16 +50,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             return 0;
         }
 
-        private void AddFrameworkServices(ServiceProvider serviceProvider, ProjectInformation projectInformation)
+        private void AddFrameworkServices(ServiceProvider serviceProvider, IProjectContext projectInformation)
         {
             var applicationInfo = new ApplicationInfo(
-                projectInformation.RootProject.ProjectName,
-                Path.GetDirectoryName(projectInformation.RootProject.ProjectFullPath));
-            serviceProvider.Add<IProjectContext>(projectInformation.RootProject);
+                projectInformation.ProjectName,
+                Path.GetDirectoryName(projectInformation.ProjectFullPath));
+            serviceProvider.Add<IProjectContext>(projectInformation);
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());
 
-            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(projectInformation, projectInformation.RootProject.Configuration));
+            serviceProvider.Add<CodeAnalysis.Workspace>(new RoslynWorkspace(projectInformation, projectInformation.Configuration));
         }
 
         private void AddCodeGenerationServices(ServiceProvider serviceProvider)

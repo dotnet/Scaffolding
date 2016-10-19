@@ -73,7 +73,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             app.Execute(args);
         }
 
-        private static ProjectInformation GetProjectInformationFromServer(ILogger logger, int portNumber)
+        private static IProjectContext GetProjectInformationFromServer(ILogger logger, int portNumber)
         {
             using (var client = ScaffoldingClient.Connect(portNumber, logger))
             {

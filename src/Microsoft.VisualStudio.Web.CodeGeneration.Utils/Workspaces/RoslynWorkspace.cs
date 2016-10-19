@@ -26,23 +26,48 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
 
-        public RoslynWorkspace(ProjectInformation projectInformation,
+        public RoslynWorkspace(IProjectContext projectInformation,
             string configuration = "debug")
             : base(MefHostServices.DefaultHost, "Custom")
         {
             Requires.NotNull(projectInformation, nameof(projectInformation));
 
-            var id = AddProject(projectInformation.RootProject, configuration);
+            var id = AddProject(projectInformation, configuration);
 
             // Since we have resolved all references, we can directly use them as MetadataReferences.
             // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
 
-            foreach (var projects in projectInformation.DependencyProjects)
+            foreach (var projectReference in projectInformation.ProjectReferenceInformation)
             {
-                AddProject(projects, configuration);
+                AddProject(projectReference, configuration);
             }
 
-            AddMetadataReferences(projectInformation.RootProject, id);
+            AddMetadataReferences(projectInformation, id);
+        }
+
+        private ProjectId AddProject(ProjectReferenceInformation referenceInfo, string configuration)
+        {
+            var fullPath = referenceInfo.FullPath;
+
+            var projectInfo = PInfo.Create(
+                ProjectId.CreateNewId(),
+                VersionStamp.Create(),
+                referenceInfo.ProjectName,
+                referenceInfo.AssemblyName,
+                LanguageNames.CSharp,
+                fullPath);
+
+            OnProjectAdded(projectInfo);
+
+            foreach(var file in referenceInfo.CompilationItems)
+            {
+                var filePath = Path.IsPathRooted(file)
+                    ? file
+                    : Path.Combine(Path.GetDirectoryName(fullPath), file);
+                AddSourceFile(projectInfo, filePath);
+            }
+
+            return projectInfo.Id;
         }
 
         private ProjectId AddProject(IProjectContext context, string configuration)

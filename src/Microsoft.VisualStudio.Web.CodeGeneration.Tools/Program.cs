@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Tools.Internal;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using NuGet.Frameworks;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
@@ -87,6 +88,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     project = Directory.GetCurrentDirectory();
                 }
+                if (!framework.HasValue())
+                {
+                    throw new ArgumentException("Please provide a valid target framework");
+                }
+
                 project = Path.GetFullPath(project);
                 var configuration = appConfiguration.Value() ?? Constants.DefaultConfiguration;
 
@@ -99,6 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     buildBasePath.Value(),
                     configuration,
                     isNoBuild,
+                    NuGetFramework.Parse(framework.Value()),
                     logger);
 
             });
@@ -112,6 +119,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             string buildBasePath,
             string configuration,
             bool noBuild,
+            NuGetFramework targetFramework,
             ILogger logger)
         {
             if (string.IsNullOrEmpty(projectPath))
@@ -119,8 +127,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 throw new ArgumentNullException(nameof(projectPath));
             }
 
-            var projectInformation = GetProjectInformation(projectPath);
-            var context = projectInformation.RootProject;
+            var context = GetProjectInformation(projectPath, targetFramework);
 
             if (!_isNoBuild)
             {
@@ -132,7 +139,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             // Start server
-            var server = StartServer(logger, projectInformation);
+            var server = StartServer(logger, context);
 
             var frameworkToUse = context.TargetFramework;
             var projectDirectory = Directory.GetParent(context.ProjectFullPath).FullName;
@@ -156,17 +163,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return exitCode;
         }
 
-        private static ProjectInformation GetProjectInformation(string projectPath)
+        private static IProjectContext GetProjectInformation(string projectPath, NuGetFramework targetFramework)
         {
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
             {
-                return new MsBuildProjectInformationBuilder(projectFileFinder.ProjectFilePath)
+                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, targetFramework)
                     .Build();
             }
             else
             {
-                return new DotNetProjectInformationBuilder(projectFileFinder.ProjectFilePath)
+                return new DotNetProjectContextBuilder(projectFileFinder.ProjectFilePath, targetFramework)
                     .Build();
             }
         }
@@ -193,7 +200,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return buildResult.Result.ExitCode;
         }
 
-        private static ScaffoldingServer StartServer(ILogger logger, ProjectInformation projectInformation)
+        private static ScaffoldingServer StartServer(ILogger logger, IProjectContext projectInformation)
         {
             server = ScaffoldingServer.Listen(logger);
             var messageHandler = new ScaffoldingMessageHandler(logger, "Scaffolding_server");

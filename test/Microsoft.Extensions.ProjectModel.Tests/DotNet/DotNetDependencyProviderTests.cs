@@ -94,7 +94,7 @@ namespace Microsoft.Extensions.ProjectModel.DotNet
                     .CreateContextForEachFramework(Path.Combine(fileProvider.Root, "demo", "project.json"))
                     .First();
 
-                var context = new DotNetProjectContext(oldContext, "Debug", Path.Combine(fileProvider.Root, "demo", "bin"));
+                var context = new DotNetProjectContext(oldContext, "Debug", Path.Combine(fileProvider.Root, "demo", "bin"), null);
 
                 var assembly = context
                     .CompilationAssemblies

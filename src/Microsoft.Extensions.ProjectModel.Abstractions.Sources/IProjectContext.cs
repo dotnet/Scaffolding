@@ -17,18 +17,15 @@ namespace Microsoft.Extensions.ProjectModel
         bool IsClassLibrary { get; }
         NuGetFramework TargetFramework { get; }
         string Config { get; }
-        string DepsJson { get; }
-        string RuntimeConfigJson { get; }
-        string PackageLockFile { get; }
         string PackagesDirectory { get; }
         string TargetDirectory { get; }
         string AssemblyName { get; }
         string AssemblyFullPath { get; }
         IEnumerable<string> CompilationItems { get; }
         IEnumerable<string> EmbededItems { get; }
-        string FindProperty(string propertyName);
         IEnumerable<DependencyDescription> PackageDependencies { get;}
         IEnumerable<ResolvedReference> CompilationAssemblies { get; }
         IEnumerable<string> ProjectReferences { get; }
+        IEnumerable<ProjectReferenceInformation> ProjectReferenceInformation { get; }
     }
 }

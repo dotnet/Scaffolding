@@ -76,12 +76,17 @@ namespace Microsoft.Extensions.ProjectModel
                 }
                 else
                 {
+                    DependencyType dt;
+                    var type = Enum.TryParse(library.Identity.Type.Value, out dt)
+                        ? dt
+                        : DependencyType.Unknown;
+
                     var description = new DependencyDescription(
                         library.Identity.Name,
                         library.Identity.Version.ToString(),
                         export.Library.Path,
                         framework.DotNetFrameworkName,
-                        library.Identity.Type.Value,
+                        type,
                         library.Resolved);
 
                     foreach (var dependency in export.Library.Dependencies)

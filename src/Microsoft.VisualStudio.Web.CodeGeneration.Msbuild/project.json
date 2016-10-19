@@ -1,9 +1,15 @@
 ﻿{
   "version": "1.0.0-*",
   "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
+    "warningsAsErrors": true,
     "compile": {
       "include": "../Shared/**/*.cs"
     },
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
   },
   "dependencies": {
     "Microsoft.Build.Runtime": "15.1.319-preview5",

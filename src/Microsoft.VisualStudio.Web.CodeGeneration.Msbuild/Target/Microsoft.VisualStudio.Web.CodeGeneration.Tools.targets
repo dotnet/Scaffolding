@@ -1,0 +1,32 @@
+﻿<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--<Import Project="$(Project)" />-->
+  <UsingTask TaskName="ProjectContextWriter"
+             AssemblyFile="$(MSBuildThisFileDirectory)\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationDependsOn>
+      $(_WriteProjectReferencesDependsOn);
+      ResolveReferences;
+      ResolvePackageDependenciesDesignTime;
+    </EvaluateProjectInfoForCodeGenerationDependsOn>
+  </PropertyGroup>
+  <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
+
+    <ProjectContextWriter TargetFramework ="$(TargetFramework)"
+                                       OutputFile ="$(OutputFile)"
+                                       Name ="$(ProjectName)"
+                                       ResolvedReferences ="@(ReferencePath)"
+                                       PackageDependencies ="@(_DependenciesDesignTime)"
+                                       ProjectReferences ="@(ProjectReference)"
+                                       AssemblyFullPath ="$(TargetPath)"
+                                       PackagesDirectory="$(NuGetPackageRoot)"
+                                       OutputType="$(OutputType)"
+                                       Platform="$(Platform)"
+                                       RootNameSpace ="$(RootNamespace)"
+                                       CompilationItems ="@(Compile)"
+                                       TargetDirectory="$(TargetDir)"
+                                       EmbeddedItems="@(EmbeddedResource)"
+                                       Configuration="$(Configuration)"
+                                       ProjectFullPath="$(MSBuildProjectFullPath)"/>
+
+  </Target>
+</Project>

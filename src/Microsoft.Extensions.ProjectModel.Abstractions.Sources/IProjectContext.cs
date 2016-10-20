@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.ProjectModel
         string ProjectFullPath { get; }
         string RootNamespace { get; }
         bool IsClassLibrary { get; }
-        NuGetFramework TargetFramework { get; }
+        string TargetFramework { get; }
         string Config { get; }
         string PackagesDirectory { get; }
         string TargetDirectory { get; }

@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
         {
             try
             {
-                ProjectInfo = msg.Payload.ToObject<IProjectContext>();
+                ProjectInfo = msg.Payload.ToObject<CommonProjectContext>();
             }
             catch (Exception ex)
             {

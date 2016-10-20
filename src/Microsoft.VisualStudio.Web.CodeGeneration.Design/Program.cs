@@ -89,14 +89,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 // Read the project Information
                 client.ReadMessage();
 
+                // TODO this shouldn't be sent here.
+                client.Send(new Message() { MessageType = MessageTypes.Scaffolding_Completed });
+
                 var projectInfo = messageHandler.ProjectInfo;
                 if (projectInfo == null)
                 {
                     throw new InvalidOperationException($"Could not get ProjectInformation.");
                 }
-
-                logger.LogMessage($"Received Project Info, now need to chew on it.");
-                logger.LogMessage($"ProjectInfo: {projectInfo}");
 
                 return projectInfo;
             }

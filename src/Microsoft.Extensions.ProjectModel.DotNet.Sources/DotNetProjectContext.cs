@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.ProjectModel
             _projectContext = projectContext;
 
             _paths = projectContext.GetOutputPaths(configuration, buidBasePath: null, outputPath: outputPath);
-            _compilerOptions = _projectContext.ProjectFile.GetCompilerOptions(TargetFramework, Configuration);
+            _compilerOptions = _projectContext.ProjectFile.GetCompilerOptions(_projectContext.TargetFramework, Configuration);
 
             // Workaround https://github.com/dotnet/cli/issues/3164
             IsClassLibrary = !(_compilerOptions?.EmitEntryPoint
@@ -62,14 +62,14 @@ namespace Microsoft.Extensions.ProjectModel
 
         public bool IsClassLibrary { get; }
 
-        public NuGetFramework TargetFramework => _projectContext.TargetFramework;
+        public string TargetFramework => _projectContext.TargetFramework.GetShortFolderName();
         public string Config => _paths.RuntimeFiles.Config;
         public string PackagesDirectory => _projectContext.PackagesDirectory;
         public string AssemblyName => string.IsNullOrEmpty(AssemblyFullPath)
             ? ProjectName
             : Path.GetFileNameWithoutExtension(AssemblyFullPath);
         public string AssemblyFullPath =>
-            !IsClassLibrary && (_projectContext.IsPortable || TargetFramework.IsDesktop())
+            !IsClassLibrary && (_projectContext.IsPortable || _projectContext.TargetFramework.IsDesktop())
                 ? _paths.RuntimeFiles.Executable
                 : _paths.RuntimeFiles.Assembly;
 

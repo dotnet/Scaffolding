@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 var info = File.ReadAllText(tmpFile);
 
-                var buildContext = JsonConvert.DeserializeObject<MsBuildProjectContext>(info);
+                var buildContext = JsonConvert.DeserializeObject<CommonProjectContext>(info);
 
                 return buildContext;
             }

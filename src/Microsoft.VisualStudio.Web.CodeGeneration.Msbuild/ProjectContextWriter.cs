@@ -69,7 +69,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         public override bool Execute()
         {
-            var msBuildContext = new MsBuildProjectContext()
+            var msBuildContext = new CommonProjectContext()
             {
                 AssemblyFullPath = this.AssemblyFullPath,
                 AssemblyName = string.IsNullOrEmpty(this.AssemblyName) ? Path.GetFileName(this.AssemblyFullPath) : this.AssemblyName,

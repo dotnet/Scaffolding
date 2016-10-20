@@ -126,10 +126,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             var context = GetProjectInformation(projectPath, targetFramework);
-
+            var frameworkToUse = NuGetFramework.Parse(context.TargetFramework);
             if (!_isNoBuild)
             {
-                var result = Build(logger, projectPath, configuration, context.TargetFramework, buildBasePath);
+                var result = Build(logger, projectPath, configuration, frameworkToUse, buildBasePath);
                 if (result != 0)
                 {
                     return result;
@@ -138,8 +138,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             // Start server
             var server = StartServer(logger, context);
-
-            var frameworkToUse = context.TargetFramework;
+            
             var projectDirectory = Directory.GetParent(context.ProjectFullPath).FullName;
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,

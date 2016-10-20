@@ -69,24 +69,26 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         public override bool Execute()
         {
-            var msBuildContext = new MsBuildProjectContext(
-                assemblyFullPath: AssemblyFullPath,
-                assemblyName: string.IsNullOrEmpty(AssemblyName) ? Path.GetFileName(AssemblyFullPath) : AssemblyName,
-                compilationAssemblies: GetCompilationAssemblies(ResolvedReferences),
-                compilationItems:  CompilationItems.Select(i => i.ItemSpec),
-                config: "Debug",
-                configuration: Configuration,
-                embededItems: EmbeddedItems.Select(i => i.ItemSpec),
-                isClassLibrary: "Library".Equals(OutputType, StringComparison.OrdinalIgnoreCase),
-                packageDependencies: GetPackageDependencies(PackageDependencies),
-                packagesDirectory: PackagesDirectory,
-                platform: Platform,
-                projectFullPath: ProjectFullPath,
-                projectName: Name,
-                projectReferences: ProjectReferences.Select(i => i.ItemSpec),
-                rootNamespace: RootNamespace,
-                targetDirectory: TargetDirectory,
-                targetFramework: TargetFramework);
+            var msBuildContext = new MsBuildProjectContext()
+            {
+                AssemblyFullPath = this.AssemblyFullPath,
+                AssemblyName = string.IsNullOrEmpty(this.AssemblyName) ? Path.GetFileName(this.AssemblyFullPath) : this.AssemblyName,
+                CompilationAssemblies = GetCompilationAssemblies(this.ResolvedReferences),
+                CompilationItems = this.CompilationItems.Select(i => i.ItemSpec),
+                Config = this.AssemblyFullPath + ".config",
+                Configuration = this.Configuration,
+                EmbededItems = this.EmbeddedItems.Select(i => i.ItemSpec),
+                IsClassLibrary = "Library".Equals(this.OutputType, StringComparison.OrdinalIgnoreCase),
+                PackageDependencies = this.GetPackageDependencies(PackageDependencies),
+                PackagesDirectory = this.PackagesDirectory,
+                Platform = this.Platform,
+                ProjectFullPath = this.ProjectFullPath,
+                ProjectName = this.Name,
+                ProjectReferences = this.ProjectReferences.Select(i => i.ItemSpec),
+                RootNamespace = this.RootNamespace,
+                TargetDirectory = this.TargetDirectory,
+                TargetFramework = this.TargetFramework
+            };
 
             var projectReferences = msBuildContext.ProjectReferences;
             var projReferenceInformation = GetProjectDependency(projectReferences, msBuildContext.ProjectFullPath);

@@ -1,14 +1,27 @@
 ﻿<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!--<Import Project="$(Project)" />-->
-  <UsingTask TaskName="ProjectContextWriter"
-             AssemblyFile="$(MSBuildThisFileDirectory)\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
   <PropertyGroup>
     <EvaluateProjectInfoForCodeGenerationDependsOn>
-      $(_WriteProjectReferencesDependsOn);
+      $(EvaluateProjectInfoForCodeGenerationDependsOn);
       ResolveReferences;
       ResolvePackageDependenciesDesignTime;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
+  <Choose>
+  <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = ''-->
+    <When Condition="'$(MSBuildRuntimeType)' == ''">
+      <PropertyGroup >
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\tools\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup >
+          <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\tools\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <UsingTask TaskName="ProjectContextWriter"
+             AssemblyFile="$(EvaluateProjectInfoForCodeGenerationAssemblyPath)" />
+  
   <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
 
     <ProjectContextWriter TargetFramework ="$(TargetFramework)"

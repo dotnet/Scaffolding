@@ -13,7 +13,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
         <add key=""dotnet-buildtools"" value=""https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json"" />
         <add key=""nugetbuild"" value=""https://www.myget.org/F/nugetbuild/api/v3/index.json"" />
-        <add key=""local"" value=""C:\git\scaffolding\artifacts\build\"" />
     </packageSources>
 </configuration>";
 

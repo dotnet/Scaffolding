@@ -30,7 +30,8 @@
       "files": {
         "mappings": {
           "build/Microsoft.VisualStudio.Web.CodeGeneration.Design.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
-          "tools/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/bin/Debug/netstandard1.6/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll"
+          "tools/netcoreapp1.0/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/bin/Debug/netstandard1.6/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll",
+          "tools/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/bin/Debug/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll"
         }
       },
       "tags": [

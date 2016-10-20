@@ -95,10 +95,5 @@ namespace Microsoft.Extensions.ProjectModel
         public string TargetDirectory { get; }
 
         public NuGetFramework TargetFramework { get; }
-
-        public string FindProperty(string propertyName)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

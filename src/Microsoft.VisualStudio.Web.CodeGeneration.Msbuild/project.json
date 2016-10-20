@@ -12,7 +12,9 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.Build.Runtime": "15.1.319-preview5",
+    "Microsoft.Build": "15.1.319-preview5",
+    "Microsoft.Build.Tasks.Core": "15.1.319-preview5",
+    "Microsoft.Build.Utilities.Core": "15.1.319-preview5",
     "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
       "version": "1.0.0-*",
       "type": "build"
@@ -23,7 +25,7 @@
   },
 
   "frameworks": {
-    "netstandard1.6": {
-    }
+    "net46":{ },
+    "netstandard1.6": { }
   }
 }

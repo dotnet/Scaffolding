@@ -1,0 +1,50 @@
+﻿<!--
+ Copyright (c) .NET Foundation. All rights reserved.
+ Licensed under the Apache License, Version 2.0.
+ -->
+
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
+  <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
+
+    <GetNearestTargetFramework ReferringTargetFramework="netcoreapp1.0"
+                               PossibleTargetFrameworks="$(TargetFrameworks)"
+                               ProjectFilePath="$(MSBuildProjectFullPath)"
+                               ContinueOnError="WarnAndContinue">
+      <Output PropertyName="NearestNetCoreFramework" TaskParameter="NearestTargetFramework" />
+    </GetNearestTargetFramework>
+
+    <GetNearestTargetFramework ReferringTargetFramework="net451"
+                               PossibleTargetFrameworks="$(TargetFrameworks)"
+                               ProjectFilePath="$(MSBuildProjectFullPath)"
+                               ContinueOnError="WarnAndContinue">
+      <Output PropertyName="NearestFullNetFramework" TaskParameter="NearestTargetFramework" />
+    </GetNearestTargetFramework>
+
+
+    <PropertyGroup>
+      <NearestTargetFramework Condition="'$(NearestFullNetFramework)' != ''">$(NearestFullNetFramework)</NearestTargetFramework>
+      <NearestTargetFramework Condition="'$(NearestNetCoreFramework)' != ''">$(NearestNetCoreFramework)</NearestTargetFramework>
+    </PropertyGroup>
+
+<!--
+    If the project doesn't have any compatible framework for scaffolding to run, fail early.
+-->
+    <Error Text="No compatible framework was found for scaffolding."
+           Condition=" '$(NearestTargetFramework)' == '' " />
+
+    <MSBuild Projects="$(MSBuildProjectFile)"
+             Targets="EvaluateProjectInfoForCodeGeneration"
+             Properties="TargetFramework=$(NearestTargetFramework);OutputFile=$(OutputFile)" />
+  </Target>
+</Project>

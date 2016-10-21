@@ -12,31 +12,37 @@ namespace Microsoft.Extensions.ProjectModel
     public class DotNetProjectContextBuilder
     {
         private string _projectPath;
+        private IEnumerable<NuGetFramework> _suggestedFrameworks;
         private NuGetFramework _targetFramework;
 
-        public DotNetProjectContextBuilder(string projectPath, NuGetFramework targetFramework)
+        public DotNetProjectContextBuilder(string projectPath, IEnumerable<NuGetFramework> suggestedFrameworks)
         {
             if (string.IsNullOrEmpty(projectPath))
             {
                 throw new ArgumentNullException(nameof(projectPath));
             }
 
-            if (targetFramework == null)
+            if (suggestedFrameworks == null || !suggestedFrameworks.Any())
             {
-                throw new ArgumentNullException(nameof(targetFramework));
+                throw new ArgumentNullException(nameof(suggestedFrameworks));
             }
-
+            _suggestedFrameworks = suggestedFrameworks;
             _projectPath = projectPath;
-            _targetFramework = targetFramework;
         }
 
         public IProjectContext Build()
         {
-            var rootContext = BuildProjectContext(_projectPath, _targetFramework);
+            ChooseTargetFramework();
+
+            var rootContext = BuildProjectContext(_projectPath, _targetFramework, checkNearest: false);
             var projectRefContexts = new List<IProjectContext>();
             foreach (var projectRef in rootContext.ProjectReferences)
             {
-                var refContext = BuildProjectContext(projectRef, _targetFramework);
+                // For project references, we should still check for the nearest NuGetFramework.
+                // The root project can target netcoreapp1.0 and the project references can be targeting 
+                // netstandard1.x, so instead of forcing the project reference to create a context with netcoreapp1.0
+                // it would end up creating a context for the correct tfm.
+                var refContext = BuildProjectContext(projectRef, _targetFramework, checkNearest: true);
                 projectRefContexts.Add(refContext);
             }
 
@@ -54,15 +60,42 @@ namespace Microsoft.Extensions.ProjectModel
             return rootContext;
         }
 
-        private DotNetProjectContext BuildProjectContext(string projectPath, NuGetFramework targetFramework)
+        private void ChooseTargetFramework()
+        {
+            var frameworksInProject = ProjectReader.GetProject(_projectPath).GetTargetFrameworks().Select(f => f.FrameworkName);
+
+            var candidateFrameworks = _suggestedFrameworks
+                    .Select(tfm =>
+                        NuGetFrameworkUtility.GetNearest(
+                            frameworksInProject,
+                            tfm,
+                            f => new NuGetFramework(f)))
+                    .Where(framework => framework != null);
+
+            if (!candidateFrameworks.Any())
+            {
+                var msg = "Could not find a compatible framework to execute."
+                            + Environment.NewLine
+                            + $"Available frameworks in project:{string.Join($"{Environment.NewLine} -", frameworksInProject.Select(f => f.GetShortFolderName()))}";
+                throw new InvalidOperationException(msg);
+            }
+
+            _targetFramework = candidateFrameworks.First();
+        }
+
+        private DotNetProjectContext BuildProjectContext(string projectPath, NuGetFramework targetFramework, bool checkNearest)
         {
             var projectFile = ProjectReader.GetProject(projectPath);
-            var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
+            var nearestFramework = targetFramework;
+            if (checkNearest)
+            {
+                var frameworksInProject = projectFile.GetTargetFrameworks().Select(f => f.FrameworkName);
 
-            var nearestFramework = NuGetFrameworkUtility.GetNearest(
-                                frameworksInProject,
-                                targetFramework,
-                                f => new NuGetFramework(f));
+                nearestFramework = NuGetFrameworkUtility.GetNearest(
+                                    frameworksInProject,
+                                    targetFramework,
+                                    f => new NuGetFramework(f));
+            }
 
             var context = new ProjectContextBuilder()
                 .WithProject(projectFile)

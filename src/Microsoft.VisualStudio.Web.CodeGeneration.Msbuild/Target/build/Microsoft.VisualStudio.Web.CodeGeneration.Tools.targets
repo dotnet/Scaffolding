@@ -1,4 +1,18 @@
-﻿<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<!--
+ Copyright (c) .NET Foundation. All rights reserved.
+ Licensed under the Apache License, Version 2.0.
+-->
+
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
   <PropertyGroup>
     <EvaluateProjectInfoForCodeGenerationDependsOn>
       $(EvaluateProjectInfoForCodeGenerationDependsOn);

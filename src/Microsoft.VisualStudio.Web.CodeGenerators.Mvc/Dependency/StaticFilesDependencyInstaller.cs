@@ -63,13 +63,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 
         private string GetWebRoot()
         {
-            var projectFile = Path.Combine(ApplicationEnvironment.ApplicationBasePath, "project.json");
+            var projectFile = ProjectContext.ProjectFullPath;
             Contract.Assert(File.Exists(projectFile));
+            string webRootRelativePath;
+            if (IsMsBuildProject)
+            {
+                //TODO: How to get this? 
+                webRootRelativePath = string.Empty;
+            }
+            else
+            {
+                var jsonContent = JObject.Parse(File.ReadAllText(projectFile));
+                var webRootToken = jsonContent["webroot"];
+                webRootRelativePath = webRootToken != null ? webRootToken.Value<string>() : string.Empty;
+            }
 
-            var jsonContent = JObject.Parse(File.ReadAllText(projectFile));
-            var webRootToken = jsonContent["webroot"];
-
-            var webRootRelativePath = webRootToken != null ? webRootToken.Value<string>() : string.Empty;
             return Path.Combine(ApplicationEnvironment.ApplicationBasePath, webRootRelativePath);
         }
     }

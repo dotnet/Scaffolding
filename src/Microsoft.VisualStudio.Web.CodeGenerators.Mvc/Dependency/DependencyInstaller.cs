@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ProjectModel;
@@ -68,10 +69,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         {
             if (MissingDepdencies.Any())
             {
-                await PackageInstaller.InstallPackages(MissingDepdencies);
-
+                var isReadMe = true;
                 var readMeGenerator = ActivatorUtilities.CreateInstance<ReadMeGenerator>(ServiceProvider);
-                var isReadMe = await readMeGenerator.GenerateStartupOrReadme(StartupContents.ToList());
+                if (IsMsBuildProject)
+                {
+                    readMeGenerator.GenerateReadMeWithContent(GetMsBuildMissingDependencyReadMeText(MissingDepdencies));
+                }
+                else
+                {
+                    await PackageInstaller.InstallPackages(MissingDepdencies);
+                    isReadMe = await readMeGenerator.GenerateStartupOrReadme(StartupContents.ToList());
+                }
 
                 if (isReadMe)
                 {
@@ -81,6 +89,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
             }
         }
 
+        private string GetMsBuildMissingDependencyReadMeText(IEnumerable<PackageMetadata> missingDepdencies)
+        {
+            var contentBuilder = new StringBuilder("Please install the below packages to your project:");
+            foreach (var dependency in missingDepdencies)
+            {
+                contentBuilder.Append($"{Environment.NewLine}    {dependency.Name} :: {dependency.Version}");
+            }
+
+            return contentBuilder.ToString();
+        }
+
         protected abstract Task GenerateCode();
 
         protected IApplicationInfo ApplicationEnvironment { get; private set; }
@@ -88,6 +107,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
         public IPackageInstaller PackageInstaller { get; private set; }
         protected IServiceProvider ServiceProvider { get; private set; }
         protected IProjectContext ProjectContext { get; private set; }
+        protected bool IsMsBuildProject => Path.GetExtension(ProjectContext.ProjectFullPath).Equals(".csproj", StringComparison.OrdinalIgnoreCase);
 
         protected IEnumerable<string> TemplateFolders
         {

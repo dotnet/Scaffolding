@@ -12,12 +12,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
         {
             if (isMsBuild)
             {
-                return new MsBuildProjectContextBuilder(path, FrameworkConstants.CommonFrameworks.NetCoreApp10)
+                return new MsBuildProjectContextBuilder(path)
                     .Build();
             }
             else
             {
-                return new DotNetProjectContextBuilder(path, FrameworkConstants.CommonFrameworks.NetStandard16)
+                return new DotNetProjectContextBuilder(
+                    path,
+                    new NuGetFramework[]
+                    {
+                        FrameworkConstants.CommonFrameworks.NetStandard16
+                    })
                     .Build();
             }
         }

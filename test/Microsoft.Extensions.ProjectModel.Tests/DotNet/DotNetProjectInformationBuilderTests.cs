@@ -91,7 +91,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test
 
                 Assert.Equal(0, result.ExitCode);
 
-                var projectInformation = new DotNetProjectContextBuilder(Path.Combine(fileProvider.Root, "demo", "project.json"), FrameworkConstants.CommonFrameworks.NetCoreApp10)
+                var projectInformation = new DotNetProjectContextBuilder(
+                    Path.Combine(fileProvider.Root, "demo", "project.json"), 
+                    new NuGetFramework[] 
+                    {
+                        FrameworkConstants.CommonFrameworks.NetCoreApp10
+                    })
                     .Build();
 
                 Assert.NotNull(projectInformation);

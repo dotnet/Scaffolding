@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using Newtonsoft.Json;
 
@@ -9,6 +10,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class ScaffoldingClient : IDisposable, IMessageSender
     {
+        private int _port;
         private TcpClient _client;
         private BinaryWriter _writer;
         private BinaryReader _reader;
@@ -19,15 +21,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
         public event EventHandler<Message> MessageReceived;
 
-        public static ScaffoldingClient Connect(int port, ILogger logger)
+        public static async Task<ScaffoldingClient> Connect(int port, ILogger logger)
         {
             TcpClient client = new TcpClient();
-            client.ConnectAsync(IPAddress.Loopback, port);
+            await client.ConnectAsync(IPAddress.Loopback, port);
 
-            return new ScaffoldingClient(client, logger);
+            return new ScaffoldingClient(client, logger, port);
         }
 
-        public ScaffoldingClient(TcpClient client, ILogger logger)
+        public ScaffoldingClient(TcpClient client, ILogger logger, int port)
         {
             if (logger == null)
             {
@@ -35,16 +37,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             }
             _client = client;
             _logger = logger;
+            _port = port;
             Init();
         }
 
         public void Init()
         {
-            var stream = _client.GetStream();
-            _writer = new BinaryWriter(stream);
-            _reader = new BinaryReader(stream);
+            if (_client.Connected)
+            {
+                var stream = _client.GetStream();
+                _writer = new BinaryWriter(stream);
+                _reader = new BinaryReader(stream);
+                return;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not connect to port {_port}");
+            }
         }
-
         public bool Send(Message message)
         {
             lock (_writer)

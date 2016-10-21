@@ -77,7 +77,7 @@ namespace Microsoft.Extensions.ProjectModel
                 else
                 {
                     DependencyType dt;
-                    var type = Enum.TryParse(library.Identity.Type.Value, out dt)
+                    var type = Enum.TryParse(library.Identity.Type.Value, ignoreCase: true, result:out dt)
                         ? dt
                         : DependencyType.Unknown;
 

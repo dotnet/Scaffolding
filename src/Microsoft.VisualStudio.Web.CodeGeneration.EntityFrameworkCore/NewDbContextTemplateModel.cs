@@ -23,6 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var modelNamespace = modelType.Namespace;
 
             ModelTypeName = modelType.Name;
+            ModelTypeFullName = modelType.FullName;
             RequiredNamespaces = new HashSet<string>();
 
             var classNameModel = new ClassNameModel(dbContextName);
@@ -42,6 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public string DbContextNamespace { get; private set; }
 
         public string ModelTypeName { get; private set; }
+        public string ModelTypeFullName { get; private set; }
 
         public HashSet<string> RequiredNamespaces { get; private set; }
     }

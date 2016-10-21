@@ -79,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         private IProjectContext GetProjectInformation(string path)
         {
-            var rootContext = new MsBuildProjectContextBuilder(path, FrameworkConstants.CommonFrameworks.NetCoreApp10)
+            var rootContext = new MsBuildProjectContextBuilder(path)
                 .Build();
             return rootContext;
         }

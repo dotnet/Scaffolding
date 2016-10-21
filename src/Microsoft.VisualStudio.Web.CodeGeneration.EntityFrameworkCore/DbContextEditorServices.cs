@@ -93,7 +93,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var lastNode = dbContextNode.ChildNodes().Last();
 
                     // Todo : Need pluralization for property name below.
-                    var dbSetProperty = "public DbSet<" + modelType.Name + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
+                    // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
+                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                     var newNode = rootNode.InsertNodesAfter(lastNode,
@@ -213,7 +214,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         // Internal for unit tests.
         internal void AddConnectionString(string connectionStringName, string dataBaseName)
         {
-            var appSettingsFile = Path.Combine(Path.GetDirectoryName(_applicationInfo.ApplicationBasePath), "appsettings.json");
+            var appSettingsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "appsettings.json");
             JObject content;
             bool writeContent = false;
 

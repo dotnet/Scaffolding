@@ -6,16 +6,14 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Newtonsoft.Json;
-using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.ProjectModel
 {
     public class MsBuildProjectContextBuilder
     {
         private string _projectPath;
-        private NuGetFramework _targetFramework;
 
-        public MsBuildProjectContextBuilder(string projectPath, NuGetFramework targetFramework)
+        public MsBuildProjectContextBuilder(string projectPath)
         {
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -23,7 +21,6 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             _projectPath = projectPath;
-            _targetFramework = targetFramework ?? FrameworkConstants.CommonFrameworks.NetCoreApp10;
         }
 
         public IProjectContext Build()
@@ -37,7 +34,7 @@ namespace Microsoft.Extensions.ProjectModel
                     "msbuild",
                     _projectPath,
                     $"/t:EvaluateProjectInfoForCodeGeneration", 
-                    $"/p:TargetFramework={_targetFramework.GetShortFolderName()};OutputFile={tmpFile}"
+                    $"/p:OutputFile={tmpFile}"
                 })
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))
@@ -51,7 +48,7 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 var info = File.ReadAllText(tmpFile);
 
-                var buildContext = JsonConvert.DeserializeObject<MsBuildProjectContext>(info);
+                var buildContext = JsonConvert.DeserializeObject<CommonProjectContext>(info);
 
                 return buildContext;
             }

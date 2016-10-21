@@ -74,8 +74,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         {
             List<string> cmdArgs = new List<string>();
             cmdArgs.Add(NO_DISPATCH_FLAG);
-            cmdArgs.Add(TARGET_FRAMEWORK);
-            cmdArgs.Add(frameworkName);
             cmdArgs.Add(PORT_NUMBER);
             cmdArgs.Add(portNumber);
 

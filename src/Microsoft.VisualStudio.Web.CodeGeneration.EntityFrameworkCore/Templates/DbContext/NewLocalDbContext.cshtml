@@ -44,7 +44,7 @@ using Microsoft.EntityFrameworkCore;
         {
         }
 
-        public DbSet<@Model.ModelTypeName> @Model.ModelTypeName { get; set; }
+        public DbSet<@Model.ModelTypeFullName> @Model.ModelTypeName { get; set; }
     }
 @{
     if (!String.IsNullOrEmpty(Model.DbContextNamespace))

@@ -96,6 +96,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 });
         }
 
+        public void GenerateReadMeWithContent(string content)
+        {
+            var outputPath = Path.Combine(_applicationInfo.ApplicationBasePath,
+                Constants.ReadMeOutputFileName);
+            try
+            {
+                File.WriteAllText(outputPath, content);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to generate readme at {outputPath}", ex);
+            }
+        }
+
         private async Task GenerateStartup(List<StartupContent> startupList)
         {
             var templateName = "Startup" + Constants.RazorTemplateExtension;

@@ -1,13 +1,15 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.ProjectModel;
 using Microsoft.Extensions.ProjectModel.Resolution;
+using NuGet.Frameworks;
+using Newtonsoft.Json;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
+namespace Microsoft.Extensions.ProjectModel
 {
-    internal class MsBuildProjectContext
+    public class CommonProjectContext : IProjectContext
     {
         public string AssemblyFullPath { get; set; }
 

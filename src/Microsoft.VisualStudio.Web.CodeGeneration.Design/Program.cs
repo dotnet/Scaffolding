@@ -3,8 +3,8 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using Microsoft.Extensions.ProjectModel;
 
@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var port = app.Option("--port-number", "", CommandOptionType.SingleValue);
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
 
-            app.OnExecute(() =>
+            app.OnExecute(async () =>
             {
 
                 string project = projectPath.Value();
@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var configuration = appConfiguration.Value();
 
                 var portNumber = int.Parse(port.Value());
-                var projectInformation = GetProjectInformationFromServer(logger, portNumber);
+                var projectInformation = await GetProjectInformationFromServer(logger, portNumber);
 
                 var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
 
@@ -73,9 +73,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             app.Execute(args);
         }
 
-        private static IProjectContext GetProjectInformationFromServer(ILogger logger, int portNumber)
+        private static async Task<IProjectContext> GetProjectInformationFromServer(ILogger logger, int portNumber)
         {
-            using (var client = ScaffoldingClient.Connect(portNumber, logger))
+            using (var client = await ScaffoldingClient.Connect(portNumber, logger))
             {
                 var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
                 client.MessageReceived += messageHandler.HandleMessages;
@@ -94,9 +94,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 {
                     throw new InvalidOperationException($"Could not get ProjectInformation.");
                 }
-
-                logger.LogMessage($"Received Project Info, now need to chew on it.");
-                logger.LogMessage($"ProjectInfo: {projectInfo}");
 
                 return projectInfo;
             }

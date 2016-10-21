@@ -52,14 +52,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         }
 
         /// <summary>
-        /// The execution is done in 2 phases.
-        /// Phase 1 ::
-        ///    1. Determine if the tool is running as a project dependency or not.
-        ///    2. Try getting the project context for the project (use netcoreapp1.0 as the tfm if not running as dependency command or else use the tfm passed in)
-        ///    3. If not running as dependency command and project context cannot be built using netcoreapp1.0, invoke project dependency command with the first tfm found in the project.json
-        ///
-        /// Phase 2 ::
-        ///     1. After successfully getting the Project context, invoke the CodeGenCommandExecutor.
+        /// Steps of execution
+        ///    1. Try getting the projectContext for the project
+        ///    2. Invoke project dependency command with the first compatible tfm found in the project
         /// </summary>
         private static void Execute(string[] args, bool isNoBuild, ILogger logger)
         {
@@ -86,10 +81,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     project = Directory.GetCurrentDirectory();
                 }
-                if (!framework.HasValue())
-                {
-                    throw new ArgumentException("Please provide a valid target framework");
-                }
 
                 project = Path.GetFullPath(project);
                 var configuration = appConfiguration.Value() ?? Constants.DefaultConfiguration;
@@ -103,7 +94,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     buildBasePath.Value(),
                     configuration,
                     isNoBuild,
-                    NuGetFramework.Parse(framework.Value()),
                     logger);
 
             });
@@ -117,7 +107,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             string buildBasePath,
             string configuration,
             bool noBuild,
-            NuGetFramework targetFramework,
             ILogger logger)
         {
             if (string.IsNullOrEmpty(projectPath))
@@ -125,11 +114,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 throw new ArgumentNullException(nameof(projectPath));
             }
 
-            var context = GetProjectInformation(projectPath, targetFramework);
-
+            var context = GetProjectInformation(projectPath);
+            var frameworkToUse = NuGetFramework.Parse(context.TargetFramework);
             if (!_isNoBuild)
             {
-                var result = Build(logger, projectPath, configuration, context.TargetFramework, buildBasePath);
+                var result = Build(logger, projectPath, configuration, frameworkToUse, buildBasePath);
                 if (result != 0)
                 {
                     return result;
@@ -138,8 +127,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             // Start server
             var server = StartServer(logger, context);
-
-            var frameworkToUse = context.TargetFramework;
+            
             var projectDirectory = Directory.GetParent(context.ProjectFullPath).FullName;
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,
@@ -161,17 +149,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return exitCode;
         }
 
-        private static IProjectContext GetProjectInformation(string projectPath, NuGetFramework targetFramework)
+        private static IProjectContext GetProjectInformation(string projectPath)
         {
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
             {
-                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, targetFramework)
+                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath)
                     .Build();
             }
             else
             {
-                return new DotNetProjectContextBuilder(projectFileFinder.ProjectFilePath, targetFramework)
+                return new DotNetProjectContextBuilder(
+                    projectFileFinder.ProjectFilePath,
+                    new NuGetFramework[] 
+                    {
+                        FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                        FrameworkConstants.CommonFrameworks.Net451
+                    })
                     .Build();
             }
         }

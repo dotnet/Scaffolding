@@ -1,7 +1,10 @@
 {
   "buildOptions": {
     "emitEntryPoint": false,
-    "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/Key.snk",
+    "compile": {
+      "include": "../Shared/**/*.cs"
+    }
   },
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
@@ -9,7 +12,7 @@
       "version": "1.0.0-*",
       "type": "platform"
     },
-    "Microsoft.Build.Runtime": "15.1.316-preview5",
+    "Microsoft.Build.Runtime": "15.1.319-preview5",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.Extensions.FileProviders.Physical": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",

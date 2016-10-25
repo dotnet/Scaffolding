@@ -21,21 +21,16 @@ Outputs the Project Information needed for CodeGeneration to a file.
                                PossibleTargetFrameworks="$(TargetFrameworks)"
                                ProjectFilePath="$(MSBuildProjectFullPath)"
                                ContinueOnError="WarnAndContinue">
-      <Output PropertyName="NearestNetCoreFramework" TaskParameter="NearestTargetFramework" />
+      <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
     </GetNearestTargetFramework>
 
     <GetNearestTargetFramework ReferringTargetFramework="net451"
                                PossibleTargetFrameworks="$(TargetFrameworks)"
                                ProjectFilePath="$(MSBuildProjectFullPath)"
+                               Condition=" '$(NearestTargetFramework)' == '' "
                                ContinueOnError="WarnAndContinue">
-      <Output PropertyName="NearestFullNetFramework" TaskParameter="NearestTargetFramework" />
+      <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
     </GetNearestTargetFramework>
-
-
-    <PropertyGroup>
-      <NearestTargetFramework Condition="'$(NearestFullNetFramework)' != ''">$(NearestFullNetFramework)</NearestTargetFramework>
-      <NearestTargetFramework Condition="'$(NearestNetCoreFramework)' != ''">$(NearestNetCoreFramework)</NearestTargetFramework>
-    </PropertyGroup>
 
 <!--
     If the project doesn't have any compatible framework for scaffolding to run, fail early.

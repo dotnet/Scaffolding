@@ -5,6 +5,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class MsBuildProjectStrings
     {
+        public const string SkipReason = "CI doesn't have CLI version required for the MSBuild stuff to work";
+
         public const string NugetConfigTxt = @"
 <configuration>
     <packageSources>
@@ -71,8 +73,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"">
       <Version>1.0.0-*</Version>
     </PackageReference>
-    <PackageReference Include=""Microsoft.NETCore.Sdk"">
+    <!-- The Tools package is included only to get the target delivered to the project-->
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"">
       <Version>1.0.0-*</Version>
+    </PackageReference>
+    <PackageReference Include=""Microsoft.NET.Sdk"">
+      <Version>1.0.0-*</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include=""Microsoft.NETCore.App"">
       <Version>1.0.1</Version>

@@ -12,8 +12,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
         {
             if (isMsBuild)
             {
+                /**
+                 * To Make this work, the test project needs to take a dependency on
+                 * 'Microsoft.VisualStudio.Web.CodeGeneration.Tools' package. That way when NuGet restores 
+                 * the project, it will include the targets in the project automatically.
+                 */
+                var codeGenerationTargetLocation = "Dummy";
                 // TODO: Need to include the build task and target
-                return new MsBuildProjectContextBuilder(path, "")
+                return new MsBuildProjectContextBuilder(path, codeGenerationTargetLocation)
                     .Build();
             }
             else

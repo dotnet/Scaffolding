@@ -18,8 +18,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
     public class EntityFrameworkServicesTests
     {
-        private const string SkipReason = "CI doesn't have CLI version required for the MSBuild stuff to work";
-
         private IApplicationInfo _appInfo;
         private ICodeGenAssemblyLoadContext _loader;
         private IModelTypesLocator _modelTypesLocator;
@@ -84,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             return rootContext;
         }
 
-        [Fact (Skip = SkipReason)]
+        [Fact (Skip = MsBuildProjectStrings.SkipReason)]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -111,43 +109,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         private void SetupProjects(TemporaryFileProvider fileProvider)
         {
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            fileProvider.Add("Nuget.config", MsBuildProjectStrings.NugetConfigTxt);
-
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.RootProjectTxt);
-            fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
-
-            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);
-            fileProvider.Add($"Library1/ModelWithMatchingShortName.cs", "namespace Library1.Models { public class ModelWithMatchingShortName { } }");
-            fileProvider.Add($"Library1/Car.cs", @"
-using System.Collections.Generic;
-
-namespace Library1.Models
-{
-    public class Car
-    {
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public int ManufacturerID { get; set; }
-        public Manufacturer Manufacturer { get; set; }
-    }
-
-    public class Manufacturer
-    {
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public virtual ICollection<Car> Cars { get; set; }
-    }
-}");
-            var result = Command.CreateDotNet("restore3",
-                new[] { Path.Combine(fileProvider.Root, "Root", "test.csproj") })
-                .OnErrorLine(l => _output.WriteLine(l))
-                .OnOutputLine(l => _output.WriteLine(l))
-                .Execute();
+            new MsBuildProjectSetupHelper().SetupProjects(fileProvider, _output);
         }
 
-        [Fact (Skip =SkipReason + "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
+        [Fact (Skip = MsBuildProjectStrings.SkipReason + "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
         public async void TestGetModelMetadata_WithDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())

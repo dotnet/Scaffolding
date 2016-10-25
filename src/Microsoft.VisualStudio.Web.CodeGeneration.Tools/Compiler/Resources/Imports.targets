@@ -8,6 +8,6 @@
     <Import Project="$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets')" />
   </ImportGroup>
   <ImportGroup Condition=" '$(TargetFramework)' != '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(CodeGenerationTargetLocation)\build\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\build\microsoft.visualstudio.web.codegeneration.tools.targets')" />
+    <Import Project="$(CodeGenerationTargetLocation)\build\netstandard1.0\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\build\netstandard1.0\microsoft.visualstudio.web.codegeneration.tools.targets')" />
   </ImportGroup>
 </Project>

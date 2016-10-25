@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test;
 using Xunit;
+using Microsoft.Extensions.ProjectModel;
+using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -20,10 +22,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #endif
         ICodeGenAssemblyLoadContext loadContext;
+        private ITestOutputHelper _outputHelper;
 
-        public CommonUtilitiesTests()
+        public CommonUtilitiesTests(ITestOutputHelper outputHelper)
         {
             loadContext = new DefaultAssemblyLoadContext();
+            _outputHelper = outputHelper;
         }
         
         [Fact]
@@ -62,6 +66,34 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.False(result.Success);
             Assert.True(result.ErrorMessages.Any());
         }
+
+        [Fact (Skip = MsBuildProjectStrings.SkipReason)]
+        public void CommonUtilities_TestGetAssemblyFromCompilation_MsBuild()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, _outputHelper);
+                var path = Path.Combine(fileProvider.Root, "Root", MsBuildProjectStrings.RootProjectName);
+
+                var projectContext = GetProjectContext(path, true);
+                
+                var references = projectContext.CompilationAssemblies.SelectMany(c => c.GetMetadataReference());
+                var code = @"using System;
+                            namespace Sample { 
+                                public class SampleClass 
+                                {
+                                } 
+                            }";
+
+                var compilation = GetCompilation(code, Path.GetRandomFileName(), references);
+                var result = CommonUtilities.GetAssemblyFromCompilation(loadContext, compilation);
+
+                Assert.True(result.Success);
+                Assert.True(result.Assembly.DefinedTypes.Where(_ => _.Name == "SampleClass").Any());
+            }
+        }
+
 
         private Compilation GetCompilation(string content, string assemblyName, IEnumerable<MetadataReference> references, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary)
         {

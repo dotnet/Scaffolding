@@ -65,7 +65,7 @@
   "packOptions": {
     "files": {
       "mappings": {
-        "build/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/build/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
+        "build/netstandard1.0/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/build/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
         "buildCrossTargeting/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/buildCrossTargeting/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
         "tools/netcoreapp1.0/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/**/netstandard1.6/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll",
         "tools/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/**/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll"

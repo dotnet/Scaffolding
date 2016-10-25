@@ -1,0 +1,13 @@
+﻿<!--
+ Copyright (c) .NET Foundation. All rights reserved.
+ Licensed under the Apache License, Version 2.0.
+ -->
+
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Condition=" '$(TargetFramework)' == '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' != '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(CodeGenerationTargetLocation)\build\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\build\microsoft.visualstudio.web.codegeneration.tools.targets')" />
+  </ImportGroup>
+</Project>

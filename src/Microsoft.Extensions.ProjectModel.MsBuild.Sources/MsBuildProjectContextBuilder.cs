@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
 using Newtonsoft.Json;
 
@@ -12,15 +13,22 @@ namespace Microsoft.Extensions.ProjectModel
     public class MsBuildProjectContextBuilder
     {
         private string _projectPath;
+        private string _targetLocation;
 
-        public MsBuildProjectContextBuilder(string projectPath)
+        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation)
         {
             if (string.IsNullOrEmpty(projectPath))
             {
                 throw new ArgumentNullException(nameof(projectPath));
             }
 
+            if (string.IsNullOrEmpty(targetsLocation))
+            {
+                throw new ArgumentNullException(nameof(targetsLocation));
+            }
+
             _projectPath = projectPath;
+            _targetLocation = targetsLocation;
         }
 
         public IProjectContext Build()
@@ -34,7 +42,7 @@ namespace Microsoft.Extensions.ProjectModel
                     "msbuild",
                     _projectPath,
                     $"/t:EvaluateProjectInfoForCodeGeneration", 
-                    $"/p:OutputFile={tmpFile}"
+                    $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation}"
                 })
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))

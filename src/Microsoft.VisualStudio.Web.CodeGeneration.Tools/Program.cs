@@ -4,12 +4,14 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using NuGet.Frameworks;
-using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
@@ -154,7 +156,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
             {
-                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath)
+                // First install the target to obj folder so that it imports the one in the tools package.
+                // Here we are taking an assumption that the 'obj' folder is the right place to put the project extension target.
+                // This may not always be true if the user's settings override the default in the csproj.
+                // However, currently restoring the project always creates the obj folder irrespective of the user's settings.
+
+                new TargetInstaller(_logger)
+                    .EnsureTargetImported(
+                        Path.GetFileName(projectFileFinder.ProjectFilePath),
+                        Path.Combine(Path.GetDirectoryName(projectFileFinder.ProjectFilePath), "obj"));
+                var codeGenerationTargetsLocation = GetTargetsLocation();
+                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, codeGenerationTargetsLocation)
                     .Build();
             }
             else
@@ -168,6 +180,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     })
                     .Build();
             }
+        }
+
+        private static string GetTargetsLocation()
+        {
+            var assembly = typeof(Program).GetTypeInfo().Assembly;
+            var path = Path.GetDirectoryName(assembly.Location);
+            // Crawl up from assembly location till we find 'build' directory.
+            do
+            {
+                if (Directory.EnumerateDirectories(path, "build", SearchOption.TopDirectoryOnly).Any())
+                {
+                    return path;
+                }
+
+                path = Path.GetDirectoryName(path);
+            } while (path != null);
+
+            return string.Empty;
         }
 
         private static int Build(ILogger logger, string projectPath, string configuration, NuGetFramework frameworkToUse, string buildBasePath)

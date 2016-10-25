@@ -12,7 +12,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
         {
             if (isMsBuild)
             {
-                return new MsBuildProjectContextBuilder(path)
+                // TODO: Need to include the build task and target
+                return new MsBuildProjectContextBuilder(path, "")
                     .Build();
             }
             else

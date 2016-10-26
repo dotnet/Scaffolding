@@ -67,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.True(result.ErrorMessages.Any());
         }
 
-        [Fact (Skip = MsBuildProjectStrings.SkipReason)]
+        [Fact]
         public void CommonUtilities_TestGetAssemblyFromCompilation_MsBuild()
         {
             using (var fileProvider = new TemporaryFileProvider())

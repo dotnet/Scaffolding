@@ -1,50 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace E2E_Test
+using System.IO;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
-    [Collection("ScaffoldingE2ECollection")]
     public class AreaScaffolderTests : E2ETestBase
     {
-        public AreaScaffolderTests(ScaffoldingE2ETestFixture fixture) : base(fixture)
+        public AreaScaffolderTests(ITestOutputHelper output)
+            : base(output)
         {
         }
 
-        [Fact (Skip = "Disabling E2E test")]
+        [Fact (Skip = E2ESkipReason)]
         public void TestAreaGenerator()
         {
-            var args = new string[]
+            using (var fileProvider = new TemporaryFileProvider())
             {
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                var args = new string[]
+                {
+                "aspnet-codegenerator",
                 "-p",
-                _testProjectPath,
+                TestProjectPath,
                 "area",
                 "Admin"
-            };
+                };
 
-            Scaffold(args);
-            var generatedFilePath = Path.Combine(_testProjectPath, "ScaffoldingReadMe.txt");
-            var baselinePath = Path.Combine("ReadMe", "Readme.txt");
+                Scaffold(args);
+                var generatedFilePath = Path.Combine(TestProjectPath, "ScaffoldingReadMe.txt");
+                var baselinePath = Path.Combine("ReadMe", "Readme.txt");
 
-            var foldersToVerify = new string[]
-            {
-                Path.Combine(_testProjectPath, "Areas", "Admin", "Controllers"),
-                Path.Combine(_testProjectPath, "Areas", "Admin", "Data"),
-                Path.Combine(_testProjectPath, "Areas", "Admin", "Models"),
-                Path.Combine(_testProjectPath, "Areas", "Admin", "Views")
-            };
+                var foldersToVerify = new string[]
+                {
+                Path.Combine(TestProjectPath, "Areas", "Admin", "Controllers"),
+                Path.Combine(TestProjectPath, "Areas", "Admin", "Data"),
+                Path.Combine(TestProjectPath, "Areas", "Admin", "Models"),
+                Path.Combine(TestProjectPath, "Areas", "Admin", "Views")
+                };
 
-            VerifyFileAndContent(generatedFilePath, baselinePath);
-            foreach (var folder in foldersToVerify)
-            {
-                VerifyFoldersCreated(folder);
+                VerifyFileAndContent(generatedFilePath, baselinePath);
+                foreach (var folder in foldersToVerify)
+                {
+                    VerifyFoldersCreated(folder);
+                }
             }
-
-            _fixture.FoldersToCleanUp.AddRange(foldersToVerify);
-            _fixture.FilesToCleanUp.Add(generatedFilePath);
         }
     }
 }

@@ -78,13 +78,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     var rawMessage = _reader.ReadString();
                     var message = JsonConvert.DeserializeObject<Message>(rawMessage);
-
-                    MessageReceived?.Invoke(this, message);
-
                     if (ShouldStopListening(message))
                     {
                         break;
                     }
+
+                    MessageReceived?.Invoke(this, message);
                 }
                 catch (Exception ex)
                 {

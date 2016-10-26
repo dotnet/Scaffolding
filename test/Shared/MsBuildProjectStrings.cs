@@ -86,6 +86,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"">
+      <Version>1.0.0-*</Version>
+    </DotNetCliToolReference>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +148,19 @@ namespace WebApplication1
     }
 }
 ";
+        public const string ProgramFileName = "Program.cs";
+        public const string ProgramFileText = @"using System;
+namespace Test
+{
+    public class Program 
+    {
+        public static void Main(string[] args)
+        {
+            Console.WriteLine(""Hello"");
+        }
+    }
+}";
+
 
         public const string LibraryProjectName = "Library1.csproj";
         public const string LibraryProjectTxt = @"

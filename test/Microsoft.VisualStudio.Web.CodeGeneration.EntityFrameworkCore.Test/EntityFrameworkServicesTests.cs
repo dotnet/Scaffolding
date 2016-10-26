@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         private EntityFrameworkServices GetEfServices(string path, string applicationName)
         {
-            _appInfo = new ApplicationInfo(applicationName, path, "Debug");
+            _appInfo = new ApplicationInfo(applicationName, Path.GetDirectoryName(path), "Debug");
             _logger = new ConsoleLogger();
             _packageInstaller = new Mock<IPackageInstaller>();
             _serviceProvider = new Mock<IServiceProvider>();
@@ -77,12 +77,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         private IProjectContext GetProjectInformation(string path)
         {
-            var rootContext = new MsBuildProjectContextBuilder(path, "")
+            var rootContext = new MsBuildProjectContextBuilder(path, "Dummy")
                 .Build();
             return rootContext;
         }
 
-        [Fact (Skip = MsBuildProjectStrings.SkipReason)]
+        [Fact]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             new MsBuildProjectSetupHelper().SetupProjects(fileProvider, _output);
         }
 
-        [Fact (Skip = MsBuildProjectStrings.SkipReason + "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
+        [Fact (Skip = "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
         public async void TestGetModelMetadata_WithDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())

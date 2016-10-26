@@ -1,21 +1,24 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace E2E_Test
+namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
-    [Collection("ScaffoldingE2ECollection")]
     public class MvcControllerTest : E2ETestBase
     {
-        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-p", ".", "controller", "--controllerName", "EmptyController" };
-        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-p", ".", "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
-        private static string[] READ_WRITE_CONTROLLER = new string[] { "-p", ".", "controller", "--controllerName", "ActionsController", "--readWriteActions" };
+        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "EmptyController" };
+        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
+        private static string[] READ_WRITE_CONTROLLER = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "ActionsController", "--readWriteActions" };
+        
 
-        public MvcControllerTest(ScaffoldingE2ETestFixture fixture) : base(fixture)
+        public MvcControllerTest(ITestOutputHelper output)
+            :base(output)
         {
+
         }
 
         public static IEnumerable<object[]> TestData
@@ -31,118 +34,120 @@ namespace E2E_Test
             }
         }
 
-        [Theory(Skip="Disabling E2E test"), MemberData("TestData")]
+        [Theory(Skip= E2ESkipReason), MemberData("TestData")]
         public void TestControllerGenerators(string baselineFile, string generatedFilePath, string[] args)
         {
-            Scaffold(args);
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                Scaffold(args);
 
-            generatedFilePath = Path.Combine(_testProjectPath, generatedFilePath);
-            VerifyFileAndContent(generatedFilePath, baselineFile);
-
-            _fixture.FilesToCleanUp.Add(generatedFilePath);
+                generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);
+                VerifyFileAndContent(generatedFilePath, baselineFile);
+            }
         }
 
-        [Fact(Skip = "Disabling E2E test")]
+        [Fact(Skip = E2ESkipReason)]
         public void TestControllerWithContext()
         {
-            var args = new string[]
+            using (var fileProvider = new TemporaryFileProvider())
             {
-                "-p",
-                _testProjectPath,
-                "controller",
-                "--controllerName",
-                "CarsController",
-                "--model",
-                "WebApplication1.Models.Car",
-                "--dataContext",
-                "WebApplication1.Models.CarContext",
-                "--noViews"
-            };
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                var args = new string[]
+                {
+                    "aspnet-codeGenerator",
+                    "-p",
+                    TestProjectPath,
+                    "controller",
+                    "--controllerName",
+                    "CarsController",
+                    "--model",
+                    "WebApplication1.Models.Car",
+                    "--dataContext",
+                    "WebApplication1.Models.CarContext",
+                    "--noViews"
+                };
 
-            Scaffold(args);
-            var generatedFilePath = Path.Combine(_testProjectPath, "CarsController.cs");
-            VerifyFileAndContent(generatedFilePath, "CarsController.txt");
-
-            _fixture.FilesToCleanUp.Add(generatedFilePath);
+                Scaffold(args);
+                var generatedFilePath = Path.Combine(TestProjectPath, "CarsController.cs");
+                VerifyFileAndContent(generatedFilePath, "CarsController.txt");
+            }
         }
 
-        [Fact(Skip = "Disabling E2E test")]
+        [Fact(Skip = E2ESkipReason)]
         public void TestControllerWithContext_WithViews()
         {
-            var args = new string[]
+            using (var fileProvider = new TemporaryFileProvider())
             {
-                "-p",
-                _testProjectPath,
-                "controller",
-                "--controllerName",
-                "CarsWithViewController",
-                "--model",
-                "WebApplication1.Models.Car",
-                "--dataContext",
-                "WebApplication1.Models.CarContext",
-                "--referenceScriptLibraries",
-                "--relativeFolderPath",
-                Path.Combine("Areas", "Test", "Controllers")
-            };
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                var args = new string[]
+                {
+                    codegeneratorToolName,
+                    "-p",
+                    TestProjectPath,
+                    "controller",
+                    "--controllerName",
+                    "CarsWithViewController",
+                    "--model",
+                    "WebApplication1.Models.Car",
+                    "--dataContext",
+                    "WebApplication1.Models.CarContext",
+                    "--referenceScriptLibraries",
+                    "--relativeFolderPath",
+                    Path.Combine("Areas", "Test", "Controllers")
+                };
 
-            Scaffold(args);
+                Scaffold(args);
 
-            var generatedFilePath = Path.Combine(_testProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
-            var viewFolder = Path.Combine(_testProjectPath, "Areas", "Test", "Views", "CarsWithView");
+                var generatedFilePath = Path.Combine(TestProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
+                var viewFolder = Path.Combine(TestProjectPath, "Areas", "Test", "Views", "CarsWithView");
 
-            VerifyFileAndContent(generatedFilePath, "CarsWithViewController.txt");
-            VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("CarViews", "Create.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Delete.cshtml"), Path.Combine("CarViews", "Delete.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("CarViews", "Details.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("CarViews", "Edit.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("CarViews", "Index.cshtml"));
-            VerifyFileAndContent(Path.Combine(_testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
-
-            _fixture.FilesToCleanUp.Add(generatedFilePath);
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Create.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Index.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Delete.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Details.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Edit.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Index.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(_testProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"));
+                VerifyFileAndContent(generatedFilePath, "CarsWithViewController.txt");
+                VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("CarViews", "Create.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Delete.cshtml"), Path.Combine("CarViews", "Delete.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("CarViews", "Details.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("CarViews", "Edit.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("CarViews", "Index.cshtml"));
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
+            }
         }
 
-        [Fact(Skip = "Disabling E2E test")]
+        [Fact(Skip = E2ESkipReason)]
         public void TestControllerWithContext_WithForeignKey()
         {
-            var args = new string[]
+            using (var fileProvider = new TemporaryFileProvider())
             {
-                "-p",
-                _testProjectPath,
-                "controller",
-                "--controllerName",
-                "ProductsController",
-                "--model",
-                "WebApplication1.Models.Product",
-                "--dataContext",
-                "WebApplication1.Models.ProductContext"
-            };
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                var args = new string[]
+                {
+                    codegeneratorToolName,
+                    "-p",
+                    TestProjectPath,
+                    "controller",
+                    "--controllerName",
+                    "ProductsController",
+                    "--model",
+                    "WebApplication1.Models.Product",
+                    "--dataContext",
+                    "WebApplication1.Models.ProductContext"
+                };
 
-            Scaffold(args);
+                Scaffold(args);
 
-            var generatedFilePath = Path.Combine(_testProjectPath, "ProductsController.cs");
-            var viewFolder = Path.Combine(_testProjectPath, "Views", "Products");
+                var generatedFilePath = Path.Combine(TestProjectPath, "ProductsController.cs");
+                var viewFolder = Path.Combine(TestProjectPath, "Views", "Products");
 
-            VerifyFileAndContent(generatedFilePath, "ProductsController.txt");
-            VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("ProductViews", "Create.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Delete.cshtml"), Path.Combine("ProductViews", "Delete.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("ProductViews", "Details.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("ProductViews", "Edit.cshtml"));
-            VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("ProductViews", "Index.cshtml"));
-
-            _fixture.FilesToCleanUp.Add(generatedFilePath);
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Create.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Index.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Delete.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Details.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Edit.cshtml"));
-            _fixture.FilesToCleanUp.Add(Path.Combine(viewFolder, "Index.cshtml"));
+                VerifyFileAndContent(generatedFilePath, "ProductsController.txt");
+                VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("ProductViews", "Create.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Delete.cshtml"), Path.Combine("ProductViews", "Delete.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("ProductViews", "Details.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("ProductViews", "Edit.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("ProductViews", "Index.cshtml"));
+            }
         }
     }
 }

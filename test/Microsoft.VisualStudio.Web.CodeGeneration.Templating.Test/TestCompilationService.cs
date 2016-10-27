@@ -58,7 +58,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
             {
                 foreach (var lib in exp.CompilationAssemblies)
                 {
-                    references.Add(GetMetadataReference(lib.ResolvedPath));
+                    var metadataReference = GetMetadataReference(lib.ResolvedPath);
+                    if (metadataReference != null)
+                    {
+                        references.Add(metadataReference);
+                    }
                 }
             }
 

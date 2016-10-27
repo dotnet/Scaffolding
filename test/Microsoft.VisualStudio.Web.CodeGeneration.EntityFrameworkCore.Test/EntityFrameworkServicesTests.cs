@@ -82,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             return rootContext;
         }
 
-        [Fact]
+        [Fact (Skip=MsBuildProjectStrings.SkipReason)]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())

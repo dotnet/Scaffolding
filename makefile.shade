@@ -79,3 +79,12 @@ k-standard-goals
             // Don't care if we couldn't delete the temp directory.
         }
     }
+#push-packages target="verify"
+    @{
+        // Temporarily push packages to feature work feed.
+        if (IsTeamCity)
+        {
+            Environment.SetEnvironmentVariable("NUGET_PUBLISH_FEED", "https://dotnet.myget.org/F/aspnetcore-feature-work/api/v2/package");
+            CallTarget("nuget-install");
+        }
+    }

@@ -35,6 +35,7 @@
     },
     "Microsoft.Extensions.PlatformAbstractions": "1.1.0-*",
     "Microsoft.Extensions.FileProviders.Physical": "1.1.0-*",
+    "Microsoft.DotNet.InternalAbstractions": "1.0.0-*",
     "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
       "version": "1.0.0-*",
       "type": "build"
@@ -47,6 +48,7 @@
       "version": "1.0.0-*",
       "type": "build"
     },
+    "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
     "Newtonsoft.Json": "9.0.1",
     "NuGet.ProjectModel": "3.6.0-*"
   },

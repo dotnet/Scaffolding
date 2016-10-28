@@ -21,18 +21,19 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
   <Choose>
-  <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = ''-->
-    <When Condition="'$(MSBuildRuntimeType)' == ''">
+    <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
+    <When Condition="'$(MSBuildRuntimeType)' == 'Core'">
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\tools\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\tools\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup >
-          <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\tools\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\tools\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
+
   <UsingTask TaskName="ProjectContextWriter"
              AssemblyFile="$(EvaluateProjectInfoForCodeGenerationAssemblyPath)" />
   

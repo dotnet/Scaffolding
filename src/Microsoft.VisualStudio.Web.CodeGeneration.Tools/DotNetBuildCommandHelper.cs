@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
@@ -16,7 +17,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             NuGetFramework framework,
             string buildBasePath)
         {
-            const string buildCommandName = "build";
+            var buildCommandName = "build";
+
             var args = new List<string>()
             {
                 project,
@@ -37,6 +39,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             var stdOutMsgs = new List<string>();
             var stdErrorMsgs = new List<string>();
+
+            // HACK :: Till we upgrade the repo to use msbuild based CLI, use *3 verbs for the tests.
+            if (string.Equals(System.Environment.GetEnvironmentVariable("USE_3_VERBS"), "1", StringComparison.Ordinal)
+                && string.Equals(Path.GetExtension(project), ".csproj", StringComparison.OrdinalIgnoreCase))
+            {
+                buildCommandName = "build3";
+            }
 
             var command = Command.CreateDotNet(
                     buildCommandName,

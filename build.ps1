@@ -32,6 +32,8 @@ cd $PSScriptRoot
 
 $repoFolder = $PSScriptRoot
 $env:REPO_FOLDER = $repoFolder
+# HACK:: Remove when we move to CLI that uses msbuild as the driver.
+$env:USE_3_VERBS = 1;
 
 $koreBuildZip="https://github.com/aspnet/KoreBuild/archive/feature/msbuild.zip"
 if ($env:KOREBUILD_ZIP)

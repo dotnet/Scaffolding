@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 repoFolder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $repoFolder
+# HACK:: Remove when we move to CLI that uses msbuild as the driver.
+export USE_3_VERBS=1
 
 koreBuildZip="https://github.com/aspnet/KoreBuild/archive/dev.zip"
 if [ ! -z $KOREBUILD_ZIP ]; then

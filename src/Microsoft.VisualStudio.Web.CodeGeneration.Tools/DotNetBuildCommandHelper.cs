@@ -16,6 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             NuGetFramework framework,
             string buildBasePath)
         {
+            const string buildCommandName = "build";
             var args = new List<string>()
             {
                 project,
@@ -36,11 +37,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             var stdOutMsgs = new List<string>();
             var stdErrorMsgs = new List<string>();
-
-            //TODO Remove this when CLI merges build3 to build.
-            var buildCommandName = Path.GetExtension(project).Equals(".csproj")
-                ? "build3"
-                : "build";
 
             var command = Command.CreateDotNet(
                     buildCommandName,

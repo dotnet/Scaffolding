@@ -9,11 +9,10 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Delete</title>
+    <title>Details</title>
 </head>
 <body>
 
-<h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Product</h4>
     <hr />
@@ -34,16 +33,13 @@
             @Html.DisplayNameFor(model => model.Manufacturer)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Manufacturer.Name)
+            @Html.DisplayFor(model => model.Manufacturer.ManufacturerID)
         </dd>
     </dl>
-    
-    <form asp-action="Delete">
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            <a asp-action="Index">Back to List</a>
-        </div>
-    </form>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ProductID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
 </div>
 </body>
 </html>

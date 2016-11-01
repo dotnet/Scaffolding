@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Xunit;
@@ -12,24 +13,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public class E2ETestBase
     {
-        public static string BaseLineFilesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Baseline");
-
         public const string E2ESkipReason = "Disabling E2E test";
-        public  const string codegeneratorToolName = "aspnet-codegenerator";
+        public const string codegeneratorToolName = "aspnet-codegenerator";
 
         protected string TestProjectPath { get; set; }
         protected ITestOutputHelper Output { get; set; }
-        
 
         public E2ETestBase(ITestOutputHelper output)
         {
             Output = output;
         }
 
-        protected void Scaffold(string[] args)
+        protected void Scaffold(string[] args, string testProjectPath)
         {
             new CommandFactory()
                 .Create("dotnet", args)
+                .WorkingDirectory(testProjectPath)
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .Execute();
@@ -43,11 +42,31 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 // TODO: This is currently to fix the tests on Non windows machine. 
                 // The baseline files need to be converted to Unix line endings
-                var expectedContents = File.ReadAllText(Path.Combine(BaseLineFilesDirectory, baselineFile));
-                var actualContents = File.ReadAllText(generatedFilePath);
-                Assert.Equal(expectedContents, actualContents);
+                var assembly = GetType().GetTypeInfo().Assembly;
+                using (var resourceStream = assembly.GetManifestResourceStream($"E2E_Test.Compiler.Resources.{baselineFile.Replace('\\', '.')}"))
+                using (var reader = new StreamReader(resourceStream))
+                {
+                    var expectedContents = reader.ReadToEnd();
+                    expectedContents = NormalizeLineEndings(expectedContents);
+                    var actualContents = File.ReadAllText(generatedFilePath);
+                    Assert.Equal(expectedContents, actualContents);
+                }
             }
             return;
+        }
+
+        private string NormalizeLineEndings(string expectedContents)
+        {
+            if (string.IsNullOrEmpty(expectedContents))
+            {
+                return expectedContents;
+            }
+            const string token = "___newline___";
+
+            expectedContents = expectedContents.Replace(Environment.NewLine, token);
+            expectedContents = expectedContents.Replace("\n", token);
+            expectedContents = expectedContents.Replace("\r", token);
+            return expectedContents.Replace(token, Environment.NewLine);
         }
 
         protected void VerifyFoldersCreated(string folderPath)

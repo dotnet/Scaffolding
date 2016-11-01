@@ -34,55 +34,55 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory(Skip= E2ESkipReason), MemberData("TestData")]
+        [Theory, MemberData("TestData")]
         public void TestControllerGenerators(string baselineFile, string generatedFilePath, string[] args)
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
-                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
-                Scaffold(args);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Scaffold(args, TestProjectPath);
 
                 generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);
                 VerifyFileAndContent(generatedFilePath, baselineFile);
             }
         }
 
-        [Fact(Skip = E2ESkipReason)]
+        [Fact]
         public void TestControllerWithContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
-                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                    "aspnet-codeGenerator",
+                    "aspnet-codegenerator",
                     "-p",
                     TestProjectPath,
                     "controller",
                     "--controllerName",
                     "CarsController",
                     "--model",
-                    "WebApplication1.Models.Car",
+                    "Library1.Models.Car",
                     "--dataContext",
                     "WebApplication1.Models.CarContext",
                     "--noViews"
                 };
 
-                Scaffold(args);
+                Scaffold(args, TestProjectPath);
                 var generatedFilePath = Path.Combine(TestProjectPath, "CarsController.cs");
                 VerifyFileAndContent(generatedFilePath, "CarsController.txt");
             }
         }
 
-        [Fact(Skip = E2ESkipReason)]
+        [Fact]
         public void TestControllerWithContext_WithViews()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
-                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
                     codegeneratorToolName,
@@ -92,7 +92,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "--controllerName",
                     "CarsWithViewController",
                     "--model",
-                    "WebApplication1.Models.Car",
+                    "Library1.Models.Car",
                     "--dataContext",
                     "WebApplication1.Models.CarContext",
                     "--referenceScriptLibraries",
@@ -100,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     Path.Combine("Areas", "Test", "Controllers")
                 };
 
-                Scaffold(args);
+                Scaffold(args, TestProjectPath);
 
                 var generatedFilePath = Path.Combine(TestProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
                 var viewFolder = Path.Combine(TestProjectPath, "Areas", "Test", "Views", "CarsWithView");
@@ -115,13 +115,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact(Skip = E2ESkipReason)]
+        [Fact]
         public void TestControllerWithContext_WithForeignKey()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
-                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Directory.SetCurrentDirectory(TestProjectPath);
                 var args = new string[]
                 {
                     codegeneratorToolName,
@@ -136,7 +137,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "WebApplication1.Models.ProductContext"
                 };
 
-                Scaffold(args);
+                Scaffold(args, TestProjectPath);
 
                 var generatedFilePath = Path.Combine(TestProjectPath, "ProductsController.cs");
                 var viewFolder = Path.Combine(TestProjectPath, "Views", "Products");

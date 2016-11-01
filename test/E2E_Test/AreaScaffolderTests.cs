@@ -14,13 +14,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
         }
 
-        [Fact (Skip = E2ESkipReason)]
+        [Fact]
         public void TestAreaGenerator()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
-                TestProjectPath = Path.Combine(fileProvider.Root, "Root", "Test.csproj");
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
                 "aspnet-codegenerator",
@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 "Admin"
                 };
 
-                Scaffold(args);
+                Scaffold(args, TestProjectPath);
                 var generatedFilePath = Path.Combine(TestProjectPath, "ScaffoldingReadMe.txt");
                 var baselinePath = Path.Combine("ReadMe", "Readme.txt");
 

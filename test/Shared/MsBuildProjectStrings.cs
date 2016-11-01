@@ -15,6 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
         <add key=""dotnet-buildtools"" value=""https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json"" />
         <add key=""nugetbuild"" value=""https://www.myget.org/F/nugetbuild/api/v3/index.json"" />
+        <add key=""feature"" value=""https://dotnet.myget.org/F/aspnetcore-feature-work/api/v3/index.json"" />
     </packageSources>
 </configuration>";
 
@@ -78,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
       <Version>1.0.0-*</Version>
     </PackageReference>
     <PackageReference Include=""Microsoft.NET.Sdk"">
-      <Version>1.0.0-*</Version>
+      <Version>1.0.0-alpha-20161029-1</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include=""Microsoft.NETCore.App"">
@@ -118,8 +119,8 @@ namespace WebApplication1
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath);
-                //.AddJsonFile(""appsettings.json"", optional: true, reloadOnChange: true)
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile(""appsettings.json"", optional: true, reloadOnChange: true);
                 //.AddJsonFile($""appsettings.{env.EnvironmentName}.json"", optional: true);
             Configuration = builder.Build();
         }
@@ -189,5 +190,52 @@ namespace Test
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>
 ";
+
+        public const string ProductTxt = @"
+using System;
+using System.Collections.Generic;
+//using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace WebApplication1.Models
+{
+    public class Product
+    {
+        public int ProductID { get; set; }
+        public string Name { get; set; }
+        public double Price { get; set; }
+        public int ManufacturerID { get; set; }
+        public Manufacturer Manufacturer { get; set; }
+    }
+
+    public class Manufacturer
+    {
+        public int ManufacturerID { get; set; }
+//        [Required]
+        public string Name { get; set; }
+    }
+}
+";
+        public const string CarTxt = @"
+using System.Collections.Generic;
+
+namespace Library1.Models
+{
+    public class Car
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public int ManufacturerID { get; set; }
+        public Manufacturer Manufacturer { get; set; }
+    }
+
+    public class Manufacturer
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public virtual ICollection<Car> Cars { get; set; }
+    }
+}";
     }
 }

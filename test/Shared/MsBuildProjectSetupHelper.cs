@@ -21,28 +21,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);
             fileProvider.Add($"Library1/ModelWithMatchingShortName.cs", "namespace Library1.Models { public class ModelWithMatchingShortName { } }");
-            fileProvider.Add($"Library1/Car.cs", @"
-using System.Collections.Generic;
+            fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
+            fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.ProductTxt);
 
-namespace Library1.Models
-{
-    public class Car
-    {
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public int ManufacturerID { get; set; }
-        public Manufacturer Manufacturer { get; set; }
-    }
-
-    public class Manufacturer
-    {
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public virtual ICollection<Car> Cars { get; set; }
-    }
-}");
             var result = Command.CreateDotNet("restore3",
-                new[] { Path.Combine(fileProvider.Root, "Root", "test.csproj") })
+                new[] { Path.Combine(fileProvider.Root, "Root", "Test.csproj") })
                 .OnErrorLine(l => output.WriteLine(l))
                 .OnOutputLine(l => output.WriteLine(l))
                 .Execute();

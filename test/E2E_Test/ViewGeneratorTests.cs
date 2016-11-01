@@ -11,8 +11,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     public class ViewGeneratorTests : E2ETestBase
     {
         private static string[] EMPTY_VIEW_ARGS = new string[] { codegeneratorToolName, "-p", ".", "view", "EmptyView", "Empty" };
-        private static string[] VIEW_WITH_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarCreate", "Create", "--model", "WebApplication1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
-        private static string[] VIEW_NO_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarDetails", "Details", "--model", "WebApplication1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--partialView" };
+        private static string[] VIEW_WITH_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
+        private static string[] VIEW_NO_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarDetails", "Details", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--partialView" };
 
         public ViewGeneratorTests(ITestOutputHelper output) : base(output)
         {
@@ -32,12 +32,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory(Skip = E2ESkipReason), MemberData("TestData")]
+        [Theory, MemberData("TestData")]
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
-            Scaffold(args);
-            generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);
-            VerifyFileAndContent(generatedFilePath, baselineFile);
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Scaffold(args, TestProjectPath);
+                generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);
+                VerifyFileAndContent(generatedFilePath, baselineFile);
+            }
         }
     }
 }

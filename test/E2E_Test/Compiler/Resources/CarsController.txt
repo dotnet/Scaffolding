@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Library1.Models;
 using WebApplication1.Models;
 
-namespace WebApplication1
+namespace TestProject
 {
     public class CarsController : Controller
     {
@@ -21,7 +22,8 @@ namespace WebApplication1
         // GET: Cars
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Car.ToListAsync());
+            var carContext = _context.Car.Include(c => c.Manufacturer);
+            return View(await carContext.ToListAsync());
         }
 
         // GET: Cars/Details/5
@@ -33,7 +35,8 @@ namespace WebApplication1
             }
 
             var car = await _context.Car
-                .SingleOrDefaultAsync(m => m.CarID == id);
+                .Include(c => c.Manufacturer)
+                .SingleOrDefaultAsync(m => m.ID == id);
             if (car == null)
             {
                 return NotFound();
@@ -45,6 +48,7 @@ namespace WebApplication1
         // GET: Cars/Create
         public IActionResult Create()
         {
+            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
             return View();
         }
 
@@ -53,7 +57,7 @@ namespace WebApplication1
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CarID,ModelName,Price")] Car car)
+        public async Task<IActionResult> Create([Bind("ID,Name,ManufacturerID")] Car car)
         {
             if (ModelState.IsValid)
             {
@@ -61,6 +65,7 @@ namespace WebApplication1
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
+            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
         }
 
@@ -72,11 +77,12 @@ namespace WebApplication1
                 return NotFound();
             }
 
-            var car = await _context.Car.SingleOrDefaultAsync(m => m.CarID == id);
+            var car = await _context.Car.SingleOrDefaultAsync(m => m.ID == id);
             if (car == null)
             {
                 return NotFound();
             }
+            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
         }
 
@@ -85,9 +91,9 @@ namespace WebApplication1
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CarID,ModelName,Price")] Car car)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,ManufacturerID")] Car car)
         {
-            if (id != car.CarID)
+            if (id != car.ID)
             {
                 return NotFound();
             }
@@ -101,7 +107,7 @@ namespace WebApplication1
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CarExists(car.CarID))
+                    if (!CarExists(car.ID))
                     {
                         return NotFound();
                     }
@@ -112,6 +118,7 @@ namespace WebApplication1
                 }
                 return RedirectToAction("Index");
             }
+            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
         }
 
@@ -124,7 +131,8 @@ namespace WebApplication1
             }
 
             var car = await _context.Car
-                .SingleOrDefaultAsync(m => m.CarID == id);
+                .Include(c => c.Manufacturer)
+                .SingleOrDefaultAsync(m => m.ID == id);
             if (car == null)
             {
                 return NotFound();
@@ -138,7 +146,7 @@ namespace WebApplication1
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var car = await _context.Car.SingleOrDefaultAsync(m => m.CarID == id);
+            var car = await _context.Car.SingleOrDefaultAsync(m => m.ID == id);
             _context.Car.Remove(car);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -146,7 +154,7 @@ namespace WebApplication1
 
         private bool CarExists(int id)
         {
-            return _context.Car.Any(e => e.CarID == id);
+            return _context.Car.Any(e => e.ID == id);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         private static string[] EMPTY_CONTROLLER_ARGS = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "EmptyController" };
         private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
         private static string[] READ_WRITE_CONTROLLER = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "ActionsController", "--readWriteActions" };
-        
+
 
         public MvcControllerTest(ITestOutputHelper output)
             :base(output)
@@ -48,7 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [Fact (Skip="Disable tests that need loading assemblies")]
         public void TestControllerWithContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -76,7 +76,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [Fact (Skip="Disable tests that need loading assemblies")]
         public void TestControllerWithContext_WithViews()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -115,7 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [Fact (Skip="Disable tests that need loading assemblies")]
         public void TestControllerWithContext_WithForeignKey()
         {
             using (var fileProvider = new TemporaryFileProvider())

@@ -17,8 +17,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             NuGetFramework framework,
             string buildBasePath)
         {
-            var buildCommandName = "build";
-
             var args = new List<string>()
             {
                 project,
@@ -29,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             if (buildBasePath != null)
             {
                 // ProjectDependenciesCommandFactory cannot handle relative build base paths.
-                buildBasePath = (!Path.IsPathRooted(buildBasePath)) 
+                buildBasePath = (!Path.IsPathRooted(buildBasePath))
                     ? Path.Combine(Directory.GetCurrentDirectory(), buildBasePath)
                     : buildBasePath;
 
@@ -40,18 +38,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var stdOutMsgs = new List<string>();
             var stdErrorMsgs = new List<string>();
 
-            // HACK :: Till we upgrade the repo to use msbuild based CLI, use *3 verbs for the tests.
-            if (string.Equals(System.Environment.GetEnvironmentVariable("USE_3_VERBS"), "1", StringComparison.Ordinal)
-                && string.Equals(Path.GetExtension(project), ".csproj", StringComparison.OrdinalIgnoreCase))
-            {
-                buildCommandName = "build3";
-            }
-
             var command = Command.CreateDotNet(
-                    buildCommandName,
+                    "build",
                     args,
                     framework,
-                    configuration:configuration)
+                    configuration: configuration)
                     .OnErrorLine((str) => stdOutMsgs.Add(str))
                     .OnOutputLine((str) => stdErrorMsgs.Add(str));
 

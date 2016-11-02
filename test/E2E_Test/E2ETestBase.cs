@@ -40,7 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             Assert.True(File.Exists(generatedFilePath));
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // TODO: This is currently to fix the tests on Non windows machine. 
+                // TODO: This is currently to fix the tests on Non windows machine.
                 // The baseline files need to be converted to Unix line endings
                 var assembly = GetType().GetTypeInfo().Assembly;
                 using (var resourceStream = assembly.GetManifestResourceStream($"E2E_Test.Compiler.Resources.{baselineFile.Replace('\\', '.')}"))

@@ -36,12 +36,12 @@ namespace Microsoft.Extensions.ProjectModel
             var errors = new List<string>();
             var output = new List<string>();
             var tmpFile = Path.GetTempFileName();
-            var result = Command.Create("dotnet",
-                new string[] 
+            var result = Command.CreateDotNet(
+                "msbuild",
+                new string[]
                 {
-                    "msbuild",
                     _projectPath,
-                    $"/t:EvaluateProjectInfoForCodeGeneration", 
+                    $"/t:EvaluateProjectInfoForCodeGeneration",
                     $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation}"
                 })
                 .OnErrorLine(e => errors.Add(e))

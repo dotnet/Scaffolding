@@ -324,7 +324,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     try
                     {
-                        var dAssembly = _loader.LoadFromPath(dependencies.Current.ResolvedPath);
+                        // Since we are running in the project's dependency context, loading assemblies
+                        // by name just works.
+                        var dAssemblyName = new AssemblyName(Path.GetFileNameWithoutExtension(dependencies.Current.ResolvedPath));
+                        var dAssembly = _loader.LoadFromName(dAssemblyName);
                         modelType = dAssembly.GetType(modelTypeName);
                     }
                     catch (Exception ex)

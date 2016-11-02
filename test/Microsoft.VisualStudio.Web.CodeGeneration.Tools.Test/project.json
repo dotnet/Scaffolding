@@ -9,7 +9,7 @@
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
     "Microsoft.NETCore.App": {
-      "version": "1.0.0-*",
+      "version": "1.0.1",
       "type": "platform"
     },
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",

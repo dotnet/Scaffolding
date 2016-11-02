@@ -6,7 +6,7 @@
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
     "Microsoft.NETCore.App": {
-      "version": "1.0.0-*",
+      "version": "1.0.1",
       "type": "platform"
     },
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",

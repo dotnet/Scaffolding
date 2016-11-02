@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
             fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.ProductTxt);
 
-            var result = Command.CreateDotNet("restore3",
+            var result = Command.CreateDotNet("restore",
                 new[] { Path.Combine(fileProvider.Root, "Root", "Test.csproj") })
                 .OnErrorLine(l => output.WriteLine(l))
                 .OnOutputLine(l => output.WriteLine(l))

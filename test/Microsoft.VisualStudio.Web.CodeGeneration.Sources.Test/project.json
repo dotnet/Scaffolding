@@ -9,7 +9,7 @@
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
     "Microsoft.NETCore.App": {
-      "version": "1.0.0-*",
+      "version": "1.0.1",
       "type": "platform"
     },
     "Microsoft.Build.Runtime": "15.1.319-preview5",

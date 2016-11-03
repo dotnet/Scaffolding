@@ -3,24 +3,26 @@
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
     "compile": {
-      "include": "../Shared/*.cs"
+      "include": [
+        "../Shared/*.cs"
+      ]
     }
   },
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-*",
-    "Microsoft.DotNet.InternalAbstractions": "1.0.0-*",
+    "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
-    "Microsoft.Build.Runtime": "15.1.319-preview5",
-    "Microsoft.Extensions.FileProviders.Physical": "1.1.0-*",
+    "Microsoft.Build.Runtime": "15.1.0-*",
+    "Microsoft.Extensions.FileProviders.Physical": "1.0.0",
     "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
       "type": "build",
       "version": "1.0.0-*"
     },
-    "Microsoft.Extensions.ProjectModel.DotNet.Sources": {
+    "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {
       "type": "build",
       "version": "1.0.0-*"
     },
-    "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {
+    "Microsoft.Extensions.ProjectModel.DotNet.Sources": {
       "type": "build",
       "version": "1.0.0-*"
     },

@@ -7,17 +7,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         public const string SkipReason = "CI doesn't have CLI version required for the MSBuild stuff to work";
 
-        public const string NugetConfigTxt = @"
+        public static string GetNugetConfigTxt(string artifactsDir)
+        {
+            return @"
 <configuration>
     <packageSources>
         <clear />
-        <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
+        <add key=""local"" value=""" + artifactsDir +  @""" />
         <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
-        <add key=""dotnet-buildtools"" value=""https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json"" />
-        <add key=""nugetbuild"" value=""https://www.myget.org/F/nugetbuild/api/v3/index.json"" />
-        <add key=""feature"" value=""https://dotnet.myget.org/F/aspnetcore-feature-work/api/v3/index.json"" />
+        <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
     </packageSources>
 </configuration>";
+        }
 
         public const string RootProjectName = "Test.csproj";
         public const string RootProjectTxt = @"
@@ -38,58 +39,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </ItemGroup>
 
   <ItemGroup>
-     <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.AspNetCore.Mvc"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"">
-        <Version> 1.0.0-*</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"">
-        <Version> 1.0.0-*</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.Extensions.Configuration.Json"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.Extensions.Logging"">
-        <Version> 1.0.0-*</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.Extensions.Logging.Console"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.Extensions.Logging.Debug"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-      <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"">
-        <Version> 1.0.0</Version>
-      </PackageReference>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"">
-      <Version>1.0.0-*</Version>
-    </PackageReference>
-    <!-- The Tools package is included only to get the target delivered to the project-->
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"">
-      <Version>1.0.0-*</Version>
-    </PackageReference>
-    <PackageReference Include=""Microsoft.NET.Sdk"">
-      <Version>1.0.0-alpha-20161029-1</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include=""Microsoft.NETCore.App"">
-      <Version>1.0.1</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"">
-      <Version>1.0.0-*</Version>
-    </DotNetCliToolReference>
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
+    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
+    <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
@@ -153,7 +117,7 @@ namespace WebApplication1
         public const string ProgramFileText = @"using System;
 namespace Test
 {
-    public class Program 
+    public class Program
     {
         public static void Main(string[] args)
         {
@@ -180,12 +144,8 @@ namespace Test
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.NETCore.Sdk"">
-      <Version>1.0.0-*</Version>
-    </PackageReference>
-    <PackageReference Include=""NETStandard.Library"">
-      <Version>1.6.0-*</Version>
-    </PackageReference>
+    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" />
+    <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
   </ItemGroup>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>

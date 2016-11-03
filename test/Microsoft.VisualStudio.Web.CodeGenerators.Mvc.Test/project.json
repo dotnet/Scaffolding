@@ -10,8 +10,8 @@
       "type": "platform"
     },
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*",
-    "Moq": "4.6.36-*",
-    "System.Diagnostics.TraceSource": "4.3.0-*",
+    "Moq": "4.6.38-alpha",
+    "System.Diagnostics.TraceSource": "4.0.0",
     "xunit": "2.2.0-*"
   },
   "frameworks": {

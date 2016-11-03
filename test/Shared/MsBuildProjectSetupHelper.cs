@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Xunit.Abstractions;
@@ -11,9 +12,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output)
         {
+            string artifactsDir = null;
+            var current = new DirectoryInfo(AppContext.BaseDirectory);
+            while (current != null)
+            {
+                if (File.Exists(Path.Combine(current.FullName, "global.json")))
+                {
+                    artifactsDir = Path.Combine(current.FullName, "artifacts/build");
+                    break;
+                }
+                current = current.Parent;
+            }
+
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            fileProvider.Add("Nuget.config", MsBuildProjectStrings.NugetConfigTxt);
+            fileProvider.Add("Nuget.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
 
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.RootProjectTxt);
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);

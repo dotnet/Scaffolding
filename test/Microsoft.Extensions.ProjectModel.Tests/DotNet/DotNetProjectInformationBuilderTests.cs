@@ -65,7 +65,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test
             _output = output;
         }
 
-        [Fact]
+        [Fact(Skip = "project.json is no longer supported")]
         public void BuildProjectDependencies()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -92,8 +92,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test
                 Assert.Equal(0, result.ExitCode);
 
                 var projectInformation = new DotNetProjectContextBuilder(
-                    Path.Combine(fileProvider.Root, "demo", "project.json"), 
-                    new NuGetFramework[] 
+                    Path.Combine(fileProvider.Root, "demo", "project.json"),
+                    new NuGetFramework[]
                     {
                         FrameworkConstants.CommonFrameworks.NetCoreApp10
                     })

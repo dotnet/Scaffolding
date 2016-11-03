@@ -4,7 +4,9 @@
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true,
     "compile": {
-      "include": "../Shared/**/*.cs"
+      "include": [
+        "../Shared/General/**/*.cs"
+      ]
     },
     "nowarn": [
       "CS1591"
@@ -12,20 +14,19 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.Build": "15.1.319-preview5",
-    "Microsoft.Build.Tasks.Core": "15.1.319-preview5",
-    "Microsoft.Build.Utilities.Core": "15.1.319-preview5",
+    "Microsoft.Build": "14.3.0",
+    "Microsoft.Build.Tasks.Core": "14.3.0",
+    "Microsoft.Build.Utilities.Core": "14.3.0",
     "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "type": "build",
+      "version": "1.0.0-*"
     },
-    "NETStandard.Library": "1.6.0-*",
+    "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1",
-    "NuGet.Frameworks": "3.6.0-*"
+    "NuGet.Frameworks": "3.5.0-rc1-final"
   },
-
   "frameworks": {
-    "net46":{ },
-    "netstandard1.6": { }
+    "net46": {},
+    "netstandard1.6": {}
   }
 }

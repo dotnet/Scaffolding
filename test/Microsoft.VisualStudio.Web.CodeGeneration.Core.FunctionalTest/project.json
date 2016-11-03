@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
-    "Microsoft.AspNetCore.Hosting": "1.1.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.1.0-*",
+    "Microsoft.AspNetCore.Hosting": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0",
     "Microsoft.NETCore.App": {
       "version": "1.0.1",
       "type": "platform"
@@ -10,7 +10,7 @@
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",
     "ModelTypesLocatorTestWebApp": "1.0.0",
-    "System.Diagnostics.Contracts": "4.3.0-*",
+    "System.Diagnostics.Contracts": "4.0.1",
     "xunit": "2.2.0-*"
   },
   "frameworks": {

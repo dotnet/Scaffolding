@@ -3,7 +3,9 @@
     "emitEntryPoint": false,
     "keyFile": "../../tools/Key.snk",
     "compile": {
-      "include": "../Shared/**/*.cs"
+      "include": [
+        "../Shared/**/*.cs"
+      ]
     }
   },
   "dependencies": {
@@ -12,20 +14,21 @@
       "version": "1.0.1",
       "type": "platform"
     },
-    "Microsoft.Build.Runtime": "15.1.319-preview5",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.Extensions.FileProviders.Physical": "1.0.0-*",
+    "Microsoft.Build.Runtime": "15.1.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-*",
+    "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+    "Microsoft.Extensions.FileProviders.Physical": "1.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-*",
     "Microsoft.Extensions.ProjectModel.MsBuild.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "type": "build",
+      "version": "1.0.0-*"
     },
     "Microsoft.Extensions.ProjectModel.DotNet.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+      "type": "build",
+      "version": "1.0.0-*"
     },
-    "Moq": "4.6.36-*",
-    "System.Diagnostics.TraceSource": "4.3.0-*",
+    "Moq": "4.6.38-alpha",
+    "System.Diagnostics.TraceSource": "4.0.0",
     "xunit": "2.2.0-*"
   },
   "frameworks": {

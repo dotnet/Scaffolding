@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
@@ -26,12 +27,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
         protected void Scaffold(string[] args, string testProjectPath)
         {
-            new CommandFactory()
-                .Create("dotnet", args)
+            var thisAssembly = GetType().GetTypeInfo().Assembly.GetName().Name;
+            var exitCode = new CommandFactory()
+                .Create(new Muxer().MuxerPath, args)
+                // .Create("dotnet", new []{
+                //     "exec",
+                //     "--depsfile", Path.Combine(AppContext.BaseDirectory, thisAssembly + ".deps.json"),
+                //     "--runtimeconfig", Path.Combine(AppContext.BaseDirectory, thisAssembly + ".runtimeconfig.json"),
+                //     Path.Combine(AppContext.BaseDirectory, "dotnet-aspnet-codegenerator.dll")
+                // }.Concat(args.Skip(1)))
                 .WorkingDirectory(testProjectPath)
-                .ForwardStdOut()
-                .ForwardStdErr()
-                .Execute();
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .OnOutputLine(l => Output.WriteLine(l))
+                .OnErrorLine(l => Output.WriteLine(l))
+                .Execute()
+                .ExitCode;
+
+            Assert.True(0 == exitCode, $"Scaffold command failed with exit code {exitCode}");
         }
 
         protected void VerifyFileAndContent(string generatedFilePath, string baselineFile)

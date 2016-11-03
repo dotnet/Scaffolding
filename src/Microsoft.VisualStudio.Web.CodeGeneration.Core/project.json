@@ -11,9 +11,9 @@
   "description": "Contains the core infrastructure used by ASP.NET Core Code Generators.",
   "dependencies": {
     "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-*",
-    "NETStandard.Library": "1.6.1-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0",
+    "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
@@ -23,8 +23,8 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Diagnostics.Process": "4.3.0-*",
-        "System.Runtime.Serialization.Primitives": "4.3.0-*"
+        "System.Diagnostics.Process": "4.1.0",
+        "System.Runtime.Serialization.Primitives": "4.1.1"
       }
     }
   },

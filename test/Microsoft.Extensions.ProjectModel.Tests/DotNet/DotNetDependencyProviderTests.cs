@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.ProjectModel.DotNet
             _output = output;
         }
 
-        [Fact]
+        [Fact(Skip = "project.json is no longer supported")]
         public void BuildProjectDependencies()
         {
             using (var fileProvider = new TemporaryFileProvider())

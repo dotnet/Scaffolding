@@ -48,7 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [Fact (Skip ="Disable tests that need loading assemblies in insideman")]
         public void TestControllerWithContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -76,7 +76,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Disable tests that need loading assemblies in insideman")]
         public void TestControllerWithContext_WithViews()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -115,7 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Disable tests that need loading assemblies in insideman")]
         public void TestControllerWithContext_WithForeignKey()
         {
             using (var fileProvider = new TemporaryFileProvider())

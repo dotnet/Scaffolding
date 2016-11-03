@@ -9,6 +9,18 @@
     ],
     "xmlDoc": true
   },
+  "configurations": {
+    "debug_x86": {
+      "buildOptions": {
+        "platform": "anycpu32bitpreferred"
+      }
+    },
+    "release_x86": {
+      "buildOptions": {
+        "platform": "anycpu32bitpreferred"
+      }
+    }
+  },
   "description": "Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. ",
   "dependencies": {
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*"

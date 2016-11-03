@@ -13,6 +13,7 @@
     ],
     "xmlDoc": true
   },
+  "description": "MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools",
   "dependencies": {
     "Microsoft.Build": "14.3.0",
     "Microsoft.Build.Tasks.Core": "14.3.0",

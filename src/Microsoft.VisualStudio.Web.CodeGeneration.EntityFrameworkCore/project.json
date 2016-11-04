@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview2-update1",
+  "version": "1.0.0-preview4-final",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -14,7 +14,7 @@
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-update1"
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview4-final"
   },
   "frameworks": {
     "net451": {},

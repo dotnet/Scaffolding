@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-rc3-000000-01",
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-update1",
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview4-final",
     "xunit": "2.1.0"
   },
   "frameworks": {

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview2-update1",
+  "version": "1.0.0-preview4-final",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "outputName": "dotnet-aspnet-codegenerator",
@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview2-update1",
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview4-final",
     "Microsoft.Extensions.DotnetToolDispatcher.Sources": {
       "version": "1.0.0-rtm-21431",
       "type": "build"

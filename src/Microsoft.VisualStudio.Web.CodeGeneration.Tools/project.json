@@ -28,7 +28,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-004050",
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0",

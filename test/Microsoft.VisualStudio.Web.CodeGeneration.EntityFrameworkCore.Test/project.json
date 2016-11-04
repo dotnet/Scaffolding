@@ -17,7 +17,7 @@
       "type": "platform"
     },
     "Microsoft.Build.Runtime": "15.1.0-preview-000370-00",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-004050",
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "Microsoft.Extensions.FileProviders.Physical": "1.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-*",

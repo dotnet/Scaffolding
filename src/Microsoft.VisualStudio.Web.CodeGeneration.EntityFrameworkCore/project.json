@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.1.0-*",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -14,7 +14,7 @@
     "Microsoft.AspNetCore.Server.Kestrel": "1.1.0-*",
     "Microsoft.EntityFrameworkCore": "1.1.0-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.1.0-*",
     "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {

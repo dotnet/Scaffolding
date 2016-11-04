@@ -9,9 +9,9 @@
       "version": "1.1.0-*",
       "type": "platform"
     },
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
-      "version": "1.0.0-*",
+      "version": "1.1.0-*",
       "type": "build"
     },
     "Moq": "4.6.36-*",

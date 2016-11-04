@@ -6,7 +6,7 @@
     ],
     "xmlDoc": true
   },
-  "version": "1.0.0-*",
+  "version": "1.1.0-*",
   "description": "Contains utilities used by ASP.NET Core Code Generation packages.",
   "dependencies": {
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0",

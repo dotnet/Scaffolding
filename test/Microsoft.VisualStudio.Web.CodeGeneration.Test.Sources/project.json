@@ -1,7 +1,7 @@
 {
   "shared": "*.cs",
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.1.0-*",
     "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {

@@ -10,7 +10,7 @@
   },
   "description": "Contains Razor based templating host used by ASP.NET Core Code Generators.",
   "dependencies": {
-    "Microsoft.AspNetCore.Razor": "1.0.0",
+    "Microsoft.AspNetCore.Razor": "1.0.1",
     "Microsoft.CodeAnalysis.CSharp": "1.3.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.0.0-preview4-final"
   },

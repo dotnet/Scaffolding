@@ -17,15 +17,15 @@
     },
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.Tools": {
-      "version": "1.0.0-*",
+      "version": "1.1.0-*",
       "type": "build",
       "target": "package"
     },
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.1.0-*"
   },
   "tools": {
     "Microsoft.VisualStudio.Web.CodeGeneration.Tools": {
-      "version": "1.0.0-*",
+      "version": "1.1.0-*",
       "imports": [
         "portable-net451+win8"
       ]

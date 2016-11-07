@@ -12,9 +12,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
     {
 
 #if NET451
-        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #else
-        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+        static string testAppPath = Path.Combine("..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #endif
         LibraryExporter _libraryExporter;
 

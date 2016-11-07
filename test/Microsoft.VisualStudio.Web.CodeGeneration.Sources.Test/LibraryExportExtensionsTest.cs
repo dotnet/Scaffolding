@@ -14,9 +14,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
     public class LibraryExportExtensionsTest : TestBase
     {
 #if NET451
-        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #else
-        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+        static string testAppPath = Path.Combine("..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #endif
 
         LibraryExport _export;

@@ -53,15 +53,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
 
         private ICompilationService GetCompilationService()
         {
-            ProjectContext context = CreateProjectContext(null);
-            var applicationInfo = new ApplicationInfo("", context.ProjectDirectory);
+            var originalAppBase = Directory.GetCurrentDirectory();
+            var testAppName = "ModelTypesLocatorTestClassLibrary";
+#if NET451
+            var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..","..","..","..","..", "..","TestApps", testAppName));
+#else
+            var testAppPath = Path.GetFullPath(Path.Combine(originalAppBase, "..", "..", "TestApps", testAppName));
+#endif
+            ProjectContext context = CreateProjectContext(testAppPath);
+            var applicationInfo = new ApplicationInfo(testAppName, context.ProjectDirectory);
             ICodeGenAssemblyLoadContext loader = new DefaultAssemblyLoadContext();
             IApplicationInfo _applicationInfo;
 
 #if RELEASE 
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Directory.GetCurrentDirectory(), "Release");
+            _applicationInfo = new ApplicationInfo(testAppName, Directory.GetCurrentDirectory(), "Release");
 #else
-            _applicationInfo = new ApplicationInfo("ModelTypesLocatorTestClassLibrary", Directory.GetCurrentDirectory(), "Debug");
+            _applicationInfo = new ApplicationInfo(testAppName, Directory.GetCurrentDirectory(), "Debug");
 #endif
 
             ILibraryExporter libExporter = new LibraryExporter(context, _applicationInfo);
@@ -76,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net451.GetShortFolderName();
 #else
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
-            var framework = "netcoreapp1.1";
+            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetStandard16.GetShortFolderName();
 #endif
             if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
             {

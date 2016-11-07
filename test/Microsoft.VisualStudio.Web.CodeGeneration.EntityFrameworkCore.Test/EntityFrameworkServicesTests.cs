@@ -1,15 +1,18 @@
-﻿using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Workspaces;
-using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Moq;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Xunit;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Workspaces;
+using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Moq;
+using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
@@ -77,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         public async void TestGetModelMetadata_WithoutDbContext()
         {
             var appName = "ModelTypesLocatorTestClassLibrary";
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "TestApps", appName);
             var efServices = GetEfServices(path, appName);
 
             var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
@@ -98,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         public async void TestGetModelMetadata_WithDbContext()
         {
             var appName = "ModelTypesLocatorTestWebApp";
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "TestApps", appName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "TestApps", appName);
             var efServices = GetEfServices(path, appName);
 
             // We need to build project here because the model type is in a dependency of the project. 

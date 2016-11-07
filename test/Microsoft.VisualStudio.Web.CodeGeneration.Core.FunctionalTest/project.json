@@ -9,7 +9,6 @@
     },
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Utils": "1.1.0-*",
-    "ModelTypesLocatorTestWebApp": "1.0.0",
     "System.Diagnostics.Contracts": "4.3.0-*",
     "xunit": "2.2.0-*"
   },

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
 using Xunit;
 
 namespace E2E_Test
@@ -14,7 +16,14 @@ namespace E2E_Test
             FilesToCleanUp = new List<string>();
             FoldersToCleanUp = new List<string>();
             BaseLineFilesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Baseline");
-            TestProjectDirectory = Path.GetFullPath(@"../TestApps/WebApplication1");
+            TestProjectDirectory = Path.GetFullPath(@"../../TestApps/WebApplication1");
+
+            var result = Command
+                .CreateDotNet("restore", new string[] {TestProjectDirectory})
+                .ForwardStdOut()
+                .ForwardStdErr()
+                .Execute();
+            Debug.Assert(result.ExitCode == 0, "Restore failed on test application");
         }
 
         public List<string> FilesToCleanUp { get; private set; }

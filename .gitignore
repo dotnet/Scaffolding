@@ -32,3 +32,5 @@ test/*/Properties
 project.fragment.lock.json
 .vscode/**
 test/**/bower_components/
+TestApps/**/bower_components/
+TestApps/*/Properties

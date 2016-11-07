@@ -11,9 +11,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
     public class LibraryManagerTests : TestBase
     {
 #if NET451
-        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #else
-        static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
+        static string testAppPath = Path.Combine("..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #endif
         LibraryManager _libraryManager;
 

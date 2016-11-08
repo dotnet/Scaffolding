@@ -38,21 +38,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             var errors = new List<string>();
             var output = new List<string>();
             // Restore the project.
-            var result = Command
-                .CreateDotNet("restore", new string[] { Path.GetDirectoryName(testAppPath) })
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .OnErrorLine(l => errors.Add(l))
-                .OnOutputLine(l => output.Add(l))
-                .Execute();
-
-            if (result.ExitCode != 0)
-            {
-                Console.WriteLine($"Failed to restore {testAppPath}");
-                Console.WriteLine(string.Join(Environment.NewLine, output));
-                Console.WriteLine(string.Join(Environment.NewLine, errors));
-                Assert.True(false);
-            }
+            RunDotNet("restore", Path.GetDirectoryName(testAppPath));
+            RunDotNet("build", testAppPath);
 
             var testEnvironment = new TestApplicationInfo(applicationInfo, testAppPath, testAppName);
             var context = ProjectContext.CreateContextForEachFramework(testAppPath).First();
@@ -69,6 +56,28 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
                     })
                 .Build()
                 .Services;
+        }
+
+        private static void RunDotNet(string commandName, string testAppPath)
+        {
+            var errors = new List<string>();
+            var output = new List<string>();
+
+            var result = Command
+                .CreateDotNet(commandName, new string[] { testAppPath })
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .OnErrorLine(l => errors.Add(l))
+                .OnOutputLine(l => output.Add(l))
+                .Execute();
+
+            if (result.ExitCode != 0)
+            {
+                Console.WriteLine($"Failed to run dotnet {commandName} {testAppPath}");
+                Console.WriteLine(string.Join(Environment.NewLine, output));
+                Console.WriteLine(string.Join(Environment.NewLine, errors));
+                Assert.True(false);
+            }
         }
 
         private class DummyServer : IServer

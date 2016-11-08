@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
             _export = _libraryExporter.GetAllExports().First();
         }
         
-        [Fact]
+        [Fact (Skip="Disable tests that need loading assemblies on CI")]
         public void LibraryExportExtensions_GetMetadataReferences()
         {
             var refList = _export.GetMetadataReferences();

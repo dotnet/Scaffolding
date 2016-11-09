@@ -2,7 +2,7 @@
   "dependencies": {
     "ClassLibrary1": "1.0.0-*",
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": {
-      "version": "1.1.0-*",
+      "version": "1.2.0-*",
       "target": "package"
     },
     "NETStandard.Library": "1.6.1-*"

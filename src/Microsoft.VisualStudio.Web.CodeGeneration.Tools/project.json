@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0-*",
+  "version": "1.2.0-*",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "outputName": "dotnet-aspnet-codegenerator",
@@ -24,10 +24,12 @@
   },
   "dependencies": {
     "Microsoft.Extensions.DotnetToolDispatcher.Sources": {
-      "version": "1.1.0-*",
+      "version": "1.2.0-*",
       "type": "build"
     },
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.1.0-*"
+    "Microsoft.VisualStudio.Web.CodeGeneration": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "net451": {},

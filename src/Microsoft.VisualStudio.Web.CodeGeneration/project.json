@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0-*",
+  "version": "1.2.0-*",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true,
@@ -10,9 +10,11 @@
   },
   "description": "Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.",
   "dependencies": {
-    "Microsoft.Extensions.CommandLineUtils": "1.1.0-*",
-    "Microsoft.Extensions.DependencyInjection": "1.1.0-*",
-    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.1.0-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.2.0-*",
+    "Microsoft.Extensions.DependencyInjection": "1.2.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": {
+      "target": "project"
+    },
     "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {

@@ -10,7 +10,7 @@
   },
   "description": "Contains the core infrastructure used by ASP.NET Core Code Generators.",
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
     "Microsoft.Extensions.CommandLineUtils": "1.2.0-*",
     "Microsoft.Extensions.DependencyInjection": "1.2.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Templating": {

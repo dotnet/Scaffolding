@@ -23,7 +23,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             new HashSet<string>(StringComparer.Ordinal)
             {
                 "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
-                "Microsoft.VisualStudio.Web.CodeGeneration"
+                "Microsoft.VisualStudio.Web.CodeGeneration",
+                "Microsoft.VisualStudio.Web.CodeGeneration.Design"
             };
 
         private readonly ICodeGenAssemblyLoadContext _assemblyLoadContext;

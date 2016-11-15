@@ -13,6 +13,7 @@ using Moq;
 using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
+using IProjectContext = Microsoft.Extensions.ProjectModel.IProjectContext;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {

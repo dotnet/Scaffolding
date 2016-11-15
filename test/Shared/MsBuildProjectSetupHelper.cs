@@ -16,9 +16,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var current = new DirectoryInfo(AppContext.BaseDirectory);
             while (current != null)
             {
-                if (File.Exists(Path.Combine(current.FullName, "global.json")))
+                if (File.Exists(Path.Combine(current.FullName, "Scaffolding.sln")))
                 {
-                    artifactsDir = Path.Combine(current.FullName, "artifacts/build");
+                    artifactsDir = Path.Combine(current.FullName, "artifacts", "build");
                     break;
                 }
                 current = current.Parent;

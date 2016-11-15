@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- other options -->
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <Company>Microsoft Corporation.</Company>
+        <Product>Microsoft .NET</Product>
+
+        <!-- pack options -->
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <BuildNumber Condition="'$(BuildNumber)'==''">$([System.DateTime]::Now.Ticks)</BuildNumber>
+        <VersionSuffix>preview4-$(BuildNumber)</VersionSuffix>
+
+        <PackageId>$(MSBuildProjectName)</PackageId>
+        <Authors>Microsoft</Authors>
+        <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+        <!--<RepositoryUrl>https://github.com/aspnet/Scaffolding</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>-->
+        <ProjectUrl>https://asp.net</ProjectUrl>
+        <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+
+        <!-- build options -->
+        <WarningsAsErrors>true</WarningsAsErrors>
+        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+        <SignAssembly>true</SignAssembly>
+        <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <!-- pack options -->
+        <Serviceable>true</Serviceable>
+    </PropertyGroup>
+
+    <!-- fixed versions -->
+    <PropertyGroup>
+        <SharedFxVersion Condition="'$(SharedFxVersion)'==''">1.1.0</SharedFxVersion>
+        <DotNetTestXunitVersion>2.2.0-preview2-build1029</DotNetTestXunitVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <ScaffoldingVersion Condition=" '$(ScaffoldingVersion)' == '' ">$(VersionPrefix)-$(VersionSuffix)</ScaffoldingVersion>
+    </PropertyGroup>
+</Project>

@@ -34,3 +34,5 @@ project.fragment.lock.json
 **/*.nuget.props
 **/*.nuget.targets
 .vscode/**
+backup/**/*.*
+.dotnet/**

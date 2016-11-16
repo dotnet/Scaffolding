@@ -23,7 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         }
         public Assembly LoadFromName(AssemblyName AssemblyName)
         {
-            var path = _projectContext.CompilationAssemblies.First(c => c.Name == AssemblyName.Name).ResolvedPath;
+            var path = _projectContext.CompilationAssemblies.First(c => Path.GetFileNameWithoutExtension(c.Name) == AssemblyName.Name).ResolvedPath;
             return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
         }
 

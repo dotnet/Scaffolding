@@ -10,10 +10,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
@@ -119,6 +120,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var dbContextSymbols = _modelTypesLocator.GetType(dbContextFullTypeName).ToList();
             var startupType = _modelTypesLocator.GetType("Startup").FirstOrDefault();
             Type modelReflectionType = null;
+            ReflectedTypesProvider reflectedTypesProvider = null;
+            string dbContextError = string.Empty;
             if (dbContextSymbols.Count == 0)
             {
                 await ValidateEFSqlServerDependency();
@@ -137,7 +140,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         dbContextTemplateModel.DbContextNamespace,
                         dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString());
                 }
-                
+
                 if (!startUpEditResult.Edited)
                 {
                     state = ContextProcessingStatus.ContextAddedButRequiresConfig;
@@ -147,8 +150,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     throw new InvalidOperationException(string.Format("{0} {1}", MessageStrings.FailedToEditStartup, MessageStrings.EnsureStartupClassExists));
                 }
                 _logger.LogMessage("Attempting to compile the application in memory with the added DbContext");
-                CompileAndGetDbContextAndModelTypes(dbContextFullTypeName,
-                    modelTypeSymbol.FullName,
+
+                var projectCompilation = _workspace.CurrentSolution.Projects
+                    .First(project => project.AssemblyName == _projectContext.AssemblyName)
+                    .GetCompilationAsync().Result;
+
+                reflectedTypesProvider = new ReflectedTypesProvider(
+                    projectCompilation,
                     c =>
                     {
                         c = c.AddSyntaxTrees(dbContextSyntaxTree);
@@ -158,8 +166,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         }
                         return c;
                     },
-                    out dbContextType,
-                    out modelReflectionType);
+                    _projectContext,
+                    _loader,
+                    _logger);
+
+                var compilationErrors = reflectedTypesProvider.GetCompilationErrors();
+                dbContextError = string.Format(
+                    MessageStrings.DbContextCreationError,
+                    (compilationErrors == null
+                        ? string.Empty
+                        : string.Join(Environment.NewLine, compilationErrors)));
 
                 // Add file information
                 dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName, areaName));
@@ -167,13 +183,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             else
             {
                 var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
+                var projectCompilation = _workspace.CurrentSolution.Projects
+                    .First(project => project.AssemblyName == _projectContext.AssemblyName)
+                    .GetCompilationAsync().Result;
+
                 if (addResult.Edited)
                 {
                     state = ContextProcessingStatus.ContextEdited;
                     dbContextSyntaxTree = addResult.NewTree;
                     _logger.LogMessage("Attempting to compile the application in memory with the modified DbContext");
-                    CompileAndGetDbContextAndModelTypes(dbContextFullTypeName, 
-                        modelTypeSymbol.FullName,
+
+                    reflectedTypesProvider = new ReflectedTypesProvider(
+                        projectCompilation,
                         c =>
                         {
                             var oldTree = c.SyntaxTrees.FirstOrDefault(t => t.FilePath == addResult.OldTree.FilePath);
@@ -186,33 +207,59 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                             }
                             return c.ReplaceSyntaxTree(oldTree, addResult.NewTree);
                         },
-                        out dbContextType,
-                        out modelReflectionType);
+                        _projectContext,
+                        _loader,
+                        _logger);
+
+                    var compilationErrors = reflectedTypesProvider.GetCompilationErrors();
+                    dbContextError = string.Format(
+                        MessageStrings.DbContextCreationError,
+                        (compilationErrors == null
+                            ? string.Empty
+                            : string.Join(Environment.NewLine, compilationErrors)));
                 }
                 else
                 {
                     _logger.LogMessage("Attempting to compile the application in memory");
-                    CompileAndGetDbContextAndModelTypes(dbContextFullTypeName, 
-                        modelTypeSymbol.FullName,
+
+                    reflectedTypesProvider = new ReflectedTypesProvider(
+                        projectCompilation,
                         c =>{ return c; },
-                        out dbContextType,
-                        out modelReflectionType);
-                    
-                    if (dbContextType == null)
-                    {
-                        throw new InvalidOperationException(string.Format(MessageStrings.DbContextTypeNotFound, dbContextFullTypeName));
-                    }
+                        _projectContext,
+                        _loader,
+                        _logger);
+
+                    dbContextError = string.Format(MessageStrings.DbContextTypeNotFound, dbContextFullTypeName);
                 }
             }
+            dbContextType = reflectedTypesProvider.GetReflectedType(dbContextFullTypeName);
 
+            if (dbContextType == null)
+            {
+                throw new InvalidOperationException(dbContextError);
+            }
+
+            modelReflectionType = reflectedTypesProvider.GetReflectedType(
+                modelType: modelTypeSymbol.FullName,
+                lookInDependencies: true);
             if (modelReflectionType == null)
             {
                 throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, modelTypeSymbol.Name));
             }
 
+            var reflectedStartupType = reflectedTypesProvider.GetReflectedType(
+                modelType: startupType.FullName,
+                lookInDependencies: true);
+
+            if (reflectedStartupType == null)
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, reflectedStartupType.Name));
+            }
+
             _logger.LogMessage("Attempting to figure out the EntityFramework metadata for the model and DbContext: "+modelTypeSymbol.Name);
 
-            var metadata = GetModelMetadata(dbContextType, modelReflectionType, startupType);
+            var metadata = GetModelMetadata(dbContextType, modelReflectionType, reflectedStartupType);
+
             // Write the DbContext/Startup if getting the model metadata is successful
             if (dbContextSyntaxTree != null)
             {
@@ -236,132 +283,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 ContextProcessingStatus = state,
                 ModelMetadata = metadata
             };
-        }
-        private bool CompileAndGetDbContextAndModelTypes(
-            string dbContextTypeName, 
-            string modelTypeName, 
-            Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> compilationModificationFunc, 
-            out Type dbContextType, 
-            out Type modelType)
-        {
-            CompilationResult result = GetCompilation(compilationModificationFunc);
-
-            if (result.Success)
-            {
-                dbContextType = string.IsNullOrEmpty(dbContextTypeName)
-                    ? null
-                    : result.Assembly.GetType(dbContextTypeName);
-                if (dbContextType == null)
-                {
-                    throw new InvalidOperationException(MessageStrings.DbContextCreationError_noTypeReturned);
-                }
-                modelType = GetModelTypeFromAssembly(modelTypeName, result.Assembly);
-                if (modelType == null)
-                {
-                    throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
-            }
-            return true;
-        }
-
-        private bool CompileAndGetModelType(
-            string modelTypeName,
-            Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> compilationModificationFunc,
-            out Type modelType)
-        {
-            CompilationResult result = GetCompilation(compilationModificationFunc);
-
-            if (result.Success)
-            {
-                modelType = GetModelTypeFromAssembly(modelTypeName, result.Assembly);
-
-                if (modelType == null)
-                {
-                    throw new InvalidOperationException("No Model Type returned for type: " + modelTypeName);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCreationError, string.Join("\n", result.ErrorMessages)));
-            }
-            return true;
-        }
-
-        // Look for the model type in the current project. 
-        // If its not found in the current project, look in the dependencies.
-        private Type GetModelTypeFromAssembly(string modelTypeName, Assembly assembly)
-        {
-            if(string.IsNullOrEmpty(modelTypeName))
-            {
-                throw new ArgumentNullException(nameof(modelTypeName));
-            }
-
-            if(assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
-
-            Type modelType = null;
-
-            try
-            {
-                modelType = assembly.GetType(modelTypeName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
-            }
-
-            if (modelType == null)
-            {
-                // Need to look in the dependencies of this project now.
-                var dependencies = _projectContext.CompilationAssemblies.GetEnumerator();
-                while (modelType == null && dependencies.MoveNext())
-                {
-                    try
-                    {
-                        // Since we are running in the project's dependency context, loading assemblies
-                        // by name just works.
-                        var dAssemblyName = new AssemblyName(Path.GetFileNameWithoutExtension(dependencies.Current.ResolvedPath));
-                        var dAssembly = _loader.LoadFromName(dAssemblyName);
-                        modelType = dAssembly.GetType(modelTypeName);
-                    }
-                    catch (Exception ex)
-                    {
-                        // This is a best effort approach. If we cannot load an assembly for any reason, 
-                        // just ignore it and look for the type in the next one.
-                        _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
-                        continue;
-                    }
-                    
-                }
-            }
-
-            return modelType;
-        }
-
-        private CompilationResult GetCompilation(Func<Compilation, Compilation> compilationModificationFunc)
-        {
-            var projectCompilation = _workspace.CurrentSolution.Projects
-                            .First(project => project.AssemblyName == _projectContext.AssemblyName)
-                            .GetCompilationAsync().Result;
-            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream. 
-            // On NET451 if the assembly name is different, MVC fails to load the assembly as it is not found on disk. 
-#if NET451
-            var newAssemblyName = projectCompilation.AssemblyName;
-#else
-            var newAssemblyName = Path.GetRandomFileName();
-#endif
-            var newCompilation = compilationModificationFunc(projectCompilation)
-                .WithAssemblyName(newAssemblyName)
-                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-            var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
-            return result;
         }
 
         private string GetPathForNewContext(string contextShortTypeName, string areaName)
@@ -427,7 +348,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
         }
 
-        private ModelMetadata GetModelMetadata(Type dbContextType, Type modelType, ModelType startupType)
+        private ModelMetadata GetModelMetadata(Type dbContextType, Type modelType, Type startupType)
         {
             if (dbContextType == null)
             {
@@ -468,23 +389,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return new ModelMetadata(entityType, dbContextType);
         }
 
-        private DbContext TryCreateContextUsingAppCode(Type dbContextType, ModelType startupType)
+        private DbContext TryCreateContextUsingAppCode(Type dbContextType, Type startupType)
         {
-            try {
-                var builder = new WebHostBuilder();
-                builder.UseKestrel()
-                        .UseContentRoot(Directory.GetCurrentDirectory());
+            try
+            {
+                // Use EF design APIs to get the DBContext instance.
+                var operationHandler = new OperationReportHandler();
+                var operationReporter = new OperationReporter(operationHandler);
+                var dbContextOperations = new DbContextOperations(
+                    operationReporter,
+                    dbContextType.GetTypeInfo().Assembly,
+                    startupType.GetTypeInfo().Assembly,
+                    "Development",
+                    Directory.GetCurrentDirectory());
 
-                if (startupType != null)
-                {
-                    var reflectedStartupType = dbContextType.GetTypeInfo().Assembly.GetType(startupType.FullName);
-                    if (reflectedStartupType != null)
-                    {
-                        builder.UseStartup(reflectedStartupType);
-                    }
-                }
-                var appServices = builder.Build().Services;
-                return appServices.GetService(dbContextType) as DbContext;
+                var dbContextService = dbContextOperations.CreateContext(dbContextType.FullName);
+
+                return dbContextService;
             }
             catch(Exception ex)
             {
@@ -499,11 +420,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(modelType));
             }
 
-            Type modelReflectionType;
-            CompileAndGetModelType(
-                modelType.FullName,
+            var projectCompilation = _workspace.CurrentSolution.Projects
+                    .First(project => project.AssemblyName == _projectContext.AssemblyName)
+                    .GetCompilationAsync().Result;
+
+            var reflectedTypesProvider = new ReflectedTypesProvider(
+                projectCompilation,
                 (c) => c,
-                out modelReflectionType);
+                _projectContext,
+                _loader,
+                _logger);
+            var modelReflectionType = reflectedTypesProvider.GetReflectedType(
+                modelType: modelType.FullName,
+                lookInDependencies: true);
+
+            if (modelReflectionType == null)
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, modelType.Name));
+            }
+
             var modelMetadata = new CodeModelMetadata(modelReflectionType);
             return Task.FromResult(new ContextProcessingResult()
             {

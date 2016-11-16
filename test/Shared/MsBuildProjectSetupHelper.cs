@@ -10,7 +10,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class MsBuildProjectSetupHelper
     {
-        public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
             string artifactsDir = null;
             var current = new DirectoryInfo(AppContext.BaseDirectory);
@@ -28,7 +28,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
             fileProvider.Add("Nuget.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
 
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.RootProjectTxt);
+            var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 

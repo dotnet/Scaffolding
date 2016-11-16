@@ -51,12 +51,60 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
     <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
     <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include = ""xyz.dll"" />
+  </ItemGroup>
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
+</Project>
+";
+
+        public const string RootNet45ProjectTxt = @"
+<Project ToolsVersion=""14.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" />
+
+  <PropertyGroup>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <ProjectName>TestProject</ProjectName>
+    <OutputType>EXE</OutputType>
+    <TargetFrameworks>net452</TargetFrameworks>
+    <OutputPath>bin\$(Configuration)</OutputPath>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include=""**\*.cs"" Exclude=""Excluded.cs"" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
+    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include=""..\Library1\Library1.csproj"" />
+    <Reference Include=""System"" />
+    <Reference Include=""System.Data"" />
+    <Reference Include=""System.ComponentModel.DataAnnotations"" />
+    <Reference Include=""Microsoft.CSharp"" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include = ""xyz.dll"" />
@@ -135,7 +183,7 @@ namespace Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
@@ -147,9 +195,14 @@ namespace Test
     <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" />
     <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
   </ItemGroup>
+  <ItemGroup Condition=""'$(TargetFramework)' == 'net451' "">
+    <Reference Include=""System"" />
+    <Reference Include=""System.Data"" />
+  </ItemGroup>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>
 ";
+
 
         public const string ProductTxt = @"
 using System;

@@ -120,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
-                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output, true);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 Directory.SetCurrentDirectory(TestProjectPath);
                 var args = new string[]

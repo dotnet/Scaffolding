@@ -26,7 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            fileProvider.Add("Nuget.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
+            fileProvider.Add("NuGet.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
 
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);

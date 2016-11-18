@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-msbuild2-final",
   "description": "Contains utilities used by ASP.NET Core Code Generation packages.",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",

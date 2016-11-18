@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-msbuild2-final",
   "description": "Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.",
   "buildOptions": {
     "warningsAsErrors": true,

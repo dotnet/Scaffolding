@@ -50,9 +50,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
     <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
     <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
   </ItemGroup>
@@ -95,8 +95,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-*"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
     <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
   </ItemGroup>
   <ItemGroup>

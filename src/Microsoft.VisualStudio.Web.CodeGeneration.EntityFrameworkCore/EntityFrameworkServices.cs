@@ -368,7 +368,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     MessageStrings.TypeCastToDbContextFailed,
                     dbContextType.FullName));
             }
-            //This part doesn't work if the type is created using activator utilities.  Need to figure out what services are missing here. 
+
             IEntityType entityType = null;
             try
             {
@@ -376,8 +376,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             catch(Exception ex)
             {
+                // We got an exception from the DbContext while finding the entityType.
+                // The error here is useful to the user for taking corrective actions.
                 _logger.LogMessage(ex.Message);
+                throw;
             }
+
             if (entityType == null)
             {
                 throw new InvalidOperationException(string.Format(

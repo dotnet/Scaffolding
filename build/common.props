@@ -11,8 +11,8 @@
         <PackageId>$(MSBuildProjectName)</PackageId>
         <Authors>Microsoft</Authors>
         <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-        <!--<RepositoryUrl>https://github.com/aspnet/Scaffolding</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>-->
+        <RepositoryUrl>https://github.com/aspnet/Scaffolding</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
         <ProjectUrl>https://asp.net</ProjectUrl>
         <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
 

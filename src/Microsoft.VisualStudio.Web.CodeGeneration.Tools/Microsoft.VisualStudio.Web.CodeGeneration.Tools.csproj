@@ -17,24 +17,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <Compile Include="..\Shared\**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+    <Compile Include="**\*.cs" Exclude="bin\**;obj\**" />
+    <Compile Include="..\Shared\**\*.cs" Exclude="bin\**;obj\**" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="Compiler\Resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs"
-      Exclude="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\bin\**;..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\obj\**" />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;"
-      Exclude="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\bin\**;..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\obj\**" />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.DotNet.Sources\**\*.cs"
-      Exclude="..\Microsoft.Extensions.ProjectModel.DotNet.Sources\bin\**;..\Microsoft.Extensions.ProjectModel.DotNet.Sources\obj\**" />
+    <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
+    <Compile Include="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;" />
+    <Compile Include="..\Microsoft.Extensions.ProjectModel.DotNet.Sources\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview3-004050" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview3-004056" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
@@ -60,13 +57,13 @@
           PackagePath="build\netstandard1.0\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\Target\buildCrossTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true"
           PackagePath="buildCrossTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" />
-    <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\bin\$(configuration)\netstandard1.6\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" Pack="true"
+    <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\bin\$(Configuration)\netstandard1.6\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" Pack="true"
           PackagePath="tools\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
-    <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\bin\$(configuration)\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" Pack="true"
+    <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\bin\$(Configuration)\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" Pack="true"
           PackagePath="tools\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
-    <None Include="bin\$(configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.deps.json" Pack="true"
+    <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.deps.json" Pack="true"
           PackagePath="lib\netcoreapp1.0\" />
-     <None Include="bin\$(configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.runtimeconfig.json" Pack="true"
+     <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.runtimeconfig.json" Pack="true"
           PackagePath="lib\netcoreapp1.0\" />
   </ItemGroup>
   

@@ -14,16 +14,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <Compile Include="..\Shared\General\**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+    <Compile Include="**\*.cs" Exclude="bin\**;obj\**" />
+    <Compile Include="..\Shared\General\**\*.cs" Exclude="bin\**;obj\**" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile
-      Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs"
-      Exclude="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\bin\**;..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\obj\**;**\*.xproj;packages\**" />
+    <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
     <EmbeddedResource Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.resx" />
   </ItemGroup>
 

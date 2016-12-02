@@ -1,0 +1,32 @@
+{
+  "buildOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk",
+    "compile": {
+      "include": [
+        "../Shared/*.cs"
+      ]
+    }
+  },
+  "dependencies": {
+    "Microsoft.Build.Runtime":"15.1.0-preview-000370-00",
+    "Microsoft.DotNet.Cli.Utils":"1.0.0-preview3-004056",
+    "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+    "Microsoft.Extensions.FileProviders.Physical":"1.0.0",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild" :"1.0.0-*",
+    "Moq": "4.6.38-alpha",
+    "dotnet-test-xunit": "2.2.0-*",
+    "xunit": "2.2.0-*"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.1",
+          "type": "platform"
+        }
+      }
+    }
+  },
+  "testRunner": "xunit"
+}

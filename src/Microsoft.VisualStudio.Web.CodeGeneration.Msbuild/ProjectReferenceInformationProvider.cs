@@ -22,7 +22,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 return projectReferenceInformation;
             }
 
-            var referencePaths = new Queue<string>(projectReferences);
+            var referencePaths = new Queue<string>(
+                projectReferences.Select(path => EnsurePathRooted(path, Path.GetDirectoryName(rootProjectPath))));
             var addedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             addedProjects.Add(rootProjectPath);
 
@@ -30,9 +31,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             while (referencePaths.Count > 0)
             {
                 var currentProjectPath = referencePaths.Dequeue();
-                currentProjectPath = Path.IsPathRooted(currentProjectPath)
-                    ? currentProjectPath :
-                    Path.GetFullPath(Path.Combine(rootProjDir, currentProjectPath));
 
                 if (addedProjects.Contains(currentProjectPath))
                 {
@@ -62,9 +60,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return projectReferenceInformation;
         }
 
+        private static string EnsurePathRooted(string targetPath, string basePath)
+        {
+            if (string.IsNullOrEmpty(targetPath))
+            {
+                throw new ArgumentNullException(nameof(targetPath));
+            }
+            return Path.IsPathRooted(targetPath)
+                ? Path.GetFullPath(targetPath)
+                : Path.GetFullPath(Path.Combine(basePath, targetPath));
+        }
+
         private static IEnumerable<string> GetProjectReferences(Project project)
         {
-            return project.GetItems("ProjectReference").Select(i => i.EvaluatedInclude);
+            return project.GetItems("ProjectReference")
+                .Select(i => i.EvaluatedInclude)
+                .Select(path => EnsurePathRooted(path, project.DirectoryPath));
         }
 
         private static ProjectReferenceInformation GetProjectInformation(Project project)

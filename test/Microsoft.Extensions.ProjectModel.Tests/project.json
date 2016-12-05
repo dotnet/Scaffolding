@@ -9,7 +9,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-004050",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview4-004215",
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
     "Microsoft.Build.Runtime": "15.1.0-preview-000370-00",

@@ -15,9 +15,9 @@
   },
   "description": "MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools",
   "dependencies": {
-    "Microsoft.Build": "15.1.0-preview-000370-00",
-    "Microsoft.Build.Tasks.Core": "15.1.0-preview-000370-00",
-    "Microsoft.Build.Utilities.Core": "15.1.0-preview-000370-00",
+    "Microsoft.Build": "15.1.0-preview-000454-01",
+    "Microsoft.Build.Tasks.Core": "15.1.0-preview-000454-01",
+    "Microsoft.Build.Utilities.Core": "15.1.0-preview-000454-01",
     "Microsoft.Extensions.ProjectModel.Abstractions.Sources": {
       "type": "build",
       "version": "1.0.0-*"

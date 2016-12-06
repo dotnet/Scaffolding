@@ -12,7 +12,7 @@
       "version": "1.0.1",
       "type": "platform"
     },
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview3-004050",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview4-004215",
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "Microsoft.Extensions.FileProviders.Physical": "1.0.0",
     "Moq": "4.6.36-*",

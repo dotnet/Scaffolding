@@ -24,12 +24,12 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
     <When Condition="'$(MSBuildRuntimeType)' == 'Core'">
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\tools\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\toolassets\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\tools\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>

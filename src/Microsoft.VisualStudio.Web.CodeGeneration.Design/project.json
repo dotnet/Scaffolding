@@ -32,7 +32,7 @@
       "imports": "portable-net45+win8",
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.1",
+          "version": "1.0.0",
           "type": "platform"
         }
       }

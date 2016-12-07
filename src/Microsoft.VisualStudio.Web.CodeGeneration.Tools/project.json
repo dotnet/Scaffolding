@@ -53,7 +53,7 @@
       "imports": [],
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.1",
+          "version": "1.0.0",
           "type": "platform"
         }
       }
@@ -65,8 +65,8 @@
         "prefercliruntime": "prefercliruntime",
         "build/netstandard1.0/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/build/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
         "buildCrossTargeting/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/Target/buildCrossTargeting/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
-        "tools/netcoreapp1.0/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/**/netstandard1.6/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll",
-        "tools/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/**/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll"
+        "toolassets/netcoreapp1.0/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/**/netstandard1.6/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll",
+        "toolassets/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll": "../Microsoft.VisualStudio.Web.CodeGeneration.MsBuild/**/net46/Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll"
       }
     },
     "tags": [

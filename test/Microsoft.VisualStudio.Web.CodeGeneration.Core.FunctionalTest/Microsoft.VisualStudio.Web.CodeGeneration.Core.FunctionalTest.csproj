@@ -1,6 +1,5 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <OutputType>EXE</OutputType>
@@ -16,9 +15,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj" />
     <ProjectReference Include="..\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.csproj">
+      <FromP2P>true</FromP2P>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj">
       <FromP2P>true</FromP2P>
     </ProjectReference>
     <ProjectReference Include="..\TestApps\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.csproj">
@@ -39,19 +40,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161024-02" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1188" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161123-03" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="4.0.1" />
     <PackageReference Include="xunit" Version="2.2.0-beta3-build3402" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1188" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-  
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

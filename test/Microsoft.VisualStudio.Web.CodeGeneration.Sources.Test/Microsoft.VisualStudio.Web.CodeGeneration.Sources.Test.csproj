@@ -1,6 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test</AssemblyName>
@@ -27,23 +25,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161024-02" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000370-00" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000454-01" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview3-004050" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
+    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161123-03" />
     <PackageReference Include="Moq" Version="4.6.38-alpha" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
-    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-  
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

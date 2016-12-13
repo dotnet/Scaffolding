@@ -1,5 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <Description>Contains the core infrastructure used by ASP.NET Core Code Generators.</Description>
@@ -29,10 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.0.0" />
-    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
@@ -49,6 +46,4 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-  
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

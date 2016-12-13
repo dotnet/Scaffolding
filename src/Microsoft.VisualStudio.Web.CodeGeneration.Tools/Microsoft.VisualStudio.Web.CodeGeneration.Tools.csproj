@@ -1,5 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
@@ -30,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview3-004056" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
@@ -66,6 +64,4 @@
      <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.runtimeconfig.json" Pack="true"
           PackagePath="lib\netcoreapp1.0\" />
   </ItemGroup>
-  
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

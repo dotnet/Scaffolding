@@ -1,17 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\build\common.props" />
+  <Import Project="..\..\dir.props" />
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>dotnet-aspnet-codegenerator</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <PackageVersion>$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Tools</PackageId>
   </PropertyGroup>
 
@@ -29,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview3-004056" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004215" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
@@ -56,9 +52,9 @@
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\Target\buildCrossTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true"
           PackagePath="buildCrossTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\bin\$(Configuration)\netstandard1.6\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" Pack="true"
-          PackagePath="tools\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
+          PackagePath="toolassets\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\bin\$(Configuration)\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" Pack="true"
-          PackagePath="tools\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
+          PackagePath="toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll" />
     <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.deps.json" Pack="true"
           PackagePath="lib\netcoreapp1.0\" />
      <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.runtimeconfig.json" Pack="true"

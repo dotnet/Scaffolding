@@ -22,8 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public const string RootProjectName = "Test.csproj";
         public const string RootProjectTxt = @"
-<Project ToolsVersion=""14.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" />
+<Project Sdk=""Microsoft.NET.Sdk"">
 
   <PropertyGroup>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -53,7 +52,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
-    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
     <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
   </ItemGroup>
   <ItemGroup>
@@ -62,14 +60,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   <ItemGroup>
     <Reference Include = ""xyz.dll"" />
   </ItemGroup>
-  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>
 ";
 
         public const string RootNet45ProjectTxt = @"
-<Project ToolsVersion=""14.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" />
-
+<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -97,7 +92,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild*"" />
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
-    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" PrivateAssets=""All"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
@@ -109,7 +103,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   <ItemGroup>
     <Reference Include = ""xyz.dll"" />
   </ItemGroup>
-  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>
 ";
 
@@ -177,8 +170,7 @@ namespace Test
 
         public const string LibraryProjectName = "Library1.csproj";
         public const string LibraryProjectTxt = @"
-<Project ToolsVersion=""14.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" />
+<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -199,7 +191,6 @@ namespace Test
     <Reference Include=""System"" />
     <Reference Include=""System.Data"" />
   </ItemGroup>
-  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 </Project>
 ";
 

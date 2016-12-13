@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000454-01" />
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview3-004050" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004215" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.0.0" />

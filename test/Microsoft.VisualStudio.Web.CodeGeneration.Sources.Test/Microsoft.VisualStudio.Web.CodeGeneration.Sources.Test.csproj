@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test</AssemblyName>
-    <OutputType>EXE</OutputType>
+    <OutputType>exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
@@ -25,8 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000454-01" />
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004215" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000458-02" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
@@ -38,7 +38,4 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

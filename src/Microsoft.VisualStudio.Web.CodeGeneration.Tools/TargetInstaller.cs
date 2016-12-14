@@ -50,7 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var toolType = typeof(TargetInstaller);
             var toolAssembly = toolType.GetTypeInfo().Assembly;
             var toolNamespace = toolType.Namespace;
-            var toolImportTargetsResourceName = $"{toolNamespace}.Compiler.Resources.{ToolsImportTargetsName}";
+            var toolImportTargetsResourceName = $"{toolNamespace}.compiler.resources.{ToolsImportTargetsName}";
 
             using (var stream = toolAssembly.GetManifestResourceStream(toolImportTargetsResourceName))
             {

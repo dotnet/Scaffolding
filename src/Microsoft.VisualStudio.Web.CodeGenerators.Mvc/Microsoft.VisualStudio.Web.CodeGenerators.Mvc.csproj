@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\dir.props" />
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
@@ -36,10 +36,6 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup>
     <None Pack="true" Include="Templates\**\*" PackagePath="Templates\" />

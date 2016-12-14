@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\dir.props" />
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <AssemblyName>dotnet-aspnet-codegenerator</AssemblyName>
-    <OutputType>Exe</OutputType>
+    <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageVersion>$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Tools</PackageId>
@@ -15,7 +15,7 @@
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**" />
     <Compile Include="..\Shared\**\*.cs" Exclude="bin\**;obj\**" />
     <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="Compiler\Resources\**\*" />
+    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004215" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
@@ -37,14 +37,6 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'debug_x86' ">
-    <PlatformTarget>anycpu32bitpreferred</PlatformTarget>
-  </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true"

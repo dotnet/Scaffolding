@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
-    <OutputType>EXE</OutputType>
+    <OutputType>exe</OutputType>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyName>E2E_Test</AssemblyName>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net451+win8</PackageTargetFallback>
@@ -12,11 +12,11 @@
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**" />
     <Compile Include="..\Shared\**\*.cs" Exclude="bin\**;obj\**" />
     <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="Compiler\Resources\**\*" />
+    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004215" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
@@ -27,7 +27,4 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

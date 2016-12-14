@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\dir.props" />
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
     <Description>Contains Entity Framework Core Services used by ASP.NET Core Code Generators.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
@@ -40,9 +40,6 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <None Pack="true" Include="Templates\**\*" PackagePath="Templates\" />
   </ItemGroup>

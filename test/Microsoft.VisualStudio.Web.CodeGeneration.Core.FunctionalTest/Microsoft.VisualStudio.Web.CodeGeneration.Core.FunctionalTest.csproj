@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\dir.props" />
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
-    <OutputType>EXE</OutputType>
+    <OutputType>exe</OutputType>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest</AssemblyName>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
@@ -49,7 +49,4 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1188" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

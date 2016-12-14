@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\dir.props" />
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
     <Description>Contains utilities used by ASP.NET Core Code Generation packages.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
@@ -42,7 +42,4 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

@@ -56,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 // TODO: This is currently to fix the tests on Non windows machine.
                 // The baseline files need to be converted to Unix line endings
                 var assembly = GetType().GetTypeInfo().Assembly;
-                using (var resourceStream = assembly.GetManifestResourceStream($"E2E_Test.Compiler.Resources.{baselineFile.Replace('\\', '.')}"))
+                using (var resourceStream = assembly.GetManifestResourceStream($"E2E_Test.compiler.resources.{baselineFile.Replace('\\', '.')}"))
                 using (var reader = new StreamReader(resourceStream))
                 {
                     var expectedContents = reader.ReadToEnd();

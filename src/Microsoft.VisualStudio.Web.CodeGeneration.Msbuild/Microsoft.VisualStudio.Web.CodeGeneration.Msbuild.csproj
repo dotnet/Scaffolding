@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\dir.props" />
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
     <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="15.1.0-preview-000454-01" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.0-preview-000454-01" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.0-preview-000454-01" />
+    <PackageReference Include="Microsoft.Build" Version="15.1.0-preview-000458-02" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.0-preview-000458-02" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.0-preview-000458-02" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="NuGet.Frameworks" Version="3.5.0-rc1-final" />
   </ItemGroup>
@@ -33,7 +33,4 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

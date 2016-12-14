@@ -1,5 +1,10 @@
 <Project>
     <Import Project="version.props" />
+    
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
     <Import Project=".build\common.props" Condition="Exists('$(MSBuildThisFileDirectory)\.build\common.props')" />
     <Target Name="EnsureInitialized" BeforeTargets="build" Condition="!Exists('$(MSBuildThisFileDirectory)\.build\common.props')">
         <Error File="$(MSBuildProjectFile)"

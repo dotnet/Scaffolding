@@ -184,7 +184,6 @@ namespace Test
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" />
     <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
   </ItemGroup>
   <ItemGroup Condition=""'$(TargetFramework)' == 'net451' "">

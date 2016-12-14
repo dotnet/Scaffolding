@@ -18,8 +18,7 @@
       Exclude="..\..\src\Microsoft.Extensions.ProjectModel.Abstractions.Sources\bin\**;..\..\src\Microsoft.Extensions.ProjectModel.Abstractions.Sources\obj\**" />
     <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;" 
       Exclude="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\bin\**;..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\obj\**" />
-    <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.DotNet.Sources\**\*.cs;"
-      Exclude="..\..\src\Microsoft.Extensions.ProjectModel.DotNet.Sources\bin\**;..\..\src\Microsoft.Extensions.ProjectModel.DotNet.Sources\obj\**" />
+    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

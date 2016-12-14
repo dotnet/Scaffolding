@@ -40,21 +40,23 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
 
     <ProjectContextWriter TargetFramework ="$(TargetFramework)"
-                                       OutputFile ="$(OutputFile)"
-                                       Name ="$(ProjectName)"
-                                       ResolvedReferences ="@(ReferencePath)"
-                                       PackageDependencies ="@(_DependenciesDesignTime)"
-                                       ProjectReferences ="@(ProjectReference)"
-                                       AssemblyFullPath ="$(TargetPath)"
-                                       PackagesDirectory="$(NuGetPackageRoot)"
-                                       OutputType="$(OutputType)"
-                                       Platform="$(Platform)"
-                                       RootNameSpace ="$(RootNamespace)"
-                                       CompilationItems ="@(Compile)"
-                                       TargetDirectory="$(TargetDir)"
-                                       EmbeddedItems="@(EmbeddedResource)"
-                                       Configuration="$(Configuration)"
-                                       ProjectFullPath="$(MSBuildProjectFullPath)"/>
+                          OutputFile ="$(OutputFile)"
+                          Name ="$(ProjectName)"
+                          ResolvedReferences ="@(ReferencePath)"
+                          PackageDependencies ="@(_DependenciesDesignTime)"
+                          ProjectReferences ="@(ProjectReference)"
+                          AssemblyFullPath ="$(TargetPath)"
+                          PackagesDirectory="$(NuGetPackageRoot)"
+                          OutputType="$(OutputType)"
+                          Platform="$(Platform)"
+                          RootNameSpace ="$(RootNamespace)"
+                          CompilationItems ="@(Compile)"
+                          TargetDirectory="$(TargetDir)"
+                          EmbeddedItems="@(EmbeddedResource)"
+                          Configuration="$(Configuration)"
+                          ProjectFullPath="$(MSBuildProjectFullPath)"
+                          ProjectDepsFileName="$(ProjectDepsFileName)"
+                          ProjectRuntimeConfigFileName="$(ProjectRuntimeConfigFileName)"/>
 
   </Target>
 </Project>

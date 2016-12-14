@@ -21,6 +21,8 @@ namespace Microsoft.Extensions.ProjectModel
         string TargetDirectory { get; }
         string AssemblyName { get; }
         string AssemblyFullPath { get; }
+        string DepsFile { get; }
+        string RuntimeConfig { get; }
         IEnumerable<string> CompilationItems { get; }
         IEnumerable<string> EmbededItems { get; }
         IEnumerable<DependencyDescription> PackageDependencies { get;}

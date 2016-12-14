@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Internal;
 using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools

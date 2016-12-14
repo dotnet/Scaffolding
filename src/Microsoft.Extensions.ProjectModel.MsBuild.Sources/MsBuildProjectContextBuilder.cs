@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Internal;
 using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.ProjectModel

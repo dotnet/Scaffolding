@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.ProjectModel;
@@ -85,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 }
 
                 project = Path.GetFullPath(project);
-                var configuration = appConfiguration.Value() ?? Constants.DefaultConfiguration;
+                var configuration = appConfiguration.Value() ?? "Debug";
 
                 var projectFileFinder = new ProjectFileFinder(project);
 
@@ -129,26 +128,70 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             // Start server
             var server = StartServer(logger, context);
-            
+
+            var command = CreateDipatchCommand(
+                context,
+                args,
+                buildBasePath,
+                configuration,
+                frameworkToUse,
+                server);
+
+            var exitCode = command
+                .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
+                .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
+                .Execute()
+                .ExitCode;
+            return exitCode;
+        }
+
+        // Creates a command to execute dotnet-aspnet-codegenerator-design
+        private static Command CreateDipatchCommand(
+            IProjectContext context,
+            string[] args,
+            string buildBasePath,
+            string configuration,
+            NuGetFramework frameworkToUse,
+            ScaffoldingServer server)
+        {
             var projectDirectory = Directory.GetParent(context.ProjectFullPath).FullName;
+
+            // Command Resolution Args
+            // To invoke dotnet-aspnet-codegenerator-design with the user project's dependency graph,
+            // we need to pass in the runtime config and deps file to dotnet for netcore app projects.
+            // For projects that target net4x, since the dotnet-aspnet-codegenerator-design.exe is in the project's bin folder
+            // and `dotnet build` generates a binding redirect file for it, we can directly invoke the exe from output location.
+
+            var targetDir = Path.GetDirectoryName(context.AssemblyFullPath);
+            var runtimeConfigPath = Path.Combine(targetDir, context.RuntimeConfig);
+            var depsFile = Path.Combine(targetDir, context.DepsFile);
+            var nugetPackageRoot = context.PackagesDirectory;
+
+            string dotnetCodeGenInsideManPath = context.CompilationAssemblies
+                .Where(c => Path.GetFileNameWithoutExtension(c.Name)
+                            .Equals(DESIGN_TOOL_NAME, StringComparison.OrdinalIgnoreCase))
+                .Select(reference => reference.ResolvedPath)
+                .FirstOrDefault();
+
+            if (string.IsNullOrEmpty(dotnetCodeGenInsideManPath))
+            {
+                throw new InvalidOperationException("Please add Microsoft.VisualStudio.Web.CodeGeneration.Design package to the project as a NuGet package reference.");
+            }
+
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,
                      frameworkToUse.GetShortFolderName(),
                      server.Port.ToString());
 
-            var exitCode = DotnetToolDispatcher.CreateDispatchCommand(
-                    dependencyArgs,
-                    frameworkToUse,
-                    configuration,
-                    null,
-                    buildBasePath,
-                    projectDirectory,
-                    DESIGN_TOOL_NAME)
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute()
-                .ExitCode;
-            return exitCode;
+            return DotnetToolDispatcher.CreateDispatchCommand(
+                    runtimeConfigPath: runtimeConfigPath,
+                    depsFile: depsFile,
+                    additionalProbingPaths: new[] { nugetPackageRoot },
+                    dependencyToolPath: dotnetCodeGenInsideManPath,
+                    dispatchArgs: dependencyArgs,
+                    framework: frameworkToUse,
+                    configuration: configuration,
+                    projectDirectory: projectDirectory);
         }
 
         private static IProjectContext GetProjectInformation(string projectPath)
@@ -169,17 +212,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, codeGenerationTargetsLocation)
                     .Build();
             }
-            else
-            {
-                return new DotNetProjectContextBuilder(
-                    projectFileFinder.ProjectFilePath,
-                    new NuGetFramework[] 
-                    {
-                        FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                        FrameworkConstants.CommonFrameworks.Net451
-                    })
-                    .Build();
-            }
+
+            throw new InvalidOperationException($"{projectFileFinder.ProjectFilePath} is not a Valid MSBuild project file.");
         }
 
         private static string GetTargetsLocation()

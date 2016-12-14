@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using Microsoft.Extensions.ProjectModel;
 using NuGet.Frameworks;
 
@@ -24,13 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
             }
             else
             {
-                return new DotNetProjectContextBuilder(
-                    path,
-                    new NuGetFramework[]
-                    {
-                        FrameworkConstants.CommonFrameworks.NetStandard16
-                    })
-                    .Build();
+                throw new NotImplementedException();
             }
         }
     }

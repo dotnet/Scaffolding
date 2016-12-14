@@ -65,6 +65,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         [Build.Framework.Required]
         public string ProjectFullPath { get; set; }
+
+        [Build.Framework.Required]
+        public string ProjectRuntimeConfigFileName { get; set; }
+
+        [Build.Framework.Required]
+        public string ProjectDepsFileName { get; set; }
         #endregion
 
         public override bool Execute()
@@ -77,6 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 CompilationItems = this.CompilationItems.Select(i => i.ItemSpec),
                 Config = this.AssemblyFullPath + ".config",
                 Configuration = this.Configuration,
+                DepsFile = this.ProjectDepsFileName,
                 EmbededItems = this.EmbeddedItems.Select(i => i.ItemSpec),
                 IsClassLibrary = "Library".Equals(this.OutputType, StringComparison.OrdinalIgnoreCase),
                 PackageDependencies = this.GetPackageDependencies(PackageDependencies),
@@ -86,6 +93,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 ProjectName = this.Name,
                 ProjectReferences = this.ProjectReferences.Select(i => i.ItemSpec),
                 RootNamespace = this.RootNamespace,
+                RuntimeConfig = this.ProjectRuntimeConfigFileName,
                 TargetDirectory = this.TargetDirectory,
                 TargetFramework = this.TargetFramework
             };

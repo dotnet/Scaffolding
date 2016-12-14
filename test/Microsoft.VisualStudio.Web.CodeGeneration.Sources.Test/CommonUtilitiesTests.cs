@@ -30,9 +30,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             _outputHelper = outputHelper;
         }
         
-        [Fact (Skip="Disable on CI")]
+        [Fact (Skip="Rewrite this for msbuild")]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
+            // TODO Use Msbuild Project here.
             var projectContext = GetProjectContext(testAppPath, false);
             IEnumerable<MetadataReference> references = projectContext.CompilationAssemblies.SelectMany(c => c.GetMetadataReference());
             string code = @"using System;

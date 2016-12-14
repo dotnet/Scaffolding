@@ -23,6 +23,8 @@ namespace Microsoft.Extensions.ProjectModel
 
         public string Configuration { get; set; }
 
+        public string DepsFile { get; set; }
+
         public IEnumerable<string> EmbededItems { get; set; }
 
         public bool IsClassLibrary { get; set; }
@@ -42,6 +44,8 @@ namespace Microsoft.Extensions.ProjectModel
         public IEnumerable<string> ProjectReferences { get; set; }
 
         public string RootNamespace { get; set; }
+
+        public string RuntimeConfig { get; set; }
 
         public string TargetDirectory { get; set; }
 

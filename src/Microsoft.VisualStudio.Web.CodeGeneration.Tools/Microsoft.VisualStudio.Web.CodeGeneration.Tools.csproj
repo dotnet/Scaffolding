@@ -22,11 +22,10 @@
   <ItemGroup>
     <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
     <Compile Include="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;" />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.DotNet.Sources\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000458-02" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />

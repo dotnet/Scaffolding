@@ -115,7 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 throw new ArgumentNullException(nameof(projectPath));
             }
 
-            var context = GetProjectInformation(projectPath);
+            var context = GetProjectInformation(projectPath, configuration);
             var frameworkToUse = NuGetFramework.Parse(context.TargetFramework);
             if (!_isNoBuild)
             {
@@ -194,7 +194,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     projectDirectory: projectDirectory);
         }
 
-        private static IProjectContext GetProjectInformation(string projectPath)
+        private static IProjectContext GetProjectInformation(string projectPath, string configuration)
         {
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
@@ -209,7 +209,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         Path.GetFileName(projectFileFinder.ProjectFilePath),
                         Path.Combine(Path.GetDirectoryName(projectFileFinder.ProjectFilePath), "obj"));
                 var codeGenerationTargetsLocation = GetTargetsLocation();
-                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, codeGenerationTargetsLocation)
+                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, codeGenerationTargetsLocation, configuration)
                     .Build();
             }
 

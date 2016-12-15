@@ -14,8 +14,9 @@ namespace Microsoft.Extensions.ProjectModel
     {
         private string _projectPath;
         private string _targetLocation;
+        private string _configuration;
 
-        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation)
+        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation, string configuration="Debug")
         {
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -27,6 +28,7 @@ namespace Microsoft.Extensions.ProjectModel
                 throw new ArgumentNullException(nameof(targetsLocation));
             }
 
+            _configuration = configuration;
             _projectPath = projectPath;
             _targetLocation = targetsLocation;
         }
@@ -42,7 +44,7 @@ namespace Microsoft.Extensions.ProjectModel
                 {
                     _projectPath,
                     $"/t:EvaluateProjectInfoForCodeGeneration",
-                    $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation}"
+                    $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation};Configuration={_configuration}"
                 })
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))

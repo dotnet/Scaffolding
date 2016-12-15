@@ -1,0 +1,21 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)..\version.props" />
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <!-- Sign Options -->
+    <PropertyGroup>
+        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+        <SignAssembly>true</SignAssembly>
+        <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    </PropertyGroup>
+
+    <Import Project="$(MSBuildThisFileDirectory)..\.build\common.props" Condition="Exists('$(MSBuildThisFileDirectory)..\.build\common.props')" />
+    <Target Name="EnsureInitialized" BeforeTargets="build" Condition="!Exists('$(MSBuildThisFileDirectory)..\.build\common.props')">
+        <Error File="$(MSBuildProjectFile)"
+               Text="Project has not been initialized. Run 'build initialize' in the solution directory '$(MSBuildThisFileDirectory)'" />
+    </Target>
+</Project>

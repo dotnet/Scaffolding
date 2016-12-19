@@ -8,13 +8,13 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**"/>
+    <Compile Include="..\Shared\FileSystem\*.cs" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj" />
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources\Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.csproj">
       <FromP2P>true</FromP2P>
     </ProjectReference>

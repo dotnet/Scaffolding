@@ -24,19 +24,19 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
     <When Condition="'$(MSBuildRuntimeType)' == 'Core'">
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\toolassets\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\toolassets\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.MsBuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\..\..\toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
 
   <UsingTask TaskName="ProjectContextWriter"
              AssemblyFile="$(EvaluateProjectInfoForCodeGenerationAssemblyPath)" />
-  
+
   <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
 
     <ProjectContextWriter TargetFramework ="$(TargetFramework)"

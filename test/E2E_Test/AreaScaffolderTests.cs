@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,6 +18,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         [Fact]
         public void TestAreaGenerator()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Skipping E2E_Tests on non windows 
+                // https://github.com/dotnet/cli/issues/5059
+                return;
+            }
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);

@@ -36,7 +36,7 @@ namespace TestProject
             {
                 // TODO: Add insert logic here
 
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
@@ -59,7 +59,7 @@ namespace TestProject
             {
                 // TODO: Add update logic here
 
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
@@ -82,7 +82,7 @@ namespace TestProject
             {
                 // TODO: Add delete logic here
 
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             catch
             {

@@ -63,7 +63,7 @@ namespace TestProject
             {
                 _context.Add(car);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
@@ -116,7 +116,7 @@ namespace TestProject
                         throw;
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
@@ -149,7 +149,7 @@ namespace TestProject
             var car = await _context.Car.SingleOrDefaultAsync(m => m.ID == id);
             _context.Car.Remove(car);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         private bool CarExists(int id)

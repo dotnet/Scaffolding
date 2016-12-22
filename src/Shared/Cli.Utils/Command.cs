@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.Internal
             var psi = new ProcessStartInfo
             {
                 FileName = commandName,
-                Arguments = string.Join(" ", args),
+                Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
                 UseShellExecute = false
             };
 

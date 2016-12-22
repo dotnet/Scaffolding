@@ -59,9 +59,12 @@ namespace Microsoft.Extensions.Internal
 
                 var commandResolutionArgs = new string[]
                 {
-                    $"--runtimeconfig {runtimeConfigPath}",
-                    $"--depsfile {depsFile}",
-                    $"--additionalprobingpath {string.Join(";", additionalProbingPaths)}",
+                    "--runtimeconfig",
+                    runtimeConfigPath,
+                    "--depsfile",
+                    depsFile,
+                    "--additionalprobingpath",
+                    string.Join(";", additionalProbingPaths),
                     dependencyToolPath
                 };
 

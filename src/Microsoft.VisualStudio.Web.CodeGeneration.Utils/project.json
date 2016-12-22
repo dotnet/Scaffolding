@@ -13,7 +13,7 @@
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
     "Microsoft.DotNet.ProjectModel.Workspaces": "1.0.0-preview2-003121",
     "Microsoft.Extensions.PlatformAbstractions": "1.2.0-*",
-    "NETStandard.Library": "1.6.1-*"
+    "NETStandard.Library": "1.6.2-*"
   },
   "frameworks": {
     "net451": {
@@ -30,7 +30,7 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Threading.Tasks.Parallel": "4.3.0-*"
+        "System.Threading.Tasks.Parallel": "4.4.0-*"
       }
     }
   },

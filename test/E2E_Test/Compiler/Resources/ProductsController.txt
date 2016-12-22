@@ -62,7 +62,7 @@ namespace TestProject
             {
                 _context.Add(product);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
             return View(product);
@@ -115,7 +115,7 @@ namespace TestProject
                         throw;
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
             return View(product);
@@ -148,7 +148,7 @@ namespace TestProject
             var product = await _context.Product.SingleOrDefaultAsync(m => m.ProductID == id);
             _context.Product.Remove(product);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)

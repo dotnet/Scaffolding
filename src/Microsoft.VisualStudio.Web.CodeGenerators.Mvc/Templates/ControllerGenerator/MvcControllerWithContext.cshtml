@@ -136,7 +136,7 @@ namespace @Model.ControllerNamespace
     }
                 @:_context.Add(@Model.ModelVariable);
                 @:await _context.SaveChangesAsync();
-}                return RedirectToAction("Index");
+}                return RedirectToAction(nameof(Index));
             }
 @{
     foreach (var property in relatedProperties.Values)
@@ -199,7 +199,7 @@ namespace @Model.ControllerNamespace
                         throw;
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 @{
     foreach (var property in relatedProperties.Values)
@@ -236,7 +236,7 @@ namespace @Model.ControllerNamespace
             var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
             _context.@(entitySetName).Remove(@Model.ModelVariable);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)

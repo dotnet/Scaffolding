@@ -23,7 +23,6 @@ namespace Microsoft.Extensions.Internal
         /// </summary>
         /// <param name="runtimeConfigPath">Full path to the runtimeconfig.json for the user's project.</param>
         /// <param name="depsFile">Full path to the deps.json for the user's project.</param>
-        /// <param name="additionalProbingPaths">Additional search paths for assembly resolution.</param>
         /// <param name="dependencyToolPath">The executable which needs to be invoked.</param>
         /// <param name="dispatchArgs">Arguments to pass to the executable.</param>
         /// <param name="framework"></param>
@@ -32,7 +31,6 @@ namespace Microsoft.Extensions.Internal
         public static Command CreateDispatchCommand(
             string runtimeConfigPath,
             string depsFile,
-            IEnumerable<string> additionalProbingPaths,
             string dependencyToolPath,
             IEnumerable<string> dispatchArgs,
             NuGetFramework framework,
@@ -63,8 +61,6 @@ namespace Microsoft.Extensions.Internal
                     runtimeConfigPath,
                     "--depsfile",
                     depsFile,
-                    "--additionalprobingpath",
-                    string.Join(";", additionalProbingPaths),
                     dependencyToolPath
                 };
 

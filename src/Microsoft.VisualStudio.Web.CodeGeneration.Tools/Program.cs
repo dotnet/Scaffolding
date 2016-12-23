@@ -165,7 +165,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var targetDir = Path.GetDirectoryName(context.AssemblyFullPath);
             var runtimeConfigPath = Path.Combine(targetDir, context.RuntimeConfig);
             var depsFile = Path.Combine(targetDir, context.DepsFile);
-            var nugetPackageRoot = context.PackagesDirectory;
 
             string dotnetCodeGenInsideManPath = context.CompilationAssemblies
                 .Where(c => Path.GetFileNameWithoutExtension(c.Name)
@@ -186,7 +185,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return DotnetToolDispatcher.CreateDispatchCommand(
                     runtimeConfigPath: runtimeConfigPath,
                     depsFile: depsFile,
-                    additionalProbingPaths: new[] { nugetPackageRoot },
                     dependencyToolPath: dotnetCodeGenInsideManPath,
                     dispatchArgs: dependencyArgs,
                     framework: frameworkToUse,

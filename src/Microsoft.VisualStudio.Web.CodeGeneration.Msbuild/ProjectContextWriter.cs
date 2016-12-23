@@ -44,9 +44,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         public string OutputType { get; set; }
 
         [Build.Framework.Required]
-        public string PackagesDirectory { get; set; }
-
-        [Build.Framework.Required]
         public string Platform { get; set; }
 
         [Build.Framework.Required]
@@ -87,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 EmbededItems = this.EmbeddedItems.Select(i => i.ItemSpec),
                 IsClassLibrary = "Library".Equals(this.OutputType, StringComparison.OrdinalIgnoreCase),
                 PackageDependencies = this.GetPackageDependencies(PackageDependencies),
-                PackagesDirectory = this.PackagesDirectory,
+                //PackagesDirectory = this.PackagesDirectory,
                 Platform = this.Platform,
                 ProjectFullPath = this.ProjectFullPath,
                 ProjectName = this.Name,

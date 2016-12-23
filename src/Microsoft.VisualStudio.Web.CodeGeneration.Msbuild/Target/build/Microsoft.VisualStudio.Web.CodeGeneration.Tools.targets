@@ -46,7 +46,6 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           PackageDependencies ="@(_DependenciesDesignTime)"
                           ProjectReferences ="@(ProjectReference)"
                           AssemblyFullPath ="$(TargetPath)"
-                          PackagesDirectory="$(NuGetPackageRoot)"
                           OutputType="$(OutputType)"
                           Platform="$(Platform)"
                           RootNameSpace ="$(RootNamespace)"

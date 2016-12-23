@@ -23,21 +23,21 @@ namespace Microsoft.Extensions.Internal
         /// </summary>
         /// <param name="runtimeConfigPath">Full path to the runtimeconfig.json for the user's project.</param>
         /// <param name="depsFile">Full path to the deps.json for the user's project.</param>
-        /// <param name="additionalProbingPaths">Additional search paths for assembly resolution.</param>
         /// <param name="dependencyToolPath">The executable which needs to be invoked.</param>
         /// <param name="dispatchArgs">Arguments to pass to the executable.</param>
         /// <param name="framework"></param>
         /// <param name="configuration"></param>
         /// <param name="projectDirectory"></param>
+        /// <param name="assemblyFullPath"></param>
         public static Command CreateDispatchCommand(
             string runtimeConfigPath,
             string depsFile,
-            IEnumerable<string> additionalProbingPaths,
             string dependencyToolPath,
             IEnumerable<string> dispatchArgs,
             NuGetFramework framework,
             string configuration,
-            string projectDirectory)
+            string projectDirectory,
+            string assemblyFullPath)
         {
             configuration = configuration ?? "Debug";
             Command command;
@@ -63,8 +63,6 @@ namespace Microsoft.Extensions.Internal
                     runtimeConfigPath,
                     "--depsfile",
                     depsFile,
-                    "--additionalprobingpath",
-                    string.Join(";", additionalProbingPaths),
                     dependencyToolPath
                 };
 
@@ -72,11 +70,27 @@ namespace Microsoft.Extensions.Internal
             }
             else
             {
+                EnsureBindingRedirects(assemblyFullPath, Path.GetFileName(dependencyToolPath));
                 // For Full framework, we can directly invoke the <dependencyTool>.exe from the user's bin folder.
+                dependencyToolPath = Path.Combine(Path.GetDirectoryName(assemblyFullPath), Path.GetFileName(dependencyToolPath));
                 command = Command.Create(dependencyToolPath, dispatchArgsList);
             }
 
             return command;
+        }
+
+        private static void EnsureBindingRedirects(string assemblyFullPath, string toolName)
+        {
+            // This is a temporary workaround.
+            // `dotnet build` should generate the binding redirects for the project dependency tools as well.
+            var bindingRedirectFile = $"{assemblyFullPath}.config";
+
+            if (File.Exists(bindingRedirectFile))
+            {
+                var text = File.ReadAllText(bindingRedirectFile);
+                var toolBindingRedirectFile = Path.Combine(Path.GetDirectoryName(assemblyFullPath), $"{toolName}.config");
+                File.WriteAllText(toolBindingRedirectFile, text);
+            }
         }
 
         public static bool IsDispatcher(string[] programArgs) =>

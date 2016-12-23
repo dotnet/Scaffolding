@@ -189,7 +189,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     dispatchArgs: dependencyArgs,
                     framework: frameworkToUse,
                     configuration: configuration,
-                    projectDirectory: projectDirectory);
+                    projectDirectory: projectDirectory,
+                    assemblyFullPath: context.AssemblyFullPath);
         }
 
         private static IProjectContext GetProjectInformation(string projectPath, string configuration)

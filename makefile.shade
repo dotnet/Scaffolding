@@ -89,3 +89,6 @@ k-standard-goals
             // Don't care if we couldn't delete the temp directory.
         }
     }
+    
+#xunit-test
+    - // Temporarily no-op until we have a resolution for https://github.com/aspnet/Scaffolding/issues/371

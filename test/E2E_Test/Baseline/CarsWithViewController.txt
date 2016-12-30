@@ -60,7 +60,7 @@ namespace WebApplication1.Areas.Test.Controllers
             {
                 _context.Add(car);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             return View(car);
         }
@@ -111,7 +111,7 @@ namespace WebApplication1.Areas.Test.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             return View(car);
         }
@@ -142,7 +142,7 @@ namespace WebApplication1.Areas.Test.Controllers
             var car = await _context.Car.SingleOrDefaultAsync(m => m.CarID == id);
             _context.Car.Remove(car);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         private bool CarExists(int id)

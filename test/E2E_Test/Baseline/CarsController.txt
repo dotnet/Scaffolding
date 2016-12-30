@@ -59,7 +59,7 @@ namespace WebApplication1
             {
                 _context.Add(car);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             return View(car);
         }
@@ -110,7 +110,7 @@ namespace WebApplication1
                         throw;
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             return View(car);
         }
@@ -141,7 +141,7 @@ namespace WebApplication1
             var car = await _context.Car.SingleOrDefaultAsync(m => m.CarID == id);
             _context.Car.Remove(car);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         private bool CarExists(int id)

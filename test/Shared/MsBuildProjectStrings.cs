@@ -22,37 +22,39 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public const string RootProjectName = "Test.csproj";
         public const string RootProjectTxt = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
+<Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <OutputType>EXE</OutputType>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
-    <OutputPath>bin\$(Configuration)</OutputPath>
-    <PackageTargetFallback>portable-net45+win8</PackageTargetFallback>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include=""**\*.cs"" Exclude=""Excluded.cs"" />
+    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.0.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.0.0"" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild*"" />
-    <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild3-*"" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild3-*"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />

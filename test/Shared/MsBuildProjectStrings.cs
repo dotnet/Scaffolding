@@ -52,6 +52,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.2"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.0.1"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.0-msbuild3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild3-*"" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.0-msbuild3-*"" />

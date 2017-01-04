@@ -122,6 +122,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Type modelReflectionType = null;
             ReflectedTypesProvider reflectedTypesProvider = null;
             string dbContextError = string.Empty;
+
+            AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
+
             if (dbContextSymbols.Count == 0)
             {
                 await ValidateEFSqlServerDependency();
@@ -159,6 +162,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     projectCompilation,
                     c =>
                     {
+                        c = c.AddSyntaxTrees(assemblyAttributeGenerator.GenerateAttributeSyntaxTree());
                         c = c.AddSyntaxTrees(dbContextSyntaxTree);
                         if (startUpEditResult.Edited)
                         {
@@ -197,6 +201,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         projectCompilation,
                         c =>
                         {
+                            c = c.AddSyntaxTrees(assemblyAttributeGenerator.GenerateAttributeSyntaxTree());
                             var oldTree = c.SyntaxTrees.FirstOrDefault(t => t.FilePath == addResult.OldTree.FilePath);
                             if (oldTree == null)
                             {
@@ -224,7 +229,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                     reflectedTypesProvider = new ReflectedTypesProvider(
                         projectCompilation,
-                        c =>{ return c; },
+                        c =>
+                        {
+                            c = c.AddSyntaxTrees(assemblyAttributeGenerator.GenerateAttributeSyntaxTree());
+                            return c;
+                        },
                         _projectContext,
                         _loader,
                         _logger);
@@ -283,6 +292,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 ContextProcessingStatus = state,
                 ModelMetadata = metadata
             };
+        }
+
+        private AssemblyAttributeGenerator GetAssemblyAttributeGenerator()
+        {
+            var originalAssembly = _loader.LoadFromName(
+                new AssemblyName(
+                    Path.GetFileNameWithoutExtension(_projectContext.AssemblyName)));
+            return new AssemblyAttributeGenerator(originalAssembly);
         }
 
         private string GetPathForNewContext(string contextShortTypeName, string areaName)
@@ -405,7 +422,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     dbContextType.GetTypeInfo().Assembly,
                     startupType.GetTypeInfo().Assembly,
                     "Development",
-                    Directory.GetCurrentDirectory());
+                    Path.GetDirectoryName(_projectContext.ProjectFullPath));
 
                 var dbContextService = dbContextOperations.CreateContext(dbContextType.FullName);
 

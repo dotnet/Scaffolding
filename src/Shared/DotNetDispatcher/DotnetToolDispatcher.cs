@@ -46,9 +46,9 @@ namespace Microsoft.Extensions.Internal
             dispatchArgsList.Add(DispatcherVersionArgumentName);
             dispatchArgsList.Add(dispatcherVersionArgumentValue);
 
-            if (framework.GetShortFolderName() == NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName())
+            if (IsNetCoreAppFramework(framework))
             {
-                // For projects targeting netcoreapp1.0 invoke the inside man in the below fashion:
+                // For projects targeting netcoreapp1.x invoke the inside man in the below fashion:
                 //
                 // C:\Program Files\dotnet\dotnet.exe exec 
                 //  --runtimeconfig (appname).runtimeconfig.json 
@@ -77,6 +77,15 @@ namespace Microsoft.Extensions.Internal
             }
 
             return command;
+        }
+
+        private static bool IsNetCoreAppFramework(NuGetFramework framework)
+        {
+            //Only need to compare the framework name to be netcoreapp. Version doesn't matter.
+
+            return NuGetFramework.FrameworkNameComparer.Equals(
+                framework,
+                NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10);
         }
 
         private static void EnsureBindingRedirects(string assemblyFullPath, string toolName)

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TestModels
 {
@@ -69,6 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
 
     public class Order
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int OrderId { get; set; }
 
         public string OrderName { get; set; }

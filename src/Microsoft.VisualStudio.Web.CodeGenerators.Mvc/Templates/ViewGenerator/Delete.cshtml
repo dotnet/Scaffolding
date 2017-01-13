@@ -45,7 +45,11 @@
 @{
     foreach (var property in Model.ModelMetadata.Properties)
     {
-        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+        if (property.IsPrimaryKey)
+        {
+        @:<input type="hidden" asp-for="@GetValueExpression(property)" />
+        }
+        else if (property.Scaffold && !property.IsForeignKey)
         {
         <dt>
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))

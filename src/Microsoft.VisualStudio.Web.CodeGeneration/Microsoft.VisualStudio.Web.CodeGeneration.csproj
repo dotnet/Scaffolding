@@ -7,7 +7,6 @@
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration</AssemblyName>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
-    <PackageVersion>$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

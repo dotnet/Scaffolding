@@ -14,6 +14,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include ="Internal.AspNetCore.Sdk" Version = "1.0.0-*" PrivateAssets="All" />
+        <PackageReference Include="Internal.AspNetCore.Sdk" Version="1.0.0-alpha-15154" PrivateAssets="All" />
     </ItemGroup>
 </Project>

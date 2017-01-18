@@ -7,7 +7,6 @@
     <AssemblyName>dotnet-aspnet-codegenerator</AssemblyName>
     <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageVersion>$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
   </PropertyGroup>
@@ -30,8 +29,8 @@
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
-    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="NuGet.Frameworks" Version="3.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">

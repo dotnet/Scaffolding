@@ -7,7 +7,6 @@
     <AssemblyName>dotnet-aspnet-codegenerator</AssemblyName>
     <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageVersion>$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
   </PropertyGroup>

@@ -44,18 +44,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.0.0"" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.0-rtm-*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.0-rtm-*"" />
-  </ItemGroup>
-  <ItemGroup>
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.0-rtm-*"" />
+    <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.1.0"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />

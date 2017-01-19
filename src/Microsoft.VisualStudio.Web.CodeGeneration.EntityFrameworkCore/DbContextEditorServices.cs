@@ -260,8 +260,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 var namedType = pSymbol.Type as INamedTypeSymbol; //When can this go wrong?
                 if (namedType != null && namedType.IsGenericType && !namedType.IsUnboundGenericType &&
-                    namedType.ContainingAssembly.Name == "Microsoft.EntityFrameworkCore" &&
-                    namedType.ContainingNamespace.ToDisplayString() == "Microsoft.EntityFrameworkCore" &&
                     namedType.Name == "DbSet")
                 {
                     // Can we check for equality of typeSymbol itself?

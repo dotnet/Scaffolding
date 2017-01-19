@@ -241,7 +241,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     dbContextError = string.Format(MessageStrings.DbContextTypeNotFound, dbContextFullTypeName);
                 }
             }
-            dbContextType = reflectedTypesProvider.GetReflectedType(dbContextFullTypeName);
+            dbContextType = reflectedTypesProvider.GetReflectedType(
+                modelType: dbContextFullTypeName,
+                lookInDependencies: true);
 
             if (dbContextType == null)
             {

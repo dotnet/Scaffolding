@@ -9,6 +9,7 @@
     <Compile Include="..\Shared\**\*.cs" />
     <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;" />
     <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" />
+    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,33 +4,16 @@
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <AssemblyName>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</AssemblyName>
     <PackageTags>aspnetcore;aspnetcoremvc;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
+    <None Pack="true" Include="Templates\**\*" PackagePath="Templates\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration\Microsoft.VisualStudio.Web.CodeGeneration.csproj" />
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Pack="true" Include="Templates\**\*" PackagePath="Templates\" />
   </ItemGroup>
 </Project>

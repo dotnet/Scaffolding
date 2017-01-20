@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
+    <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views.</Description>
     <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
@@ -10,35 +10,11 @@
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp1.0' ">win7-x86</RuntimeIdentifier>
+    <NetCoreAppImplicitPackageVersion>1.0.0</NetCoreAppImplicitPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration\Microsoft.VisualStudio.Web.CodeGeneration.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

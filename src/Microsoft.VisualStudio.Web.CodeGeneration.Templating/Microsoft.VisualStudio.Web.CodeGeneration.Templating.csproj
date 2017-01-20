@@ -4,22 +4,13 @@
     <Description>Contains Razor based templating host used by ASP.NET Core Code Generators.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Templating</AssemblyName>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dotnet5.6;dnxcore50;portable-net45+win8</PackageTargetFallback>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Razor" Version="1.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="1.3.0" />
   </ItemGroup>

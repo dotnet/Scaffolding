@@ -4,6 +4,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+        <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
     </PropertyGroup>
 
     <!-- Sign Options -->
@@ -14,6 +15,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Internal.AspNetCore.Sdk" Version="1.0.0-*" PrivateAssets="All" />
+        <PackageReference Include="Internal.AspNetCore.Sdk" Version="1.0.1-*" PrivateAssets="All" />
     </ItemGroup>
 </Project>

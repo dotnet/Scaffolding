@@ -4,19 +4,13 @@
     <Description>Contains utilities used by ASP.NET Core Code Generation packages.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Utils</AssemblyName>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**" />
-    <Compile Include="..\Shared\General\**\*.cs" Exclude="bin\**;obj\**" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Compile Include="..\Shared\General\**\*.cs"  />
     <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
     <EmbeddedResource Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.resx" />
   </ItemGroup>
@@ -25,7 +19,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="1.3.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="NuGet.Frameworks" Version="3.5.0-rc1-final" />
+    <PackageReference Include="NuGet.Frameworks" Version="3.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">

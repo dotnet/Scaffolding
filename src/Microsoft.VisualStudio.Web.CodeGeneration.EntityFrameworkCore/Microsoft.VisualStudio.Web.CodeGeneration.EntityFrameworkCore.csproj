@@ -33,6 +33,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.0.1" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
   <ItemGroup>
     <None Pack="true" Include="Templates\**\*" PackagePath="Templates\" />
   </ItemGroup>

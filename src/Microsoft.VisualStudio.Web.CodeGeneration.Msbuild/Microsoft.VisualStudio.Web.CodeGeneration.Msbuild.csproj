@@ -5,6 +5,7 @@
     <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

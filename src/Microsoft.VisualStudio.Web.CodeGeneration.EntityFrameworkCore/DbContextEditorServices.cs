@@ -92,9 +92,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
                     var lastNode = dbContextNode.ChildNodes().Last();
 
+                    var safeModelName = GetSafeModelName(modelType.Name, dbContext.TypeSymbol);
                     // Todo : Need pluralization for property name below.
                     // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
-                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + modelType.Name + " { get; set; }" + Environment.NewLine;
+                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                     var newNode = rootNode.InsertNodesAfter(lastNode,
@@ -118,6 +119,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 Edited = false
             };
+        }
+
+        private string GetSafeModelName(string name, ITypeSymbol dbContext)
+        {
+            var safeName = name;
+
+            int i = 1;
+            // We don't expect users to have more than a few symbols having the naming as modelName_1, modelName_2, etc.
+            while (dbContext.GetMembers(safeName).Any())
+            {
+                safeName = $"{name}_{i++}";
+            }
+
+            return safeName;
         }
 
         public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName)

@@ -54,7 +54,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                     ex = ex.InnerException;
                 }
                 _logger.LogMessage(ex.Message, LogMessageLevel.Error);
-                _logger.LogMessage(ex.StackTrace, LogMessageLevel.Error);
+                _logger.LogMessage(ex.StackTrace);
             }
             return 0;
         }

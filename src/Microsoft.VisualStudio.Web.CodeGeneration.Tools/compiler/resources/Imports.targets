@@ -5,7 +5,7 @@
 
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Condition=" '$(TargetFramework)' == '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets')" />
+    <Import Project="$(CodeGenerationTargetLocation)\buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\buildCrossTargeting\microsoft.visualstudio.web.codegeneration.tools.targets')" />
   </ImportGroup>
   <ImportGroup Condition=" '$(TargetFramework)' != '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(CodeGenerationTargetLocation)\build\netstandard1.0\microsoft.visualstudio.web.codegeneration.tools.targets" Condition="Exists('$(CodeGenerationTargetLocation)\build\netstandard1.0\microsoft.visualstudio.web.codegeneration.tools.targets')" />

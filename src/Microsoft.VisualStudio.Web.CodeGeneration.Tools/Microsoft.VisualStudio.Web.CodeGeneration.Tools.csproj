@@ -38,8 +38,6 @@
           PackagePath="toolassets\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\bin\$(Configuration)\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true"
           PackagePath="toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
-
-
     <None Include="prefercliruntime" Pack="true"
           PackagePath="prefercliruntime" />
   </ItemGroup>

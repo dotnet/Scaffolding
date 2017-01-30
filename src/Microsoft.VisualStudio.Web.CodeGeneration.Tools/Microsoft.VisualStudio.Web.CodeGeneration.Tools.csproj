@@ -47,8 +47,6 @@
           PackagePath="toolassets\netcoreapp1.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\bin\$(Configuration)\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true"
           PackagePath="toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
-    <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.deps.json" Pack="true"
-          PackagePath="lib\netcoreapp1.0\" />
      <None Include="bin\$(Configuration)\netcoreapp1.0\dotnet-aspnet-codegenerator.runtimeconfig.json" Pack="true"
           PackagePath="lib\netcoreapp1.0\" />
     <None Include="prefercliruntime" Pack="true"

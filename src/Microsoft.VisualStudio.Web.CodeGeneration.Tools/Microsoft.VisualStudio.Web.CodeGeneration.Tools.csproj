@@ -40,27 +40,6 @@
           PackagePath="toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="prefercliruntime" Pack="true"
           PackagePath="prefercliruntime" />
+    <None Include="$(ProjectRuntimeConfigFilePath)" Pack="true" PackagePath="lib\$(TargetFramework)\" />
   </ItemGroup>
-
-  <!-- workaround https://github.com/NuGet/Home/issues/4321
-  
-  When fixed, replace with this instead
-  <None Include="$(ProjectRuntimeConfigFilePath)" Pack="true" PackagePath="lib\$(TargetFramework)\" />
-  -->
-  <PropertyGroup>
-    <DefaultItemExcludes>$(DefaultItemExcludes);lib\**\*</DefaultItemExcludes>
-  </PropertyGroup>
-  <Target Name="PackRuntimeConfigurationFile"
-          DependsOnTargets="GenerateBuildRuntimeConfigurationFiles"
-          BeforeTargets="_GetPackageFiles">
-    <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)" DestinationFolder="lib\netcoreapp1.0\" />
-    <ItemGroup>
-      <_PackageFiles Include="lib\netcoreapp1.0\*.json" BuildAction="None" PackagePath="%(Identity)" />
-    </ItemGroup>
-  </Target>
-  <Target Name="CleanupTempRuntimeConfigurationFile"
-          AfterTargets="Pack">
-    <RemoveDir Directories="lib\" />
-  </Target>
-  <!-- end workaround -->
 </Project>

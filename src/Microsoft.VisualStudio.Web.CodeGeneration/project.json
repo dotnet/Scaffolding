@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview4-final",
+  "version": "1.0.0-preview4-update1",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true,
@@ -10,7 +10,7 @@
   },
   "description": "Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.",
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview4-final",
+    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview4-update1",
     "Microsoft.Extensions.CommandLineUtils": "1.0.1",
     "Microsoft.Extensions.DependencyInjection": "1.0.1"
   },

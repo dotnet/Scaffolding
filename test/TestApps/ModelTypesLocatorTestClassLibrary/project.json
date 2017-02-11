@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview4-final",
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview4-update1",
     "ClassLibrary1": "1.0.0"
   },
   "frameworks": {

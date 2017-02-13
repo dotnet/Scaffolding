@@ -25,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>

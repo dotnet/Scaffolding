@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview4-final",
+  "version": "1.0.0-preview4-update1",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -10,11 +10,11 @@
   },
   "description": "Contains Entity Framework Core Services used by ASP.NET Core Code Generators.",
   "dependencies": {
-    "Microsoft.AspNetCore.Hosting": "1.0.1",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.2",
-    "Microsoft.EntityFrameworkCore": "1.0.2",
-    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.2",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview4-final"
+    "Microsoft.AspNetCore.Hosting": "1.0.2",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.3",
+    "Microsoft.EntityFrameworkCore": "1.0.3",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.3",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview4-update1"
   },
   "frameworks": {
     "net451": {},

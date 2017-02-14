@@ -45,6 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var dependencyCommand = app.Option("--no-dispatch", "", CommandOptionType.NoValue);
             var port = app.Option("--port-number", "", CommandOptionType.SingleValue);
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
+            var simMode = app.Option("--simulation-mode", "Specifies whether to persist any file changes.", CommandOptionType.NoValue);
 
             app.OnExecute(async () =>
             {
@@ -61,11 +62,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var projectInformation = await GetProjectInformationFromServer(logger, portNumber);
 
                 var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
-
+                var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
                 CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,
                     codeGenArgs,
                     configuration,
-                    logger);
+                    logger,
+                    isSimulationMode);
 
                 return executor.Execute();
             });

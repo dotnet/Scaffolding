@@ -17,6 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         private const string BUILD_BASE_PATH = "--build-base-path";
         private const string DISPATCHER_VERSION = "--dispatcher-version";
         private const string NO_BUILD = "--no-build";
+        private const string SIM_MODE = "--simulation-mode";
 
         private const string NO_DISPATCH_FLAG_SHORT = "-nd";
         private const string CONFIGURATION_SHORT = "-c";
@@ -35,11 +36,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             List<string> filteredArgs = new List<string>();
             for (int i = 0; i < args.Length; i++)
             {
-                switch (args[i])
+                switch (args[i].ToLower())
                 {
                     case NO_DISPATCH_FLAG:
                     case NO_DISPATCH_FLAG_SHORT:
                     case NO_BUILD:
+                    case SIM_MODE:
                         break;
                     case CONFIGURATION:
                     case CONFIGURATION_SHORT:
@@ -64,5 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             return filteredArgs.ToArray();
         }
+
+        internal static bool IsSimulationMode(string[] args) => args.Contains(SIM_MODE, StringComparer.OrdinalIgnoreCase);
     }
 }

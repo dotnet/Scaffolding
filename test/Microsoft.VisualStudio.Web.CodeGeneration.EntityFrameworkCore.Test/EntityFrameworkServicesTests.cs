@@ -72,6 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 _packageInstaller.Object,
                 _serviceProvider.Object,
                 _workspace,
+                DefaultFileSystem.Instance,
                 _logger);
 
         }

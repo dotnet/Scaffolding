@@ -19,8 +19,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         private string[] _codeGenArguments;
         private string _configuration;
         private ILogger _logger;
+        private bool _isSimulationMode;
 
-        public CodeGenCommandExecutor(IProjectContext projectInformation, string[] codeGenArguments, string configuration, ILogger logger)
+        public CodeGenCommandExecutor(IProjectContext projectInformation, string[] codeGenArguments, string configuration, ILogger logger, bool isSimulationMode)
         {
             if (projectInformation == null)
             {
@@ -38,6 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             _codeGenArguments = codeGenArguments;
             _configuration = configuration;
             _logger = logger;
+            _isSimulationMode = isSimulationMode;
         }
 
         public int Execute()
@@ -47,6 +49,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
             codeGenCommand.Execute(_codeGenArguments);
+
+            if (_isSimulationMode)
+            {
+                foreach (var change in SimulationModeFileSystem.Instance.FileSystemChangeTracker.Changes)
+                {
+                    _logger.LogMessage($"----------------- {change.FullPath} -----------------");
+                    _logger.LogMessage($"Change Type: {change.ChangeType.ToString() }");
+                    switch (change.ChangeType)
+                    {
+                        case ChangeType.AddFile:
+                        case ChangeType.EditFile:
+                            _logger.LogMessage($"Contents:{Environment.NewLine}{change.FileContents}");
+                            _logger.LogMessage("----------------- End change -----------------");
+                            break;
+                    }
+                }
+            }
+
             return 0;
         }
 
@@ -69,7 +89,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
+            IFileSystem fileSystem = _isSimulationMode
+                ? (IFileSystem)SimulationModeFileSystem.Instance
+                : (IFileSystem)DefaultFileSystem.Instance;
             //Ordering of services is important here
+            serviceProvider.Add(typeof(IFileSystem), fileSystem);
             serviceProvider.Add(typeof(ILogger), _logger);
             serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());
 

@@ -36,6 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string NewDbContextFolderName = "Data";
         private readonly Workspace _workspace;
         private readonly IProjectContext _projectContext;
+        private readonly IFileSystem _fileSystem;
 
 
         public EntityFrameworkServices(
@@ -47,6 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             IPackageInstaller packageInstaller,
             IServiceProvider serviceProvider,
             Workspace workspace,
+            IFileSystem fileSystem,
             ILogger logger)
         {
             if (projectContext == null)
@@ -94,6 +96,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(workspace));
             }
 
+            if(fileSystem == null)
+            {
+                throw new ArgumentNullException(nameof(fileSystem));
+            }
+
             _projectContext = projectContext;
             _applicationInfo = applicationInfo;
             _loader = loader;
@@ -103,6 +110,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _serviceProvider = serviceProvider;
             _logger = logger;
             _workspace = workspace;
+            _fileSystem = fileSystem;
         }
 
         public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName)
@@ -356,15 +364,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Debug.Assert(newTree != null);
             Debug.Assert(!String.IsNullOrEmpty(newTree.FilePath));
 
-            Directory.CreateDirectory(Path.GetDirectoryName(newTree.FilePath));
-
-            using (var fileStream = new FileStream(newTree.FilePath, FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
-                {
-                    newTree.GetText().Write(streamWriter);
-                }
-            }
+            _fileSystem.CreateDirectory(Path.GetDirectoryName(newTree.FilePath));
+            _fileSystem.WriteAllText(newTree.FilePath, newTree.GetText().ToString());
+            //using (var fileStream = new FileStream(newTree.FilePath, FileMode.OpenOrCreate, FileAccess.Write))
+            //{
+            //    using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
+            //    {
+            //        newTree.GetText().Write(streamWriter);
+            //    }
+            //}
         }
 
         private ModelMetadata GetModelMetadata(Type dbContextType, Type modelType, Type startupType)

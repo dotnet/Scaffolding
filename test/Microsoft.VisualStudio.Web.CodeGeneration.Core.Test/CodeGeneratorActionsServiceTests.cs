@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             var mockTemplating = new Mock<ITemplating>();
 
             var codeGeneratorActionService = new CodeGeneratorActionsService(
-                mockTemplating.Object, mockFilesLocator.Object);
+                mockTemplating.Object, mockFilesLocator.Object, DefaultFileSystem.Instance);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => 
                 await codeGeneratorActionService.AddFileFromTemplateAsync("Dummy", 

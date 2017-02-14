@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             List<string> filteredArgs = new List<string>();
             for (int i = 0; i < args.Length; i++)
             {
-                switch (args[i])
+                switch (args[i].ToLower())
                 {
                     case NO_DISPATCH_FLAG:
                     case NO_DISPATCH_FLAG_SHORT:

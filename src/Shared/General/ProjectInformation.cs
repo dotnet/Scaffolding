@@ -2,8 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Extensions.ProjectModel;
-
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
     public class ProjectInformation

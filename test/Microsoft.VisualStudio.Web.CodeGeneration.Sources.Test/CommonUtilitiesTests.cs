@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test;
 using Xunit;
-using Microsoft.Extensions.ProjectModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration

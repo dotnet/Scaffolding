@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel
 {
     public class ProjectReferenceInformation
     {

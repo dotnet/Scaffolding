@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Internal;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.ProjectModel

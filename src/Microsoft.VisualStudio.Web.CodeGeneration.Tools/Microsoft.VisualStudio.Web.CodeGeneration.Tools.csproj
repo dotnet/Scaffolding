@@ -13,13 +13,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\**\*.cs" />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs" />
+    <Compile Include="..\Shared\**\*.cs" >
+      <Link>Shared\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Contracts\Microsoft.VisualStudio.Web.CodeGeneration.Contracts.csproj" />
     <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.548" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.1" />

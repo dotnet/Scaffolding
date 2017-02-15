@@ -2,16 +2,23 @@
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\*.cs" />
-    <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs"/>
-    <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;" />
-    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" />
+    <Compile Include="..\Shared\*.cs">
+      <Link>Shared\%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs;">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs">
+      <Link>Shared\Cli.Utils\%(FileName)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Contracts\Microsoft.VisualStudio.Web.CodeGeneration.Contracts.csproj" />
     <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.548" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />

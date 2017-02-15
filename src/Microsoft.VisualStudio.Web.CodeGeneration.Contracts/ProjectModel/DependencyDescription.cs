@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel
 {
     public class DependencyDescription
     {

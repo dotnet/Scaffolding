@@ -3,12 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net451+win8</PackageTargetFallback>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\*.cs" />
-    <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs" />
-    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" />
+    <Compile Include="..\Shared\*.cs">
+      <Link>Shared\%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs">
+      <Link>Shared\Cli.Utils\%(FileName)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

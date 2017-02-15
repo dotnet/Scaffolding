@@ -11,12 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\General\**\*.cs"  />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
-    <EmbeddedResource Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.resx" />
+    <Compile Include="..\Shared\General\**\*.cs">
+      <Link>Shared\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Contracts\Microsoft.VisualStudio.Web.CodeGeneration.Contracts.csproj" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="1.3.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />

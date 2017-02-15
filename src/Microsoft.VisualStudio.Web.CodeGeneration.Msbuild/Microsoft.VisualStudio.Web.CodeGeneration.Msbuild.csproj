@@ -10,9 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\General\**\*.cs" />
-    <Compile Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.cs" />
-    <EmbeddedResource Include="..\Microsoft.Extensions.ProjectModel.Abstractions.Sources\**\*.resx" />
+    <Compile Include="..\Shared\General\*.cs">
+      <Link>Shared\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Contracts\ProjectModel\*.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

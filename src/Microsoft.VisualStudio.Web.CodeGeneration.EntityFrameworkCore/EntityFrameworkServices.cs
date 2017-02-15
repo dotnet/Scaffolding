@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
@@ -366,13 +366,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             _fileSystem.CreateDirectory(Path.GetDirectoryName(newTree.FilePath));
             _fileSystem.WriteAllText(newTree.FilePath, newTree.GetText().ToString());
-            //using (var fileStream = new FileStream(newTree.FilePath, FileMode.OpenOrCreate, FileAccess.Write))
-            //{
-            //    using (var streamWriter = new StreamWriter(stream: fileStream, encoding: Encoding.UTF8))
-            //    {
-            //        newTree.GetText().Write(streamWriter);
-            //    }
-            //}
         }
 
         private ModelMetadata GetModelMetadata(Type dbContextType, Type modelType, Type startupType)

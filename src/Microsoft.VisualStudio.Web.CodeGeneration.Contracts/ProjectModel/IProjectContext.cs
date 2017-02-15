@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Extensions.ProjectModel.Resolution;
-using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel
 {
     public interface IProjectContext
     {

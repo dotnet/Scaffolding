@@ -2,10 +2,13 @@
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\*.cs" />
+    <Compile Include="..\Shared\*.cs" >
+      <Link>Shared\%(FileName)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

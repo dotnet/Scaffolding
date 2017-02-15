@@ -3,8 +3,7 @@
 
 using System;
 using System.Linq;
-using Microsoft.Extensions.ProjectModel;
-using Microsoft.Extensions.ProjectModel.Resolution;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils

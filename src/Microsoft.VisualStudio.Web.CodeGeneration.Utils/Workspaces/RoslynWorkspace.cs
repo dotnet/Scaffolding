@@ -10,8 +10,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.Extensions.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using PInfo = Microsoft.CodeAnalysis.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils

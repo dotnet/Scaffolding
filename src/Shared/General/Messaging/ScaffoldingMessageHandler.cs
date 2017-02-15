@@ -3,7 +3,8 @@
 
 using System;
 using Newtonsoft.Json.Linq;
-using Microsoft.Extensions.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
 {

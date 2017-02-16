@@ -26,9 +26,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.548" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="NuGet.Frameworks" Version="3.5.0" />
   </ItemGroup>

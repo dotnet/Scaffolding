@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;aspnetcoremvc;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>

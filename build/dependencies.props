@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <CoreFxVersion>4.3.0</CoreFxVersion>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
   </PropertyGroup>
 </Project>

@@ -1,20 +1,22 @@
 <Project>
-    <Import Project="$(MSBuildThisFileDirectory)..\version.props" />
-    <PropertyGroup>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
-    </PropertyGroup>
+  <Import Project="dependencies.props" />
+  <Import Project="..\version.props" />
 
-    <!-- Sign Options -->
-    <PropertyGroup>
-        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
-        <SignAssembly>true</SignAssembly>
-        <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
-    </PropertyGroup>
+  <PropertyGroup>
+    <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Internal.AspNetCore.Sdk" Version="1.0.1-*" PrivateAssets="All" />
-    </ItemGroup>
+  <!-- Sign Options -->
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Internal.AspNetCore.Sdk" Version="1.0.1-*" PrivateAssets="All" />
+  </ItemGroup>
+
 </Project>

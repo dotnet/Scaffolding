@@ -9,7 +9,7 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
-    <NetCoreAppImplicitPackageVersion>1.0.0</NetCoreAppImplicitPackageVersion>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,6 +40,5 @@
           PackagePath="toolassets\net46\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="prefercliruntime" Pack="true"
           PackagePath="prefercliruntime" />
-    <None Include="$(ProjectRuntimeConfigFilePath)" Pack="true" PackagePath="lib\$(TargetFramework)\" />
   </ItemGroup>
 </Project>

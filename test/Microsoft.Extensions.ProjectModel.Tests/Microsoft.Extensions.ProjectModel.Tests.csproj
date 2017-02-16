@@ -27,13 +27,13 @@
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.1" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.4" />
   </ItemGroup>
 
 </Project>

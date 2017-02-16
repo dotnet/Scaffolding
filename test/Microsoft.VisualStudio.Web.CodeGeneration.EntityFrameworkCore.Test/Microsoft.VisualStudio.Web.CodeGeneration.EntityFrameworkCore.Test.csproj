@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.csproj" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.546" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.548" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />

@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
     <PackageReference Include="Moq" Version="4.6.38-alpha" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />

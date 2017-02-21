@@ -19,13 +19,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         private readonly IFileSystem _fileSystem;
         private readonly ITemplating _templatingService;
 
-        //public CodeGeneratorActionsService(
-        //    ITemplating templatingService,
-        //    IFilesLocator filesLocator)
-        //    : this(templatingService, filesLocator, new DefaultFileSystem())
-        //{
-        //}
-
         public CodeGeneratorActionsService(
             ITemplating templatingService,
             IFilesLocator filesLocator,

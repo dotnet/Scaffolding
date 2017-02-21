@@ -19,10 +19,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public static SimulationModeFileSystem Instance = new SimulationModeFileSystem();
 
-        public IFileSystemChangeTracker FileSystemChangeTracker { get; private set; }
-        private SimulationModeFileSystem()
+        private IFileSystemChangeTracker FileSystemChangeTracker { get; set; }
+
+        internal SimulationModeFileSystem()
         {
             FileSystemChangeTracker = new FileSystemChangeTracker();
+        }
+
+        public IEnumerable<FileSystemChangeInformation> FileSystemChanges
+        {
+            get
+            {
+                return FileSystemChangeTracker.Changes;
+            }
         }
 
         public async Task AddFileAsync(string outputPath, Stream sourceStream)

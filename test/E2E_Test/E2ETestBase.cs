@@ -49,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
         protected void VerifyFileAndContent(string generatedFilePath, string baselineFile)
         {
-            Console.WriteLine($"Checking if file is generated at {generatedFilePath}");
+            Output.WriteLine($"Checking if file is generated at {generatedFilePath}");
             Assert.True(File.Exists(generatedFilePath));
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -84,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
         protected void VerifyFoldersCreated(string folderPath)
         {
-            Console.WriteLine($"Verifying folder exists: {folderPath}");
+            Output.WriteLine($"Verifying folder exists: {folderPath}");
             Assert.True(Directory.Exists(folderPath));
         }
     }

@@ -10,5 +10,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         IEnumerable<FileSystemChangeInformation> Changes { get; }
         void AddChange(FileSystemChangeInformation info);
+        void ClearChanges();
     }
 }

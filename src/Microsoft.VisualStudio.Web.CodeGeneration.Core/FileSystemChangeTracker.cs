@@ -36,5 +36,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 _changes[fileSystemChangeInfo.FullPath] = fileSystemChangeInfo;
             }
         }
+
+        public void ClearChanges()
+        {
+            lock (_syncobject)
+            {
+                _changes.Clear();
+            }
+        }
     }
 }

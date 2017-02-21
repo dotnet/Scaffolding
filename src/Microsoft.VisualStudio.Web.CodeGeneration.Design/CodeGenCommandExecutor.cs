@@ -54,7 +54,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             if (_isSimulationMode && simModeAction != null)
             {
-                simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChangeTracker.Changes);
+                simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChanges);
             }
 
             return 0;

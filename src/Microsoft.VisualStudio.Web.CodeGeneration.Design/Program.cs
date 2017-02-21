@@ -2,12 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
@@ -60,54 +62,71 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var configuration = appConfiguration.Value();
 
                 var portNumber = int.Parse(port.Value());
-                var projectInformation = await GetProjectInformationFromServer(logger, portNumber);
+                using (var client = await ScaffoldingClient.Connect(portNumber, logger))
+                {
+                    var projectInformation = GetProjectInformationFromServer(logger, portNumber, client);
 
-                var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
-                var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
-                CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,
-                    codeGenArgs,
-                    configuration,
-                    logger,
-                    isSimulationMode);
+                    var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
+                    var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
+                    CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,
+                        codeGenArgs,
+                        configuration,
+                        logger,
+                        isSimulationMode);
 
-                return executor.Execute();
+                    var exitCode = executor.Execute((changes) => SendFileSystemChanges(changes, client));
+
+                    client.Send(new Message() { MessageType = MessageTypes.Scaffolding_Completed });
+
+                    return exitCode;
+                }
             });
 
             app.Execute(args);
         }
 
-        private static async Task<IProjectContext> GetProjectInformationFromServer(ILogger logger, int portNumber)
+        private static void SendFileSystemChanges(IEnumerable<FileSystemChangeInformation> changes, ScaffoldingClient client)
         {
-            using (var client = await ScaffoldingClient.Connect(portNumber, logger))
+            if (changes == null)
             {
-                var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
-                client.MessageReceived += messageHandler.HandleMessages;
+                return;
+            }
 
+            foreach (var change in changes)
+            {
                 var message = new Message()
                 {
-                    MessageType = MessageTypes.ProjectInfoRequest
+                    MessageType = MessageTypes.FileSystemChangeInformation
                 };
+                message.Payload = JToken.FromObject(change);
 
                 client.Send(message);
-                // Read the project Information
-                client.ReadMessage();
-
-                var projectInfo = messageHandler.ProjectInfo;
-
-                message = new Message()
-                {
-                    MessageType = MessageTypes.Scaffolding_Completed
-                };
-
-                client.Send(message);
-
-                if (projectInfo == null)
-                {
-                    throw new InvalidOperationException($"Could not get ProjectInformation.");
-                }
-
-                return projectInfo;
             }
+        }
+
+        private static IProjectContext GetProjectInformationFromServer(ILogger logger, int portNumber, ScaffoldingClient client)
+        {
+
+            var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
+            client.MessageReceived += messageHandler.HandleMessages;
+
+            var message = new Message()
+            {
+                MessageType = MessageTypes.ProjectInfoRequest
+            };
+
+            client.Send(message);
+            // Read the project Information
+            client.ReadMessage();
+
+            var projectInfo = messageHandler.ProjectInfo;
+
+            if (projectInfo == null)
+            {
+                throw new InvalidOperationException($"Could not get ProjectInformation.");
+            }
+
+            return projectInfo;
         }
     }
 }

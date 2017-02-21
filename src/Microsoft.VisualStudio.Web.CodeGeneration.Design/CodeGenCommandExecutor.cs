@@ -3,7 +3,9 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
@@ -42,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             _isSimulationMode = isSimulationMode;
         }
 
-        public int Execute()
+        public int Execute(Action<IEnumerable<FileSystemChangeInformation>> simModeAction = null)
         {
             var serviceProvider = new ServiceProvider();
             AddFrameworkServices(serviceProvider, _projectInformation);
@@ -50,21 +52,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
             codeGenCommand.Execute(_codeGenArguments);
 
-            if (_isSimulationMode)
+            if (_isSimulationMode && simModeAction != null)
             {
-                foreach (var change in SimulationModeFileSystem.Instance.FileSystemChangeTracker.Changes)
-                {
-                    _logger.LogMessage($"----------------- {change.FullPath} -----------------");
-                    _logger.LogMessage($"Change Type: {change.ChangeType.ToString() }");
-                    switch (change.ChangeType)
-                    {
-                        case ChangeType.AddFile:
-                        case ChangeType.EditFile:
-                            _logger.LogMessage($"Contents:{Environment.NewLine}{change.FileContents}");
-                            _logger.LogMessage("----------------- End change -----------------");
-                            break;
-                    }
-                }
+                simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChangeTracker.Changes);
             }
 
             return 0;

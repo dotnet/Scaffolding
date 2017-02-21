@@ -4,6 +4,7 @@
 using System;
 using Newtonsoft.Json.Linq;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
@@ -36,10 +37,48 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
                 case MessageTypes.ProjectInfoResponse:
                     BuildDependencyProviderFromResponse(e);
                     break;
+                case MessageTypes.FileSystemChangeInformation:
+                    DisplayFileChangeInformation(e);
+                    break;
                 default:
                     _logger.LogMessage($"Unknown message type {e.MessageType}");
                     break;
             }
+        }
+
+        private void DisplayFileChangeInformation(Message e)
+        {
+            FileSystemChangeInformation info = e.Payload.ToObject<FileSystemChangeInformation>();
+
+            if (info == null)
+            {
+                _logger.LogMessage($"Invalid FileSystemChange message: ");
+                _logger.LogMessage($"Received message of type {e.MessageType}");
+                _logger.LogMessage($"Contents: {Environment.NewLine}{e.Payload.ToString()}");
+            }
+
+            _logger.LogMessage($"{Environment.NewLine}\t\t:::Start FileSystemChange:::");
+            switch (info.FileSystemChangeType)
+            {
+                case FileSystemChangeType.AddFile:
+                    _logger.LogMessage($"Add File: {info.FullPath}");
+                    _logger.LogMessage($"Contents: {info.FileContents}");
+                    break;
+                case FileSystemChangeType.EditFile:
+                    _logger.LogMessage($"Edit File: {info.FullPath}");
+                    _logger.LogMessage($"New Contents: {info.FileContents}");
+                    break;
+                case FileSystemChangeType.DeleteFile:
+                    _logger.LogMessage($"Deleted file: {info.FullPath}");
+                    break;
+                case FileSystemChangeType.AddDirectory:
+                    _logger.LogMessage($"Add directory: {info.FullPath}");
+                    break;
+                case FileSystemChangeType.RemoveDirectory:
+                    _logger.LogMessage($"Delete directory: {info.FullPath}");
+                    break;
+            }
+            _logger.LogMessage($"\t\t:::End FileSystemChange:::{Environment.NewLine}");
         }
 
         private void BuildDependencyProviderFromResponse(Message msg)

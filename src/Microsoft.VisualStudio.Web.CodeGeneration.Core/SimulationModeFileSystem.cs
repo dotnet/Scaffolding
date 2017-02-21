@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -40,7 +41,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 FileSystemChangeInformation addDirectoryInformation = new FileSystemChangeInformation()
                 {
                     FullPath = path,
-                    ChangeType = ChangeType.AddDirectory
+                    FileSystemChangeType = FileSystemChangeType.AddDirectory
                 };
 
                 FileSystemChangeTracker.AddChange(addDirectoryInformation);
@@ -80,13 +81,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var fileWriteInformation = new FileSystemChangeInformation()
             {
                 FullPath = path,
-                ChangeType = ChangeType.AddFile,
+                FileSystemChangeType = FileSystemChangeType.AddFile,
                 FileContents = contents
             };
 
             if (FileExists(path))
             {
-                fileWriteInformation.ChangeType = ChangeType.EditFile;
+                fileWriteInformation.FileSystemChangeType = FileSystemChangeType.EditFile;
             }
 
             FileSystemChangeTracker.AddChange(fileWriteInformation);

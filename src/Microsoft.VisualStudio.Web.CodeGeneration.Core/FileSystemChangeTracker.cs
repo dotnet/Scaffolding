@@ -3,8 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {

@@ -3,10 +3,10 @@
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange
 {
-    interface IFileSystemChangeInformation
+    public class FileSystemChangeInformation
     {
-        string FullPath { get; }
-        string FileSystemChangeType { get; }
-        string FileContents { get; }
+        public string FullPath { get; set; }
+        public string FileSystemChangeType { get; set; }
+        public string FileContents { get; set; }
     }
 }

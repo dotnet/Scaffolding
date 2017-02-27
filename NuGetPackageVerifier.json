@@ -16,12 +16,6 @@
       }
     }
   },
-  "adx-nonshipping": {
-    "rules": [],
-    "packages": {
-      "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild": {}
-    }
-  },
   "Default": {
     "rules": [
       "DefaultCompositeRule"

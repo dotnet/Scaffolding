@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
@@ -11,14 +12,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         private object _syncobject = new object();
 
-        private Dictionary<string, FileSystemChangeInformation> _changes = new Dictionary<string, FileSystemChangeInformation>();
+        private Dictionary<string, FileSystemChangeInformation> _changes = new Dictionary<string, FileSystemChangeInformation>(StringComparer.OrdinalIgnoreCase);
         public IEnumerable<FileSystemChangeInformation> Changes
         {
             get
             {
                 lock (_syncobject)
                 {
-                    return _changes.Values;
+                    return _changes.Values.ToList();
                 }
             }
         }
@@ -37,6 +38,41 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
+        public void RemoveChange(FileSystemChangeInformation fileSystemChangeInfo)
+        {
+            if (fileSystemChangeInfo == null)
+            {
+                throw new ArgumentNullException(nameof(fileSystemChangeInfo));
+            }
+
+            lock (_syncobject)
+            {
+                if (_changes.ContainsKey(fileSystemChangeInfo.FullPath))
+                {
+                    _changes.Remove(fileSystemChangeInfo.FullPath);
+                }
+            }
+        }
+
+        public void RemoveChanges(IEnumerable<FileSystemChangeInformation> fileSystemChanges)
+        {
+            if (fileSystemChanges == null)
+            {
+                throw new ArgumentNullException(nameof(fileSystemChanges));
+            }
+
+            lock (_syncobject)
+            {
+                foreach (var changeInfo in fileSystemChanges)
+                {
+                    if (_changes.ContainsKey(changeInfo.FullPath))
+                    {
+                        _changes.Remove(changeInfo.FullPath);
+                    }
+                }
+            }
+        }
+
         public void ClearChanges()
         {
             lock (_syncobject)
@@ -44,5 +80,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 _changes.Clear();
             }
         }
+
     }
 }

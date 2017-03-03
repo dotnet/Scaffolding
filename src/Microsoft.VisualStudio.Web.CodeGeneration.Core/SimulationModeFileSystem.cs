@@ -1,9 +1,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 
@@ -16,6 +20,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     /// </summary>
     public class SimulationModeFileSystem : IFileSystem
     {
+
+#if NET451
+        private static readonly StringComparison PathComparisonType = StringComparison.OrdinalIgnoreCase;
+#else
+        private static readonly StringComparison PathComparisonType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+#endif
 
         public static SimulationModeFileSystem Instance = new SimulationModeFileSystem();
 
@@ -34,6 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
+        #region File operations
         public async Task AddFileAsync(string outputPath, Stream sourceStream)
         {
             using (var reader = new StreamReader(sourceStream))
@@ -43,33 +56,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
-        public void CreateDirectory(string path)
-        {
-            if (!DirectoryExists(path))
-            {
-                FileSystemChangeInformation addDirectoryInformation = new FileSystemChangeInformation()
-                {
-                    FullPath = path,
-                    FileSystemChangeType = FileSystemChangeType.AddDirectory
-                };
-
-                FileSystemChangeTracker.AddChange(addDirectoryInformation);
-            }
-        }
-
-        public bool DirectoryExists(string path)
-        {
-            return Directory.Exists(path);
-        }
-
-        public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
-        {
-            return Directory.EnumerateFiles(path, searchPattern, searchOption);
-        }
-
         public bool FileExists(string path)
         {
-            return File.Exists(path);
+            return File.Exists(path)
+                && (!FileSystemChanges.Any(
+                    f => f.FullPath.Equals(path, PathComparisonType)
+                        && f.FileSystemChangeType == FileSystemChangeType.DeleteFile));
         }
 
         public void MakeFileWritable(string path)
@@ -82,11 +74,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public string ReadAllText(string path)
         {
-            return File.ReadAllText(path);
+            var text = FileSystemChanges
+                .FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType))
+                ?.FileContents;
+
+            return text ?? File.ReadAllText(path);
         }
 
         public void WriteAllText(string path, string contents)
         {
+            if (!DirectoryExists(Path.GetDirectoryName(path)))
+            {
+                throw new IOException($"Could not find a part of the path '{path}'");
+            }
+
             var fileWriteInformation = new FileSystemChangeInformation()
             {
                 FullPath = path,
@@ -100,6 +101,242 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             FileSystemChangeTracker.AddChange(fileWriteInformation);
+        }
+
+        public void DeleteFile(string path)
+        {
+            if (!FileExists(path))
+            {
+                throw new IOException($"Could not find a part of the path '{path}'");
+            }
+
+            var change = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType)
+                && f.FileSystemChangeType == FileSystemChangeType.AddFile);
+
+            if (change != null)
+            {
+                FileSystemChangeTracker.RemoveChange(change);
+            }
+            else
+            {
+                FileSystemChangeTracker.AddChange(new FileSystemChangeInformation()
+                {
+                    FullPath = path,
+                    FileSystemChangeType = FileSystemChangeType.DeleteFile
+                });
+            }
+
+        }
+        #endregion
+
+        #region Directory Operations
+        public void CreateDirectory(string path)
+        {
+            if (!DirectoryExists(path))
+            {
+                var change = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType)
+                    && f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory);
+
+                if (change != null)
+                {
+                    // If the directory was deleted, just remove the change.
+                    // The directory could have been deleted to remove its children then added back.
+                    FileSystemChangeTracker.RemoveChange(change);
+                }
+                else
+                {
+                    FileSystemChangeInformation addDirectoryInformation = new FileSystemChangeInformation()
+                    {
+                        FullPath = path,
+                        FileSystemChangeType = FileSystemChangeType.AddDirectory
+                    };
+
+                    FileSystemChangeTracker.AddChange(addDirectoryInformation);
+                }
+
+                var deletedParents = FileSystemChanges.Where(f => path.StartsWith(f.FullPath) && f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory);
+                foreach(var deletedParent in deletedParents)
+                {
+                    FileSystemChangeTracker.RemoveChange(deletedParent);
+                }
+
+                // Add parents if necessary.
+                var root = string.Empty;
+                foreach (var pathPart in path.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    root = Path.Combine(root, pathPart);
+                    if (!DirectoryExists(root))
+                    {
+                        FileSystemChangeInformation addDirectoryInformation = new FileSystemChangeInformation()
+                        {
+                            FullPath = root,
+                            FileSystemChangeType = FileSystemChangeType.AddDirectory
+                        };
+
+                        FileSystemChangeTracker.AddChange(addDirectoryInformation);
+                    }
+                }
+            }
+        }
+
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path)
+                && (!FileSystemChanges.Any(
+                        f => f.FullPath.Equals(path, PathComparisonType)
+                            && f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory));
+        }
+
+        public void RemoveDirectory(string path, bool recursive)
+        {
+            if (!DirectoryExists(path))
+            {
+                throw new IOException($"Could not find a part of the path '{path}'");
+            }
+
+            var change = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType));
+
+            var subDirectoryChanges = FileSystemChanges.Where(f => f.FullPath.StartsWith(path, PathComparisonType));
+            if (!recursive) {
+                if (change != null && change.FileSystemChangeType == FileSystemChangeType.AddDirectory)
+                {
+                    if (subDirectoryChanges.Any())
+                    {
+                        throw new IOException($"The directory is not empty : '{path}'");
+                    }
+
+                    FileSystemChangeTracker.RemoveChange(change);
+                }
+                else
+                {
+                    if (EnumerateFiles(path, "*", SearchOption.AllDirectories).Any()
+                        || EnumerateDirectories(path, "*", SearchOption.AllDirectories).Any())
+                    {
+                        throw new IOException($"The directory is not empty : '{path}'");
+                    }
+                }
+            }
+            else
+            {
+                if (change != null && change.FileSystemChangeType == FileSystemChangeType.AddDirectory)
+                {
+                    // All changes here then should be just additions.
+                    FileSystemChangeTracker.RemoveChanges(subDirectoryChanges);
+                }
+                else
+                {
+                    var files = EnumerateFiles(path, "*", SearchOption.AllDirectories);
+                    foreach(var file in files)
+                    {
+                        DeleteFile(file);
+                    }
+
+                    var subDirs = EnumerateDirectories(path, "*", SearchOption.AllDirectories);
+                    foreach(var subDir in subDirs)
+                    {
+                        RemoveDirectory(subDir, false);
+                    }
+                }
+            }
+
+        }
+
+        private IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+        {
+            if(!DirectoryExists(path))
+            {
+                throw new IOException($"Could not find a part of the path '{path}'");
+            }
+
+            var dirsOnDisk = Directory.Exists(path)
+                ? Directory.EnumerateDirectories(path, searchPattern, searchOption)
+                : new List<string>();
+
+            IEnumerable<FileSystemChangeInformation> changedDirs = GetChangesFromDirectory(
+                path,
+                searchOption,
+                f=>(f.FileSystemChangeType == FileSystemChangeType.AddDirectory || f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory));
+
+            List<string> enumeratedDirs = new List<string>(dirsOnDisk);
+
+            foreach (var changedDir in changedDirs)
+            {
+                if (changedDir.FileSystemChangeType == FileSystemChangeType.AddDirectory
+                    && MatchesPattern(Path.GetFileName(changedDir.FullPath), searchPattern))
+                {
+                    enumeratedDirs.Add(changedDir.FullPath);
+                }
+                else if (changedDir.FileSystemChangeType == FileSystemChangeType.RemoveDirectory)
+                {
+                    enumeratedDirs.Remove(changedDir.FullPath);
+                }
+            }
+
+            return enumeratedDirs;
+        }
+
+        public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
+        {
+            if (!DirectoryExists(path))
+            {
+                throw new IOException($"Could not find a part of the path '{path}'");
+            }
+
+            var filesOnDisk = Directory.Exists(path)
+                ? Directory.EnumerateFiles(path, searchPattern, searchOption)
+                : new List<string>();
+
+            IEnumerable<FileSystemChangeInformation> changedFiles = GetChangesFromDirectory(
+                path,
+                searchOption,
+                f => f.FileSystemChangeType == FileSystemChangeType.AddFile || f.FileSystemChangeType == FileSystemChangeType.DeleteFile);
+
+            List<string> enumeratedFiles = new List<string>(filesOnDisk);
+
+            foreach (var changedFile in changedFiles)
+            {
+                if (changedFile.FileSystemChangeType == FileSystemChangeType.AddFile
+                    && MatchesPattern(Path.GetFileName(changedFile.FullPath), searchPattern))
+                {
+                    enumeratedFiles.Add(changedFile.FullPath);
+                }
+                else if (changedFile.FileSystemChangeType == FileSystemChangeType.DeleteFile)
+                {
+                    enumeratedFiles.Remove(changedFile.FullPath);
+                }
+
+            }
+
+            return enumeratedFiles;
+        }
+        #endregion
+
+        private IEnumerable<FileSystemChangeInformation> GetChangesFromDirectory(
+            string path,
+            SearchOption searchOption,
+            Func<FileSystemChangeInformation, bool> changeTypeFilter)
+        {
+            if (searchOption == SearchOption.AllDirectories)
+            {
+                return FileSystemChanges.Where(
+                    f => Path.GetDirectoryName(f.FullPath)
+                        .StartsWith(path, PathComparisonType)
+                        && changeTypeFilter(f));
+            }
+            else
+            {
+                return FileSystemChanges.Where(
+                    f => Path.GetDirectoryName(f.FullPath)
+                        .Equals(path, PathComparisonType)
+                        && changeTypeFilter(f));
+            }
+        }
+
+
+        private bool MatchesPattern(string fileName, string searchPattern)
+        {
+            Regex rx = new Regex(Regex.Escape(searchPattern).Replace("\\*", ".*").Replace("\\?", "."));
+            return rx.IsMatch(fileName);
         }
     }
 }

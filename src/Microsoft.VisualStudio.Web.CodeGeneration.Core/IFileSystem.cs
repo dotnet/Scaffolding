@@ -30,5 +30,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         Task AddFileAsync(string outputPath, Stream sourceStream);
 
         void CreateDirectory(string path);
+
+        void DeleteFile(string path);
+
+        void RemoveDirectory(string path, bool removeIfNotEmpty);
     }
 }

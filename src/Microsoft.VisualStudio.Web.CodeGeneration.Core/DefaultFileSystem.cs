@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -27,6 +28,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         public void CreateDirectory(string path)
         {
             Directory.CreateDirectory(path);
+        }
+
+        public void DeleteFile(string path)
+        {
+            File.Delete(path);
         }
 
         public bool DirectoryExists(string path)
@@ -58,6 +64,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         public string ReadAllText(string path)
         {
             return File.ReadAllText(path);
+        }
+
+        public void RemoveDirectory(string path, bool recursive)
+        {
+            Directory.Delete(path, recursive);
         }
 
         public void WriteAllText(string path, string contents)

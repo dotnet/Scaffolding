@@ -79,5 +79,31 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
         {
             _folders.Add(path);
         }
+
+        public void DeleteFile(string path)
+        {
+            if (_files.ContainsKey(path))
+            {
+                _files.Remove(path);
+            }
+        }
+
+        public void RemoveDirectory(string path, bool removeIfNotEmpty)
+        {
+            if (!removeIfNotEmpty
+                && (_folders.Any(f =>f.StartsWith(path) && !f.Equals(path))
+                    || _files.Keys.Any(f => f.StartsWith(path))))
+            {
+                throw new IOException($"Directory not empty: {path}");
+            }
+
+            _folders.RemoveWhere(folder => folder.StartsWith(path));
+
+            var subFiles = _files.Keys.Where(f => f.StartsWith(path));
+            foreach(var subFile in subFiles)
+            {
+                _files.Remove(subFile);
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class CodeGeneratorDescriptor
     {
+        private const string GenerateCodeMethodName = "GenerateCode";
         private readonly TypeInfo _codeGeneratorType;
         private readonly IServiceProvider _serviceProvider;
         private ActionDescriptor _codeGeneratorAction;
@@ -48,17 +49,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 if (_codeGeneratorAction == null)
                 {
                     var candidates = _codeGeneratorType
-                        .GetDeclaredMethods("GenerateCode")
+                        .GetDeclaredMethods(GenerateCodeMethodName)
                         .Where(mi => IsValidAction(mi));
 
                     var count = candidates.Count();
                     if (count == 0)
                     {
-                        throw new InvalidOperationException(string.Format(MessageStrings.MethodNotFound ,"GenerateCode", _codeGeneratorType.FullName));
+                        throw new InvalidOperationException(string.Format(MessageStrings.MethodNotFound , GenerateCodeMethodName, _codeGeneratorType.FullName));
                     }
                     if (count > 1)
                     {
-                        throw new InvalidOperationException(string.Format(MessageStrings.MultipleMethodsFound, "GenerateCode", _codeGeneratorType.FullName));
+                        throw new InvalidOperationException(string.Format(MessageStrings.MultipleMethodsFound, GenerateCodeMethodName, _codeGeneratorType.FullName));
                     }
 
                     _codeGeneratorAction = new ActionDescriptor(this, candidates.First());

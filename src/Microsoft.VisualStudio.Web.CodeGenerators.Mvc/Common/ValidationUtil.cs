@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             if (count > 1)
             {
                 throw new ArgumentException(string.Format(
-                    "Multiple types matching the name {0} exist:{1}, please use a fully qualified name",
+                    MessageStrings.MultipleTypesMatchingName,
                     typeName,
                     string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
             }

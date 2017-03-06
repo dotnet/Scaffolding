@@ -117,8 +117,23 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddedController" xml:space="preserve">
+    <value>Added Controller : '{0}'.</value>
+  </data>
+  <data name="AdditionalStepsRequired" xml:space="preserve">
+    <value>There are probably still some manual steps required.</value>
+  </data>
+  <data name="CheckoutReadMe" xml:space="preserve">
+    <value>Checkout the '{0}' file that got generated.</value>
+  </data>
   <data name="ControllerNameRequired" xml:space="preserve">
     <value>Controller Name is required</value>
+  </data>
+  <data name="DbContextOptionDesc" xml:space="preserve">
+    <value>DbContext class to use.</value>
+  </data>
+  <data name="DefaultLayoutSwitchDesc" xml:space="preserve">
+    <value>Switch to specify that default layout should be used for the views.</value>
   </data>
   <data name="EmptyControllerNameRequired" xml:space="preserve">
     <value>Controller name is required for an Empty Controller</value>
@@ -126,17 +141,47 @@
   <data name="FileExists_useforce" xml:space="preserve">
     <value>The file {0} exists, use -f option to overwrite</value>
   </data>
+  <data name="ForceOptionDesc" xml:space="preserve">
+    <value>Specify whether to overwrite existing files.</value>
+  </data>
+  <data name="InstallPackageMessage" xml:space="preserve">
+    <value>Please install the below packages to your project:</value>
+  </data>
   <data name="InvalidNamespaceName" xml:space="preserve">
     <value>The namespace name '{0}' is not valid.</value>
   </data>
+  <data name="LayoutOptionsDesc" xml:space="preserve">
+    <value>Custom Layout page to use.</value>
+  </data>
+  <data name="ModelClassOptionDesc" xml:space="preserve">
+    <value>Model class to use.</value>
+  </data>
+  <data name="MultipleTypesMatchingName" xml:space="preserve">
+    <value>Multiple types matching the name {0} exist:{1}, please use a fully qualified name"</value>
+  </data>
+  <data name="NamespaceOptionDesc" xml:space="preserve">
+    <value>Specify the name of the namespace to use for the generated controller.</value>
+  </data>
+  <data name="OutDirOptionDesc" xml:space="preserve">
+    <value>Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder.</value>
+  </data>
   <data name="ProvideValidArgument" xml:space="preserve">
     <value>Please provide a valid {0}</value>
+  </data>
+  <data name="ReadmeGenerationFailed" xml:space="preserve">
+    <value>Failed to generate a readme: {0}</value>
   </data>
   <data name="ScaffoldingSuccessful_unregistered" xml:space="preserve">
     <value>Scaffolding generated all the code but the new context created could be registered using dependency injection.</value>
   </data>
   <data name="Scaffolding_additionalSteps" xml:space="preserve">
     <value>There may be additional steps required for the generated code to work. Refer to &lt;forward-link&gt;</value>
+  </data>
+  <data name="ScriptsOptionDesc" xml:space="preserve">
+    <value>Switch to specify whether to reference script libraries in the generated views.</value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value>Failed to generate readme file at '{0}'.</value>
   </data>
   <data name="TemplateNameRequired" xml:space="preserve">
     <value>The TemplateName cannot be empty</value>
@@ -148,6 +193,6 @@
     <value>Validation succeded but model type not set</value>
   </data>
   <data name="ViewNameRequired" xml:space="preserve">
-    <value>The ViewName cannot be empty"</value>
+    <value>The ViewName cannot be empty.</value>
   </data>
 </root>

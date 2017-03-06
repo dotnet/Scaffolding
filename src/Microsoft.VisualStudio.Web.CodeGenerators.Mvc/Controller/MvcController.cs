@@ -49,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
             var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);
-            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+            Logger.LogMessage(string.Format(MessageStrings.AddedController, outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)));
 
             await layoutDependencyInstaller.InstallDependencies();
         }

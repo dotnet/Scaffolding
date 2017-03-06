@@ -68,9 +68,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             if (nearestFramework == null)
             {
                 // This should never happen as long as we dispatch correctly.
-                var msg = "Could not find a compatible framework to execute."
+                var msg = Resources.NoCompatibleFrameworks
                     + Environment.NewLine
-                    + $"Available frameworks in project:{string.Join($"{Environment.NewLine} -", frameworksInProject.Select(f => f.GetShortFolderName()))}";
+                    + string.Format(Resources.AvailableFrameworks, string.Join($"{Environment.NewLine} -", frameworksInProject.Select(f => f.GetShortFolderName())));
                 throw new InvalidOperationException(msg);
             }
 

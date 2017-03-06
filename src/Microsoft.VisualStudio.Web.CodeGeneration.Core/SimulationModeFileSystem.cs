@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -85,7 +86,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             if (!DirectoryExists(Path.GetDirectoryName(path)))
             {
-                throw new IOException($"Could not find a part of the path '{path}'");
+                throw new IOException(string.Format(MessageStrings.PathNotFound, path));
             }
 
             var fileWriteInformation = new FileSystemChangeInformation()
@@ -107,7 +108,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             if (!FileExists(path))
             {
-                throw new IOException($"Could not find a part of the path '{path}'");
+                throw new IOException(string.Format(MessageStrings.PathNotFound, path));
             }
 
             var change = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType)
@@ -191,7 +192,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             if (!DirectoryExists(path))
             {
-                throw new IOException($"Could not find a part of the path '{path}'");
+                throw new IOException(string.Format(MessageStrings.PathNotFound, path));
             }
 
             var change = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType));
@@ -202,7 +203,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     if (subDirectoryChanges.Any())
                     {
-                        throw new IOException($"The directory is not empty : '{path}'");
+                        throw new IOException(string.Format(MessageStrings.DirectoryNotEmpty, path));
                     }
 
                     FileSystemChangeTracker.RemoveChange(change);
@@ -212,7 +213,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                     if (EnumerateFiles(path, "*", SearchOption.AllDirectories).Any()
                         || EnumerateDirectories(path, "*", SearchOption.AllDirectories).Any())
                     {
-                        throw new IOException($"The directory is not empty : '{path}'");
+                        throw new IOException(string.Format(MessageStrings.DirectoryNotEmpty, path));
                     }
                 }
             }
@@ -245,7 +246,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             if(!DirectoryExists(path))
             {
-                throw new IOException($"Could not find a part of the path '{path}'");
+                throw new IOException(string.Format(MessageStrings.PathNotFound, path));
             }
 
             var dirsOnDisk = Directory.Exists(path)
@@ -279,7 +280,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             if (!DirectoryExists(path))
             {
-                throw new IOException($"Could not find a part of the path '{path}'");
+                throw new IOException(string.Format(MessageStrings.PathNotFound, path));
             }
 
             var filesOnDisk = Directory.Exists(path)

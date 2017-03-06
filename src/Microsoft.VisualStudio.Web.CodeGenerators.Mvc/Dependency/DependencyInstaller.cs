@@ -83,15 +83,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 
                 if (isReadMe)
                 {
-                    Logger.LogMessage("There are probably still some manual steps required");
-                    Logger.LogMessage("Checkout the " + Constants.ReadMeOutputFileName + " file that got generated");
+                    Logger.LogMessage(MessageStrings.AdditionalStepsRequired);
+                    Logger.LogMessage(string.Format(MessageStrings.CheckoutReadMe, Constants.ReadMeOutputFileName));
                 }
             }
         }
 
         private string GetMsBuildMissingDependencyReadMeText(IEnumerable<PackageMetadata> missingDepdencies)
         {
-            var contentBuilder = new StringBuilder("Please install the below packages to your project:");
+            var contentBuilder = new StringBuilder(MessageStrings.InstallPackageMessage);
             foreach (var dependency in missingDepdencies)
             {
                 contentBuilder.Append($"{Environment.NewLine}    {dependency.Name} :: {dependency.Version}");

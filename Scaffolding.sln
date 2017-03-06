@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26214.1
+VisualStudioVersion = 15.0.26228.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4057ACF-27F0-4724-963B-44548B6BC4E9}"
 EndProject
@@ -19,8 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		build.ps1 = build.ps1
 		build.sh = build.sh
+		build\common.props = build\common.props
 		CONTRIBUTING.md = CONTRIBUTING.md
+		build\dependencies.props = build\dependencies.props
 		dir = dir
+		build\Key.snk = build\Key.snk
 		LICENSE.txt = LICENSE.txt
 		makefile.shade = makefile.shade
 		NuGet.config = NuGet.config

@@ -21,10 +21,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private static bool _isNoBuild;
 
         private const string APPNAME = "Code Generation";
-        private const string APP_DESC = "Code generation for Asp.net Core";
         private const string TOOL_NAME = "dotnet-aspnet-codegenerator";
         private const string DESIGN_TOOL_NAME = "dotnet-aspnet-codegenerator-design";
-        private const string PROJECT_JSON_SUPPORT_VERSION = "1.0.0-preview2-update1";
+        private const string PROJECT_JSON_SUPPORT_VERSION = "1.0.0-preview4-final";
         private static ScaffoldingServer server;
 
         public static void Main(string[] args)
@@ -63,15 +62,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var app = new CommandLineApplication(false)
             {
                 Name = APPNAME,
-                Description = APP_DESC
+                Description = Resources.AppDesc
             };
 
             // Define app Options;
             app.HelpOption("-h|--help");
-            var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
-            var packagesPath = app.Option("-n|--nuget-package-dir", "Path to check for Nuget packages", CommandOptionType.SingleValue);
-            var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
-            var framework = app.Option("-tfm|--target-framework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
+            var projectPath = app.Option("-p|--project", Resources.ProjectPathOptionDesc, CommandOptionType.SingleValue);
+            var packagesPath = app.Option("-n|--nuget-package-dir", "", CommandOptionType.SingleValue);
+            var appConfiguration = app.Option("-c|--configuration", Resources.ConfigurationOptionDesc, CommandOptionType.SingleValue);
+            var framework = app.Option("-tfm|--target-framework", Resources.TargetFrameworkOptionDesc, CommandOptionType.SingleValue);
             var buildBasePath = app.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
             var dependencyCommand = app.Option("--no-dispatch", "", CommandOptionType.NoValue);
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
@@ -175,7 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             if (string.IsNullOrEmpty(dotnetCodeGenInsideManPath))
             {
-                throw new InvalidOperationException("Please add Microsoft.VisualStudio.Web.CodeGeneration.Design package to the project as a NuGet package reference.");
+                throw new InvalidOperationException(Resources.AddDesignPackage);
             }
 
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
@@ -213,7 +212,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     .Build();
             }
 
-            throw new InvalidOperationException($"{projectFileFinder.ProjectFilePath} is not a Valid MSBuild project file.");
+            throw new InvalidOperationException(string.Format(Resources.InvalidMsBuildProjectFile, projectFileFinder.ProjectFilePath));
         }
 
         private static string GetTargetsLocation()
@@ -237,7 +236,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private static int Build(ILogger logger, string projectPath, string configuration, NuGetFramework frameworkToUse, string buildBasePath)
         {
 
-            logger.LogMessage("Building project ...");
+            logger.LogMessage(Resources.BuildingProject);
             var buildResult = DotNetBuildCommandHelper.Build(
                 projectPath,
                 configuration,
@@ -248,7 +247,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 //Build failed. 
                 // Stop the process here. 
-                logger.LogMessage("Build Failed");
+                logger.LogMessage(Resources.BuildFailed);
                 logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
                 logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
             }

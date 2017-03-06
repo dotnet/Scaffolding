@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -55,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException("There was an error attempting to create an instace of model for GenerateCode method: " + ex.Message);
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelCreationFailed, ex.Message));
                 }
 
                 foreach (var param in ActionDescriptor.Parameters)

@@ -84,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             };
 
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);
-            Logger.LogMessage("Added Controller : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+            Logger.LogMessage(string.Format(MessageStrings.AddedController, outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)));
 
             await GenerateViewsIfRequired(controllerGeneratorModel, modelTypeAndContextModel, templateModel.ControllerRootName);
 

@@ -100,8 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
             catch (Exception ex)
             {
-                _logger.LogMessage("Error running dotnet restore");
-                _logger.LogMessage(ex.ToString());
+                _logger.LogMessage(string.Format(MessageStrings.DotNetRestoreError, ex.ToString()));
             }
         }
 
@@ -136,8 +135,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             foreach (var package in packages)
             {
-                _logger.LogMessage("Adding dependency " + package.Name +
-                    " of version " + package.Version + " to the application.");
+                _logger.LogMessage(string.Format(MessageStrings.AddDependency, package.Name, package.Version));
 
                 root[DependenciesNodeName][package.Name] = package.Version;
             }

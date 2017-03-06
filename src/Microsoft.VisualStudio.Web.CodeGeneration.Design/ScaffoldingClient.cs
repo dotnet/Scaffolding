@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             }
             else
             {
-                throw new InvalidOperationException($"Could not connect to port {_port}");
+                throw new InvalidOperationException(string.Format(Resources.ConnectToServerError, _port));
             }
         }
         public bool Send(Message message)

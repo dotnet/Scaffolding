@@ -117,61 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddDependency" xml:space="preserve">
-    <value>Adding dependency '{0}' version '{1}'.</value>
+  <data name="AppDesc" xml:space="preserve">
+    <value>Code generation for Asp.net Core</value>
   </data>
-  <data name="CodeGeneratorInstanceCreationError" xml:space="preserve">
-    <value>There was an error creating the code generator instance: {0}\r\n{1}</value>
+  <data name="ConfigurationOptionDesc" xml:space="preserve">
+    <value>Configuration for the project (Possible values: Debug/ Release)</value>
   </data>
-  <data name="CodeGeneratorNotFound" xml:space="preserve">
-    <value>No code generators found with the name '{0}'</value>
+  <data name="ConnectToServerError" xml:space="preserve">
+    <value>Could not connect to port {0}.</value>
   </data>
-  <data name="DirectoryNotEmpty" xml:space="preserve">
-    <value>The directory is not empty : '{0}'</value>
+  <data name="ProjectInformationError" xml:space="preserve">
+    <value>Could not get ProjectInformation.</value>
   </data>
-  <data name="DnuNotFound" xml:space="preserve">
-    <value>Could not find dotnet.exe on path. </value>
+  <data name="ProjectPathOptionDesc" xml:space="preserve">
+    <value>Path to .csproj file in the project.</value>
   </data>
-  <data name="DotNetRestoreError" xml:space="preserve">
-    <value>There was an error running 'dotnet restore' : '{0}'</value>
+  <data name="SimulationModeOptionDesc" xml:space="preserve">
+    <value>Specifies whether to persist any file changes.</value>
   </data>
-  <data name="FileNotFound" xml:space="preserve">
-    <value>The provided file '{0}' does not exist. This method expects a fully qualified path of an existing file.</value>
-  </data>
-  <data name="FileNotFoundInFolders" xml:space="preserve">
-    <value>A file matching the name {0} was not found within any of the folders: {1}</value>
-  </data>
-  <data name="MethodNotFound" xml:space="preserve">
-    <value>{0} method with a model parameter is not found in class: {1}</value>
-  </data>
-  <data name="ModelCreationFailed" xml:space="preserve">
-    <value>There was an error attempting to create an instace of model for GenerateCode method: {0}</value>
-  </data>
-  <data name="MultipleCodeGeneratorsFound" xml:space="preserve">
-    <value>Multiple code generators found matching the name '{0}'</value>
-  </data>
-  <data name="MultipleFilesFound" xml:space="preserve">
-    <value>Multiple files with name {0} found within {1}</value>
-  </data>
-  <data name="MultipleMethodsFound" xml:space="preserve">
-    <value>Multiple {0} methods with a model parameter are found in class: {1}</value>
-  </data>
-  <data name="NullParamError" xml:space="preserve">
-    <value>Parameter '{0}' cannot be null or empty.</value>
-  </data>
-  <data name="PathNotFound" xml:space="preserve">
-    <value>Could not find a part of the path '{0}'</value>
-  </data>
-  <data name="TemplateFileNotFound" xml:space="preserve">
-    <value>Template file {0} not found within search paths {1}</value>
-  </data>
-  <data name="TemplateProcessingError" xml:space="preserve">
-    <value>There was an error running the template {0}: {1}</value>
-  </data>
-  <data name="UnableToRunRestore" xml:space="preserve">
-    <value>Unable to run restore.</value>
-  </data>
-  <data name="UnexpectedTypeLibraryForTemplates" xml:space="preserve">
-    <value>Unexpected type of library information for template folders</value>
+  <data name="TargetFrameworkOptionDesc" xml:space="preserve">
+    <value>Target Framework to use. (Short folder name of the tfm. eg. net451)</value>
   </data>
 </root>

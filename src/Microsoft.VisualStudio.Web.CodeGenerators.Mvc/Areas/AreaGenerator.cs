@@ -72,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas
             }
             catch (Exception ex)
             {
-                _logger.LogMessage($"Failed to generate a readme: {ex.Message}");
+                _logger.LogMessage(string.Format(MessageStrings.ReadmeGenerationFailed, ex.Message));
                 throw ex.Unwrap(_logger);
             }
         }

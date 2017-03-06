@@ -117,6 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddedDbContext" xml:space="preserve">
+    <value>Added DbContext : '{0}'</value>
+  </data>
+  <data name="AdditionalSteps" xml:space="preserve">
+    <value>However there may be additional steps required for the generted code to work properly, refer to documentation &lt;forward_link&gt;.</value>
+  </data>
+  <data name="CompilingInMemory" xml:space="preserve">
+    <value>Attempting to compile the application in memory.</value>
+  </data>
+  <data name="CompilingWithAddedDbContext" xml:space="preserve">
+    <value>Attempting to compile the application in memory with the added DbContext.</value>
+  </data>
+  <data name="CompilingWithModifiedDbContext" xml:space="preserve">
+    <value>Attempting to compile the application in memory with the modified DbContext.</value>
+  </data>
   <data name="DbContextCreationError" xml:space="preserve">
     <value>There was an error creating a DbContext :{0}</value>
   </data>
@@ -129,11 +144,20 @@
   <data name="DbContextTypeNotFound" xml:space="preserve">
     <value>Could not get the reflection type for DbContext : {0}</value>
   </data>
+  <data name="EFSqlServerPackageNotAvailable" xml:space="preserve">
+    <value>Please install the package 'Microsoft.EntityFrameworkCore.SqlServer' and retry again.</value>
+  </data>
   <data name="EnsureStartupClassExists" xml:space="preserve">
     <value>Make sure there is a Startup class and a ConfigureServices method and Configuration property in it.</value>
   </data>
   <data name="FailedToEditStartup" xml:space="preserve">
     <value>Scaffolding failed to edit Startup class to register the new Context using Dependency Injection.</value>
+  </data>
+  <data name="GeneratingDbContext" xml:space="preserve">
+    <value>Generating a new DbContext class '{0}'</value>
+  </data>
+  <data name="GettingEFMetadata" xml:space="preserve">
+    <value>Attempting to figure out the EntityFramework metadata for the model and DbContext: '{0}'</value>
   </data>
   <data name="ModelTypeCouldNotBeAdded" xml:space="preserve">
     <value>Could not add Model type '{0}' to DbContext '{1}'. Please make sure that '{1}' has a DbSet property for '{0}'.</value>
@@ -143,6 +167,9 @@
   </data>
   <data name="NoEntityOfTypeInDbContext" xml:space="preserve">
     <value>There is no entity type {0} on DbContext {1}</value>
+  </data>
+  <data name="PrimaryKeyNotFound" xml:space="preserve">
+    <value>Primary key not found.</value>
   </data>
   <data name="ScaffoldingNeedsToRerun" xml:space="preserve">
     <value>Scaffolding should be run again since it needs to reload the application with the added package reference - just run the previous command one more time.</value>

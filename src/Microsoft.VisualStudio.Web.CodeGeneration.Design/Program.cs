@@ -16,11 +16,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
     public class Program
     {
         public const string TOOL_NAME = "dotnet-aspnet-codegenerator-design";
+        private const string APPNAME = "Code Generation";
 
         private static ConsoleLogger _logger;
-
-        private const string APPNAME = "Code Generation";
-        private const string APP_DESC = "Code generation for Asp.net Core";
 
         public static void Main(string[] args)
         {
@@ -36,19 +34,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var app = new CommandLineApplication(false)
             {
                 Name = APPNAME,
-                Description = APP_DESC
+                Description = Resources.AppDesc
             };
 
             // Define app Options;
             app.HelpOption("-h|--help");
-            var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
-            var appConfiguration = app.Option("-c|--configuration", "Configuration for the project (Possible values: Debug/ Release)", CommandOptionType.SingleValue);
-            var framework = app.Option("-tfm|--target-framework", "Target Framework to use. (Short folder name of the tfm. eg. net451)", CommandOptionType.SingleValue);
+            var projectPath = app.Option("-p|--project", Resources.ProjectPathOptionDesc, CommandOptionType.SingleValue);
+            var appConfiguration = app.Option("-c|--configuration", Resources.ConfigurationOptionDesc, CommandOptionType.SingleValue);
+            var framework = app.Option("-tfm|--target-framework", Resources.TargetFrameworkOptionDesc, CommandOptionType.SingleValue);
             var buildBasePath = app.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
             var dependencyCommand = app.Option("--no-dispatch", "", CommandOptionType.NoValue);
             var port = app.Option("--port-number", "", CommandOptionType.SingleValue);
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
-            var simMode = app.Option("--simulation-mode", "Specifies whether to persist any file changes.", CommandOptionType.NoValue);
+            var simMode = app.Option("--simulation-mode", Resources.SimulationModeOptionDesc, CommandOptionType.NoValue);
 
             app.OnExecute(async () =>
             {
@@ -123,7 +121,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             if (projectInfo == null)
             {
-                throw new InvalidOperationException($"Could not get ProjectInformation.");
+                throw new InvalidOperationException(Resources.ProjectInformationError);
             }
 
             return projectInfo;

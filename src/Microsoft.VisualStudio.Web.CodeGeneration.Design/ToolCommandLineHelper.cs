@@ -9,23 +9,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     internal class ToolCommandLineHelper
     {
-        private const string NO_DISPATCH_FLAG = "--no-dispatch";
-        private const string CONFIGURATION = "--configuration";
-        private const string TARGET_FRAMEWORK = "--target-framework";
-        private const string PROJECT = "--project";
-        private const string NUGET_PACKAGE_DIR = "--nuget-package-dir";
-        private const string BUILD_BASE_PATH = "--build-base-path";
-        private const string DISPATCHER_VERSION = "--dispatcher-version";
-        private const string NO_BUILD = "--no-build";
-        private const string SIM_MODE = "--simulation-mode";
+        private const string NO_DISPATCH_FLAG = "--NO-DISPATCH";
+        private const string CONFIGURATION = "--CONFIGURATION";
+        private const string TARGET_FRAMEWORK = "--TARGET-FRAMEWORK";
+        private const string PROJECT = "--PROJECT";
+        private const string NUGET_PACKAGE_DIR = "--NUGET-PACKAGE-DIR";
+        private const string BUILD_BASE_PATH = "--BUILD-BASE-PATH";
+        private const string DISPATCHER_VERSION = "--DISPATCHER-VERSION";
+        private const string NO_BUILD = "--NO-BUILD";
+        private const string SIM_MODE = "--SIMULATION-MODE";
+        private const string PORT_NUMBER = "--PORT-NUMBER";
 
-        private const string NO_DISPATCH_FLAG_SHORT = "-nd";
-        private const string CONFIGURATION_SHORT = "-c";
-        private const string TARGET_FRAMEWORK_SHORT = "-tfm";
-        private const string PROJECT_SHORT = "-p";
-        private const string NUGET_PACKAGE_DIR_SHORT = "-n";
-        private const string BUILD_BASE_PATH_SHORT = "-b";
-        private const string PORT_NUMBER = "--port-number";
+        private const string NO_DISPATCH_FLAG_SHORT = "-ND";
+        private const string CONFIGURATION_SHORT = "-C";
+        private const string TARGET_FRAMEWORK_SHORT = "-TFM";
+        private const string PROJECT_SHORT = "-P";
+        private const string NUGET_PACKAGE_DIR_SHORT = "-N";
+        private const string BUILD_BASE_PATH_SHORT = "-B";
 
         internal static string[] FilterExecutorArguments(string[] args)
         {
@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             List<string> filteredArgs = new List<string>();
             for (int i = 0; i < args.Length; i++)
             {
-                switch (args[i].ToLower())
+                switch (args[i].ToUpperInvariant())
                 {
                     case NO_DISPATCH_FLAG:
                     case NO_DISPATCH_FLAG_SHORT:

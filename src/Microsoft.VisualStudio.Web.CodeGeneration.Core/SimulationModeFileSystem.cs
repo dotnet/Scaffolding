@@ -182,10 +182,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public bool DirectoryExists(string path)
         {
-            return Directory.Exists(path)
-                && (!FileSystemChanges.Any(
-                        f => f.FullPath.Equals(path, PathComparisonType)
-                            && f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory));
+            var fileSystemChange = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType));
+
+            if (fileSystemChange == null)
+            {
+                return Directory.Exists(path);
+            }
+
+            return (Directory.Exists(path) && !(fileSystemChange.FileSystemChangeType == FileSystemChangeType.RemoveDirectory))
+                || (fileSystemChange.FileSystemChangeType == FileSystemChangeType.AddDirectory);
+                
         }
 
         public void RemoveDirectory(string path, bool recursive)

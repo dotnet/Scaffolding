@@ -106,7 +106,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(string.Format(MessageStrings.ReadmeGenerationFailed, outputPath));
+                throw new InvalidOperationException(string.Format(MessageStrings.ReadmeGenerationFailed, outputPath), ex);
             }
         }
 

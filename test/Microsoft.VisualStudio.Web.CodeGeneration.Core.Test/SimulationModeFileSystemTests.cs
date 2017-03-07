@@ -41,10 +41,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             var fileSystem = new SimulationModeFileSystem();
             var contents = "DummyContents";
             byte[] bytes = Encoding.UTF8.GetBytes(contents);
+            var currentDir = Directory.GetCurrentDirectory();
 
-            await fileSystem.AddFileAsync("DummyOutputPath", new MemoryStream(bytes));
+            await fileSystem.AddFileAsync(Path.Combine(currentDir, "DummyOutputPath.txt"), new MemoryStream(bytes));
 
-            Assert.Equal("DummyOutputPath", fileSystem.FileSystemChanges.First().FullPath);
+            Assert.Equal(Path.Combine(currentDir, "DummyOutputPath.txt"), fileSystem.FileSystemChanges.First().FullPath);
             Assert.Equal("DummyContents", fileSystem.FileSystemChanges.First().FileContents);
             Assert.Equal(FileSystemChangeType.AddFile, fileSystem.FileSystemChanges.First().FileSystemChangeType);
         }

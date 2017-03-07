@@ -2,4 +2,31 @@
   <PropertyGroup>
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
   </PropertyGroup>
+  <!-- AspNetCore Versions -->
+  <PropertyGroup>
+    <AspNetCoreHostingVersion>1.0.2</AspNetCoreHostingVersion>
+    <KestrelVersion>1.0.3</KestrelVersion>
+    <CommandLineUtilsVersion>1.0.1</CommandLineUtilsVersion>
+    <DotNetInternalAbstractionsVersion>1.0.0</DotNetInternalAbstractionsVersion>
+    <DependencyInjectionVersion>1.0.2</DependencyInjectionVersion>
+    <EntityFrameworkCoreVersion>1.0.3</EntityFrameworkCoreVersion>
+    <FileProvidersVersion>1.0.1</FileProvidersVersion>
+    <PlatformAbstractionsVersion>1.0.0</PlatformAbstractionsVersion>
+    <RazorVersion>1.0.2</RazorVersion>
+  </PropertyGroup>
+  <!-- Partner Versions-->
+  <PropertyGroup>
+    <CodeAnalysisVersion>1.3.0</CodeAnalysisVersion>
+    <MicrosoftBuildVersion>15.1.548</MicrosoftBuildVersion>
+    <NewtonSoftVersion>9.0.1</NewtonSoftVersion>
+    <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
+    <NuGetFrameworksLegacyVersion>3.5.0</NuGetFrameworksLegacyVersion>
+    <SystemAppContextVersion>4.1.0</SystemAppContextVersion>
+    <SystemDiagnosticsContractsVersion>4.0.1</SystemDiagnosticsContractsVersion>
+    <SystemDiagnosticsProcessVersion>4.1.0</SystemDiagnosticsProcessVersion>
+    <SystemRuntimeLoaderVersion>4.0.0</SystemRuntimeLoaderVersion>
+    <SystemRuntimeSerializationPrimitivesVersion>4.1.1</SystemRuntimeSerializationPrimitivesVersion>
+    <SystemSecurityCryptographyAlgorithmsVersion>4.2.0</SystemSecurityCryptographyAlgorithmsVersion>
+    <SystemThreadingTasksParallelVersion>4.0.1</SystemThreadingTasksParallelVersion>
+  </PropertyGroup>
 </Project>

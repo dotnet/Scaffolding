@@ -4,23 +4,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class FileSystemChangeTracker : IFileSystemChangeTracker
     {
-        private object _syncobject = new object();
+#if NET451
+        private static readonly StringComparer PathComparisonType = StringComparer.OrdinalIgnoreCase;
+#else
+        private static readonly StringComparer PathComparisonType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            ? StringComparer.OrdinalIgnoreCase
+            : StringComparer.Ordinal;
+#endif
+        private ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
-        private Dictionary<string, FileSystemChangeInformation> _changes = new Dictionary<string, FileSystemChangeInformation>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, FileSystemChangeInformation> _changes = new Dictionary<string, FileSystemChangeInformation>(PathComparisonType);
         public IEnumerable<FileSystemChangeInformation> Changes
         {
             get
             {
-                lock (_syncobject)
-                {
-                    return _changes.Values.ToList();
-                }
+                readerWriterLock.EnterReadLock();
+                var returnvalue = _changes.Values.ToList();
+                readerWriterLock.ExitReadLock();
+                return returnvalue;
             }
         }
 
@@ -32,10 +41,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             // The last change always wins.
-            lock (_syncobject)
-            {
-                _changes[fileSystemChangeInfo.FullPath] = fileSystemChangeInfo;
-            }
+            readerWriterLock.EnterWriteLock();
+            _changes[fileSystemChangeInfo.FullPath] = fileSystemChangeInfo;
+            readerWriterLock.ExitWriteLock();
         }
 
         public void RemoveChange(FileSystemChangeInformation fileSystemChangeInfo)
@@ -45,13 +53,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 throw new ArgumentNullException(nameof(fileSystemChangeInfo));
             }
 
-            lock (_syncobject)
+            readerWriterLock.EnterWriteLock();
+            if (_changes.ContainsKey(fileSystemChangeInfo.FullPath))
             {
-                if (_changes.ContainsKey(fileSystemChangeInfo.FullPath))
-                {
-                    _changes.Remove(fileSystemChangeInfo.FullPath);
-                }
+                _changes.Remove(fileSystemChangeInfo.FullPath);
             }
+            readerWriterLock.ExitWriteLock();
         }
 
         public void RemoveChanges(IEnumerable<FileSystemChangeInformation> fileSystemChanges)
@@ -61,24 +68,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 throw new ArgumentNullException(nameof(fileSystemChanges));
             }
 
-            lock (_syncobject)
+            readerWriterLock.EnterWriteLock();
+            foreach (var changeInfo in fileSystemChanges)
             {
-                foreach (var changeInfo in fileSystemChanges)
+                if (_changes.ContainsKey(changeInfo.FullPath))
                 {
-                    if (_changes.ContainsKey(changeInfo.FullPath))
-                    {
-                        _changes.Remove(changeInfo.FullPath);
-                    }
+                    _changes.Remove(changeInfo.FullPath);
                 }
             }
+            readerWriterLock.ExitWriteLock();
         }
 
         public void ClearChanges()
         {
-            lock (_syncobject)
-            {
-                _changes.Clear();
-            }
+            readerWriterLock.EnterWriteLock();
+            _changes.Clear();
+            readerWriterLock.ExitWriteLock();
         }
 
     }

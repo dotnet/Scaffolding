@@ -14,6 +14,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <packageSources>
         <clear />
         <add key=""local"" value=""" + artifactsDir +  @""" />
+        <add key=""AspNetCoreCiDev"" value=""https://dotnet.myget.org/F/aspnetcore-ci-dev/api/v3/index.json"" />
         <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
         <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
     </packageSources>
@@ -25,8 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
-    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
   </PropertyGroup>
@@ -37,20 +37,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.0.3"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.2.0-preview1-*"" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.0.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.1-*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.1-*"" />
   </ItemGroup>
@@ -83,17 +83,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.1-*"" />
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.1-*"" />
   </ItemGroup>

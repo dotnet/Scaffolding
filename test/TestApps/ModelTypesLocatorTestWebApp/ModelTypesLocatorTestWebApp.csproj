@@ -6,9 +6,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.2.0-preview1-*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.2.0-preview1-*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.2.0-preview1-*" />
   </ItemGroup>
 
 </Project>

@@ -4,15 +4,15 @@
   </PropertyGroup>
   <!-- AspNetCore Versions -->
   <PropertyGroup>
-    <AspNetCoreHostingVersion>1.0.2</AspNetCoreHostingVersion>
-    <KestrelVersion>1.0.3</KestrelVersion>
-    <CommandLineUtilsVersion>1.0.1</CommandLineUtilsVersion>
+    <AspNetCoreHostingVersion>1.2.0-*</AspNetCoreHostingVersion>
+    <KestrelVersion>1.2.0-*</KestrelVersion>
+    <CommandLineUtilsVersion>1.2.0-*</CommandLineUtilsVersion>
     <DotNetInternalAbstractionsVersion>1.0.0</DotNetInternalAbstractionsVersion>
-    <DependencyInjectionVersion>1.0.2</DependencyInjectionVersion>
-    <EntityFrameworkCoreVersion>1.0.3</EntityFrameworkCoreVersion>
-    <FileProvidersVersion>1.0.1</FileProvidersVersion>
-    <PlatformAbstractionsVersion>1.0.0</PlatformAbstractionsVersion>
-    <RazorVersion>1.0.2</RazorVersion>
+    <DependencyInjectionVersion>1.2.0-*</DependencyInjectionVersion>
+    <EntityFrameworkCoreVersion>1.2.0-*</EntityFrameworkCoreVersion>
+    <FileProvidersVersion>1.2.0-*</FileProvidersVersion>
+    <PlatformAbstractionsVersion>1.2.0-*</PlatformAbstractionsVersion>
+    <RazorVersion>1.2.0-*</RazorVersion>
   </PropertyGroup>
   <!-- Partner Versions-->
   <PropertyGroup>
@@ -21,12 +21,12 @@
     <NewtonSoftVersion>9.0.1</NewtonSoftVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
     <NuGetFrameworksLegacyVersion>3.5.0</NuGetFrameworksLegacyVersion>
-    <SystemAppContextVersion>4.1.0</SystemAppContextVersion>
-    <SystemDiagnosticsContractsVersion>4.0.1</SystemDiagnosticsContractsVersion>
-    <SystemDiagnosticsProcessVersion>4.1.0</SystemDiagnosticsProcessVersion>
-    <SystemRuntimeLoaderVersion>4.0.0</SystemRuntimeLoaderVersion>
-    <SystemRuntimeSerializationPrimitivesVersion>4.1.1</SystemRuntimeSerializationPrimitivesVersion>
-    <SystemSecurityCryptographyAlgorithmsVersion>4.2.0</SystemSecurityCryptographyAlgorithmsVersion>
-    <SystemThreadingTasksParallelVersion>4.0.1</SystemThreadingTasksParallelVersion>
+    <SystemAppContextVersion>4.3.0</SystemAppContextVersion>
+    <SystemDiagnosticsContractsVersion>4.3.0</SystemDiagnosticsContractsVersion>
+    <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
+    <SystemRuntimeLoaderVersion>4.3.0</SystemRuntimeLoaderVersion>
+    <SystemRuntimeSerializationPrimitivesVersion>4.3.0</SystemRuntimeSerializationPrimitivesVersion>
+    <SystemSecurityCryptographyAlgorithmsVersion>4.3.0</SystemSecurityCryptographyAlgorithmsVersion>
+    <SystemThreadingTasksParallelVersion>4.3.0</SystemThreadingTasksParallelVersion>
   </PropertyGroup>
 </Project>

@@ -160,23 +160,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     FileSystemChangeTracker.RemoveChange(deletedParent);
                 }
-
-                // Add parents if necessary.
-                var root = string.Empty;
-                foreach (var pathPart in path.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    root = Path.Combine(root, pathPart);
-                    if (!DirectoryExists(root))
-                    {
-                        FileSystemChangeInformation addDirectoryInformation = new FileSystemChangeInformation()
-                        {
-                            FullPath = root,
-                            FileSystemChangeType = FileSystemChangeType.AddDirectory
-                        };
-
-                        FileSystemChangeTracker.AddChange(addDirectoryInformation);
-                    }
-                }
             }
         }
 

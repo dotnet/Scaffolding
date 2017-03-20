@@ -117,31 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppDesc" xml:space="preserve">
-    <value>Code generation for Asp.net Core</value>
+  <data name="AddDirectoryMessage" xml:space="preserve">
+    <value>Add directory: '{0}'</value>
   </data>
-  <data name="ConfigurationOptionDesc" xml:space="preserve">
-    <value>Configuration for the project (Possible values: Debug/ Release)</value>
+  <data name="AddFileMessage" xml:space="preserve">
+    <value>Add File: '{0}'</value>
   </data>
-  <data name="ConnectToServerError" xml:space="preserve">
-    <value>Could not connect to port {0}.</value>
+  <data name="ContentsMessage" xml:space="preserve">
+    <value>Contents: {0}</value>
   </data>
-  <data name="FileSystemChangeMessageNotSupported" xml:space="preserve">
-    <value>Server does not support File System change messages. HostId: '{0}', ProtocolVersion: '{1}'.</value>
+  <data name="DeleteFileMessage" xml:space="preserve">
+    <value>Deleted file: '{0}'</value>
   </data>
-  <data name="ProjectInformationError" xml:space="preserve">
-    <value>Could not get ProjectInformation.</value>
+  <data name="EditFileMessage" xml:space="preserve">
+    <value>Edit File: '{0}'</value>
   </data>
-  <data name="ProjectPathOptionDesc" xml:space="preserve">
-    <value>Path to .csproj file in the project.</value>
+  <data name="EndFileSystemChangeToken" xml:space="preserve">
+    <value>:::End FileSystemChange:::</value>
   </data>
-  <data name="RunWithoutSimulationMode" xml:space="preserve">
-    <value>Please run scaffolding without --simulation-mode switch</value>
+  <data name="InvalidFileSystemChangeMessage" xml:space="preserve">
+    <value>Invalid FileSystemChange message.</value>
   </data>
-  <data name="SimulationModeOptionDesc" xml:space="preserve">
-    <value>Specifies whether to persist any file changes.</value>
+  <data name="InvalidProjectInformationMessage" xml:space="preserve">
+    <value>ProjectInformation Response received is not valid.</value>
   </data>
-  <data name="TargetFrameworkOptionDesc" xml:space="preserve">
-    <value>Target Framework to use. (Short folder name of the tfm. eg. net451)</value>
+  <data name="ProtocolVersionMismatch" xml:space="preserve">
+    <value>The protocol version '{0}' of the message is different than currently handled version '{1}'.</value>
+  </data>
+  <data name="RemoveDirectoryMessage" xml:space="preserve">
+    <value>Deleted directory: '{0}'</value>
+  </data>
+  <data name="StartFileSystemChangeToken" xml:space="preserve">
+    <value>:::Start FileSystemChange:::</value>
   </data>
 </root>

@@ -12,8 +12,11 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\General\**\*.cs">
-      <Link>Shared\%(RecursiveDir)%(FileName)</Link>
+      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
     </Compile>
+    <EmbeddedResource Include="..\Shared\General\**\*.resx">
+      <Link>Shared\%(RecursiveDir)%(FileName).resx</Link>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +46,21 @@
     <EmbeddedResource Update="Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>-->
+
+  <!--<ItemGroup>
+    <Compile Update="MessageStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MessageStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="MessageStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>-->
 

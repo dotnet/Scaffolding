@@ -1,15 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
@@ -50,7 +43,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             app.OnExecute(async () =>
             {
-
                 string project = projectPath.Value();
                 if (string.IsNullOrEmpty(project))
                 {
@@ -62,7 +54,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 var portNumber = int.Parse(port.Value());
                 using (var client = await ScaffoldingClient.Connect(portNumber, logger))
                 {
-                    var projectInformation = GetProjectInformationFromServer(logger, portNumber, client);
+                    var messageOrchestrator = new MessageOrchestrator(client, logger);
+                    var projectInformation = messageOrchestrator.GetProjectInformation();
 
                     var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
                     var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
@@ -72,59 +65,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                         logger,
                         isSimulationMode);
 
-                    var exitCode = executor.Execute((changes) => SendFileSystemChanges(changes, client));
+                    var exitCode = executor.Execute((changes) => messageOrchestrator.SendFileSystemChangeInformation(changes));
 
-                    client.Send(new Message() { MessageType = MessageTypes.Scaffolding_Completed });
+                    messageOrchestrator.SendScaffoldingCompletedMessage();
 
                     return exitCode;
                 }
             });
 
             app.Execute(args);
-        }
-
-        private static void SendFileSystemChanges(IEnumerable<FileSystemChangeInformation> changes, ScaffoldingClient client)
-        {
-            if (changes == null)
-            {
-                return;
-            }
-
-            foreach (var change in changes)
-            {
-                var message = new Message()
-                {
-                    MessageType = MessageTypes.FileSystemChangeInformation
-                };
-                message.Payload = JToken.FromObject(change);
-
-                client.Send(message);
-            }
-        }
-
-        private static IProjectContext GetProjectInformationFromServer(ILogger logger, int portNumber, ScaffoldingClient client)
-        {
-
-            var messageHandler = new ScaffoldingMessageHandler(logger, "ScaffoldingClient");
-            client.MessageReceived += messageHandler.HandleMessages;
-
-            var message = new Message()
-            {
-                MessageType = MessageTypes.ProjectInfoRequest
-            };
-
-            client.Send(message);
-            // Read the project Information
-            client.ReadMessage();
-
-            var projectInfo = messageHandler.ProjectInfo;
-
-            if (projectInfo == null)
-            {
-                throw new InvalidOperationException(Resources.ProjectInformationError);
-            }
-
-            return projectInfo;
         }
     }
 }

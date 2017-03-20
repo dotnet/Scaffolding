@@ -26,6 +26,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private const string PROJECT_JSON_SUPPORT_VERSION = "1.0.0-preview4-final";
         private static ScaffoldingServer server;
 
+        // Wait time after the 'inside_man' process has exited to process any messages.
+        private static readonly int ServerWaitTimeForExit = 3;
+
         public static void Main(string[] args)
         {
 
@@ -128,21 +131,28 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             // Start server
             var server = StartServer(logger, context);
+            try
+            {
+                var command = CreateDipatchCommand(
+                    context,
+                    args,
+                    buildBasePath,
+                    configuration,
+                    frameworkToUse,
+                    server);
 
-            var command = CreateDipatchCommand(
-                context,
-                args,
-                buildBasePath,
-                configuration,
-                frameworkToUse,
-                server);
+                var exitCode = command
+                    .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
+                    .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
+                    .Execute()
+                    .ExitCode;
 
-            var exitCode = command
-                .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
-                .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
-                .Execute()
-                .ExitCode;
-            return exitCode;
+                return exitCode;
+            }
+            finally
+            {
+                server.WaitForExit(TimeSpan.FromSeconds(ServerWaitTimeForExit));
+            }
         }
 
         // Creates a command to execute dotnet-aspnet-codegenerator-design
@@ -258,9 +268,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private static ScaffoldingServer StartServer(ILogger logger, IProjectContext projectInformation)
         {
             server = ScaffoldingServer.Listen(logger);
-            var messageHandler = new ScaffoldingMessageHandler(logger, "Scaffolding_server");
-            messageHandler.ProjectInfo = projectInformation;
-            server.MessageReceived += messageHandler.HandleMessages;
+            server.AddHandler(new ProjectInformationMessageHandler(projectInformation, logger));
+            server.AddHandler(new FileSystemChangeMessageHandler(logger));
             server.Accept();
             return server;
         }

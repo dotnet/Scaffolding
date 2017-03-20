@@ -1,16 +1,24 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
     public class ScaffoldingClient : IDisposable, IMessageSender
     {
+        private static readonly string HostId = typeof(ScaffoldingClient).GetTypeInfo().Assembly.GetName().Name;
+
         private int _port;
         private TcpClient _client;
         private BinaryWriter _writer;
@@ -20,7 +28,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         private bool disposedValue = false; // To detect redundant calls
         private readonly ILogger _logger;
 
-        public event EventHandler<Message> MessageReceived;
+        public ISet<IMessageHandler> MessageHandlers { get; private set; }
+
+        public int CurrentProtocolVersion => 1;
 
         public static async Task<ScaffoldingClient> Connect(int port, ILogger logger)
         {
@@ -62,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             {
                 try
                 {
-                    if (message.MessageType == MessageTypes.Terminate)
+                    if (message.MessageType == MessageTypes.Terminate.Value)
                     {
                         TerminateSessionRequested = true;
                     }
@@ -78,19 +88,58 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             return true;
         }
 
-        public void ReadMessage()
+        public Message CreateMessage(MessageType messageType, object payload, int protocolVersion)
+        {
+            if (messageType == null)
+            {
+                throw new ArgumentNullException(nameof(messageType));
+            }
+
+            return new Message()
+            {
+                MessageType = messageType.Value,
+                HostId = HostId,
+                Payload = payload == null ? null : JToken.FromObject(payload),
+                ProtocolVersion = protocolVersion
+            };
+        }
+
+        public Message ReadMessage()
         {
             try
             {
                 var rawMessage = _reader.ReadString();
                 var message = JsonConvert.DeserializeObject<Message>(rawMessage);
 
-                MessageReceived?.Invoke(this, message);
+                if (MessageHandlers != null)
+                {
+                    foreach (var handler in MessageHandlers)
+                    {
+                        if (handler.HandleMessage(this, message))
+                        {
+                            break;
+                        }
+                    }
+                    // No handler could handle the message.
+                }
+                return message;
             }
             catch (Exception ex)
             {
                 _logger.LogMessage(ex.Message);
                 throw ex;
+            }
+        }
+
+        public void AddHandler(IMessageHandler handler)
+        {
+            if (MessageHandlers == null)
+            {
+                MessageHandlers = new HashSet<IMessageHandler>();
+            }
+            if (!MessageHandlers.Contains(handler))
+            {
+                MessageHandlers.Add(handler);
             }
         }
 

@@ -8,5 +8,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
     public interface IMessageSender
     {
         bool Send(Message message);
+
+        Message CreateMessage(MessageType messageType, object o, int protocolVersion);
     }
 }

@@ -8,11 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
+namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging {
     using System;
     using System.Reflection;
-
-
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,14 +22,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    internal class MessageStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal MessageStrings() {
         }
         
         /// <summary>
@@ -40,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.VisualStudio.Web.CodeGeneration.Design.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.VisualStudio.Web.CodeGeneration.Utils.MessageStrings", typeof(MessageStrings).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -62,83 +61,101 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Code generation for Asp.net Core.
+        ///   Looks up a localized string similar to Add directory: &apos;{0}&apos;.
         /// </summary>
-        internal static string AppDesc {
+        internal static string AddDirectoryMessage {
             get {
-                return ResourceManager.GetString("AppDesc", resourceCulture);
+                return ResourceManager.GetString("AddDirectoryMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configuration for the project (Possible values: Debug/ Release).
+        ///   Looks up a localized string similar to Add File: &apos;{0}&apos;.
         /// </summary>
-        internal static string ConfigurationOptionDesc {
+        internal static string AddFileMessage {
             get {
-                return ResourceManager.GetString("ConfigurationOptionDesc", resourceCulture);
+                return ResourceManager.GetString("AddFileMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not connect to port {0}..
+        ///   Looks up a localized string similar to Contents: {0}.
         /// </summary>
-        internal static string ConnectToServerError {
+        internal static string ContentsMessage {
             get {
-                return ResourceManager.GetString("ConnectToServerError", resourceCulture);
+                return ResourceManager.GetString("ContentsMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Server does not support File System change messages. HostId: &apos;{0}&apos;, ProtocolVersion: &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Deleted file: &apos;{0}&apos;.
         /// </summary>
-        internal static string FileSystemChangeMessageNotSupported {
+        internal static string DeleteFileMessage {
             get {
-                return ResourceManager.GetString("FileSystemChangeMessageNotSupported", resourceCulture);
+                return ResourceManager.GetString("DeleteFileMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not get ProjectInformation..
+        ///   Looks up a localized string similar to Edit File: &apos;{0}&apos;.
         /// </summary>
-        internal static string ProjectInformationError {
+        internal static string EditFileMessage {
             get {
-                return ResourceManager.GetString("ProjectInformationError", resourceCulture);
+                return ResourceManager.GetString("EditFileMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Path to .csproj file in the project..
+        ///   Looks up a localized string similar to :::End FileSystemChange:::.
         /// </summary>
-        internal static string ProjectPathOptionDesc {
+        internal static string EndFileSystemChangeToken {
             get {
-                return ResourceManager.GetString("ProjectPathOptionDesc", resourceCulture);
+                return ResourceManager.GetString("EndFileSystemChangeToken", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please run scaffolding without --simulation-mode switch.
+        ///   Looks up a localized string similar to Invalid FileSystemChange message..
         /// </summary>
-        internal static string RunWithoutSimulationMode {
+        internal static string InvalidFileSystemChangeMessage {
             get {
-                return ResourceManager.GetString("RunWithoutSimulationMode", resourceCulture);
+                return ResourceManager.GetString("InvalidFileSystemChangeMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies whether to persist any file changes..
+        ///   Looks up a localized string similar to ProjectInformation Response received is not valid..
         /// </summary>
-        internal static string SimulationModeOptionDesc {
+        internal static string InvalidProjectInformationMessage {
             get {
-                return ResourceManager.GetString("SimulationModeOptionDesc", resourceCulture);
+                return ResourceManager.GetString("InvalidProjectInformationMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Target Framework to use. (Short folder name of the tfm. eg. net451).
+        ///   Looks up a localized string similar to The protocol version &apos;{0}&apos; of the message is different than currently handled version &apos;{1}&apos;..
         /// </summary>
-        internal static string TargetFrameworkOptionDesc {
+        internal static string ProtocolVersionMismatch {
             get {
-                return ResourceManager.GetString("TargetFrameworkOptionDesc", resourceCulture);
+                return ResourceManager.GetString("ProtocolVersionMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted directory: &apos;{0}&apos;.
+        /// </summary>
+        internal static string RemoveDirectoryMessage {
+            get {
+                return ResourceManager.GetString("RemoveDirectoryMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to :::Start FileSystemChange:::.
+        /// </summary>
+        internal static string StartFileSystemChangeToken {
+            get {
+                return ResourceManager.GetString("StartFileSystemChangeToken", resourceCulture);
             }
         }
     }

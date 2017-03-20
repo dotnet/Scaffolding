@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\**\*.cs">
-      <Link>Shared\%(RecursiveDir)%(FileName)</Link>
+      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.Extensions.ProjectModel.MsBuild.Sources\**\*.cs">
-      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName).cs</Link>
     </Compile>
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
@@ -47,9 +47,18 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <!--<Compile Update="MessageStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MessageStrings.resx</DependentUpon>
+    </Compile>-->
   </ItemGroup>
 
   <ItemGroup>
+    <!--<EmbeddedResource Update="MessageStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>-->
     <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

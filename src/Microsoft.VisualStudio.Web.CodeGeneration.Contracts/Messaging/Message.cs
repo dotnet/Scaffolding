@@ -26,10 +26,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging
         /// </summary>
         public JToken Payload { get; set; }
 
+        /// <summary>
+        /// The protocol version to use for communication.
+        /// </summary>
+        public int ProtocolVersion { get; set; }
+
         /// <inheritdoc/>
         public override string ToString()
         {
-            return "(" + HostId + ", " + MessageType + ") -> " + (Payload == null ? "null" : Payload.ToString(Formatting.Indented));
+            return "(" + HostId + ", " + MessageType + ", " + ProtocolVersion+") -> " + (Payload == null ? "null" : Payload.ToString(Formatting.Indented));
         }
     }
 }

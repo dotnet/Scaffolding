@@ -13,7 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     {
         private static string[] EMPTY_VIEW_ARGS = new string[] { codegeneratorToolName, "-p", ".", "view", "EmptyView", "Empty" };
         private static string[] VIEW_WITH_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
-        private static string[] VIEW_NO_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarDetails", "Details", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--partialView" };
+        private static string[] VIEW_NO_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "view", "CarDetails", "Details", "--model", "Library1.Models.Car", "--partialView" };
 
         public ViewGeneratorTests(ITestOutputHelper output) : base(output)
         {

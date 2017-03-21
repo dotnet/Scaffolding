@@ -20,24 +20,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
             //Act && Assert
             Assert.Equal(8, metadata.Properties.Length);
-            Assert.Null(metadata.PrimaryKeys);
-            Assert.Null(metadata.Navigations);
+            Assert.Equal(0, metadata.PrimaryKeys.Length);
+            Assert.Equal(0, metadata.Navigations.Length);
 
             //Arrange
             metadata = new CodeModelMetadata(typeof(Category));
 
             //Act && Assert
             Assert.Equal(2, metadata.Properties.Length);
-            Assert.Null(metadata.PrimaryKeys);
-            Assert.Null(metadata.Navigations);
+            Assert.Equal(0, metadata.PrimaryKeys.Length);
+            Assert.Equal(0, metadata.Navigations.Length);
 
             //Arrange
             metadata = new CodeModelMetadata(typeof(Customer));
 
             //Act && Assert
             Assert.Equal(2, metadata.Properties.Length);
-            Assert.Null(metadata.PrimaryKeys);
-            Assert.Null(metadata.Navigations);
+            Assert.Equal(0, metadata.PrimaryKeys.Length);
+            Assert.Equal(0, metadata.Navigations.Length);
         }
     }
 }

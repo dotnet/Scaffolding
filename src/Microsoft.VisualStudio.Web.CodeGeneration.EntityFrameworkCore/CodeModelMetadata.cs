@@ -16,6 +16,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     public class CodeModelMetadata : IModelMetadata
     {
         private PropertyMetadata[] _properties;
+        private NavigationMetadata[] _navigations;
+        private PropertyMetadata[] _primaryKeys;
         private Type _model;
 
         private static Type[] bindableNonPrimitiveTypes = new Type[]
@@ -35,27 +37,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(model));
             }
             _model = model;
+            _navigations = new NavigationMetadata[0];
+            _primaryKeys = new PropertyMetadata[0];
         }
 
         /// <summary>
-        /// Always returns null as there is no Entity type information
+        /// Always returns empty array as there is no Entity type information
         /// </summary>
         public NavigationMetadata[] Navigations
         {
             get
             {
-                return null;
+                return _navigations;
             }
         }
 
         /// <summary>
-        /// Always return null as there is no Entity type information
+        /// Always return empty array as there is no Entity type information
         /// </summary>
         public PropertyMetadata[] PrimaryKeys
         {
             get
             {
-                return null;
+                return _primaryKeys;
             }
         }
 

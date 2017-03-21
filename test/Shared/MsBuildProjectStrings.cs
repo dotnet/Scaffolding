@@ -55,9 +55,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.0*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.0"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.1"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.1"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.1"" />
     <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.1.0"" />
   </ItemGroup>
   <ItemGroup>
@@ -96,8 +96,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.0"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.1"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.1"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />

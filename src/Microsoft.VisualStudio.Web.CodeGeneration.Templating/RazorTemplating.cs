@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Razor;
+using Microsoft.AspNetCore.Razor.Evolution;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
@@ -28,50 +28,53 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
         public async Task<TemplateResult> RunTemplateAsync(string content,
             dynamic templateModel)
         {
-            RazorTemplatingHost host = new RazorTemplatingHost(typeof(RazorTemplateBase));
-            RazorTemplateEngine engine = new RazorTemplateEngine(host);
+            var razorEngine = RazorEngine.Create();
 
-            using (var reader = new StringReader(content))
+            // Don't care about the RazorProject as we already have the content of the .cshtml file 
+            // and don't need to deal with imports.
+            var razorProject = new FileSystemRazorProject(Directory.GetCurrentDirectory());
+            var razorTemplateEngine = new RazorTemplateEngine(razorEngine, razorProject);
+
+            var razorDocument = RazorCodeDocument.Create(RazorSourceDocument.Create(content, string.Empty));
+            var generatorResults = razorTemplateEngine.GenerateCode(razorDocument);
+
+            if (generatorResults.Diagnostics.Any())
             {
-                var generatorResults = engine.GenerateCode(reader);
-
-                if (!generatorResults.Success)
-                {
-                    var messages = generatorResults.ParserErrors.Select(e => e.Message);
-                    return new TemplateResult()
-                    {
-                        GeneratedText = string.Empty,
-                        ProcessingException = new TemplateProcessingException(messages, generatorResults.GeneratedCode)
-                    };
-                }
-
-                var templateResult = _compilationService.Compile(generatorResults.GeneratedCode);
-                if (templateResult.Messages.Any())
-                {
-                    return new TemplateResult()
-                    {
-                        GeneratedText = string.Empty,
-                        ProcessingException = new TemplateProcessingException(templateResult.Messages, generatorResults.GeneratedCode)
-                    };
-                }
-
-                var compiledObject = Activator.CreateInstance(templateResult.CompiledType);
-                var razorTemplate = compiledObject as RazorTemplateBase;
-
-                string result = String.Empty;
-                if (razorTemplate != null)
-                {
-                    razorTemplate.Model = templateModel;
-                    //ToDo: If there are errors executing the code, they are missed here.
-                    result = await razorTemplate.ExecuteTemplate();
-                }
-
+                var messages = generatorResults.Diagnostics.Select(d => d.GetMessage());
                 return new TemplateResult()
                 {
-                    GeneratedText = result,
-                    ProcessingException = null
+                    GeneratedText = string.Empty,
+                    ProcessingException = new TemplateProcessingException(messages, generatorResults.GeneratedCode)
                 };
             }
+
+            var templateResult = _compilationService.Compile(generatorResults.GeneratedCode);
+            if (templateResult.Messages.Any())
+            {
+                return new TemplateResult()
+                {
+                    GeneratedText = string.Empty,
+                    ProcessingException = new TemplateProcessingException(templateResult.Messages, generatorResults.GeneratedCode)
+                };
+            }
+
+            var compiledObject = Activator.CreateInstance(templateResult.CompiledType);
+            var razorTemplate = compiledObject as RazorTemplateBase;
+
+            string result = String.Empty;
+            if (razorTemplate != null)
+            {
+                razorTemplate.Model = templateModel;
+                //ToDo: If there are errors executing the code, they are missed here.
+                result = await razorTemplate.ExecuteTemplate();
+            }
+
+            return new TemplateResult()
+            {
+                GeneratedText = result,
+                ProcessingException = null
+            };
+
         }
     }
 }

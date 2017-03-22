@@ -1,4 +1,5 @@
 ﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic;
 @using System.Linq;
 Scaffolding has generated all the files and added the required dependencies.
 
@@ -8,12 +9,12 @@ However the Application's Startup code may required additional changes for thing
 
 @:Add the following namespace usings if not already added:
 
-    var allNamespaces = new SortedSet<string>(StringComparer.Ordinal);
+    var allNamespaces = new HashSet<string>(StringComparer.Ordinal);
     foreach (var list in Model.StartupList)
     {
         allNamespaces.UnionWith(list.RequiredNamespaces);
     }
-    foreach (var namespaceName in allNamespaces)
+    foreach (var namespaceName in allNamespaces.OrderBy(n=>n))
     {
 @:using @namespaceName;
     }

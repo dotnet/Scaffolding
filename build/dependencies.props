@@ -29,4 +29,10 @@
     <SystemSecurityCryptographyAlgorithmsVersion>4.3.0</SystemSecurityCryptographyAlgorithmsVersion>
     <SystemThreadingTasksParallelVersion>4.3.0</SystemThreadingTasksParallelVersion>
   </PropertyGroup>
+  <!-- The CLI tool needs to have the 1.0.x versions of the dependencies -->
+  <PropertyGroup>
+    <CommandLineUtilsLegacyVersion>1.0.1</CommandLineUtilsLegacyVersion>
+    <PlatformAbstractionsLegacyVersion>1.0.0</PlatformAbstractionsLegacyVersion>
+    <FileProvidersLegacyVersion>1.0.1</FileProvidersLegacyVersion>
+  </PropertyGroup>
 </Project>

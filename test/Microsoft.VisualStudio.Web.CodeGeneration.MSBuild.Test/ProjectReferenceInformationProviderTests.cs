@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
     <ProjectReference Include=""..\Library2\Library2.csproj"" />
   </ItemGroup>
-  <ItemGroup Condition=""'$(TargetFramework)' == 'net451' "">
+  <ItemGroup Condition=""'$(TargetFramework)' == 'net46' "">
     <Reference Include=""System"" />
     <Reference Include=""System.Data"" />
   </ItemGroup>
@@ -43,7 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library2</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
@@ -55,7 +55,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" />
     <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
   </ItemGroup>
-  <ItemGroup Condition=""'$(TargetFramework)' == 'net451' "">
+  <ItemGroup Condition=""'$(TargetFramework)' == 'net46' "">
     <Reference Include=""System"" />
     <Reference Include=""System.Data"" />
   </ItemGroup>

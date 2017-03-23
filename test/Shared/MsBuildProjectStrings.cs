@@ -72,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <OutputType>EXE</OutputType>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>net46</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -179,7 +179,7 @@ namespace Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
@@ -188,7 +188,7 @@ namespace Test
     <Compile Include=""**\*.cs"" Exclude=""Excluded.cs;$(DefaultItemExcludes)"" />
   </ItemGroup>
 
-  <ItemGroup Condition=""'$(TargetFramework)' == 'net451' "">
+  <ItemGroup Condition=""'$(TargetFramework)' == 'net46' "">
     <Reference Include=""System"" />
     <Reference Include=""System.Data"" />
   </ItemGroup>

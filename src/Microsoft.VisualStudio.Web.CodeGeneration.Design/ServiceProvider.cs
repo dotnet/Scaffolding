@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NET451
+#if NET46
 using System.ComponentModel;
 #endif
 using System.Linq;

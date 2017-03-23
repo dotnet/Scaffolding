@@ -21,12 +21,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
 
             mockServiceProvider = new Mock<IServiceProvider>();
             mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
-#if NET451
+#if NET46
             Assembly currentAssembly = typeof(CodeGeneratorsLocatorTests).Assembly;
             mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)
                 .Returns(new[] { currentAssembly });
-#else
+#elif NETCOREAPP1_0
             List<TypeInfo> typeList = new List<TypeInfo>();
 
             typeList.Add(typeof(SampleCodeGenerator).GetTypeInfo());
@@ -40,6 +40,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
              mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)
                 .Returns(new[] { currentAssembly.Object });
+#else
+#error target frameworks need to be updated.
 #endif
         }
 

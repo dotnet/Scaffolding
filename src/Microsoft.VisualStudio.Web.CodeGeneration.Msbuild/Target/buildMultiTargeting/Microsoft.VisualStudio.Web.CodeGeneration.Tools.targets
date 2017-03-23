@@ -24,7 +24,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
       <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
     </GetNearestTargetFramework>
 
-    <GetNearestTargetFramework ReferringTargetFramework="net451"
+    <GetNearestTargetFramework ReferringTargetFramework="net46"
                                PossibleTargetFrameworks="$(TargetFrameworks)"
                                ProjectFilePath="$(MSBuildProjectFullPath)"
                                Condition=" '$(NearestTargetFramework)' == '' "

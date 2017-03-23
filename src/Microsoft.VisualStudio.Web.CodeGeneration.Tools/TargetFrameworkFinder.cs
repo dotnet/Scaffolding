@@ -62,7 +62,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 nearestFramework = NuGetFrameworkUtility.GetNearest(
                     frameworksInProject,
-                FrameworkConstants.CommonFrameworks.Net451,
+                FrameworkConstants.CommonFrameworks.Net46,
                 f => new NuGetFramework(f));
             }
             if (nearestFramework == null)

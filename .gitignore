@@ -36,3 +36,4 @@ project.fragment.lock.json
 .vscode/**
 backup/**/*.*
 .dotnet/**
+global.json

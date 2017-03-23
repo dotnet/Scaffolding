@@ -53,12 +53,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private CompilationResult GetCompilationResult(Compilation compilation)
         {
             // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream.  
-            // On NET451 if the assembly name is different, MVC fails to load the assembly as it is not found on disk.
+            // On desktop if the assembly name is different, MVC fails to load the assembly as it is not found on disk.
 
-#if NET451
+#if NET46
             var newAssemblyName = Path.GetFileNameWithoutExtension(compilation.AssemblyName);
-#else
+#elif NETSTANDARD1_6
             var newAssemblyName = Path.GetRandomFileName();
+#else
+#error target frameworks need to be updated.
 #endif
 
             var newCompilation = compilation

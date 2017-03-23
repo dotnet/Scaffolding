@@ -154,6 +154,6 @@
     <value>Specifies whether to persist any file changes.</value>
   </data>
   <data name="TargetFrameworkOptionDesc" xml:space="preserve">
-    <value>Target Framework to use. (Short folder name of the tfm. eg. net451)</value>
+    <value>Target Framework to use. (Short folder name of the tfm. eg. net46)</value>
   </data>
 </root>

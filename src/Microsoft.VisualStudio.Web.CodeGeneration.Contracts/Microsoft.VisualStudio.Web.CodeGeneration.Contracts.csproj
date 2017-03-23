@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <Description>Contains interfaces for Project Model and messaging for scaffolding.</Description>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>

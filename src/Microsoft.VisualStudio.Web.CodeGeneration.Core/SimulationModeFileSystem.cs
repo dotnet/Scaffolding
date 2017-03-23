@@ -21,14 +21,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     /// </summary>
     public class SimulationModeFileSystem : IFileSystem
     {
-
-#if NET451
-        private static readonly StringComparison PathComparisonType = StringComparison.OrdinalIgnoreCase;
-#else
         private static readonly StringComparison PathComparisonType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
-#endif
 
         public static SimulationModeFileSystem Instance = new SimulationModeFileSystem();
 

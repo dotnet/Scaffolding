@@ -170,7 +170,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Target Framework to use. (Short folder name of the tfm. eg. net451).
+        ///   Looks up a localized string similar to Target Framework to use. (Short folder name of the tfm. eg. net46).
         /// </summary>
         internal static string TargetFrameworkOptionDesc {
             get {

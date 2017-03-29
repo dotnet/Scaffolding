@@ -63,9 +63,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 scaffolder = ActivatorUtilities.CreateInstance<EmptyViewScaffolder>(_serviceProvider);
             }
-            else
+            else if (string.IsNullOrEmpty(viewGeneratorModel.DataContextClass))
             {
                 scaffolder = ActivatorUtilities.CreateInstance<ModelBasedViewScaffolder>(_serviceProvider);
+            }
+            else
+            {
+                scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedViewScaffolder>(_serviceProvider);
             }
 
             if (scaffolder != null)

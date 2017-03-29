@@ -84,30 +84,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             return rootContext;
         }
 
-        [Fact (Skip=MsBuildProjectStrings.SkipReason)]
-        public async void TestGetModelMetadata_WithoutDbContext()
-        {
-            using (var fileProvider = new TemporaryFileProvider())
-            {
-                SetupProjects(fileProvider);
-
-                var appName = MsBuildProjectStrings.RootProjectName;
-                var path = Path.Combine(fileProvider.Root, "Root", appName);
-                var efServices = GetEfServices(path, appName);
-                var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
-                var metadata = await efServices.GetModelMetadata(modelType);
-                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-                Assert.Null(metadata.ModelMetadata.Navigations);
-                Assert.False(metadata.ModelMetadata.Properties.Any());
-
-                modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
-                metadata = await efServices.GetModelMetadata(modelType);
-                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-                Assert.Null(metadata.ModelMetadata.Navigations);
-                Assert.Null(metadata.ModelMetadata.PrimaryKeys);
-                Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
-            }
-        }
 
         private void SetupProjects(TemporaryFileProvider fileProvider)
         {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -57,6 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
+            ValidateEFDependencies();
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
@@ -95,6 +97,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             }
         }
 
+        private void ValidateEFDependencies()
+        {
+            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
+            var isEFDesignPackagePresent = ProjectContext
+                .PackageDependencies
+                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
+
+            const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
+            var isSqlServerPackagePresent = ProjectContext
+                .PackageDependencies
+                .Any(package => package.Name.Equals(SqlServerPackageName, StringComparison.OrdinalIgnoreCase));
+
+            if (!isEFDesignPackagePresent || !isSqlServerPackagePresent)
+            {
+                throw new InvalidOperationException(
+                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlServerPackageName}"));
+            }
+        }
+
         private async Task GenerateViewsIfRequired(CommandLineGeneratorModel controllerGeneratorModel,
             ModelTypeAndContextModel modelTypeAndContextModel,
             string controllerRootName)
@@ -102,7 +123,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             if (!controllerGeneratorModel.IsRestController && !controllerGeneratorModel.NoViews)
             {
                 var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
-                var viewGenerator = ActivatorUtilities.CreateInstance<ModelBasedViewScaffolder>(ServiceProvider);
+                var viewGenerator = ActivatorUtilities.CreateInstance<EFModelBasedViewScaffolder>(ServiceProvider);
 
                 var areaPath = string.IsNullOrEmpty(_areaName) ? string.Empty : Path.Combine("Areas", _areaName);
                 var viewBaseOutputPath = Path.Combine(

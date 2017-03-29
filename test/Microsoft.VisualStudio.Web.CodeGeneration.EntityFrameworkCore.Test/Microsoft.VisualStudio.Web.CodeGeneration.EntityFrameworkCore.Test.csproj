@@ -25,6 +25,7 @@
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview4-004233" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.2.0-preview1-*" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.0.1" />

@@ -143,6 +143,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}.
+        /// </summary>
+        internal static string InstallEfPackages {
+            get {
+                return ResourceManager.GetString("InstallEfPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please install the below packages to your project:.
         /// </summary>
         internal static string InstallPackageMessage {

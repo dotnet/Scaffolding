@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
-    public class NavigationMetadata
+    public class NavigationMetadata : INavigationMetadata
     {
         public NavigationMetadata(INavigation navigation, Type dbContextType)
         {

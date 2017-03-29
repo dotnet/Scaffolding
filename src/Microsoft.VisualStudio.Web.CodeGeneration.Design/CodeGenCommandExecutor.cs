@@ -101,6 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
             serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
+            serviceProvider.AddServiceWithDependencies<ICodeModelService, CodeModelService>();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
     public class ModelMetadataUtilitiesTest
     {
         private Mock<IEntityFrameworkService> efService;
+        private Mock<ICodeModelService> codeModelService;
         private CommonCommandLineModel model;
         private Mock<IModelTypesLocator> modelTypesLocator;
 
@@ -22,6 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         {
             efService = new Mock<IEntityFrameworkService>();
             modelTypesLocator = new Mock<IModelTypesLocator>();
+            codeModelService = new Mock<ICodeModelService>();
         }
 
         [Fact]
@@ -39,7 +41,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             Exception ex = await Assert.ThrowsAsync<ArgumentException>(
                 async () => await ModelMetadataUtilities.ValidateModelAndGetCodeModelMetadata(
                     model,
-                    efService.Object,
+                    codeModelService.Object,
                     modelTypesLocator.Object));
             Assert.Equal("A type with the name InvalidModel does not exist", ex.Message);
 
@@ -57,13 +59,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(modelType))
+            codeModelService.Setup(e => e.GetModelMetadata(modelType))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
             var result = await ModelMetadataUtilities.ValidateModelAndGetCodeModelMetadata(
                     model,
-                    efService.Object,
+                    codeModelService.Object,
                     modelTypesLocator.Object);
 
             //Assert
@@ -89,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             Exception ex = await Assert.ThrowsAsync<ArgumentException>(
                 async () => await ModelMetadataUtilities.ValidateModelAndGetCodeModelMetadata(
                     model,
-                    efService.Object,
+                    codeModelService.Object,
                     modelTypesLocator.Object));
             Assert.Equal("A type with the name SampleModel does not exist", ex.Message);
 

@@ -161,9 +161,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 }
                 _logger.LogMessage(MessageStrings.CompilingWithAddedDbContext);
 
-                var projectCompilation = _workspace.CurrentSolution.Projects
+                var projectCompilation = await _workspace.CurrentSolution.Projects
                     .First(project => project.AssemblyName == _projectContext.AssemblyName)
-                    .GetCompilationAsync().Result;
+                    .GetCompilationAsync();
 
                 reflectedTypesProvider = new ReflectedTypesProvider(
                     projectCompilation,
@@ -194,9 +194,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             else
             {
                 var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbols.First(), modelTypeSymbol);
-                var projectCompilation = _workspace.CurrentSolution.Projects
+                var projectCompilation = await _workspace.CurrentSolution.Projects
                     .First(project => project.AssemblyName == _projectContext.AssemblyName)
-                    .GetCompilationAsync().Result;
+                    .GetCompilationAsync();
 
                 if (addResult.Edited)
                 {
@@ -425,40 +425,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 throw ex.Unwrap(_logger);
             }
-        }
-
-        public Task<ContextProcessingResult> GetModelMetadata(ModelType modelType)
-        {
-            if (modelType == null)
-            {
-                throw new ArgumentNullException(nameof(modelType));
-            }
-
-            var projectCompilation = _workspace.CurrentSolution.Projects
-                    .First(project => project.AssemblyName == _projectContext.AssemblyName)
-                    .GetCompilationAsync().Result;
-
-            var reflectedTypesProvider = new ReflectedTypesProvider(
-                projectCompilation,
-                (c) => c,
-                _projectContext,
-                _loader,
-                _logger);
-            var modelReflectionType = reflectedTypesProvider.GetReflectedType(
-                modelType: modelType.FullName,
-                lookInDependencies: true);
-
-            if (modelReflectionType == null)
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, modelType.Name));
-            }
-
-            var modelMetadata = new CodeModelMetadata(modelReflectionType);
-            return Task.FromResult(new ContextProcessingResult()
-            {
-                ContextProcessingStatus = ContextProcessingStatus.ContextAvailable,
-                ModelMetadata = modelMetadata
-            });
         }
     }
 }

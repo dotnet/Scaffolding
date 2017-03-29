@@ -144,6 +144,9 @@
   <data name="ForceOptionDesc" xml:space="preserve">
     <value>Specify whether to overwrite existing files.</value>
   </data>
+  <data name="InstallEfPackages" xml:space="preserve">
+    <value>To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}</value>
+  </data>
   <data name="InstallPackageMessage" xml:space="preserve">
     <value>Please install the below packages to your project:</value>
   </data>

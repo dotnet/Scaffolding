@@ -14,9 +14,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     // app's EF dependency
     public class ModelMetadata : IModelMetadata
     {
-        private PropertyMetadata[] _properties;
-        private PropertyMetadata[] _primaryKeys;
-        private NavigationMetadata[] _navigations;
+        private IPropertyMetadata[] _properties;
+        private IPropertyMetadata[] _primaryKeys;
+        private INavigationMetadata[] _navigations;
 
         //Todo: Perhaps move the constructor to something line MetadataReader?
         public ModelMetadata(IEntityType entityType, Type dbContextType)
@@ -42,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public string EntitySetName { get; private set; }
 
-        public PropertyMetadata[] Properties
+        public IPropertyMetadata[] Properties
         {
             get
             {
@@ -59,17 +59,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// </summary>
         /// <param name="entityType"></param>
         /// <returns></returns>
-        private PropertyMetadata[] GetSortedProperties(IEntityType entityType)
+        private IPropertyMetadata[] GetSortedProperties(IEntityType entityType)
         {
             if(entityType == null)
             {
                 throw new ArgumentNullException(nameof(entityType));
             }
 
-            var properties = new Dictionary<string, PropertyMetadata>();
+
+            var properties = new Dictionary<string, IPropertyMetadata>();
             var entityProperties = entityType.GetProperties()
                 .Where(p => !p.IsShadowProperty)
-                .Select(p => new PropertyMetadata(p, DbContexType));
+                .Select(p => p.ToPropertyMetadata(DbContexType));
 
             foreach(var p in entityProperties)
             {
@@ -77,7 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
 
             var reflectedProperties = entityType.ClrType.GetProperties();
-            var sortedProperties = new PropertyMetadata[entityProperties.Count()];
+            var sortedProperties = new IPropertyMetadata[entityProperties.Count()];
             int i = 0;
             foreach(var r in reflectedProperties)
             {
@@ -90,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return sortedProperties;
         }
 
-        public PropertyMetadata[] PrimaryKeys
+        public IPropertyMetadata[] PrimaryKeys
         {
             get
             {
@@ -104,7 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                     _primaryKeys = primaryKey
                         .Properties
-                        .Select(p => new PropertyMetadata(p, DbContexType))
+                        .Select(p => p.ToPropertyMetadata(DbContexType))
                         .ToArray();
                 }
                 return _primaryKeys;
@@ -117,7 +118,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// Typically this is used to create code for drop down lists
         /// to choose values from principal entity.
         /// </summary>
-        public NavigationMetadata[] Navigations
+        public INavigationMetadata[] Navigations
         {
             get
             {

@@ -15,13 +15,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
     {
         internal static async Task<ModelTypeAndContextModel> ValidateModelAndGetCodeModelMetadata(
             CommonCommandLineModel commandLineModel, 
-            IEntityFrameworkService entityFrameworkService, 
+            ICodeModelService codeModeService, 
             IModelTypesLocator modelTypesLocator)
         {
             ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
 
             Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
-            var result = await entityFrameworkService.GetModelMetadata(model);
+            var result = await codeModeService.GetModelMetadata(model);
 
             return new ModelTypeAndContextModel()
             {

@@ -157,5 +157,33 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("ProductViews", "Index.cshtml"));
             }
         }
+
+        [Fact (Skip = "Disable tests that need loading assemblies in insideman")]
+        public void TestControllerWithoutEf()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectsWithoutEF(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Directory.SetCurrentDirectory(TestProjectPath);
+                System.Console.WriteLine(fileProvider.Root);
+                var args = new string[]
+                {
+                    codegeneratorToolName,
+                    "-p",
+                    TestProjectPath,
+                    "controller",
+                    "--controllerName",
+                    "ActionsController",
+                    "--readWriteActions"
+                };
+
+                Scaffold(args, TestProjectPath);
+
+                var generatedFilePath = Path.Combine(TestProjectPath, "ActionsController.cs");
+
+                VerifyFileAndContent(generatedFilePath, "ReadWriteController.txt");
+            }
+        }
     }
 }

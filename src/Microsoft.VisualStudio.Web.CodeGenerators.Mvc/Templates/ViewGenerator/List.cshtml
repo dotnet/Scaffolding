@@ -44,7 +44,7 @@
     @:<thead>
         @:<tr>
 
-        IEnumerable<PropertyMetadata> properties = Model.ModelMetadata.Properties;
+        var properties = Model.ModelMetadata.Properties;
         foreach (var property in properties)
         {
             if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
@@ -119,12 +119,12 @@
         : null;
     }
 
-    string GetValueExpression(PropertyMetadata property)
+    string GetValueExpression(IPropertyMetadata property)
     {
         return property.PropertyName;
     }
 
-    string GetValueExpression(NavigationMetadata navigation)
+    string GetValueExpression(INavigationMetadata navigation)
     {
         return navigation.AssociationPropertyName;
     }

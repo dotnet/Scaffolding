@@ -88,12 +88,12 @@
 }
 @functions
 {
-    string GetValueExpression(PropertyMetadata property)
+    string GetValueExpression(IPropertyMetadata property)
     {
         return property.PropertyName;
     }
 
-    string GetValueExpression(NavigationMetadata navigation)
+    string GetValueExpression(INavigationMetadata navigation)
     {
         return navigation.AssociationPropertyName;
     }

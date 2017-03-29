@@ -10,8 +10,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public interface IModelMetadata
     {
-        PropertyMetadata[] Properties { get; }
-        PropertyMetadata[] PrimaryKeys { get; }
-        NavigationMetadata[] Navigations { get; }
+        IPropertyMetadata[] Properties { get; }
+        IPropertyMetadata[] PrimaryKeys { get; }
+        INavigationMetadata[] Navigations { get; }
     }
 }

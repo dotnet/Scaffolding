@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     /// </summary>
     public class CodeModelMetadata : IModelMetadata
     {
-        private PropertyMetadata[] _properties;
+        private IPropertyMetadata[] _properties;
         private Type _model;
 
         private static Type[] bindableNonPrimitiveTypes = new Type[]
@@ -40,7 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <summary>
         /// Always returns null as there is no Entity type information
         /// </summary>
-        public NavigationMetadata[] Navigations
+        public INavigationMetadata[] Navigations
         {
             get
             {
@@ -51,7 +51,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <summary>
         /// Always return null as there is no Entity type information
         /// </summary>
-        public PropertyMetadata[] PrimaryKeys
+        public IPropertyMetadata[] PrimaryKeys
         {
             get
             {
@@ -63,7 +63,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// Returns an array of properties that are bindable.
         /// (For eg. primitive types, strings, DateTime etc.)
         /// </summary>
-        public PropertyMetadata[] Properties
+        public IPropertyMetadata[] Properties
         {
             get
             {
@@ -75,7 +75,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
         }
 
-        private PropertyMetadata[] GetBindableProperties(Type _model)
+        private IPropertyMetadata[] GetBindableProperties(Type _model)
         {
             var props = _model.GetProperties().Where(p => IsBindable(p));
             return props.Select(p => new PropertyMetadata(p)).ToArray();

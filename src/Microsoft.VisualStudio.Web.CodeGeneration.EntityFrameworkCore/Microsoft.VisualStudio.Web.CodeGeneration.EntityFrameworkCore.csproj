@@ -13,9 +13,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EntityFrameworkCoreVersion)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(EntityFrameworkCoreVersion)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EntityFrameworkCoreVersion)" />
+    <!-- The EntityFramework.Design is intentionally set to PrivateAssets=All. Scaffolding will rely on the user's 
+       project to provide this dependency, rather than introducing the dependency.
+       This way if the user wants to scaffold non-ef related controller/view, they could do so 
+       without adding EntityFrameworkCore dependency.
+       https://github.com/aspnet/scaffolding/issues/434
+       -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(EntityFrameworkCoreVersion)" PrivateAssets="All" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="$(SystemDiagnosticsContractsVersion)" />
   </ItemGroup>
 

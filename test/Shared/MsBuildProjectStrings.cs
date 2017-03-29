@@ -5,8 +5,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class MsBuildProjectStrings
     {
-        public const string SkipReason = "CI doesn't have CLI version required for the MSBuild stuff to work";
-
         public static string GetNugetConfigTxt(string artifactsDir)
         {
             return @"
@@ -50,6 +48,45 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.2.0-preview1-*"" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.2.0-preview1-*"" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include=""..\Library1\Library1.csproj"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include = ""xyz.dll"" />
+  </ItemGroup>
+</Project>
+";
+
+public const string RootProjectTxtWithoutEF = @"
+<Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <ProjectName>TestProject</ProjectName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.2.0-preview1-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.2.0-preview1-*"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.2.0-preview1-*"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.2.0-preview1-*"" />
@@ -120,6 +157,54 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+
+namespace WebApplication1
+{
+    public class Startup
+    {
+        public Startup(IHostingEnvironment env)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile(""appsettings.json"", optional: true, reloadOnChange: true);
+                //.AddJsonFile($""appsettings.{env.EnvironmentName}.json"", optional: true);
+            Configuration = builder.Build();
+        }
+
+        public IConfigurationRoot Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // Add framework services.
+            services.AddMvc();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            app.UseStaticFiles();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: ""default"",
+                    template: ""{controller=Home}/{action=Index}/{id?}"");
+            });
+        }
+    }
+}
+";
+
+public const string StartupTxtWithoutEf = @"using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace WebApplication1
 {

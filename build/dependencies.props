@@ -18,8 +18,8 @@
   <!-- Partner Versions-->
   <PropertyGroup>
     <CodeAnalysisVersion>1.3.0</CodeAnalysisVersion>
-    <MicrosoftBuildVersion>15.1.548</MicrosoftBuildVersion>
-    <NewtonSoftVersion>9.0.1</NewtonSoftVersion>
+    <MicrosoftBuildVersion>15.2.0-preview-000047-02</MicrosoftBuildVersion>
+    <JsonNetVersion>10.0.1</JsonNetVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
     <NuGetFrameworksLegacyVersion>3.5.0</NuGetFrameworksLegacyVersion>
     <SystemAppContextVersion>4.3.0</SystemAppContextVersion>
@@ -35,5 +35,6 @@
     <CommandLineUtilsLegacyVersion>1.0.1</CommandLineUtilsLegacyVersion>
     <PlatformAbstractionsLegacyVersion>1.0.0</PlatformAbstractionsLegacyVersion>
     <FileProvidersLegacyVersion>1.0.1</FileProvidersLegacyVersion>
+    <JsonNetLegacyVersion>9.0.1</JsonNetLegacyVersion>
   </PropertyGroup>
 </Project>

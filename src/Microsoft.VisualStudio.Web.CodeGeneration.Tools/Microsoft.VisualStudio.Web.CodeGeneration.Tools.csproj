@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="$(CommandLineUtilsLegacyVersion)" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="$(PlatformAbstractionsLegacyVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(FileProvidersLegacyVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetLegacyVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksLegacyVersion)" />
   </ItemGroup>
 

@@ -23,7 +23,7 @@
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Contracts\Microsoft.VisualStudio.Web.CodeGeneration.Contracts.csproj" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(CodeAnalysisVersion)" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksLegacyVersion)" />
   </ItemGroup>
 

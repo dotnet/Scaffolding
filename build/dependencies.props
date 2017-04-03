@@ -6,22 +6,22 @@
   <!-- AspNetCore Versions -->
   <PropertyGroup>
     <AspNetCoreHostingVersion>1.2.0-*</AspNetCoreHostingVersion>
-    <KestrelVersion>1.2.0-*</KestrelVersion>
     <CommandLineUtilsVersion>1.2.0-*</CommandLineUtilsVersion>
-    <DotNetInternalAbstractionsVersion>1.0.0</DotNetInternalAbstractionsVersion>
     <DependencyInjectionVersion>1.2.0-*</DependencyInjectionVersion>
+    <DotNetInternalAbstractionsVersion>1.0.0</DotNetInternalAbstractionsVersion>
     <EntityFrameworkCoreVersion>1.2.0-*</EntityFrameworkCoreVersion>
     <FileProvidersVersion>1.2.0-*</FileProvidersVersion>
+    <KestrelVersion>1.2.0-*</KestrelVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsVersion>1.2.0-*</MicrosoftExtensionsConfigurationAbstractionsVersion>
     <PlatformAbstractionsVersion>1.2.0-*</PlatformAbstractionsVersion>
     <RazorVersion>1.2.0-*</RazorVersion>
   </PropertyGroup>
   <!-- Partner Versions-->
   <PropertyGroup>
     <CodeAnalysisVersion>1.3.0</CodeAnalysisVersion>
-    <MicrosoftBuildVersion>15.2.0-preview-000047-02</MicrosoftBuildVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
+    <MicrosoftBuildVersion>15.2.0-preview-000047-02</MicrosoftBuildVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
-    <NuGetFrameworksLegacyVersion>3.5.0</NuGetFrameworksLegacyVersion>
     <SystemAppContextVersion>4.3.0</SystemAppContextVersion>
     <SystemDiagnosticsContractsVersion>4.3.0</SystemDiagnosticsContractsVersion>
     <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
@@ -33,8 +33,20 @@
   <!-- The CLI tool needs to have the 1.0.x versions of the dependencies -->
   <PropertyGroup>
     <CommandLineUtilsLegacyVersion>1.0.1</CommandLineUtilsLegacyVersion>
-    <PlatformAbstractionsLegacyVersion>1.0.0</PlatformAbstractionsLegacyVersion>
     <FileProvidersLegacyVersion>1.0.1</FileProvidersLegacyVersion>
     <JsonNetLegacyVersion>9.0.1</JsonNetLegacyVersion>
+    <NuGetFrameworksLegacyVersion>3.5.0</NuGetFrameworksLegacyVersion>
+    <PlatformAbstractionsLegacyVersion>1.0.0</PlatformAbstractionsLegacyVersion>
+  </PropertyGroup>
+
+  <!-- Dependencies for Test Project -->
+  <PropertyGroup>
+    <CliUtilsVersion>1.0.0-preview4-004233</CliUtilsVersion>
+    <TestSdkVersion>15.0.0-*</TestSdkVersion>
+    <MoqVersion>4.6.36-*</MoqVersion>
+    <SystemDiagnosticsTraceSourceVersion>4.0.0</SystemDiagnosticsTraceSourceVersion>
+    <XunitVersion>2.2.0-*</XunitVersion>
+    <DotNetProjectModelVersion>1.0.0-rc3-003121</DotNetProjectModelVersion>
+    <SystemDiagnosticsContractsLegacyVersion>4.0.1</SystemDiagnosticsContractsLegacyVersion>
   </PropertyGroup>
 </Project>

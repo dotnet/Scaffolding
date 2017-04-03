@@ -184,13 +184,18 @@ namespace WebApplication1
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseStaticFiles();
-
+            CS7_method(out var i);
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: ""default"",
                     template: ""{controller=Home}/{action=Index}/{id?}"");
             });
+        }
+
+        private void CS7_method(out int i)
+        {
+            i = 1;
         }
     }
 }

@@ -10,7 +10,7 @@
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj" />
     <ProjectReference Include="..\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
-    <PackageReference Include="System.Diagnostics.Contracts" Version="$(SystemDiagnosticsContractsLegacyVersion)" />
+    <PackageReference Include="System.Diagnostics.Contracts" Version="$(CoreFxVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
   </ItemGroup>

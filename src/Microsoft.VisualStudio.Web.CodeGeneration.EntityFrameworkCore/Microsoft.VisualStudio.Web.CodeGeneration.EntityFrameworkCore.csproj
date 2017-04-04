@@ -19,8 +19,8 @@
        without adding EntityFrameworkCore dependency.
        https://github.com/aspnet/scaffolding/issues/434
        -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(EntityFrameworkCoreVersion)" PrivateAssets="All" />
-    <PackageReference Include="System.Diagnostics.Contracts" Version="$(SystemDiagnosticsContractsVersion)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+    <PackageReference Include="System.Diagnostics.Contracts" Version="$(CoreFxVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">

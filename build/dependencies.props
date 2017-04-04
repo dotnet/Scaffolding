@@ -5,7 +5,7 @@
   </PropertyGroup>
   <!-- AspNetCore Versions -->
   <PropertyGroup>
-    <AspNetCoreVersion>1.2.0-*</AspNetCoreVersion>
+    <AspNetCoreVersion>2.0.0-*</AspNetCoreVersion>
     <DotNetInternalAbstractionsVersion>1.0.0</DotNetInternalAbstractionsVersion>
   </PropertyGroup>
   <!-- Partner Versions-->

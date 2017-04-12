@@ -81,10 +81,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include=""**\*.cs"" Exclude=""Excluded.cs"" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.1.0"" />
     <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.1.0"" />
@@ -101,10 +97,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
-    <Reference Include=""System"" />
-    <Reference Include=""System.Data"" />
-    <Reference Include=""System.ComponentModel.DataAnnotations"" />
-    <Reference Include=""Microsoft.CSharp"" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include = ""xyz.dll"" />
@@ -184,18 +176,6 @@ namespace Test
     <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include=""**\*.cs"" Exclude=""Excluded.cs"" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
-  </ItemGroup>
-  <ItemGroup Condition=""'$(TargetFramework)' == 'net451' "">
-    <Reference Include=""System"" />
-    <Reference Include=""System.Data"" />
-  </ItemGroup>
 </Project>
 ";
 

@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
 #if NET46
             projectPath = projectPath ?? Path.Combine("..", "..", "..", "..");
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NET46.GetShortFolderName();
-#elif NETCOREAPP1_0
+#elif NETCOREAPP2_0
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
 #else

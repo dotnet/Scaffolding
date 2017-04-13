@@ -26,7 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)
                 .Returns(new[] { currentAssembly });
-#elif NETCOREAPP1_0
+#elif NETCOREAPP2_0
             List<TypeInfo> typeList = new List<TypeInfo>();
 
             typeList.Add(typeof(SampleCodeGenerator).GetTypeInfo());

@@ -27,7 +27,6 @@
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="$(DotNetInternalAbstractionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="$(CommandLineUtilsLegacyVersion)" />
-    <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="$(PlatformAbstractionsLegacyVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(FileProvidersLegacyVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetLegacyVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksLegacyVersion)" />

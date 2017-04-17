@@ -63,14 +63,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
                var metadata = await CodeModelService.GetModelMetadata(modelType);
                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-               Assert.Null(metadata.ModelMetadata.Navigations);
+               Assert.False(metadata.ModelMetadata.Navigations.Any());
                Assert.False(metadata.ModelMetadata.Properties.Any());
 
                modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
                metadata = await CodeModelService.GetModelMetadata(modelType);
                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-               Assert.Null(metadata.ModelMetadata.Navigations);
-               Assert.Null(metadata.ModelMetadata.PrimaryKeys);
+               Assert.False(metadata.ModelMetadata.Navigations.Any());
+               Assert.False(metadata.ModelMetadata.PrimaryKeys.Any());
                Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
            }
         }

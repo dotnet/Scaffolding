@@ -13,21 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration\Microsoft.VisualStudio.Web.CodeGeneration.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

@@ -15,20 +15,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Core\Microsoft.VisualStudio.Web.CodeGeneration.Core.csproj" />
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Templating\Microsoft.VisualStudio.Web.CodeGeneration.Templating.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Utils\Microsoft.VisualStudio.Web.CodeGeneration.Utils.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

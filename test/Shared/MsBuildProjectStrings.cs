@@ -38,15 +38,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.0.3"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.4"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.0.4"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.0.4"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.4"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.0.1"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.1"" />

@@ -16,6 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         <add key=""local1.1"" value=""" + artifactsDir +  @""" />
         <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
         <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
+        <add key=""AspNetCore-Patch"" value=""https://dotnet.myget.org/F/aspnet-1-1-2-may2017-patch/api/v3/index.json"" />
     </packageSources>
 </configuration>";
         }

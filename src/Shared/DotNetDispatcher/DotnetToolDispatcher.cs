@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.Internal
@@ -16,7 +15,7 @@ namespace Microsoft.Extensions.Internal
     {
         private const string DispatcherVersionArgumentName = "--dispatcher-version";
 
-        private static readonly string DispatcherName = PlatformServices.Default.Application.ApplicationName;
+        private static readonly string DispatcherName = Assembly.GetEntryAssembly().GetName().Name;
 
         /// <summary>
         /// Invokes the 'tool' with the dependency context of the user's project.

@@ -11,7 +11,10 @@
   <PropertyGroup>
     <CodeAnalysisVersion>2.0.0</CodeAnalysisVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
-    <MicrosoftBuildVersion>15.2.0-preview-000047-02</MicrosoftBuildVersion>
+    <!-- This needs to match the CLI's msbuild version. 
+      https://github.com/dotnet/cli/blob/master/build/DependencyVersions.props
+      -->
+    <MicrosoftBuildVersion>15.2.0-preview-000093-02</MicrosoftBuildVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
     <CoreFxVersion>4.3.0</CoreFxVersion>
   </PropertyGroup>
@@ -23,4 +26,9 @@
     <XunitVersion>2.2.0</XunitVersion>
     <DotNetProjectModelVersion>1.0.0-rc3-003121</DotNetProjectModelVersion>
   </PropertyGroup>
+  <!-- MSBuild used by CLI currently uses the 9.0.1 version. -->
+  <PropertyGroup>
+    <JsonNetLegacyVersion>9.0.1</JsonNetLegacyVersion>
+  </PropertyGroup>
+
 </Project>

@@ -23,12 +23,11 @@
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.csproj" />
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(CliUtilsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="$(DotNetInternalAbstractionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(DotNetProjectModelVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(AspNetCoreVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="$(FileProvidersLegacyVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(FileProvidersLegacyVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
     <PackageReference Include="Moq" Version="$(MoqVersion)" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="$(CoreFxVersion)" />

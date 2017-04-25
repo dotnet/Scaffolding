@@ -15,8 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(CliUtilsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="$(DotNetInternalAbstractionsVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(FileProvidersLegacyVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
     <PackageReference Include="Moq" Version="$(MoqVersion)" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="$(CoreFxVersion)" />

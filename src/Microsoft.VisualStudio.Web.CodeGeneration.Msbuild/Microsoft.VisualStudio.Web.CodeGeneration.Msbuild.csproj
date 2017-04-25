@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetLegacyVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksVersion)" />
   </ItemGroup>
 

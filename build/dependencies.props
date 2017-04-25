@@ -15,15 +15,6 @@
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
     <CoreFxVersion>4.3.0</CoreFxVersion>
   </PropertyGroup>
-  <!-- The CLI tool needs to have the 1.0.x versions of the dependencies -->
-  <PropertyGroup>
-    <CommandLineUtilsLegacyVersion>1.0.1</CommandLineUtilsLegacyVersion>
-    <FileProvidersLegacyVersion>1.0.1</FileProvidersLegacyVersion>
-    <JsonNetLegacyVersion>9.0.1</JsonNetLegacyVersion>
-    <NuGetFrameworksLegacyVersion>3.5.0</NuGetFrameworksLegacyVersion>
-    <PlatformAbstractionsLegacyVersion>1.0.0</PlatformAbstractionsLegacyVersion>
-  </PropertyGroup>
-
   <!-- Dependencies for Test Project -->
   <PropertyGroup>
     <CliUtilsVersion>1.0.0-preview4-004233</CliUtilsVersion>

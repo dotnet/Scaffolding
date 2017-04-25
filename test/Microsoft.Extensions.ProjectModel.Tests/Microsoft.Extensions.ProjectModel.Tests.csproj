@@ -22,9 +22,8 @@
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(CliUtilsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="$(DotNetInternalAbstractionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(DotNetProjectModelVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(FileProvidersLegacyVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
   </ItemGroup>

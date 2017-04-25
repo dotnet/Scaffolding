@@ -15,15 +15,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
         }
 
-        [Fact]
+        [Fact (Skip="Need new CLI that can run tools on netcoreapp2.0")]
         public void TestAreaGenerator()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Skipping E2E_Tests on non windows 
-                // https://github.com/dotnet/cli/issues/5059
-                return;
-            }
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);

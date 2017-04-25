@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
         }
 
-        [Fact]
+        [Fact(Skip="Need new CLI that can run tools on netcoreapp2.0")]
         public void TestControllerWithContext()
         {
             using (var fileProvider = new TemporaryFileProvider())

@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <InternalAspNetCoreSdkVersion>2.0.0-*</InternalAspNetCoreSdkVersion>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
   </PropertyGroup>
   <!-- AspNetCore Versions -->
   <PropertyGroup>

@@ -217,7 +217,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 if (namedType != null &&
                     namedType.ContainingAssembly.Name == "Microsoft.Extensions.Configuration.Abstractions" &&
                     namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Extensions.Configuration" &&
-                    namedType.Name == "IConfigurationRoot") 
+                    namedType.Name == "IConfiguration") 
                 {
                     return pSymbol;
                 }

@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory(Skip="Need new CLI that can run tools on netcoreapp2.0"), MemberData("TestData")]
+        [Theory, MemberData("TestData")]
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

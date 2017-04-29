@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory(Skip="Need new CLI that can run tools on netcoreapp2.0"), MemberData("TestData")]
+        [Theory, MemberData("TestData")]
         public void TestControllerGenerators(string baselineFile, string generatedFilePath, string[] args)
         {
             using (var fileProvider = new TemporaryFileProvider())

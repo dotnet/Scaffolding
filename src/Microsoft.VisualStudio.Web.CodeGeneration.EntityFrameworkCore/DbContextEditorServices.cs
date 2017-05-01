@@ -58,6 +58,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
 
             var templateName = "NewLocalDbContext.cshtml";
+            return await AddNewContextItemsInternal(templateName, dbContextTemplateModel);
+        }
+
+        public async Task<SyntaxTree> AddNewDbContextFactory(NewDbContextTemplateModel dbContextTemplateModel)
+        {
+            if (dbContextTemplateModel == null)
+            {
+                throw new ArgumentNullException(nameof(dbContextTemplateModel));
+            }
+
+            var templateName = "NewDbContextFactory.cshtml";
+            return await AddNewContextItemsInternal(templateName, dbContextTemplateModel);
+        }
+
+        private async Task<SyntaxTree> AddNewContextItemsInternal(string templateName, NewDbContextTemplateModel dbContextTemplateModel)
+        {
             var templatePath = _filesLocator.GetFilePath(templateName, TemplateFolders);
             Contract.Assert(File.Exists(templatePath));
 
@@ -78,6 +94,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             return CSharpSyntaxTree.ParseText(sourceText);
         }
+
 
         public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType)
         {

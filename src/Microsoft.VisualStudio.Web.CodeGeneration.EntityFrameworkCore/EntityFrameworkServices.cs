@@ -116,6 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         {
             Type dbContextType;
             SyntaxTree dbContextSyntaxTree = null;
+            SyntaxTree dbContextFactorySyntaxTree = null;
 
             EditSyntaxTreeResult startUpEditResult = new EditSyntaxTreeResult()
             {
@@ -126,6 +127,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             var dbContextSymbols = _modelTypesLocator.GetType(dbContextFullTypeName).ToList();
             var startupType = _modelTypesLocator.GetType("Startup").FirstOrDefault();
+            var programType = _modelTypesLocator.GetType("Program").FirstOrDefault();
             Type modelReflectionType = null;
             ReflectedTypesProvider reflectedTypesProvider = null;
             string dbContextError = string.Empty;
@@ -138,8 +140,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                 // Create a new Context
                 _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, dbContextFullTypeName));
-                var dbContextTemplateModel = new NewDbContextTemplateModel(dbContextFullTypeName, modelTypeSymbol);
+                var dbContextTemplateModel = new NewDbContextTemplateModel(dbContextFullTypeName, modelTypeSymbol, programType);
                 dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
+                dbContextFactorySyntaxTree = await _dbContextEditorServices.AddNewDbContextFactory(dbContextTemplateModel);
                 state = ContextProcessingStatus.ContextAdded;
 
                 // Edit startup class to register the context using DI
@@ -171,6 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     {
                         c = c.AddSyntaxTrees(assemblyAttributeGenerator.GenerateAttributeSyntaxTree());
                         c = c.AddSyntaxTrees(dbContextSyntaxTree);
+                        c = c.AddSyntaxTrees(dbContextFactorySyntaxTree);
                         if (startUpEditResult.Edited)
                         {
                             c = c.ReplaceSyntaxTree(startUpEditResult.OldTree, startUpEditResult.NewTree);
@@ -190,6 +194,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                 // Add file information
                 dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName, areaName));
+                dbContextFactorySyntaxTree = dbContextFactorySyntaxTree.WithFilePath(GetPathForNewContextFactory(dbContextTemplateModel.DbContextTypeName, areaName));
             }
             else
             {
@@ -279,9 +284,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var metadata = GetModelMetadata(dbContextType, modelReflectionType, reflectedStartupType);
 
             // Write the DbContext/Startup if getting the model metadata is successful
-            if (dbContextSyntaxTree != null)
+            if (dbContextSyntaxTree != null && dbContextFactorySyntaxTree != null)
             {
                 PersistSyntaxTree(dbContextSyntaxTree);
+                PersistSyntaxTree(dbContextFactorySyntaxTree);
+
                 if (state == ContextProcessingStatus.ContextAdded || state == ContextProcessingStatus.ContextAddedButRequiresConfig)
                 {
                     _logger.LogMessage(string.Format(MessageStrings.AddedDbContext, dbContextSyntaxTree.FilePath.Substring(_applicationInfo.ApplicationBasePath.Length)));
@@ -324,6 +331,30 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             if (File.Exists(outputPath))
             {
                 // Odd case, a file exists with the same name as the DbContextTypeName but perhaps
+                // the type defined in that file is different, what should we do in this case?
+                // How likely is the above scenario?
+                // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                    MessageStrings.DbContextCreationError_fileExists,
+                    outputPath));
+            }
+
+            return outputPath;
+        }
+
+        private string GetPathForNewContextFactory(string contextShortTypeName, string areaName)
+        {
+            var areaPath = string.IsNullOrEmpty(areaName) ? string.Empty : Path.Combine("Areas", areaName);
+            var appBasePath = _applicationInfo.ApplicationBasePath;
+            var outputPath = Path.Combine(
+                appBasePath,
+                areaPath,
+                NewDbContextFolderName,
+                contextShortTypeName + "Factory.cs");
+
+            if (File.Exists(outputPath))
+            {
+                // Odd case, a file exists with the same name as the DbContextFactoryTypeName but perhaps
                 // the type defined in that file is different, what should we do in this case?
                 // How likely is the above scenario?
                 // Perhaps we can enumerate files with prefix and generate a safe name? For now, just throw.

@@ -12,8 +12,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <packageSources>
         <clear />
         <add key=""local"" value=""" + artifactsDir +  @""" />
-        <add key=""AspNetCoreCiDev"" value=""https://dotnet.myget.org/F/aspnetcore-ci-dev/api/v3/index.json"" />
-        <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
+        <add key=""AspNetCore"" value=""https://dotnet.myget.org/F/aspnetcore-ci-release/api/v3/index.json"" />
+        <add key=""cli-deps"" value=""https://dotnet.myget.org/F/cli-deps/api/v3/index.json"" />
         <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
     </packageSources>
 </configuration>";
@@ -158,16 +158,12 @@ namespace WebApplication1
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile(""appsettings.json"", optional: true, reloadOnChange: true);
-                //.AddJsonFile($""appsettings.{env.EnvironmentName}.json"", optional: true);
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -177,7 +173,7 @@ namespace WebApplication1
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseStaticFiles();
             CS7_method(out var i);
@@ -246,16 +242,32 @@ namespace WebApplication1
 ";
         public const string ProgramFileName = "Program.cs";
         public const string ProgramFileText = @"using System;
-namespace Test
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace WebApplication1
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(""Hello"");
+            BuildWebHost(args).Run();
         }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost
+                .CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .Build();
     }
-}";
+}
+";
 
 
         public const string LibraryProjectName = "Library1.csproj";

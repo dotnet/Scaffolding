@@ -4,7 +4,7 @@ namespace WebAppNamespace
 {
     public class Startup
     {
-        public Microsoft.Extensions.Configuration.IConfigurationRoot ConfigurationProp { get; set; }
+        public Microsoft.Extensions.Configuration.IConfiguration ConfigurationProp { get; set; }
 
         public void ConfigureServices(IServiceCollection servicesVar)
         {

@@ -10,6 +10,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     {
         Task<SyntaxTree> AddNewContext(NewDbContextTemplateModel dbContextTemplateModel);
 
+        Task<SyntaxTree> AddNewDbContextFactory(NewDbContextTemplateModel dbContextTemplateModel);
+
         EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType);
 
         EditSyntaxTreeResult EditStartupForNewContext(ModelType startup, string dbContextTypeName, string dbContextNamespace, string dataBaseName);

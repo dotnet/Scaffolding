@@ -11,6 +11,6 @@ namespace WebAppNamespace
             servicesVar.AddDbContext<MyContext>(options =>
                     options.UseSqlServer(ConfigurationProp.GetConnectionString("MyContext")));
         }
-        public IConfigurationRoot ConfigurationProp { get; set; }
+        public IConfiguration ConfigurationProp { get; set; }
     }
 }

@@ -6,6 +6,6 @@ namespace WebAppNamespace
         public void ConfigureServices(IServiceCollection servicesVar)
         {
         }
-        public IConfigurationRoot ConfigurationProp { get; set; }
+        public IConfiguration ConfigurationProp { get; set; }
     }
 }

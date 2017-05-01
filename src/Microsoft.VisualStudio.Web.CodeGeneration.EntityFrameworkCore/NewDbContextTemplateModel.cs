@@ -8,7 +8,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class NewDbContextTemplateModel
     {
-        public NewDbContextTemplateModel(string dbContextName, ModelType modelType)
+        public NewDbContextTemplateModel(string dbContextName, ModelType modelType, ModelType programType)
         {
             if (dbContextName == null)
             {
@@ -20,10 +20,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(modelType));
             }
 
+            if (programType == null)
+            {
+                throw new ArgumentNullException(nameof(programType));
+            }
+
             var modelNamespace = modelType.Namespace;
 
             ModelTypeName = modelType.Name;
             ModelTypeFullName = modelType.FullName;
+            ProgramTypeName = programType.Name;
+            ProgramNamespace = programType.Namespace;
             RequiredNamespaces = new HashSet<string>();
 
             var classNameModel = new ClassNameModel(dbContextName);
@@ -36,6 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 RequiredNamespaces.Add(modelNamespace);
             }
+
         }
 
         public string DbContextTypeName { get; private set; }
@@ -44,6 +52,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public string ModelTypeName { get; private set; }
         public string ModelTypeFullName { get; private set; }
+
+        public string ProgramTypeName { get; private set; }
+        public string ProgramNamespace { get; private set; }
 
         public HashSet<string> RequiredNamespaces { get; private set; }
     }

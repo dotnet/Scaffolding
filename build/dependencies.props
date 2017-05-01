@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <InternalAspNetCoreSdkVersion>2.0.0-*</InternalAspNetCoreSdkVersion>
+    <NETStandardImplicitPackageVersion>$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
   </PropertyGroup>
   <!-- AspNetCore Versions -->
   <PropertyGroup>
@@ -30,5 +31,4 @@
   <PropertyGroup>
     <JsonNetLegacyVersion>9.0.1</JsonNetLegacyVersion>
   </PropertyGroup>
-
 </Project>

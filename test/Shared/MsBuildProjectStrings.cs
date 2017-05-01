@@ -12,8 +12,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <packageSources>
         <clear />
         <add key=""local"" value=""" + artifactsDir +  @""" />
-        <add key=""AspNetCoreCiDev"" value=""https://dotnet.myget.org/F/aspnetcore-ci-dev/api/v3/index.json"" />
-        <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
+        <add key=""AspNetCore"" value=""https://dotnet.myget.org/F/aspnetcore-ci-release/api/v3/index.json"" />
+        <add key=""cli-deps"" value=""https://dotnet.myget.org/F/cli-deps/api/v3/index.json"" />
         <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
     </packageSources>
 </configuration>";

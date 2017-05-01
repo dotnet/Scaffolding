@@ -15,11 +15,12 @@ using Microsoft.Extensions.DependencyInjection;
 @{
     var factoryClassName = @Model.DbContextTypeName+"Factory";
 }
+
 namespace @Model.DbContextNamespace
 {
     public class @factoryClassName : IDbContextFactory<@Model.DbContextTypeName>
     {
-        public @Model.DbContextTypeName Create(DbContextFactoryOptions options) =>
-            @(Model.ProgramTypeName).BuildWebHost(Array.Empty<string>()).Services.GetRequiredService<@Model.DbContextTypeName>();
+        public @Model.DbContextTypeName Create(string[] args) =>
+            @(Model.ProgramTypeName).BuildWebHost(args).Services.GetRequiredService<@Model.DbContextTypeName>();
     }
 }

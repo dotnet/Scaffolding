@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Internal;
 using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
@@ -37,12 +37,36 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add($"Library1/ModelWithMatchingShortName.cs", "namespace Library1.Models { public class ModelWithMatchingShortName { } }");
             fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
             fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.ProductTxt);
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        private void RestoreAndBuild(string path, ITestOutputHelper output)
+        {
 
             var result = Command.CreateDotNet("restore",
-                new[] { Path.Combine(fileProvider.Root, "Root", "Test.csproj") })
+                new string[] {})
+                .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
+                .InWorkingDirectory(path)
                 .OnErrorLine(l => output.WriteLine(l))
                 .OnOutputLine(l => output.WriteLine(l))
                 .Execute();
+
+            if (result.ExitCode !=0)
+            {
+                throw new InvalidOperationException($"Restore failed with exit code: {result.ExitCode}");
+            }
+
+            result = Command.CreateDotNet("build", new string[] {})
+                .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
+                .InWorkingDirectory(path)
+                .OnErrorLine(l => output.WriteLine(l))
+                .OnOutputLine(l => output.WriteLine(l))
+                .Execute();
+
+           if (result.ExitCode !=0)
+            {
+                throw new InvalidOperationException($"Build failed with exit code: {result.ExitCode}");
+            }
         }
 
         public void SetupProjectsWithoutEF(TemporaryFileProvider fileProvider, ITestOutputHelper output)
@@ -73,11 +97,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
             fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.ProductTxt);
 
-            var result = Command.CreateDotNet("restore",
-                new[] { Path.Combine(fileProvider.Root, "Root", "Test.csproj") })
-                .OnErrorLine(l => output.WriteLine(l))
-                .OnOutputLine(l => output.WriteLine(l))
-                .Execute();
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }
     }
 }

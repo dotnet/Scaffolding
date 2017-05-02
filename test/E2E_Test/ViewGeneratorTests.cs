@@ -28,8 +28,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 {
                     new object[] { Path.Combine("Views", "EmptyView.txt"), "EmptyView.cshtml", EMPTY_VIEW_ARGS },
                     // Disable tests that need loading assemblies in insideman
-                    //new object[] { Path.Combine("Views", "CarCreate.txt"), "CarCreate.cshtml", VIEW_WITH_DATACONTEXT },
-                    //new object[] { Path.Combine("Views", "CarDetails.txt"),"CarDetails.cshtml", VIEW_NO_DATACONTEXT }
+                    new object[] { Path.Combine("Views", "CarCreate.txt"), "CarCreate.cshtml", VIEW_WITH_DATACONTEXT },
+                    new object[] { Path.Combine("Views", "CarDetails.txt"),"CarDetails.cshtml", VIEW_NO_DATACONTEXT }
                 };
             }
         }
@@ -37,12 +37,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         [Theory, MemberData("TestData")]
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Skipping E2E_Tests on non windows 
-                // https://github.com/dotnet/cli/issues/5059
-                return;
-            }
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);

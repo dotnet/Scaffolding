@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         }
 
         [Fact]
-        public void TestControllerWithContext()
+        public void TestControllerWithoutContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {

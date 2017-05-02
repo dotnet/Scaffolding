@@ -21,7 +21,6 @@
   </PropertyGroup>
   <!-- Dependencies for Test Project -->
   <PropertyGroup>
-    <CliUtilsVersion>1.0.0-preview4-004233</CliUtilsVersion>
     <TestSdkVersion>15.0.0</TestSdkVersion>
     <MoqVersion>4.6.36-*</MoqVersion>
     <XunitVersion>2.2.0</XunitVersion>

@@ -33,13 +33,30 @@ namespace Microsoft.Extensions.Internal
             {
                 FileName = commandName,
                 Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
-                UseShellExecute = false
+                UseShellExecute = false, 
             };
 
             _process = new Process
             {
                 StartInfo = psi
             };
+        }
+
+        public Command InWorkingDirectory(string workingDir)
+        {
+            if (string.IsNullOrEmpty(workingDir))
+            {
+                throw new ArgumentException(nameof(workingDir));
+            }
+
+            _process.StartInfo.WorkingDirectory = workingDir;
+            return this;
+        }
+
+        public Command WithEnvironmentVariable(string name, string value)
+        {
+            _process.StartInfo.EnvironmentVariables[name] = value;
+            return this;
         }
 
         public CommandResult Execute()

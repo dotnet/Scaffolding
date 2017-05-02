@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Internal;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,17 +28,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         protected void Scaffold(string[] args, string testProjectPath)
         {
             var thisAssembly = GetType().GetTypeInfo().Assembly.GetName().Name;
-            var exitCode = new CommandFactory()
-                .Create(new Muxer().MuxerPath, args)
-                // .Create("dotnet", new []{
-                //     "exec",
-                //     "--depsfile", Path.Combine(AppContext.BaseDirectory, thisAssembly + ".deps.json"),
-                //     "--runtimeconfig", Path.Combine(AppContext.BaseDirectory, thisAssembly + ".runtimeconfig.json"),
-                //     Path.Combine(AppContext.BaseDirectory, "dotnet-aspnet-codegenerator.dll")
-                // }.Concat(args.Skip(1)))
-                .WorkingDirectory(testProjectPath)
-                .CaptureStdErr()
-                .CaptureStdOut()
+            var exitCode = Command.Create(DotNetMuxer.MuxerPathOrDefault(), args.Concat(new [] {"--no-build"}))
+                .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
+                .InWorkingDirectory(testProjectPath)
                 .OnOutputLine(l => Output.WriteLine(l))
                 .OnErrorLine(l => Output.WriteLine(l))
                 .Execute()

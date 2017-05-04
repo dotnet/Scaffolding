@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
@@ -15,13 +15,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class CommonUtilitiesTests : TestBase
     {
-#if NET46
-        static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
-#elif NETCOREAPP2_0
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
-#else
-#error target frameworks need to be updated.
-#endif
+
         ICodeGenAssemblyLoadContext loadContext;
         private ITestOutputHelper _outputHelper;
 

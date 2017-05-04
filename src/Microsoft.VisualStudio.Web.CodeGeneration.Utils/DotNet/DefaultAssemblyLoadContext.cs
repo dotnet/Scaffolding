@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
@@ -15,28 +15,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 
         public Assembly LoadStream(Stream assembly, Stream symbols)
         {
-#if NET46
-            using (var ms = new MemoryStream())
-            {
-                assembly.CopyTo(ms);
-                return Assembly.Load(ms.ToArray());
-            }
-#elif NETSTANDARD1_6
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(assembly);
-#else
-#error target frameworks need to be updated.
-#endif
         }
 
         public Assembly LoadFromPath(string path)
         {
-#if NET46
-            return Assembly.LoadFrom(path);
-#elif NETSTANDARD1_6
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
-#else
-#error target frameworks need to be updated.
-#endif
-            }
+        }
     }
 }

@@ -2,11 +2,11 @@
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <Description>Contains utilities used by ASP.NET Core Code Generation packages.</Description>
-    <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
@@ -24,9 +24,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(CodeAnalysisVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <PackageReference Include="System.AppContext" Version="$(CoreFxVersion)" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="$(CoreFxVersion)" />
     <PackageReference Include="System.Threading.Tasks.Parallel" Version="$(CoreFxVersion)" />

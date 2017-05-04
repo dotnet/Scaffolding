@@ -2,11 +2,11 @@
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <Description>Contains the core infrastructure used by ASP.NET Core Code Generators.</Description>
-    <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 

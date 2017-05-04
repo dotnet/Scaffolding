@@ -3,11 +3,11 @@
 
   <PropertyGroup>
     <Description>Contains Entity Framework Core Services used by ASP.NET Core Code Generators.</Description>
-    <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
@@ -22,10 +22,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="$(CoreFxVersion)" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="$(CoreFxVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-    <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 
   <ItemGroup>

@@ -28,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             return Path.Combine(currDir, ".test");
         }
         public TemporaryFileProvider()
-            : base(Directory.CreateDirectory(Path.Combine(TestFolder, "tmpfiles", Guid.NewGuid().ToString())).FullName)
+            : base(Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "tmpfiles", Guid.NewGuid().ToString())).FullName)
         {
         }
 

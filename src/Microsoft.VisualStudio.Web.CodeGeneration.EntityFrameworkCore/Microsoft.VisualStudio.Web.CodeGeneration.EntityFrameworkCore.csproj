@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Pack="true" Include="Templates\**\*" PackagePath="Templates\" />
+    <None Pack="true" Include="Templates\DbContext\*" PackagePath="Templates\DbContext\" />
   </ItemGroup>
 
   <!--<ItemGroup>

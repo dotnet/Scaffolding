@@ -14,6 +14,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public class E2ETestBase
     {
+        #if RELEASE
+        public const string Configuration = "Release";
+        #else
+        public const string Configuration = "Debug";
+        #endif
+
         public const string E2ESkipReason = "Disabling E2E test";
         public const string codegeneratorToolName = "aspnet-codegenerator";
 

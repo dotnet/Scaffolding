@@ -10,6 +10,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class MsBuildProjectSetupHelper
     {
+        #if RELEASE
+        public const string Configuration = "Release";
+        #else
+        public const string Configuration = "Debug";
+        #endif
+
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
             string artifactsDir = null;
@@ -56,7 +62,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 throw new InvalidOperationException($"Restore failed with exit code: {result.ExitCode}");
             }
 
-            result = Command.CreateDotNet("build", new string[] {})
+            result = Command.CreateDotNet("build", new string[] {"-c", Configuration})
                 .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
                 .InWorkingDirectory(path)
                 .OnErrorLine(l => output.WriteLine(l))

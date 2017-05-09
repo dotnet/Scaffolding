@@ -11,9 +11,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public class MvcControllerTest : E2ETestBase
     {
-        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "EmptyController" };
-        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
-        private static string[] READ_WRITE_CONTROLLER = new string[] { codegeneratorToolName, "-p", ".", "controller", "--controllerName", "ActionsController", "--readWriteActions" };
+        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController" };
+        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
+        private static string[] READ_WRITE_CONTROLLER = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "controller",  "--controllerName", "ActionsController", "--readWriteActions" };
 
 
         public MvcControllerTest(ITestOutputHelper output)
@@ -61,6 +61,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "aspnet-codegenerator",
                     "-p",
                     TestProjectPath,
+                    "-c",
+                    Configuration,
                     "controller",
                     "--controllerName",
                     "CarsController",
@@ -89,6 +91,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     codegeneratorToolName,
                     "-p",
                     TestProjectPath,
+                    "-c",
+                    Configuration,
                     "controller",
                     "--controllerName",
                     "CarsWithViewController",
@@ -129,6 +133,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     codegeneratorToolName,
                     "-p",
                     TestProjectPath,
+                    "-c",
+                    Configuration,
                     "controller",
                     "--controllerName",
                     "ProductsController",
@@ -166,6 +172,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     codegeneratorToolName,
                     "-p",
                     TestProjectPath,
+                    "-c",
+                    Configuration,
                     "controller",
                     "--controllerName",
                     "ActionsController",

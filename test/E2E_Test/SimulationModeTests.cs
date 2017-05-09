@@ -28,6 +28,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "aspnet-codegenerator",
                     "-p",
                     TestProjectPath,
+                    "-c",
+                    Configuration,
                     "--simulation-mode",
                     "controller",
                     "--controllerName",

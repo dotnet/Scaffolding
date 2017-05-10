@@ -43,6 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             app.OnExecute(async () =>
             {
+                CodeGenerationEnvironmentHelper.SetupEnvironment();
                 string project = projectPath.Value();
                 if (string.IsNullOrEmpty(project))
                 {

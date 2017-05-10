@@ -21,6 +21,6 @@ namespace @Model.DbContextNamespace
     public class @factoryClassName : IDbContextFactory<@Model.DbContextTypeName>
     {
         public @Model.DbContextTypeName Create(string[] args) =>
-            @(Model.ProgramTypeName).BuildWebHost(args).Services.GetRequiredService<@Model.DbContextTypeName>();
+            @(Model.ProgramTypeName).BuildWebHost(args).Services.CreateScope().ServiceProvider.GetRequiredService<@Model.DbContextTypeName>();
     }
 }

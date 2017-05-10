@@ -441,12 +441,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 // Use EF design APIs to get the DBContext instance.
                 var operationHandler = new OperationReportHandler();
                 var operationReporter = new OperationReporter(operationHandler);
+                // EF infers the environment (Development/ Production) based on the environment variable
+                // ASPNETCORE_ENVIRONMENT. This should already be set up by the CodeGeneration.Design process.
                 var dbContextOperations = new DbContextOperations(
                     operationReporter,
                     dbContextType.GetTypeInfo().Assembly,
-                    startupType.GetTypeInfo().Assembly,
-                    "Development",
-                    Path.GetDirectoryName(_projectContext.ProjectFullPath));
+                    startupType.GetTypeInfo().Assembly);
 
                 var dbContextService = dbContextOperations.CreateContext(dbContextType.FullName);
 

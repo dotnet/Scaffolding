@@ -35,7 +35,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             var razorProject = RazorProject.Create(Directory.GetCurrentDirectory());
             var razorTemplateEngine = new RazorTemplateEngine(razorEngine, razorProject);
 
-            var razorDocument = RazorCodeDocument.Create(RazorSourceDocument.Create(content, string.Empty));
+            var imports = new RazorSourceDocument[]
+            {
+                RazorSourceDocument.Create(@"
+@using System
+@using System.Threading.Tasks
+", fileName: null),
+            };
+
+            var razorDocument = RazorCodeDocument.Create(RazorSourceDocument.Create(content, string.Empty), imports);
             var generatorResults = razorTemplateEngine.GenerateCode(razorDocument);
 
             if (generatorResults.Diagnostics.Any())

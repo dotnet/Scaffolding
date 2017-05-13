@@ -33,7 +33,9 @@ namespace Microsoft.Extensions.Internal
             {
                 FileName = commandName,
                 Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
-                UseShellExecute = false, 
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
             };
 
             _process = new Process
@@ -69,6 +71,8 @@ namespace Microsoft.Extensions.Internal
             _process.ErrorDataReceived += OnErrorReceived;
 
             _process.Start();
+            _process.BeginOutputReadLine();
+            _process.BeginErrorReadLine();
 
             _process.WaitForExit();
 
@@ -84,12 +88,18 @@ namespace Microsoft.Extensions.Internal
 
         private void OnErrorReceived(object sender, DataReceivedEventArgs e)
         {
-            _stdErrorHandler?.Invoke(e.Data);
+            if (e.Data != null)
+            {
+                _stdErrorHandler?.Invoke(e.Data);
+            }
         }
 
         private void OnOutputReceived(object sender, DataReceivedEventArgs e)
         {
-            _stdOutHandler?.Invoke(e.Data);
+            if (e.Data != null)
+            {
+                _stdOutHandler?.Invoke(e.Data);
+            }
         }
 
         public Command OnOutputLine(Action<string> handler)

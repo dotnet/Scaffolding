@@ -9,7 +9,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 {
     public class NamespaceUtilitiesTest
     {
-        [Theory, MemberData("NameSpaceData")]
+        [Theory, MemberData(nameof(NameSpaceData))]
         public void TestGetSafeNameSpaceName(string nameSpaceName, string expected)
         {
             Assert.Equal(expected, NameSpaceUtilities.GetSafeNameSpaceName(nameSpaceName));
@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             }
         }
 
-        [Theory, MemberData("NamespaceFromPathData")]
+        [Theory, MemberData(nameof(NamespaceFromPathData))]
         public void TestGetSafeNameSpaceNameFromPath(string path, string prefix, string expected)
         {
             Assert.Equal(expected, NameSpaceUtilities.GetSafeNameSpaceFromPath(path, prefix));

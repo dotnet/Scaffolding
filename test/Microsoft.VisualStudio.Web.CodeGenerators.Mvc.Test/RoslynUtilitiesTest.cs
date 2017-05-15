@@ -7,7 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 {
     public class RoslynUtilitiesTest
     {
-        [Theory, MemberData("TestData")]
+        [Theory, MemberData(nameof(TestData))]
         public void TestCreateEscapedIdentifier(string identifier, string expectedValue)
         {
             Assert.Equal(expectedValue, RoslynUtilities.CreateEscapedIdentifier(identifier));
@@ -104,7 +104,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             }
         }
 
-        [Theory, MemberData("NameSpaceTestData")]
+        [Theory, MemberData(nameof(NameSpaceTestData))]
         public void TestCreateValidNameSpace(string identifier, bool expectedValue)
         {
             Assert.Equal(expectedValue, RoslynUtilities.IsValidNamespace(identifier));
@@ -121,12 +121,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                     new object[] {"abc.def ghi.xyz", false},
                     new object[] {"..abc",false},
                     new object[] {"abc.@xyz", false},
-                    new object[] {"$abd", false}, 
+                    new object[] {"$abd", false},
                     new object[] {"namespace", false},
                     new object[] {"class", false},
                     new object[] {"9abc", false},
                     new object[] {"9.abc", false},
-                    new object[] {"ab.c9.de", true},  
+                    new object[] {"ab.c9.de", true},
                     new object[] {"abc.def", true},
                     new object[] {"validnamespace", true}
                 };

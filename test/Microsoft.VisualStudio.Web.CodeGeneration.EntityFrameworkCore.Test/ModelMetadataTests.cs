@@ -100,10 +100,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             var properties = modelMetadata.Properties;
 
             // Assert
-            Assert.Equal(properties[0].PropertyName, "ProductId");
-            Assert.Equal(properties[1].PropertyName, "ProductName");
-            Assert.Equal(properties[2].PropertyName, "CategoryId");
-            Assert.Equal(properties[3].PropertyName, "EnumProperty");
+            Assert.Equal("ProductId", properties[0].PropertyName);
+            Assert.Equal("ProductName", properties[1].PropertyName);
+            Assert.Equal("CategoryId", properties[2].PropertyName);
+            Assert.Equal("EnumProperty", properties[3].PropertyName);
         }
     }
 }

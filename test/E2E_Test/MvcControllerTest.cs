@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory, MemberData("TestData")]
+        [Theory, MemberData(nameof(TestData))]
         public void TestControllerGenerators(string baselineFile, string generatedFilePath, string[] args)
         {
             using (var fileProvider = new TemporaryFileProvider())

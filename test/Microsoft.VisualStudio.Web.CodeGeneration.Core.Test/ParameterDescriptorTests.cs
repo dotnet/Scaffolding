@@ -17,42 +17,36 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core
         [InlineData("BooleanWithoutExplicitOption",
                     "--BooleanWithoutExplicitOption",
                     "",
-                    CommandOptionType.NoValue,
                     "--BooleanWithoutExplicitOption",
                     true,
                     false)]
         [InlineData("BooleanWithExplicitOption",
                     "--NameOverride|-bwo",
                     "Bool with explicit option",
-                    CommandOptionType.NoValue,
                     "--NameOverride",
                     true,
                     false)]
         [InlineData("BooleanWithDefaultValue",
                     "--BooleanWithDefaultValue",
                     "",
-                    CommandOptionType.NoValue,
                     "--BooleanWithDefaultValue",
                     true,
                     true)]
         [InlineData("StringOption",
                     "--StringOption|-so",
                     "String with explicit option",
-                    CommandOptionType.SingleValue,
                     "--StringOption GivenValue",
                     "GivenValue",
                     "")]
         [InlineData("StringOptionWithNameOverride",
                     "--OverridenName",
                     "",
-                    CommandOptionType.SingleValue,
                     "--OverridenName GivenValue",
                     "GivenValue",
                     "")]
         [InlineData("StringOptionWithDefaultValue",
                     "--StringOptionWithDefaultValue",
                     "",
-                    CommandOptionType.SingleValue,
                     "--StringOptionWithDefaultValue GivenValue",
                     "GivenValue",
                     "Default Value")]
@@ -60,7 +54,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core
             string propertyName,
             string expectedOptionTemplate,
             string expectedOptionDescription,
-            int expectedCommandOptionType,
             string commandLineStringWithTheOption,
             object expectedValueWhenOptionIsPresent,
             object expectedValueWhenOptionIsNotPresent)
@@ -69,7 +62,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core
             var command = new CommandLineApplication();
             var property = typeof(TestClass).GetProperty(propertyName);
             var descriptor = new ParameterDescriptor(property);
-            var expectedOption = new CommandOption(expectedOptionTemplate, (CommandOptionType)expectedCommandOptionType);
+            var optionType = expectedValueWhenOptionIsPresent is bool
+                ? CommandOptionType.NoValue
+                : CommandOptionType.SingleValue;
+            var expectedOption = new CommandOption(expectedOptionTemplate, optionType);
 
             //Act
             descriptor.AddCommandLineParameterTo(command);
@@ -82,7 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core
             Assert.Equal(expectedOptionDescription, actualOption.Description);
 
             //Arrange
-            command.Execute(new string[0] { });
+            command.Execute(new string[0]);
 
             //Assert
             Assert.Equal(expectedValueWhenOptionIsNotPresent, descriptor.Value);
@@ -118,7 +114,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core
             command.Execute(new string[0] { });
 
             //Assert
-            Assert.Equal(null, descriptor.Value); //Is this right assumption to test?
+            Assert.Null(descriptor.Value); //Is this right assumption to test?
 
             //Arrange
             command.Execute(new string[] { "PassedValue" });

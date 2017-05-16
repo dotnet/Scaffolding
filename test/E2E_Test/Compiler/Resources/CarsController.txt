@@ -16,7 +16,7 @@ namespace TestProject
 
         public CarsController(CarContext context)
         {
-            _context = context;    
+            _context = context;
         }
 
         // GET: Cars

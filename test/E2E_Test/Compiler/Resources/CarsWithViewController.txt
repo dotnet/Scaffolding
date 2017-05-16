@@ -17,7 +17,7 @@ namespace TestProject.Areas.Test.Controllers
 
         public CarsWithViewController(CarContext context)
         {
-            _context = context;    
+            _context = context;
         }
 
         // GET: Test/CarsWithView

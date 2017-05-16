@@ -15,7 +15,7 @@ namespace TestProject
 
         public ProductsController(ProductContext context)
         {
-            _context = context;    
+            _context = context;
         }
 
         // GET: Products

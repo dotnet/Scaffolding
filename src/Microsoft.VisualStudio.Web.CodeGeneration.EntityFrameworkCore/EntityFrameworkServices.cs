@@ -116,7 +116,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         {
             Type dbContextType;
             SyntaxTree dbContextSyntaxTree = null;
-            SyntaxTree dbContextFactorySyntaxTree = null;
 
             EditSyntaxTreeResult startUpEditResult = new EditSyntaxTreeResult()
             {
@@ -142,7 +141,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, dbContextFullTypeName));
                 var dbContextTemplateModel = new NewDbContextTemplateModel(dbContextFullTypeName, modelTypeSymbol, programType);
                 dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
-                dbContextFactorySyntaxTree = await _dbContextEditorServices.AddNewDbContextFactory(dbContextTemplateModel);
                 state = ContextProcessingStatus.ContextAdded;
 
                 // Edit startup class to register the context using DI
@@ -174,7 +172,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     {
                         c = c.AddSyntaxTrees(assemblyAttributeGenerator.GenerateAttributeSyntaxTree());
                         c = c.AddSyntaxTrees(dbContextSyntaxTree);
-                        c = c.AddSyntaxTrees(dbContextFactorySyntaxTree);
                         if (startUpEditResult.Edited)
                         {
                             c = c.ReplaceSyntaxTree(startUpEditResult.OldTree, startUpEditResult.NewTree);
@@ -194,7 +191,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                 // Add file information
                 dbContextSyntaxTree = dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName, areaName));
-                dbContextFactorySyntaxTree = dbContextFactorySyntaxTree.WithFilePath(GetPathForNewContextFactory(dbContextTemplateModel.DbContextTypeName, areaName));
             }
             else
             {
@@ -284,10 +280,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var metadata = GetModelMetadata(dbContextType, modelReflectionType, reflectedStartupType);
 
             // Write the DbContext/Startup if getting the model metadata is successful
-            if (dbContextSyntaxTree != null && dbContextFactorySyntaxTree != null)
+            if (dbContextSyntaxTree != null)
             {
                 PersistSyntaxTree(dbContextSyntaxTree);
-                PersistSyntaxTree(dbContextFactorySyntaxTree);
 
                 if (state == ContextProcessingStatus.ContextAdded || state == ContextProcessingStatus.ContextAddedButRequiresConfig)
                 {

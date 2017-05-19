@@ -61,17 +61,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return await AddNewContextItemsInternal(templateName, dbContextTemplateModel);
         }
 
-        public async Task<SyntaxTree> AddNewDbContextFactory(NewDbContextTemplateModel dbContextTemplateModel)
-        {
-            if (dbContextTemplateModel == null)
-            {
-                throw new ArgumentNullException(nameof(dbContextTemplateModel));
-            }
-
-            var templateName = "NewDbContextFactory.cshtml";
-            return await AddNewContextItemsInternal(templateName, dbContextTemplateModel);
-        }
-
         private async Task<SyntaxTree> AddNewContextItemsInternal(string templateName, NewDbContextTemplateModel dbContextTemplateModel)
         {
             var templatePath = _filesLocator.GetFilePath(templateName, TemplateFolders);

@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory, MemberData(nameof(TestData))]
+        [Theory(Skip="Disable flakey tests https://github.com/aspnet/Scaffolding/issues/491"), MemberData(nameof(TestData))]
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
             using (var fileProvider = new TemporaryFileProvider())

@@ -4,6 +4,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TestModels
 {
@@ -13,7 +15,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
         {
             get
             {
-                var builder = new ModelBuilder(new CoreConventionSetBuilder().CreateConventionSet());
+                var sqlServerTypeMapper = new SqlServerTypeMapper(new RelationalTypeMapperDependencies()); 
+                var builder = new ModelBuilder(new CoreConventionSetBuilder(new CoreConventionSetBuilderDependencies(sqlServerTypeMapper)).CreateConventionSet());
 
                 builder.Entity<Product>();
                 builder.Entity<Category>();
@@ -26,7 +29,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
         {
             get
             {
-                var builder = new ModelBuilder(new CoreConventionSetBuilder().CreateConventionSet());
+                var sqlServerTypeMapper = new SqlServerTypeMapper(new RelationalTypeMapperDependencies()); 
+                var builder = new ModelBuilder(new CoreConventionSetBuilder(new CoreConventionSetBuilderDependencies(sqlServerTypeMapper)).CreateConventionSet());
 
                 builder.Entity<Customer>();
                 builder.Entity<Order>();

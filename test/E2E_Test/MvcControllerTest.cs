@@ -49,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact(Skip="Disable flakey tests https://github.com/aspnet/Scaffolding/issues/491")]
+        [Fact]
         public void TestControllerWithContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -79,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact(Skip="Disable flakey tests https://github.com/aspnet/Scaffolding/issues/491")]
+        [Fact]
         public void TestControllerWithContext_WithViews()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -120,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact(Skip="Disable flakey tests https://github.com/aspnet/Scaffolding/issues/491")]
+        [Fact]
         public void TestControllerWithContext_WithForeignKey()
         {
             using (var fileProvider = new TemporaryFileProvider())

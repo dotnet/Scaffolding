@@ -12,9 +12,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class FileSystemChangeTracker : IFileSystemChangeTracker
     {
+#if NET461
+        private static readonly StringComparer PathComparisonType = StringComparer.OrdinalIgnoreCase;
+#else
         private static readonly StringComparer PathComparisonType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
             ? StringComparer.OrdinalIgnoreCase
             : StringComparer.Ordinal;
+#endif
         private ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
         private Dictionary<string, FileSystemChangeInformation> _changes = new Dictionary<string, FileSystemChangeInformation>(PathComparisonType);

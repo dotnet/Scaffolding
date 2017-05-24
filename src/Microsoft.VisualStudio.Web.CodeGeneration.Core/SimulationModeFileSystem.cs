@@ -21,10 +21,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     /// </summary>
     public class SimulationModeFileSystem : IFileSystem
     {
+#if NET461
+        private static readonly StringComparison PathComparisonType = StringComparison.OrdinalIgnoreCase;
+#else
         private static readonly StringComparison PathComparisonType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
-
+#endif
         public static SimulationModeFileSystem Instance = new SimulationModeFileSystem();
 
         private IFileSystemChangeTracker FileSystemChangeTracker { get; set; }
@@ -42,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
-        #region File operations
+#region File operations
         public async Task AddFileAsync(string outputPath, Stream sourceStream)
         {
             using (var reader = new StreamReader(sourceStream))
@@ -123,9 +126,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
         }
-        #endregion
+#endregion
 
-        #region Directory Operations
+#region Directory Operations
         public void CreateDirectory(string path)
         {
             if (!DirectoryExists(path))
@@ -294,7 +297,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             return enumeratedFiles;
         }
-        #endregion
+#endregion
 
         private IEnumerable<FileSystemChangeInformation> GetChangesFromDirectory(
             string path,

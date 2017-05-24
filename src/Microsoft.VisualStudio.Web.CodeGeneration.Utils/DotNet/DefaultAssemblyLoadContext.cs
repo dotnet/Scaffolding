@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
                 assembly.CopyTo(ms);
                 return Assembly.Load(ms.ToArray());
             }
-#elif NETSTANDARD1_6
+#elif NETSTANDARD2_0
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(assembly);
 #else
 #error target frameworks need to be updated.
@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
         {
 #if NET461
             return Assembly.LoadFrom(path);
-#elif NETSTANDARD1_6
+#elif NETSTANDARD2_0
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
 #else
 #error target frameworks need to be updated.

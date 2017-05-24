@@ -17,6 +17,9 @@
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-*" PrivateAssets="All" />
+  </ItemGroup>
 
   <!--<ItemGroup>
     <Compile Update="Resources.Designer.cs">

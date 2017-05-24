@@ -55,7 +55,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream.  
             // On desktop if the assembly name is different, MVC fails to load the assembly as it is not found on disk.
 
-#if NET46
+#if NET461
             var newAssemblyName = Path.GetFileNameWithoutExtension(compilation.AssemblyName);
 #elif NETSTANDARD1_6
             var newAssemblyName = Path.GetRandomFileName();

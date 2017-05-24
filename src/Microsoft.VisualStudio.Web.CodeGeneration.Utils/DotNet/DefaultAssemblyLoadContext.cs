@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 
         public Assembly LoadStream(Stream assembly, Stream symbols)
         {
-#if NET46
+#if NET461
             using (var ms = new MemoryStream())
             {
                 assembly.CopyTo(ms);
@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 
         public Assembly LoadFromPath(string path)
         {
-#if NET46
+#if NET461
             return Assembly.LoadFrom(path);
 #elif NETSTANDARD1_6
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(path);

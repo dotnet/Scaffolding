@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="$(CoreFxVersion)" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="$(CoreFxVersion)" />
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

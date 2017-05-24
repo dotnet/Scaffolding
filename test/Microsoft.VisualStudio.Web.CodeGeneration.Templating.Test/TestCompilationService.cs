@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -88,15 +88,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
 
         private static ProjectContext CreateProjectContext(string projectPath)
         {
-#if NET46
-            projectPath = projectPath ?? Path.Combine("..", "..", "..", "..");
-            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NET46.GetShortFolderName();
-#elif NETCOREAPP2_0
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
-#else
-#error target frameworks need to be updated.
-#endif
+
             if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
             {
                 projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);

@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Contains interfaces for Project Model and messaging for scaffolding.</Description>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
   </PropertyGroup>

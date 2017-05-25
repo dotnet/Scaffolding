@@ -59,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             var newCompilation = compilation
                 .WithAssemblyName(newAssemblyName)
-                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+                .WithOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication));
 
             var result = CommonUtilities.GetAssemblyFromCompilation(_loader, newCompilation);
             return result;

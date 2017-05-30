@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
 
             mockServiceProvider = new Mock<IServiceProvider>();
             mockAssemblyProvider = new Mock<ICodeGeneratorAssemblyProvider>();
-#if NET46
+#if NET461
             Assembly currentAssembly = typeof(CodeGeneratorsLocatorTests).Assembly;
             mockAssemblyProvider
                 .SetupGet(ap => ap.CandidateAssemblies)

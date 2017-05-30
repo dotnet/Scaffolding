@@ -47,11 +47,7 @@
 @{
     foreach (var property in Model.ModelMetadata.Properties)
     {
-        if (property.IsPrimaryKey)
-        {
-        @:<input type="hidden" asp-for="@GetValueExpression(property)" />
-        }
-        else if (property.Scaffold && !property.IsForeignKey)
+        if (property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
         {
         <dt>
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
@@ -74,6 +70,12 @@
     @:
     @:<form asp-action="@Model.ViewName">
         @:<div class="form-group">
+            foreach (var property in Model.ModelMetadata.Properties)
+            {
+                if(property.IsPrimaryKey){
+                   @:<input type="hidden" asp-for="@GetValueExpression(property)" />
+                }
+            }
             @:<input type="submit" value="Delete" class="btn btn-default" /> |
             @:<a asp-action="Index">Back to List</a>
         @:</div>

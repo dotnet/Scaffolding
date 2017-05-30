@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class CommonUtilitiesTests : TestBase
     {
-#if NET46
+#if NET461
         static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #elif NETCOREAPP2_0
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");

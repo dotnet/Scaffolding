@@ -4,8 +4,7 @@
 
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
-    <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

@@ -35,25 +35,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""2.0.0-preview2-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview2-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview2-*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
@@ -79,20 +79,20 @@ public const string RootProjectTxtWithoutEF = @"
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""2.0.0-preview2-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview2-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview2-*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
@@ -120,19 +120,19 @@ public const string RootProjectTxtWithoutEF = @"
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""2.0.0-preview2-*"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""2.0.0-preview2-*"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview2-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""2.0.0-preview3-*"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""2.0.0-preview3-*"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""2.0.0-preview3-*"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />

@@ -73,7 +73,7 @@
             foreach (var property in Model.ModelMetadata.Properties)
             {
                 if(property.IsPrimaryKey){
-                   @:<input type="hidden" asp-for="@GetValueExpression(property)" />
+            @:<input type="hidden" asp-for="@GetValueExpression(property)" />
                 }
             }
             @:<input type="submit" value="Delete" class="btn btn-default" /> |

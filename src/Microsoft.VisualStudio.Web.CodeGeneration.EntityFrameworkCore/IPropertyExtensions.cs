@@ -28,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             propertyMetadata.IsForeignKey = property.IsForeignKey();
 
             propertyMetadata.IsEnum = property.ClrType.GetTypeInfo().IsEnum;
-            propertyMetadata.IsReadOnly = property.BeforeSaveBehavior != PropertyValueBehavior.UseValue;
+            propertyMetadata.IsReadOnly = property.BeforeSaveBehavior != PropertySaveBehavior.Save;
 
             //TODO: RequiresValueGenerator() is an internal EF Core method.
             // Need to confirm with EF if this is ok to use. 

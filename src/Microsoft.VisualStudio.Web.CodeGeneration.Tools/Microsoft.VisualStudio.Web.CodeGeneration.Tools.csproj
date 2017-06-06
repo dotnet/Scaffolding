@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true" PackagePath="build\netstandard1.0\microsoft.visualstudio.web.codegeneration.tools.targets" />
+    <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true" PackagePath="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true" PackagePath="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true" PackagePath="toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="..\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true" PackagePath="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />

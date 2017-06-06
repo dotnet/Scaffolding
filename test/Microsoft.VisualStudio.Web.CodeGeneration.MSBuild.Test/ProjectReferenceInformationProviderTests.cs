@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.6;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
@@ -28,8 +28,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" />
-    <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
     <ProjectReference Include=""..\Library2\Library2.csproj"" />
   </ItemGroup>
   <ItemGroup Condition=""'$(TargetFramework)' == 'net461' "">
@@ -37,30 +35,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <Reference Include=""System.Data"" />
   </ItemGroup>
 </Project>";
-        private const string ProjectReference2 = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <RootNamespace>Microsoft.Library</RootNamespace>
-    <ProjectName>Library2</ProjectName>
-    <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.6;net461</TargetFrameworks>
-    <OutputPath>bin\$(Configuration)</OutputPath>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include=""**\*.cs"" Exclude=""Excluded.cs"" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include=""Microsoft.NET.Sdk"" Version=""1.0.0-alpha-20161029-1"" />
-    <PackageReference Include=""NETStandard.Library"" Version=""1.6"" />
-  </ItemGroup>
-  <ItemGroup Condition=""'$(TargetFramework)' == 'net461' "">
-    <Reference Include=""System"" />
-    <Reference Include=""System.Data"" />
-  </ItemGroup>
-</Project>";
-
         private ITestOutputHelper _output;
 
         public ProjectReferenceInformationTests(ITestOutputHelper output)

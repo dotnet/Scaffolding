@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
 
@@ -10,6 +11,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class TemporaryFileProvider : PhysicalFileProvider
     {
+        private static string solutionFileName = "Scaffolding.sln";
+        private static string TestFolder = GetTestFolder();
+        private static string GetTestFolder()
+        {
+            string currDir = Directory.GetCurrentDirectory();
+            while (!Directory.EnumerateFiles(currDir, solutionFileName).Any())
+            {
+                currDir = Path.GetDirectoryName(currDir);
+                if (string.IsNullOrEmpty(currDir))
+                {
+                    throw new InvalidOperationException("Could not find Scaffolding.sln");
+                }
+            }
+
+            return Path.Combine(currDir, ".test");
+        }
         public TemporaryFileProvider()
             : base(Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "tmpfiles", Guid.NewGuid().ToString())).FullName)
         {

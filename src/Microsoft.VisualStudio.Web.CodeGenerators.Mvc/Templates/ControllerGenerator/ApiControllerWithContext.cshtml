@@ -60,41 +60,6 @@ namespace @Model.ControllerNamespace
             return Ok(@Model.ModelVariable);
         }
 
-        // PUT: @routePrefix/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id, [FromBody] @Model.ModelTypeName @Model.ModelVariable)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != @(Model.ModelVariable).@primaryKeyName)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(@Model.ModelVariable).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!@(Model.ModelTypeName)Exists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: @routePrefix
         [HttpPost]
         public async Task<IActionResult> Post@(Model.ModelTypeName)([FromBody] @Model.ModelTypeName @Model.ModelVariable)
@@ -131,6 +96,41 @@ namespace @Model.ControllerNamespace
 }
 
             return CreatedAtAction("Get@(Model.ModelTypeName)", new { id = @(Model.ModelVariable).@primaryKeyName }, @Model.ModelVariable);
+        }
+
+        // PUT: @routePrefix/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put@(Model.ModelTypeName)([FromRoute] @primaryKeyShortTypeName id, [FromBody] @Model.ModelTypeName @Model.ModelVariable)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != @(Model.ModelVariable).@primaryKeyName)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(@Model.ModelVariable).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!@(Model.ModelTypeName)Exists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
         // DELETE: @routePrefix/5

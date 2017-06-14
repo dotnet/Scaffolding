@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
@@ -74,7 +74,7 @@ public const string RootProjectTxtWithoutEF = @"
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

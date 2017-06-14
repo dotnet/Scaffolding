@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard2.0' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <AssetTargetFallback Condition=" '$(TargetFramework)' == 'netstandard2.0' ">$(AssetTargetFallback);portable-net45+win8</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

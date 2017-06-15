@@ -7,6 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         public static string GetNugetConfigTxt(string artifactsDir)
         {
+            // TODO: Remove dotnet-core feed.
             return @"
 <configuration>
     <packageSources>
@@ -14,6 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         <add key=""local"" value=""" + artifactsDir +  @""" />
         <add key=""AspNetCoreCiDev"" value=""https://dotnet.myget.org/F/aspnetcore-ci-dev/api/v3/index.json"" />
         <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
+        <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/v3/index.json"" />
     </packageSources>
 </configuration>";
         }

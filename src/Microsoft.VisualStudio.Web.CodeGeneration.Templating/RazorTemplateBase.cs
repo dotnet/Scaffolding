@@ -62,5 +62,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                 writer.Write(content.ToString());
             }
         }
+
+        public void BeginContext(int position, int length, bool x)
+        {
+            // Do Nothing.
+        }
+
+        public void EndContext()
+        {
+            // Do Nothing.
+        }
     }
 }

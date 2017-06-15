@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
@@ -28,7 +29,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
         public async Task<TemplateResult> RunTemplateAsync(string content,
             dynamic templateModel)
         {
-            var razorEngine = RazorEngine.Create();
+            var razorEngine = RazorEngine.Create((builder) =>
+            {
+                 RazorExtensions.Register(builder);
+            });
 
             // Don't care about the RazorProject as we already have the content of the .cshtml file 
             // and don't need to deal with imports.
@@ -40,10 +44,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                 RazorSourceDocument.Create(@"
 @using System
 @using System.Threading.Tasks
-", fileName: null),
+", fileName: null)
             };
 
-            var razorDocument = RazorCodeDocument.Create(RazorSourceDocument.Create(content, string.Empty), imports);
+            var razorDocument = RazorCodeDocument.Create(RazorSourceDocument.Create(content, "Template"), imports);
             var generatorResults = razorTemplateEngine.GenerateCode(razorDocument);
 
             if (generatorResults.Diagnostics.Any())
@@ -55,7 +59,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                     ProcessingException = new TemplateProcessingException(messages, generatorResults.GeneratedCode)
                 };
             }
-
             var templateResult = _compilationService.Compile(generatorResults.GeneratedCode);
             if (templateResult.Messages.Any())
             {

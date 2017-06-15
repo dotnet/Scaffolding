@@ -2,7 +2,7 @@
   <Import Project="..\..\..\build\common.props" />
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8</AssetTargetFallback>
   </PropertyGroup>
 
 

@@ -8,7 +8,7 @@
     <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
     <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <AssetTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(AssetTargetFallback);portable-net45+win8</AssetTargetFallback>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x86</RuntimeIdentifier>
   </PropertyGroup>

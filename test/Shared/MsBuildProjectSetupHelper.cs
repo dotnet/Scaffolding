@@ -73,7 +73,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         private void RestoreAndBuild(string path, ITestOutputHelper output)
         {
-
             var result = Command.CreateDotNet("restore",
                 new string[] {})
                 .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
@@ -84,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             if (result.ExitCode !=0)
             {
-                throw new InvalidOperationException($"Restore failed with exit code: {result.ExitCode}");
+                throw new InvalidOperationException($"Restore failed with exit code: {result.ExitCode} :: Dotnet path: {DotNetMuxer.MuxerPathOrDefault()}");
             }
 
             result = Command.CreateDotNet("build", new string[] {"-c", Configuration})

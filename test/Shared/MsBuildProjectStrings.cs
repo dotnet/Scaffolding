@@ -7,7 +7,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         public static string GetNugetConfigTxt(string artifactsDir)
         {
-            // TODO: Remove dotnet-core feed.
             return @"
 <configuration>
     <packageSources>
@@ -15,7 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         <add key=""local"" value=""" + artifactsDir +  @""" />
         <add key=""AspNetCoreCiDev"" value=""https://dotnet.myget.org/F/aspnetcore-ci-dev/api/v3/index.json"" />
         <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
-        <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/v3/index.json"" />
     </packageSources>
 </configuration>";
         }
@@ -28,6 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -71,6 +70,7 @@ public const string RootProjectTxtWithoutEF = @"
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -113,6 +113,7 @@ public const string RootProjectTxtWithoutEF = @"
     <OutputPath>bin\$(Configuration)</OutputPath>
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

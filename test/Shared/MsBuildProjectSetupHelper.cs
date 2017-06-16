@@ -3,7 +3,10 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.DependencyModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
@@ -15,6 +18,28 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         #else
         public const string Configuration = "Debug";
         #endif
+
+        private string AspNetCoreVersion
+        {
+            get 
+            {
+                var aspnetCoreLib = DependencyContext
+                    .Default
+                    .CompileLibraries
+                    .FirstOrDefault(l => l.Name.StartsWith("Microsoft.Extensions.FileProviders.Abstractions", StringComparison.OrdinalIgnoreCase));
+
+                return aspnetCoreLib?.Version;
+            }
+        }
+
+        private string CodeGenerationVersion
+        {
+            get 
+            {
+                var informationalVersionAttr = this.GetType().Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false).First();
+                return ((AssemblyInformationalVersionAttribute)informationalVersionAttr).InformationalVersion;
+            }
+        }
 
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
@@ -35,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add("NuGet.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
 
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion));
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 
@@ -94,7 +119,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add("NuGet.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
 
             var rootProjectTxt = MsBuildProjectStrings.RootProjectTxtWithoutEF;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion));
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxtWithoutEf);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 

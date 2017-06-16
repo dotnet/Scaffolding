@@ -13,7 +13,7 @@
   <PropertyGroup>
     <CodeAnalysisVersion>2.3.0-beta1</CodeAnalysisVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
-    <MicrosoftBuildVersion>15.3.0-*</MicrosoftBuildVersion>
+    <MicrosoftBuildVersion>15.3.0-preview-000388-01</MicrosoftBuildVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
   </PropertyGroup>
   <!-- Dependencies for Test Project -->

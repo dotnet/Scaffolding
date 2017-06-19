@@ -32,5 +32,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         [Option(Name = "controllerNamespace", ShortName = "namespace", Description = "Specify the name of the namespace to use for the generated controller")]
         public string ControllerNamespace { get; set; }
+
+        public abstract CommonCommandLineModel Clone();
+
+        protected CommonCommandLineModel()
+        {
+        }
+
+        protected CommonCommandLineModel(CommonCommandLineModel copyFrom)
+        {
+            ModelClass = copyFrom.ModelClass;
+            DataContextClass = copyFrom.DataContextClass;
+            ReferenceScriptLibraries = copyFrom.ReferenceScriptLibraries;
+            LayoutPage = copyFrom.LayoutPage;
+            UseDefaultLayout = copyFrom.UseDefaultLayout;
+            Force = copyFrom.Force;
+            RelativeFolderPath = copyFrom.RelativeFolderPath;
+            ControllerNamespace = copyFrom.ControllerNamespace;
+        }
     }
 }

@@ -181,7 +181,7 @@
     <value>Failed to generate a readme: {0}</value>
   </data>
   <data name="ScaffoldingSuccessful_unregistered" xml:space="preserve">
-    <value>Scaffolding generated all the code but the new context created could be registered using dependency injection.</value>
+    <value>Scaffolding generated all the code but the new context created could not be registered using dependency injection.</value>
   </data>
   <data name="Scaffolding_additionalSteps" xml:space="preserve">
     <value>There may be additional steps required for the generated code to work. Refer to &lt;forward-link&gt;</value>

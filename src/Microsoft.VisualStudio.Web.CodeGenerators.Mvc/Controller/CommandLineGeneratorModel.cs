@@ -21,5 +21,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         [Option(Name = "readWriteActions", ShortName = "actions", Description = "Specify this switch to generate Controller with read/write actions when a Model class is not used")]
         public bool GenerateReadWriteActions { get; set; }
+
+        public CommandLineGeneratorModel()
+        {
+        }
+
+        protected CommandLineGeneratorModel(CommandLineGeneratorModel copyFrom)
+            : base(copyFrom)
+        {
+            UseAsync = copyFrom.UseAsync;
+            NoViews = copyFrom.NoViews;
+            ControllerName = copyFrom.ControllerName;
+            IsRestController = copyFrom.IsRestController;
+            GenerateReadWriteActions = copyFrom.GenerateReadWriteActions;
+        }
+
+        public override CommonCommandLineModel Clone()
+        {
+            return new CommandLineGeneratorModel(this);
+        }
     }
 }

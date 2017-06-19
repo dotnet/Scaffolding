@@ -150,7 +150,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 
         class TestCommandLineModel : CommonCommandLineModel
         {
-
+            public override CommonCommandLineModel Clone()
+            {
+                return new TestCommandLineModel();
+            }
         }
     }
 }

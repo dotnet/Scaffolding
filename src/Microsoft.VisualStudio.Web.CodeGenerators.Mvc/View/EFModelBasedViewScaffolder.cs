@@ -64,7 +64,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
 
-            ValidateEFDependencies();
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
+
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 viewGeneratorModel,
                 _entityFrameworkService,
@@ -80,25 +81,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
             {
                 throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered, MessageStrings.Scaffolding_additionalSteps));
-            }
-        }
-
-        private void ValidateEFDependencies()
-        {
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-            var isEFDesignPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
-
-            const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-            var isSqlServerPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(SqlServerPackageName, StringComparison.OrdinalIgnoreCase));
-
-            if (!isEFDesignPackagePresent || !isSqlServerPackagePresent)
-            {
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlServerPackageName}"));
             }
         }
 
@@ -124,7 +106,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         /// <param name="baseOutputPath">Folder where all views will be generated</param>
         internal async Task GenerateViews(Dictionary<string, string> viewsAndTemplates, ViewGeneratorModel viewGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string baseOutputPath)
         {
-
             if (viewsAndTemplates == null)
             {
                 throw new ArgumentNullException(nameof(viewsAndTemplates));

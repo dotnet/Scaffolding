@@ -29,10 +29,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <ProjectName>TestProject</ProjectName>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""2.0.0-preview2-*"" />
@@ -71,10 +67,6 @@ public const string RootProjectTxtWithoutEF = @"
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

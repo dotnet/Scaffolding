@@ -6,7 +6,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;aspnetcoremvc;codegenerator;scaffolding;visualstudioweb</PackageTags>
-    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

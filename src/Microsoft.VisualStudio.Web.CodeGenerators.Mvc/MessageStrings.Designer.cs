@@ -11,8 +11,7 @@
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
     using System;
     using System.Reflection;
-
-
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -20,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class MessageStrings {
@@ -170,6 +169,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The template name &apos;{0}&apos; is not valid. Supported view templates: &apos;Empty|Create|Edit|Delete|Details|List&apos;&quot;.
+        /// </summary>
+        internal static string InvalidViewTemplateName {
+            get {
+                return ResourceManager.GetString("InvalidViewTemplateName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Layout page to use..
         /// </summary>
         internal static string LayoutOptionsDesc {
@@ -184,6 +192,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string ModelClassOptionDesc {
             get {
                 return ResourceManager.GetString("ModelClassOptionDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; template cannot be used without specifying a model class. Please provide a model using &apos;--model&apos; option..
+        /// </summary>
+        internal static string ModelClassRequiredForTemplate {
+            get {
+                return ResourceManager.GetString("ModelClassRequiredForTemplate", resourceCulture);
             }
         }
         

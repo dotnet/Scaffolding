@@ -85,7 +85,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 }
             }
         }
-        
+
         public abstract Task GenerateCode(ViewGeneratorModel viewGeneratorModel);
 
         internal async Task GenerateView(ViewGeneratorModel viewGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string outputPath)

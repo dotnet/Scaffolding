@@ -43,23 +43,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
         public async Task GenerateCode(ViewGeneratorModel viewGeneratorModel)
         {
-            if (viewGeneratorModel == null)
-            {
-                throw new ArgumentNullException(nameof(viewGeneratorModel));
-            }
-
-            if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
-            {
-                throw new ArgumentException(MessageStrings.ViewNameRequired);
-            }
-
-            if (string.IsNullOrEmpty(viewGeneratorModel.TemplateName))
-            {
-                throw new ArgumentException(MessageStrings.TemplateNameRequired);
-            }
+            var viewTemplate = ValidateViewGeneratorModel(viewGeneratorModel);
 
             ViewScaffolderBase scaffolder = null;
-            if (string.IsNullOrEmpty(viewGeneratorModel.ModelClass))
+            if (viewTemplate.Name == ViewTemplate.EmptyViewTemplate.Name)
             {
                 scaffolder = ActivatorUtilities.CreateInstance<EmptyViewScaffolder>(_serviceProvider);
             }
@@ -76,6 +63,38 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 await scaffolder.GenerateCode(viewGeneratorModel);
             }
+        }
+
+        private static ViewTemplate ValidateViewGeneratorModel(ViewGeneratorModel viewGeneratorModel)
+        {
+            if (viewGeneratorModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewGeneratorModel));
+            }
+
+            if (string.IsNullOrEmpty(viewGeneratorModel.ViewName))
+            {
+                throw new ArgumentException(MessageStrings.ViewNameRequired);
+            }
+
+            var templateName = viewGeneratorModel.TemplateName;
+            if (string.IsNullOrEmpty(templateName))
+            {
+                throw new ArgumentException(MessageStrings.TemplateNameRequired);
+            }
+
+            ViewTemplate viewTemplate;
+            if (!ViewTemplate.ViewTemplateNames.TryGetValue(templateName, out viewTemplate))
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidViewTemplateName, templateName));
+            }
+
+            if (viewTemplate.IsModelRequired && string.IsNullOrEmpty(viewGeneratorModel.ModelClass))
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.ModelClassRequiredForTemplate, templateName));
+            }
+
+            return viewTemplate;
         }
     }
 }

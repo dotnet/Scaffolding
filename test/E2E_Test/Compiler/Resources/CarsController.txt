@@ -27,7 +27,7 @@ namespace TestProject
         }
 
         // GET: Cars/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(string id)
         {
             if (id == null)
             {
@@ -70,7 +70,7 @@ namespace TestProject
         }
 
         // GET: Cars/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
             {
@@ -91,7 +91,7 @@ namespace TestProject
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,ManufacturerID")] Car car)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,Name,ManufacturerID")] Car car)
         {
             if (id != car.ID)
             {
@@ -123,7 +123,7 @@ namespace TestProject
         }
 
         // GET: Cars/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
             {
@@ -144,7 +144,7 @@ namespace TestProject
         // POST: Cars/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var car = await _context.Car.SingleOrDefaultAsync(m => m.ID == id);
             _context.Car.Remove(car);
@@ -152,7 +152,7 @@ namespace TestProject
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CarExists(int id)
+        private bool CarExists(string id)
         {
             return _context.Car.Any(e => e.ID == id);
         }

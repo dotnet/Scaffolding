@@ -323,7 +323,7 @@ namespace Library1.Models
 {
     public class Car
     {
-        public int ID { get; set; }
+        public string ID { get; set; }
         public string Name { get; set; }
         public int ManufacturerID { get; set; }
         public Manufacturer Manufacturer { get; set; }

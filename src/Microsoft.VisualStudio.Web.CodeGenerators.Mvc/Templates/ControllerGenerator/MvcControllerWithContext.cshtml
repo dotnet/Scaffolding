@@ -263,7 +263,7 @@ namespace @Model.ControllerNamespace
         catch
         {
         }
-        if (primaryKeyType != null && (Microsoft.VisualStudio.Web.CodeGeneration.Templating.TypeUtilities.IsTypePrimitive(primaryKeyType) || IsGuid(typeName)))
+        if (primaryKeyType != null && (!Microsoft.VisualStudio.Web.CodeGeneration.Templating.TypeUtilities.IsNullable(primaryKeyType) || IsGuid(typeName)))
         {
             return shortTypeName + "?";
         }

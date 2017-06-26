@@ -13,7 +13,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
         private static bool IsNonIntegerPrimitive(Type type)
         {
             type = Nullable.GetUnderlyingType(type) ?? type;
-
             return (type == typeof(bool))
                    || (type == typeof(byte[]))
                    || (type == typeof(DateTime))
@@ -37,7 +36,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                    || (type == typeof(ulong))
                    || (type == typeof(ushort))
                    || (type == typeof(sbyte))
-                   || (type == typeof(char));    
+                   || (type == typeof(char));
         }
-    }    
+
+        public static bool IsNullable(Type t)
+        {
+            if (Nullable.GetUnderlyingType(t) == null
+              && (t.IsPrimitive || t.IsValueType))
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
 } 

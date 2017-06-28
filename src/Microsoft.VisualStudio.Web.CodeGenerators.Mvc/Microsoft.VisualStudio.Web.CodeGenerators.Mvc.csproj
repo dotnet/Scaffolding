@@ -15,6 +15,7 @@
     <None Pack="true" Include="Templates\Startup\*" PackagePath="Templates\Startup\" />
     <None Pack="true" Include="Templates\StaticFiles\*" PackagePath="Templates\StaticFiles\" />
     <None Pack="true" Include="Templates\ViewGenerator\*" PackagePath="Templates\ViewGenerator\" />
+    <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
   </ItemGroup>
 
   <ItemGroup>

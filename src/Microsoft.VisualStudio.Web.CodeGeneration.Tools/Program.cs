@@ -19,8 +19,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
     {
         private static ConsoleLogger _logger;
         private static bool _isNoBuild;
-
-        private const string APPNAME = "Code Generation";
         private const string TOOL_NAME = "dotnet-aspnet-codegenerator";
         private const string DESIGN_TOOL_NAME = "dotnet-aspnet-codegenerator-design";
         private const string PROJECT_JSON_SUPPORT_VERSION = "1.0.0-preview4-final";
@@ -62,40 +60,32 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         /// </summary>
         private static void Execute(string[] args, bool isNoBuild, ILogger logger)
         {
-            var app = new CommandLineApplication(false)
-            {
-                Name = APPNAME,
-                Description = Resources.AppDesc
-            };
-
-            // Define app Options;
-            app.HelpOption("-h|--help");
-            var projectPath = app.Option("-p|--project", Resources.ProjectPathOptionDesc, CommandOptionType.SingleValue);
-            var packagesPath = app.Option("-n|--nuget-package-dir", "", CommandOptionType.SingleValue);
-            var appConfiguration = app.Option("-c|--configuration", Resources.ConfigurationOptionDesc, CommandOptionType.SingleValue);
-            var framework = app.Option("-tfm|--target-framework", Resources.TargetFrameworkOptionDesc, CommandOptionType.SingleValue);
-            var buildBasePath = app.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
-            var dependencyCommand = app.Option("--no-dispatch", "", CommandOptionType.NoValue);
-            var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
+            var app = new ScaffoldingApp(false);
 
             app.OnExecute(() =>
             {
-                string project = projectPath.Value();
+                string project = app.ProjectPath.Value();
                 if (string.IsNullOrEmpty(project))
                 {
                     project = Directory.GetCurrentDirectory();
                 }
 
                 project = Path.GetFullPath(project);
-                var configuration = appConfiguration.Value() ?? "Debug";
+                var configuration = app.AppConfiguration.Value() ?? "Debug";
 
                 var projectFileFinder = new ProjectFileFinder(project);
 
+                if (ToolCommandLineHelper.IsHelpArgument(args))
+                {
+                    app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration);
+                    app.ShowHelp();
+                    return 0;
+                }
                 // Invoke the tool from the project's build directory.
                 return BuildAndDispatchDependencyCommand(
                     args,
                     projectFileFinder.ProjectFilePath,
-                    buildBasePath.Value(),
+                    app.BuildBasePath.Value(),
                     configuration,
                     isNoBuild,
                     logger);

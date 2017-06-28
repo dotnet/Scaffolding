@@ -123,6 +123,9 @@
   <data name="AppDesc" xml:space="preserve">
     <value>Code generation for Asp.net Core</value>
   </data>
+  <data name="AvailableGeneratorsHeader" xml:space="preserve">
+    <value>Available generators:</value>
+  </data>
   <data name="AvailableFrameworks" xml:space="preserve">
     <value>Available frameworks in project: {0}</value>
   </data>
@@ -138,8 +141,20 @@
   <data name="ConnectToServerError" xml:space="preserve">
     <value>Could not connect to port {0}.</value>
   </data>
+  <data name="GeneratorArgumentDesc" xml:space="preserve">
+    <value>Name of the generator. Check available generators below.</value>
+  </data>
+  <data name="GeneratorArgsHeader" xml:space="preserve">
+    <value>Generator Arguments:</value>
+  </data>
+  <data name="GeneratorOptionsHeader" xml:space="preserve">
+    <value>Generator Options:</value>
+  </data>
   <data name="InvalidMsBuildProjectFile" xml:space="preserve">
     <value>'{0}' is not a Valid MSBuild project file.</value>
+  </data>
+  <data name="NoCodeGeneratorFound" xml:space="preserve">
+    <value>No code generator found with the name '{0}'.</value>
   </data>
   <data name="NoCompatibleFrameworks" xml:space="preserve">
     <value>Could not find a compatible framework to execute.</value>
@@ -149,6 +164,9 @@
   </data>
   <data name="ProjectPathOptionDesc" xml:space="preserve">
     <value>Path to .csproj file in the project.</value>
+  </data>
+  <data name="SelectedCodeGeneratorStr" xml:space="preserve">
+    <value>Selected Code Generator: {0}</value>
   </data>
   <data name="SimulationModeOptionDesc" xml:space="preserve">
     <value>Specifies whether to persist any file changes.</value>

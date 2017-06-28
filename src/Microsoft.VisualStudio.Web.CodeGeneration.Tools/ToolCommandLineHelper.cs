@@ -79,5 +79,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         }
 
         internal static bool IsNoBuild(string[] args) => args.Contains(NO_BUILD, StringComparer.OrdinalIgnoreCase);
+
+        internal static bool IsHelpArgument(string[] args) => args.Any(a => a.Equals("-h", StringComparison.OrdinalIgnoreCase)
+                                                                         || a.Equals("--help", StringComparison.OrdinalIgnoreCase));
     }
 }

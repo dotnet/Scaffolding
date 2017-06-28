@@ -78,7 +78,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
                 return ResourceManager.GetString("AppDesc", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        /// Looks up a localized string similar to Available generators:.
+        /// </summary>
+        internal static string AvailableGeneratorsHeader {
+            get {
+                return ResourceManager.GetString("AvailableGeneratorsHeader", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to Available frameworks in project: {0}.
         /// </summary>
@@ -123,6 +131,33 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
                 return ResourceManager.GetString("ConnectToServerError", resourceCulture);
             }
         }
+
+        /// <summary>
+        /// Looks up a localized string similar to Name of the generator. Check available generators below..
+        /// </summary>
+        internal static string GeneratorArgumentDesc {
+            get {
+                return ResourceManager.GetString("GeneratorArgumentDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Generator Arguments:.
+        /// </summary>
+        internal static string GeneratorArgsHeader {
+            get {
+                return ResourceManager.GetString("GeneratorArgsHeader", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Looks up a localized string similar to Generator Options:.
+        /// </summary>
+        internal static string GeneratorOptionsHeader {
+            get {
+                return ResourceManager.GetString("GeneratorOptionsHeader", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a Valid MSBuild project file..
@@ -133,6 +168,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
             }
         }
         
+        /// <summary>
+        /// Looks up a localized string similar to No code generator found with the name &apos;{0}&apos;.
+        /// </summary>
+        internal static string NoCodeGeneratorFound {
+            get {
+                return ResourceManager.GetString("NoCodeGeneratorFound", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to Could not find a compatible framework to execute..
         /// </summary>
@@ -160,6 +203,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
             }
         }
         
+        /// <summary>
+        /// Looks up a localized string similar to Selected Code Generator: {0}.
+        /// </summary>
+        internal static string SelectedCodeGeneratorStr {
+            get {
+                return ResourceManager.GetString("SelectedCodeGeneratorStr", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to Specifies whether to persist any file changes..
         /// </summary>

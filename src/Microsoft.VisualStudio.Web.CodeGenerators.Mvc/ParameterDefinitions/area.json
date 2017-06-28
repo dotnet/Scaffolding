@@ -1,0 +1,11 @@
+{
+    "Alias": "area",
+    "Description": "Generates an MVC Area.",
+    "Arguments": [
+        {
+            "Name": "Name",
+            "Description": "Name of the Area to generate"
+        }
+    ],
+    "Options": [ ]
+}

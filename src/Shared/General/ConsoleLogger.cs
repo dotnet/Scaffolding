@@ -7,6 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class ConsoleLogger : ILogger
     {
+        private static bool isTrace = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("codegen_trace"));
         private object _syncObject = new object();
 
         public void LogMessage(string message)
@@ -22,11 +23,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     Console.Error.WriteLine(message);
                 }
-                else if (level == LogMessageLevel.Trace)
+                else if (level == LogMessageLevel.Trace && isTrace)
                 {
-                    Console.Out.WriteLine(message);
+                    Console.Out.WriteLine($"[Trace]: {message}");
                 }
-                else
+                else if (level == LogMessageLevel.Information)
                 {
                     Console.Out.WriteLine(message);
                 }

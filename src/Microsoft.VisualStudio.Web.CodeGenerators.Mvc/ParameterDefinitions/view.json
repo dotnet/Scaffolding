@@ -1,0 +1,61 @@
+{
+    "Alias": "view",
+    "Description": "Generates a view.",
+    "Arguments": [
+        {
+            "Name": "viewName",
+            "Description": "Name of the view"
+        },
+        {
+            "Name": "templateName",
+            "Description": "The view template to use, supported view templates: 'Empty|Create|Edit|Delete|Details|List'"
+        }
+    ],
+    "Options": [
+        {
+            "Name": "model",
+            "ShortName": "m",
+            "Description": "Model class to use"
+        },
+        {
+            "Name": "dataContext",
+            "ShortName": "dc",
+            "Description": "DbContext class to use"
+        },
+        {
+            "Name": "referenceScriptLibraries",
+            "ShortName": "scripts",
+            "Description": "Switch to specify whether to reference script libraries in the generated views"
+        },
+        {
+            "Name": "layout",
+            "ShortName": "l",
+            "Description": "Custom Layout page to use"
+        },
+        {
+            "Name": "useDefaultLayout",
+            "ShortName": "udl",
+            "Description": "Switch to specify that default layout should be used for the views"
+        },
+        {
+            "Name": "force",
+            "ShortName": "f",
+            "Description": "Use this option to overwrite existing files"
+        },
+        {
+            "Name": "relativeFolderPath",
+            "ShortName": "outDir",
+            "Description": "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder"
+        },
+        {
+            "Name": "controllerNamespace",
+            "ShortName": "namespace",
+            "Description": "Specify the name of the namespace to use for the generated controller"
+        },
+        {
+            "Name": "partialView",
+            "ShortName": "partial",
+            "Description": "Generate a partial view, other layout options (-l and -udl) are ignored if this is specified"
+        }
+    ]
+}

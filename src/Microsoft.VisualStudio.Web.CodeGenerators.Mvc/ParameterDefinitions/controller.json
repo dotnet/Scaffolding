@@ -1,0 +1,74 @@
+{
+    "Alias": "controller",
+    "Description": "Generates a controller.",
+    "Arguments": [
+
+    ],
+    "Options": [
+        {
+            "Name": "controllerName",
+            "ShortName": "name",
+            "Description": "Name of the controller"
+        },
+        {
+            "Name": "useAsyncActions",
+            "ShortName": "async",
+            "Description": "Switch to indicate whether to generate async controller actions"
+        },
+        {
+            "Name": "noViews",
+            "ShortName": "nv",
+            "Description": "Switch to indicate whether to generate CRUD views"
+        },
+        {
+            "Name": "restWithNoViews",
+            "ShortName": "api",
+            "Description": "Specify this switch to generate a Controller with REST style API, noViews is assumed and any view related options are ignored"
+        },
+        {
+            "Name": "readWriteActions",
+            "ShortName": "actions",
+            "Description": "Specify this switch to generate Controller with read/write actions when a Model class is not used"
+        },
+        {
+            "Name": "model",
+            "ShortName": "m",
+            "Description": "Model class to use"
+        },
+        {
+            "Name": "dataContext",
+            "ShortName": "dc",
+            "Description": "DbContext class to use"
+        },
+        {
+            "Name": "referenceScriptLibraries",
+            "ShortName": "scripts",
+            "Description": "Switch to specify whether to reference script libraries in the generated views"
+        },
+        {
+            "Name": "layout",
+            "ShortName": "l",
+            "Description": "Custom Layout page to use"
+        },
+        {
+            "Name": "useDefaultLayout",
+            "ShortName": "udl",
+            "Description": "Switch to specify that default layout should be used for the views"
+        },
+        {
+            "Name": "force",
+            "ShortName": "f",
+            "Description": "Use this option to overwrite existing files"
+        },
+        {
+            "Name": "relativeFolderPath",
+            "ShortName": "outDir",
+            "Description": "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder"
+        },
+        {
+            "Name": "controllerNamespace",
+            "ShortName": "namespace",
+            "Description": "Specify the name of the namespace to use for the generated controller"
+        }
+    ]
+}

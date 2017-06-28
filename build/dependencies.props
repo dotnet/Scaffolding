@@ -19,7 +19,7 @@
   <!-- Dependencies for Test Project -->
   <PropertyGroup>
     <TestSdkVersion>15.3.0-*</TestSdkVersion>
-    <MoqVersion>4.7.25</MoqVersion>
+    <MoqVersion>4.7.49</MoqVersion>
     <XunitVersion>2.3.0-beta2-*</XunitVersion>
     <DotNetProjectModelVersion>1.0.0-rc3-003121</DotNetProjectModelVersion>
   </PropertyGroup>

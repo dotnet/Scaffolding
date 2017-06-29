@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -17,6 +18,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
     {
         private IEntityFrameworkService _entityFrameworkService;
         private IModelTypesLocator _modelTypesLocator;
+        private static readonly IReadOnlyList<string> Views = new List<string>()
+        {
+            "Create",
+            "Edit",
+            "Details",
+            "Delete",
+            "List"
+        };
 
         public EFModelBasedRazorPageScaffolder(
             IProjectContext projectContext,
@@ -89,10 +98,81 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (viewGeneratorModel.ReferenceScriptLibraries)
             {
+                // TODO: make this Razor specific once we get razor content.
                 requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
             }
 
             return requiredFiles;
+        }
+
+        internal async Task GenerateViews(RazorPageGeneratorModel razorPageGeneratorModel)
+        {
+            if (razorPageGeneratorModel == null)
+            {
+                throw new ArgumentNullException(nameof(razorPageGeneratorModel));
+            }
+
+            IDictionary<string, string> viewAndTemplateNames = new Dictionary<string, string>();
+            foreach (string viewTemplate in Views)
+            {
+                string viewName = viewTemplate == "List" ? "Index" : viewTemplate;
+                viewAndTemplateNames.Add(viewName, viewTemplate);
+            }
+
+            ModelTypeAndContextModel modelTypeAndContextModel = null;
+            string outputPath = ValidateAndGetOutputPath(razorPageGeneratorModel, string.Empty);
+
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
+
+            modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
+                razorPageGeneratorModel,
+                _entityFrameworkService,
+                _modelTypesLocator,
+                string.Empty);
+
+            await BaseGenerateViews(viewAndTemplateNames, razorPageGeneratorModel, modelTypeAndContextModel, outputPath);
+        }
+
+        internal async Task BaseGenerateViews(IDictionary<string, string> viewsAndTemplates, RazorPageGeneratorModel razorPageGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string baseOutputPath)
+        {
+            if (viewsAndTemplates == null)
+            {
+                throw new ArgumentNullException(nameof(viewsAndTemplates));
+            }
+
+            if (razorPageGeneratorModel == null)
+            {
+                throw new ArgumentNullException(nameof(razorPageGeneratorModel));
+            }
+
+            if (modelTypeAndContextModel == null)
+            {
+                throw new ArgumentNullException(nameof(modelTypeAndContextModel));
+            }
+
+            if (string.IsNullOrEmpty(baseOutputPath))
+            {
+                baseOutputPath = ApplicationInfo.ApplicationBasePath;
+            }
+
+            foreach (KeyValuePair<string, string> entry in viewsAndTemplates)
+            {
+                string viewName = entry.Key;
+                string templateName = entry.Value;
+                string outputPath = Path.Combine(baseOutputPath, viewName + Constants.ViewExtension);
+
+                bool isLayoutSelected = !razorPageGeneratorModel.PartialView &&
+                    (razorPageGeneratorModel.UseDefaultLayout || !string.IsNullOrEmpty(razorPageGeneratorModel.LayoutPage));
+
+                RazorPageGeneratorTemplateModel templateModel = GetRazorPageViewGeneratorTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
+                templateModel.ViewName = viewName;
+
+                templateName = templateName + Constants.RazorTemplateExtension;
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+                _logger.LogMessage($"Added Razor View : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
+            }
+
+            await AddRequiredFiles(razorPageGeneratorModel);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.ProjectModel
         {
             var errors = new List<string>();
             var output = new List<string>();
-            var tmpFile = Path.GetTempFileName();
+            var tmpFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var result = Command.CreateDotNet(
                 "msbuild",
                 new string[]

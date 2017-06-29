@@ -54,7 +54,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
         public async void SimulationModeFileSystem_EditFile()
         {
             var fileSystem = new SimulationModeFileSystem();
-            var path = Path.GetTempFileName();
+            var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            File.WriteAllText(path, "");
             var contents = "DummyContents";
             byte[] bytes = Encoding.UTF8.GetBytes(contents);
 

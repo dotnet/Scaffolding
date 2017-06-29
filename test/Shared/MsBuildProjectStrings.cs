@@ -38,10 +38,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""{0}"" />
@@ -80,10 +76,6 @@ public const string RootProjectTxtWithoutEF = @"
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

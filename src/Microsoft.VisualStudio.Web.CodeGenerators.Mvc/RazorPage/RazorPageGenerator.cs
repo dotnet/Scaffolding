@@ -11,21 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {
-    [Alias("razor")]
+    [Alias("razorpage")]
     public class RazorPageGenerator : CommonGeneratorBase, ICodeGenerator
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
-
-        // When the template name is blank, generate each of these.
-        private static readonly IReadOnlyList<string> TemplateNamesForAllGeneration = new List<string>()
-        {
-            "Create",
-            "Edit",
-            "Details",
-            "Delete",
-            "List"
-        };
 
         public RazorPageGenerator(
             IApplicationInfo applicationInfo,
@@ -52,46 +42,37 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             _logger = logger;
         }
 
-        public async Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel)
+        public async Task GenerateCode(RazorPageGeneratorModel razorPageGeneratorModel)
         {
-            if (razorGeneratorModel == null)
+            if (razorPageGeneratorModel == null)
             {
-                throw new ArgumentNullException(nameof(razorGeneratorModel));
+                throw new ArgumentNullException(nameof(razorPageGeneratorModel));
             }
 
-            if (string.IsNullOrEmpty(razorGeneratorModel.ViewName))
+            if (string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
             {
-                // TODO: make a separate message resource string for this (currently setup using the one for VIEW)
-                throw new ArgumentException(MessageStrings.ViewNameRequired);
-            }
-
-            // TODO: Determine if these checks are appropriate for when to use which scaffolder.
-            //
-            RazorPageScaffolderBase scaffolder = null;
-            if (string.IsNullOrEmpty(razorGeneratorModel.ModelClass) && string.IsNullOrEmpty(razorGeneratorModel.DataContextClass))
-            {
-                scaffolder = ActivatorUtilities.CreateInstance<EmptyRazorPageScaffolder>(_serviceProvider);
+                // when this happens, we want to generate all the views
+                EFModelBasedRazorPageScaffolder scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
+                await scaffolder.GenerateViews(razorPageGeneratorModel);
             }
             else
             {
-                scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
-            }
+                RazorPageScaffolderBase scaffolder = null;
 
-            if (scaffolder != null)
-            {
-                if (string.IsNullOrEmpty(razorGeneratorModel.TemplateName))
+                // TODO: Determine if these checks are appropriate for when to use which scaffolder.
+                //
+                if (string.IsNullOrEmpty(razorPageGeneratorModel.ModelClass) && string.IsNullOrEmpty(razorPageGeneratorModel.DataContextClass))
                 {
-                    foreach (string templateName in TemplateNamesForAllGeneration)
-                    {
-                        RazorPageGeneratorModel modelForTemplate = (RazorPageGeneratorModel)razorGeneratorModel.Clone();
-                        modelForTemplate.TemplateName = templateName;
-                        modelForTemplate.ViewName = razorGeneratorModel.ViewName + templateName;
-                        await scaffolder.GenerateCode(modelForTemplate);
-                    }
+                    scaffolder = ActivatorUtilities.CreateInstance<EmptyRazorPageScaffolder>(_serviceProvider);
                 }
                 else
                 {
-                    await scaffolder.GenerateCode(razorGeneratorModel);
+                    scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
+                }
+
+                if (scaffolder != null)
+                {
+                    await scaffolder.GenerateCode(razorPageGeneratorModel);
                 }
             }
         }

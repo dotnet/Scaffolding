@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {
@@ -98,7 +97,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 razorGeneratorModel.ViewName = razorGeneratorModel.ViewName.Substring(0, viewNameLength);
             }
 
-            var templateModel = GetRazorViewGeneratorTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
+            var templateModel = GetRazorPageViewGeneratorTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
             var templateName = razorGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
             _logger.LogMessage("Added Razor View : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
@@ -108,7 +107,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         protected abstract IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel);
 
-        protected RazorPageGeneratorTemplateModel GetRazorViewGeneratorTemplateModel(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel)
+        protected RazorPageGeneratorTemplateModel GetRazorPageViewGeneratorTemplateModel(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel)
         {
             bool isLayoutSelected = !razorGeneratorModel.PartialView &&
                 (razorGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(razorGeneratorModel.LayoutPage));

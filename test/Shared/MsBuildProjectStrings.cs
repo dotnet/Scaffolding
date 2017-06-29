@@ -1,21 +1,30 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.IO;
+using System.Xml;
+
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class MsBuildProjectStrings
     {
-        public static string GetNugetConfigTxt(string artifactsDir)
+        public static string GetNugetConfigTxt(string artifactsDir, string nugetConfigPath)
         {
-            return @"
-<configuration>
-    <packageSources>
-        <clear />
-        <add key=""local"" value=""" + artifactsDir +  @""" />
-        <add key=""AspNetCoreCiDev"" value=""https://dotnet.myget.org/F/aspnetcore-ci-dev/api/v3/index.json"" />
-        <add key=""NuGet"" value=""https://api.nuget.org/v3/index.json"" />
-    </packageSources>
-</configuration>";
+            var xmlDoc = new XmlDocument();
+            xmlDoc.Load(nugetConfigPath);
+
+            var root = xmlDoc.DocumentElement;
+            var packageSources = root.SelectSingleNode("packageSources");
+            var newSource = xmlDoc.CreateElement("add");
+            newSource.SetAttribute("key", "local");
+            newSource.SetAttribute("value", artifactsDir);
+            packageSources.AppendChild(newSource);
+
+            using (var sw = new StringWriter())
+            {
+                xmlDoc.WriteContentTo(new XmlTextWriter(sw));
+                return sw.ToString();
+            }
         }
 
         public const string RootProjectName = "Test.csproj";

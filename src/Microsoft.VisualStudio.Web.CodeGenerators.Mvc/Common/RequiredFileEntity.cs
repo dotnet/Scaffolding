@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public string TemplateName { get; private set; }
         
         /// <summary>
-        /// Path Relative to the project.json.
+        /// Path Relative to the .csproj file
         /// </summary>
         public string OutputPath { get; private set; }
     }

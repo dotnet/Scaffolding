@@ -16,6 +16,7 @@
     <None Pack="true" Include="Templates\StaticFiles\*" PackagePath="Templates\StaticFiles\" />
     <None Pack="true" Include="Templates\ViewGenerator\*" PackagePath="Templates\ViewGenerator\" />
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
+    <None Pack="true" Include="Templates\RazorPageGenerator\*" PackagePath="Templates\RazorPageGenerator\" />
   </ItemGroup>
 
   <ItemGroup>

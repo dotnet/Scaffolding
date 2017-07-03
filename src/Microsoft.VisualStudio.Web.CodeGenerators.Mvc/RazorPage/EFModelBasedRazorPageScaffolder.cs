@@ -69,6 +69,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.TemplateNameRequired);
             }
 
+            if (razorGeneratorModel.NoPageModel)
+            {
+                // Throw not supported exception.
+                throw new ArgumentException(MessageStrings.PageModelFlagNotSupported);
+            }
+
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.ViewName + Constants.ViewExtension);
 
@@ -110,6 +116,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             if (razorPageGeneratorModel == null)
             {
                 throw new ArgumentNullException(nameof(razorPageGeneratorModel));
+            }
+
+            if (razorPageGeneratorModel.NoPageModel)
+            {
+                // Throw not supported exception.
+                throw new ArgumentException(MessageStrings.PageModelFlagNotSupported);
             }
 
             IDictionary<string, string> viewAndTemplateNames = new Dictionary<string, string>();
@@ -164,7 +176,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 bool isLayoutSelected = !razorPageGeneratorModel.PartialView &&
                     (razorPageGeneratorModel.UseDefaultLayout || !string.IsNullOrEmpty(razorPageGeneratorModel.LayoutPage));
 
-                RazorPageGeneratorTemplateModel templateModel = GetRazorPageViewGeneratorTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
+                RazorPageGeneratorTemplateModel templateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
                 templateModel.ViewName = viewName;
 
                 templateName = templateName + Constants.RazorTemplateExtension;

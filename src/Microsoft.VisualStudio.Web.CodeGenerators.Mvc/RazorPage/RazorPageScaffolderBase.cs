@@ -65,9 +65,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
-                    // TODO: TEMPORARY - until we get some razor scaffold content
-                    //baseFolders: new[] { "RazorGenerator" },
-                    baseFolders: new[] { "ViewGenerator" },
+                    baseFolders: new[] { "RazorPageGenerator" },
                     projectContext: _projectContext);
             }
         }
@@ -97,25 +95,68 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 razorGeneratorModel.ViewName = razorGeneratorModel.ViewName.Substring(0, viewNameLength);
             }
 
-            var templateModel = GetRazorPageViewGeneratorTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
+            var templateModel = modelTypeAndContextModel == null
+                ? GetRazorPageViewGeneratorTemplateModel(razorGeneratorModel)
+                : GetRazorPageWithContextTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
+
             var templateName = razorGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
+            var pageModelTemplateName = razorGeneratorModel.TemplateName + "PageModel" + Constants.RazorTemplateExtension;
+            var pageModelOutputPath = outputPath + ".cs";
             await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-            _logger.LogMessage("Added Razor View : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+            _logger.LogMessage("Added RazorPage : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+            if (!razorGeneratorModel.NoPageModel)
+            {
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, TemplateFolders, templateModel);
+                _logger.LogMessage("Added PageModel : " + pageModelOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+            }
 
             await AddRequiredFiles(razorGeneratorModel);
         }
 
         protected abstract IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel);
 
-        protected RazorPageGeneratorTemplateModel GetRazorPageViewGeneratorTemplateModel(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel)
+        protected RazorPageGeneratorTemplateModel GetRazorPageViewGeneratorTemplateModel(RazorPageGeneratorModel razorGeneratorModel)
         {
             bool isLayoutSelected = !razorGeneratorModel.PartialView &&
                 (razorGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(razorGeneratorModel.LayoutPage));
 
+            var namespaceName = string.IsNullOrEmpty(razorGeneratorModel.NamespaceName)
+                ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
+                : razorGeneratorModel.NamespaceName;
+
             RazorPageGeneratorTemplateModel templateModel = new RazorPageGeneratorTemplateModel()
             {
+                NamespaceName = namespaceName,
+                NoPageModel = razorGeneratorModel.NoPageModel,
+                PageModelClassName = razorGeneratorModel.ViewName+"Model",
+                ViewName = razorGeneratorModel.ViewName,
+                LayoutPageFile = razorGeneratorModel.LayoutPage,
+                IsLayoutPageSelected = isLayoutSelected,
+                IsPartialView = razorGeneratorModel.PartialView,
+                ReferenceScriptLibraries = razorGeneratorModel.ReferenceScriptLibraries,
+                JQueryVersion = "1.10.2" //Todo
+            };
+
+            return templateModel;
+        }
+
+        protected RazorPageWithContextTemplateModel GetRazorPageWithContextTemplateModel(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel)
+        {
+            bool isLayoutSelected = !razorGeneratorModel.PartialView &&
+                (razorGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(razorGeneratorModel.LayoutPage));
+
+            var namespaceName = string.IsNullOrEmpty(razorGeneratorModel.NamespaceName)
+                ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
+                : razorGeneratorModel.NamespaceName;
+
+            RazorPageWithContextTemplateModel templateModel = new RazorPageWithContextTemplateModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
+            {
+                NamespaceName = namespaceName,
+                NoPageModel = razorGeneratorModel.NoPageModel,
+                PageModelClassName = razorGeneratorModel.ViewName + "Model",
                 ViewDataTypeName = modelTypeAndContextModel?.ModelType?.FullName,
                 ViewDataTypeShortName = modelTypeAndContextModel?.ModelType?.Name,
+                ContextTypeName = modelTypeAndContextModel?.DbContextFullName,
                 ViewName = razorGeneratorModel.ViewName,
                 LayoutPageFile = razorGeneratorModel.LayoutPage,
                 IsLayoutPageSelected = isLayoutSelected,
@@ -126,6 +167,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             };
 
             return templateModel;
+        }
+
+        private string GetDefaultPageModelNamespaceName(string relativeFolderPath)
+        {
+            return NameSpaceUtilities.GetSafeNameSpaceFromPath(relativeFolderPath, ApplicationInfo.ApplicationName);
         }
     }
 }

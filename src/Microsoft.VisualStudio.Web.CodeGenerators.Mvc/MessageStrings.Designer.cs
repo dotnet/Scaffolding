@@ -232,6 +232,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;--noPageModel&apos; flag cannot be used for scaffolding model based Razor Pages..
+        /// </summary>
+        internal static string PageModelFlagNotSupported {
+            get {
+                return ResourceManager.GetString("PageModelFlagNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please provide a valid {0}.
         /// </summary>
         internal static string ProvideValidArgument {
@@ -259,7 +268,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Scaffolding generated all the code but the new context created could be registered using dependency injection..
+        ///   Looks up a localized string similar to Scaffolding generated all the code but the new context created could not be registered using dependency injection..
         /// </summary>
         internal static string ScaffoldingSuccessful_unregistered {
             get {

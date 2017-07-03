@@ -27,6 +27,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         private const string NUGET_PACKAGE_DIR_SHORT = "-N";
         private const string BUILD_BASE_PATH_SHORT = "-B";
 
+        private const string DEBUG = "--DEBUG";
+
         internal static string[] FilterExecutorArguments(string[] args)
         {
             if (args == null)
@@ -42,6 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                     case NO_DISPATCH_FLAG_SHORT:
                     case NO_BUILD:
                     case SIM_MODE:
+                    case DEBUG:
                         break;
                     case CONFIGURATION:
                     case CONFIGURATION_SHORT:

@@ -15,6 +15,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         [Option(Name = "partialView", ShortName = "partial", Description = "Generate a partial view, other layout options (-l and -udl) are ignored if this is specified")]
         public bool PartialView { get; set; }
 
+        [Option(Name ="noPageModel", ShortName ="npm", Description =" Switch to not generate a PageModel class for Empty template.")]
+        public bool NoPageModel { get; set; }
+
+        [Option(Name ="namespaceName", ShortName ="", Description = "")]
+        public string NamespaceName { get; set; }
+
         public RazorPageGeneratorModel()
         {
         }

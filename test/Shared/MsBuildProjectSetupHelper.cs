@@ -67,6 +67,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
+        private string RuntimeFrameworkVersion =>
+            DependencyContext
+                .Default
+                .RuntimeLibraries
+                .FirstOrDefault(l => l.Name.StartsWith("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
+                ?.Version;
+
         private string CodeGenerationVersion
         {
             get 
@@ -78,13 +85,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
-
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
             fileProvider.Add("NuGet.config", NuGetConfigText);
 
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion));
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion, RuntimeFrameworkVersion));
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 
@@ -130,7 +136,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add("NuGet.config", NuGetConfigText);
 
             var rootProjectTxt = MsBuildProjectStrings.RootProjectTxtWithoutEF;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion));
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion, RuntimeFrameworkVersion));
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxtWithoutEf);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 

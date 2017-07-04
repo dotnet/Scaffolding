@@ -51,21 +51,21 @@
             if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
             {
                 <th>
-                    @@Html.DisplayNameFor(model => model.@(Model.ViewDatatypeShortName).@GetValueExpression(property))
+                    @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(property))
                 </th>
             }
         }
         foreach (var navigation in Model.ModelMetadata.Navigations)
         {
             <th>
-                @@Html.DisplayNameFor(model => model.@(Model.ViewDatatypeShortName).@GetValueExpression(navigation))
+                @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(navigation))
             </th>
         }
             @:<th></th>
         @:</tr>
     @:</thead>
     @:<tbody>
-@:@@foreach (var item in Model.@(Model.ViewDatatypeShortName)   ) {
+@:@@foreach (var item in Model.@(Model.ViewDataTypeShortName)   ) {
         @:<tr>
         foreach (PropertyMetadata property in properties)
         {

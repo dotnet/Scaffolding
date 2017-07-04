@@ -172,16 +172,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 string viewName = entry.Key;
                 string templateName = entry.Value;
                 string outputPath = Path.Combine(baseOutputPath, viewName + Constants.ViewExtension);
+                var pageModelOutputPath = outputPath + ".cs";
 
                 bool isLayoutSelected = !razorPageGeneratorModel.PartialView &&
                     (razorPageGeneratorModel.UseDefaultLayout || !string.IsNullOrEmpty(razorPageGeneratorModel.LayoutPage));
 
-                RazorPageGeneratorTemplateModel templateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
+                RazorPageWithContextTemplateModel templateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
                 templateModel.ViewName = viewName;
-
+                templateModel.PageModelClassName = viewName + "Model";
+                var pageModelTemplateName = templateName + "PageModel" + Constants.RazorTemplateExtension;
                 templateName = templateName + Constants.RazorTemplateExtension;
+
                 await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
                 _logger.LogMessage($"Added Razor View : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, TemplateFolders, templateModel);
+                _logger.LogMessage("Added PageModel : " + pageModelOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
             }
 
             await AddRequiredFiles(razorPageGeneratorModel);

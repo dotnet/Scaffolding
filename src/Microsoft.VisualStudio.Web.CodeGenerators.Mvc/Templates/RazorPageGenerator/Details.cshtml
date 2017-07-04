@@ -50,20 +50,20 @@
         if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
         {
         <dt>
-            @@Html.DisplayNameFor(model => model.@(Model.ViewDatatypeShortName).@GetValueExpression(property))
+            @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(property))
         </dt>
         <dd>
-            @@Html.DisplayFor(model => model.@(Model.ViewDatatypeShortName).@GetValueExpression(property))
+            @@Html.DisplayFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(property))
         </dd>
         }
     }
     foreach (var navigation in Model.ModelMetadata.Navigations)
     {
         <dt>
-            @@Html.DisplayNameFor(model => model.@(Model.ViewDatatypeShortName).@GetValueExpression(navigation))
+            @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(navigation))
         </dt>
         <dd>
-            @@Html.DisplayFor(model => model.@(Model.ViewDatatypeShortName).@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+            @@Html.DisplayFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(navigation).@navigation.DisplayPropertyName)
         </dd>
     }
 }    </dl>
@@ -73,7 +73,7 @@
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
     {
-    @:<a asp-action="Edit" asp-route-id="@@Model.@(Model.ViewDatatypeShortName).@pkName">Edit</a> |
+    @:<a asp-action="Edit" asp-route-id="@@Model.@(Model.ViewDataTypeShortName).@pkName">Edit</a> |
     @:<a asp-action="Index">Back to List</a>
     }
     else

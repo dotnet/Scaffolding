@@ -39,7 +39,7 @@
 @:
         //    PushIndent("    ");
     }
-@:<form asp-action="@Model.ViewName">
+@:<form method="post" class="form-horizontal">
     @:<div class="form-horizontal">
         @:<h4>@Model.ViewDataTypeShortName</h4>
         @:<hr />
@@ -51,9 +51,9 @@
             if (property.IsForeignKey)
             {
         @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
+            @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
-                @:<select asp-for="@property.PropertyName" class ="form-control" asp-items="ViewBag.@property.PropertyName"></select>
+                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class ="form-control" asp-items="ViewBag.@property.PropertyName"></select>
             @:</div>
         @:</div>
                 continue;
@@ -65,8 +65,8 @@
         @:<div class="form-group">
             @:<div class="col-md-offset-2 col-md-10">
                 @:<div class="checkbox">
-                    @:<input asp-for="@property.PropertyName" />
-                    @:<label asp-for="@property.PropertyName"></label>
+                    @:<input asp-for="@(Model.ModelTypeName).@property.PropertyName" />
+                    @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName"></label>
                 @:</div>
             @:</div>
         @:</div>
@@ -74,20 +74,20 @@
             else if (property.IsEnum && !property.IsEnumFlags)
             {
         @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
+            @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
-                @:<select asp-for="@property.PropertyName" class="form-control"></select>
-                @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
+                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></select>
+                @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
         @:</div>
             }
             else
             {
         @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
+            @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="col-md-2 control-label"></label>
             @:<div class="col-md-10">
-                @:<input asp-for="@property.PropertyName" class="form-control" />
-                @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
+                @:<input asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" />
+                @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
         @:</div>
             }
@@ -103,7 +103,7 @@
 </form>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-page="Index">Back to List</a>
 </div>
 
 @{

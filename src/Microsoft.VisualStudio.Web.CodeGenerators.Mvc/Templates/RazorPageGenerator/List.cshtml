@@ -39,7 +39,7 @@
         //    PushIndent("    ");
     }
 @:<p>
-    @:<a asp-action="Create">Create New</a>
+    @:<a asp-page="Create">Create New</a>
 @:</p>
 @:<table class="table">
     @:<thead>
@@ -51,21 +51,21 @@
             if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
             {
                 <th>
-                    @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(property))
+                    @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName)[0].@GetValueExpression(property))
                 </th>
             }
         }
         foreach (var navigation in Model.ModelMetadata.Navigations)
         {
             <th>
-                @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(navigation))
+                @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName)[0].@GetValueExpression(navigation))
             </th>
         }
             @:<th></th>
         @:</tr>
     @:</thead>
     @:<tbody>
-@:@@foreach (var item in Model.@(Model.ViewDataTypeShortName)   ) {
+@:@@foreach (var item in Model.@(Model.ModelTypeName)) {
         @:<tr>
         foreach (PropertyMetadata property in properties)
         {
@@ -86,9 +86,9 @@
         if (pkName != null)
         {
             @:<td>
-                @:<a asp-action="Edit" asp-route-id="@@item.@pkName">Edit</a> |
-                @:<a asp-action="Details" asp-route-id="@@item.@pkName">Details</a> |
-                @:<a asp-action="Delete" asp-route-id="@@item.@pkName">Delete</a>
+                @:<a asp-page="./Edit" asp-route-id="@@item.@pkName">Edit</a> |
+                @:<a asp-page="./Details" asp-route-id="@@item.@pkName">Details</a> |
+                @:<a asp-page="./Delete" asp-route-id="@@item.@pkName">Delete</a>
             @:</td>
         }
         else

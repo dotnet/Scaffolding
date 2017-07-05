@@ -51,34 +51,34 @@
         if (property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
         {
         <dt>
-            @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(property))
+            @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
         </dt>
         <dd>
-            @@Html.DisplayFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(property))
+            @@Html.DisplayFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
         </dd>
         }
     }
     foreach (var navigation in Model.ModelMetadata.Navigations)
     {
         <dt>
-            @@Html.DisplayNameFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(navigation))
+            @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(navigation))
         </dt>
         <dd>
-            @@Html.DisplayFor(model => model.@(Model.ViewDataTypeShortName).@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+            @@Html.DisplayFor(model => model.@(Model.ModelTypeName).@GetValueExpression(navigation).@navigation.DisplayPropertyName)
         </dd>
     }
     @:</dl>
     @:
-    @:<form asp-action="@Model.ViewName">
+    @:<form method="post" class="form-horizontal">
         @:<div class="form-actions no-color">
             foreach (var property in Model.ModelMetadata.Properties)
             {
                 if(property.IsPrimaryKey){
-            @:<input type="hidden" asp-for="@(Model.ViewDataTypeShortName).@GetValueExpression(property)" />
+            @:<input type="hidden" asp-for="@(Model.ModelTypeName).@GetValueExpression(property)" />
                 }
             }
             @:<input type="submit" value="Delete" class="btn btn-default" /> |
-            @:<a asp-action="Index">Back to List</a>
+            @:<a asp-page="./Index">Back to List</a>
         @:</div>
     @:</form>
 @:</div>

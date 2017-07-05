@@ -7,11 +7,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 @{
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
     var primaryKeyNullableTypeName = GetNullableTypeName(primaryKeyType, primaryKeyShortTypeName);
+    var lambdaVar = Model.ModelVariable[0];
+    var relatedProperties = new Dictionary<string, dynamic>();
+    foreach (var nav in Model.ModelMetadata.Navigations)
+    {
+        relatedProperties.Add(nav.AssociationPropertyName, nav);
+
+    }
+    var inlineIncludes = "";
+    foreach (var property in relatedProperties.Values)
+    {
+        inlineIncludes += string.Format("{0}                .Include({1} => {1}.{2})", Environment.NewLine, lambdaVar, property.AssociationPropertyName);
+    }
 
     foreach (var namespaceName in Model.RequiredNamespaces)
     {
@@ -39,7 +52,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(Model.ViewDataTypeShortName).FindAsync(id);
+            @Model.ViewDataTypeShortName = await _context.@(Model.ModelTypeName)@(inlineIncludes).SingleOrDefaultAsync(m => m.@(primaryKeyName) == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {

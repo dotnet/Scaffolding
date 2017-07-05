@@ -35,6 +35,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         public ModelType ModelType { get; private set; }
 
+        public string ModelTypeName
+        {
+            get
+            {
+                return ModelType.Name;
+            }
+        }
+
+        public string ModelVariable
+        {
+            get
+            {
+                return RoslynUtilities.CreateEscapedIdentifier(ModelTypeName.ToLowerInvariantFirstChar());
+            }
+        }
+
+        public string EntitySetVariable
+        {
+            get
+            {
+                return ContextTypeName.ToLowerInvariantFirstChar();
+            }
+        }
+
         public HashSet<string> RequiredNamespaces
         {
             get

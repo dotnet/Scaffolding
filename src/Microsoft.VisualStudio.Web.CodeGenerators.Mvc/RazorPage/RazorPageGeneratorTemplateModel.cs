@@ -11,7 +11,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {
     public class RazorPageGeneratorTemplateModel
     {
-
         public string NamespaceName { get; set; }
 
         public bool NoPageModel { get; set; }
@@ -31,6 +30,5 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         public IModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }
-
     }
 }

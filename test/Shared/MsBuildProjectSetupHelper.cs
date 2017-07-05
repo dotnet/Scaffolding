@@ -19,6 +19,41 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         public const string Configuration = "Debug";
         #endif
 
+        private static object _syncObj = new object();
+        private static string _nugetConfigText;
+        private static string NuGetConfigText
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_nugetConfigText))
+                {
+                    lock(_syncObj)
+                    {
+                        if (string.IsNullOrEmpty(_nugetConfigText))
+                        {
+                            string artifactsDir = null;
+                            string nugetConfigPath = null;
+                            var current = new DirectoryInfo(AppContext.BaseDirectory);
+                            while (current != null)
+                            {
+                                if (File.Exists(Path.Combine(current.FullName, "Scaffolding.sln")))
+                                {
+                                    artifactsDir = Path.Combine(current.FullName, "artifacts", "build");
+                                    nugetConfigPath = Path.Combine(current.FullName, "NuGet.config");
+                                    break;
+                                }
+                                current = current.Parent;
+                            }
+
+                            _nugetConfigText = MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir, nugetConfigPath);
+                        }
+                    }
+                }
+
+                return _nugetConfigText;
+            }
+        }
+
         private string AspNetCoreVersion
         {
             get 
@@ -32,6 +67,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
+        private string RuntimeFrameworkVersion =>
+            DependencyContext
+                .Default
+                .RuntimeLibraries
+                .FirstOrDefault(l => l.Name.StartsWith("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
+                ?.Version;
+
         private string CodeGenerationVersion
         {
             get 
@@ -43,24 +85,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
-            string artifactsDir = null;
-            var current = new DirectoryInfo(AppContext.BaseDirectory);
-            while (current != null)
-            {
-                if (File.Exists(Path.Combine(current.FullName, "Scaffolding.sln")))
-                {
-                    artifactsDir = Path.Combine(current.FullName, "artifacts", "build");
-                    break;
-                }
-                current = current.Parent;
-            }
-
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            fileProvider.Add("NuGet.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
+            fileProvider.Add("NuGet.config", NuGetConfigText);
 
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion));
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion, RuntimeFrameworkVersion));
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 
@@ -101,24 +131,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public void SetupProjectsWithoutEF(TemporaryFileProvider fileProvider, ITestOutputHelper output)
         {
-            string artifactsDir = null;
-            var current = new DirectoryInfo(AppContext.BaseDirectory);
-            while (current != null)
-            {
-                if (File.Exists(Path.Combine(current.FullName, "Scaffolding.sln")))
-                {
-                    artifactsDir = Path.Combine(current.FullName, "artifacts", "build");
-                    break;
-                }
-                current = current.Parent;
-            }
-
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            fileProvider.Add("NuGet.config", MsBuildProjectStrings.GetNugetConfigTxt(artifactsDir));
+            fileProvider.Add("NuGet.config", NuGetConfigText);
 
             var rootProjectTxt = MsBuildProjectStrings.RootProjectTxtWithoutEF;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion));
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion, RuntimeFrameworkVersion));
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxtWithoutEf);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 

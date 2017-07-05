@@ -104,8 +104,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (viewGeneratorModel.ReferenceScriptLibraries)
             {
-                // TODO: make this Razor specific once we get razor content.
-                requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
+                requiredFiles.Add(new RequiredFileEntity(Path.Combine("Pages","_ValidationScriptsPartial.cshtml"), @"_ValidationScriptsPartial.cshtml"));
             }
 
             return requiredFiles;
@@ -184,9 +183,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 templateName = templateName + Constants.RazorTemplateExtension;
 
                 await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
-                _logger.LogMessage($"Added Razor View : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
+                _logger.LogMessage($"Added Razor Page : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
                 await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, TemplateFolders, templateModel);
-                _logger.LogMessage("Added PageModel : " + pageModelOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
+                _logger.LogMessage($"Added PageModel : {pageModelOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
             }
 
             await AddRequiredFiles(razorPageGeneratorModel);

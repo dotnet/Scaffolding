@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
+using System;
+
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     public class RequiredFileEntity
     {
@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         public string TemplateName { get; private set; }
         
         /// <summary>
-        /// Path Relative to the project.json.
+        /// Path Relative to the .csproj file
         /// </summary>
         public string OutputPath { get; private set; }
     }

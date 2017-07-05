@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
@@ -41,6 +43,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
             var simMode = app.Option("--simulation-mode", Resources.SimulationModeOptionDesc, CommandOptionType.NoValue);
 
+#if DEBUG
+            if (args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"Attach a debugger to processID: {System.Diagnostics.Process.GetCurrentProcess().Id} and hit enter.");
+                Console.ReadKey();
+            }
+#endif
             app.OnExecute(async () =>
             {
                 CodeGenerationEnvironmentHelper.SetupEnvironment();

@@ -4,7 +4,7 @@
     "Arguments": [
         {
             "Name": "razorPageName",
-            "Description": "Name of the Razor Page."
+            "Description": "Name of the Razor Page"
         },
         {
             "Name": "templateName",
@@ -60,7 +60,7 @@
         {
             "Name": "noPageModel",
             "ShortName": "npm",
-            "Description": "Switch to not generate a PageModel class for Empty template."
+            "Description": "Switch to not generate a PageModel class for Empty template"
         }
     ]
 }

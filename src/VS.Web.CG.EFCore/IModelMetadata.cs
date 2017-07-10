@@ -13,5 +13,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         IPropertyMetadata[] Properties { get; }
         IPropertyMetadata[] PrimaryKeys { get; }
         INavigationMetadata[] Navigations { get; }
+        Type ModelType { get; }
     }
 }

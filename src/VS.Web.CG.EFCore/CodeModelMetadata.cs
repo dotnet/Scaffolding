@@ -41,6 +41,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _primaryKeys = new IPropertyMetadata[0];
         }
 
+        public Type ModelType
+        {
+            get
+            {
+                return _model;
+            }
+        }
+
         /// <summary>
         /// Always returns empty array as there is no Entity type information
         /// </summary>

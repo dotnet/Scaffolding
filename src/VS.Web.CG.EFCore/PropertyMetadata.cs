@@ -26,6 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public PropertyMetadata(PropertyInfo property)
         {
             Contract.Assert(property != null && property.Name != null && property.PropertyType != null);
+            PropertyInfo = property;
             PropertyName = property.Name;
             TypeName = property.PropertyType.FullName;
 
@@ -66,5 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public string ShortTypeName { get; set; }
 
         public string TypeName { get; set; }
+
+        public PropertyInfo PropertyInfo { get; set; }
     }
 }

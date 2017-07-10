@@ -36,6 +36,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             EntitySetName = GetEntitySetName(DbContexType, EntityType.ClrType);
         }
 
+
+        public Type ModelType
+        {
+            get
+            {
+                return EntityType.ClrType;
+            }
+        }
         public IEntityType EntityType { get; private set; }
 
         public Type DbContexType { get; private set; }

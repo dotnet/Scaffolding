@@ -13,7 +13,7 @@
   <PropertyGroup>
     <RoslynVersion>2.3.0</RoslynVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
-    <MicrosoftBuildVersion>15.3.0-*</MicrosoftBuildVersion>
+    <MicrosoftBuildVersion>15.3.406</MicrosoftBuildVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>
   </PropertyGroup>
   <!-- Dependencies for Test Project -->

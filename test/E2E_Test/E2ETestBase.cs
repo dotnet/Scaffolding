@@ -59,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 {
                     var expectedContents = reader.ReadToEnd();
                     expectedContents = NormalizeLineEndings(expectedContents);
-                    var actualContents = File.ReadAllText(generatedFilePath);
+                    var actualContents = NormalizeLineEndings(File.ReadAllText(generatedFilePath));
                     Assert.Equal(expectedContents, actualContents);
                 }
             }

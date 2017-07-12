@@ -11,7 +11,7 @@
   </PropertyGroup>
   <!-- Partner Versions-->
   <PropertyGroup>
-    <CodeAnalysisVersion>2.3.0-beta3-*</CodeAnalysisVersion>
+    <RoslynVersion>2.3.0</RoslynVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
     <MicrosoftBuildVersion>15.3.0-*</MicrosoftBuildVersion>
     <NuGetFrameworksVersion>4.0.0-*</NuGetFrameworksVersion>

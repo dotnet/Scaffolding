@@ -40,7 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
+    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.1.1"" />
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""{0}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""{0}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""{0}"" />
@@ -81,7 +81,7 @@ public const string RootProjectTxtWithoutEF = @"
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
+    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.1.1"" />
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""{0}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""{0}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""{0}"" />

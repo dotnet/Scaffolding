@@ -38,86 +38,79 @@
 @:
         //    PushIndent("    ");
     }
-@:<form asp-action="@Model.ViewName">
-    @:<div class="form-horizontal">
-        @:<h4>@Model.ViewDataTypeShortName</h4>
-        @:<hr />
-        @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
-    {
-        if (property.IsPrimaryKey)
+@:<h4>@Model.ViewDataTypeShortName</h4>
+@:<hr />
+@:<div class="row">
+    @:<div class="col-md-4">
+        @:<form asp-action="@Model.ViewName">
+            @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
         {
-        @:<input type="hidden" asp-for="@property.PropertyName" />
-            continue;
-        }
-
-        if (property.Scaffold)
-        {
-            if (property.IsReadOnly)
+            if (property.IsPrimaryKey)
             {
+            @:<input type="hidden" asp-for="@property.PropertyName" />
                 continue;
             }
 
-            if (property.IsForeignKey)
+            if (property.Scaffold)
             {
-        @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="control-label col-md-2"></label>
-            @:<div class="col-md-10">
+                if (property.IsReadOnly)
+                {
+                    continue;
+                }
+
+                if (property.IsForeignKey)
+                {
+            @:<div class="form-group">
+                @:<label asp-for="@property.PropertyName" class="control-label"></label>
                 @:<select asp-for="@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
             @:</div>
-        @:</div>
-                continue;
-            }
+                    continue;
+                }
 
-            bool isCheckbox = property.TypeName.Equals("System.Boolean");
-            if (isCheckbox)
-            {
-        @:<div class="form-group">
-            @:<div class="col-md-offset-2 col-md-10">
+                bool isCheckbox = property.TypeName.Equals("System.Boolean");
+                if (isCheckbox)
+                {
+            @:<div class="form-group">
                 @:<div class="checkbox">
-                    @:<input asp-for="@property.PropertyName" />
-                    @:<label asp-for="@property.PropertyName"></label>
+                    @:<label>
+                        @:<input asp-for="@property.PropertyName" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+                    @:</label>
                 @:</div>
             @:</div>
-        @:</div>
-            }
-            else if (property.IsEnum && !property.IsEnumFlags)
-            {
-        @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
-            @:<div class="col-md-10">
+                }
+                else if (property.IsEnum && !property.IsEnumFlags)
+                {
+            @:<div class="form-group">
+                @:<label asp-for="@property.PropertyName" class="control-label"></label>
                 @:<select asp-for="@property.PropertyName" class="form-control"></select>
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
             @:</div>
-        @:</div>
-            }
-            else
-            {
-        @:<div class="form-group">
-            @:<label asp-for="@property.PropertyName" class="col-md-2 control-label"></label>
-            @:<div class="col-md-10">
+                }
+                else
+                {
+            @:<div class="form-group">
+                @:<label asp-for="@property.PropertyName" class="control-label"></label>
                 @:<input asp-for="@property.PropertyName" class="form-control" />
                 @:<span asp-validation-for="@property.PropertyName" class="text-danger"></span>
             @:</div>
-        @:</div>
+                }
+            }
+            // Ideally we shouldn't be here  but if the user marks the foreign key as [ScaffoldColumn(false)], we want to atleast try to make it work.
+            else if (property.IsForeignKey)
+            {
+        @:<input type="hidden" asp-for="@property.PropertyName" />
+                continue;
             }
         }
-        // Ideally we shouldn't be here  but if the user marks the foreign key as [ScaffoldColumn(false)], we want to atleast try to make it work.
-        else if (property.IsForeignKey)
-        {
-    @:<input type="hidden" asp-for="@property.PropertyName" />
-            continue;
-        }
     }
-}
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
-        </div>
+        </form>
     </div>
-</form>
+</div>
 
 <div>
     <a asp-action="Index">Back to List</a>
@@ -142,6 +135,11 @@
     string GetAssociationName(IPropertyMetadata property)
     {
         //Todo: Implement properly.
+        return property.PropertyName;
+    }
+
+    string GetValueExpression(IPropertyMetadata property)
+    {
         return property.PropertyName;
     }
 }

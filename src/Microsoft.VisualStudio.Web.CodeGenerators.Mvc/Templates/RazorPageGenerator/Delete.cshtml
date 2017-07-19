@@ -69,17 +69,15 @@
     }
     @:</dl>
     @:
-    @:<form method="post" class="form-horizontal">
-        @:<div class="form-actions no-color">
-            foreach (var property in Model.ModelMetadata.Properties)
-            {
-                if(property.IsPrimaryKey){
-            @:<input type="hidden" asp-for="@(Model.ModelTypeName).@GetValueExpression(property)" />
-                }
+    @:<form method="post">
+        foreach (var property in Model.ModelMetadata.Properties)
+        {
+            if(property.IsPrimaryKey){
+        @:<input type="hidden" asp-for="@(Model.ModelTypeName).@GetValueExpression(property)" />
             }
-            @:<input type="submit" value="Delete" class="btn btn-default" /> |
-            @:<a asp-page="./Index">Back to List</a>
-        @:</div>
+        }
+        @:<input type="submit" value="Delete" class="btn btn-default" /> |
+        @:<a asp-page="./Index">Back to List</a>
     @:</form>
 @:</div>
     if (!Model.IsPartialView && !Model.IsLayoutPageSelected)

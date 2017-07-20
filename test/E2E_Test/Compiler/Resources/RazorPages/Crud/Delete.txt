@@ -20,11 +20,9 @@
         </dd>
     </dl>
     
-    <form method="post" class="form-horizontal">
-        <div class="form-actions no-color">
-            <input type="hidden" asp-for="Car.ID" />
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            <a asp-page="./Index">Back to List</a>
-        </div>
+    <form method="post">
+        <input type="hidden" asp-for="Car.ID" />
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        <a asp-page="./Index">Back to List</a>
     </form>
 </div>

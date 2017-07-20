@@ -62,6 +62,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
+            IsViewWireUpNeeded = !ViewsFolderExists(viewGeneratorModel.RelativeFolderPath, ApplicationInfo.ApplicationBasePath);
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetCodeModelMetadata(viewGeneratorModel, _codeModelService, _modelTypesLocator);
 
@@ -70,18 +71,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             await GenerateView(viewGeneratorModel, modelTypeAndContextModel, outputPath);
             await layoutDependencyInstaller.InstallDependencies();
-        }
-
-        protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(ViewGeneratorModel viewGeneratorModel)
-        {
-            List<RequiredFileEntity> requiredFiles = new List<RequiredFileEntity>();
-
-            if (viewGeneratorModel.ReferenceScriptLibraries)
-            {
-                requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
-            }
-
-            return requiredFiles;
         }
     }
 }

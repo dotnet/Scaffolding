@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
@@ -44,16 +45,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             }
 
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
+            IsViewWireUpNeeded = !ViewsFolderExists(viewGeneratorModel.RelativeFolderPath, ApplicationInfo.ApplicationBasePath);
+
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             await layoutDependencyInstaller.Execute();
 
             await GenerateView(viewGeneratorModel, null, outputPath);
             await layoutDependencyInstaller.InstallDependencies();
-        }
-
-        protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(ViewGeneratorModel viewGeneratorModel)
-        {
-            return RequiredFiles;
         }
     }
 }

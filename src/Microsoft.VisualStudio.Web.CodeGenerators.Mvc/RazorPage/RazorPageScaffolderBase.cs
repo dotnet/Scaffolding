@@ -70,6 +70,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             }
         }
 
+        protected bool IsRazorPageWireUpNeeded { get; set; }
+
         protected async Task AddRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)
         {
             IEnumerable<RequiredFileEntity> requiredFiles = GetRequiredFiles(razorGeneratorModel);
@@ -77,9 +79,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 if (!File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath)))
                 {
-                    await _codeGeneratorActionsService.AddFileAsync(
-                        Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
-                        Path.Combine(TemplateFolders.First(), file.TemplateName));
+                     if (file.IsStaticFile)
+                    {
+                        await _codeGeneratorActionsService.AddFileAsync(
+                            Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
+                            Path.Combine(TemplateFolders.First(), file.TemplateName));
+                    }
+                    else
+                    {
+                        await _codeGeneratorActionsService.AddFileFromTemplateAsync(
+                            Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
+                            file.TemplateName,
+                            TemplateFolders,
+                            file.TemplateModel);
+                    }
                     _logger.LogMessage($"Added additional file :{file.OutputPath}");
                 }
             }
@@ -113,7 +126,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             await AddRequiredFiles(razorGeneratorModel);
         }
 
-        protected abstract IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel);
+        protected virtual IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)
+        {
+            List<RequiredFileEntity> requiredFiles = new List<RequiredFileEntity>();
+            var namespaceName = string.IsNullOrEmpty(razorGeneratorModel.NamespaceName)
+                ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
+                : razorGeneratorModel.NamespaceName;
+
+            if (razorGeneratorModel.ReferenceScriptLibraries)
+            {
+                requiredFiles.Add(new RequiredFileEntity(@"Pages/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
+            }
+
+            if (IsRazorPageWireUpNeeded)
+            {
+                requiredFiles.Add(new RequiredFileEntity(@"Pages/_ViewImports.cshtml", "_ViewImports.cshtml", false, new RequiredFilesTemplateModel() { RootNamespace = namespaceName }));
+                if (razorGeneratorModel.UseDefaultLayout)
+                {
+                    requiredFiles.Add(new RequiredFileEntity(@"Pages/_ViewStart.cshtml", "_ViewStart.cshtml"));
+                    requiredFiles.Add(new RequiredFileEntity(@"Pages/_Layout.cshtml", "_Layout.cshtml", false, new RequiredFilesTemplateModel() { AppName = ApplicationInfo.ApplicationName }));
+                }
+            }
+
+            return requiredFiles;
+        }
 
         protected RazorPageGeneratorTemplateModel GetRazorPageViewGeneratorTemplateModel(RazorPageGeneratorModel razorGeneratorModel)
         {
@@ -138,6 +174,33 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             };
 
             return templateModel;
+        }
+
+        protected bool RazorPagesFolderExists(string relativeFolderPath, string applicationBasePath)
+        {
+            const string viewsFolderName = "Pages";
+            var currentDir = applicationBasePath;
+            if (Directory.Exists(Path.Combine(currentDir, viewsFolderName)))
+            {
+                return true;
+            }
+
+            var pathParts = new string[0];
+            if (!string.IsNullOrEmpty(relativeFolderPath))
+            {
+                pathParts = relativeFolderPath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            }
+
+            foreach (var part in pathParts)
+            {
+                currentDir = Path.Combine(currentDir, part);
+                if (Directory.Exists(Path.Combine(currentDir, viewsFolderName)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected RazorPageWithContextTemplateModel GetRazorPageWithContextTemplateModel(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel)

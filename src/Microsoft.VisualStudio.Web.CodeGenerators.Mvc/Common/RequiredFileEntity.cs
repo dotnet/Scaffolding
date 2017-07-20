@@ -7,7 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     public class RequiredFileEntity
     {
-        public RequiredFileEntity(string outputPath, string templateName)
+        public RequiredFileEntity(string outputPath, string templateName, bool isStaticFile = true, dynamic templateModel = null)
         {
             if (string.IsNullOrEmpty(outputPath))
             {
@@ -21,16 +21,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             TemplateName = templateName;
             OutputPath = outputPath;
+            IsStaticFile = isStaticFile;
+            TemplateModel = templateModel;
         }
         
         /// <summary>
         /// Name of the template file.
         /// </summary>
-        public string TemplateName { get; private set; }
+        public string TemplateName { get; }
         
         /// <summary>
         /// Path Relative to the .csproj file
         /// </summary>
-        public string OutputPath { get; private set; }
+        public string OutputPath { get; }
+
+        public bool IsStaticFile { get; }
+
+        public dynamic TemplateModel { get; }
     }
 }

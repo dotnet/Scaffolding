@@ -71,6 +71,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             }
         }
 
+        protected bool IsViewWireUpNeeded { get; set; }
+
         protected async Task AddRequiredFiles(ViewGeneratorModel viewGeneratorModel)
         {
             IEnumerable<RequiredFileEntity> requiredFiles = GetRequiredFiles(viewGeneratorModel);
@@ -78,9 +80,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 if (!File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath)))
                 {
-                    await _codeGeneratorActionsService.AddFileAsync(
-                        Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
-                        Path.Combine(TemplateFolders.First(), file.TemplateName));
+                    if (file.IsStaticFile)
+                    {
+                        await _codeGeneratorActionsService.AddFileAsync(
+                            Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
+                            Path.Combine(TemplateFolders.First(), file.TemplateName));
+                    }
+                    else
+                    {
+                        await _codeGeneratorActionsService.AddFileFromTemplateAsync(
+                            Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
+                            file.TemplateName,
+                            TemplateFolders,
+                            file.TemplateModel);
+                    }
                     _logger.LogMessage($"Added additional file :{file.OutputPath}");
                 }
             }
@@ -104,7 +117,54 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             await AddRequiredFiles(viewGeneratorModel);
         }
 
-        protected abstract IEnumerable<RequiredFileEntity> GetRequiredFiles(ViewGeneratorModel viewGeneratorModel);
+        protected virtual IEnumerable<RequiredFileEntity> GetRequiredFiles(ViewGeneratorModel viewGeneratorModel)
+        {
+            List<RequiredFileEntity> requiredFiles = new List<RequiredFileEntity>();
+
+            if (viewGeneratorModel.ReferenceScriptLibraries)
+            {
+                requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
+            }
+
+            if (IsViewWireUpNeeded)
+            {
+                requiredFiles.Add(new RequiredFileEntity(@"Views/_ViewImports.cshtml", "_ViewImports.cshtml", false, new RequiredFilesTemplateModel() { RootNamespace = _projectContext.RootNamespace }));
+                if (viewGeneratorModel.UseDefaultLayout)
+                {
+                    requiredFiles.Add(new RequiredFileEntity(@"Views/_ViewStart.cshtml", "_ViewStart.cshtml"));
+                    requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_Layout.cshtml", "_Layout.cshtml", false, new RequiredFilesTemplateModel() { AppName = ApplicationInfo.ApplicationName }));
+                }
+            }
+
+            return requiredFiles;
+        }
+
+        protected bool ViewsFolderExists(string relativeFolderPath, string applicationBasePath)
+        {
+            const string viewsFolderName = "Views";
+            var currentDir = applicationBasePath;
+            if (Directory.Exists(Path.Combine(currentDir, viewsFolderName)))
+            {
+                return true;
+            }
+
+            var pathParts = new string[0];
+            if (!string.IsNullOrEmpty(relativeFolderPath))
+            {
+                pathParts = relativeFolderPath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            }
+
+            foreach (var part in pathParts)
+            {
+                currentDir = Path.Combine(currentDir, part);
+                if (Directory.Exists(Path.Combine(currentDir, viewsFolderName)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         protected ViewGeneratorTemplateModel GetViewGeneratorTemplateModel(ViewGeneratorModel viewGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel)
         {

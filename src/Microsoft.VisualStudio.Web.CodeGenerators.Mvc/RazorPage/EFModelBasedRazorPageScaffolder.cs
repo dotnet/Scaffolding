@@ -77,7 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.ViewName + Constants.ViewExtension);
-
+            IsRazorPageWireUpNeeded = !RazorPagesFolderExists(razorGeneratorModel.RelativeFolderPath, ApplicationInfo.ApplicationBasePath);
             EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
@@ -96,18 +96,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered, MessageStrings.Scaffolding_additionalSteps));
             }
-        }
-
-        protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel viewGeneratorModel)
-        {
-            List<RequiredFileEntity> requiredFiles = new List<RequiredFileEntity>();
-
-            if (viewGeneratorModel.ReferenceScriptLibraries)
-            {
-                requiredFiles.Add(new RequiredFileEntity(Path.Combine("Pages","_ValidationScriptsPartial.cshtml"), @"_ValidationScriptsPartial.cshtml"));
-            }
-
-            return requiredFiles;
         }
 
         internal async Task GenerateViews(RazorPageGeneratorModel razorPageGeneratorModel)
@@ -132,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             string outputPath = ValidateAndGetOutputPath(razorPageGeneratorModel, string.Empty);
-
+            IsRazorPageWireUpNeeded = !RazorPagesFolderExists(razorPageGeneratorModel.RelativeFolderPath, ApplicationInfo.ApplicationBasePath);
             EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(

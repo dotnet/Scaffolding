@@ -63,6 +63,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
+            IsViewWireUpNeeded = !ViewsFolderExists(viewGeneratorModel.RelativeFolderPath, ApplicationInfo.ApplicationBasePath);
 
             EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
 
@@ -82,18 +83,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered, MessageStrings.Scaffolding_additionalSteps));
             }
-        }
-
-        protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(ViewGeneratorModel viewGeneratorModel)
-        {
-            List<RequiredFileEntity> requiredFiles = new List<RequiredFileEntity>();
-
-            if (viewGeneratorModel.ReferenceScriptLibraries)
-            {
-                requiredFiles.Add(new RequiredFileEntity(@"Views/Shared/_ValidationScriptsPartial.cshtml", @"_ValidationScriptsPartial.cshtml"));
-            }
-
-            return requiredFiles;
         }
 
         /// <summary>
@@ -125,6 +114,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 baseOutputPath = ApplicationInfo.ApplicationBasePath;
             }
+
+            IsViewWireUpNeeded = !ViewsFolderExists(baseOutputPath, ApplicationInfo.ApplicationBasePath);
 
             foreach (var entry in viewsAndTemplates)
             {

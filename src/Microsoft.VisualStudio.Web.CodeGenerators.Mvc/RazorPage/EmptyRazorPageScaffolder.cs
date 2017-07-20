@@ -45,16 +45,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             }
 
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.ViewName + Constants.ViewExtension);
+            IsRazorPageWireUpNeeded = !RazorPagesFolderExists(razorGeneratorModel.RelativeFolderPath, ApplicationInfo.ApplicationBasePath);
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             await layoutDependencyInstaller.Execute();
 
             await GenerateView(razorGeneratorModel, null, outputPath);
             await layoutDependencyInstaller.InstallDependencies();
-        }
-
-        protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)
-        {
-            return RequiredFiles;
         }
     }
 }

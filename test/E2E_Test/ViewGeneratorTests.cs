@@ -43,6 +43,35 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 Scaffold(args, TestProjectPath);
                 generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);
                 VerifyFileAndContent(generatedFilePath, baselineFile);
+                
+            }
+        }
+
+        [Fact]
+        public void TestViewGenerator_AddRequiredFiles()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                var args = new string[]
+                {
+                    codegeneratorToolName,
+                    "-p",
+                    ".",
+                    "-c",
+                    Configuration,
+                    "view",
+                    "EmptyView",
+                    "Empty",
+                    "-udl",
+                    "-scripts"
+                };
+
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Scaffold(args, TestProjectPath);
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "_ViewStart.cshtml"), Path.Combine("Views", "_ViewStart.txt"));
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "_ViewImports.cshtml"), Path.Combine("Views", "_ViewImports.txt"));
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "Shared", "_Layout.cshtml"), Path.Combine("Views", "_Layout.txt"));
             }
         }
     }

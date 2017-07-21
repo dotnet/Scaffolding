@@ -1,0 +1,3 @@
+@using TestProject
+@namespace TestProject.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

@@ -1,13 +1,9 @@
-@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-    var currentYear = System.DateTime.Now.Year;
-}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@@ViewData["Title"] - @Model.AppName</title>
+    <title>@ViewData["Title"] - TestProject</title>
 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -30,7 +26,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-page="/Index" class="navbar-brand">@Model.AppName</a>
+                <a asp-page="/Index" class="navbar-brand">TestProject</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -42,10 +38,10 @@
         </div>
     </nav>
     <div class="container body-content">
-        @@RenderBody()
+        @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @currentYear - @Model.AppName</p>
+            <p>&copy; 2017 - TestProject</p>
         </footer>
     </div>
 
@@ -70,6 +66,6 @@
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
 
-    @@RenderSection("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

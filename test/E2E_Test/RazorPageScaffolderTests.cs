@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         }
 
         [Theory, MemberData(nameof(TestData))]
-        public void TestViewGenerator(string[] baselineFiles, string[] generatedFilePaths, string[] args)
+        public void TestRazorPageGenerator(string[] baselineFiles, string[] generatedFilePaths, string[] args)
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
@@ -103,6 +103,34 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     var generatedFilePath = Path.Combine(TestProjectPath, generatedFilePaths[i]);
                     VerifyFileAndContent(generatedFilePath, baselineFiles[i]);
                 }
+            }
+        }
+
+        [Fact]
+        public void TestRazorPageGenerator_AddRequiredFiles()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                var args = new string[]
+                {
+                    codegeneratorToolName,
+                    "-p",
+                    ".",
+                    "-c",
+                    Configuration,
+                    "razorpage",
+                    "EmptyPage",
+                    "Empty",
+                    "-udl",
+                    "-scripts"
+                };
+
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Scaffold(args, TestProjectPath);
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Pages", "_ViewStart.cshtml"), Path.Combine("RazorPages", "_ViewStart.txt"));
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Pages", "_ViewImports.cshtml"), Path.Combine("RazorPages", "_ViewImports.txt"));
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Pages", "_Layout.cshtml"), Path.Combine("RazorPages", "_Layout.txt"));
             }
         }
     }

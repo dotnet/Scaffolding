@@ -51,7 +51,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
             {
-                // when this happens, we want to generate all the views
+                throw new ArgumentException(MessageStrings.ViewNameRequired);
+            }
+
+            if (string.Equals(razorPageGeneratorModel.TemplateName, "All", StringComparison.Ordinal))
+            {
                 EFModelBasedRazorPageScaffolder scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
                 await scaffolder.GenerateViews(razorPageGeneratorModel);
             }
@@ -59,8 +63,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 RazorPageScaffolderBase scaffolder = null;
 
-                // TODO: Determine if these checks are appropriate for when to use which scaffolder.
-                //
                 if (string.IsNullOrEmpty(razorPageGeneratorModel.ModelClass) && string.IsNullOrEmpty(razorPageGeneratorModel.DataContextClass))
                 {
                     scaffolder = ActivatorUtilities.CreateInstance<EmptyRazorPageScaffolder>(_serviceProvider);

@@ -49,32 +49,33 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentNullException(nameof(razorPageGeneratorModel));
             }
 
-            if (string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
+            if (string.IsNullOrEmpty(razorPageGeneratorModel.ModelClass))
             {
-                throw new ArgumentException(MessageStrings.ViewNameRequired);
-            }
+                if (string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
+                {
+                    // TODO: make a separate message resource string for this (currently setup using the one for VIEW)
+                    throw new ArgumentException(MessageStrings.ViewNameRequired);
+                }
 
-            if (string.Equals(razorPageGeneratorModel.TemplateName, "All", StringComparison.Ordinal))
-            {
-                EFModelBasedRazorPageScaffolder scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
-                await scaffolder.GenerateViews(razorPageGeneratorModel);
+                if (string.IsNullOrEmpty(razorPageGeneratorModel.TemplateName))
+                {
+                    throw new ArgumentException(MessageStrings.TemplateNameRequired);
+                }
+
+                RazorPageScaffolderBase scaffolder = ActivatorUtilities.CreateInstance<EmptyRazorPageScaffolder>(_serviceProvider);
+                await scaffolder.GenerateCode(razorPageGeneratorModel);
             }
             else
             {
-                RazorPageScaffolderBase scaffolder = null;
+                EFModelBasedRazorPageScaffolder scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
 
-                if (string.IsNullOrEmpty(razorPageGeneratorModel.ModelClass) && string.IsNullOrEmpty(razorPageGeneratorModel.DataContextClass))
-                {
-                    scaffolder = ActivatorUtilities.CreateInstance<EmptyRazorPageScaffolder>(_serviceProvider);
+                if (!string.IsNullOrEmpty(razorPageGeneratorModel.TemplateName) && !string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
+                {   // Razor page using EF
+                    await scaffolder.GenerateCode(razorPageGeneratorModel);
                 }
                 else
-                {
-                    scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
-                }
-
-                if (scaffolder != null)
-                {
-                    await scaffolder.GenerateCode(razorPageGeneratorModel);
+                {   // Razor page CRUD using EF
+                    await scaffolder.GenerateViews(razorPageGeneratorModel);
                 }
             }
         }

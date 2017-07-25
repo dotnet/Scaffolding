@@ -43,13 +43,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
             var simMode = app.Option("--simulation-mode", Resources.SimulationModeOptionDesc, CommandOptionType.NoValue);
 
-#if DEBUG
-            if (args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
+// the for reals version
+//
+//#if DEBUG
+//            if (args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
+//            {
+//                Console.WriteLine($"Attach a debugger to processID: {System.Diagnostics.Process.GetCurrentProcess().Id} and hit enter.");
+//                Console.ReadKey();
+//            }
+//#endif
+//
+
+// for testing via VS
+            while (!System.Diagnostics.Debugger.IsAttached)
             {
-                Console.WriteLine($"Attach a debugger to processID: {System.Diagnostics.Process.GetCurrentProcess().Id} and hit enter.");
-                Console.ReadKey();
             }
-#endif
+
             app.OnExecute(async () =>
             {
                 CodeGenerationEnvironmentHelper.SetupEnvironment();

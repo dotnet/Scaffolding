@@ -60,7 +60,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (string.IsNullOrEmpty(razorGeneratorModel.ViewName))
             {
-                // TODO: make a separate message resource string for this (currently setup using the one for VIEW)
                 throw new ArgumentException(MessageStrings.ViewNameRequired);
             }
 

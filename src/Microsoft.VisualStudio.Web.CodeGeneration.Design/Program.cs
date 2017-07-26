@@ -43,6 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             var noBuild = app.Option("--no-build", "", CommandOptionType.NoValue);
             var simMode = app.Option("--simulation-mode", Resources.SimulationModeOptionDesc, CommandOptionType.NoValue);
 
+
             app.OnExecute(async () =>
             {
                 CodeGenerationEnvironmentHelper.SetupEnvironment();

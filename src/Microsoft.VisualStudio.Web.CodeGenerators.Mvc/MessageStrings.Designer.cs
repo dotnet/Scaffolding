@@ -10,7 +10,7 @@
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
     using System;
-    using System.Reflection;
+    
     
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MessageStrings", typeof(MessageStrings).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MessageStrings", typeof(MessageStrings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -246,6 +246,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string ProvideValidArgument {
             get {
                 return ResourceManager.GetString("ProvideValidArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pazor Page Name is required..
+        /// </summary>
+        internal static string RazorPageNameRequired {
+            get {
+                return ResourceManager.GetString("RazorPageNameRequired", resourceCulture);
             }
         }
         

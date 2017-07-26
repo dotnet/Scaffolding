@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
@@ -51,9 +50,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (string.IsNullOrEmpty(razorPageGeneratorModel.ModelClass))
             {
-                if (string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
+                if (string.IsNullOrEmpty(razorPageGeneratorModel.RazorPageName))
                 {
-                    throw new ArgumentException(MessageStrings.ViewNameRequired);
+                    throw new ArgumentException(MessageStrings.RazorPageNameRequired);
                 }
 
                 if (string.IsNullOrEmpty(razorPageGeneratorModel.TemplateName))
@@ -68,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 EFModelBasedRazorPageScaffolder scaffolder = ActivatorUtilities.CreateInstance<EFModelBasedRazorPageScaffolder>(_serviceProvider);
 
-                if (!string.IsNullOrEmpty(razorPageGeneratorModel.TemplateName) && !string.IsNullOrEmpty(razorPageGeneratorModel.ViewName))
+                if (!string.IsNullOrEmpty(razorPageGeneratorModel.TemplateName) && !string.IsNullOrEmpty(razorPageGeneratorModel.RazorPageName))
                 {   // Razor page using EF
                     await scaffolder.GenerateCode(razorPageGeneratorModel);
                 }

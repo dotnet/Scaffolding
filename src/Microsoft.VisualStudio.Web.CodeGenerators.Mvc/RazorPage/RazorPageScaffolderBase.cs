@@ -89,10 +89,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         internal async Task GenerateView(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string outputPath)
         {
-            if (razorGeneratorModel.ViewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
+            if (razorGeneratorModel.RazorPageName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
             {
-                int viewNameLength = razorGeneratorModel.ViewName.Length - Constants.ViewExtension.Length;
-                razorGeneratorModel.ViewName = razorGeneratorModel.ViewName.Substring(0, viewNameLength);
+                int viewNameLength = razorGeneratorModel.RazorPageName.Length - Constants.ViewExtension.Length;
+                razorGeneratorModel.RazorPageName = razorGeneratorModel.RazorPageName.Substring(0, viewNameLength);
             }
 
             var templateModel = modelTypeAndContextModel == null
@@ -128,8 +128,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 NamespaceName = namespaceName,
                 NoPageModel = razorGeneratorModel.NoPageModel,
-                PageModelClassName = razorGeneratorModel.ViewName+"Model",
-                ViewName = razorGeneratorModel.ViewName,
+                PageModelClassName = razorGeneratorModel.RazorPageName+"Model",
+                RazorPageName = razorGeneratorModel.RazorPageName,
                 LayoutPageFile = razorGeneratorModel.LayoutPage,
                 IsLayoutPageSelected = isLayoutSelected,
                 IsPartialView = razorGeneratorModel.PartialView,
@@ -153,11 +153,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 NamespaceName = namespaceName,
                 NoPageModel = razorGeneratorModel.NoPageModel,
-                PageModelClassName = razorGeneratorModel.ViewName + "Model",
+                PageModelClassName = razorGeneratorModel.RazorPageName + "Model",
                 ViewDataTypeName = modelTypeAndContextModel?.ModelType?.FullName,
                 ViewDataTypeShortName = modelTypeAndContextModel?.ModelType?.Name,
                 ContextTypeName = modelTypeAndContextModel?.DbContextFullName,
-                ViewName = razorGeneratorModel.ViewName,
+                RazorPageName = razorGeneratorModel.RazorPageName,
                 LayoutPageFile = razorGeneratorModel.LayoutPage,
                 IsLayoutPageSelected = isLayoutSelected,
                 IsPartialView = razorGeneratorModel.PartialView,

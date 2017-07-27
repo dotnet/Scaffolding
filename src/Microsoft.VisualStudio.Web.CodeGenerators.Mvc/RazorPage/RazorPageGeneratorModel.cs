@@ -7,7 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {
     public class RazorPageGeneratorModel : CommonCommandLineModel
     {
-        public string ViewName { get; set; }
+        public string RazorPageName { get; set; }
 
         [Argument(Description = "The view template to use, supported view templates: 'Empty|Create|Edit|Delete|Details|List'")]
         public string TemplateName { get; set; }
@@ -28,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         protected RazorPageGeneratorModel(RazorPageGeneratorModel copyFrom)
             : base(copyFrom)
         {
-            ViewName = copyFrom.ViewName;
+            RazorPageName = copyFrom.RazorPageName;
             TemplateName = copyFrom.TemplateName;
             PartialView = copyFrom.PartialView;
         }

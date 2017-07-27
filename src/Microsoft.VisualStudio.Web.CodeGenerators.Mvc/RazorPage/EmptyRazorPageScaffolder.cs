@@ -33,10 +33,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentNullException(nameof(razorGeneratorModel));
             }
 
-            if (string.IsNullOrEmpty(razorGeneratorModel.ViewName))
+            if (string.IsNullOrEmpty(razorGeneratorModel.RazorPageName))
             {
-                // TODO: make a separate message resource string for this (currently setup using the one for VIEW)
-                throw new ArgumentException(MessageStrings.ViewNameRequired);
+                throw new ArgumentException(MessageStrings.RazorPageNameRequired);
             }
 
             if (string.IsNullOrEmpty(razorGeneratorModel.TemplateName))
@@ -44,7 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.TemplateNameRequired);
             }
 
-            var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.ViewName + Constants.ViewExtension);
+            var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
             await layoutDependencyInstaller.Execute();
 

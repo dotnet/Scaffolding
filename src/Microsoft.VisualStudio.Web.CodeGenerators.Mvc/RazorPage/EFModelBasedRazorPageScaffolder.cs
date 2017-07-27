@@ -58,10 +58,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentNullException(nameof(razorGeneratorModel));
             }
 
-            if (string.IsNullOrEmpty(razorGeneratorModel.ViewName))
+            if (string.IsNullOrEmpty(razorGeneratorModel.RazorPageName))
             {
-                // TODO: make a separate message resource string for this (currently setup using the one for VIEW)
-                throw new ArgumentException(MessageStrings.ViewNameRequired);
+                throw new ArgumentException(MessageStrings.RazorPageNameRequired);
             }
 
             if (string.IsNullOrEmpty(razorGeneratorModel.TemplateName))
@@ -76,7 +75,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             }
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
-            var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.ViewName + Constants.ViewExtension);
+            var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
             EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
 
@@ -177,7 +176,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                     (razorPageGeneratorModel.UseDefaultLayout || !string.IsNullOrEmpty(razorPageGeneratorModel.LayoutPage));
 
                 RazorPageWithContextTemplateModel templateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
-                templateModel.ViewName = viewName;
+                templateModel.RazorPageName = viewName;
                 templateModel.PageModelClassName = viewName + "Model";
                 var pageModelTemplateName = templateName + "PageModel" + Constants.RazorTemplateExtension;
                 templateName = templateName + Constants.RazorTemplateExtension;

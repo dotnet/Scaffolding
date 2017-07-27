@@ -18,7 +18,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         public string PageModelClassName { get; set; }
 
-        public string ViewName { get; set; }
+        public string RazorPageName { get; set; }
 
         public string LayoutPageFile { get; set; }
 

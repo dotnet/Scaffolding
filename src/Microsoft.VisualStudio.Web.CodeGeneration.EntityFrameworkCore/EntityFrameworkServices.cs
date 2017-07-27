@@ -14,7 +14,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
@@ -433,17 +432,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         {
             try
             {
-                // Use EF design APIs to get the DBContext instance.
-                var operationHandler = new OperationReportHandler();
-                var operationReporter = new OperationReporter(operationHandler);
                 // EF infers the environment (Development/ Production) based on the environment variable
                 // ASPNETCORE_ENVIRONMENT. This should already be set up by the CodeGeneration.Design process.
-                var dbContextOperations = new DbContextOperations(
-                    operationReporter,
-                    dbContextType.GetTypeInfo().Assembly,
-                    startupType.GetTypeInfo().Assembly);
-
-                var dbContextService = dbContextOperations.CreateContext(dbContextType.FullName);
+                // Use EF design APIs to get the DBContext instance.
+                var operationHandler = new OperationReportHandler();
+                var dbContextService = DbContextActivator.CreateInstance(dbContextType,
+                    startupType.GetTypeInfo().Assembly,
+                    operationHandler);
 
                 return dbContextService;
             }

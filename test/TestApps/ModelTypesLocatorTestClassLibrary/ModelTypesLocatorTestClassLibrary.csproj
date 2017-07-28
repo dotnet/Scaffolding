@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />
-    <ProjectReference Include="..\..\..\src\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
+    <ProjectReference Include="..\..\..\src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
   </ItemGroup>
 
 </Project>

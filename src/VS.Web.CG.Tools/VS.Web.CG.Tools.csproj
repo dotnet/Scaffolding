@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>dotnet-aspnet-codegenerator</AssemblyName>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <OutputType>exe</OutputType>
+    <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
+    <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Tools</PackageId>
+    <PackageType>DotnetCliTool</PackageType>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\**\*.cs">
+      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
+    </Compile>
+    <Compile Include="..\Ext.ProjectModel.MsBuild.Sources\**\*.cs">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName).cs</Link>
+    </Compile>
+    <EmbeddedResource Include="compiler\resources\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\VS.Web.CG.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true" PackagePath="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
+    <None Include="..\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true" PackagePath="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
+    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true" PackagePath="toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
+    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true" PackagePath="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
+    <None Include="prefercliruntime" Pack="true" PackagePath="prefercliruntime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <!--<Compile Update="MessageStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MessageStrings.resx</DependentUpon>
+    </Compile>-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--<EmbeddedResource Update="MessageStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>-->
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

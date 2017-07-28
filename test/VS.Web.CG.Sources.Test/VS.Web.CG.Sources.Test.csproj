@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test</AssemblyName>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Sources</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs">
+      <Link>Shared\%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Ext.ProjectModel.MsBuild.Sources\**\*.cs">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs">
+      <Link>Shared\Cli.Utils\%(FileName)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VS.Web.CG.Utils\VS.Web.CG.Utils.csproj" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(DotNetProjectModelVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+  </ItemGroup>
+
+</Project>

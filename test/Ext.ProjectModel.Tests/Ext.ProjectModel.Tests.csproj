@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Microsoft.Extensions.ProjectModel.Tests</AssemblyName>
+    <RootNamespace>Microsoft.Extensions.ProjectModel</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs">
+      <Link>Shared\%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Ext.ProjectModel.MsBuild.Sources\**\*.cs;">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs">
+      <Link>Shared\Cli.Utils\%(FileName)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(DotNetProjectModelVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+
+    <!-- Required to prevent a conflict warning between Microsoft.VisualStudio.Web.CodeGeneration.Contracts and Microsoft.DotNet.ProjectModel. -->
+    <!-- Can be removed once Microsoft.DotNet.ProjectModel moves to Newtonsoft.Json 10.0.1 -->
+    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

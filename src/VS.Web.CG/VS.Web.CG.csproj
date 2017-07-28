@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.</Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration</AssemblyName>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VS.Web.CG.EFCore\VS.Web.CG.EFCore.csproj" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(AspNetCoreVersion)" />
+  </ItemGroup>
+</Project>

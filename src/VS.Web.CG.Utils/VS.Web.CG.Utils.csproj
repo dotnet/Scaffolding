@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>Contains utilities used by ASP.NET Core Code Generation packages.</Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Utils</AssemblyName>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Utils</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\General\**\*.cs">
+      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
+    </Compile>
+    <EmbeddedResource Include="..\Shared\General\**\*.resx">
+      <Link>Shared\%(RecursiveDir)%(FileName).resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksVersion)" />
+  </ItemGroup>
+  <!--<ItemGroup>
+    <Compile Update="Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>-->
+
+  <!--<ItemGroup>
+    <Compile Update="MessageStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MessageStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="MessageStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>-->
+
+
+</Project>

@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>Microsoft.Extensions.ProjectModel.Tests</AssemblyName>
@@ -27,10 +28,6 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
-
-    <!-- Required to prevent a conflict warning between Microsoft.VisualStudio.Web.CodeGeneration.Contracts and Microsoft.DotNet.ProjectModel. -->
-    <!-- Can be removed once Microsoft.DotNet.ProjectModel moves to Newtonsoft.Json 10.0.1 -->
-    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

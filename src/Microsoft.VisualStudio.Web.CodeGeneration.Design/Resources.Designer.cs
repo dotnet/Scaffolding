@@ -107,7 +107,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
         }
 
         /// <summary>
-        ///    Looks up a localized string similar to Something went wrong.
+        ///    Looks up a localized string similar to Scaffolding failed..
         /// </summary>
         internal static string GenericErrorMessage {
             get {

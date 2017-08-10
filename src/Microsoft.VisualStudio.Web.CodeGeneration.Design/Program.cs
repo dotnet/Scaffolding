@@ -52,35 +52,50 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 #endif
             app.OnExecute(async () =>
             {
-                CodeGenerationEnvironmentHelper.SetupEnvironment();
-                string project = projectPath.Value();
-                if (string.IsNullOrEmpty(project))
+                var exitCode = 1;
+                try
                 {
-                    project = Directory.GetCurrentDirectory();
-                }
-                project = Path.GetFullPath(project);
-                var configuration = appConfiguration.Value();
+                    CodeGenerationEnvironmentHelper.SetupEnvironment();
+                    string project = projectPath.Value();
+                    if (string.IsNullOrEmpty(project))
+                    {
+                        project = Directory.GetCurrentDirectory();
+                    }
+                    project = Path.GetFullPath(project);
+                    var configuration = appConfiguration.Value();
 
-                var portNumber = int.Parse(port.Value());
-                using (var client = await ScaffoldingClient.Connect(portNumber, logger))
+                    var portNumber = int.Parse(port.Value());
+                    using (var client = await ScaffoldingClient.Connect(portNumber, logger))
+                    {
+                        var messageOrchestrator = new MessageOrchestrator(client, logger);
+                        var projectInformation = messageOrchestrator.GetProjectInformation();
+
+                        var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
+                        var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
+                        CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,
+                            codeGenArgs,
+                            configuration,
+                            logger,
+                            isSimulationMode);
+
+                        exitCode = executor.Execute((changes) => messageOrchestrator.SendFileSystemChangeInformation(changes));
+
+                        messageOrchestrator.SendScaffoldingCompletedMessage();
+                    }
+                }
+                catch(Exception ex)
                 {
-                    var messageOrchestrator = new MessageOrchestrator(client, logger);
-                    var projectInformation = messageOrchestrator.GetProjectInformation();
+                    logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
+                    logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                    logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
+                    if (!logger.IsTracing)
+                    {
+                        logger.LogMessage(Resources.EnableTracingMessage);
+                    }
 
-                    var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
-                    var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
-                    CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,
-                        codeGenArgs,
-                        configuration,
-                        logger,
-                        isSimulationMode);
-
-                    var exitCode = executor.Execute((changes) => messageOrchestrator.SendFileSystemChangeInformation(changes));
-
-                    messageOrchestrator.SendScaffoldingCompletedMessage();
-
-                    return exitCode;
                 }
+                return exitCode;
+                
             });
 
             app.Execute(args);

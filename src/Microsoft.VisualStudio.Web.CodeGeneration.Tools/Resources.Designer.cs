@@ -10,7 +10,6 @@
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -20,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -40,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.VisualStudio.Web.CodeGeneration.Tools.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.VisualStudio.Web.CodeGeneration.Tools.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -78,21 +77,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
                 return ResourceManager.GetString("AppDesc", resourceCulture);
             }
         }
-
-        /// <summary>
-        /// Looks up a localized string similar to Available generators:.
-        /// </summary>
-        internal static string AvailableGeneratorsHeader {
-            get {
-                return ResourceManager.GetString("AvailableGeneratorsHeader", resourceCulture);
-            }
-        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Available frameworks in project: {0}.
         /// </summary>
         internal static string AvailableFrameworks {
             get {
                 return ResourceManager.GetString("AvailableFrameworks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Available generators:.
+        /// </summary>
+        internal static string AvailableGeneratorsHeader {
+            get {
+                return ResourceManager.GetString("AvailableGeneratorsHeader", resourceCulture);
             }
         }
         
@@ -131,9 +131,27 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
                 return ResourceManager.GetString("ConnectToServerError", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        /// Looks up a localized string similar to Name of the generator. Check available generators below..
+        ///   Looks up a localized string similar to To see more information, enable tracing by setting environment variable &apos;codegen_trace&apos; = 1..
+        /// </summary>
+        internal static string EnableTracingMessage {
+            get {
+                return ResourceManager.GetString("EnableTracingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generator Arguments:.
+        /// </summary>
+        internal static string GeneratorArgsHeader {
+            get {
+                return ResourceManager.GetString("GeneratorArgsHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name of the generator. Check available generators below..
         /// </summary>
         internal static string GeneratorArgumentDesc {
             get {
@@ -142,20 +160,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
         }
         
         /// <summary>
-        /// Looks up a localized string similar to Generator Arguments:.
-        /// </summary>
-        internal static string GeneratorArgsHeader {
-            get {
-                return ResourceManager.GetString("GeneratorArgsHeader", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        /// Looks up a localized string similar to Generator Options:.
+        ///   Looks up a localized string similar to Generator Options:.
         /// </summary>
         internal static string GeneratorOptionsHeader {
             get {
                 return ResourceManager.GetString("GeneratorOptionsHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Something went wrong..
+        /// </summary>
+        internal static string GenericErrorMessage {
+            get {
+                return ResourceManager.GetString("GenericErrorMessage", resourceCulture);
             }
         }
         
@@ -169,13 +187,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
         }
         
         /// <summary>
-        /// Looks up a localized string similar to No code generator found with the name &apos;{0}&apos;.
+        ///   Looks up a localized string similar to No code generator found with the name &apos;{0}&apos;..
         /// </summary>
         internal static string NoCodeGeneratorFound {
             get {
                 return ResourceManager.GetString("NoCodeGeneratorFound", resourceCulture);
             }
         }
+        
         /// <summary>
         ///   Looks up a localized string similar to Could not find a compatible framework to execute..
         /// </summary>
@@ -204,13 +223,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
         }
         
         /// <summary>
-        /// Looks up a localized string similar to Selected Code Generator: {0}.
+        ///   Looks up a localized string similar to Selected Code Generator: {0}.
         /// </summary>
         internal static string SelectedCodeGeneratorStr {
             get {
                 return ResourceManager.GetString("SelectedCodeGeneratorStr", resourceCulture);
             }
         }
+        
         /// <summary>
         ///   Looks up a localized string similar to Specifies whether to persist any file changes..
         /// </summary>

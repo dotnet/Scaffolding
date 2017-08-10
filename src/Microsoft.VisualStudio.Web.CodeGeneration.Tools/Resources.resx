@@ -178,7 +178,7 @@
     <value>To see more information, enable tracing by setting environment variable 'codegen_trace' = 1.</value>
   </data>
   <data name="GenericErrorMessage" xml:space="preserve">
-    <value>Something went wrong.</value>
+    <value>Scaffolding failed.</value>
   </data>
   <data name="NoCodeGeneratorsFound" xml:space="preserve">
     <value>No codegenerators are available in this project. Please add 'Microsoft.VisualStudio.Web.CodeGeneration.Design' NuGet package to the project.</value>

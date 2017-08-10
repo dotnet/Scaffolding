@@ -10,6 +10,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         private static bool isTrace = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("codegen_trace"));
         private object _syncObject = new object();
 
+        public bool IsTracing => isTrace;
+
         public void LogMessage(string message)
         {
             LogMessage(message, LogMessageLevel.Information);

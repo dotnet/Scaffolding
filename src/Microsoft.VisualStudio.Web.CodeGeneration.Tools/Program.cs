@@ -58,37 +58,51 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         ///    1. Try getting the projectContext for the project
         ///    2. Invoke project dependency command with the first compatible tfm found in the project
         /// </summary>
-        private static void Execute(string[] args, bool isNoBuild, ILogger logger)
+        private static void Execute(string[] args, bool isNoBuild, ConsoleLogger logger)
         {
             var app = new ScaffoldingApp(false);
 
             app.OnExecute(() =>
             {
-                string project = app.ProjectPath.Value();
-                if (string.IsNullOrEmpty(project))
+                try
                 {
-                    project = Directory.GetCurrentDirectory();
+                    string project = app.ProjectPath.Value();
+                    if (string.IsNullOrEmpty(project))
+                    {
+                        project = Directory.GetCurrentDirectory();
+                    }
+
+                    project = Path.GetFullPath(project);
+                    var configuration = app.AppConfiguration.Value() ?? "Debug";
+
+                    var projectFileFinder = new ProjectFileFinder(project);
+
+                    if (ToolCommandLineHelper.IsHelpArgument(args))
+                    {
+                        app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration);
+                        app.ShowHelp();
+                        return 0;
+                    }
+                    // Invoke the tool from the project's build directory.
+                    return BuildAndDispatchDependencyCommand(
+                        args,
+                        projectFileFinder.ProjectFilePath,
+                        app.BuildBasePath.Value(),
+                        configuration,
+                        isNoBuild,
+                        logger);
                 }
-
-                project = Path.GetFullPath(project);
-                var configuration = app.AppConfiguration.Value() ?? "Debug";
-
-                var projectFileFinder = new ProjectFileFinder(project);
-
-                if (ToolCommandLineHelper.IsHelpArgument(args))
+                catch (Exception ex)
                 {
-                    app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration);
-                    app.ShowHelp();
-                    return 0;
+                    logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
+                    logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                    logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
+                    if (!logger.IsTracing)
+                    {
+                        logger.LogMessage(Resources.EnableTracingMessage);
+                    }
+                    return -1;
                 }
-                // Invoke the tool from the project's build directory.
-                return BuildAndDispatchDependencyCommand(
-                    args,
-                    projectFileFinder.ProjectFilePath,
-                    app.BuildBasePath.Value(),
-                    configuration,
-                    isNoBuild,
-                    logger);
 
             });
 

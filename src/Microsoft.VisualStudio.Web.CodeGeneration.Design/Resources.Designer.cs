@@ -87,7 +87,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
                 return ResourceManager.GetString("ConnectToServerError", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to To see more information, enable tracing by setting environment variable 'codegen_trace' = 1..
+        /// </summary>
+        internal static string EnableTracingMessage { 
+            get {
+                return ResourceManager.GetString("EnableTracingMessage", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Server does not support File System change messages. HostId: &apos;{0}&apos;, ProtocolVersion: &apos;{1}&apos;..
         /// </summary>
@@ -96,7 +105,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design {
                 return ResourceManager.GetString("FileSystemChangeMessageNotSupported", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///    Looks up a localized string similar to Something went wrong.
+        /// </summary>
+        internal static string GenericErrorMessage {
+            get {
+                return ResourceManager.GetString("GenericErrorMessage", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Could not get ProjectInformation..
         /// </summary>

@@ -174,4 +174,10 @@
   <data name="TargetFrameworkOptionDesc" xml:space="preserve">
     <value>Target Framework to use. (Short folder name of the tfm. eg. net46)</value>
   </data>
+  <data name="EnableTracingMessage" xml:space="preserve">
+    <value>To see more information, enable tracing by setting environment variable 'codegen_trace' = 1.</value>
+  </data>
+  <data name="GenericErrorMessage" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
 </root>

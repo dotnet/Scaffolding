@@ -180,4 +180,7 @@
   <data name="GenericErrorMessage" xml:space="preserve">
     <value>Something went wrong.</value>
   </data>
+  <data name="NoCodeGeneratorsFound" xml:space="preserve">
+    <value>No codegenerators are available in this project. Please add 'Microsoft.VisualStudio.Web.CodeGeneration.Design' NuGet package to the project.</value>
+  </data>
 </root>

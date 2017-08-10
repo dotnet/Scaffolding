@@ -90,6 +90,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine();
+
+            if (!paramDefinitionsCache.Any())
+            {
+                // No parameterDefinitions were found in any of the nuget packages.
+                // This can happen if the project doesn't have a reference to 'Microsoft.VisualStudio.Web.CodeGeneration.Design' package.
+                sb.Append(Resources.NoCodeGeneratorsFound);
+                sb.Append(Resources.AddDesignPackage);
+                return sb.ToString();
+            }
+
             sb.AppendLine(Resources.AvailableGeneratorsHeader);
             var maxLenGeneratorName = paramDefinitionsCache.Max(p => p.Key.Length);
             var formatStr = "  {0,-"+maxLenGeneratorName+"}: {1}";

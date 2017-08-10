@@ -77,7 +77,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
                     var projectFileFinder = new ProjectFileFinder(project);
 
-                    if (ToolCommandLineHelper.IsHelpArgument(args))
+                    if (ToolCommandLineHelper.IsHelpArgument(args) 
+                        || app.GeneratorArgument == null
+                        || string.IsNullOrEmpty(app.GeneratorArgument.Value))
                     {
                         app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration);
                         app.ShowHelp();

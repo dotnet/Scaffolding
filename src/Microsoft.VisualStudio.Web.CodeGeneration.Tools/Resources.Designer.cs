@@ -196,6 +196,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No codegenerators are available in this project. Please add &apos;Microsoft.VisualStudio.Web.CodeGeneration.Design&apos; NuGet package to the project..
+        /// </summary>
+        internal static string NoCodeGeneratorsFound {
+            get {
+                return ResourceManager.GetString("NoCodeGeneratorsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find a compatible framework to execute..
         /// </summary>
         internal static string NoCompatibleFrameworks {

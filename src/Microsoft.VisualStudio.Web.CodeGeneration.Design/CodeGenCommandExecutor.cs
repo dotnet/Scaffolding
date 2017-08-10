@@ -50,11 +50,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             AddFrameworkServices(serviceProvider, _projectInformation);
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
-            codeGenCommand.Execute(_codeGenArguments);
 
-            if (_isSimulationMode && simModeAction != null)
+            try
             {
-                simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChanges);
+                codeGenCommand.Execute(_codeGenArguments);
+
+                if (_isSimulationMode && simModeAction != null)
+                {
+                    simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChanges);
+                }
+            }
+            catch (InvalidOperationException ioe)
+            {
+                _logger.LogMessage(ioe.Message, LogMessageLevel.Error);
+                _logger.LogMessage(ioe.StackTrace, LogMessageLevel.Trace);
             }
 
             return 0;

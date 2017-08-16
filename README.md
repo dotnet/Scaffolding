@@ -1,9 +1,8 @@
 ASP.NET Scaffolding
 ======================
 
-AppVeyor: [![AppVeyor](https://ci.appveyor.com/api/projects/status/jm7in54ohd4dmwte/branch/dev?svg=true)](https://ci.appveyor.com/project/aspnetci/Scaffolding/branch/dev)
-
-Travis:   [![Travis](https://travis-ci.org/aspnet/Scaffolding.svg?branch=dev)](https://travis-ci.org/aspnet/Scaffolding)
+[![AppVeyor build status](https://img.shields.io/appveyor/ci/aspnetci/Scaffolding/dev.svg?label=appveyor&style=flat-square)](https://ci.appveyor.com/project/aspnetci/Scaffolding/branch/dev)
+[![Travis build status](https://img.shields.io/travis/aspnet/Scaffolding.svg?label=travis-ci&branch=dev&style=flat-square)](https://travis-ci.org/aspnet/Scaffolding/branches)
 
 ASP.NET Scaffolding enables generating boilerplate code for web applications to speed up development.
 

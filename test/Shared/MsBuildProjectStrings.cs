@@ -35,7 +35,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <NoWarn>NU1605</NoWarn>
     <RuntimeFrameworkVersion>{2}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
@@ -76,7 +75,6 @@ public const string RootProjectTxtWithoutEF = @"
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <NoWarn>NU1605</NoWarn>
     <RuntimeFrameworkVersion>{2}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
@@ -116,7 +114,6 @@ public const string RootProjectTxtWithoutEF = @"
     <OutputPath>bin\$(Configuration)</OutputPath>
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <NoWarn>NU1605</NoWarn>
     <RuntimeFrameworkVersion>{2}</RuntimeFrameworkVersion>
   </PropertyGroup>
 

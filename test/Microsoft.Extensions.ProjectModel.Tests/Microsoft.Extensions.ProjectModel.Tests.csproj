@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(DotNetProjectModelVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
 
     <!-- Required to prevent a conflict warning between Microsoft.VisualStudio.Web.CodeGeneration.Contracts and Microsoft.DotNet.ProjectModel. -->
     <!-- Can be removed once Microsoft.DotNet.ProjectModel moves to Newtonsoft.Json 10.0.1 -->

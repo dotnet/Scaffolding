@@ -9,12 +9,24 @@
     <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x86</RuntimeIdentifier>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x64</RuntimeIdentifier>
+    <X86ProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86\</X86ProjectDirectory>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="$(X86ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" Condition="'$(TargetFramework)'=='net461'" />
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).dll" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).dll" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)'=='Windows_NT'">
+    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe" Pack="true" PackagePath="lib\net461\win7-x64\$(AssemblyName).exe" />
+    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="lib\net461\win7-x86\$(AssemblyName).exe" />
   </ItemGroup>
 
   <!--<ItemGroup>

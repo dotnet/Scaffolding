@@ -9,9 +9,12 @@
     <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />

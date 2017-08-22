@@ -182,15 +182,27 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var runtimeConfigPath = Path.Combine(targetDir, context.RuntimeConfig);
             var depsFile = Path.Combine(targetDir, context.DepsFile);
 
-            string dotnetCodeGenInsideManPath = context.CompilationAssemblies
+            string dotnetCodeGenInsideManPath = string.Empty;
+            
+            if (IsNetCoreAppFramework(frameworkToUse))
+            {
+                dotnetCodeGenInsideManPath = context.CompilationAssemblies
                 .Where(c => Path.GetFileNameWithoutExtension(c.Name)
                             .Equals(DESIGN_TOOL_NAME, StringComparison.OrdinalIgnoreCase))
                 .Select(reference => reference.ResolvedPath)
                 .FirstOrDefault();
-
-            if (string.IsNullOrEmpty(dotnetCodeGenInsideManPath))
+                if (string.IsNullOrEmpty(dotnetCodeGenInsideManPath))
+                {
+                    throw new InvalidOperationException(Resources.AddDesignPackage);
+                }
+            }
+            else
             {
-                throw new InvalidOperationException(Resources.AddDesignPackage);
+                dotnetCodeGenInsideManPath = Path.Combine(Path.GetDirectoryName(context.AssemblyFullPath), DESIGN_TOOL_NAME+".exe");
+                if (!File.Exists(dotnetCodeGenInsideManPath))
+                {
+                    throw new InvalidOperationException(Resources.AddDesignPackage);
+                }
             }
 
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
@@ -207,6 +219,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     configuration: configuration,
                     projectDirectory: projectDirectory,
                     assemblyFullPath: context.AssemblyFullPath);
+        }
+
+        private static bool IsNetCoreAppFramework(NuGetFramework framework)
+        {
+            //Only need to compare the framework name to be netcoreapp. Version doesn't matter.
+
+            return NuGetFramework.FrameworkNameComparer.Equals(
+                framework,
+                NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10);
         }
 
         private static IProjectContext GetProjectInformation(string projectPath, string configuration)

@@ -7,7 +7,7 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
     <OutputType>exe</OutputType>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <PlatformTarget>AnyCpu</PlatformTarget>
     <CodeGenDesignSrcPath>..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Design\</CodeGenDesignSrcPath>
     <!-- The rootnamespace property is needed to make the embedded resource files have the right namespace.-->
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Design</RootNamespace>

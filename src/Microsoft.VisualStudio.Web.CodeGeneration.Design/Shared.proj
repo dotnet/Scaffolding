@@ -1,0 +1,17 @@
+<Project>
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
+    <OutputType>exe</OutputType>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Design</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

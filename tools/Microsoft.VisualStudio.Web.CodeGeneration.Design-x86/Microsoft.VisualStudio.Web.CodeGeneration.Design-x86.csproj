@@ -1,41 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\build\common.props" />
+  <Import Project="..\Shared.proj" />
   <PropertyGroup>
-    <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views.</Description>
-    <TargetFramework>net461</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
-    <OutputType>exe</OutputType>
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
-    <CodeGenDesignSrcPath>..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Design\</CodeGenDesignSrcPath>
-    <!-- The rootnamespace property is needed to make the embedded resource files have the right namespace.-->
-    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Design</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="$(CodeGenDesignSrcPath)\*.cs" />
-    <EmbeddedResource Include="$(CodeGenDesignSrcPath)\*.resx" />
-  </ItemGroup>
-
-  <!--<ItemGroup>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup> -->
-
-  <ItemGroup>
-    <EmbeddedResource Update="$(CodeGenDesignSrcPath)\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>$(CodeGenDesignSrcPath)\Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
 </Project>

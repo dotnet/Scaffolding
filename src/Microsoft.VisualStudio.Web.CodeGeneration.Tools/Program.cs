@@ -198,7 +198,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
             else
             {
-                dotnetCodeGenInsideManPath = Path.Combine(Path.GetDirectoryName(context.AssemblyFullPath), DESIGN_TOOL_NAME+".exe");
+                dotnetCodeGenInsideManPath = Path.Combine(Path.GetDirectoryName(context.AssemblyFullPath), DESIGN_TOOL_NAME + ".exe");
                 if (!File.Exists(dotnetCodeGenInsideManPath))
                 {
                     throw new InvalidOperationException(Resources.AddDesignPackage);
@@ -223,7 +223,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
         private static bool IsNetCoreAppFramework(NuGetFramework framework)
         {
-            //Only need to compare the framework name to be netcoreapp. Version doesn't matter.
+            // Only need to compare the framework name to be netcoreapp. Version doesn't matter.
 
             return NuGetFramework.FrameworkNameComparer.Equals(
                 framework,

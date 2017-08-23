@@ -1,0 +1,15 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\src\Microsoft.VisualStudio.Web.CodeGeneration.Design\Shared.proj" />
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <CodeGenDesignSrcPath>$(MSBuildThisFileDirectory)..\src\Microsoft.VisualStudio.Web.CodeGeneration.Design\</CodeGenDesignSrcPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(CodeGenDesignSrcPath)\*.cs" />
+    <EmbeddedResource Include="$(CodeGenDesignSrcPath)\*.resx" />
+  </ItemGroup>
+  <Target Name="PrintStuff" BeforeTargets="Build">
+    <Message Importance="high" Text="Building $(MSBuildProjectFile)" />
+    <Message Importance="high" Text="CodeGenSrcPath $(CodeGenDesignSrcPath)" />
+  </Target>
+</Project>

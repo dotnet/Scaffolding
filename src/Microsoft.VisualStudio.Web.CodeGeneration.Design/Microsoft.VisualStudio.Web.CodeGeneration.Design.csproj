@@ -1,29 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\build\common.props" />
+  <!--
+   NOTE: Do not add package/ project references to this file.
+   Edit the Shared.proj file to add additional package/ project references.
+      -->
+  <Import Project="Shared.proj" />
   <PropertyGroup>
-    <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views.</Description>
     <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
-    <OutputType>exe</OutputType>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x64</RuntimeIdentifier>
     <X86ProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86\</X86ProjectDirectory>
-    <ARMProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86\</ARMProjectDirectory>
-    <ARM64ProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86\</ARM64ProjectDirectory>
+    <ARMProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm\</ARMProjectDirectory>
+    <ARM64ProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64\</ARM64ProjectDirectory>
     <AnyCpuProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="$(X86ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" Condition="'$(TargetFramework)'=='net461'" />
-    <ProjectReference Include="$(ARMProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" Condition="'$(TargetFramework)'=='net461'" />
-    <ProjectReference Include="$(ARM64ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" Condition="'$(TargetFramework)'=='net461'" />
-    <ProjectReference Include="$(AnyCpuProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" Condition="'$(TargetFramework)'=='net461'" />
-    <ProjectReference Include="..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <ProjectReference Include="$(X86ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ARMProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ARM64ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(AnyCpuProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,8 +30,8 @@
   <ItemGroup Condition="'$(OS)'=='Windows_NT'">
     <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x64\native\$(AssemblyName).exe" />
     <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x86\native\$(AssemblyName).exe" />
-    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm\native\$(AssemblyName).exe" />
-    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm64\native\$(AssemblyName).exe" />
+    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm\native\$(AssemblyName).exe" />
+    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm64\native\$(AssemblyName).exe" />
     <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).exe" Pack="true" PackagePath="lib\net461\$(AssemblyName).exe" />
   </ItemGroup>
 

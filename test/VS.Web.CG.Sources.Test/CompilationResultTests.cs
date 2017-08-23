@@ -28,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
             var result = CompilationResult.FromErrorMessages(new List<string>() { "error1", "error2", "error3" });
 
             Assert.False(result.Success);
-            Assert.True(result.ErrorMessages.Contains("error1"));
+            Assert.Contains("error1", result.ErrorMessages);
             Assert.Equal(3, result.ErrorMessages.Count());
             Assert.Null(result.Assembly);
         }

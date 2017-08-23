@@ -18,7 +18,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
             //Act && Assert
             Assert.Equal(8, productMetadata.Properties.Length);
-            Assert.Equal(1, productMetadata.Navigations.Length);
+            Assert.Single(productMetadata.Navigations);
 
             //Arrange
             var categoryEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Category));
@@ -26,7 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
             //Act && Assert
             Assert.Equal(2, categoryMetadata.Properties.Length);
-            Assert.Equal(0, categoryMetadata.Navigations.Length);
+            Assert.Empty(categoryMetadata.Navigations);
 
             //Arrange
             var customerEntity = TestModel.CustomerOrderModel.FindEntityType(typeof(Customer));
@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
             //Act && Assert
             Assert.Equal(2, customerMetadata.Properties.Length);
-            Assert.Equal(0, customerMetadata.Navigations.Length);
+            Assert.Empty(customerMetadata.Navigations);
 
             //Arrange
             var orderEntity = TestModel.CustomerOrderModel.FindEntityType(typeof(Order));
@@ -42,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
             //Act && Assert
             Assert.Equal(3, orderMetadata.Properties.Length);
-            Assert.Equal(1, orderMetadata.Navigations.Length);
+            Assert.Single(orderMetadata.Navigations);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             var primaryKeys = modelMetadata.PrimaryKeys;
 
             //Assert
-            Assert.Equal(1, primaryKeys.Length);
+            Assert.Single(primaryKeys);
             var primaryKey = primaryKeys[0];
             Assert.Equal(nameof(Product.ProductId), primaryKey.PropertyName);
         }

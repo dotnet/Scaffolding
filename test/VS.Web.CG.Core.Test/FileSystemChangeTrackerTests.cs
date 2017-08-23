@@ -20,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                 FileSystemChangeType = FileSystemChangeType.AddFile
             });
 
-            Assert.Equal(1, changeTracker.Changes.Count());
+            Assert.Single(changeTracker.Changes);
             Assert.Equal("DummyPath", changeTracker.Changes.First().FullPath);
             Assert.Equal("abc", changeTracker.Changes.First().FileContents);
 
@@ -31,7 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                 FileSystemChangeType = FileSystemChangeType.AddFile
             });
 
-            Assert.Equal(1, changeTracker.Changes.Count());
+            Assert.Single(changeTracker.Changes);
             Assert.Equal("DummyPath", changeTracker.Changes.First().FullPath);
             Assert.Equal("def", changeTracker.Changes.First().FileContents);
         }
@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                 FileSystemChangeType = FileSystemChangeType.AddFile
             });
 
-            Assert.Equal(1, changeTracker.Changes.Count());
+            Assert.Single(changeTracker.Changes);
             Assert.Equal("DummyPath1", changeTracker.Changes.First().FullPath);
             Assert.Equal("abc", changeTracker.Changes.First().FileContents);
 
@@ -74,12 +74,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                 FileSystemChangeType = FileSystemChangeType.AddFile
             });
 
-            Assert.Equal(1, changeTracker.Changes.Count());
+            Assert.Single(changeTracker.Changes);
             Assert.Equal("DummyPath1", changeTracker.Changes.First().FullPath);
             Assert.Equal("abc", changeTracker.Changes.First().FileContents);
 
             changeTracker.ClearChanges();
-            Assert.Equal(0, changeTracker.Changes.Count());
+            Assert.Empty(changeTracker.Changes);
         }
     }
 }

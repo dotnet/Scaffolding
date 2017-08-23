@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             var types = locator.GetType("ModelTypesLocatorTestWebApp.Models.ModelWithMatchingShortName");
             
             //Assert
-            Assert.Equal(1, types.Count());
+            Assert.Single(types);
             var type = types.First();
             Assert.Equal("ModelWithMatchingShortName", type.Name);
             Assert.Equal("ModelTypesLocatorTestWebApp.Models", type.Namespace);
@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             var types = locator.GetType("System.Object");
 
             //Assert
-            Assert.Equal(0, types.Count());
+            Assert.Empty(types);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             var types = locator.GetType("ModelTypesLocatorTestClassLibrary.ModelWithMatchingShortName");
 
             //Assert
-            Assert.Equal(1, types.Count());
+            Assert.Single(types);
             var type = types.First();
             Assert.Equal("ModelWithMatchingShortName", type.Name);
             Assert.Equal("ModelTypesLocatorTestClassLibrary", type.Namespace);
@@ -57,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             types = locator.GetType("ClassLibrary1.Class1");
 
             //Assert
-            Assert.Equal(1, types.Count());
+            Assert.Single(types);
             type = types.First();
             Assert.Equal("Class1", type.Name);
             Assert.Equal("ClassLibrary1", type.Namespace);

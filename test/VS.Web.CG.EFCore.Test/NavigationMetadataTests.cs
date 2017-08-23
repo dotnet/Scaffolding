@@ -25,9 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(nameof(Product.Category), navigationMetadata.AssociationPropertyName);
             Assert.Equal(nameof(TestDbContext.Categories), navigationMetadata.EntitySetName);
             Assert.Equal(nameof(Category.CategoryName), navigationMetadata.DisplayPropertyName);
-            Assert.Equal(1, navigationMetadata.ForeignKeyPropertyNames.Count());
+            Assert.Single(navigationMetadata.ForeignKeyPropertyNames);
             Assert.Equal(nameof(Product.CategoryId), navigationMetadata.ForeignKeyPropertyNames[0]);
-            Assert.Equal(1, navigationMetadata.PrimaryKeyNames.Count());
+            Assert.Single(navigationMetadata.PrimaryKeyNames);
             Assert.Equal(nameof(Category.CategoryId), navigationMetadata.PrimaryKeyNames[0]);
             Assert.Equal(typeof(Category).FullName, navigationMetadata.TypeName);
             Assert.Equal(typeof(Category).Name, navigationMetadata.ShortTypeName);
@@ -48,9 +48,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(nameof(Order.Customer), navigationMetadata.AssociationPropertyName);
             Assert.Equal(nameof(TestDbContext.Customers), navigationMetadata.EntitySetName);
             Assert.Equal(nameof(Customer.CustomerId), navigationMetadata.DisplayPropertyName); //Todo
-            Assert.Equal(1, navigationMetadata.ForeignKeyPropertyNames.Count());
+            Assert.Single(navigationMetadata.ForeignKeyPropertyNames);
             Assert.Equal(nameof(Order.CustomerId), navigationMetadata.ForeignKeyPropertyNames[0]);
-            Assert.Equal(1, navigationMetadata.PrimaryKeyNames.Count());
+            Assert.Single(navigationMetadata.PrimaryKeyNames);
             Assert.Equal(nameof(Customer.CustomerId), navigationMetadata.PrimaryKeyNames[0]);
             Assert.Equal(typeof(Customer).FullName, navigationMetadata.TypeName);
             Assert.Equal(typeof(Customer).Name, navigationMetadata.ShortTypeName);

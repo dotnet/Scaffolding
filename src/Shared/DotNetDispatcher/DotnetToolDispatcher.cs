@@ -71,7 +71,6 @@ namespace Microsoft.Extensions.Internal
             {
                 EnsureBindingRedirects(assemblyFullPath, Path.GetFileName(dependencyToolPath));
                 // For Full framework, we can directly invoke the <dependencyTool>.exe from the user's bin folder.
-                // dependencyToolPath = Path.Combine(Path.GetDirectoryName(assemblyFullPath), Path.GetFileName(dependencyToolPath));
                 command = Command.Create(dependencyToolPath, dispatchArgsList);
             }
 

@@ -38,22 +38,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.1.3"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.1.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.1.4"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.1.2"" />
     <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.1.2"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.1.2"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.1.2"" />
     <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.1.2"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.1"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.1"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.1"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.2"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.2"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
@@ -76,19 +76,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.1.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.1"" />
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.1"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.1.4"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.1.3"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"" Version=""1.1.2"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.1.2"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.1.2"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />

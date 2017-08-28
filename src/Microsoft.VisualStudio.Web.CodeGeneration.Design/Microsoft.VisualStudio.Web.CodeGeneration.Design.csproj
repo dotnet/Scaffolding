@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
     <TargetFrameworks>net451;netcoreapp1.1</TargetFrameworks>
-    <RuntimeFrameworkVersion>1.1.2</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>1.1.3</RuntimeFrameworkVersion>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <AssemblyName>dotnet-aspnet-codegenerator-design</AssemblyName>
     <OutputType>exe</OutputType>

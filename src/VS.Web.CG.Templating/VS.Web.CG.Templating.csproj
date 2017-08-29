@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\build\common.props" />
+
   <PropertyGroup>
     <Description>Contains Razor based templating host used by ASP.NET Core Code Generators.</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -18,20 +18,5 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
   </ItemGroup>
-
-  <!--<ItemGroup>
-    <Compile Update="MessageStrings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>MessageStrings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="MessageStrings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>-->
 
 </Project>

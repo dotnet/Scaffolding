@@ -1,6 +1,6 @@
-<Project>
-  <Import Project="dependencies.props" />
-  <Import Project="..\version.xml" />
+﻿<Project>
+  <Import Project="build\dependencies.props" />
+  <Import Project="version.xml" />
 
   <PropertyGroup>
     <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
@@ -11,12 +11,8 @@
 
   <!-- Sign Options -->
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Internal.AspNetCore.Sdk" Version="$(InternalAspNetCoreSdkVersion)" PrivateAssets="All" />
-  </ItemGroup>
 </Project>

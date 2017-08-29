@@ -1,5 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\build\common.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest</AssemblyName>
@@ -10,9 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
     <ProjectReference Include="..\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
   </ItemGroup>
 
 </Project>

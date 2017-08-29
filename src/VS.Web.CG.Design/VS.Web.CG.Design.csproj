@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\build\common.props" />
+
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views.</Description>
     <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
@@ -15,6 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
   </ItemGroup>
+
 </Project>

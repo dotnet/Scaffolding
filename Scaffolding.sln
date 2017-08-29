@@ -1,13 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.0
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4057ACF-27F0-4724-963B-44548B6BC4E9}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{81B64EBF-613D-43AE-82DA-B375FB751921}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{95C6F0B4-1687-4C36-90BF-1362CAB06524}"
+	ProjectSection(SolutionItems) = preProject
+		test\TestApps\Directory.Build.props = test\TestApps\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{98547032-3A5C-4368-8168-D48DB6E9B30F}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,10 +28,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		build.ps1 = build.ps1
 		build.sh = build.sh
-		build\common.props = build\common.props
 		CONTRIBUTING.md = CONTRIBUTING.md
 		build\dependencies.props = build\dependencies.props
 		dir = dir
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		build\Key.snk = build\Key.snk
 		LICENSE.txt = LICENSE.txt
 		makefile.shade = makefile.shade
@@ -31,41 +41,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj", "{3E99E653-6B31-45CF-9B3A-30EEE497BE13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Mvc", "src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj", "{3E99E653-6B31-45CF-9B3A-30EEE497BE13}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Utils", "src\VS.Web.CG.Utils\VS.Web.CG.Utils.csproj", "{121FD6A8-6A7C-405A-B223-D3991D07D6E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Utils", "src\VS.Web.CG.Utils\VS.Web.CG.Utils.csproj", "{121FD6A8-6A7C-405A-B223-D3991D07D6E4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Tools", "src\VS.Web.CG.Tools\VS.Web.CG.Tools.csproj", "{FBBAA490-5752-41E0-A7ED-9B96F06B661E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Tools", "src\VS.Web.CG.Tools\VS.Web.CG.Tools.csproj", "{FBBAA490-5752-41E0-A7ED-9B96F06B661E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Templating", "src\VS.Web.CG.Templating\VS.Web.CG.Templating.csproj", "{5041A3DC-CBBF-4615-99B1-781B641BCC01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Templating", "src\VS.Web.CG.Templating\VS.Web.CG.Templating.csproj", "{5041A3DC-CBBF-4615-99B1-781B641BCC01}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild", "src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj", "{4524AF86-DEEC-48DF-B613-EDCF1212047B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Msbuild", "src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj", "{4524AF86-DEEC-48DF-B613-EDCF1212047B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore", "src\VS.Web.CG.EFCore\VS.Web.CG.EFCore.csproj", "{D798406A-9D72-434E-82FF-38AA0D946AE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.EFCore", "src\VS.Web.CG.EFCore\VS.Web.CG.EFCore.csproj", "{D798406A-9D72-434E-82FF-38AA0D946AE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Design", "src\VS.Web.CG.Design\VS.Web.CG.Design.csproj", "{AF3DE3DB-6FCD-459B-A413-70229C5AA34F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Design", "src\VS.Web.CG.Design\VS.Web.CG.Design.csproj", "{AF3DE3DB-6FCD-459B-A413-70229C5AA34F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Core", "src\VS.Web.CG.Core\VS.Web.CG.Core.csproj", "{E44DFA05-387E-44A9-8F5D-89EA9AAED43F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core", "src\VS.Web.CG.Core\VS.Web.CG.Core.csproj", "{E44DFA05-387E-44A9-8F5D-89EA9AAED43F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration", "src\VS.Web.CG\VS.Web.CG.csproj", "{98D140A5-7719-4B03-B696-C5294B3CAD64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG", "src\VS.Web.CG\VS.Web.CG.csproj", "{98D140A5-7719-4B03-B696-C5294B3CAD64}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E2E_Test", "test\E2E_Test\E2E_Test.csproj", "{976D7EFB-E15E-49A0-A420-47246A294320}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.ProjectModel.Tests", "test\Ext.ProjectModel.Tests\Ext.ProjectModel.Tests.csproj", "{AA84CF7B-0C63-4909-9371-C2B85D304A68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ext.ProjectModel.Tests", "test\Ext.ProjectModel.Tests\Ext.ProjectModel.Tests.csproj", "{AA84CF7B-0C63-4909-9371-C2B85D304A68}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest", "test\VS.Web.CG.Core.FunctionalTest\VS.Web.CG.Core.FunctionalTest.csproj", "{0037B7ED-05D3-44BF-848D-475BE6E25042}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.FunctionalTest", "test\VS.Web.CG.Core.FunctionalTest\VS.Web.CG.Core.FunctionalTest.csproj", "{0037B7ED-05D3-44BF-848D-475BE6E25042}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test", "test\VS.Web.CG.Core.Test\VS.Web.CG.Core.Test.csproj", "{B1E6D126-898E-4FBF-9239-DF8A83D59F6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.Test", "test\VS.Web.CG.Core.Test\VS.Web.CG.Core.Test.csproj", "{B1E6D126-898E-4FBF-9239-DF8A83D59F6E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test", "test\VS.Web.CG.EFCore.Test\VS.Web.CG.EFCore.Test.csproj", "{AE46E3E2-E6F3-4D9B-BA0C-9FB15F7C4A3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.EFCore.Test", "test\VS.Web.CG.EFCore.Test\VS.Web.CG.EFCore.Test.csproj", "{AE46E3E2-E6F3-4D9B-BA0C-9FB15F7C4A3C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test", "test\VS.Web.CG.Sources.Test\VS.Web.CG.Sources.Test.csproj", "{47C1796A-7CAE-4CC1-84CB-7E94ABBF5E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Sources.Test", "test\VS.Web.CG.Sources.Test\VS.Web.CG.Sources.Test.csproj", "{47C1796A-7CAE-4CC1-84CB-7E94ABBF5E62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test", "test\VS.Web.CG.Templating.Test\VS.Web.CG.Templating.Test.csproj", "{0E2E48BA-005C-4E7B-992C-B476A3386186}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Templating.Test", "test\VS.Web.CG.Templating.Test\VS.Web.CG.Templating.Test.csproj", "{0E2E48BA-005C-4E7B-992C-B476A3386186}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test", "test\VS.Web.CG.Tools.Test\VS.Web.CG.Tools.Test.csproj", "{53D14FA5-EEBD-4EBF-A728-1A4CDC22B581}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Tools.Test", "test\VS.Web.CG.Tools.Test\VS.Web.CG.Tools.Test.csproj", "{53D14FA5-EEBD-4EBF-A728-1A4CDC22B581}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test", "test\VS.Web.CG.Mvc.Test\VS.Web.CG.Mvc.Test.csproj", "{960602CF-A019-4C6B-ABD3-1C08C70A0005}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Mvc.Test", "test\VS.Web.CG.Mvc.Test\VS.Web.CG.Mvc.Test.csproj", "{960602CF-A019-4C6B-ABD3-1C08C70A0005}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelTypesLocatorTestWebApp", "test\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj", "{61EDA55A-5CB5-4C73-882D-D496D9623CD1}"
 EndProject
@@ -75,9 +85,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary2", "test\TestA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary1", "test\TestApps\ClassLibrary1\ClassLibrary1.csproj", "{1DD609A3-870C-4C1C-AB41-32ACBF292C16}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test", "test\VS.Web.CG.MSBuild.Test\VS.Web.CG.MSBuild.Test.csproj", "{6C1398FF-A8C1-45A9-9796-6A60B2B011E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.MSBuild.Test", "test\VS.Web.CG.MSBuild.Test\VS.Web.CG.MSBuild.Test.csproj", "{6C1398FF-A8C1-45A9-9796-6A60B2B011E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.VisualStudio.Web.CodeGeneration.Contracts", "src\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj", "{315EDEE3-EB23-4019-958D-C1EEA5F1DA18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Contracts", "src\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj", "{315EDEE3-EB23-4019-958D-C1EEA5F1DA18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -554,5 +564,8 @@ Global
 		{1DD609A3-870C-4C1C-AB41-32ACBF292C16} = {95C6F0B4-1687-4C36-90BF-1362CAB06524}
 		{6C1398FF-A8C1-45A9-9796-6A60B2B011E1} = {81B64EBF-613D-43AE-82DA-B375FB751921}
 		{315EDEE3-EB23-4019-958D-C1EEA5F1DA18} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}
 	EndGlobalSection
 EndGlobal

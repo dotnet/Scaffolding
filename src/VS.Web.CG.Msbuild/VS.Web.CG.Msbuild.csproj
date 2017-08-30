@@ -18,11 +18,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildVersion)" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetLegacyVersion)" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksVersion)" />
+    <PackageReference Include="Microsoft.Build" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" PrivateAssets="All">
+      <!-- This version needs to line up with what is bundled in MSBuild -->
+      <NoWarn>KRB4002</NoWarn>
+    </PackageReference>
+    <PackageReference Include="NuGet.Frameworks" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

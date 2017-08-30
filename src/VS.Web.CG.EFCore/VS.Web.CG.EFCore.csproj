@@ -17,7 +17,7 @@
        without adding EntityFrameworkCore dependency.
        https://github.com/aspnet/scaffolding/issues/434
        -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

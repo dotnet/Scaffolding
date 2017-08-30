@@ -23,9 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
-    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(DotNetProjectModelVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" />
+    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-1-003177">
+      <!-- TODO stop using project.json era API -->
+      <NoWarn>KRB4002</NoWarn>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" />
   </ItemGroup>
 
 </Project>

@@ -37,7 +37,7 @@ namespace TestProject.Areas.Test.Controllers
 
             var car = await _context.Car
                 .Include(c => c.Manufacturer)
-                .SingleOrDefaultAsync(m => m.ID == id);
+                .FindAsync(id);
             if (car == null)
             {
                 return NotFound();
@@ -78,7 +78,7 @@ namespace TestProject.Areas.Test.Controllers
                 return NotFound();
             }
 
-            var car = await _context.Car.SingleOrDefaultAsync(m => m.ID == id);
+            var car = await _context.Car.FindAsync(id);
             if (car == null)
             {
                 return NotFound();
@@ -133,7 +133,7 @@ namespace TestProject.Areas.Test.Controllers
 
             var car = await _context.Car
                 .Include(c => c.Manufacturer)
-                .SingleOrDefaultAsync(m => m.ID == id);
+                .FindAsync(id);
             if (car == null)
             {
                 return NotFound();
@@ -147,7 +147,7 @@ namespace TestProject.Areas.Test.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var car = await _context.Car.SingleOrDefaultAsync(m => m.ID == id);
+            var car = await _context.Car.FindAsync(id);
             _context.Car.Remove(car);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

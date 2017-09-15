@@ -35,7 +35,7 @@ namespace TestProject
 
             var product = await _context.Product
                 .Include(p => p.Manufacturer)
-                .SingleOrDefaultAsync(m => m.ProductID == id);
+                .FindAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -76,7 +76,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            var product = await _context.Product.SingleOrDefaultAsync(m => m.ProductID == id);
+            var product = await _context.Product.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -131,7 +131,7 @@ namespace TestProject
 
             var product = await _context.Product
                 .Include(p => p.Manufacturer)
-                .SingleOrDefaultAsync(m => m.ProductID == id);
+                .FindAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -145,7 +145,7 @@ namespace TestProject
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Product.SingleOrDefaultAsync(m => m.ProductID == id);
+            var product = await _context.Product.FindAsync(id);
             _context.Product.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

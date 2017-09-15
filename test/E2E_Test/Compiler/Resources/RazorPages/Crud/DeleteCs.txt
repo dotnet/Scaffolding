@@ -30,7 +30,7 @@ namespace TestProject
             }
 
             Car = await _context.Car
-                .Include(c => c.Manufacturer).SingleOrDefaultAsync(m => m.ID == id);
+                .Include(c => c.Manufacturer).FindAsync(id);
 
             if (Car == null)
             {

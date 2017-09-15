@@ -102,7 +102,7 @@ namespace @Model.ControllerNamespace
             }
 
             var @Model.ModelVariable = await _context.@(entitySetName)@inlineIncludes
-                .SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+                .FindAsync(id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -157,7 +157,7 @@ namespace @Model.ControllerNamespace
                 return NotFound();
             }
 
-            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).FindAsync(id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -221,7 +221,7 @@ namespace @Model.ControllerNamespace
             }
 
             var @Model.ModelVariable = await _context.@(entitySetName)@inlineIncludes
-                .SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+                .FindAsync(id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -235,7 +235,7 @@ namespace @Model.ControllerNamespace
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
         {
-            var @Model.ModelVariable = await _context.@(entitySetName).SingleOrDefaultAsync(m => m.@primaryKeyName == id);
+            var @Model.ModelVariable = await _context.@(entitySetName).FindAsync(id);
             _context.@(entitySetName).Remove(@Model.ModelVariable);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

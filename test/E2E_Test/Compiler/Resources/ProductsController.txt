@@ -35,7 +35,7 @@ namespace TestProject
 
             var product = await _context.Product
                 .Include(p => p.Manufacturer)
-                .FindAsync(id);
+                .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
             {
                 return NotFound();
@@ -131,7 +131,7 @@ namespace TestProject
 
             var product = await _context.Product
                 .Include(p => p.Manufacturer)
-                .FindAsync(id);
+                .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
             {
                 return NotFound();

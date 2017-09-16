@@ -36,7 +36,7 @@ namespace TestProject
 
             var car = await _context.Car
                 .Include(c => c.Manufacturer)
-                .FindAsync(id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (car == null)
             {
                 return NotFound();
@@ -132,7 +132,7 @@ namespace TestProject
 
             var car = await _context.Car
                 .Include(c => c.Manufacturer)
-                .FindAsync(id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (car == null)
             {
                 return NotFound();

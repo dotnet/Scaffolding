@@ -41,19 +41,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.1.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""{0}"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""2.0.1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""2.0.1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""2.0.0"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""2.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""2.0.0"" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""{0}"" />
-    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""{0}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""2.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""2.0.1-*"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""2.0.1-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""2.0.1-*"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""2.0.1-*"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""2.0.0"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""{1}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""{1}"" />
   </ItemGroup>

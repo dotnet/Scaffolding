@@ -8,8 +8,4 @@
     <Compile Include="$(CodeGenDesignSrcPath)\*.cs" />
     <EmbeddedResource Include="$(CodeGenDesignSrcPath)\*.resx" />
   </ItemGroup>
-  <Target Name="PrintStuff" BeforeTargets="Build">
-    <Message Importance="high" Text="Building $(MSBuildProjectFile)" />
-    <Message Importance="high" Text="CodeGenSrcPath $(CodeGenDesignSrcPath)" />
-  </Target>
 </Project>

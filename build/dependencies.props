@@ -28,4 +28,6 @@
   <PropertyGroup>
     <JsonNetLegacyVersion>9.0.1</JsonNetLegacyVersion>
   </PropertyGroup>
+
+  <Import Project="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
 </Project>

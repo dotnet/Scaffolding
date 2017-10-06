@@ -14,12 +14,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.csproj" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(AspNetCoreVersion)" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
-    <PackageReference Include="Moq" Version="$(MoqVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioPackageVersion)" />
   </ItemGroup>
 
 </Project>

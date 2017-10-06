@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Microsoft.VisualStudio.Web.CodeGenerators.Mvc\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.csproj" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

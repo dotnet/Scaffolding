@@ -21,42 +21,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         private static object _syncObj = new object();
 
-        private string AspNetCoreVersion
-        {
-            get
-            {
-                var aspnetCoreLib = DependencyContext
-                    .Default
-                    .CompileLibraries
-                    .FirstOrDefault(l => l.Name.StartsWith("Microsoft.Extensions.FileProviders.Abstractions", StringComparison.OrdinalIgnoreCase));
-
-                return aspnetCoreLib?.Version;
-            }
-        }
-
-        private string RuntimeFrameworkVersion =>
-            DependencyContext
-                .Default
-                .RuntimeLibraries
-                .FirstOrDefault(l => l.Name.StartsWith("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
-                ?.Version;
-
-        private string CodeGenerationVersion
-        {
-            get
-            {
-                var informationalVersionAttr = this.GetType().Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false).First();
-                return ((AssemblyInformationalVersionAttribute)informationalVersionAttr).InformationalVersion;
-            }
-        }
-
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            
+
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion, RuntimeFrameworkVersion, "2.0.1-*"));
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 
@@ -99,9 +70,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            
+
             var rootProjectTxt = MsBuildProjectStrings.RootProjectTxtWithoutEF;
-            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", string.Format(rootProjectTxt, AspNetCoreVersion, CodeGenerationVersion, RuntimeFrameworkVersion, "2.0.1-*"));
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxtWithoutEf);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 

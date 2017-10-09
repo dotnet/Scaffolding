@@ -58,8 +58,8 @@
       TemplateFile="$(TestProjectTemplateFile)"
       Properties="$(TestProjectProperties)"
       OutputPath="$(GeneratedTestProjectFile)">
-      <Output TaskParameter="FileWrites" ItemName="FileWrites" />
-      <Output TaskParameter="FileWrites" ItemName="Compile" />
+      <Output TaskParameter="OutputPath" ItemName="FileWrites" />
+      <Output TaskParameter="OutputPath" ItemName="Compile" />
     </Sdk_GenerateFileFromTemplate>
 
   </Target>

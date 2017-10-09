@@ -102,7 +102,6 @@ public const string RootProjectTxtWithoutEF = @"
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion>{2}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>

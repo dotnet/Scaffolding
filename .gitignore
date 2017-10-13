@@ -38,4 +38,3 @@ backup/**/*.*
 .dotnet/**
 global.json
 *.g.targets
-korebuild-lock.txt

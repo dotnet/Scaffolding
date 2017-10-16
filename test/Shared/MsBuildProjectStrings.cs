@@ -38,22 +38,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
     <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""2.0.0-beta1"" />
-    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.0.6"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.5"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.4"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.0.4"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.0.4"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.0.4"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.0.5"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.0.5"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""1.0.7"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.6"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""1.0.6"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""1.0.6"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer.Design"" Version=""1.0.6"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""1.0.2"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.2"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.2"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""1.0.3"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.3"" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.2"" />
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""1.0.3"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
@@ -76,11 +76,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.0.0"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.0.1"" />
-    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""1.0.6"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"" Version=""1.0.5"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"" Version=""1.0.6"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""1.0.4"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""1.0.0"" />
     <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""1.0.0"" />

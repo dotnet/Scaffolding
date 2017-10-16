@@ -1,9 +1,10 @@
-﻿<Project>
+<Project>
   <Import Project="version.xml" />
 
   <PropertyGroup>
     <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>

@@ -41,6 +41,11 @@
     <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).xml" Pack="true" PackagePath="lib\net461\$(AssemblyName).xml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Set to PrivateAssets=All so the package does not appear in the generated nuspec. This prevents issues such as https://github.com/aspnet/Scaffolding/issues/645. -->
+    <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
+  </ItemGroup>
+
   <!--<ItemGroup>
     <Compile Update="Resources.Designer.cs">
       <DesignTime>True</DesignTime>

@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Shared.props" />
+  <PropertyGroup>
+    <PlatformTarget>AnyCpu</PlatformTarget>
+  </PropertyGroup>
+</Project>

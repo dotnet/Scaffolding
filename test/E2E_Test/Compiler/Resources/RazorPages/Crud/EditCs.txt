@@ -56,10 +56,22 @@ namespace TestProject
             }
             catch (DbUpdateConcurrencyException)
             {
-                
+                if (!CarExists(Car.ID))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             return RedirectToPage("./Index");
+        }
+
+        private bool CarExists(string id)
+        {
+            return _context.Car.Any(e => e.ID == id);
         }
     }
 }

@@ -126,8 +126,14 @@
   <data name="ConnectToServerError" xml:space="preserve">
     <value>Could not connect to port {0}.</value>
   </data>
+  <data name="EnableTracingMessage" xml:space="preserve">
+    <value>To see more information, enable tracing by setting environment variable 'codegen_trace' = 1.</value>
+  </data>
   <data name="FileSystemChangeMessageNotSupported" xml:space="preserve">
     <value>Server does not support File System change messages. HostId: '{0}', ProtocolVersion: '{1}'.</value>
+  </data>
+  <data name="GenericErrorMessage" xml:space="preserve">
+    <value>Scaffolding failed.</value>
   </data>
   <data name="ProjectInformationError" xml:space="preserve">
     <value>Could not get ProjectInformation.</value>

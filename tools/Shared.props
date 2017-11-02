@@ -1,0 +1,11 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\src\Microsoft.VisualStudio.Web.CodeGeneration.Design\Shared.props" />
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <CodeGenDesignSrcPath>$(MSBuildThisFileDirectory)..\src\Microsoft.VisualStudio.Web.CodeGeneration.Design\</CodeGenDesignSrcPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(CodeGenDesignSrcPath)\*.cs" />
+    <EmbeddedResource Include="$(CodeGenDesignSrcPath)\*.resx" />
+  </ItemGroup>
+</Project>

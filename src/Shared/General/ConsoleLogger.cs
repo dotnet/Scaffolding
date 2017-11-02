@@ -1,7 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-﻿using System;
+using System;
+using System.Text;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -9,6 +10,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         private static bool isTrace = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("codegen_trace"));
         private object _syncObject = new object();
+
+        public bool IsTracing => isTrace;
+
+        public ConsoleLogger()
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+        }
 
         public void LogMessage(string message)
         {

@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
     var primaryKeyNullableTypeName = GetNullableTypeName(primaryKeyType, primaryKeyShortTypeName);
     var lambdaVar = Model.ModelVariable[0];
+    var entitySetName = Model.ModelMetadata.EntitySetName;
     var relatedProperties = new Dictionary<string, dynamic>();
     foreach (var nav in Model.ModelMetadata.Navigations)
     {
@@ -84,10 +85,22 @@ namespace @Model.NamespaceName
             }
             catch (DbUpdateConcurrencyException)
             {
-                
+                if (!@(Model.ModelTypeName)Exists(@Model.ViewDataTypeShortName.@primaryKeyName))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             return RedirectToPage("./Index");
+        }
+
+        private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
+        {
+            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
     }
 }

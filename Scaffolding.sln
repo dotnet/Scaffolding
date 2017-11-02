@@ -91,13 +91,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Contracts", "src\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu", "tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu.csproj", "{CB0F7112-C0BF-4249-BB41-5F2EFA760757}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-anycpu", "tools\VS.Web.CG.Design-anycpu\VS.Web.CG.Design-anycpu.csproj", "{CB0F7112-C0BF-4249-BB41-5F2EFA760757}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.VisualStudio.Web.CodeGeneration.Design-arm", "tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm.csproj", "{B2FB25DC-DD8D-4A0E-AF9F-CCBC6ED75ED0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-arm", "tools\VS.Web.CG.Design-arm\VS.Web.CG.Design-arm.csproj", "{B2FB25DC-DD8D-4A0E-AF9F-CCBC6ED75ED0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64", "tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64.csproj", "{867AB4D3-0EE0-4A3E-B0F0-78E2B612495A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-arm64", "tools\VS.Web.CG.Design-arm64\VS.Web.CG.Design-arm64.csproj", "{867AB4D3-0EE0-4A3E-B0F0-78E2B612495A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.VisualStudio.Web.CodeGeneration.Design-x86", "tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86.csproj", "{8A75336B-A55F-42F6-B8BA-B55EFDA39705}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-x86", "tools\VS.Web.CG.Design-x86\VS.Web.CG.Design-x86.csproj", "{8A75336B-A55F-42F6-B8BA-B55EFDA39705}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

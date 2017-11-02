@@ -1,0 +1,4 @@
+<Project>
+  <!-- Skip the targets for test projects -->
+  <Import Project="..\..\Directory.Build.targets" />
+</Project>

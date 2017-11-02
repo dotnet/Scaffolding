@@ -9,18 +9,18 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x64</RuntimeIdentifier>
-    <X86ProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86\</X86ProjectDirectory>
-    <ARMProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm\</ARMProjectDirectory>
-    <ARM64ProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64\</ARM64ProjectDirectory>
-    <AnyCpuProjectDirectory>..\..\tools\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu\</AnyCpuProjectDirectory>
+    <X86ProjectDirectory>..\..\tools\VS.Web.CG.Design-x86\</X86ProjectDirectory>
+    <ARMProjectDirectory>..\..\tools\VS.Web.CG.Design-arm\</ARMProjectDirectory>
+    <ARM64ProjectDirectory>..\..\tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
+    <AnyCpuProjectDirectory>..\..\tools\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <ProjectReference Include="$(X86ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(ARMProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(ARM64ProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(AnyCpuProjectDirectory)\Microsoft.VisualStudio.Web.CodeGeneration.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(X86ProjectDirectory)\VS.Web.CG.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ARMProjectDirectory)\VS.Web.CG.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ARM64ProjectDirectory)\VS.Web.CG.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

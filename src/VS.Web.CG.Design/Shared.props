@@ -1,5 +1,4 @@
 <Project>
-  <Import Project="..\..\build\common.props" />
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

@@ -37,4 +37,3 @@ project.fragment.lock.json
 backup/**/*.*
 .dotnet/**
 global.json
-korebuild-lock.txt

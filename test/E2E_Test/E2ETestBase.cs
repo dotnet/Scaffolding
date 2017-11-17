@@ -34,7 +34,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         protected void Scaffold(string[] args, string testProjectPath)
         {
             var thisAssembly = GetType().GetTypeInfo().Assembly.GetName().Name;
-            var exitCode = Command.Create(DotNetMuxer.MuxerPathOrDefault(), args.Concat(new [] {"--no-build"}))
+            var muxerPath = DotNetMuxer.MuxerPathOrDefault();
+            Output.WriteLine($"Executing {muxerPath} {string.Join(" ", args)}");
+            var exitCode = Command.Create(muxerPath, args.Concat(new [] {"--no-build"}))
                 .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
                 .InWorkingDirectory(testProjectPath)
                 .OnOutputLine(l => Output.WriteLine(l))

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
     <AssemblyName>Microsoft.Extensions.ProjectModel.Tests</AssemblyName>
     <RootNamespace>Microsoft.Extensions.ProjectModel</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>

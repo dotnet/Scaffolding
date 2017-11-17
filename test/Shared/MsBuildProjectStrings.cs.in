@@ -13,10 +13,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <RuntimeFrameworkVersion>${RuntimeFrameworkVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,10 +54,11 @@ public const string RootProjectTxtWithoutEF = @"
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <RuntimeFrameworkVersion>${RuntimeFrameworkVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -276,7 +278,6 @@ namespace WebApplication1
         public const string ProductTxt = @"
 using System;
 using System.Collections.Generic;
-//using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 

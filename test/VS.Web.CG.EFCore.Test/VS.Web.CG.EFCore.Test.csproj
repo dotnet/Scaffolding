@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>

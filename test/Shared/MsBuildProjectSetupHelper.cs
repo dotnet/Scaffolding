@@ -21,39 +21,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 #endif
 
         private static object _syncObj = new object();
-        private static string _nugetConfigText;
-        private static string NuGetConfigText
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_nugetConfigText))
-                {
-                    lock (_syncObj)
-                    {
-                        if (string.IsNullOrEmpty(_nugetConfigText))
-                        {
-                            string artifactsDir = null;
-                            string nugetConfigPath = null;
-                            var current = new DirectoryInfo(AppContext.BaseDirectory);
-                            while (current != null)
-                            {
-                                if (File.Exists(Path.Combine(current.FullName, "Scaffolding.sln")))
-                                {
-                                    artifactsDir = Path.Combine(current.FullName, "artifacts", "build");
-                                    nugetConfigPath = Path.Combine(current.FullName, "NuGet.config");
-                                    break;
-                                }
-                                current = current.Parent;
-                            }
-
-                            _nugetConfigText = GetNugetConfigTxt(artifactsDir, nugetConfigPath);
-                        }
-                    }
-                }
-
-                return _nugetConfigText;
-            }
-        }
 
         private static string _globalJsonText;
         private static string GlobalJsonText
@@ -87,31 +54,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
-        private static string GetNugetConfigTxt(string artifactsDir, string nugetConfigPath)
-        {
-            var xmlDoc = new XmlDocument();
-            xmlDoc.Load(nugetConfigPath);
-
-            var root = xmlDoc.DocumentElement;
-            var packageSources = root.SelectSingleNode("packageSources");
-            var newSource = xmlDoc.CreateElement("add");
-            newSource.SetAttribute("key", "local");
-            newSource.SetAttribute("value", artifactsDir);
-            packageSources.AppendChild(newSource);
-
-            using (var sw = new StringWriter())
-            {
-                xmlDoc.WriteContentTo(new XmlTextWriter(sw));
-                return sw.ToString();
-            }
-        }
-
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
             fileProvider.Add("global.json", GlobalJsonText);
-            fileProvider.Add("NuGet.config", NuGetConfigText);
 
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
@@ -158,7 +105,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
             fileProvider.Add("global.json", GlobalJsonText);
-            fileProvider.Add("NuGet.config", NuGetConfigText);
 
             var rootProjectTxt = MsBuildProjectStrings.RootProjectTxtWithoutEF;
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);

@@ -13,6 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
+    <RestoreSources>${RestoreSources}</RestoreSources>
     <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -54,6 +55,7 @@ public const string RootProjectTxtWithoutEF = @"
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
+    <RestoreSources>${RestoreSources}</RestoreSources>
     <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -90,7 +92,7 @@ public const string RootProjectTxtWithoutEF = @"
         public const string RootNet45ProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-
+    <RestoreSources>${RestoreSources}</RestoreSources>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <OutputType>EXE</OutputType>
@@ -259,7 +261,7 @@ namespace WebApplication1
         public const string LibraryProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-
+    <RestoreSources>${RestoreSources}</RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>

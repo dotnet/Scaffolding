@@ -161,6 +161,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to compile the project in memory: {0}.
+        /// </summary>
+        internal static string FailedToCompileInMemory {
+            get {
+                return ResourceManager.GetString("FailedToCompileInMemory", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Scaffolding failed to edit Startup class to register the new Context using Dependency Injection..
         /// </summary>
         internal static string FailedToEditStartup {

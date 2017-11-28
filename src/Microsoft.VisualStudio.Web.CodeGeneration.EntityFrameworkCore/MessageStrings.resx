@@ -150,6 +150,9 @@
   <data name="EnsureStartupClassExists" xml:space="preserve">
     <value>Make sure there is a Startup class and a ConfigureServices method and Configuration property in it.</value>
   </data>
+  <data name="FailedToCompileInMemory" xml:space="preserve">
+    <value>Failed to compile the project in memory: {0}</value>
+  </data>
   <data name="FailedToEditStartup" xml:space="preserve">
     <value>Scaffolding failed to edit Startup class to register the new Context using Dependency Injection.</value>
   </data>

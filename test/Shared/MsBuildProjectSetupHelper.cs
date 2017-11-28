@@ -83,5 +83,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }
+
+        public void SetupProjectsWithDbContextInDependency(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "DAL"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+
+            var rootProjectTxt = MsBuildProjectStrings.WebProjectTxt;
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
+            fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupWithDbContext);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.AppSettingsFileName}", MsBuildProjectStrings.AppSettingsFileTxt);
+
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);
+            fileProvider.Add($"Library1/ModelWithMatchingShortName.cs", "namespace Library1.Models { public class ModelWithMatchingShortName { } }");
+            fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
+            fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.ProductTxt);
+
+            fileProvider.Add($"DAL/{MsBuildProjectStrings.DALProjectName}", MsBuildProjectStrings.DAL);
+            fileProvider.Add($"DAL/{MsBuildProjectStrings.CarContextFileName}", MsBuildProjectStrings.CarContextTxt);
+            
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
     }
 }

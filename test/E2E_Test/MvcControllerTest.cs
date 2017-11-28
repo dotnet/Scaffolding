@@ -187,5 +187,46 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 VerifyFileAndContent(generatedFilePath, "ReadWriteController.txt");
             }
         }
+
+        [Fact]
+        public void TestEFWithDbContextInDependency()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectsWithDbContextInDependency(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                var args = new string[]
+                {
+                    codegeneratorToolName,
+                    "-p",
+                    TestProjectPath,
+                    "-c",
+                    Configuration,
+                    "controller",
+                    "--controllerName",
+                    "CarsWithViewController",
+                    "--model",
+                    "Library1.Models.Car",
+                    "--dataContext",
+                    "DAL.CarContext",
+                    "--referenceScriptLibraries",
+                    "--relativeFolderPath",
+                    Path.Combine("Areas", "Test", "Controllers")
+                };
+
+                Scaffold(args, TestProjectPath);
+
+                var generatedFilePath = Path.Combine(TestProjectPath, "Areas", "Test", "Controllers", "CarsWithViewController.cs");
+                var viewFolder = Path.Combine(TestProjectPath, "Areas", "Test", "Views", "CarsWithView");
+
+                VerifyFileAndContent(generatedFilePath, "CarsControllerWithDAL.txt");
+                VerifyFileAndContent(Path.Combine(viewFolder, "Create.cshtml"), Path.Combine("CarViews", "Create.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Delete.cshtml"), Path.Combine("CarViews", "Delete.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Details.cshtml"), Path.Combine("CarViews", "Details.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("CarViews", "Edit.cshtml"));
+                VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("CarViews", "Index.cshtml"));
+                VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
+            }
+        }
     }
 }

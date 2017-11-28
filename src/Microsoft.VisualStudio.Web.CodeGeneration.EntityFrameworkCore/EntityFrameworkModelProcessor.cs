@@ -195,7 +195,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             var dbContextType = _reflectedTypesProvider.GetReflectedType(_dbContextFullTypeName, lookInDependencies:true);
 
-            if (_reflectedTypesProvider.GetCompilationErrors().Any())
+            if (_reflectedTypesProvider.GetCompilationErrors() != null 
+                && _reflectedTypesProvider.GetCompilationErrors().Any())
             {
                 throw new InvalidOperationException(string.Format(
                     MessageStrings.FailedToCompileInMemory,

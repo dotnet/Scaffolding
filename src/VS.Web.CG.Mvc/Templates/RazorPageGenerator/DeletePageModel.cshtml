@@ -9,6 +9,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 @{
+    var entitySetName = Model.ModelMetadata.EntitySetName;
+    var entitySetVar = Model.EntitySetVariable ??
+        (String.IsNullOrEmpty(entitySetName)
+            ? entitySetName
+            : (entitySetName.Substring(0, length: 1).ToLowerInvariant() + entitySetName.Substring(1)));
+
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
@@ -53,7 +59,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(Model.ModelTypeName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
+            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {
@@ -69,11 +75,11 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(Model.ModelTypeName).FindAsync(id);
+            @Model.ViewDataTypeShortName = await _context.@(entitySetName).FindAsync(id);
 
             if (@Model.ViewDataTypeShortName != null)
             {
-                _context.@(Model.ModelTypeName).Remove(@Model.ViewDataTypeShortName);
+                _context.@(entitySetName).Remove(@Model.ViewDataTypeShortName);
                 await _context.SaveChangesAsync();
             }
 

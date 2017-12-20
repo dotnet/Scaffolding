@@ -55,7 +55,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(Model.ModelTypeName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
+            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {

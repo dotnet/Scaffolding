@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 @{
+    var entitySetName = Model.ModelMetadata.EntitySetName;
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
@@ -52,7 +53,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(Model.ModelTypeName)@(inlineIncludes).SingleOrDefaultAsync(m => m.@(primaryKeyName) == id);
+            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).SingleOrDefaultAsync(m => m.@(primaryKeyName) == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {

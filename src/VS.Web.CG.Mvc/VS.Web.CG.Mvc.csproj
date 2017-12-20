@@ -25,6 +25,17 @@
     <None Pack="true" Include="Templates\Identity\Pages\*" PackagePath="Templates\Identity\Pages\" />
     <None Pack="true" Include="Templates\Identity\Pages\Account\*" PackagePath="Templates\Identity\Pages\Account\" />
     <None Pack="true" Include="Templates\Identity\Pages\Account\Manage\*" PackagePath="Templates\Identity\Pages\Account\Manage\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\css\*" PackagePath="Templates\Identity\wwwroot\css\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\js\*" PackagePath="Templates\Identity\wwwroot\js\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\bootstrap\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\bootstrap\dist\css\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\css\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\bootstrap\dist\fonts\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\fonts\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\bootstrap\dist\js\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\js\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\jquery\*" PackagePath="Templates\Identity\wwwroot\lib\jquery\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\jquery\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery\dist\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\dist\" />
+    <None Pack="true" Include="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\" />
   </ItemGroup>
 
   <ItemGroup>

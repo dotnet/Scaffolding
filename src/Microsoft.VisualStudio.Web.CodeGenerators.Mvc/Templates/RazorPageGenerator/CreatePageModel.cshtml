@@ -59,7 +59,7 @@ namespace @Model.NamespaceName
                 return Page();
             }
 
-            _context.@(Model.ModelTypeName).Add(@Model.ViewDataTypeShortName);
+            _context.@(entitySetName).Add(@Model.ViewDataTypeShortName);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

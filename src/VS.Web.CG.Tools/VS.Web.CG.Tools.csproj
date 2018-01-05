@@ -40,7 +40,7 @@
     <None Include="..\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" Pack="true" PackagePath="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true" PackagePath="toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Pack="true" PackagePath="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
-    <None Include="prefercliruntime" Pack="true" PackagePath="prefercliruntime" />
+    <None Include="prefercliruntime" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>

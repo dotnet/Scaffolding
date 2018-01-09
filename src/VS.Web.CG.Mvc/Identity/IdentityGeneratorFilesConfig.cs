@@ -28,7 +28,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"EmailSender.cshtml", Path.Combine("Areas", "Identity","Services", "EmailSender.cs")},
             {"IEmailSender.cshtml", Path.Combine("Areas", "Identity","Services", "IEmailSender.cs")},
             {"_Layout.cshtml", Path.Combine("Areas", "Identity", "Pages", "_Layout.cshtml")},
-            {"_LoginPartial.cshtml", Path.Combine("Areas", "Identity", "Pages", "_LoginPartial.cshtml")},
             {"_ViewImports.cshtml", Path.Combine("Areas", "Identity", "Pages", "_ViewImports.cshtml")},
             {"Error.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Error.cshtml.cs")},
 

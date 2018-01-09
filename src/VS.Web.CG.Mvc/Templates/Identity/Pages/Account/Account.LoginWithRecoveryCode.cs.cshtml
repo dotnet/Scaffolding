@@ -43,7 +43,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
             }
 
             ReturnUrl = returnUrl;
@@ -61,7 +61,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
             }
 
             var recoveryCode = Input.RecoveryCode.Replace(" ", string.Empty);
@@ -71,7 +71,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", user.Id);
-                return LocalRedirect(Url.GetLocalUrl(returnUrl));
+                return LocalRedirect(returnUrl ?? Url.Content("~/"));
             }
             if (result.IsLockedOut)
             {

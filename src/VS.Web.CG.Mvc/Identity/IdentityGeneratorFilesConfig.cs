@@ -29,11 +29,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"_Layout.cshtml", Path.Combine("Areas", "Identity", "Pages", "_Layout.cshtml")},
             {"_LoginPartial.cshtml", Path.Combine("Areas", "Identity", "Pages", "_LoginPartial.cshtml")},
             {"_ViewImports.cshtml", Path.Combine("Areas", "Identity", "Pages", "_ViewImports.cshtml")},
+            {"Error.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Error.cshtml.cs")},
 
             // Accounts
+            {"Account._ViewImports.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "_ViewImports.cshtml")},
             {"Account.AccessDenied.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "AccessDenied.cshtml.cs")},
             {"Account.ConfirmEmail.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "ConfirmEmail.cshtml.cs")},
             {"Account.ExternalLogin.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "ExternalLogin.cshtml.cs")},
+            {"Account.ForgotPassword.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "ForgotPassword.cshtml.cs")},
             {"Account.ForgotPasswordConfirmation.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "ForgotPasswordConfirmation.cshtml.cs")},
             {"Account.LockOut.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "LockOut.cshtml.cs")},
             {"Account.Login.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Login.cshtml.cs")},
@@ -42,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"Account.Register.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Register.cshtml.cs")},
             {"Account.ResetPassword.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "ResetPassword.cshtml.cs")},
             {"Account.ResetPasswordConfirmation.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "ResetPasswordConfirmation.cshtml.cs")},
-            {"Account.SignedOut.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "SignedOut.cshtml.cs")},
+            {"Account.Logout.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Logout.cshtml.cs")},
             
             // Accounts/Manage
             {"Account.Manage._ViewImports.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_ViewImports.cshtml")},
@@ -63,11 +66,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             {Path.Combine("Pages", "_ValidationScriptsPartial.cshtml"), Path.Combine("Areas", "Identity", "Pages", "_ValidationScriptsPartial.cshtml")},
             {Path.Combine("Pages", "_ViewStart.cshtml"), Path.Combine("Areas", "Identity", "Pages", "_ViewStart.cshtml")},
+            {Path.Combine("Pages", "Error.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Error.cshtml")},
 
             // Accounts
             {Path.Combine("Pages", "Account", "Account.AccessDenied.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "AccessDenied.cshtml")},
             {Path.Combine("Pages", "Account", "Account.ConfirmEmail.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "ConfirmEmail.cshtml")},
             {Path.Combine("Pages", "Account", "Account.ExternalLogin.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "ExternalLogin.cshtml")},
+            {Path.Combine("Pages", "Account", "Account.ForgotPassword.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "ForgotPassword.cshtml")},
             {Path.Combine("Pages", "Account", "Account.ForgotPasswordConfirmation.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "ForgotPasswordConfirmation.cshtml")},
             {Path.Combine("Pages", "Account", "Account.LockOut.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "LockOut.cshtml")},
             {Path.Combine("Pages", "Account", "Account.Login.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Login.cshtml")},
@@ -76,7 +81,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {Path.Combine("Pages", "Account", "Account.Register.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Register.cshtml")},
             {Path.Combine("Pages", "Account", "Account.ResetPassword.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "ResetPassword.cshtml")},
             {Path.Combine("Pages", "Account", "Account.ResetPasswordConfirmation.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "ResetPasswordConfirmation.cshtml")},
-            {Path.Combine("Pages", "Account", "Account.SignedOut.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "SignedOut.cshtml")},
+            {Path.Combine("Pages", "Account", "Account.Logout.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Logout.cshtml")},
 
             // Accounts/Manage
             {Path.Combine("Pages", "Account", "Manage", "Account.Manage._Layout.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_Layout.cshtml")},
@@ -98,10 +103,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {Path.Combine("wwwroot","css","site.min.css"), Path.Combine("wwwroot","identity","css","site.min.css")},
             {Path.Combine("wwwroot","js","site.js"), Path.Combine("wwwroot","identity","js","site.js")},
             {Path.Combine("wwwroot","js","site.min.js"), Path.Combine("wwwroot","identity","js","site.min.js")},
+            {Path.Combine("wwwroot","lib","bootstrap",".bower.json"), Path.Combine("wwwroot","identity","lib","bootstrap", ".bower.json")},
+            {Path.Combine("wwwroot","lib","bootstrap","LICENSE"), Path.Combine("wwwroot","identity","lib","bootstrap","LICENSE")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap-theme.css"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap-theme.css")},
+            {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap-theme.min.css"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap-theme.min.css")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap-theme.css.map"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap-theme.css.map")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap-theme.min.css.map"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap-theme.min.css.map")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap.css"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap.css")},
+            {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap.min.css"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap.min.css")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap.css.map"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap.css.map")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","css","bootstrap.min.css.map"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","css","bootstrap.min.css.map")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","fonts","glyphicons-halflings-regular.eot"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","fonts","glyphicons-halflings-regular.eot")},
@@ -110,13 +119,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {Path.Combine("wwwroot","lib","bootstrap","dist","fonts","glyphicons-halflings-regular.woff"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","fonts","glyphicons-halflings-regular.woff")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","fonts","glyphicons-halflings-regular.woff2"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","fonts","glyphicons-halflings-regular.woff2")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","js","bootstrap.js"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","js","bootstrap.js")},
+            {Path.Combine("wwwroot","lib","bootstrap","dist","js","bootstrap.min.js"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","js","bootstrap.min.js")},
             {Path.Combine("wwwroot","lib","bootstrap","dist","js","npm.js"), Path.Combine("wwwroot","identity","lib","bootstrap","dist","js","npm.js")},
+            {Path.Combine("wwwroot","lib","jquery", ".bower.json"), Path.Combine("wwwroot","identity","lib","jquery",".bower.json")},
             {Path.Combine("wwwroot","lib","jquery","LICENSE.txt"), Path.Combine("wwwroot","identity","lib","jquery","LICENSE.txt")},
+            {Path.Combine("wwwroot","lib","jquery", "dist", "jquery.js"), Path.Combine("wwwroot","identity","lib","jquery","dist","jquery.js")},
+            {Path.Combine("wwwroot","lib","jquery", "dist", "jquery.min.js"), Path.Combine("wwwroot","identity","lib","jquery","dist","jquery.min.js")},
+            {Path.Combine("wwwroot","lib","jquery", "dist", "jquery.min.map"), Path.Combine("wwwroot","identity","lib","jquery","dist","jquery.min.map")},
             {Path.Combine("wwwroot","lib","jquery-validation","LICENSE.md"), Path.Combine("wwwroot","identity","lib","jquery-validation","LICENSE.md")},
+            {Path.Combine("wwwroot","lib","jquery-validation",".bower.json"), Path.Combine("wwwroot","identity","lib","jquery-validation",".bower.json")},
             {Path.Combine("wwwroot","lib","jquery-validation","dist","additional-methods.js"), Path.Combine("wwwroot","identity","lib","jquery-validation","dist","additional-methods.js")},
+            {Path.Combine("wwwroot","lib","jquery-validation","dist","additional-methods.min.js"), Path.Combine("wwwroot","identity","lib","jquery-validation","dist","additional-methods.min.js")},
             {Path.Combine("wwwroot","lib","jquery-validation","dist","jquery.validate.js"), Path.Combine("wwwroot","identity","lib","jquery-validation","dist","jquery.validate.js")},
+            {Path.Combine("wwwroot","lib","jquery-validation","dist","jquery.validate.min.js"), Path.Combine("wwwroot","identity","lib","jquery-validation","dist","jquery.validate.min.js")},
+            {Path.Combine("wwwroot","lib","jquery-validation-unobtrusive",".bower.json"), Path.Combine("wwwroot","identity","lib","jquery-validation-unobtrusive",".bower.json")},
             {Path.Combine("wwwroot","lib","jquery-validation-unobtrusive","jquery.validate.unobtrusive.js"), Path.Combine("wwwroot","identity","lib","jquery-validation-unobtrusive","jquery.validate.unobtrusive.js")},
             {Path.Combine("wwwroot","lib","jquery-validation-unobtrusive","jquery.validate.unobtrusive.min.js"), Path.Combine("wwwroot","identity","lib","jquery-validation-unobtrusive","jquery.validate.unobtrusive.min.js")},
+            {"ScaffoldingReadme.txt", Path.Combine(".","ScaffoldingReadme.txt")}
         };
     }
 }

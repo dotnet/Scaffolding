@@ -18,6 +18,7 @@
     <None Pack="true" Include="Templates\ViewGenerator\*" PackagePath="Templates\ViewGenerator\" />
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
     <None Pack="true" Include="Templates\RazorPageGenerator\*" PackagePath="Templates\RazorPageGenerator\" />
+    <None Pack="true" Include="Templates\Identity\*" PackagePath="Templates\Identity\" />
     <None Pack="true" Include="Templates\Identity\Controllers\*" PackagePath="Templates\Identity\Controllers\" />
     <None Pack="true" Include="Templates\Identity\Data\*" PackagePath="Templates\Identity\Data\" />
     <None Pack="true" Include="Templates\Identity\Extensions\*" PackagePath="Templates\Identity\Extensions\" />

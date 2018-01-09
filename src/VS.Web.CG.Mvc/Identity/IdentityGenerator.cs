@@ -128,10 +128,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private async Task AddTemplateFiles(IdentityGeneratorCommandLineModel commandLineModel)
         {
+            var rootNamespace = string.IsNullOrEmpty(commandLineModel.RootNamespace) ? _projectContext.RootNamespace:
+                    commandLineModel.RootNamespace;
+
             var model = new IdentityGeneratorTemplateModel()
             {
-                Namespace = _projectContext.RootNamespace,
-                DbContextNamespace = _projectContext.RootNamespace+".Areas.Identity.Data",
+                Namespace = rootNamespace,
+                DbContextNamespace = rootNamespace+".Areas.Identity.Data",
                 ApplicationName = _applicationInfo.ApplicationName
             };
 

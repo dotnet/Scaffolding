@@ -4,6 +4,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
     public class IdentityGeneratorCommandLineModel
     {
+        [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namesapce to use for generating identity code." )]
+        public string RootNamespace { get; set; }
+
         [Option(Name = "skipLayoutPage", ShortName ="slp", Description = "Flag to specify that the Layout page should not be generated.")]
         public bool SkipLayoutPage { get; set; }
 

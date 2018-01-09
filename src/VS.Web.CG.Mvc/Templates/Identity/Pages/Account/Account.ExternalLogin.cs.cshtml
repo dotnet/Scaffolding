@@ -61,15 +61,17 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
+            returnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
             {
                 ErrorMessage = $"Error from external provider: {remoteError}";
-                return RedirectToPage("./Login");
+                return RedirectToPage("./Login", new {ReturnUrl = returnUrl });
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return RedirectToPage("./Login");
+                ErrorMessage = "Error loading external login information.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             // Sign in the user with this external login provider if the user already has a login.
@@ -77,7 +79,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
-                return LocalRedirect(Url.GetLocalUrl(returnUrl));
+                return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -101,14 +103,17 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            // Get the information about the user from the external login provider
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                ErrorMessage = "Error loading external login information during confirmation.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
             if (ModelState.IsValid)
             {
-                // Get the information about the user from the external login provider
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    throw new ApplicationException("Error loading external login information during confirmation.");
-                }
                 var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -118,7 +123,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-                        return LocalRedirect(Url.GetLocalUrl(returnUrl));
+                        return LocalRedirect(returnUrl);
                     }
                 }
                 foreach (var error in result.Errors)
@@ -127,6 +132,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
                 }
             }
 
+            LoginProvider = info.LoginProvider;
             ReturnUrl = returnUrl;
             return Page();
         }

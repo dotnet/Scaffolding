@@ -55,7 +55,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             Username = user.UserName;
@@ -81,7 +81,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             if (Input.Email != user.Email)
@@ -89,7 +89,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
                 var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
                 if (!setEmailResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
+                    throw new InvalidOperationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
                 }
             }
 
@@ -98,7 +98,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
+                    throw new InvalidOperationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
                 }
             }
 
@@ -115,12 +115,19 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-            await _emailSender.SendEmailConfirmationAsync(user.Email, callbackUrl);
+            var callbackUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { user.Id, code },
+                protocol: Request.Scheme);
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                "Confirm your email",
+                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();

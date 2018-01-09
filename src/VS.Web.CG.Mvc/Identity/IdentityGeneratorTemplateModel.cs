@@ -11,5 +11,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string Namespace { get; set; }
         public string DbContextNamespace { get; set; }
         public string ApplicationName { get; set; }
+        public string UserClass { get; set; }
+        public string DbContextClass { get; set; }
+
+        public bool IsGenerateCustomUser
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(UserClass) 
+                    && !string.IsNullOrEmpty(DbContextClass);
+            }
+        }
     }
 }

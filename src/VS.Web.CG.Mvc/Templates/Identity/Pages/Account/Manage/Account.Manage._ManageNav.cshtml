@@ -1,4 +1,11 @@
-﻿@inject SignInManager<ApplicationUser> SignInManager
+﻿@{
+    var userClassName = "IdentityUser";
+    if (Model.IsGenerateCustomUser)
+    {
+        userClassName = @Model.UserClass;
+    }
+}
+@inject SignInManager<@(userClassName)> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

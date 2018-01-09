@@ -1,9 +1,15 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @@using Microsoft.AspNetCore.Identity
-@@using @(Model.Namespace).Areas.Identity.Data
-@@inject SignInManager<ApplicationUser> SignInManager
-@@inject UserManager<ApplicationUser> UserManager
-
+@{
+    var userClassName = "IdentityUser";
+    if (Model.IsGenerateCustomUser)
+    {
+@:@@using @(Model.Namespace).Areas.Identity.Data
+        userClassName = @Model.UserClass;
+    }
+}
+@@inject SignInManager<@(userClassName)> SignInManager
+@@inject UserManager<@(userClassName)> UserManager
 @@if (SignInManager.IsSignedIn(User))
 {
     <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">

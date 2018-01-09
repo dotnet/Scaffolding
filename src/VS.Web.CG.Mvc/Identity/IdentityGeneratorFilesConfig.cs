@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -10,20 +12,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     {
         public static readonly string[] AreaFolders = new string[]
         {
-            "Controllers",
+            "Pages",
+            "Services"
+        };
+
+        public static readonly string[] AreaFoldersWithData = new string[]
+        {
             "Data",
-            "Extensions",
             "Pages",
             "Services"
         };
 
         public static Dictionary<string, string> Templates = new Dictionary<string,string>()
         {
-            {"AccountController.cshtml", Path.Combine("Areas", "Identity","Controllers", "AccountController.cs")},
-            {"ApplicationDbContext.cshtml", Path.Combine("Areas", "Identity","Data", "ApplicationDbContext.cs")},
-            {"ApplicationUser.cshtml", Path.Combine("Areas", "Identity","Data", "ApplicationUser.cs")},
-            {"EmailSenderExtensions.cshtml", Path.Combine("Areas", "Identity","Extensions", "EmailSenderExtensions.cs")},
-            {"UrlHelperExtensions.cshtml", Path.Combine("Areas", "Identity","Extensions", "UrlHelperExtensions.cs")},
             {"EmailSender.cshtml", Path.Combine("Areas", "Identity","Services", "EmailSender.cs")},
             {"IEmailSender.cshtml", Path.Combine("Areas", "Identity","Services", "IEmailSender.cs")},
             {"_Layout.cshtml", Path.Combine("Areas", "Identity", "Pages", "_Layout.cshtml")},
@@ -137,5 +138,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {Path.Combine("wwwroot","lib","jquery-validation-unobtrusive","jquery.validate.unobtrusive.min.js"), Path.Combine("wwwroot","identity","lib","jquery-validation-unobtrusive","jquery.validate.unobtrusive.min.js")},
             {"ScaffoldingReadme.txt", Path.Combine(".","ScaffoldingReadme.txt")}
         };
+
+        public static string[] GetFolders(bool isGeneratingCustomUser)
+        {
+            return isGeneratingCustomUser 
+                ? AreaFoldersWithData
+                : AreaFolders;
+        }
+        public static Dictionary<string, string> GetCustomUserClassAndDbContextTemplates(string userClass, string dbContextClass)
+        {
+            if (string.IsNullOrEmpty(userClass))
+            {
+                throw new ArgumentException(nameof(userClass));
+            }
+
+            if (string.IsNullOrEmpty(dbContextClass))
+            {
+                throw new ArgumentException(nameof(dbContextClass));
+            }
+
+            return new Dictionary<string, string>()
+            {
+                {"ApplicationDbContext.cshtml", Path.Combine("Areas", "Identity","Data", $"{dbContextClass}.cs")},
+                {"ApplicationUser.cshtml", Path.Combine("Areas", "Identity","Data", $"{userClass}.cs")},
+            };
+        }
     }
 }

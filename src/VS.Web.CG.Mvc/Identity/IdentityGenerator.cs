@@ -103,13 +103,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task GenerateCode(IdentityGeneratorCommandLineModel commandlineModel)
         {
-            // TODO: Generation logic.
             if (commandlineModel == null)
             {
                 throw new ArgumentNullException(nameof(commandlineModel));
             }
 
-            EnsureFolderLayout(IdentityAreaName);
+            Validate(commandlineModel);
+
+            EnsureFolderLayout(IdentityAreaName, commandlineModel.IsGenerateCustomUser);
 
             await AddTemplateFiles(commandlineModel);
             await AddStaticFiles();
@@ -126,6 +127,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
+        private void Validate(IdentityGeneratorCommandLineModel model)
+        {
+            if ((string.IsNullOrEmpty(model.UserClass) && !string.IsNullOrEmpty(model.DbContext))
+                || (!string.IsNullOrEmpty(model.UserClass) && string.IsNullOrEmpty(model.DbContext)))
+            {
+                throw new ArgumentException("Both --userClass and --dbContext options should be passed in order to generate custom User class");
+            }
+
+            if (!string.IsNullOrEmpty(model.UserClass) && !RoslynUtilities.IsValidIdentifier(model.UserClass))
+            {
+                throw new ArgumentException(string.Format("Value of --userClass '{0}' is not a valid class name.", model.UserClass));
+            }
+
+            if (!string.IsNullOrEmpty(model.DbContext) && !RoslynUtilities.IsValidIdentifier(model.DbContext))
+            {
+                throw new ArgumentException(string.Format("Value of --dbContext '{0}' is not a valid class name.", model.DbContext));
+            }
+        }
+
         private async Task AddTemplateFiles(IdentityGeneratorCommandLineModel commandLineModel)
         {
             var rootNamespace = string.IsNullOrEmpty(commandLineModel.RootNamespace) ? _projectContext.RootNamespace:
@@ -135,17 +155,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 Namespace = rootNamespace,
                 DbContextNamespace = rootNamespace+".Areas.Identity.Data",
-                ApplicationName = _applicationInfo.ApplicationName
+                ApplicationName = _applicationInfo.ApplicationName,
+                UserClass = commandLineModel.UserClass,
+                DbContextClass = commandLineModel.DbContext
             };
 
-            foreach (var template in IdentityGeneratorFilesConfig.Templates)
+            var templates = model.IsGenerateCustomUser
+                ? IdentityGeneratorFilesConfig.Templates
+                    .Concat(IdentityGeneratorFilesConfig.GetCustomUserClassAndDbContextTemplates(commandLineModel.UserClass, commandLineModel.DbContext))
+                : IdentityGeneratorFilesConfig.Templates;
+
+
+            foreach (var template in templates)
             {
                 await _codegeratorActionService.AddFileFromTemplateAsync(
                     template.Value,
                     template.Key,
                     TemplateFolders,
-                    model
-                );
+                    model);
             }
         }
 
@@ -154,13 +181,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         ///     ProjectDir
         ///        \ Areas
         ///            \ IdentityAreaName
-        ///                \ Controllers
         ///                \ Data
-        ///                \ Extensions
         ///                \ Pages
         ///                \ Services
         /// </summary>
-        private void EnsureFolderLayout(string IdentityareaName)
+        private void EnsureFolderLayout(string IdentityareaName, bool isGenerateCustomUser)
         {
             var areaBasePath = Path.Combine(_applicationInfo.ApplicationBasePath, "Areas");
             if (!Directory.Exists(areaBasePath))
@@ -174,7 +199,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 Directory.CreateDirectory(areaPath);
             }
 
-            foreach (var areaFolder in IdentityGeneratorFilesConfig.AreaFolders)
+            foreach (var areaFolder in IdentityGeneratorFilesConfig.GetFolders(isGenerateCustomUser))
             {
                 var path = Path.Combine(areaPath, areaFolder);
                 if (!Directory.Exists(path))

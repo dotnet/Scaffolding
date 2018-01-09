@@ -53,5 +53,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
             return true;
         }
+
+        public static bool IsValidIdentifier(string identifier)
+        {
+            return SyntaxFacts.IsValidIdentifier(identifier);
+        }
     }
 }

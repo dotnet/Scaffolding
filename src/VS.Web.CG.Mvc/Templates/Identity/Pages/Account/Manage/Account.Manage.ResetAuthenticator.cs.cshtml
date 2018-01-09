@@ -7,17 +7,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using @(Model.DbContextNamespace);
+@{
+    var userClassName = "IdentityUser";
+    if (Model.IsGenerateCustomUser)
+    {
+@:using @(Model.DbContextNamespace);
+        userClassName = @Model.UserClass;
+    }
+}
 
 namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
 {
     public class ResetAuthenticatorModel : PageModel
     {
-        UserManager<ApplicationUser> _userManager;
+        UserManager<@(userClassName)> _userManager;
         ILogger<ResetAuthenticatorModel> _logger;
 
         public ResetAuthenticatorModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<@(userClassName)> userManager,
             ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;

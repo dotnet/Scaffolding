@@ -18,5 +18,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         [Option(Name = "force", ShortName = "f", Description = "Use this option to overwrite existing files.")]
         public bool Force { get; set; }
+
+        public bool IsGenerateCustomUser
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(UserClass) && !string.IsNullOrEmpty(DbContext);
+            }
+        }
     }
 }

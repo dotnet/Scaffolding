@@ -7,18 +7,25 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using @(Model.DbContextNamespace);
+@{
+    var userClassName = "IdentityUser";
+    if (Model.IsGenerateCustomUser)
+    {
+@:using @(Model.DbContextNamespace);
+        userClassName = @Model.UserClass;
+    }
+}
 
 namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<@(userClassName)> _userManager;
+        private readonly SignInManager<@(userClassName)> _signInManager;
 
         public ExternalLoginsModel(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            UserManager<@(userClassName)> userManager,
+            SignInManager<@(userClassName)> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

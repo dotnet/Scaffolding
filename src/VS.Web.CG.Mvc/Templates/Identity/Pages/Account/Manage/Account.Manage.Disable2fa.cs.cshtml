@@ -7,17 +7,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using @(Model.DbContextNamespace);
+@{
+    var userClassName = "IdentityUser";
+    if (Model.IsGenerateCustomUser)
+    {
+@:using @(Model.DbContextNamespace);
+        userClassName = @Model.UserClass;
+    }
+}
 
 namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
 {
     public class Disable2faModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<@(userClassName)> _userManager;
         private readonly ILogger<Disable2faModel> _logger;
 
         public Disable2faModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<@(userClassName)> userManager,
             ILogger<Disable2faModel> logger)
         {
             _userManager = userManager;

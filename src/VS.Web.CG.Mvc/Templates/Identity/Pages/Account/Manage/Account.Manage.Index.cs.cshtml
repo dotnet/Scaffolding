@@ -8,20 +8,27 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using @(Model.DbContextNamespace);
+@{
+    var userClassName = "IdentityUser";
+    if (Model.IsGenerateCustomUser)
+    {
+@:using @(Model.DbContextNamespace);
+        userClassName = @Model.UserClass;
+    }
+}
 using @(Model.Namespace).Areas.Identity.Services;
 
 namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<@(userClassName)> _userManager;
+        private readonly SignInManager<@(userClassName)> _signInManager;
         private readonly IEmailSender _emailSender;
 
         public IndexModel(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
+            UserManager<@(userClassName)> userManager,
+            SignInManager<@(userClassName)> signInManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;

@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace @(Model.Namespace).Areas.Identity.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class @Model.DbContextClass : IdentityDbContext<@Model.UserClass>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public @(Model.DbContextClass)(DbContextOptions<@Model.DbContextClass> options)
             : base(options)
         {
         }

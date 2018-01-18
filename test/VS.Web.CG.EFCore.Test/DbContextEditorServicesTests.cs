@@ -83,74 +83,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString());
         }
 
-        [Fact]
-        public void AddConnectionString_Creates_App_Settings_File()
-        {
-            //Arrange
-            var fs = new MockFileSystem();
-            var testObj = GetTestObject(fs);
-
-            //Act
-            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid");
-
-            //Assert
-            string expected = @"{
-  ""ConnectionStrings"": {
-    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-  }
-}";
-            var appSettingsPath = Path.Combine(AppBase, "appsettings.json"); 
-            fs.FileExists(appSettingsPath);
-            Assert.Equal(expected, fs.ReadAllText(appSettingsPath));
-        }
-
-        [Theory]
-        // Empty invalid json file - should this be supported?
-        //[InlineData("",
-        //    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"@\\\"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\\\"\"\r\n    }\r\n  }\r\n}")]
-        // Empty file with valid json token
-        [InlineData("{}",
-                    @"{
-  ""ConnectionStrings"": {
-    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-  }
-}")]
-        // File with no node for connection name
-        [InlineData(@"{
-  ""ConnectionStrings"": {
-  }
-}",
-                    @"{
-  ""ConnectionStrings"": {
-    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
-  }
-}")]
-        // File with node for connection name and also existing ConnectionString property
-        // modification should be skipped in this case
-        [InlineData(@"{
-  ""ConnectionStrings"": {
-    ""MyDbContext"": ""SomeExistingValue""
-  }
-}",
-                     @"{
-  ""ConnectionStrings"": {
-    ""MyDbContext"": ""SomeExistingValue""
-  }
-}")]
-        public void AddConnectionString_Modifies_App_Settings_File_As_Required(string previousContent, string newContent)
-        {
-            //Arrange
-            var fs = new MockFileSystem();
-            var appSettingsPath = Path.Combine(AppBase, "appsettings.json");
-            fs.WriteAllText(appSettingsPath, previousContent);
-            var testObj = GetTestObject(fs);
-
-            //Act
-            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid");
-
-            //Assert
-            Assert.Equal(newContent, fs.ReadAllText(appSettingsPath));
-        }
 
         private DbContextEditorServices GetTestObject(MockFileSystem fs = null)
         {
@@ -161,6 +93,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 app.Object,
                 new Mock<IFilesLocator>().Object,
                 new Mock<ITemplating>().Object,
+                new Mock<IConnectionStringsWriter>().Object,
                 fs != null ? fs : new MockFileSystem());
         }
 

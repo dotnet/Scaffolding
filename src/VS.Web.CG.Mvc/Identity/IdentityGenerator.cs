@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -24,6 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private IServiceProvider _serviceProvider;
         private ICodeGeneratorActionsService _codegeratorActionService;
         private IProjectContext _projectContext;
+        private IConnectionStringsWriter _connectionStringsWriter;
 
         public IEnumerable<string> TemplateFolders
         {
@@ -68,6 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             IServiceProvider serviceProvider,
             ICodeGeneratorActionsService actionService,
             IProjectContext projectContext,
+            IConnectionStringsWriter connectionStringsWriter,
             ILogger logger)
         {
             if (applicationInfo == null)
@@ -90,6 +93,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(projectContext));
             }
 
+            if (connectionStringsWriter == null)
+            {
+                throw new ArgumentNullException(nameof(connectionStringsWriter));
+            }
+
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
@@ -99,6 +107,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             _serviceProvider = serviceProvider;
             _codegeratorActionService = actionService;
             _projectContext = projectContext;
+            _connectionStringsWriter = connectionStringsWriter;
             _logger = logger;
         }
 
@@ -175,6 +184,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     TemplateFolders,
                     model);
             }
+
+            var dbContextClass = model.IsGenerateCustomUser ? model.DbContextClass : "IdentityDbContext";
+            _connectionStringsWriter.AddConnectionString(
+                connectionStringName: $"{dbContextClass}Connection",
+                dataBaseName: $"{model.ApplicationName}",
+                useSQLite: true);
         }
 
         /// <summary>

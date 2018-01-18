@@ -1,23 +1,21 @@
-The code for Identity UI has been generated under Areas/Identity.
-Content files have been added under wwwroot/Identity
+Support for ASP.NET Core Identity was added to your project
+- The code for adding Identity to your project was generated under Areas/Identity.
+- Content files have been added under wwwroot/Identity.
 
-However you may need to make additional changes to the Startup's ConfigureServices method:
+Configuration of the Identity related services can be found in the Areas/Identity/IdentityHostingStartup.cs file.
 
-1. Enable Areas support for RazorPages:
+If your app was previously configured to use Identity, then you should remove the entire call to AddIdentity from your
+ConfigureServices method.
 
-    services.AddMvc()
-    .AddRazorPagesOptions(options => options.AllowAreas = true);
+The generated UI requires support for static files. To add static files to your app:
+1. Call app.UseStaticFiles() from your Configure method
 
+To use ASP.NET Core Identity you also need to enable authentication. To authentication to your app:
+1. Call app.UseAuthentication() from your Configure method (after static files)
 
-2. Set up the Identity cookie paths
+The generated UI requires MVC. To add MVC to your app:
+1. Call services.AddMvc() from your ConfigureServices method
+2. Call app.UseMvc() from your Configure method (after authentication)
 
-    services.ConfigureApplicationCookie(options => 
-    {
-        options.LoginPath = "/Identity/Account/Login";
-        options.LogoutPath = "/Identity/Account/Logout";
-        options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-    });
-
-3. Add EmailSender to services
-
-    services.Add<IEmailSender, EmailSender>();
+Apps that use ASP.NET Core Identity should also use HTTPS. To enable HTTPS see
+https://go.microsoft.com/fwlink/?linkid=848054.

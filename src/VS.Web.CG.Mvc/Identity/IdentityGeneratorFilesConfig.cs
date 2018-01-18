@@ -59,7 +59,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"Account.Manage.SetPassword.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "SetPassword.cshtml.cs")},
             {"Account.Manage.TwoFactorAuthentication.cs.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "TwoFactorAuthentication.cshtml.cs")},
             {"Account.Manage.ManageNavPages.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "ManageNavPages.cs")},
-            
+            {"Account.Manage._ManageNav.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_ManageNav.cshtml")},
+
+            //IdentityHostingStartup
+            {"IdentityHostingStartup.cshtml", Path.Combine("Areas", "Identity", "IdentityStartup.cs")},
         };
 
         public static Dictionary<string, string> StaticFiles = new Dictionary<string, string>()
@@ -85,7 +88,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             // Accounts/Manage
             {Path.Combine("Pages", "Account", "Manage", "Account.Manage._Layout.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_Layout.cshtml")},
-            {Path.Combine("Pages", "Account", "Manage", "Account.Manage._ManageNav.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_ManageNav.cshtml")},
             {Path.Combine("Pages", "Account", "Manage", "Account.Manage._StatusMessage.cshtml"), Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_StatusMessage.cshtml")},
             
 

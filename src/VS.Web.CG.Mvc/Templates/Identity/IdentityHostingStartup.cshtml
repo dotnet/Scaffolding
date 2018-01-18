@@ -1,0 +1,62 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+using System;
+using Microsoft.AspNetCore.Identity;
+@{
+    if(!Model.IsGenerateCustomUser)
+    {
+@:using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    }
+}
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using @(Model.Namespace).Areas.Identity.Services;
+@{
+     var userClassName = "IdentityUser";
+     var dbContextName = "IdentityDbContext";
+    if (Model.IsGenerateCustomUser)
+    {
+@:using @(Model.DbContextNamespace);
+        userClassName = @Model.UserClass;
+        dbContextName = @Model.DbContextClass;
+    }
+}
+
+[assembly: HostingStartup(typeof(@(Model.Namespace).Areas.Identity.IdentityStartup))]
+namespace @(Model.Namespace).Areas.Identity
+{
+    public class IdentityStartup : IHostingStartup
+    {
+        public void Configure(IWebHostBuilder builder)
+        {
+            builder.ConfigureServices((context, services) => {
+                services.AddTransient<IEmailSender, EmailSender>();
+
+                services.AddDbContext<@dbContextName>(options =>
+                    options.UseSqlite(
+                        context.Configuration.GetConnectionString("@(dbContextName)Connection"),
+                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
+
+                services.AddIdentity<@(userClassName), IdentityRole>()
+                    .AddEntityFrameworkStores<@dbContextName>()
+                    .AddDefaultTokenProviders();
+
+                services.AddMvc()
+                    .AddRazorPagesOptions(options =>
+                    {
+                        options.AllowAreas = true;
+                        options.Conventions.AuthorizeFolder("/Account/Manage");
+                        options.Conventions.AuthorizePage("/Account/Logout");
+                    });
+
+                services.ConfigureApplicationCookie(options => 
+                {
+                    options.LoginPath = "/Identity/Account/Login";
+                    options.LogoutPath = "/Identity/Account/Logout";
+                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                });
+            });
+        }
+    }
+}

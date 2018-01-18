@@ -1,22 +1,23 @@
-﻿@{
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
     var userClassName = "IdentityUser";
     if (Model.IsGenerateCustomUser)
     {
         userClassName = @Model.UserClass;
     }
 }
-@inject SignInManager<@(userClassName)> SignInManager
-@{
+@@inject SignInManager<@(userClassName)> SignInManager
+@@{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-
-<ul class="nav nav-pills nav-stacked">
-    <li class="@ManageNavPages.IndexNavClass(ViewContext)"><a asp-page="./Index">Profile</a></li>
-    <li class="@ManageNavPages.ChangePasswordNavClass(ViewContext)"><a asp-page="./ChangePassword">Password</a></li>
-    @if (hasExternalLogins)
-    {
-        <li class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-page="./ExternalLogins">External logins</a></li>
-    }
-    <li class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"><a asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-</ul>
-
+@{
+@:<ul class="nav nav-pills nav-stacked">
+@:    <li class="@@ManageNavPages.IndexNavClass(ViewContext)"><a asp-page="./Index">Profile</a></li>
+@:    <li class="@@ManageNavPages.ChangePasswordNavClass(ViewContext)"><a asp-page="./ChangePassword">Password</a></li>
+@:    @@if (hasExternalLogins)
+@:    {
+@:        <li class="@@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-page="./ExternalLogins">External logins</a></li>
+@:    }
+@:    <li class="@@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"><a asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
+@:</ul>
+}

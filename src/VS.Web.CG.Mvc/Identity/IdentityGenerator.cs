@@ -39,6 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                          Path.Combine("Identity", "Extensions"),
                          Path.Combine("Identity", "Services"),
                          Path.Combine("Identity", "Pages"),
+                         "Identity"
                      },
                     _projectContext);
             }

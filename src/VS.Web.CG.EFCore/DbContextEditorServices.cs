@@ -26,13 +26,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private readonly IFilesLocator _filesLocator;
         private readonly IFileSystem _fileSystem;
         private readonly IProjectContext _projectContext;
+        private readonly IConnectionStringsWriter _connectionStringsWriter;
 
         public DbContextEditorServices(
             IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
-            ITemplating templatingService)
-            : this (projectContext, applicationInfo, filesLocator, templatingService, DefaultFileSystem.Instance)
+            ITemplating templatingService,
+            IConnectionStringsWriter connectionStringsWriter)
+            : this (projectContext, applicationInfo, filesLocator, templatingService, connectionStringsWriter, DefaultFileSystem.Instance)
         {
         }
 
@@ -41,6 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             IApplicationInfo applicationInfo,
             IFilesLocator filesLocator,
             ITemplating templatingService,
+            IConnectionStringsWriter connectionStringsWriter,
             IFileSystem fileSystem)
         {
             _projectContext = projectContext;
@@ -48,6 +51,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _filesLocator = filesLocator;
             _templatingService = templatingService;
             _fileSystem = fileSystem;
+            _connectionStringsWriter = connectionStringsWriter;
         }
 
         public async Task<SyntaxTree> AddNewContext(NewDbContextTemplateModel dbContextTemplateModel)
@@ -168,7 +172,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                     if (servicesParam != null)
                     {
-                        AddConnectionString(dbContextTypeName, dataBaseName);
+                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSQLite: false);
                         var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
 
                         string textToAddAtEnd =

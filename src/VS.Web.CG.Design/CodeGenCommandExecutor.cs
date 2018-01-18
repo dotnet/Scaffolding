@@ -96,6 +96,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             serviceProvider.Add(typeof(ILogger), _logger);
             serviceProvider.Add(typeof(IFilesLocator), new FilesLocator());
 
+            serviceProvider.AddServiceWithDependencies<IConnectionStringsWriter, ConnectionStringsWriter>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorAssemblyProvider, DefaultCodeGeneratorAssemblyProvider>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorLocator, CodeGeneratorsLocator>();
             serviceProvider.AddServiceWithDependencies<CodeGenCommand, CodeGenCommand>();

@@ -1,5 +1,4 @@
-<Project>
-  <Import Project="..\version.props" />
+﻿<Project>
 
   <PropertyGroup>
     <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>

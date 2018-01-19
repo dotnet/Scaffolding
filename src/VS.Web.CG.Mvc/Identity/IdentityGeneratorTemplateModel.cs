@@ -13,6 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string ApplicationName { get; set; }
         public string UserClass { get; set; }
         public string DbContextClass { get; set; }
+        public bool UseSQLite { get; set; }
 
         public bool IsGenerateCustomUser
         {

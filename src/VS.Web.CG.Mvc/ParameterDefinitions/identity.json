@@ -14,9 +14,9 @@
       "Description": "Name of the User class to generate."
     },
     {
-      "Name": "skipLayoutPage",
-      "ShortName": "slp",
-      "Description": "Flag to specify that the Layout page should not be generated."
+      "Name": "useSqLite",
+      "ShortName": "sqlite",
+      "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
     },
     {
       "Name": "force",

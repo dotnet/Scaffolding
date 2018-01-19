@@ -119,11 +119,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
 
             Validate(commandlineModel);
+            ValidateEFDependencies(commandlineModel.UseSQLite);
 
             EnsureFolderLayout(IdentityAreaName, commandlineModel.IsGenerateCustomUser);
 
             await AddTemplateFiles(commandlineModel);
             await AddStaticFiles();
+        }
+
+        private void ValidateEFDependencies(bool useSqlite)
+        {
+            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
+            var isEFDesignPackagePresent = _projectContext
+                .PackageDependencies
+                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
+
+            string SqlPackageName = useSqlite 
+                ? "Microsoft.EntityFrameworkCore.Sqlite"
+                : "Microsoft.EntityFrameworkCore.SqlServer";
+
+            var isSqlServerPackagePresent = _projectContext
+                .PackageDependencies
+                .Any(package => package.Name.Equals(SqlPackageName, StringComparison.OrdinalIgnoreCase));
+
+            if (!isEFDesignPackagePresent || !isSqlServerPackagePresent)
+            {
+                throw new InvalidOperationException(
+                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlPackageName}"));
+            }
         }
 
         private async Task AddStaticFiles()
@@ -139,20 +162,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private void Validate(IdentityGeneratorCommandLineModel model)
         {
-            if ((string.IsNullOrEmpty(model.UserClass) && !string.IsNullOrEmpty(model.DbContext))
-                || (!string.IsNullOrEmpty(model.UserClass) && string.IsNullOrEmpty(model.DbContext)))
-            {
-                throw new ArgumentException("Both --userClass and --dbContext options should be passed in order to generate custom User class");
-            }
-
+            var errorStrings = new List<string>();;
             if (!string.IsNullOrEmpty(model.UserClass) && !RoslynUtilities.IsValidIdentifier(model.UserClass))
             {
-                throw new ArgumentException(string.Format("Value of --userClass '{0}' is not a valid class name.", model.UserClass));
+                errorStrings.Add(string.Format(MessageStrings.InvalidUserClassName, model.UserClass));;
             }
 
             if (!string.IsNullOrEmpty(model.DbContext) && !RoslynUtilities.IsValidIdentifier(model.DbContext))
             {
-                throw new ArgumentException(string.Format("Value of --dbContext '{0}' is not a valid class name.", model.DbContext));
+                errorStrings.Add(string.Format(MessageStrings.InvalidDbContextClassName, model.DbContext));;
+            }
+
+            if (errorStrings.Any())
+            {
+                throw new ArgumentException(string.Join(Environment.NewLine, errorStrings));
             }
         }
 
@@ -167,14 +190,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = rootNamespace+".Areas.Identity.Data",
                 ApplicationName = _applicationInfo.ApplicationName,
                 UserClass = commandLineModel.UserClass,
-                DbContextClass = commandLineModel.DbContext
+                DbContextClass = GetDbContextClassName(commandLineModel.DbContext),
+                UseSQLite = commandLineModel.UseSQLite
             };
 
-            var templates = model.IsGenerateCustomUser
-                ? IdentityGeneratorFilesConfig.Templates
-                    .Concat(IdentityGeneratorFilesConfig.GetCustomUserClassAndDbContextTemplates(commandLineModel.UserClass, commandLineModel.DbContext))
-                : IdentityGeneratorFilesConfig.Templates;
-
+            var templates = IdentityGeneratorFilesConfig.GetTemplateFiles(model.UserClass, model.DbContextClass);
 
             foreach (var template in templates)
             {
@@ -189,7 +209,27 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             _connectionStringsWriter.AddConnectionString(
                 connectionStringName: $"{dbContextClass}Connection",
                 dataBaseName: $"{model.ApplicationName}",
-                useSQLite: true);
+                useSQLite: commandLineModel.UseSQLite);
+        }
+
+        // We always want to generate a DbContext. In case the user does not provide a name, 
+        // we try to generate one by concatenating Application name and "IdentityDbContext"
+        // If the result is not a valid class name, then we just use IdentityDbContext.
+        private string GetDbContextClassName(string dbContext)
+        {
+            if (!string.IsNullOrEmpty(dbContext))
+            {
+                return dbContext;
+            }
+
+            var defaultDbContextName = $"{_applicationInfo.ApplicationName}IdentityDbContext";
+
+            if (!RoslynUtilities.IsValidIdentifier(defaultDbContextName))
+            {
+                defaultDbContextName = "IdentityDbContext";
+            }
+
+            return defaultDbContextName;
         }
 
         /// <summary>
@@ -215,7 +255,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 Directory.CreateDirectory(areaPath);
             }
 
-            foreach (var areaFolder in IdentityGeneratorFilesConfig.GetFolders(isGenerateCustomUser))
+            foreach (var areaFolder in IdentityGeneratorFilesConfig.AreaFolders)
             {
                 var path = Path.Combine(areaPath, areaFolder);
                 if (!Directory.Exists(path))

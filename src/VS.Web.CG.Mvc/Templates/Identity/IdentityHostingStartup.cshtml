@@ -23,21 +23,32 @@ using @(Model.Namespace).Areas.Identity.Services;
     }
 }
 
-[assembly: HostingStartup(typeof(@(Model.Namespace).Areas.Identity.IdentityStartup))]
+[assembly: HostingStartup(typeof(@(Model.Namespace).Areas.Identity.IdentityHostingStartup))]
 namespace @(Model.Namespace).Areas.Identity
 {
-    public class IdentityStartup : IHostingStartup
+    public class IdentityHostingStartup : IHostingStartup
     {
         public void Configure(IWebHostBuilder builder)
         {
             builder.ConfigureServices((context, services) => {
                 services.AddTransient<IEmailSender, EmailSender>();
 
-                services.AddDbContext<@dbContextName>(options =>
-                    options.UseSqlite(
-                        context.Configuration.GetConnectionString("@(dbContextName)Connection"),
-                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
-
+@{
+    if (Model.UseSQLite)
+    {
+@:                services.AddDbContext<@dbContextName>(options =>
+@:                    options.UseSqlite(
+@:                        context.Configuration.GetConnectionString("@(dbContextName)Connection"),
+@:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
+    }
+    else
+    {
+@:                services.AddDbContext<@dbContextName>(options =>
+@:                    options.UseSqlServer(
+@:                        context.Configuration.GetConnectionString("@(dbContextName)Connection"),
+@:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
+    }
+}
                 services.AddIdentity<@(userClassName), IdentityRole>()
                     .AddEntityFrameworkStores<@dbContextName>()
                     .AddDefaultTokenProviders();

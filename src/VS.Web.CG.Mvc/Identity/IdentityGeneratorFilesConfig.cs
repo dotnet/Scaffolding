@@ -12,12 +12,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     {
         public static readonly string[] AreaFolders = new string[]
         {
-            "Pages",
-            "Services"
-        };
-
-        public static readonly string[] AreaFoldersWithData = new string[]
-        {
             "Data",
             "Pages",
             "Services"
@@ -62,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"Account.Manage._ManageNav.cshtml", Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_ManageNav.cshtml")},
 
             //IdentityHostingStartup
-            {"IdentityHostingStartup.cshtml", Path.Combine("Areas", "Identity", "IdentityStartup.cs")},
+            {"IdentityHostingStartup.cshtml", Path.Combine("Areas", "Identity", "IdentityHostingStartup.cs")},
         };
 
         public static Dictionary<string, string> StaticFiles = new Dictionary<string, string>()
@@ -140,29 +134,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"ScaffoldingReadme.txt", Path.Combine(".","ScaffoldingReadme.txt")}
         };
 
-        public static string[] GetFolders(bool isGeneratingCustomUser)
+        public static Dictionary<string, string> GetTemplateFiles(string userClass, string dbContextClass)
         {
-            return isGeneratingCustomUser 
-                ? AreaFoldersWithData
-                : AreaFolders;
-        }
-        public static Dictionary<string, string> GetCustomUserClassAndDbContextTemplates(string userClass, string dbContextClass)
-        {
-            if (string.IsNullOrEmpty(userClass))
-            {
-                throw new ArgumentException(nameof(userClass));
-            }
-
             if (string.IsNullOrEmpty(dbContextClass))
             {
                 throw new ArgumentException(nameof(dbContextClass));
             }
 
-            return new Dictionary<string, string>()
+            var templates = new Dictionary<string, string>(Templates);
+
+            templates.Add("ApplicationDbContext.cshtml", Path.Combine("Areas", "Identity","Data", $"{dbContextClass}.cs"));
+
+            if (!string.IsNullOrEmpty(userClass))
             {
-                {"ApplicationDbContext.cshtml", Path.Combine("Areas", "Identity","Data", $"{dbContextClass}.cs")},
-                {"ApplicationUser.cshtml", Path.Combine("Areas", "Identity","Data", $"{userClass}.cs")},
-            };
+                templates.Add("ApplicationUser.cshtml", Path.Combine("Areas", "Identity","Data", $"{userClass}.cs"));
+            }
+
+            return templates;
         }
     }
 }

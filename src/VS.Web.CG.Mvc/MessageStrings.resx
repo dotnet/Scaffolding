@@ -150,6 +150,12 @@
   <data name="InstallPackageMessage" xml:space="preserve">
     <value>Please install the below packages to your project:</value>
   </data>
+  <data name="InvalidDbContextClassName" xml:space="preserve">
+    <value>Value of --dbContext '{0}' is not a valid class name.</value>
+  </data>
+  <data name="InvalidUserClassName" xml:space="preserve">
+    <value>Value of --userClass '{0}' is not a valid class name.</value>
+  </data>
   <data name="InvalidNamespaceName" xml:space="preserve">
     <value>The namespace name '{0}' is not valid.</value>
   </data>

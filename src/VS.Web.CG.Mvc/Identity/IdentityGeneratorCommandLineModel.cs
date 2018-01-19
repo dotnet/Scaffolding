@@ -7,8 +7,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namesapce to use for generating identity code." )]
         public string RootNamespace { get; set; }
 
-        [Option(Name = "skipLayoutPage", ShortName ="slp", Description = "Flag to specify that the Layout page should not be generated.")]
-        public bool SkipLayoutPage { get; set; }
+        [Option(Name = "useSqLite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
+        public bool UseSQLite { get; set; }
 
         [Option(Name = "dbContext", ShortName = "dc", Description = "Name of the DbContext class to generate.")]
         public string DbContext { get; set; }

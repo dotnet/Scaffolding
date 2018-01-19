@@ -158,6 +158,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("InstallPackageMessage", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Value of --dbContext '{0}' is not a valid class name..
+        /// </summary>
+        internal static string InvalidDbContextClassName {
+            get {
+                return ResourceManager.GetString("InvalidDbContextClassName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Value of --userClass '{0}' is not a valid class name..
+        /// </summary>
+        internal static string InvalidUserClassName {
+            get {
+                return ResourceManager.GetString("InvalidUserClassName", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The namespace name &apos;{0}&apos; is not valid..

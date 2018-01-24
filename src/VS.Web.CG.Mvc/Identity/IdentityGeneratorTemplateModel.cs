@@ -9,19 +9,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     public class IdentityGeneratorTemplateModel
     {
         public string Namespace { get; set; }
-        public string DbContextNamespace { get; set; }
         public string ApplicationName { get; set; }
         public string UserClass { get; set; }
+        public string UserClassNamespace { get; set; }
         public string DbContextClass { get; set; }
+        public string DbContextNamespace { get; set; }
         public bool UseSQLite { get; set; }
-
-        public bool IsGenerateCustomUser
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(UserClass) 
-                    && !string.IsNullOrEmpty(DbContextClass);
-            }
-        }
+        public bool IsUsingExistingDbContext { get; set; }
+        public bool IsGenerateCustomUser { get; set; }
     }
 }

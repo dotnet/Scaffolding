@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
@@ -23,9 +24,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private ILogger _logger;
         private IApplicationInfo _applicationInfo;
         private IServiceProvider _serviceProvider;
-        private ICodeGeneratorActionsService _codegeratorActionService;
+        private ICodeGeneratorActionsService _codegeneratorActionService;
         private IProjectContext _projectContext;
         private IConnectionStringsWriter _connectionStringsWriter;
+        private Workspace _workspace;
+        private ICodeGenAssemblyLoadContext _loader;
 
         public IEnumerable<string> TemplateFolders
         {
@@ -71,6 +74,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             ICodeGeneratorActionsService actionService,
             IProjectContext projectContext,
             IConnectionStringsWriter connectionStringsWriter,
+            Workspace workspace,
+            ICodeGenAssemblyLoadContext loader,
             ILogger logger)
         {
             if (applicationInfo == null)
@@ -98,6 +103,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(connectionStringsWriter));
             }
 
+            if (workspace == null)
+            {
+                throw new ArgumentNullException(nameof(workspace));
+            }
+
+            if (loader == null)
+            {
+                throw new ArgumentNullException(nameof(loader));
+            }
+
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
@@ -105,9 +120,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             _applicationInfo = applicationInfo;
             _serviceProvider = serviceProvider;
-            _codegeratorActionService = actionService;
+            _codegeneratorActionService = actionService;
             _projectContext = projectContext;
             _connectionStringsWriter = connectionStringsWriter;
+            _workspace = workspace;
+            _loader = loader;
             _logger = logger;
         }
 
@@ -117,119 +134,50 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 throw new ArgumentNullException(nameof(commandlineModel));
             }
+            var templateModelBuilder = new IdentityGeneratorTemplateModelBuilder(
+                commandlineModel,
+                _applicationInfo,
+                _projectContext,
+                _workspace,
+                _loader,
+                _logger);
 
-            Validate(commandlineModel);
-            ValidateEFDependencies(commandlineModel.UseSQLite);
+            var templateModel = await templateModelBuilder.ValidateAndBuild();
 
-            EnsureFolderLayout(IdentityAreaName, commandlineModel.IsGenerateCustomUser);
+            EnsureFolderLayout(IdentityAreaName, templateModel);
 
-            await AddTemplateFiles(commandlineModel);
+            await AddTemplateFiles(templateModel);
             await AddStaticFiles();
-        }
-
-        private void ValidateEFDependencies(bool useSqlite)
-        {
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-            var isEFDesignPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
-
-            string SqlPackageName = useSqlite 
-                ? "Microsoft.EntityFrameworkCore.Sqlite"
-                : "Microsoft.EntityFrameworkCore.SqlServer";
-
-            var isSqlServerPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(SqlPackageName, StringComparison.OrdinalIgnoreCase));
-
-            if (!isEFDesignPackagePresent || !isSqlServerPackagePresent)
-            {
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlPackageName}"));
-            }
         }
 
         private async Task AddStaticFiles()
         {
             foreach (var staticFile  in IdentityGeneratorFilesConfig.StaticFiles)
             {
-                await _codegeratorActionService.AddFileAsync(
+                await _codegeneratorActionService.AddFileAsync(
                     staticFile.Value,
                     Path.Combine(TemplateFolderRoot, staticFile.Key)
                 );
             }
         }
 
-        private void Validate(IdentityGeneratorCommandLineModel model)
+        private async Task AddTemplateFiles(IdentityGeneratorTemplateModel templateModel)
         {
-            var errorStrings = new List<string>();;
-            if (!string.IsNullOrEmpty(model.UserClass) && !RoslynUtilities.IsValidIdentifier(model.UserClass))
-            {
-                errorStrings.Add(string.Format(MessageStrings.InvalidUserClassName, model.UserClass));;
-            }
-
-            if (!string.IsNullOrEmpty(model.DbContext) && !RoslynUtilities.IsValidIdentifier(model.DbContext))
-            {
-                errorStrings.Add(string.Format(MessageStrings.InvalidDbContextClassName, model.DbContext));;
-            }
-
-            if (errorStrings.Any())
-            {
-                throw new ArgumentException(string.Join(Environment.NewLine, errorStrings));
-            }
-        }
-
-        private async Task AddTemplateFiles(IdentityGeneratorCommandLineModel commandLineModel)
-        {
-            var rootNamespace = string.IsNullOrEmpty(commandLineModel.RootNamespace) ? _projectContext.RootNamespace:
-                    commandLineModel.RootNamespace;
-
-            var model = new IdentityGeneratorTemplateModel()
-            {
-                Namespace = rootNamespace,
-                DbContextNamespace = rootNamespace+".Areas.Identity.Data",
-                ApplicationName = _applicationInfo.ApplicationName,
-                UserClass = commandLineModel.UserClass,
-                DbContextClass = GetDbContextClassName(commandLineModel.DbContext),
-                UseSQLite = commandLineModel.UseSQLite
-            };
-
-            var templates = IdentityGeneratorFilesConfig.GetTemplateFiles(model.UserClass, model.DbContextClass);
+            var templates = IdentityGeneratorFilesConfig.GetTemplateFiles(templateModel);
 
             foreach (var template in templates)
             {
-                await _codegeratorActionService.AddFileFromTemplateAsync(
+                await _codegeneratorActionService.AddFileFromTemplateAsync(
                     template.Value,
                     template.Key,
                     TemplateFolders,
-                    model);
+                    templateModel);
             }
 
-            var dbContextClass = model.IsGenerateCustomUser ? model.DbContextClass : "IdentityDbContext";
             _connectionStringsWriter.AddConnectionString(
-                connectionStringName: $"{dbContextClass}Connection",
-                dataBaseName: $"{model.ApplicationName}",
-                useSQLite: commandLineModel.UseSQLite);
-        }
-
-        // We always want to generate a DbContext. In case the user does not provide a name, 
-        // we try to generate one by concatenating Application name and "IdentityDbContext"
-        // If the result is not a valid class name, then we just use IdentityDbContext.
-        private string GetDbContextClassName(string dbContext)
-        {
-            if (!string.IsNullOrEmpty(dbContext))
-            {
-                return dbContext;
-            }
-
-            var defaultDbContextName = $"{_applicationInfo.ApplicationName}IdentityDbContext";
-
-            if (!RoslynUtilities.IsValidIdentifier(defaultDbContextName))
-            {
-                defaultDbContextName = "IdentityDbContext";
-            }
-
-            return defaultDbContextName;
+                connectionStringName: $"{templateModel.DbContextClass}Connection",
+                dataBaseName: templateModel.ApplicationName,
+                useSQLite: templateModel.UseSQLite);
         }
 
         /// <summary>
@@ -241,7 +189,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         ///                \ Pages
         ///                \ Services
         /// </summary>
-        private void EnsureFolderLayout(string IdentityareaName, bool isGenerateCustomUser)
+        private void EnsureFolderLayout(string identityAreaName, IdentityGeneratorTemplateModel templateModel)
         {
             var areaBasePath = Path.Combine(_applicationInfo.ApplicationBasePath, "Areas");
             if (!Directory.Exists(areaBasePath))
@@ -249,13 +197,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 Directory.CreateDirectory(areaBasePath);
             }
 
-            var areaPath = Path.Combine(areaBasePath, IdentityareaName);
+            var areaPath = Path.Combine(areaBasePath, identityAreaName);
             if (!Directory.Exists(areaPath))
             {
                 Directory.CreateDirectory(areaPath);
             }
 
-            foreach (var areaFolder in IdentityGeneratorFilesConfig.AreaFolders)
+            var areaFolders = IdentityGeneratorFilesConfig.GetAreaFolders(
+                !templateModel.IsUsingExistingDbContext);
+
+            foreach (var areaFolder in areaFolders)
             {
                 var path = Path.Combine(areaPath, areaFolder);
                 if (!Directory.Exists(path))

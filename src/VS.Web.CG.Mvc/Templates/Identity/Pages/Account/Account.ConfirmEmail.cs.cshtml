@@ -1,26 +1,40 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 @{
-    var userClassName = "IdentityUser";
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+        });
+
+    var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account";
     if (Model.IsGenerateCustomUser)
     {
-@:using @(Model.DbContextNamespace);
-        userClassName = @Model.UserClass;
+        if (thisNamespace != Model.UserClassNamespace)
+        {
+            namespaceSet.Add(Model.UserClassNamespace);
+        }
+    }
+    foreach(var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
     }
 }
-namespace @(Model.Namespace).Areas.Identity.Pages.Account
+
+namespace @thisNamespace
 {
     public class ConfirmEmailModel : PageModel
     {
-        private readonly UserManager<@(userClassName)> _userManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
 
-        public ConfirmEmailModel(UserManager<@(userClassName)> userManager)
+        public ConfirmEmailModel(UserManager<@(Model.UserClass)> userManager)
         {
             _userManager = userManager;
         }

@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore 
 {
-    internal class ReflectedTypesProvider
+    public class ReflectedTypesProvider
     {
         private ILogger _logger;
         private ICodeGenAssemblyLoadContext _loader;

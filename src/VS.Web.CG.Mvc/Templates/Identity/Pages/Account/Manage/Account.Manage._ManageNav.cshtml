@@ -1,12 +1,5 @@
 ﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-    var userClassName = "IdentityUser";
-    if (Model.IsGenerateCustomUser)
-    {
-        userClassName = @Model.UserClass;
-    }
-}
-@@inject SignInManager<@(userClassName)> SignInManager
+@@inject SignInManager<@(Model.UserClass)> SignInManager
 @@{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

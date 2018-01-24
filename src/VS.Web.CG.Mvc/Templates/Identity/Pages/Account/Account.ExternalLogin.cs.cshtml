@@ -1,34 +1,47 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 @{
-    var userClassName = "IdentityUser";
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.Extensions.Logging",
+        });
+
+    var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account";
     if (Model.IsGenerateCustomUser)
     {
-@:using @(Model.DbContextNamespace);
-        userClassName = @Model.UserClass;
+        if (thisNamespace != Model.UserClassNamespace)
+        {
+            namespaceSet.Add(Model.UserClassNamespace);
+        }
+    }
+    foreach(var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
     }
 }
 
-namespace @(Model.Namespace).Areas.Identity.Pages.Account
+namespace @thisNamespace
 {
     public class ExternalLoginModel : PageModel
     {
-        private readonly SignInManager<@(userClassName)> _signInManager;
-        private readonly UserManager<@(userClassName)> _userManager;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         public ExternalLoginModel(
-            SignInManager<@(userClassName)> signInManager,
-            UserManager<@(userClassName)> userManager,
+            SignInManager<@(Model.UserClass)> signInManager,
+            UserManager<@(Model.UserClass)> userManager,
             ILogger<ExternalLoginModel> logger)
         {
             _signInManager = signInManager;
@@ -121,7 +134,7 @@ namespace @(Model.Namespace).Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = new @(userClassName) { UserName = Input.Email, Email = Input.Email };
+                var user = new @(Model.UserClass) { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {

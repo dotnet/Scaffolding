@@ -1,30 +1,43 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 @{
-    var userClassName = "IdentityUser";
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.Extensions.Logging",
+        });
+    var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account.Manage";
     if (Model.IsGenerateCustomUser)
     {
-@:using @(Model.DbContextNamespace);
-        userClassName = @Model.UserClass;
+        if (thisNamespace != Model.UserClassNamespace)
+        {
+            namespaceSet.Add(Model.UserClassNamespace);
+        }
+    }
+    foreach(var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
     }
 }
 
-namespace @(Model.Namespace).Areas.Identity.Pages.Account.Manage
+namespace @thisNamespace
 {
     public class DeletePersonalDataModel : PageModel
     {
-        private readonly UserManager<@(userClassName)> _userManager;
-        private readonly SignInManager<@(userClassName)> _signInManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
 
         public DeletePersonalDataModel(
-            UserManager<@(userClassName)> userManager,
-            SignInManager<@(userClassName)> signInManager,
+            UserManager<@(Model.UserClass)> userManager,
+            SignInManager<@(Model.UserClass)> signInManager,
             ILogger<DeletePersonalDataModel> logger)
         {
             _userManager = userManager;

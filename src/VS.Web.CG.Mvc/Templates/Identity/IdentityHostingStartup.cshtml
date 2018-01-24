@@ -1,30 +1,42 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
 using System;
-using Microsoft.AspNetCore.Identity;
 @{
-    if(!Model.IsGenerateCustomUser)
-    {
-@:using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    }
-}
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using @(Model.Namespace).Areas.Identity.Services;
-@{
-     var userClassName = "IdentityUser";
-     var dbContextName = "IdentityDbContext";
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Hosting",
+            "Microsoft.EntityFrameworkCore",
+            "Microsoft.Extensions.Configuration",
+            "Microsoft.Extensions.DependencyInjection",
+            $"{Model.Namespace}.Areas.Identity.Services"
+        });
+    var thisNamespace = $"{Model.Namespace}.Areas.Identity";
     if (Model.IsGenerateCustomUser)
     {
-@:using @(Model.DbContextNamespace);
-        userClassName = @Model.UserClass;
-        dbContextName = @Model.DbContextClass;
+        if (thisNamespace != Model.UserClassNamespace)
+        {
+            namespaceSet.Add(Model.UserClassNamespace);
+        }
+    }
+    else
+    {
+        namespaceSet.Add("Microsoft.AspNetCore.Identity.EntityFrameworkCore");
+    }
+    if (Model.IsUsingExistingDbContext)
+    {
+        namespaceSet.Add(Model.DbContextNamespace);
+    }
+    foreach(var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
     }
 }
 
-[assembly: HostingStartup(typeof(@(Model.Namespace).Areas.Identity.IdentityHostingStartup))]
-namespace @(Model.Namespace).Areas.Identity
+[assembly: HostingStartup(typeof(@(thisNamespace).IdentityHostingStartup))]
+namespace @(thisNamespace)
 {
     public class IdentityHostingStartup : IHostingStartup
     {
@@ -34,24 +46,27 @@ namespace @(Model.Namespace).Areas.Identity
                 services.AddTransient<IEmailSender, EmailSender>();
 
 @{
-    if (Model.UseSQLite)
+    if (!Model.IsUsingExistingDbContext)
     {
-@:                services.AddDbContext<@dbContextName>(options =>
+        if (Model.UseSQLite)
+        {
+@:                services.AddDbContext<@Model.DbContextClass>(options =>
 @:                    options.UseSqlite(
-@:                        context.Configuration.GetConnectionString("@(dbContextName)Connection"),
+@:                        context.Configuration.GetConnectionString("@(Model.DbContextClass)Connection"),
 @:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
-    }
-    else
-    {
-@:                services.AddDbContext<@dbContextName>(options =>
+        }
+        else
+        {
+@:                services.AddDbContext<@Model.DbContextClass>(options =>
 @:                    options.UseSqlServer(
-@:                        context.Configuration.GetConnectionString("@(dbContextName)Connection"),
+@:                        context.Configuration.GetConnectionString("@(Model.DbContextClass)Connection"),
 @:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
+        }
+@:                services.AddIdentity<@(Model.UserClass), IdentityRole>()
+@:                    .AddEntityFrameworkStores<@Model.DbContextClass>()
+@:                   .AddDefaultTokenProviders();
     }
 }
-                services.AddIdentity<@(userClassName), IdentityRole>()
-                    .AddEntityFrameworkStores<@dbContextName>()
-                    .AddDefaultTokenProviders();
 
                 services.AddMvc()
                     .AddRazorPagesOptions(options =>

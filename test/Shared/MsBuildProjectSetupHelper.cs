@@ -72,6 +72,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }
 
+        internal void SetupProjectsForIdentityScaffolder(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.RootProjectTxt);
+            fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.IdentityContextText);
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
         private void RestoreAndBuild(string path, ITestOutputHelper output)
         {
             var result = Command.CreateDotNet("restore",

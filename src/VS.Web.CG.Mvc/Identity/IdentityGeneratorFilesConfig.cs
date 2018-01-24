@@ -10,12 +10,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
     public static class IdentityGeneratorFilesConfig
     {
-        public static readonly string[] AreaFolders = new string[]
+        public static string[] GetAreaFolders(bool isDataRequired)
         {
-            "Data",
-            "Pages",
-            "Services"
-        };
+            return isDataRequired
+                ? new string[]
+                {
+                    "Data",
+                    "Pages",
+                    "Services"
+                }
+                : new string[]
+                {
+                    "Pages",
+                    "Services"
+                };
+        }
 
         public static Dictionary<string, string> Templates = new Dictionary<string,string>()
         {
@@ -140,20 +149,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {"ScaffoldingReadme.txt", Path.Combine(".","ScaffoldingReadme.txt")}
         };
 
-        public static Dictionary<string, string> GetTemplateFiles(string userClass, string dbContextClass)
+        public static Dictionary<string, string> GetTemplateFiles(IdentityGeneratorTemplateModel templateModel)
         {
-            if (string.IsNullOrEmpty(dbContextClass))
+            if (templateModel == null)
             {
-                throw new ArgumentException(nameof(dbContextClass));
+                throw new ArgumentNullException(nameof(templateModel));
             }
 
             var templates = new Dictionary<string, string>(Templates);
 
-            templates.Add("ApplicationDbContext.cshtml", Path.Combine("Areas", "Identity","Data", $"{dbContextClass}.cs"));
-
-            if (!string.IsNullOrEmpty(userClass))
+            if (!templateModel.IsUsingExistingDbContext)
             {
-                templates.Add("ApplicationUser.cshtml", Path.Combine("Areas", "Identity","Data", $"{userClass}.cs"));
+                templates.Add("ApplicationDbContext.cshtml", Path.Combine("Areas", "Identity", "Data", $"{templateModel.DbContextClass}.cs"));
+
+                if (templateModel.IsGenerateCustomUser)
+                {
+                    templates.Add("ApplicationUser.cshtml", Path.Combine("Areas", "Identity", "Data", $"{templateModel.UserClass}.cs"));
+                }
             }
 
             return templates;

@@ -1,0 +1,71 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+@{
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.Extensions.Logging",
+            "Newtonsoft.Json"
+        });
+
+    var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account.Manage";
+    if (Model.IsGenerateCustomUser)
+    {
+        if (thisNamespace != Model.UserClassNamespace)
+        {
+            namespaceSet.Add(Model.UserClassNamespace);
+        }
+    }
+    foreach(var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
+    }
+}
+
+namespace @thisNamespace
+{
+    public class DownloadPersonalDataModel : PageModel
+    {
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly ILogger<DownloadPersonalDataModel> _logger;
+
+        public DownloadPersonalDataModel(
+            UserManager<@(Model.UserClass)> userManager,
+            ILogger<DownloadPersonalDataModel> logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            _logger.LogInformation("User with ID '{UserId}' asked for their personal data.", _userManager.GetUserId(User));
+
+            // Only include personal data for download
+            var personalData = new Dictionary<string, string>();
+            personalData.Add("UserId", await _userManager.GetUserIdAsync(user));
+            personalData.Add("UserName", await _userManager.GetUserNameAsync(user));
+            personalData.Add("Email", await _userManager.GetEmailAsync(user));
+            personalData.Add("EmailConfirmed", (await _userManager.IsEmailConfirmedAsync(user)).ToString());
+            personalData.Add("PhoneNumber", await _userManager.GetPhoneNumberAsync(user));
+            personalData.Add("PhoneNumberConfirmed", (await _userManager.IsPhoneNumberConfirmedAsync(user)).ToString());
+
+            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
+            return new FileContentResult(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(personalData)), "text/json");
+        }
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "Alias": "identity",
+    "Description": "Generates an MVC Area with controllers and ",
+    "Arguments": [ ],
+  "Options": [
+    {
+      "Name": "dbContext",
+      "ShortName": "dc",
+      "Description": "Name of the DbContext class to generate."
+    },
+    {
+      "Name": "userClass",
+      "ShortName": "u",
+      "Description": "Name of the User class to generate."
+    },
+    {
+      "Name": "useSqLite",
+      "ShortName": "sqlite",
+      "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
+    },
+    {
+      "Name": "force",
+      "ShortName": "f",
+      "Description": "Use this option to overwrite existing files."
+    }
+  ]
+}

@@ -57,10 +57,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 It.IsAny<string>()))
                 .Returns(editSyntaxTreeResult);
 
+            var connectionStringsWriter = new Mock<IConnectionStringsWriter>();
+            connectionStringsWriter.Setup(c => c.AddConnectionString(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+
             var filesLocator = new FilesLocator();
             var compilationService = new RoslynCompilationService(_appInfo, _loader, _projectContext);
             var templatingService = new Templating.RazorTemplating(compilationService);
-            _dbContextEditorServices = new DbContextEditorServices(_projectContext, _appInfo, filesLocator, templatingService);
+            _dbContextEditorServices = new DbContextEditorServices(_projectContext, _appInfo, filesLocator, templatingService, connectionStringsWriter.Object);
 
             return new EntityFrameworkServices(
                 _projectContext,

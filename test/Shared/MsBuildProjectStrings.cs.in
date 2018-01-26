@@ -492,5 +492,68 @@ namespace DAL
     }
 }
 ";
+
+        public const string RootProjectForIdentityScaffolderText = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+
+  <PropertyGroup>
+    <RestoreSources>${RestoreSources}</RestoreSources>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <ProjectName>TestProject</ProjectName>
+    <NoWarn>NU1605</NoWarn>
+    <RuntimeFrameworkVersion>${RuntimeFrameworkVersion}</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""${MicrosoftApplicationInsightsAspNetCorePackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""${MicrosoftVisualStudioWebBrowserLinkPackageVersion}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""${MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""${MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion}"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""${MicrosoftEntityFrameworkCoreSqlServerPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string IdentityContextName = "MyApplicationDbContext.cs";
+        public const string IdentityContextText = @"
+using System;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace Test.Data
+{
+    public class MyApplicationDbContext : IdentityDbContext<IdentityUser>
+    {
+        public MyApplicationDbContext(DbContextOptions<MyApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            // Customize the ASP.NET Identity model and override the defaults if needed.
+            // For example, you can rename the ASP.NET Identity table names and more.
+            // Add your customizations after calling base.OnModelCreating(builder);
+        }
+    }
+}
+";
     }
 }

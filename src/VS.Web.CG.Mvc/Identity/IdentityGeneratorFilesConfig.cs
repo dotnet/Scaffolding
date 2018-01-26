@@ -69,6 +69,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             //IdentityHostingStartup
             {"IdentityHostingStartup.cshtml", Path.Combine("Areas", "Identity", "IdentityHostingStartup.cs")},
+            // LoginPartial
+            {"_LoginPartial.cshtml", Path.Combine("Pages", "Shared", "_LoginPartial.cshtml")}
         };
 
         public static Dictionary<string, string> StaticFiles = new Dictionary<string, string>()

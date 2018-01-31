@@ -399,7 +399,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 var dbContextOperations = new DbContextOperations(
                     operationReporter,
                     dbContextType.GetTypeInfo().Assembly,
-                    startupType.GetTypeInfo().Assembly);
+                    startupType.GetTypeInfo().Assembly,
+                    Array.Empty<string>());
 
                 var dbContextService = dbContextOperations.CreateContext(dbContextType.FullName);
 

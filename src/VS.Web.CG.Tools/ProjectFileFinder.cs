@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             if (!File.Exists(resolvedPath))
             {
-                throw new Exception($"Could not find project file in {_initialPath}");
+                throw new FileNotFoundException($"Could not find project file in {_initialPath}");
             }
 
             if (!Path.GetExtension(resolvedPath).Equals(".csproj", StringComparison.OrdinalIgnoreCase)

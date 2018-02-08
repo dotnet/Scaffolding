@@ -54,6 +54,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
+        public static void InstallGlobalTool()
+        {
+            File.WriteAllText("Nuget.config", MsBuildProjectStrings.GetNugetConfigText());
+            var result = Command.CreateDotNet("install",
+                new string[] { "tool", "dotnet-aspnet-codegenerator", "-g", "--configfile", "Nuget.config", "--version", MsBuildProjectStrings.GlobalToolVersion })
+                .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
+                .InWorkingDirectory(Directory.GetCurrentDirectory())
+                .OnErrorLine(l => Console.WriteLine(l))
+                .OnOutputLine(l => Console.WriteLine(l))
+                .Execute();
+
+            if (result.ExitCode != 0 )
+            {
+                Console.Error.WriteLine("Failed to install global tool.");
+            }
+        }
+
         public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));

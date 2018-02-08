@@ -61,7 +61,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private static void Execute(string[] args, bool isNoBuild, ConsoleLogger logger)
         {
             var app = new ScaffoldingApp(false);
-
+            bool isShowHelp = false;
             app.OnExecute(() =>
             {
                 try
@@ -75,11 +75,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     project = Path.GetFullPath(project);
                     var configuration = app.AppConfiguration.Value() ?? "Debug";
 
-                    var projectFileFinder = new ProjectFileFinder(project);
+                    isShowHelp = ToolCommandLineHelper.IsHelpArgument(args)
+                                                || app.GeneratorArgument == null
+                                                || string.IsNullOrEmpty(app.GeneratorArgument.Value);
+                    
+                    ProjectFileFinder projectFileFinder = new ProjectFileFinder(project);
 
-                    if (ToolCommandLineHelper.IsHelpArgument(args) 
-                        || app.GeneratorArgument == null
-                        || string.IsNullOrEmpty(app.GeneratorArgument.Value))
+                    if (isShowHelp)
                     {
                         app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration);
                         app.ShowHelp();
@@ -98,6 +100,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
                     logger.LogMessage(ex.Message, LogMessageLevel.Error);
+
+                    if (isShowHelp)
+                    {
+                        app.ShowHelp();
+                    }
+
                     logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
                     if (!logger.IsTracing)
                     {

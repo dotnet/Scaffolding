@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 15.0.26730.03
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4057ACF-27F0-4724-963B-44548B6BC4E9}"
 	ProjectSection(SolutionItems) = preProject
@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGetPackageVerifier.json = NuGetPackageVerifier.json
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Mvc", "src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj", "{3E99E653-6B31-45CF-9B3A-30EEE497BE13}"
 EndProject
@@ -89,8 +91,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.MSBuild.Test", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Contracts", "src\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj", "{315EDEE3-EB23-4019-958D-C1EEA5F1DA18}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-anycpu", "tools\VS.Web.CG.Design-anycpu\VS.Web.CG.Design-anycpu.csproj", "{CB0F7112-C0BF-4249-BB41-5F2EFA760757}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-arm", "tools\VS.Web.CG.Design-arm\VS.Web.CG.Design-arm.csproj", "{B2FB25DC-DD8D-4A0E-AF9F-CCBC6ED75ED0}"
@@ -98,6 +98,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-arm64", "tools\VS.Web.CG.Design-arm64\VS.Web.CG.Design-arm64.csproj", "{867AB4D3-0EE0-4A3E-B0F0-78E2B612495A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Web.CG.Design-x86", "tools\VS.Web.CG.Design-x86\VS.Web.CG.Design-x86.csproj", "{8A75336B-A55F-42F6-B8BA-B55EFDA39705}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-aspnet-codegenerator", "src\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj", "{0294A050-806F-4FF5-989E-9755DF3D56B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -616,6 +618,24 @@ Global
 		{8A75336B-A55F-42F6-B8BA-B55EFDA39705}.Release|x64.Build.0 = Release|Any CPU
 		{8A75336B-A55F-42F6-B8BA-B55EFDA39705}.Release|x86.ActiveCfg = Release|Any CPU
 		{8A75336B-A55F-42F6-B8BA-B55EFDA39705}.Release|x86.Build.0 = Release|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Debug|x64.Build.0 = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Debug|x86.Build.0 = Debug|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x64.ActiveCfg = Release|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x64.Build.0 = Release|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -650,9 +670,7 @@ Global
 		{B2FB25DC-DD8D-4A0E-AF9F-CCBC6ED75ED0} = {4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}
 		{867AB4D3-0EE0-4A3E-B0F0-78E2B612495A} = {4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}
 		{8A75336B-A55F-42F6-B8BA-B55EFDA39705} = {4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8DA7AF03-FFF5-4EB3-A7D4-CDBD49A0D4B9}
+		{0294A050-806F-4FF5-989E-9755DF3D56B1} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

@@ -273,6 +273,10 @@ namespace WebApplication1
     <Compile Include=""**\*.cs"" Exclude=""Excluded.cs;$(DefaultItemExcludes)"" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include=""System.ComponentModel.Annotations"" Version=""4.4.1"" />
+  </ItemGroup>
+
 </Project>
 ";
 
@@ -304,6 +308,7 @@ namespace WebApplication1.Models
 ";
         public const string CarTxt = @"
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Library1.Models
 {
@@ -313,6 +318,8 @@ namespace Library1.Models
         public string Name { get; set; }
         public int ManufacturerID { get; set; }
         public Manufacturer Manufacturer { get; set; }
+        [DataType(DataType.MultilineText)]
+        public string Notes { get; set; }
     }
 
     public class Manufacturer

@@ -22,6 +22,12 @@
         <dd>
             @Html.DisplayFor(model => model.ManufacturerID)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Notes)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Notes)
+        </dd>
     </dl>
 </div>
 <div>

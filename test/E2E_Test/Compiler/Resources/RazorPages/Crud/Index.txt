@@ -10,6 +10,9 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Car[0].Name)
                 </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Car[0].Notes)
+                </th>
             <th>
                 @Html.DisplayNameFor(model => model.Car[0].Manufacturer)
             </th>
@@ -21,6 +24,9 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Notes)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Manufacturer.ID)

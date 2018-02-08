@@ -17,6 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         bool Scaffold { get; set; }
         string ShortTypeName { get; set; }
         string TypeName { get; set; }
+        bool IsMultilineText { get; set; }
 
         PropertyInfo PropertyInfo { get; set; }
     }

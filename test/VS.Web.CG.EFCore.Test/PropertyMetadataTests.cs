@@ -174,6 +174,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         }
 
         [Fact]
+        public void DataType_Attribute_Is_Reflected_In_Metadata()
+        {
+            //Arrange
+            var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
+            var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
+
+            //Act
+            var dataTypeAttributePropertyMetadata = modelMetadata.Properties.FirstOrDefault(p => p.PropertyName == nameof(Product.DataTypeAttributeProperty));
+            var productNameAttributeMetadata = modelMetadata.Properties.FirstOrDefault(p => p.PropertyName == nameof(Product.ProductName));
+
+            //Assert
+            Assert.True(dataTypeAttributePropertyMetadata.IsMultilineText);
+            Assert.False(productNameAttributeMetadata.IsMultilineText);
+        }
+
+        [Fact]
         public void PropertyMetadata_From_PropertyInfo()
         {
             //Arrange

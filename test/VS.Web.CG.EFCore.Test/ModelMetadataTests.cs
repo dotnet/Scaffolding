@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             var productMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
 
             //Act && Assert
-            Assert.Equal(8, productMetadata.Properties.Length);
+            Assert.Equal(9, productMetadata.Properties.Length);
             Assert.Single(productMetadata.Navigations);
 
             //Arrange

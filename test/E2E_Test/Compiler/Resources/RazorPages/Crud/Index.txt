@@ -7,12 +7,12 @@
 <table class="table">
     <thead>
         <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Car[0].Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Car[0].Notes)
-                </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Car[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Car[0].Notes)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Car[0].Manufacturer)
             </th>

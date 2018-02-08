@@ -31,6 +31,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             Output = output;
         }
 
+        static E2ETestBase()
+        {
+            MsBuildProjectSetupHelper.InstallGlobalTool();
+        }
+
         protected void Scaffold(string[] args, string testProjectPath)
         {
             var thisAssembly = GetType().GetTypeInfo().Assembly.GetName().Name;

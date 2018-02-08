@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         public override string GetHelpText(string commandName=null)
         {
             string helpText = base.GetHelpText(commandName);
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(helpText);
 
             // Search for NuGetPackages with CodeGenerationPackages.
             if (ProjectContext != null)
@@ -76,11 +76,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     sb.AppendLine(GetHelpTextForAvailableGenerators(paramDefinitionsCache));
                 }
 
-                sb.Insert(0, helpText);
             }
             else
             {
-                Debug.Fail("Project Context was not set. Cannot search for generators to display help.");
+                Debug.Print("Project Context was not set. Cannot search for generators to display help.");
             }
 
             return sb.ToString();
@@ -109,6 +108,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             return sb.ToString();
+        }
+
+        internal void ShowHelpWithoutProjectInformation()
+        {
+
         }
 
         private static string BuildHelpForGenerator( ParamDefinition generatorParamDef)

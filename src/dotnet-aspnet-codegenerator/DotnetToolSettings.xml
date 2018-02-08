@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<DotNetCliTool>
+  <Commands>
+    <Command Name="dotnet-aspnet-codegenerator" EntryPoint="dotnet-aspnet-codegenerator.dll" Runner="dotnet" />
+  </Commands>
+</DotNetCliTool> 

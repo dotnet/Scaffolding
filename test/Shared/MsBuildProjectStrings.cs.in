@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
+using System.Text;
 using System.Xml;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
@@ -39,9 +41,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
-  <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
   </ItemGroup>
@@ -77,9 +77,7 @@ public const string RootProjectTxtWithoutEF = @"
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
-  <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include=""..\Library1\Library1.csproj"" />
   </ItemGroup>
@@ -361,9 +359,7 @@ namespace Library1.Models
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
-  <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include=""..\DAL\DAL.csproj"" />
   </ItemGroup>
@@ -530,9 +526,7 @@ namespace DAL
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
-  <ItemGroup>
-    <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
-  </ItemGroup>
+
 </Project>
 ";
 
@@ -562,5 +556,26 @@ namespace Test.Data
     }
 }
 ";
+      public const string GlobalToolVersion = "${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}";
+
+      public static string GetNugetConfigText()
+      {
+        var sources = @"${RestoreSources}";
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine(@"<?xml version=""1.0"" encoding=""utf-8""?>");
+        sb.AppendLine("<configuration>");
+        sb.AppendLine("  <packageSources>");
+        sb.AppendLine("    <Clear/>");
+        int i = 1;
+        foreach (var s in sources.Split(new char [] {';', '\r', '\n'}, StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (!string.IsNullOrWhiteSpace(s))
+              sb.AppendLine($"    <add key=\"Source{i++}\" value=\"{s.Trim()}\" />");
+        }
+
+        sb.AppendLine("  </packageSources>");
+        sb.AppendLine("</configuration>");
+        return sb.ToString();
+      }
     }
 }

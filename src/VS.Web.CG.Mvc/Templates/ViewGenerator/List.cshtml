@@ -49,9 +49,9 @@
         {
             if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
             {
-               <th>
-                    @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
-                </th>
+            <th>
+                @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+            </th>
             }
         }
         foreach (var navigation in Model.ModelMetadata.Navigations)

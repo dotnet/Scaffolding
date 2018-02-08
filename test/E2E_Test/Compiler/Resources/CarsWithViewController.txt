@@ -58,7 +58,7 @@ namespace TestProject.Areas.Test.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,ManufacturerID")] Car car)
+        public async Task<IActionResult> Create([Bind("ID,Name,ManufacturerID,Notes")] Car car)
         {
             if (ModelState.IsValid)
             {
@@ -92,7 +92,7 @@ namespace TestProject.Areas.Test.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ID,Name,ManufacturerID")] Car car)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,Name,ManufacturerID,Notes")] Car car)
         {
             if (id != car.ID)
             {

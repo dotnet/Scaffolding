@@ -38,6 +38,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Scaffold = false;
             }
 
+            var dataTypeAttribute = property.GetCustomAttribute(typeof(DataTypeAttribute)) as DataTypeAttribute;
+            IsMultilineText = (dataTypeAttribute != null) && (dataTypeAttribute.DataType == DataType.MultilineText);
+
             // Since this is not being treated as an EF based model,
             // below values are set as false.
             IsPrimaryKey = false;
@@ -67,6 +70,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public string ShortTypeName { get; set; }
 
         public string TypeName { get; set; }
+
+        public bool IsMultilineText { get; set; }
 
         public PropertyInfo PropertyInfo { get; set; }
     }

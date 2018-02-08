@@ -45,6 +45,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     propertyMetadata.Scaffold = scaffoldAttr.Scaffold;
                 }
+
+                var dataTypeAttr = reflectionProperty.GetCustomAttribute(typeof(DataTypeAttribute)) as DataTypeAttribute;
+                propertyMetadata.IsMultilineText = (dataTypeAttr != null) && (dataTypeAttr.DataType == DataType.MultilineText);
             }
 
             propertyMetadata.IsEnumFlags = false;

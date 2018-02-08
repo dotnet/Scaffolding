@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             var metadata = new CodeModelMetadata(typeof(Product));
 
             //Act && Assert
-            Assert.Equal(8, metadata.Properties.Length);
+            Assert.Equal(9, metadata.Properties.Length);
             Assert.Empty(metadata.PrimaryKeys);
             Assert.Empty(metadata.Navigations);
 

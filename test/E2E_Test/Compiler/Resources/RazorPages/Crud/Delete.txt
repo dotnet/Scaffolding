@@ -13,6 +13,12 @@
             @Html.DisplayFor(model => model.Car.Name)
         </dd>
         <dt>
+            @Html.DisplayNameFor(model => model.Car.Notes)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Car.Notes)
+        </dd>
+        <dt>
             @Html.DisplayNameFor(model => model.Car.Manufacturer)
         </dt>
         <dd>

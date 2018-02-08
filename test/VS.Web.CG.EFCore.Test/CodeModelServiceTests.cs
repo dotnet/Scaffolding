@@ -70,7 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
                Assert.False(metadata.ModelMetadata.Navigations.Any());
                Assert.False(metadata.ModelMetadata.PrimaryKeys.Any());
-               Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
+               Assert.Equal(4, metadata.ModelMetadata.Properties.Length);
            }
         }
 

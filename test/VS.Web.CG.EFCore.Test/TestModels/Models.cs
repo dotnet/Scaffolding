@@ -37,6 +37,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
 
         //[ReadOnly(true)]
         public string ReadOnlyProperty { get; set; }
+
+        [DataType(DataType.MultilineText)]
+        public string DataTypeAttributeProperty { get; set; }
     }
 
     public class CategoryBase

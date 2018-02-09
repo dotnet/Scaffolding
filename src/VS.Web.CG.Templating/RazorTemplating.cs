@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
 
             // Don't care about the RazorProject as we already have the content of the .cshtml file 
             // and don't need to deal with imports.
-            var razorProject = RazorProject.Create(Directory.GetCurrentDirectory());
+            var razorProject = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
             var razorTemplateEngine = new RazorTemplateEngine(razorEngine, razorProject);
 
             var imports = new RazorSourceDocument[]

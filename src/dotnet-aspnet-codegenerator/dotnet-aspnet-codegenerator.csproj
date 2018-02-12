@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <OutputType>exe</OutputType>
@@ -17,12 +17,7 @@
     <Compile Include="..\Ext.ProjectModel.MsBuild.Sources\**\*.cs">
       <Link>MsBuildSources\%(RecursiveDir)%(FileName).cs</Link>
     </Compile>
-    <Compile Include="..\VS.Web.CG.Tools\*.cs" />
-    <Compile Include="..\VS.Web.CG.Tools\Properties\*.cs" />
-    <EmbeddedResource Include="..\VS.Web.CG.Tools\*.resx" />
-    <EmbeddedResource Include="..\VS.Web.CG.Tools\compiler\resources\**\*">
-      <Link>compiler\resources\%(RecursiveDir)%(filename)%(extension)</Link>
-    </EmbeddedResource>
+    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="..\VS.Web.CG.Tools\Resources.Designer.cs">
+    <Compile Update="Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
@@ -53,7 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="..\VS.Web.CG.Tools\Resources.resx">
+    <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>

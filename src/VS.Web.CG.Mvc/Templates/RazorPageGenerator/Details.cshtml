@@ -45,9 +45,13 @@
     <hr />
     <dl class="dl-horizontal">
 @{
-    foreach (var property in Model.ModelMetadata.Properties)
+    Dictionary<string, IPropertyMetadata> propertyLookup = ((IModelMetadata)Model.ModelMetadata).Properties.ToDictionary(x => x.PropertyName, x => x);
+    Dictionary<string, INavigationMetadata> navigationLookup = ((IModelMetadata)Model.ModelMetadata).Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
+
+    foreach (var item in Model.ModelMetadata.ModelType.GetProperties())
     {
-        if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey)
+        if (propertyLookup.TryGetValue(item.Name, out IPropertyMetadata property)
+            && property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
         {
         <dt>
             @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
@@ -56,15 +60,15 @@
             @@Html.DisplayFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
         </dd>
         }
-    }
-    foreach (var navigation in Model.ModelMetadata.Navigations)
-    {
+        else if (navigationLookup.TryGetValue(item.Name, out INavigationMetadata navigation))
+        {
         <dt>
             @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(navigation))
         </dt>
         <dd>
             @@Html.DisplayFor(model => model.@(Model.ModelTypeName).@GetValueExpression(navigation).@navigation.DisplayPropertyName)
         </dd>
+        }
     }
 }    </dl>
 </div>

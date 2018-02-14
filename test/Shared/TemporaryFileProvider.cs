@@ -20,6 +20,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             File.WriteAllText(Path.Combine(this.Root, filename), contents, Encoding.UTF8);
         }
 
+        public void Copy(string source, string destination)
+        {
+            File.Copy(source, Path.Combine(this.Root, destination));
+        }
+
         public new void Dispose()
         {
             base.Dispose();

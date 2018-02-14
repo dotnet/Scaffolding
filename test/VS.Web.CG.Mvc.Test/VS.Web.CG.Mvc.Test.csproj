@@ -19,10 +19,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
-
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="$(MicrosoftExtensionsFileProvidersEmbeddedPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
     <ProjectReference Include="..\..\src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" ReferenceOutputAssembly="false" CopyToOutputDirectory="Always" OutputItemType="Content" />
   </ItemGroup>
 
 </Project>

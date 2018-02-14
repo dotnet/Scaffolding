@@ -12,10 +12,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     public class RazorPageScaffolderTests : E2ETestBase
     {
 
-        private static string[] EMPTY_PAGE_ARGS = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "razorpage", "EmptyPage", "Empty" };
-        private static string[] PAGE_WITH_DATACONTEXT = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
-        private static string[] CRUD_PAGES = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "razorpage", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--partialView" };
-        private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries" };
+        private static string[] EMPTY_PAGE_ARGS = new string[] { "-p", ".", "-c", Configuration, "razorpage", "EmptyPage", "Empty" };
+        private static string[] PAGE_WITH_DATACONTEXT = new string[] { "-p", ".", "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
+        private static string[] CRUD_PAGES = new string[] { "-p", ".", "-c", Configuration, "razorpage", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--partialView" };
+        private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { "-p", ".", "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries" };
 
         public RazorPageScaffolderTests(ITestOutputHelper output)
             :base (output)

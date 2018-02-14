@@ -13,6 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         public const string RootProjectName = "Test.csproj";
         public const string RootProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
@@ -39,7 +40,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""${MicrosoftEntityFrameworkCoreSqlServerPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
 public const string RootProjectTxtWithoutEF = @"
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
@@ -75,7 +76,6 @@ public const string RootProjectTxtWithoutEF = @"
     <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -89,6 +89,8 @@ public const string RootProjectTxtWithoutEF = @"
 
         public const string RootNet45ProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -331,6 +333,7 @@ namespace Library1.Models
 // Strings for 3 layered project
     public const string WebProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
@@ -357,7 +360,6 @@ namespace Library1.Models
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""${MicrosoftEntityFrameworkCoreSqlServerPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -498,6 +500,7 @@ namespace DAL
 
         public const string RootProjectForIdentityScaffolderText = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
@@ -524,7 +527,6 @@ namespace DAL
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""${MicrosoftEntityFrameworkCoreSqlServerPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" Version=""${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}"" />
   </ItemGroup>
 
 </Project>
@@ -555,6 +557,65 @@ namespace Test.Data
         }
     }
 }
+";
+
+      public const string MSBuildTaskDllPath = @"${OutputPath}\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll";
+      public const string TestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationDependsOn>
+      $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      ResolveReferences;
+      ResolvePackageDependenciesDesignTime;
+    </EvaluateProjectInfoForCodeGenerationDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
+    <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
+      <PropertyGroup>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup >
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <UsingTask TaskName=""ProjectContextWriter""
+             AssemblyFile=""$(EvaluateProjectInfoForCodeGenerationAssemblyPath)"" />
+
+  <Target Name=""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
+
+    <ProjectContextWriter TargetFramework =""$(TargetFramework)""
+                          OutputFile =""$(OutputFile)""
+                          Name =""$(ProjectName)""
+                          ResolvedReferences =""@(ReferencePath)""
+                          PackageDependencies =""@(_DependenciesDesignTime)""
+                          ProjectReferences =""@(ProjectReference)""
+                          AssemblyFullPath =""$(TargetPath)""
+                          OutputType=""$(OutputType)""
+                          Platform=""$(Platform)""
+                          RootNameSpace =""$(RootNamespace)""
+                          CompilationItems =""@(Compile)""
+                          TargetDirectory=""$(TargetDir)""
+                          EmbeddedItems=""@(EmbeddedResource)""
+                          Configuration=""$(Configuration)""
+                          ProjectFullPath=""$(MSBuildProjectFullPath)""
+                          ProjectDepsFileName=""$(ProjectDepsFileName)""
+                          ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""/>
+
+  </Target>
+</Project>
 ";
       public const string GlobalToolVersion = "${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}";
 

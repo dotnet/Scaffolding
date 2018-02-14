@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VS.Web.CG.Utils\VS.Web.CG.Utils.csproj" />
+    <ProjectReference Include="..\..\src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" ReferenceOutputAssembly="false" CopyToOutputDirectory="Always" OutputItemType="Content" />
   </ItemGroup>
 
   <ItemGroup>

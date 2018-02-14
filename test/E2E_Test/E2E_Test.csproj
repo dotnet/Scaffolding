@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" />
+    <!-- <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" /> -->
     <Compile Include="..\Shared\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
@@ -16,6 +16,8 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
     <ProjectReference Include="..\..\src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" />
+    <ProjectReference Include="..\..\src\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj" />
   </ItemGroup>
 
 </Project>

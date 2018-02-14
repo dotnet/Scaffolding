@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
     public class Program
     {
-        private static ConsoleLogger _logger;
         private static bool _isNoBuild;
         private const string TOOL_NAME = "dotnet-aspnet-codegenerator";
         private const string DESIGN_TOOL_NAME = "dotnet-aspnet-codegenerator-design";
@@ -27,19 +27,57 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         // Wait time after the 'inside_man' process has exited to process any messages.
         private static readonly int ServerWaitTimeForExit = 3;
 
-        public static void Main(string[] args)
-        {
+        internal bool SkipImportTarget { get; set; }
 
+        private string _codeGenerationTargetsLocation;
+        internal string CodeGenerationTargetsLocation 
+        { 
+            get
+            {
+                if (string.IsNullOrEmpty(_codeGenerationTargetsLocation))
+                {
+                    _codeGenerationTargetsLocation = GetTargetsLocation();
+                }
+
+                return _codeGenerationTargetsLocation;
+            }
+            set
+            {
+                _codeGenerationTargetsLocation = value;
+            }
+        }
+
+        private ILogger _logger;
+        internal ILogger Logger 
+        { 
+            get
+            {
+                if (_logger == null)
+                {
+                    _logger = new ConsoleLogger();
+                }
+                return _logger;
+            }
+            set
+            {
+                _logger = value;
+            }
+        }
+
+        public static int Main(string[] args)
+        {
+            int exitCode = -1;
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            _logger = new ConsoleLogger();
-            _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
+            var instance = new Program();
+            instance.Logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
 
             _isNoBuild = ToolCommandLineHelper.IsNoBuild(args);
             try
             {
                 DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
-                Execute(args, _isNoBuild, _logger);
+                instance.SkipImportTarget = false;
+                exitCode = instance.Execute(args, _isNoBuild);
             }
             finally
             {
@@ -49,8 +87,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
 
-                _logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
+                instance.Logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
             }
+
+            return exitCode;
         }
 
         /// <summary>
@@ -58,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         ///    1. Try getting the projectContext for the project
         ///    2. Invoke project dependency command with the first compatible tfm found in the project
         /// </summary>
-        private static void Execute(string[] args, bool isNoBuild, ConsoleLogger logger)
+        internal int Execute(string[] args, bool isNoBuild)
         {
             var app = new ScaffoldingApp(false);
             bool isShowHelp = false;
@@ -94,32 +134,32 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         app.BuildBasePath.Value(),
                         configuration,
                         isNoBuild,
-                        logger);
+                        Logger);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
-                    logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                    Logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
+                    Logger.LogMessage(ex.Message, LogMessageLevel.Error);
 
                     if (isShowHelp)
                     {
                         app.ShowHelp();
                     }
 
-                    logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
-                    if (!logger.IsTracing)
+                    Logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
+                    if (Logger is ConsoleLogger consoleLogger && !consoleLogger.IsTracing)
                     {
-                        logger.LogMessage(Resources.EnableTracingMessage);
+                        Logger.LogMessage(Resources.EnableTracingMessage);
                     }
                     return -1;
                 }
 
             });
 
-            app.Execute(args);
+            return app.Execute(args);
         }
 
-        private static int BuildAndDispatchDependencyCommand(
+        private int BuildAndDispatchDependencyCommand(
             string[] args,
             string projectPath,
             string buildBasePath,
@@ -170,7 +210,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         }
 
         // Creates a command to execute dotnet-aspnet-codegenerator-design
-        private static Command CreateDipatchCommand(
+        private Command CreateDipatchCommand(
             IProjectContext context,
             string[] args,
             string buildBasePath,
@@ -238,29 +278,32 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10);
         }
 
-        private static IProjectContext GetProjectInformation(string projectPath, string configuration)
+        private IProjectContext GetProjectInformation(string projectPath, string configuration)
         {
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
             {
-                // First install the target to obj folder so that it imports the one in the tools package.
-                // Here we are taking an assumption that the 'obj' folder is the right place to put the project extension target.
-                // This may not always be true if the user's settings override the default in the csproj.
-                // However, currently restoring the project always creates the obj folder irrespective of the user's settings.
+                if (!SkipImportTarget)
+                {
+                    // First install the target to obj folder so that it imports the one in the tools package.
+                    // Here we are taking an assumption that the 'obj' folder is the right place to put the project extension target.
+                    // This may not always be true if the user's settings override the default in the csproj.
+                    // However, currently restoring the project always creates the obj folder irrespective of the user's settings.
 
-                new TargetInstaller(_logger)
-                    .EnsureTargetImported(
-                        Path.GetFileName(projectFileFinder.ProjectFilePath),
-                        Path.Combine(Path.GetDirectoryName(projectFileFinder.ProjectFilePath), "obj"));
-                var codeGenerationTargetsLocation = GetTargetsLocation();
-                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, codeGenerationTargetsLocation, configuration)
+                    new TargetInstaller(_logger)
+                        .EnsureTargetImported(
+                            Path.GetFileName(projectFileFinder.ProjectFilePath),
+                            Path.Combine(Path.GetDirectoryName(projectFileFinder.ProjectFilePath), "obj"));
+                }
+
+                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, CodeGenerationTargetsLocation, configuration)
                     .Build();
             }
 
             throw new InvalidOperationException(string.Format(Resources.InvalidMsBuildProjectFile, projectFileFinder.ProjectFilePath));
         }
 
-        private static string GetTargetsLocation()
+        private string GetTargetsLocation()
         {
             var assembly = typeof(Program).GetTypeInfo().Assembly;
             var path = Path.GetDirectoryName(assembly.Location);
@@ -275,10 +318,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 path = Path.GetDirectoryName(path);
             } while (path != null);
 
+
             return string.Empty;
         }
 
-        private static int Build(ILogger logger, string projectPath, string configuration, NuGetFramework frameworkToUse, string buildBasePath)
+        private int Build(ILogger logger, string projectPath, string configuration, NuGetFramework frameworkToUse, string buildBasePath)
         {
 
             logger.LogMessage(Resources.BuildingProject);
@@ -300,7 +344,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return buildResult.Result.ExitCode;
         }
 
-        private static ScaffoldingServer StartServer(ILogger logger, IProjectContext projectInformation)
+        private ScaffoldingServer StartServer(ILogger logger, IProjectContext projectInformation)
         {
             server = ScaffoldingServer.Listen(logger);
             server.AddHandler(new ProjectInformationMessageHandler(projectInformation, logger));

@@ -154,6 +154,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             foreach (var staticFile  in IdentityGeneratorFilesConfig.StaticFiles)
             {
+                _logger.LogMessage($"Adding static file: {staticFile.Key}", LogMessageLevel.Trace);
+
                 await _codegeneratorActionService.AddFileAsync(
                     staticFile.Value,
                     Path.Combine(TemplateFolderRoot, staticFile.Key)
@@ -167,6 +169,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             foreach (var template in templates)
             {
+                _logger.LogMessage($"Adding template: {template.Key}", LogMessageLevel.Trace);
                 await _codegeneratorActionService.AddFileFromTemplateAsync(
                     template.Value,
                     template.Key,

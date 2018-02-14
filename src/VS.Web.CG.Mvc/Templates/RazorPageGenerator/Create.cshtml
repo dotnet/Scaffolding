@@ -81,8 +81,8 @@
                 {
             @:<div class="form-group">
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
                 @:<textarea asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></textarea>
+                @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                 }
                 else

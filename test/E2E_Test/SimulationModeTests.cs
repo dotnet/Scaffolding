@@ -25,7 +25,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                    "aspnet-codegenerator",
                     "-p",
                     TestProjectPath,
                     "-c",

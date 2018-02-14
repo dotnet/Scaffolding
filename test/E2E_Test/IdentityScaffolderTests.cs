@@ -24,7 +24,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                "aspnet-codegenerator",
                 "-p",
                 TestProjectPath,
                 "-c",
@@ -36,12 +35,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
                 foreach(var file in IdentityGeneratorFilesConfig.StaticFiles)
                 {
-                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file.Value)));
+                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file.Value)), $"Static file does not exist: '{file.Value}'");
                 }
 
                 foreach(var file in IdentityGeneratorFilesConfig.Templates)
                 {
-                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file.Value)));
+                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file.Value)), $"Template file does not exist: '{file.Value}'");
                 }
             }
         }

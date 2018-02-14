@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -31,24 +32,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             Output = output;
         }
 
-        static E2ETestBase()
-        {
-            MsBuildProjectSetupHelper.InstallGlobalTool();
-        }
-
         protected void Scaffold(string[] args, string testProjectPath)
         {
-            var thisAssembly = GetType().GetTypeInfo().Assembly.GetName().Name;
-            var muxerPath = DotNetMuxer.MuxerPathOrDefault();
-            Output.WriteLine($"Executing {muxerPath} {string.Join(" ", args)}");
-            var exitCode = Command.Create(muxerPath, args.Concat(new [] {"--no-build"}))
-                .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
-                .InWorkingDirectory(testProjectPath)
-                .OnOutputLine(l => Output.WriteLine(l))
-                .OnErrorLine(l => Output.WriteLine(l))
-                .Execute()
-                .ExitCode;
+            Directory.SetCurrentDirectory(testProjectPath);
+            var program = new Microsoft.VisualStudio.Web.CodeGeneration.Tools.Program();
 
+            program.SkipImportTarget = true;
+            program.CodeGenerationTargetsLocation = "Dummy";
+            var exitCode = program.Execute(args, false);
             Assert.True(0 == exitCode, $"Scaffold command failed with exit code {exitCode}");
         }
 

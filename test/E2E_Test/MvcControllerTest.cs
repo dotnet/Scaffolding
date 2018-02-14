@@ -11,9 +11,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public class MvcControllerTest : E2ETestBase
     {
-        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController" };
-        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
-        private static string[] READ_WRITE_CONTROLLER = new string[] { codegeneratorToolName, "-p", ".", "-c", Configuration, "controller",  "--controllerName", "ActionsController", "--readWriteActions" };
+        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController" };
+        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
+        private static string[] READ_WRITE_CONTROLLER = new string[] { "-p", ".", "-c", Configuration, "controller",  "--controllerName", "ActionsController", "--readWriteActions" };
 
 
         public MvcControllerTest(ITestOutputHelper output)
@@ -58,7 +58,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                    "aspnet-codegenerator",
                     "-p",
                     TestProjectPath,
                     "-c",
@@ -88,7 +87,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                    codegeneratorToolName,
                     "-p",
                     TestProjectPath,
                     "-c",
@@ -130,7 +128,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 Directory.SetCurrentDirectory(TestProjectPath);
                 var args = new string[]
                 {
-                    codegeneratorToolName,
                     "-p",
                     TestProjectPath,
                     "-c",
@@ -169,7 +166,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 System.Console.WriteLine(fileProvider.Root);
                 var args = new string[]
                 {
-                    codegeneratorToolName,
                     "-p",
                     TestProjectPath,
                     "-c",
@@ -197,7 +193,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                    codegeneratorToolName,
                     "-p",
                     TestProjectPath,
                     "-c",

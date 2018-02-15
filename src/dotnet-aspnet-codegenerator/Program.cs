@@ -266,7 +266,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     framework: frameworkToUse,
                     configuration: configuration,
                     projectDirectory: projectDirectory,
-                    assemblyFullPath: context.AssemblyFullPath);
+                    assemblyFullPath: context.AssemblyFullPath)
+                .InWorkingDirectory(projectDirectory);
         }
 
         private static bool IsNetCoreAppFramework(NuGetFramework framework)

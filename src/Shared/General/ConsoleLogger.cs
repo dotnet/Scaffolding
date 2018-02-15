@@ -23,7 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             LogMessage(message, LogMessageLevel.Information);
         }
 
-        public void LogMessage(string message, LogMessageLevel level)
+        public virtual void LogMessage(string message, LogMessageLevel level)
         {
             lock (_syncObject)
             {

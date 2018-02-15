@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,28 +19,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
-                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
                 var args = new string[]
                 {
-                "-p",
-                TestProjectPath,
-                "-c",
-                Configuration,
-                "identity"
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "identity"
                 };
 
                 Scaffold(args, TestProjectPath);
 
-                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles)
-                {
-                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file.Value)), $"Static file does not exist: '{file.Value}'");
-                }
-
                 foreach(var file in IdentityGeneratorFilesConfig.Templates)
                 {
-                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file.Value)), $"Template file does not exist: '{file.Value}'");
+                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Template file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
+
+                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles)
+                {
+                    Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Static file does not exist: '{Path.Combine(TestProjectPath, file)}'");
+                }
+
             }
         }
     }

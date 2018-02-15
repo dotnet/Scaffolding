@@ -134,6 +134,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 throw new ArgumentNullException(nameof(commandlineModel));
             }
+
             var templateModelBuilder = new IdentityGeneratorTemplateModelBuilder(
                 commandlineModel,
                 _applicationInfo,
@@ -152,12 +153,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private async Task AddStaticFiles()
         {
+            var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
             foreach (var staticFile  in IdentityGeneratorFilesConfig.StaticFiles)
             {
                 _logger.LogMessage($"Adding static file: {staticFile.Key}", LogMessageLevel.Trace);
 
                 await _codegeneratorActionService.AddFileAsync(
-                    staticFile.Value,
+                    Path.Combine(projectDir, staticFile.Value),
                     Path.Combine(TemplateFolderRoot, staticFile.Key)
                 );
             }
@@ -166,12 +168,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private async Task AddTemplateFiles(IdentityGeneratorTemplateModel templateModel)
         {
             var templates = IdentityGeneratorFilesConfig.GetTemplateFiles(templateModel);
+            var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
 
             foreach (var template in templates)
             {
                 _logger.LogMessage($"Adding template: {template.Key}", LogMessageLevel.Trace);
                 await _codegeneratorActionService.AddFileFromTemplateAsync(
-                    template.Value,
+                    Path.Combine(projectDir, template.Value),
                     template.Key,
                     TemplateFolders,
                     templateModel);
@@ -214,6 +217,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var path = Path.Combine(areaPath, areaFolder);
                 if (!Directory.Exists(path))
                 {
+                    _logger.LogMessage($"Adding folder: {path}", LogMessageLevel.Trace);
                     Directory.CreateDirectory(path);
                 }
             }

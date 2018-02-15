@@ -34,12 +34,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
         protected void Scaffold(string[] args, string testProjectPath)
         {
-            Directory.SetCurrentDirectory(testProjectPath);
             var program = new Microsoft.VisualStudio.Web.CodeGeneration.Tools.Program();
 
             program.SkipImportTarget = true;
             program.CodeGenerationTargetsLocation = "Dummy";
-            var exitCode = program.Execute(args, false);
+            program.Logger = new TestLogger(Output);
+            var exitCode = program.Execute(args, true);
             Assert.True(0 == exitCode, $"Scaffold command failed with exit code {exitCode}");
         }
 

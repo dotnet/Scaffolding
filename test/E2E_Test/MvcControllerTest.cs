@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,9 +12,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public class MvcControllerTest : E2ETestBase
     {
-        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController" };
-        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-p", ".", "-c", Configuration, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
-        private static string[] READ_WRITE_CONTROLLER = new string[] { "-p", ".", "-c", Configuration, "controller",  "--controllerName", "ActionsController", "--readWriteActions" };
+        private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-c", Configuration, "controller", "--controllerName", "EmptyController" };
+        private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-c", Configuration, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
+        private static string[] READ_WRITE_CONTROLLER = new string[] { "-c", Configuration, "controller",  "--controllerName", "ActionsController", "--readWriteActions" };
 
 
         public MvcControllerTest(ITestOutputHelper output)
@@ -42,7 +43,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                Scaffold(args, TestProjectPath);
+                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj")}.Concat(args).ToArray();
+                Scaffold(invocationArgs, TestProjectPath);
 
                 generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);
                 VerifyFileAndContent(generatedFilePath, baselineFile);
@@ -59,7 +61,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 var args = new string[]
                 {
                     "-p",
-                    TestProjectPath,
+                    Path.Combine(TestProjectPath, "Test.csproj"),
                     "-c",
                     Configuration,
                     "controller",
@@ -88,7 +90,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 var args = new string[]
                 {
                     "-p",
-                    TestProjectPath,
+                    Path.Combine(TestProjectPath, "Test.csproj"),
                     "-c",
                     Configuration,
                     "controller",
@@ -129,7 +131,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 var args = new string[]
                 {
                     "-p",
-                    TestProjectPath,
+                    Path.Combine(TestProjectPath, "Test.csproj"),
                     "-c",
                     Configuration,
                     "controller",
@@ -167,7 +169,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 var args = new string[]
                 {
                     "-p",
-                    TestProjectPath,
+                    Path.Combine(TestProjectPath, "Test.csproj"),
                     "-c",
                     Configuration,
                     "controller",
@@ -194,7 +196,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 var args = new string[]
                 {
                     "-p",
-                    TestProjectPath,
+                    Path.Combine(TestProjectPath, "Test.csproj"),
                     "-c",
                     Configuration,
                     "controller",

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
@@ -29,26 +30,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
         public async Task<TemplateResult> RunTemplateAsync(string content,
             dynamic templateModel)
         {
-            var razorEngine = RazorEngine.Create((builder) =>
-            {
-                 RazorExtensions.Register(builder);
-            });
-
             // Don't care about the RazorProject as we already have the content of the .cshtml file 
             // and don't need to deal with imports.
-            var razorProject = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
-            var razorTemplateEngine = new RazorTemplateEngine(razorEngine, razorProject);
-
-            var imports = new RazorSourceDocument[]
+            var fileSystem = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
+            var projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, fileSystem, (builder) =>
             {
-                RazorSourceDocument.Create(@"
-@using System
-@using System.Threading.Tasks
-", fileName: null)
-            };
+                 RazorExtensions.Register(builder);
 
-            var razorDocument = RazorCodeDocument.Create(RazorSourceDocument.Create(content, "Template"), imports);
-            var generatorResults = razorTemplateEngine.GenerateCode(razorDocument);
+                builder.AddDefaultImports(DefaultImportItem.Instance);
+            });
+
+            var templateItem = new TemplateRazorProjectItem(content);
+            var codeDocument = projectEngine.Process(templateItem);
+            var generatorResults = codeDocument.GetCSharpDocument();
 
             if (generatorResults.Diagnostics.Any())
             {
@@ -86,6 +80,37 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                 ProcessingException = null
             };
 
+        }
+
+        private class DefaultImportItem : RazorProjectItem
+        {
+            private readonly byte[] _defaultImportBytes;
+
+            private DefaultImportItem()
+            {
+                var preamble = Encoding.UTF8.GetPreamble();
+                var content = @"
+@using System
+@using System.Threading.Tasks
+";
+                var contentBytes = Encoding.UTF8.GetBytes(content);
+
+                _defaultImportBytes = new byte[preamble.Length + contentBytes.Length];
+                preamble.CopyTo(_defaultImportBytes, 0);
+                contentBytes.CopyTo(_defaultImportBytes, preamble.Length);
+            }
+
+            public override string BasePath => null;
+
+            public override string FilePath => null;
+
+            public override string PhysicalPath => null;
+
+            public override bool Exists => true;
+
+            public static DefaultImportItem Instance { get; } = new DefaultImportItem();
+
+            public override Stream Read() => new MemoryStream(_defaultImportBytes);
         }
     }
 }

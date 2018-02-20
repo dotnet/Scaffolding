@@ -16,6 +16,7 @@
             "tools/any/any/Microsoft.Build.Utilities.Core.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg."
           },
           "SERVICING_ATTRIBUTE": {
@@ -25,7 +26,8 @@
             "tools/any/any/Microsoft.Build.Utilities.Core.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",
-            "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg."
+            "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg."
           },
           "VERSION_INFORMATIONALVERSION": {
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg."
@@ -38,6 +40,7 @@
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",
             "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Xml.XPath.XmlDocument.dll": "Assembly built by another project but bundled in our nupkg.", 
             "tools/any/any/runtimes/unix/lib/netstandard1.3/System.Text.Encoding.CodePages.dll": "Assembly built by another project but bundled in our nupkg.",
@@ -51,6 +54,7 @@
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",
             "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Xml.XPath.XmlDocument.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/runtimes/unix/lib/netstandard1.3/System.Text.Encoding.CodePages.dll": "Assembly built by another project but bundled in our nupkg.",
@@ -63,6 +67,7 @@
             "tools/any/any/Microsoft.Build.Utilities.Core.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg."
           },
           "ASSEMBLY_VERSION_MISMATCH": {
@@ -72,6 +77,7 @@
             "tools/any/any/Microsoft.Build.Utilities.Core.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg."
           },
           "FILE_MISSING_FROM_SIGN_REQUEST": {
@@ -86,13 +92,14 @@
             "tools/any/any/Microsoft.VisualStudio.Web.CodeGeneration.Contracts.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/MSBuild.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",
-            "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",      
+            "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
+            "tools/any/any/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Xml.XPath.XmlDocument.dll": "Assembly built by another project but bundled in our nupkg.", 
             "tools/any/any/runtimes/unix/lib/netstandard1.3/System.Text.Encoding.CodePages.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/runtimes/win/lib/netstandard1.3/System.Text.Encoding.CodePages.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/toolassets/net461/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll": "Assembly built by another project but bundled in our nupkg.",
-        "tools/any/any/toolassets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll": "Assembly built by another project but bundled in our nupkg."
+            "tools/any/any/toolassets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll": "Assembly built by another project but bundled in our nupkg."
           }
         }
       }

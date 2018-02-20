@@ -617,26 +617,5 @@ Outputs the Project Information needed for CodeGeneration to a file.
   </Target>
 </Project>
 ";
-      public const string GlobalToolVersion = "${MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion}";
-
-      public static string GetNugetConfigText()
-      {
-        var sources = @"${RestoreSources}";
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine(@"<?xml version=""1.0"" encoding=""utf-8""?>");
-        sb.AppendLine("<configuration>");
-        sb.AppendLine("  <packageSources>");
-        sb.AppendLine("    <Clear/>");
-        int i = 1;
-        foreach (var s in sources.Split(new char [] {';', '\r', '\n'}, StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (!string.IsNullOrWhiteSpace(s))
-              sb.AppendLine($"    <add key=\"Source{i++}\" value=\"{s.Trim()}\" />");
-        }
-
-        sb.AppendLine("  </packageSources>");
-        sb.AppendLine("</configuration>");
-        return sb.ToString();
-      }
     }
 }

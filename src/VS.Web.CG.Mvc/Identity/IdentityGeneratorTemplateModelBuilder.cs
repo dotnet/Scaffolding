@@ -67,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             _loader = loader;
             _logger = logger;
         }
-
+        internal bool IsFilesSpecified => !string.IsNullOrEmpty(_commandlineModel.Files);
         internal bool IsDbContextSpecified => !string.IsNullOrEmpty(_commandlineModel.DbContext);
 
         private Type _userType;
@@ -102,6 +102,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 : _commandlineModel.RootNamespace;
 
             var defaultDbContextNamespace = $"{RootNamespace}.Areas.Identity.Data";
+
+            if (IsFilesSpecified)
+            {
+                ValidateFilesOption();
+            }
 
             if (string.IsNullOrEmpty(_commandlineModel.UserClass))
             {
@@ -140,7 +145,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             else
             {
                 // --dbContext paramter was not specified. So we need to generate one using convention.
-                DbContextClass = GetDfaultDbContextName();
+                DbContextClass = GetDefaultDbContextName();
                 DbContextNamespace = defaultDbContextNamespace;
             }
 
@@ -160,7 +165,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             return templateModel;
         }
 
-        private string GetDfaultDbContextName()
+        private void ValidateFilesOption()
+        {
+            var errors = new List<string>();
+            if (!IsDbContextSpecified)
+            {
+                // We need the user to specify that there is an existing DbContext that inherits from IdentityDbContext.
+                errors.Add("Please specify a DbContext when using '--files' option");
+            }
+
+            var files = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var invalidFiles = files.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList().Contains(f));
+            if (invalidFiles.Any())
+            {
+                errors.Add("Could not find the files below. (Please use '--listFiles' to check the list of available files)");
+                errors.AddRange(invalidFiles);
+            }
+
+            if (errors.Any())
+            {
+                throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
+            }
+        }
+
+        private string GetDefaultDbContextName()
         {
             var defaultDbContextName = $"{_applicationInfo.ApplicationName}IdentityDbContext";
 

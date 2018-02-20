@@ -135,6 +135,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(commandlineModel));
             }
 
+            if (commandlineModel.ListFiles)
+            {
+                ShowFileList();
+                return;
+            }
+
             var templateModelBuilder = new IdentityGeneratorTemplateModelBuilder(
                 commandlineModel,
                 _applicationInfo,
@@ -149,6 +155,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             await AddTemplateFiles(templateModel);
             await AddStaticFiles();
+        }
+
+        private void ShowFileList()
+        {
+            _logger.LogMessage("File List:");
+            var files = IdentityGeneratorFilesConfig.GetFilesToList();
+            _logger.LogMessage(string.Join(Environment.NewLine, files));
         }
 
         private async Task AddStaticFiles()

@@ -16,6 +16,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "userClass", ShortName = "u", Description = "Name of the User class to generate.")]
         public string UserClass { get; set; }
 
+        [Option(Name = "files", ShortName = "fi", Description = "List of semicolon separated files to scaffold. Use the --list-files option to see the available options.")]
+        public string Files { get; set; }
+
+        [Option(Name = "listFiles", Description = "Lists the files that can be scaffolded by using the '--files' option.")]
+        public bool ListFiles { get; set; }
+
         [Option(Name = "force", ShortName = "f", Description = "Use this option to overwrite existing files.")]
         public bool Force { get; set; }
 

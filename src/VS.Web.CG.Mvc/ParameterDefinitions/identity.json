@@ -9,6 +9,16 @@
       "Description": "Name of the DbContext class to generate."
     },
     {
+      "Name": "files",
+      "ShortName": "fi",
+      "Description": "List of semicolon separated files to scaffold. Use the --list-files option to see the available options."
+    },
+    {
+      "Name": "listFiles",
+      "ShortName": "lf",
+      "Description": "Lists the files that can be scaffolded by using the '--files' option."
+    },
+    {
       "Name": "userClass",
       "ShortName": "u",
       "Description": "Name of the User class to generate."

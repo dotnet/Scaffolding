@@ -110,11 +110,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return sb.ToString();
         }
 
-        internal void ShowHelpWithoutProjectInformation()
-        {
-
-        }
-
         private static string BuildHelpForGenerator( ParamDefinition generatorParamDef)
         {
             StringBuilder sb = new StringBuilder();

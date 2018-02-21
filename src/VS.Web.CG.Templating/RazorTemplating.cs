@@ -37,7 +37,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             {
                  RazorExtensions.Register(builder);
 
-                builder.AddDefaultImports(DefaultImportItem.Instance);
+                builder.AddDefaultImports(@"
+@using System
+@using System.Threading.Tasks
+");
             });
 
             var templateItem = new TemplateRazorProjectItem(content);
@@ -80,37 +83,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                 ProcessingException = null
             };
 
-        }
-
-        private class DefaultImportItem : RazorProjectItem
-        {
-            private readonly byte[] _defaultImportBytes;
-
-            private DefaultImportItem()
-            {
-                var preamble = Encoding.UTF8.GetPreamble();
-                var content = @"
-@using System
-@using System.Threading.Tasks
-";
-                var contentBytes = Encoding.UTF8.GetBytes(content);
-
-                _defaultImportBytes = new byte[preamble.Length + contentBytes.Length];
-                preamble.CopyTo(_defaultImportBytes, 0);
-                contentBytes.CopyTo(_defaultImportBytes, preamble.Length);
-            }
-
-            public override string BasePath => null;
-
-            public override string FilePath => null;
-
-            public override string PhysicalPath => null;
-
-            public override bool Exists => true;
-
-            public static DefaultImportItem Instance { get; } = new DefaultImportItem();
-
-            public override Stream Read() => new MemoryStream(_defaultImportBytes);
         }
     }
 }

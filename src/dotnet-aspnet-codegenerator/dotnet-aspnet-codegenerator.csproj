@@ -9,6 +9,7 @@
     <PackageType>DotnetTool</PackageType>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <PackageBasePath>tools/any/any/</PackageBasePath>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -47,8 +47,6 @@
             "tools/any/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",
             "tools/any/any/NuGet.Frameworks.dll": "Assembly built by another project but bundled in our nupkg.",
             "tools/any/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg.",
-            "tools/any/any/toolassets/net461/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll": "Assembly built by another project but bundled in our nupkg.",
-            "tools/any/any/toolassets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll": "Assembly built by another project but bundled in our nupkg."
           }
         }
       } 

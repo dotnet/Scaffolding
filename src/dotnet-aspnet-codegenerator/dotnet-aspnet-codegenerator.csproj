@@ -38,6 +38,12 @@
     <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
   </ItemGroup>
 
+  <!-- Additional package files for signing-->
+  <ItemGroup>
+    <SignedPackageFile Include="$(PublishDir)toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" PackagePath="tools\any\any\toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Visible="false" />
+    <SignedPackageFile Include="$(PublishDir)toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" PackagePath="tools\any\any\toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Visible="false" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Update="Resources.Designer.cs">
       <DesignTime>True</DesignTime>

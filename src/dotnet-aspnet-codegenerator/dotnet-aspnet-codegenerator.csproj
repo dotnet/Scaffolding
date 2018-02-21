@@ -8,6 +8,7 @@
     <OutputType>exe</OutputType>
     <PackageType>DotnetTool</PackageType>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <PackageBasePath>tools/any/any/</PackageBasePath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,8 +41,54 @@
 
   <!-- Additional package files for signing-->
   <ItemGroup>
-    <SignedPackageFile Include="$(PublishDir)toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" PackagePath="tools\any\any\toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Visible="false" />
-    <SignedPackageFile Include="$(PublishDir)toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" PackagePath="tools\any\any\toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)\Microsoft.Extensions.FileProviders.Abstractions.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)Microsoft.Extensions.FileProviders.Abstractions.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)Microsoft.Extensions.FileProviders.Physical.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)Microsoft.Extensions.FileProviders.Physical.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)Microsoft.Extensions.FileSystemGlobbing.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)Microsoft.Extensions.FileSystemGlobbing.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)Microsoft.Extensions.Primitives.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)Microsoft.Extensions.Primitives.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)Microsoft.VisualStudio.Web.CodeGeneration.Contracts.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)Microsoft.VisualStudio.Web.CodeGeneration.Contracts.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)Newtonsoft.Json.dll"
+      Certificate="3PartyDual"
+      PackagePath="$(PackageBasePath)Newtonsoft.Json.dll"
+      Visible="false" />
+
+    <!-- Exclude the below files as they should already be signed -->
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)\System.Runtime.CompilerServices.Unsafe.dll"
+      PackagePath="$(PackageBasePath)System.Runtime.CompilerServices.Unsafe.dll" />
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)\NuGet.Frameworks.dll"
+      PackagePath="$(PackageBasePath)NuGet.Frameworks.dll" />
   </ItemGroup>
 
   <ItemGroup>

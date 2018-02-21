@@ -19,5 +19,6 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    <AssemblySigningCertName>Microsoft</AssemblySigningCertName>
   </PropertyGroup>
 </Project>

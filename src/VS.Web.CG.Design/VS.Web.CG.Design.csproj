@@ -24,21 +24,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).dll" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).dll" />
-    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).xml" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).xml" />
+    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).dll" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).dll" Visible="false" />
+    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).xml" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).xml" Visible="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(OS)'=='Windows_NT'">
-    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x64\lib\net461\$(AssemblyName).exe" />
-    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win7-x64\lib\net461\$(AssemblyName).xml" />
-    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x86\lib\net461\$(AssemblyName).exe" />
-    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win7-x86\lib\net461\$(AssemblyName).xml" />
-    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm\lib\net461\$(AssemblyName).exe" />
-    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win-arm\lib\net461\$(AssemblyName).xml" />
-    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm64\lib\net461\$(AssemblyName).exe" />
-    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win-arm64\lib\net461\$(AssemblyName).xml" />
-    <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).exe" Pack="true" PackagePath="lib\net461\$(AssemblyName).exe" />
-    <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).xml" Pack="true" PackagePath="lib\net461\$(AssemblyName).xml" />
+    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x64\lib\net461\$(AssemblyName).exe" Visible="false" />
+    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win7-x64\lib\net461\$(AssemblyName).xml" Visible="false" />
+    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x86\lib\net461\$(AssemblyName).exe" Visible="false" />
+    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win7-x86\lib\net461\$(AssemblyName).xml" Visible="false" />
+    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm\lib\net461\$(AssemblyName).exe" Visible="false" />
+    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win-arm\lib\net461\$(AssemblyName).xml" Visible="false" />
+    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm64\lib\net461\$(AssemblyName).exe" Visible="false" />
+    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win-arm64\lib\net461\$(AssemblyName).xml" Visible="false" />
+    <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).exe" Pack="true" PackagePath="lib\net461\$(AssemblyName).exe" Visible="false" />
+    <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).xml" Pack="true" PackagePath="lib\net461\$(AssemblyName).xml" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

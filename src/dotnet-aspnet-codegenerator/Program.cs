@@ -174,7 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             var context = GetProjectInformation(projectPath, configuration);
             var frameworkToUse = NuGetFramework.Parse(context.TargetFramework);
-            if (!_isNoBuild)
+            if (!noBuild)
             {
                 var result = Build(logger, projectPath, configuration, frameworkToUse, buildBasePath);
                 if (result != 0)

@@ -122,6 +122,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("EmptyControllerNameRequired", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot use an existing DbContext with the '--useDefaultUI' option..
+        /// </summary>
+        internal static string ExistingDbContextCannotBeUsedForDefaultUI {
+            get {
+                return ResourceManager.GetString("ExistingDbContextCannotBeUsedForDefaultUI", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The file {0} exists, use -f option to overwrite.
@@ -165,6 +174,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string InvalidDbContextClassName {
             get {
                 return ResourceManager.GetString("InvalidDbContextClassName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Option '{0}' cannot be used with '{1}'..
+        /// </summary>
+        internal static string InvalidOptionCombination {
+            get {
+                return ResourceManager.GetString("InvalidOptionCombination", resourceCulture);
             }
         }
 
@@ -336,6 +354,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string TypeDoesNotExist {
             get {
                 return ResourceManager.GetString("TypeDoesNotExist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The below files exist. Use '--force' to overwrite: {0}.
+        /// </summary>
+        internal static string UseForceOption {
+            get {
+                return ResourceManager.GetString("UseForceOption", resourceCulture);
             }
         }
         

@@ -25,6 +25,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
         public Assembly LoadFromPath(string path)
         {
             return Assembly.LoadFrom(path);
-            }
+        }
     }
 }

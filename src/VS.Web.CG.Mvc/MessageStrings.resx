@@ -138,6 +138,9 @@
   <data name="EmptyControllerNameRequired" xml:space="preserve">
     <value>Controller name is required for an Empty Controller</value>
   </data>
+  <data name="ExistingDbContextCannotBeUsedForDefaultUI" xml:space="preserve">
+    <value>Cannot use an existing DbContext with the '--useDefaultUI' option.</value>
+  </data>
   <data name="FileExists_useforce" xml:space="preserve">
     <value>The file {0} exists, use -f option to overwrite</value>
   </data>
@@ -152,6 +155,9 @@
   </data>
   <data name="InvalidDbContextClassName" xml:space="preserve">
     <value>Value of --dbContext '{0}' is not a valid class name.</value>
+  </data>
+  <data name="InvalidOptionCombination" xml:space="preserve">
+    <value>Option '{0}' cannot be used with option '{1}'.</value>
   </data>
   <data name="InvalidUserClassName" xml:space="preserve">
     <value>Value of --userClass '{0}' is not a valid class name.</value>
@@ -209,6 +215,9 @@
   </data>
   <data name="TypeDoesNotExist" xml:space="preserve">
     <value>A type with the name {0} does not exist</value>
+  </data>
+  <data name="UseForceOption" xml:space="preserve">
+    <value>The below files exist. Use '--force' to overwrite: {0}</value>
   </data>
   <data name="ValidationSuccessfull_modelUnset" xml:space="preserve">
     <value>Validation succeded but model type not set</value>

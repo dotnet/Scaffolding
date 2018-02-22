@@ -29,6 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private IConnectionStringsWriter _connectionStringsWriter;
         private Workspace _workspace;
         private ICodeGenAssemblyLoadContext _loader;
+        private IFileSystem _fileSystem;
 
         public IEnumerable<string> TemplateFolders
         {
@@ -76,6 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             IConnectionStringsWriter connectionStringsWriter,
             Workspace workspace,
             ICodeGenAssemblyLoadContext loader,
+            IFileSystem fileSystem,
             ILogger logger)
         {
             if (applicationInfo == null)
@@ -113,6 +115,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(loader));
             }
 
+            if (fileSystem == null)
+            {
+                throw new ArgumentNullException(nameof(fileSystem));
+            }
+
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
@@ -125,6 +132,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             _connectionStringsWriter = connectionStringsWriter;
             _workspace = workspace;
             _loader = loader;
+            _fileSystem = fileSystem;
             _logger = logger;
         }
 
@@ -147,6 +155,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 _projectContext,
                 _workspace,
                 _loader,
+                _fileSystem,
                 _logger);
 
             var templateModel = await templateModelBuilder.ValidateAndBuild();
@@ -154,7 +163,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             EnsureFolderLayout(IdentityAreaName, templateModel);
 
             await AddTemplateFiles(templateModel);
-            await AddStaticFiles();
+            await AddStaticFiles(templateModel);
         }
 
         private void ShowFileList()
@@ -164,39 +173,53 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             _logger.LogMessage(string.Join(Environment.NewLine, files));
         }
 
-        private async Task AddStaticFiles()
+        private async Task AddStaticFiles(IdentityGeneratorTemplateModel templateModel)
         {
-            var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
-            foreach (var staticFile  in IdentityGeneratorFilesConfig.StaticFiles)
-            {
-                _logger.LogMessage($"Adding static file: {staticFile.Key}", LogMessageLevel.Trace);
 
-                await _codegeneratorActionService.AddFileAsync(
-                    Path.Combine(projectDir, staticFile.Value),
-                    Path.Combine(TemplateFolderRoot, staticFile.Key)
-                );
+            var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+            foreach (var staticFile  in templateModel.FilesToGenerate.Where(f => !f.IsTemplate))
+            {
+                var outputPath = Path.Combine(projectDir, staticFile.OutputPath);
+                if (staticFile.ShouldOverWrite != OverWriteCondition.Never || !_fileSystem.FileExists(outputPath))
+                {
+                    // We never overwrite some files like _ViewImports.cshtml.
+                    _logger.LogMessage($"Adding static file: {staticFile.Name}", LogMessageLevel.Trace);
+
+                    await _codegeneratorActionService.AddFileAsync(
+                        outputPath,
+                        Path.Combine(TemplateFolderRoot, staticFile.SourcePath)
+                    );
+                }
             }
         }
 
         private async Task AddTemplateFiles(IdentityGeneratorTemplateModel templateModel)
         {
-            var templates = IdentityGeneratorFilesConfig.GetTemplateFiles(templateModel);
             var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+            var templates = templateModel.FilesToGenerate.Where(t => t.IsTemplate);
 
             foreach (var template in templates)
             {
-                _logger.LogMessage($"Adding template: {template.Key}", LogMessageLevel.Trace);
-                await _codegeneratorActionService.AddFileFromTemplateAsync(
-                    Path.Combine(projectDir, template.Value),
-                    template.Key,
-                    TemplateFolders,
-                    templateModel);
+                var outputPath = Path.Combine(projectDir, template.OutputPath);
+                if (template.ShouldOverWrite != OverWriteCondition.Never || !_fileSystem.FileExists(outputPath))
+                {
+                    // We never overwrite some files like _ViewImports.cshtml.
+                    _logger.LogMessage($"Adding template: {template.Name}", LogMessageLevel.Trace);
+                    await _codegeneratorActionService.AddFileFromTemplateAsync(
+                        outputPath,
+                        template.SourcePath,
+                        TemplateFolders,
+                        templateModel);
+                }
             }
 
-            _connectionStringsWriter.AddConnectionString(
-                connectionStringName: $"{templateModel.DbContextClass}Connection",
-                dataBaseName: templateModel.ApplicationName,
-                useSQLite: templateModel.UseSQLite);
+            if (!templateModel.IsUsingExistingDbContext)
+            {
+                _connectionStringsWriter.AddConnectionString(
+                    connectionStringName: $"{templateModel.DbContextClass}Connection",
+                    dataBaseName: templateModel.ApplicationName,
+                    useSQLite: templateModel.UseSQLite);
+            }
         }
 
         /// <summary>
@@ -211,15 +234,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private void EnsureFolderLayout(string identityAreaName, IdentityGeneratorTemplateModel templateModel)
         {
             var areaBasePath = Path.Combine(_applicationInfo.ApplicationBasePath, "Areas");
-            if (!Directory.Exists(areaBasePath))
+            if (!_fileSystem.DirectoryExists(areaBasePath))
             {
-                Directory.CreateDirectory(areaBasePath);
+                _fileSystem.CreateDirectory(areaBasePath);
             }
 
             var areaPath = Path.Combine(areaBasePath, identityAreaName);
-            if (!Directory.Exists(areaPath))
+            if (!_fileSystem.DirectoryExists(areaPath))
             {
-                Directory.CreateDirectory(areaPath);
+                _fileSystem.CreateDirectory(areaPath);
             }
 
             var areaFolders = IdentityGeneratorFilesConfig.GetAreaFolders(
@@ -228,10 +251,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             foreach (var areaFolder in areaFolders)
             {
                 var path = Path.Combine(areaPath, areaFolder);
-                if (!Directory.Exists(path))
+                if (!_fileSystem.DirectoryExists(path))
                 {
                     _logger.LogMessage($"Adding folder: {path}", LogMessageLevel.Trace);
-                    Directory.CreateDirectory(path);
+                    _fileSystem.CreateDirectory(path);
                 }
             }
         }

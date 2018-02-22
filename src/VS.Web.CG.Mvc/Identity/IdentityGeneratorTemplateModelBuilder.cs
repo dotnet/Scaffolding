@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -20,6 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private IProjectContext _projectContext;
         private Workspace _workspace;
         private ICodeGenAssemblyLoadContext _loader;
+        private IFileSystem _fileSystem;
         private ILogger _logger;
 
         public IdentityGeneratorTemplateModelBuilder(
@@ -28,6 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             IProjectContext projectContext,
             Workspace workspace,
             ICodeGenAssemblyLoadContext loader,
+            IFileSystem fileSystem,
             ILogger logger)
         {
             if (commandlineModel == null)
@@ -55,6 +58,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(loader));
             }
 
+            if (fileSystem == null)
+            {
+                throw new ArgumentNullException(nameof(fileSystem));
+            }
+
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
@@ -65,10 +73,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             _projectContext = projectContext;
             _workspace = workspace;
             _loader = loader;
+            _fileSystem = fileSystem;
             _logger = logger;
         }
+
         internal bool IsFilesSpecified => !string.IsNullOrEmpty(_commandlineModel.Files);
         internal bool IsDbContextSpecified => !string.IsNullOrEmpty(_commandlineModel.DbContext);
+        internal bool IsUsingExistingDbContext { get; set; }
 
         private Type _userType;
 
@@ -93,6 +104,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         internal string DbContextNamespace { get; private set; }
         internal string RootNamespace { get; private set; }
         internal bool IsGenerateCustomUser { get; private set; }
+        internal IdentityGeneratorFile[] FilesToGenerate { get; private set; }
+        internal IEnumerable<string> NamedFiles { get; private set; }
 
         public async Task<IdentityGeneratorTemplateModel> ValidateAndBuild()
         {
@@ -103,9 +116,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             var defaultDbContextNamespace = $"{RootNamespace}.Areas.Identity.Data";
 
-            if (IsFilesSpecified)
+            IsUsingExistingDbContext = false;
+            if (IsDbContextSpecified)
             {
-                ValidateFilesOption();
+                var existingDbContext = await FindExistingType(_commandlineModel.DbContext);
+                if (existingDbContext == null)
+                {
+                    // We need to create one with what the user specified.
+                    DbContextClass = GetClassNameFromTypeName(_commandlineModel.DbContext);
+                    DbContextNamespace = GetNamespaceFromTypeName(_commandlineModel.DbContext)
+                        ?? defaultDbContextNamespace;
+                }
+                else
+                {
+                    ValidateExistingDbContext(existingDbContext);
+                    IsGenerateCustomUser = false;
+                    IsUsingExistingDbContext = true;
+                    UserType = FindUserTypeFromDbContext(existingDbContext);
+                    DbContextClass = existingDbContext.Name;
+                    DbContextNamespace = existingDbContext.Namespace;
+                }
+            }
+            else
+            {
+                // --dbContext paramter was not specified. So we need to generate one using convention.
+                DbContextClass = GetDefaultDbContextName();
+                DbContextNamespace = defaultDbContextNamespace;
             }
 
             if (string.IsNullOrEmpty(_commandlineModel.UserClass))
@@ -121,32 +157,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 UserClassNamespace = defaultDbContextNamespace;
             }
 
-            var usingExistingDbContext = false;
-            if (IsDbContextSpecified)
+            if (_commandlineModel.UseDefaultUI)
             {
-                var existingDbContext = await FindExistingType(_commandlineModel.DbContext);
-                if (existingDbContext == null)
-                {
-                    // We need to create one with what the user specified.
-                    DbContextClass = GetClassNameFromTypeName(_commandlineModel.DbContext);
-                    DbContextNamespace = GetNamespaceFromTypeName(_commandlineModel.DbContext)
-                        ?? defaultDbContextNamespace;
-                }
-                else
-                {
-                    ValidateExistingDbContext(existingDbContext);
-                    IsGenerateCustomUser = false;
-                    usingExistingDbContext = true;
-                    UserType = FindUserTypeFromDbContext(existingDbContext);
-                    DbContextClass = existingDbContext.Name;
-                    DbContextNamespace = existingDbContext.Namespace;
-                }
+                ValidateDefaultUIOption();
             }
-            else
+
+            if (IsFilesSpecified)
             {
-                // --dbContext paramter was not specified. So we need to generate one using convention.
-                DbContextClass = GetDefaultDbContextName();
-                DbContextNamespace = defaultDbContextNamespace;
+                await ValidateFilesOption();
             }
 
             var templateModel = new IdentityGeneratorTemplateModel()
@@ -157,25 +175,130 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 UserClass = UserClass,
                 UserClassNamespace = UserClassNamespace,
                 UseSQLite = _commandlineModel.UseSQLite,
-                IsUsingExistingDbContext = usingExistingDbContext,
+                IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
-                IsGenerateCustomUser = IsGenerateCustomUser
+                IsGenerateCustomUser = IsGenerateCustomUser,
+                IsGeneratingIndividualFiles = IsFilesSpecified,
+                UseDefaultUI = _commandlineModel.UseDefaultUI
             };
+
+            var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
+
+            // Check if we need to add ViewImports and which ones.
+            if (!_commandlineModel.UseDefaultUI)
+            {
+                filesToGenerate.AddRange(IdentityGeneratorFilesConfig.GetViewImports(filesToGenerate, _fileSystem, _applicationInfo.ApplicationBasePath));
+            }
+
+            templateModel.FilesToGenerate = filesToGenerate.ToArray();
+
+            ValidateFilesToGenerate(templateModel.FilesToGenerate);
 
             return templateModel;
         }
 
-        private void ValidateFilesOption()
+        private void ValidateFilesToGenerate(IdentityGeneratorFile[] filesToGenerate)
         {
-            var errors = new List<string>();
-            if (!IsDbContextSpecified)
+            var rootPath = _applicationInfo.ApplicationBasePath;
+            var filesToOverWrite = filesToGenerate
+                .Where(f => f.ShouldOverWrite == OverWriteCondition.WithForce
+                                && _fileSystem.FileExists(Path.Combine(rootPath, f.OutputPath)));
+
+            if (filesToOverWrite.Any() && !_commandlineModel.Force)
             {
-                // We need the user to specify that there is an existing DbContext that inherits from IdentityDbContext.
-                errors.Add("Please specify a DbContext when using '--files' option");
+                var msg = string.Format(
+                        MessageStrings.UseForceOption,
+                        string.Join(Environment.NewLine, filesToOverWrite.Select(f => f.OutputPath)));
+                throw new InvalidOperationException(msg);
+            }
+        }
+
+        private void ValidateDefaultUIOption()
+        {
+            var errorStrings = new List<string>();
+
+            if (IsFilesSpecified)
+            {
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--useDefaultUI"));
             }
 
-            var files = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            var invalidFiles = files.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList().Contains(f));
+            if (IsUsingExistingDbContext)
+            {
+                errorStrings.Add(MessageStrings.ExistingDbContextCannotBeUsedForDefaultUI);
+            }
+
+            if (errorStrings.Any())
+            {
+                throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
+            }
+        }
+
+        private async Task ValidateFilesOption()
+        {
+            var errors = new List<string>();
+            if (!IsUsingExistingDbContext && IsDbContextSpecified)
+            {
+                // We need the user to specify that there is an existing DbContext that inherits from IdentityDbContext.
+                errors.Add("Using '--files' option requires specifying an existing DbContext which inherits from IdentityDbContext.");
+            }
+            else if (!IsDbContextSpecified)
+            {
+                // Try to find an existing DbContext in the project (not in the dependencies) that inherits from IdentityDbContext.
+                // If 0 or more than 1 are found, ask the user to specify.
+                // If exactly one is found, use that.
+
+                var compilation = await _workspace.CurrentSolution.Projects
+                    .Where(p => p.AssemblyName == _projectContext.AssemblyName)
+                    .First()
+                    .GetCompilationAsync();
+
+                var reflectedTypesProvider = new ReflectedTypesProvider(
+                    compilation,
+                    null,
+                    _projectContext,
+                    _loader,
+                    _logger);
+
+                if (reflectedTypesProvider.GetCompilationErrors()!= null
+                    && reflectedTypesProvider.GetCompilationErrors().Any())
+                {
+                    // Failed to build the project.
+                    throw new InvalidOperationException(
+                        string.Format("Failed to compile the project in memory{0}{1}",
+                            Environment.NewLine,
+                            string.Join(Environment.NewLine, reflectedTypesProvider.GetCompilationErrors())));
+                }
+
+                var typesInProject = compilation.Assembly.TypeNames;
+                var reflectedTypes = typesInProject.Select(t => reflectedTypesProvider.GetReflectedType(t, false));
+
+                var candidateDbContexts = new List<Type>();
+                foreach (var reflectedType in reflectedTypes)
+                {
+                    if (IsTypeDerivedFromIdentityDbContext(reflectedType))
+                    {
+                        candidateDbContexts.Add(reflectedType);
+                    }
+                }
+
+                if (!candidateDbContexts.Any())
+                {
+                    errors.Add("No valid DbContext found in the project to use.");
+                    errors.Add("Please specify an existing DbContext which inherits from IdentityDbContext using the '--dbContext' option.");
+                    errors.Add("To add a new DbContext first scaffold using '--useDefaultUI' option.");
+                }
+
+                if (candidateDbContexts.Count > 1)
+                {
+                    errors.Add("Found more than 1 DbContexts. Please specify one from below using the '--dbContext' option");
+                    errors.AddRange(candidateDbContexts.Select(c => $"{c.Namespace}.{c.Name}"));
+                }
+            }
+
+
+            NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var invalidFiles = NamedFiles.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList().Contains(f));
+
             if (invalidFiles.Any())
             {
                 errors.Add("Could not find the files below. (Please use '--listFiles' to check the list of available files)");
@@ -220,26 +343,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var errorStrings = new List<string>();
 
             // Validate that the dbContext inherits from IdentityDbContext.
-            var parentType = existingDbContext.BaseType;
-            var foundValidParentDbContextClass = false;
-            while (parentType != null && parentType != typeof(object))
-            {
-                // There are multiple variations of IdentityDbContext classes.
-                // So have to use StartsWith instead of comparing names.
-                // 1. IdentityDbContext
-                // 2. IdentityDbContext <TUser, TRole, TKey>
-                // 3. IdentityDbContext <TUser, TRole, string> 
-                // 4. IdentityDbContext<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken> etc.
-                if (parentType.Name.StartsWith("IdentityDbContext")
-                    && parentType.Namespace == "Microsoft.AspNetCore.Identity.EntityFrameworkCore"
-                    && parentType.Assembly.GetName().Name == "Microsoft.AspNetCore.Identity.EntityFrameworkCore")
-                {
-                    foundValidParentDbContextClass = true;
-                    break;
-                }
-
-                parentType = parentType.BaseType;
-            }
+            bool foundValidParentDbContextClass = IsTypeDerivedFromIdentityDbContext(existingDbContext);
 
             if (!foundValidParentDbContextClass)
             {
@@ -260,6 +364,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
             }
 
+        }
+
+        private static bool IsTypeDerivedFromIdentityDbContext(Type type)
+        {
+            var parentType = type.BaseType;
+            var foundValidParentDbContextClass = false;
+            while (parentType != null && parentType != typeof(object))
+            {
+                // There are multiple variations of IdentityDbContext classes.
+                // So have to use StartsWith instead of comparing names.
+                // 1. IdentityDbContext
+                // 2. IdentityDbContext <TUser, TRole, TKey>
+                // 3. IdentityDbContext <TUser, TRole, string> 
+                // 4. IdentityDbContext<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken> etc.
+                if (parentType.Name.StartsWith("IdentityDbContext")
+                    && parentType.Namespace == "Microsoft.AspNetCore.Identity.EntityFrameworkCore"
+                    && parentType.Assembly.GetName().Name == "Microsoft.AspNetCore.Identity.EntityFrameworkCore")
+                {
+                    foundValidParentDbContextClass = true;
+                    break;
+                }
+
+                parentType = parentType.BaseType;
+            }
+
+            return foundValidParentDbContextClass;
         }
 
         private Type FindUserTypeFromDbContext(Type existingDbContext)

@@ -25,6 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "force", ShortName = "f", Description = "Use this option to overwrite existing files.")]
         public bool Force { get; set; }
 
+        [Option(Name = "useDefaultUI", ShortName = "udui", Description = "Use this option to setup identity and to use Default UI.")]
+        public bool UseDefaultUI { get; set; }
+
         public bool IsGenerateCustomUser
         {
             get

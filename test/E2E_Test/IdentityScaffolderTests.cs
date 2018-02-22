@@ -42,7 +42,33 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Static file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
+            }
+        }
 
+        [Fact]
+        public void TestIdentityGenerator_IndividualFiles()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                var args = new string[]
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "identity",
+                    "--dbContext",
+                    "Test.Data.MyApplicationDbContext",
+                    "--files",
+                    "Account.Login"
+                };
+
+                Scaffold(args, TestProjectPath);
+
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml.cs")));
             }
         }
     }

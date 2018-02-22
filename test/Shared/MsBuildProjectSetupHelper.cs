@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             // Copy Msbuild task dlls.
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
             fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
+            fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupForIdentityTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
             fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.IdentityContextText);
             fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -55,6 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     _projectContext,
                     workspace,
                     _loader,
+                    new DefaultFileSystem(),
                     _logger.Object);
 
                 var templateModel = await builder.ValidateAndBuild();
@@ -76,6 +78,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
                 Assert.Equal("MyIdentityUser", templateModel.UserClass);
                 Assert.True(templateModel.IsGenerateCustomUser);
+                Assert.False(templateModel.IsGeneratingIndividualFiles);
+
             }
         }
 

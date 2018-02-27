@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
+    [Collection("E2E_Tests")]
     public class RazorPageScaffolderTests : E2ETestBase
     {
 

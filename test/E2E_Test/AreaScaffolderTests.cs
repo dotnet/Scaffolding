@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
+    [Collection("E2E_Tests")]
     public class AreaScaffolderTests : E2ETestBase
     {
         public AreaScaffolderTests(ITestOutputHelper output)

@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
+    [Collection("E2E_Tests")]
     public class ViewGeneratorTests : E2ETestBase
     {
         private static string[] EMPTY_VIEW_ARGS = new string[] { "-c", Configuration, "view", "EmptyView", "Empty" };

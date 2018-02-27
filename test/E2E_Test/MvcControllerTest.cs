@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
+    [Collection("E2E_Tests")]
     public class MvcControllerTest : E2ETestBase
     {
         private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-c", Configuration, "controller", "--controllerName", "EmptyController" };

@@ -90,6 +90,21 @@
     <ExcludePackageFileFromSigning
       Include="$(PublishDir)\NuGet.Frameworks.dll"
       PackagePath="$(PackageBasePath)NuGet.Frameworks.dll" />
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)System.Buffers.dll"
+      PackagePath="$(PackagebasePath)System.Buffers.dll" />
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)System.Memory.dll"
+      PackagePath="$(PackagebasePath)System.Memory.dll" />
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)System.Numerics.Vectors.dll"
+      PackagePath="$(PackagebasePath)System.Numerics.Vectors.dll" />
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)runtimes/unix/lib/netcoreapp2.0/System.Buffers.dll"
+      PackagePath="$(PackagebasePath)runtimes/unix/lib/netcoreapp2.0/System.Buffers.dll" />
+    <ExcludePackageFileFromSigning
+      Include="$(PublishDir)runtimes/win/lib/netcoreapp2.0/System.Buffers.dll"
+      PackagePath="$(PackagebasePath)runtimes/win/lib/netcoreapp2.0/System.Buffers.dll" />
   </ItemGroup>
 
   <ItemGroup>

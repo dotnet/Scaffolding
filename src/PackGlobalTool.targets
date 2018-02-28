@@ -11,6 +11,7 @@
         copyright=$(Copyright);
         description=$(Description);
         repositoryUrl=$(RepositoryUrl);
+        repositoryCommit=$(RepositoryCommit);
         targetframework=$(TargetFramework);
         MicrosoftNETCorePlatformsPackageVersion=$(MicrosoftNETCorePlatformsPackageVersion);
       </NuspecProperties>

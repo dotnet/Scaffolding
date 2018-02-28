@@ -16,10 +16,8 @@
     <packageTypes>
         <packageType name="DotnetTool" />
     </packageTypes>
-    <repository type="git" url="$repositoryUrl$" />
+    <repository type="git" url="$repositoryUrl$" commit="$repositoryCommit$" />
     <dependencies>
-      <!-- Workaround https://github.com/dotnet/cli/issues/8418 -->
-      <dependency id="Microsoft.NETCore.Platforms" version="$MicrosoftNETCorePlatformsPackageVersion$" />
     </dependencies>
   </metadata>
   <files>

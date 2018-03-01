@@ -34,13 +34,28 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
         protected void Scaffold(string[] args, string testProjectPath)
         {
-            var program = new Microsoft.VisualStudio.Web.CodeGeneration.Tools.Program();
+            var muxerPath = DotNetMuxer.MuxerPathOrDefault();
+            var outputPath = Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
 
-            program.SkipImportTarget = true;
-            program.CodeGenerationTargetsLocation = "Dummy";
-            program.Logger = new TestLogger(Output);
-            var exitCode = program.Execute(args, true);
-            Assert.True(0 == exitCode, $"Scaffold command failed with exit code {exitCode}");
+            var codegenToolPath = Path.Combine(outputPath, "dotnet-aspnet-codegenerator.dll");
+            var invocationArgs = new [] 
+            {
+                "exec",
+                "--runtimeconfig",
+                Path.Combine(outputPath, "E2E_Test.runtimeconfig.json"),
+                "--depsfile",
+                Path.Combine(outputPath, "E2E_Test.deps.json"),
+                codegenToolPath
+            }.Concat(args);
+
+            Output.WriteLine($"Executing {muxerPath} {string.Join(" ", invocationArgs)}");
+
+            var exitCode = Command.Create(muxerPath, invocationArgs.Concat(new [] {"--no-build"}))
+                .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
+                .OnOutputLine(l => Output.WriteLine(l))
+                .OnErrorLine(l => Output.WriteLine(l))
+                .Execute()
+                .ExitCode;
         }
 
         protected void VerifyFileAndContent(string generatedFilePath, string baselineFile)

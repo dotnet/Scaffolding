@@ -88,8 +88,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     filesToGenerate.AddRange(_config.NamedFileConfig.SelectMany(f => f.Value));
                 }
-
-                // filesToGenerate.AddRange(GetViewImports(filesToGenerate));
             }
 
             filesToGenerate.Add(ReadMe);
@@ -608,14 +606,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         ""SourcePath"": ""Pages/Account/Manage/Account.Manage._StatusMessage.cshtml"",
         ""OutputPath"": ""Areas/Identity/Pages/Account/Manage/_StatusMessage.cshtml"",
         ""IsTemplate"": false
-      }
-    ],
-    ""Account.Manage._ViewImports"": [
-      {
-        ""Name"": ""Account.Manage._ViewImports"",
-        ""SourcePath"": ""Account.Manage._ViewImports.cshtml"",
-        ""OutputPath"": ""Areas/Identity/Pages/Account/Manage/_ViewImports.cshtml"",
-        ""IsTemplate"": true
       }
     ],
     ""Account.Manage.ChangePassword"": [

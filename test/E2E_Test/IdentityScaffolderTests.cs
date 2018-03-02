@@ -62,13 +62,60 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "--dbContext",
                     "Test.Data.MyApplicationDbContext",
                     "--files",
-                    "Account.Login"
+                    "Account.Login;Account.Manage.PersonalData"
                 };
 
                 Scaffold(args, TestProjectPath);
 
                 Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml")));
                 Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml.cs")));
+
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Manage", "PersonalData.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Manage", "PersonalData.cshtml.cs")));
+
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Manage", "_ViewImports.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "_ViewImports.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "_ViewImports.cshtml")));
+            }
+        }
+
+        [Fact]
+        public void TestIdentityGenerator_IndividualFiles_ViewImports()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root", "Areas", "Identity", "Pages", "Account"));
+                fileProvider.Add("Root/Areas/Identity/Pages/Account/_ViewImports.cshtml", "__");
+
+                var args = new string[]
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "identity",
+                    "--dbContext",
+                    "Test.Data.MyApplicationDbContext",
+                    "--files",
+                    "Account.Login;Account.Manage.PersonalData"
+                };
+
+                Scaffold(args, TestProjectPath);
+
+                var manageViewImportsPath = Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "_ViewImports.cshtml");
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml.cs")));
+
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Manage", "PersonalData.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Manage", "PersonalData.cshtml.cs")));
+
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "Manage", "_ViewImports.cshtml")));
+                Assert.True(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "Account", "_ViewImports.cshtml")));
+                var contents = File.ReadAllText(manageViewImportsPath);
+                Assert.False(File.Exists(Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "_ViewImports.cshtml")));
+                Assert.Equal("__", contents);
             }
         }
     }

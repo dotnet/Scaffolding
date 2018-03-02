@@ -269,8 +269,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                             string.Join(Environment.NewLine, reflectedTypesProvider.GetCompilationErrors())));
                 }
 
-                var typesInProject = compilation.Assembly.TypeNames;
-                var reflectedTypes = typesInProject.Select(t => reflectedTypesProvider.GetReflectedType(t, false));
+                var reflectedTypes = reflectedTypesProvider.GetAllTypesInProject();
 
                 var candidateDbContexts = new List<Type>();
                 foreach (var reflectedType in reflectedTypes)

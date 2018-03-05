@@ -6,7 +6,7 @@
     {
       "Name": "dbContext",
       "ShortName": "dc",
-      "Description": "Name of the DbContext class to generate."
+      "Description": "Name of the DbContext to use, or generate (if it does not exist)."
     },
     {
       "Name": "files",

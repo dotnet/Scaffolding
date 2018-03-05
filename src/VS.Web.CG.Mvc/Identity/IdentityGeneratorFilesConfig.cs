@@ -27,6 +27,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 };
         }
 
+        private static IdentityGeneratorFile IdentityHostingStartup = new IdentityGeneratorFile()
+        {
+            Name = "IdentityHostingStartup",
+            SourcePath = "IdentityHostingStartup.cshtml",
+            OutputPath = "Areas/Identity/IdentityHostingStartup.cs",
+            IsTemplate = true,
+            ShowInListFiles = false
+        };
+
+        private static IdentityGeneratorFile ReadMe = new IdentityGeneratorFile()
+        {
+            Name = "ScaffoldingReadme",
+            SourcePath = "ScaffoldingReadme.cshtml",
+            OutputPath = "./ScaffoldingReadme.txt",
+            IsTemplate = true,
+            ShouldOverWrite = OverWriteCondition.Always,
+            ShowInListFiles = false
+        };
+
         private static IdentityGeneratorFile[] ViewImports = new []
         {
             // Order is important here.
@@ -56,16 +75,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         };
 
-        private static IdentityGeneratorFile ReadMe = new IdentityGeneratorFile()
-        {
-            Name = "ScaffoldingReadme",
-            SourcePath = "ScaffoldingReadme.cshtml",
-            OutputPath = "./ScaffoldingReadme.txt",
-            IsTemplate = true,
-            ShouldOverWrite = OverWriteCondition.Always,
-            ShowInListFiles = false
-        };
-
         internal static IdentityGeneratorFile[] GetFilesToGenerate(IEnumerable<string> names, IdentityGeneratorTemplateModel templateModel)
         {
             if (templateModel == null)
@@ -90,6 +99,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 }
             }
 
+            filesToGenerate.Add(IdentityHostingStartup);
             filesToGenerate.Add(ReadMe);
             return filesToGenerate.ToArray();
         }
@@ -846,15 +856,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         ""Name"": ""Error.cs"",
         ""SourcePath"": ""Error.cs.cshtml"",
         ""OutputPath"": ""Areas/Identity/Pages/Error.cshtml.cs"",
-        ""IsTemplate"": true,
-        ""ShowInListFiles"": false
-      }
-    ],
-    ""IdentityHostingStartup"": [
-      {
-        ""Name"": ""IdentityHostingStartup"",
-        ""SourcePath"": ""IdentityHostingStartup.cshtml"",
-        ""OutputPath"": ""Areas/Identity/IdentityHostingStartup.cs"",
         ""IsTemplate"": true,
         ""ShowInListFiles"": false
       }

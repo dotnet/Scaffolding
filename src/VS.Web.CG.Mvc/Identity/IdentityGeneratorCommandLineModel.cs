@@ -10,7 +10,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "useSqLite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSQLite { get; set; }
 
-        [Option(Name = "dbContext", ShortName = "dc", Description = "Name of the DbContext class to generate.")]
+        [Option(Name = "dbContext", ShortName = "dc", Description = "Name of the DbContext to use, or generate (if it does not exist).")]
         public string DbContext { get; set; }
 
         [Option(Name = "userClass", ShortName = "u", Description = "Name of the User class to generate.")]

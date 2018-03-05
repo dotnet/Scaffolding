@@ -37,13 +37,13 @@ namespace @thisNamespace
     {
         private readonly SignInManager<@(Model.UserClass)> _signInManager;
         private readonly UserManager<@(Model.UserClass)> _userManager;
-        private readonly ILogger<LoginModel> _logger;
+        private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
             UserManager<@(Model.UserClass)> userManager,
             SignInManager<@(Model.UserClass)> signInManager,
-            ILogger<LoginModel> logger,
+            ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
             _userManager = userManager;

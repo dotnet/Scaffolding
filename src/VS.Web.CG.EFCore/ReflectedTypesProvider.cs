@@ -83,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _logger.LogMessage(ex.Message, LogMessageLevel.Error);
                 if (throwOnError)
                 {
-                    throw ex;
+                    throw;
                 }
             }
 

@@ -33,6 +33,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             SourcePath = "IdentityHostingStartup.cshtml",
             OutputPath = "Areas/Identity/IdentityHostingStartup.cs",
             IsTemplate = true,
+            ShouldOverWrite = OverWriteCondition.Never,
             ShowInListFiles = false
         };
 

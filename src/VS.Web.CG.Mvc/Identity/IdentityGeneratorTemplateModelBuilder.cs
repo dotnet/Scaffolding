@@ -259,14 +259,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     _loader,
                     _logger);
 
-                if (reflectedTypesProvider.GetCompilationErrors()!= null
-                    && reflectedTypesProvider.GetCompilationErrors().Any())
+                var compilationErrors = reflectedTypesProvider.GetCompilationErrors();
+                if (compilationErrors != null
+                    && compilationErrors.Any())
                 {
                     // Failed to build the project.
                     throw new InvalidOperationException(
                         string.Format("Failed to compile the project in memory{0}{1}",
                             Environment.NewLine,
-                            string.Join(Environment.NewLine, reflectedTypesProvider.GetCompilationErrors())));
+                            string.Join(Environment.NewLine, compilationErrors)));
                 }
 
                 var reflectedTypes = reflectedTypesProvider.GetAllTypesInProject();

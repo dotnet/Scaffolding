@@ -341,7 +341,8 @@ namespace Library1.Models
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion>${RuntimeFrameworkVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -508,7 +509,8 @@ namespace DAL
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion>${RuntimeFrameworkVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -559,7 +561,6 @@ namespace Test.Data
 }
 ";
 
-      public const string MSBuildTaskDllPath = @"${OutputPath}\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll";
       public const string TestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************

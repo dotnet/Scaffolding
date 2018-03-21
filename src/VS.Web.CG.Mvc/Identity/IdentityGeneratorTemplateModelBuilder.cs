@@ -164,7 +164,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (IsFilesSpecified)
             {
-                await ValidateFilesOption();
+                ValidateFilesOption();
             }
 
             var templateModel = new IdentityGeneratorTemplateModel()
@@ -233,75 +233,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private async Task ValidateFilesOption()
+        private void ValidateFilesOption()
         {
             var errors = new List<string>();
-            if (!IsUsingExistingDbContext && IsDbContextSpecified)
-            {
-                // We need the user to specify that there is an existing DbContext that inherits from IdentityDbContext.
-                errors.Add("Using '--files' option requires specifying an existing DbContext which inherits from IdentityDbContext.");
-            }
-            else if (!IsDbContextSpecified)
-            {
-                // Try to find an existing DbContext in the project (not in the dependencies) that inherits from IdentityDbContext.
-                // If 0 or more than 1 are found, ask the user to specify.
-                // If exactly one is found, use that.
-
-                var compilation = await _workspace.CurrentSolution.Projects
-                    .Where(p => p.AssemblyName == _projectContext.AssemblyName)
-                    .First()
-                    .GetCompilationAsync();
-
-                var reflectedTypesProvider = new ReflectedTypesProvider(
-                    compilation,
-                    null,
-                    _projectContext,
-                    _loader,
-                    _logger);
-
-                var compilationErrors = reflectedTypesProvider.GetCompilationErrors();
-                if (compilationErrors != null
-                    && compilationErrors.Any())
-                {
-                    // Failed to build the project.
-                    throw new InvalidOperationException(
-                        string.Format("Failed to compile the project in memory{0}{1}",
-                            Environment.NewLine,
-                            string.Join(Environment.NewLine, compilationErrors)));
-                }
-
-                var reflectedTypes = reflectedTypesProvider.GetAllTypesInProject();
-
-                var candidateDbContexts = new List<Type>();
-                foreach (var reflectedType in reflectedTypes)
-                {
-                    if (IsTypeDerivedFromIdentityDbContext(reflectedType))
-                    {
-                        candidateDbContexts.Add(reflectedType);
-                    }
-                }
-
-                if (!candidateDbContexts.Any())
-                {
-                    errors.Add("No valid DbContext found in the project to use.");
-                    errors.Add("Please specify an existing DbContext which inherits from IdentityDbContext using the '--dbContext' option.");
-                    errors.Add("To add a new DbContext first scaffold using '--useDefaultUI' option.");
-                }
-
-                if (candidateDbContexts.Count > 1)
-                {
-                    errors.Add("Found more than 1 DbContexts. Please specify one from below using the '--dbContext' option");
-                    errors.AddRange(candidateDbContexts.Select(c => $"{c.Namespace}.{c.Name}"));
-                }
-            }
-
 
             NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var invalidFiles = NamedFiles.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList().Contains(f));
 
             if (invalidFiles.Any())
             {
-                errors.Add("Could not find the files below. (Please use '--listFiles' to check the list of available files)");
+                errors.Add(MessageStrings.InvalidFilesListMessage);
                 errors.AddRange(invalidFiles);
             }
 
@@ -348,7 +289,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (!foundValidParentDbContextClass)
             {
                 errorStrings.Add(
-                    string.Format("DbContext type '{0}' is found but it does not inherit from '{1}'",
+                    string.Format(MessageStrings.DbContextNeedsToInheritFromIdentityContextMessage,
                         existingDbContext.Name,
                         "Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext"));
             }
@@ -356,7 +297,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             // Validate that the `--userClass` parameter is not passed.
             if (!string.IsNullOrEmpty(_commandlineModel.UserClass))
             {
-                errorStrings.Add("'--userClass' cannot be used to specify a user class when using an existing DbContext.");
+                errorStrings.Add(MessageStrings.UserClassAndDbContextCannotBeSpecifiedTogether);
             }
 
             if (errorStrings.Any())
@@ -404,7 +345,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 // The IdentityDbContext has DbSet<UserType> Users property.
                 // The only case this would happen is if the user hides the inherited property.
                 throw new InvalidOperationException(
-                    string.Format("Could not determine the user class from the DbContext class '{0}'",
+                    string.Format(MessageStrings.UserClassCouldNotBeDetermined,
                         existingDbContext.Name));
             }
 
@@ -430,7 +371,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 // Failed to build the project.
                 throw new InvalidOperationException(
-                    string.Format("Failed to compile the project in memory{0}{1}",
+                    string.Format(MessageStrings.CompilationFailedMessage,
                         Environment.NewLine,
                         string.Join(Environment.NewLine, reflectedTypesProvider.GetCompilationErrors())));
             }

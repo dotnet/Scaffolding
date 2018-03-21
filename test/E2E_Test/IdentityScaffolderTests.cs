@@ -28,7 +28,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     Path.Combine(TestProjectPath, "Test.csproj"),
                     "-c",
                     Configuration,
-                    "identity"
+                    "identity",
+                    "--generateLayout",
+                    "-f"
                 };
 
                 Scaffold(args, TestProjectPath);

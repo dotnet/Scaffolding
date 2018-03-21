@@ -167,6 +167,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ValidateFilesOption();
             }
 
+            var layout = _commandlineModel.Layout;
+            if (_commandlineModel.GenerateLayout)
+            {
+                layout = "~/Pages/Shared/_Layout.chstml";
+            }
+
+
             var templateModel = new IdentityGeneratorTemplateModel()
             {
                 ApplicationName = _applicationInfo.ApplicationName,
@@ -179,7 +186,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,
                 IsGeneratingIndividualFiles = IsFilesSpecified,
-                UseDefaultUI = _commandlineModel.UseDefaultUI
+                UseDefaultUI = _commandlineModel.UseDefaultUI,
+                GenerateLayout = _commandlineModel.GenerateLayout,
+                Layout = layout
             };
 
             var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
@@ -397,6 +406,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (!string.IsNullOrEmpty(model.RootNamespace) && !RoslynUtilities.IsValidNamespace(model.RootNamespace))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidNamespaceName, model.RootNamespace));
+            }
+
+            if (!string.IsNullOrEmpty(model.Layout) && model.GenerateLayout)
+            {
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--layout", "--generateLayout"));
             }
 
             if (errorStrings.Any())

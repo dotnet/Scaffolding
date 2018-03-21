@@ -28,6 +28,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "useDefaultUI", ShortName = "udui", Description = "Use this option to setup identity and to use Default UI.")]
         public bool UseDefaultUI { get; set; }
 
+        [Option(Name = "layout", ShortName = "l", Description = "Specify a custom layout file to use.")]
+        public string Layout { get; set; }
+
+        [Option(Name="generateLayout", ShortName="gl", Description="Use this option to generate a new _Layout.cshtml")]
+        public bool GenerateLayout { get; set; }
+
         public bool IsGenerateCustomUser
         {
             get

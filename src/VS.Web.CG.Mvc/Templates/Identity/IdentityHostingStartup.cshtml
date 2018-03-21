@@ -14,11 +14,6 @@ using System;
         });
     var thisNamespace = $"{Model.Namespace}.Areas.Identity";
 
-    if (!Model.UseDefaultUI && !Model.IsGeneratingIndividualFiles)
-    {
-        namespaceSet.Add($"{thisNamespace}.Services");
-    }
-    
     if (Model.IsGenerateCustomUser)
     {
         if (thisNamespace != Model.UserClassNamespace)
@@ -49,11 +44,6 @@ namespace @(thisNamespace)
         {
 @{
 @:            builder.ConfigureServices((context, services) => {
-    if (!Model.UseDefaultUI && !Model.IsGeneratingIndividualFiles)
-    {
-@:                services.AddTransient<IEmailSender, EmailSender>();
-@:
-    }
 
     if (!Model.IsUsingExistingDbContext)
     {

@@ -20,5 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public bool IsGeneratingIndividualFiles { get; set; }
         public IdentityGeneratorFile[] FilesToGenerate { get; set; }
         public bool UseDefaultUI { get; set; }
+        public bool GenerateLayout { get; set; }
+        public string Layout { get; set; }
     }
 }

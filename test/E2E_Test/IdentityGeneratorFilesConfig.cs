@@ -12,7 +12,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     {
         public static List<string> Templates = new List<string>()
         {
-            Path.Combine("Areas", "Identity", "Pages", "_Layout.cshtml"),
+            Path.Combine("Pages", "Shared", "_Layout.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "_ViewImports.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "Error.cshtml.cs"),
 

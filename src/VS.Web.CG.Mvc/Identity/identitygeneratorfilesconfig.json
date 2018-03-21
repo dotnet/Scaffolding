@@ -1,13 +1,5 @@
 ﻿{
   "NamedFileConfig": {
-    "_Layout": [
-      {
-        "Name": "_Layout",
-        "SourcePath": "_Layout.cshtml",
-        "OutputPath": "Areas/Identity/Pages/_Layout.cshtml",
-        "IsTemplate": true
-      }
-    ],
     "_LoginPartial": [
       {
         "Name": "_LoginPartial",
@@ -21,14 +13,6 @@
         "Name": "_ValidationScriptsPartial",
         "SourcePath": "Pages/_ValidationScriptsPartial.cshtml",
         "OutputPath": "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
-        "IsTemplate": false
-      }
-    ],
-    "_ViewStart": [
-      {
-        "Name": "_ViewStart",
-        "SourcePath": "Pages/_ViewStart.cshtml",
-        "OutputPath": "Areas/Identity/Pages/_ViewStart.cshtml",
         "IsTemplate": false
       }
     ],

@@ -47,6 +47,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             ShowInListFiles = false
         };
 
+        private static IdentityGeneratorFile Layout = new IdentityGeneratorFile()
+        {
+            Name= "_Layout",
+            SourcePath = "_Layout.cshtml",
+            OutputPath = "Pages/Shared/_Layout.cshtml",
+            IsTemplate = true,
+            ShowInListFiles = false
+        };
+
+        private static IdentityGeneratorFile ViewStart = new IdentityGeneratorFile()
+        {
+            Name = "_ViewStart",
+            SourcePath = "_ViewStart.cshtml",
+            OutputPath = "Areas/Identity/Pages/_ViewStart.cshtml",
+            IsTemplate = true,
+            ShowInListFiles = false
+        };
+
         private static IdentityGeneratorFile[] ViewImports = new []
         {
             // Order is important here.
@@ -84,6 +102,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
 
             List<IdentityGeneratorFile> filesToGenerate = GetDataModelFiles(templateModel);
+
+            if (templateModel.GenerateLayout)
+            {
+                filesToGenerate.Add(Layout);
+            }
+
+            if (!string.IsNullOrEmpty(templateModel.Layout))
+            {
+                filesToGenerate.Add(ViewStart);
+            }
 
             if (!templateModel.UseDefaultUI)
             {

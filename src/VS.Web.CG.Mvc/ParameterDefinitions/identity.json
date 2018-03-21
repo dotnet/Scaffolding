@@ -1,7 +1,7 @@
 {
-    "Alias": "identity",
-    "Description": "Generates an MVC Area with controllers and ",
-    "Arguments": [ ],
+  "Alias": "identity",
+  "Description": "Generates an MVC Area with controllers and ",
+  "Arguments": [ ],
   "Options": [
     {
       "Name": "dbContext",
@@ -37,6 +37,16 @@
       "Name": "useDefaultUI",
       "ShortName": "udui",
       "Description": "Use this option to setup identity and to use Default UI."
+    },
+    {
+      "Name": "layout",
+      "ShortName": "l",
+      "Description": "Specify a custom layout file to use."
+    }, 
+    {
+      "Name": "generateLayout",
+      "ShortName": "gl",
+      "Description": "Use this option to generate a new _Layout.cshtml"
     }
   ]
 }

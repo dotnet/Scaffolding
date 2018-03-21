@@ -7,6 +7,7 @@ using System;
         new string[]
         {
             "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Identity.UI",
             "Microsoft.AspNetCore.Hosting",
             "Microsoft.EntityFrameworkCore",
             "Microsoft.Extensions.Configuration",
@@ -63,16 +64,14 @@ namespace @(thisNamespace)
         } // End else
 @:
 @:                services.AddIdentity<@(Model.UserClass), IdentityRole>()
-@:                    .AddEntityFrameworkStores<@Model.DbContextClass>()
-        if (Model.UseDefaultUI)
-        {
+@:                   .AddEntityFrameworkStores<@Model.DbContextClass>()
 @:                   .AddDefaultUI()
-        }
 @:                   .AddDefaultTokenProviders();
     } // End Model.IsUsingExstingDbContext
 
     if (!Model.UseDefaultUI)
     {
+@:
 @:                services.AddMvc()
 @:                    .AddRazorPagesOptions(options =>
 @:                    {

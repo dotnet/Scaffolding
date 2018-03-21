@@ -178,6 +178,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please install the following packages to your project for scaffolding identity: {0}.
+        /// </summary>
+        internal static string InstallPackagesForScaffoldingIdentity {
+            get {
+                return ResourceManager.GetString("InstallPackagesForScaffoldingIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please install the below packages to your project:.
         /// </summary>
         internal static string InstallPackageMessage {

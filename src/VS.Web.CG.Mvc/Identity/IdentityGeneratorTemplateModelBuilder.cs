@@ -114,6 +114,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ? _projectContext.RootNamespace
                 : _commandlineModel.RootNamespace;
 
+            ValidateRequiredDependencies(_commandlineModel.UseSQLite);
+
             var defaultDbContextNamespace = $"{RootNamespace}.Areas.Identity.Data";
 
             IsUsingExistingDbContext = false;
@@ -419,25 +421,35 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private void ValidateEFDependencies(bool useSqlite)
+        private void ValidateRequiredDependencies(bool useSqlite)
         {
+
+            var dependencies = new HashSet<string>()
+            {
+                "Microsoft.AspNetCore.Identity.UI",
+                "Microsoft.EntityFrameworkCore.Design"
+            };
+
             const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
             var isEFDesignPackagePresent = _projectContext
                 .PackageDependencies
                 .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
-            string SqlPackageName = useSqlite 
-                ? "Microsoft.EntityFrameworkCore.Sqlite"
-                : "Microsoft.EntityFrameworkCore.SqlServer";
+            if (useSqlite)
+            {
+                dependencies.Add("Microsoft.EntityFrameworkCore.Sqlite");
+            }
+            else
+            {
+                dependencies.Add("Microsoft.EntityFrameworkCore.SqlServer");
+            }
 
-            var isSqlServerPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(SqlPackageName, StringComparison.OrdinalIgnoreCase));
+            var missingPackages = dependencies.Where(d => !_projectContext.PackageDependencies.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
 
-            if (!isEFDesignPackagePresent || !isSqlServerPackagePresent)
+            if (missingPackages.Any())
             {
                 throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlPackageName}"));
+                    string.Format(MessageStrings.InstallPackagesForScaffoldingIdentity, string.Join(",", missingPackages)));
             }
         }
     }

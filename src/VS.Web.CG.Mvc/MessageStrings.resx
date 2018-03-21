@@ -156,6 +156,9 @@
   <data name="InstallEfPackages" xml:space="preserve">
     <value>To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}</value>
   </data>
+  <data name="InstallPackagesForScaffoldingIdentity" xml:space="preserve">
+    <value>Please install the following packages to your project for scaffolding identity: {0}</value>
+  </data>
   <data name="InstallPackageMessage" xml:space="preserve">
     <value>Please install the below packages to your project:</value>
   </data>

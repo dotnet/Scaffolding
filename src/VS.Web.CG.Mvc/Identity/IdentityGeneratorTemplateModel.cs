@@ -2,10 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
-
     public class IdentityGeneratorTemplateModel
     {
         public string Namespace { get; set; }
@@ -17,5 +17,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public bool UseSQLite { get; set; }
         public bool IsUsingExistingDbContext { get; set; }
         public bool IsGenerateCustomUser { get; set; }
+        public bool IsGeneratingIndividualFiles { get; set; }
+        public IdentityGeneratorFile[] FilesToGenerate { get; set; }
+        public bool UseDefaultUI { get; set; }
+        public bool GenerateLayout { get; set; }
+        public string Layout { get; set; }
     }
 }

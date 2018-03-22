@@ -1,12 +1,22 @@
 {
-    "Alias": "identity",
-    "Description": "Generates an MVC Area with controllers and ",
-    "Arguments": [ ],
+  "Alias": "identity",
+  "Description": "Generates an MVC Area with controllers and ",
+  "Arguments": [ ],
   "Options": [
     {
       "Name": "dbContext",
       "ShortName": "dc",
-      "Description": "Name of the DbContext class to generate."
+      "Description": "Name of the DbContext to use, or generate (if it does not exist)."
+    },
+    {
+      "Name": "files",
+      "ShortName": "fi",
+      "Description": "List of semicolon separated files to scaffold. Use the --list-files option to see the available options."
+    },
+    {
+      "Name": "listFiles",
+      "ShortName": "lf",
+      "Description": "Lists the files that can be scaffolded by using the '--files' option."
     },
     {
       "Name": "userClass",
@@ -22,6 +32,21 @@
       "Name": "force",
       "ShortName": "f",
       "Description": "Use this option to overwrite existing files."
+    },
+    {
+      "Name": "useDefaultUI",
+      "ShortName": "udui",
+      "Description": "Use this option to setup identity and to use Default UI."
+    },
+    {
+      "Name": "layout",
+      "ShortName": "l",
+      "Description": "Specify a custom layout file to use."
+    }, 
+    {
+      "Name": "generateLayout",
+      "ShortName": "gl",
+      "Description": "Use this option to generate a new _Layout.cshtml"
     }
   ]
 }

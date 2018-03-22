@@ -36,6 +36,7 @@
         MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion);
         MicrosoftAspNetCoreDiagnosticsPackageVersion=$(MicrosoftAspNetCoreDiagnosticsPackageVersion);
         MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion);
+        MicrosoftAspNetCoreIdentityUIPackageVersion=$(MicrosoftAspNetCoreIdentityUIPackageVersion);
         MicrosoftAspNetCoreMvcPackageVersion=$(MicrosoftAspNetCoreMvcPackageVersion);
         MicrosoftAspNetCorePackageVersion=$(MicrosoftAspNetCorePackageVersion);
         MicrosoftAspNetCoreServerIISIntegrationPackageVersion=$(MicrosoftAspNetCoreServerIISIntegrationPackageVersion);

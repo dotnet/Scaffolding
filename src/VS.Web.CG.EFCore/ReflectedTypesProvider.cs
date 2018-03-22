@@ -65,6 +65,31 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return result;
         }
 
+        public Type[] GetAllTypesInProject(bool throwOnError = false)
+        {
+            if (_compilationResult == null
+                || !_compilationResult.Success)
+            {
+                // If the compilation was not successful, just return null.
+                return null;
+            }
+
+            try
+            {
+                return _compilationResult.Assembly?.GetTypes();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                if (throwOnError)
+                {
+                    throw;
+                }
+            }
+
+            return null;
+        }
+
         public Type GetReflectedType(string modelType)
         {
             return GetReflectedType(modelType, false);

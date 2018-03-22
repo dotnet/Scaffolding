@@ -7,13 +7,14 @@ using System;
         new string[]
         {
             "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Identity.UI",
             "Microsoft.AspNetCore.Hosting",
             "Microsoft.EntityFrameworkCore",
             "Microsoft.Extensions.Configuration",
             "Microsoft.Extensions.DependencyInjection",
-            $"{Model.Namespace}.Areas.Identity.Services"
         });
     var thisNamespace = $"{Model.Namespace}.Areas.Identity";
+
     if (Model.IsGenerateCustomUser)
     {
         if (thisNamespace != Model.UserClassNamespace)
@@ -42,10 +43,9 @@ namespace @(thisNamespace)
     {
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices((context, services) => {
-                services.AddTransient<IEmailSender, EmailSender>();
-
 @{
+@:            builder.ConfigureServices((context, services) => {
+
     if (!Model.IsUsingExistingDbContext)
     {
         if (Model.UseSQLite)
@@ -54,35 +54,41 @@ namespace @(thisNamespace)
 @:                    options.UseSqlite(
 @:                        context.Configuration.GetConnectionString("@(Model.DbContextClass)Connection"),
 @:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
-        }
+        } // End if Model.UseSQLite
         else
         {
 @:                services.AddDbContext<@Model.DbContextClass>(options =>
 @:                    options.UseSqlServer(
 @:                        context.Configuration.GetConnectionString("@(Model.DbContextClass)Connection"),
 @:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
-        }
+        } // End else
+@:
 @:                services.AddIdentity<@(Model.UserClass), IdentityRole>()
-@:                    .AddEntityFrameworkStores<@Model.DbContextClass>()
+@:                   .AddEntityFrameworkStores<@Model.DbContextClass>()
+@:                   .AddDefaultUI()
 @:                   .AddDefaultTokenProviders();
-    }
-}
+    } // End Model.IsUsingExstingDbContext
 
-                services.AddMvc()
-                    .AddRazorPagesOptions(options =>
-                    {
-                        options.AllowAreas = true;
-                        options.Conventions.AuthorizeFolder("/Account/Manage");
-                        options.Conventions.AuthorizePage("/Account/Logout");
-                    });
-
-                services.ConfigureApplicationCookie(options => 
-                {
-                    options.LoginPath = "/Identity/Account/Login";
-                    options.LogoutPath = "/Identity/Account/Logout";
-                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-                });
-            });
+    if (!Model.UseDefaultUI)
+    {
+@:
+@:                services.AddMvc()
+@:                    .AddRazorPagesOptions(options =>
+@:                    {
+@:                        options.AllowAreas = true;
+@:                        options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
+@:                        options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
+@:                    });
+@:
+@:                services.ConfigureApplicationCookie(options => 
+@:                {
+@:                    options.LoginPath = "/Identity/Account/Login";
+@:                    options.LogoutPath = "/Identity/Account/Logout";
+@:                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+@:                });
+    } // End Model.UseDefaultUI
+@:            });
+        }
         }
     }
 }

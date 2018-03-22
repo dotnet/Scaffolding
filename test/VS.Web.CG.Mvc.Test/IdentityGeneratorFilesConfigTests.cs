@@ -13,8 +13,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             string userClass,
             bool isUsingExistingDbContext,
             bool isGenerateCustomUser,
-            Predicate<KeyValuePair<string,string>> excludeFilter,
-            Predicate<KeyValuePair<string, string>> includeFilter)
+            Predicate<IdentityGeneratorFile> excludeFilter,
+            Predicate<IdentityGeneratorFile> includeFilter)
         {
             var templateModel = new IdentityGeneratorTemplateModel()
             {
@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 IsGenerateCustomUser = isGenerateCustomUser
             };
 
-            var templateFiles = IdentityGeneratorFilesConfig.GetTemplateFiles(templateModel);
+            var templateFiles = IdentityGeneratorFilesConfig.GetFilesToGenerate(null, templateModel);
 
             if (excludeFilter != null)
             {
@@ -35,7 +35,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 Assert.Contains(templateFiles, includeFilter);
             }
-
         }
 
         public static IEnumerable<object[]> TestData
@@ -50,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                         "MyApplicationUser",
                         true,
                         false,
-                        new Predicate<KeyValuePair<string, string>>(t => t.Key == "ApplicationDbContext.cshtml" || t.Key =="ApplicationUser.cshtml"),
+                        new Predicate<IdentityGeneratorFile>(t => t.SourcePath == "ApplicationDbContext.cshtml" || t.SourcePath =="ApplicationUser.cshtml"),
                         null
                     },
                     new object []
@@ -60,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                         false,
                         true,
                         null,
-                        new Predicate<KeyValuePair<string, string>>(t => t.Key == "ApplicationDbContext.cshtml" || t.Key =="ApplicationUser.cshtml"),
+                        new Predicate<IdentityGeneratorFile>(t => t.SourcePath == "ApplicationDbContext.cshtml" || t.SourcePath =="ApplicationUser.cshtml"),
                     },
                     new object []
                     {
@@ -68,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                         "MyApplicationUser",
                         true,
                         true,
-                        new Predicate<KeyValuePair<string, string>>(t => t.Key == "ApplicationDbContext.cshtml" || t.Key =="ApplicationUser.cshtml"),
+                        new Predicate<IdentityGeneratorFile>(t => t.SourcePath == "ApplicationDbContext.cshtml" || t.SourcePath =="ApplicationUser.cshtml"),
                         null
                     },
                     new object []
@@ -77,8 +76,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                         "MyApplicationUser",
                         false,
                         false,
-                        new Predicate<KeyValuePair<string, string>>(t => t.Key =="ApplicationUser.cshtml"),
-                        new Predicate<KeyValuePair<string, string>>(t => t.Key == "ApplicationDbContext.cshtml"),
+                        new Predicate<IdentityGeneratorFile>(t => t.SourcePath =="ApplicationUser.cshtml"),
+                        new Predicate<IdentityGeneratorFile>(t => t.SourcePath == "ApplicationDbContext.cshtml"),
                     },
                 };
             }

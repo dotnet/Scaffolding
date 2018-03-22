@@ -88,11 +88,29 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to compile the project in memory{0}{1}.
+        /// </summary>
+        internal static string CompilationFailedMessage {
+            get {
+                return ResourceManager.GetString("CompilationFailedMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Controller Name is required.
         /// </summary>
         internal static string ControllerNameRequired {
             get {
                 return ResourceManager.GetString("ControllerNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DbContext type '{0}' is found but it does not inherit from '{1}'.
+        /// </summary>
+        internal static string DbContextNeedsToInheritFromIdentityContextMessage {
+            get {
+                return ResourceManager.GetString("DbContextNeedsToInheritFromIdentityContextMessage", resourceCulture);
             }
         }
         
@@ -120,6 +138,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string EmptyControllerNameRequired {
             get {
                 return ResourceManager.GetString("EmptyControllerNameRequired", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot use an existing DbContext with the '--useDefaultUI' option..
+        /// </summary>
+        internal static string ExistingDbContextCannotBeUsedForDefaultUI {
+            get {
+                return ResourceManager.GetString("ExistingDbContextCannotBeUsedForDefaultUI", resourceCulture);
             }
         }
         
@@ -151,6 +178,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please install the following packages to your project for scaffolding identity: {0}.
+        /// </summary>
+        internal static string InstallPackagesForScaffoldingIdentity {
+            get {
+                return ResourceManager.GetString("InstallPackagesForScaffoldingIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please install the below packages to your project:.
         /// </summary>
         internal static string InstallPackageMessage {
@@ -165,6 +201,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string InvalidDbContextClassName {
             get {
                 return ResourceManager.GetString("InvalidDbContextClassName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find the files below. (Please use '--listFiles' to check the list of available files).
+        /// </summary>
+        internal static string InvalidFilesListMessage {
+            get {
+                return ResourceManager.GetString("InvalidFilesListMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Option '{0}' cannot be used with '{1}'..
+        /// </summary>
+        internal static string InvalidOptionCombination {
+            get {
+                return ResourceManager.GetString("InvalidOptionCombination", resourceCulture);
             }
         }
 
@@ -338,7 +392,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("TypeDoesNotExist", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The below files exist. Use '--force' to overwrite: {0}.
+        /// </summary>
+        internal static string UseForceOption {
+            get {
+                return ResourceManager.GetString("UseForceOption", resourceCulture);
+            }
+        }
         
+        /// <summary>
+        ///   Looks up a localized string similar to '--userClass' cannot be used to specify a user class when using an existing DbContext..
+        /// </summary>
+        internal static string UserClassAndDbContextCannotBeSpecifiedTogether {
+            get {
+                return ResourceManager.GetString("UserClassAndDbContextCannotBeSpecifiedTogether", resourceCulture);
+            }
+        }
+        
+         /// <summary>
+        ///   Looks up a localized string similar to Could not determine the user class from the DbContext class '{0}'.
+        /// </summary>
+        internal static string UserClassCouldNotBeDetermined {
+            get {
+                return ResourceManager.GetString("UserClassCouldNotBeDetermined", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Validation succeded but model type not set.
         /// </summary>

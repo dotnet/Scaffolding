@@ -9,6 +9,7 @@
     <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <MicrosoftAspNetCoreDiagnosticsPackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreDiagnosticsPackageVersion>
     <MicrosoftAspNetCoreHostingPackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreHostingPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <MicrosoftAspNetCoreMvcPackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreMvcPackageVersion>
     <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>2.1.0-preview2-30272</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>

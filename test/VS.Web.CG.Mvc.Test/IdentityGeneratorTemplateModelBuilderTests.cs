@@ -68,18 +68,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
                 Assert.Equal("IdentityUser", templateModel.UserClass);
                 Assert.False(templateModel.IsGenerateCustomUser);
-
-                commandLineModel.UserClass = "MyIdentityUser";
-
-                templateModel = await builder.ValidateAndBuild();
-
-                Assert.Equal("Test.Namespace.Areas.Identity.Data", templateModel.DbContextNamespace);
-                Assert.False(templateModel.IsUsingExistingDbContext);
-
-                Assert.Equal("MyIdentityUser", templateModel.UserClass);
-                Assert.True(templateModel.IsGenerateCustomUser);
-                Assert.False(templateModel.IsGeneratingIndividualFiles);
-
             }
         }
 

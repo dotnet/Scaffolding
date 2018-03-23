@@ -94,6 +94,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupForIdentityTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
             fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.IdentityContextText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityUserName}", MsBuildProjectStrings.IdentityUserText);
             fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.LibraryProjectTxt);
             RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }

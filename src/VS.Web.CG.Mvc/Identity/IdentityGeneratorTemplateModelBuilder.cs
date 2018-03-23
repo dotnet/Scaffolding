@@ -24,6 +24,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private IFileSystem _fileSystem;
         private ILogger _logger;
 
+        private ReflectedTypesProvider _reflectedTypesProvider;
+
         public IdentityGeneratorTemplateModelBuilder(
             IdentityGeneratorCommandLineModel commandlineModel,
             IApplicationInfo applicationInfo,
@@ -154,9 +156,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
             else
             {
-                IsGenerateCustomUser = true;
-                UserClass = _commandlineModel.UserClass;
-                UserClassNamespace = defaultDbContextNamespace;
+                var existingUser = await FindExistingType(_commandlineModel.UserClass);
+                if (existingUser != null)
+                {
+                    ValidateExistingUserType(existingUser);
+                    IsGenerateCustomUser = false;
+                    UserType = existingUser;
+                }
+                else
+                {
+                    IsGenerateCustomUser = true;
+                    UserClass = GetClassNameFromTypeName(_commandlineModel.UserClass);
+                    UserClassNamespace = GetNamespaceFromTypeName(_commandlineModel.UserClass)
+                        ?? defaultDbContextNamespace;
+                }
             }
 
             if (_commandlineModel.UseDefaultUI)
@@ -269,6 +282,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (!RoslynUtilities.IsValidIdentifier(defaultDbContextName))
             {
+                // TODO: This default name causes conflicts in the IdentityHostingStartup.
+                // Need to come up with a different name.
                 defaultDbContextName = "IdentityDbContext";
             }
 
@@ -315,13 +330,49 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
             }
+        }
 
+        private void ValidateExistingUserType(Type existingUser)
+        {
+            var errorStrings = new List<string>();
+
+            // Validate that the user type inherits from IdentityUser
+            bool foundValidParentDbContextClass = IsTypeDerivedFromIdentityUser(existingUser);
+
+            if (!foundValidParentDbContextClass)
+            {
+                errorStrings.Add(
+                    string.Format(MessageStrings.DbContextNeedsToInheritFromIdentityContextMessage,
+                        existingUser.Name,
+                        "Microsoft.AspNetCore.Identity.Identityuser"));
+            }
+
+            if (errorStrings.Any())
+            {
+                throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
+            }
+        }
+
+        private static bool IsTypeDerivedFromIdentityUser(Type type)
+        {
+            var parentType = type.BaseType;
+            while (parentType != null && parentType != typeof(object))
+            {
+                if (parentType.FullName == "Microsoft.AspNetCore.Identity.IdentityUser"
+                    && parentType.Assembly.GetName().Name == "Microsoft.AspNetCore.Identity.EntityFrameworkCore")
+                {
+                    return true;
+                }
+
+                parentType = parentType.BaseType;
+            }
+
+            return false;
         }
 
         private static bool IsTypeDerivedFromIdentityDbContext(Type type)
         {
             var parentType = type.BaseType;
-            var foundValidParentDbContextClass = false;
             while (parentType != null && parentType != typeof(object))
             {
                 // There are multiple variations of IdentityDbContext classes.
@@ -334,14 +385,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     && parentType.Namespace == "Microsoft.AspNetCore.Identity.EntityFrameworkCore"
                     && parentType.Assembly.GetName().Name == "Microsoft.AspNetCore.Identity.EntityFrameworkCore")
                 {
-                    foundValidParentDbContextClass = true;
-                    break;
+                    return true;
                 }
 
                 parentType = parentType.BaseType;
             }
 
-            return foundValidParentDbContextClass;
+            return false;
         }
 
         private Type FindUserTypeFromDbContext(Type existingDbContext)
@@ -363,39 +413,42 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             return usersProperty.PropertyType.GetGenericArguments().First();
         }
 
-        private async Task<Type> FindExistingType(string dbContext)
+        private async Task<Type> FindExistingType(string type)
         {
-            var compilation = await _workspace.CurrentSolution.Projects
-                .Where(p => p.AssemblyName == _projectContext.AssemblyName)
-                .First()
-                .GetCompilationAsync();
-
-            var reflectedTypesProvider = new ReflectedTypesProvider(
-                compilation,
-                null,
-                _projectContext,
-                _loader,
-                _logger);
-
-            if (reflectedTypesProvider.GetCompilationErrors()!= null
-                && reflectedTypesProvider.GetCompilationErrors().Any())
+            if (_reflectedTypesProvider == null)
             {
-                // Failed to build the project.
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.CompilationFailedMessage,
-                        Environment.NewLine,
-                        string.Join(Environment.NewLine, reflectedTypesProvider.GetCompilationErrors())));
+                var compilation = await _workspace.CurrentSolution.Projects
+                    .Where(p => p.AssemblyName == _projectContext.AssemblyName)
+                    .First()
+                    .GetCompilationAsync();
+
+                _reflectedTypesProvider = new ReflectedTypesProvider(
+                    compilation,
+                    null,
+                    _projectContext,
+                    _loader,
+                    _logger);
+
+                if (_reflectedTypesProvider.GetCompilationErrors() != null
+                    && _reflectedTypesProvider.GetCompilationErrors().Any())
+                {
+                    // Failed to build the project.
+                    throw new InvalidOperationException(
+                        string.Format(MessageStrings.CompilationFailedMessage,
+                            Environment.NewLine,
+                            string.Join(Environment.NewLine, _reflectedTypesProvider.GetCompilationErrors())));
+                }
             }
 
-            var dbContextType = reflectedTypesProvider.GetReflectedType(dbContext, true);
+            var reflectedType = _reflectedTypesProvider.GetReflectedType(type, true);
 
-            return dbContextType;
+            return reflectedType;
         }
 
         private void ValidateCommandLine(IdentityGeneratorCommandLineModel model)
         {
             var errorStrings = new List<string>();;
-            if (!string.IsNullOrEmpty(model.UserClass) && !RoslynUtilities.IsValidIdentifier(model.UserClass))
+            if (!string.IsNullOrEmpty(model.UserClass) && !RoslynUtilities.IsValidNamespace(model.UserClass))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidUserClassName, model.UserClass));;
             }

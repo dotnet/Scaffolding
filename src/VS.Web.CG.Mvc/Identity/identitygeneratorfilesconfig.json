@@ -162,6 +162,18 @@
         "SourcePath": "Pages/Account/Manage/Account.Manage._Layout.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/_Layout.cshtml",
         "IsTemplate": false
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
       }
     ],
     "Account.Manage._ManageNav": [
@@ -212,6 +224,18 @@
         "SourcePath": "Account.Manage.DeletePersonalData.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/DeletePersonalData.cshtml.cs",
         "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
       }
     ],
     "Account.Manage.Disable2fa": [
@@ -225,6 +249,18 @@
         "Name": "Account.Manage.Disable2fa.cs",
         "SourcePath": "Account.Manage.Disable2fa.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/Disable2fa.cshtml.cs",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
         "IsTemplate": true
       }
     ],
@@ -240,6 +276,18 @@
         "SourcePath": "Account.Manage.DownloadPersonalData.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/DownloadPersonalData.cshtml.cs",
         "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
       }
     ],
     "Account.Manage.EnableAuthenticator": [
@@ -253,6 +301,18 @@
         "Name": "Account.Manage.EnableAuthenticator.cs",
         "SourcePath": "Account.Manage.EnableAuthenticator.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/EnableAuthenticator.cshtml.cs",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
         "IsTemplate": true
       }
     ],
@@ -282,6 +342,18 @@
         "SourcePath": "Account.Manage.GenerateRecoveryCodes.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/GenerateRecoveryCodes.cshtml.cs",
         "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
       }
     ],
     "Account.Manage.Index": [
@@ -310,6 +382,18 @@
         "SourcePath": "Account.Manage.PersonalData.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/PersonalData.cshtml.cs",
         "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
       }
     ],
     "Account.Manage.ResetAuthenticator": [
@@ -324,6 +408,18 @@
         "SourcePath": "Account.Manage.ResetAuthenticator.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/ResetAuthenticator.cshtml.cs",
         "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
       }
     ],
     "Account.Manage.SetPassword": [
@@ -337,6 +433,18 @@
         "Name": "Account.Manage.SetPassword.cs",
         "SourcePath": "Account.Manage.SetPassword.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Manage/SetPassword.cshtml.cs",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
         "IsTemplate": true
       }
     ],

@@ -117,10 +117,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 if (names != null && names.Any())
                 {
-                  foreach (var name in names)
-                  {
-                      filesToGenerate.AddRange(_config.NamedFileConfig[name]);
-                  }
+                    foreach (var name in names)
+                    {
+                        filesToGenerate.AddRange(_config.NamedFileConfig[name]);
+                    }
                 }
                 else
                 {
@@ -130,7 +130,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             filesToGenerate.Add(IdentityHostingStartup);
             filesToGenerate.Add(ReadMe);
-            return filesToGenerate.ToArray();
+
+            return filesToGenerate.Distinct(new IdentityGeneratorFileComparer()).ToArray();
         }
 
         /// <summary>

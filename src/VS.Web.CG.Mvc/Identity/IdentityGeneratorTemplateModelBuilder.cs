@@ -342,7 +342,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(
                     string.Format(MessageStrings.DbContextNeedsToInheritFromIdentityContextMessage,
                         existingUser.Name,
-                        "Microsoft.AspNetCore.Identity.Identityuser"));
+                        "Microsoft.AspNetCore.Identity.IdentityUser"));
             }
 
             if (errorStrings.Any())
@@ -357,7 +357,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             while (parentType != null && parentType != typeof(object))
             {
                 if (parentType.FullName == "Microsoft.AspNetCore.Identity.IdentityUser"
-                    && parentType.Assembly.GetName().Name == "Microsoft.AspNetCore.Identity.EntityFrameworkCore")
+                    && parentType.Assembly.GetName().Name == "Microsoft.Extensions.Identity.Stores")
                 {
                     return true;
                 }

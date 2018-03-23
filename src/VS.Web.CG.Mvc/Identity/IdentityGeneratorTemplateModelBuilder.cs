@@ -282,9 +282,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (!RoslynUtilities.IsValidIdentifier(defaultDbContextName))
             {
-                // TODO: This default name causes conflicts in the IdentityHostingStartup.
-                // Need to come up with a different name.
-                defaultDbContextName = "IdentityDbContext";
+                defaultDbContextName = "IdentityDataContext";
             }
 
             return defaultDbContextName;

@@ -1,8 +1,8 @@
 <!-- This file may be overwritten by automation. Only values allowed here are VersionPrefix and VersionSuffix.  -->
 <Project>
     <PropertyGroup>
-        <PackageVersion>1.0.3</PackageVersion>
-        <VersionPrefix>1.0.3</VersionPrefix>
+        <PackageVersion>1.0.4</PackageVersion>
+        <VersionPrefix>1.0.4</VersionPrefix>
         <VersionSuffix>rtm</VersionSuffix>
     </PropertyGroup>
 </Project>

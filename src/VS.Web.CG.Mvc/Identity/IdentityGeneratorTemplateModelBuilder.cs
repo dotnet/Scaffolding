@@ -185,7 +185,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var layout = _commandlineModel.Layout;
             if (_commandlineModel.GenerateLayout)
             {
-                layout = "~/Pages/Shared/_Layout.chstml";
+                layout = "/Pages/Shared/_Layout.chstml";
             }
 
 

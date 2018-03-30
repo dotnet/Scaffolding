@@ -4,10 +4,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.Language;
-using Microsoft.AspNetCore.Mvc.Razor.Extensions;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
@@ -35,7 +35,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             var fileSystem = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
             var projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, fileSystem, (builder) =>
             {
-                 RazorExtensions.Register(builder);
+                FunctionsDirective.Register(builder);
+                InheritsDirective.Register(builder);
+                SectionDirective.Register(builder);
+
+                builder.AddTargetExtension(new TemplateTargetExtension()
+                {
+                    TemplateTypeName = "global::Microsoft.AspNetCore.Mvc.Razor.HelperResult",
+                });
 
                 builder.AddDefaultImports(@"
 @using System
@@ -67,10 +74,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             }
 
             var compiledObject = Activator.CreateInstance(templateResult.CompiledType);
-            var razorTemplate = compiledObject as RazorTemplateBase;
 
-            string result = String.Empty;
-            if (razorTemplate != null)
+            var result = string.Empty;
+            if (compiledObject is RazorTemplateBase razorTemplate)
             {
                 razorTemplate.Model = templateModel;
                 //ToDo: If there are errors executing the code, they are missed here.

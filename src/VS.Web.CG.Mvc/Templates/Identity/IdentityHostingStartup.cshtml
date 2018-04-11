@@ -63,10 +63,10 @@ namespace @(thisNamespace)
 @:                        sqlOptions => sqlOptions.MigrationsAssembly("@Model.ApplicationName")));
         } // End else
 @:
-@:                services.AddIdentity<@(Model.UserClass), IdentityRole>()
-@:                   .AddEntityFrameworkStores<@Model.DbContextClass>()
-@:                   .AddDefaultUI()
-@:                   .AddDefaultTokenProviders();
+
+@:                services.AddDefaultIdentity<@(Model.UserClass)>()
+@:                    .AddEntityFrameworkStores<@Model.DbContextClass>();
+
     } // End Model.IsUsingExstingDbContext
 
     if (!Model.UseDefaultUI)

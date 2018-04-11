@@ -12,6 +12,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public bool IsTemplate { get; set; }
         public bool ShowInListFiles { get; set; } = true;
         public OverWriteCondition ShouldOverWrite { get; set; } = OverWriteCondition.WithForce;
+        public List<string> AltPaths { get; set; } = new List<string>();
     }
 
     internal class IdentityGeneratorFiles

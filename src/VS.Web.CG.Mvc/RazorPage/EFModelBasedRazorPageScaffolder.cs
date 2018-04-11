@@ -103,7 +103,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (viewGeneratorModel.ReferenceScriptLibraries)
             {
-                requiredFiles.Add(new RequiredFileEntity(Path.Combine("Pages","_ValidationScriptsPartial.cshtml"), @"_ValidationScriptsPartial.cshtml"));
+                requiredFiles.Add(new RequiredFileEntity(Path.Combine("Pages", "_ValidationScriptsPartial.cshtml")
+                                        , @"_ValidationScriptsPartial.cshtml"
+                                        , new List<string>() { Path.Combine("Pages", "Shared", "_ValidationScriptsPartial.cshtml") }));
             }
 
             return requiredFiles;

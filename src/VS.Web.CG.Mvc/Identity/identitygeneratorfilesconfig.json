@@ -5,7 +5,7 @@
         "Name": "_LoginPartial",
         "SourcePath": "_LoginPartial.cshtml",
         "OutputPath": "Pages/Shared/_LoginPartial.cshtml",
-        "IsTemplate": true,
+        "IsTemplate": false,
         "AltPaths": [ "Pages/_LoginPartial.cshtml" ],
         "ShouldOverWrite": "Never"
       }

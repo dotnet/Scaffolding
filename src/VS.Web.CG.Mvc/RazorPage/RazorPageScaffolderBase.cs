@@ -92,14 +92,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 return false;
             }
 
-            if (fileEntity.AltPaths != null)
+            foreach (string altPath in fileEntity.AltPaths)
             {
-                foreach (string altPath in fileEntity.AltPaths)
+                if (File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, altPath)))
                 {
-                    if (File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, altPath)))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 

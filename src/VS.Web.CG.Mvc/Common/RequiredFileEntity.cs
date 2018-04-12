@@ -28,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public RequiredFileEntity(string outputPath, string templateName, IEnumerable<string> altPaths)
             : this(outputPath, templateName)
         {
-            AltPaths = altPaths.ToList() ?? new List<string>();
+            AltPaths = altPaths?.ToList() ?? new List<string>();
         }
 
         /// <summary>
@@ -44,6 +44,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// <summary>
         /// A list of other paths to check for file existence - to avoid generating new versions of existing files when not appropriate).
         /// </summary>
-        public List<string> AltPaths { get; private set; } = new List<string>();
+        public List<string> AltPaths { get; private set; }
     }
 }

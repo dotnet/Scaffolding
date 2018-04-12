@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -24,13 +25,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             OutputPath = outputPath;
         }
         
-        public RequiredFileEntity(string outputPath, string templateName, List<string> altPaths)
+        public RequiredFileEntity(string outputPath, string templateName, IEnumerable<string> altPaths)
             : this(outputPath, templateName)
         {
-            if (altPaths != null)
-            {
-                AltPaths = altPaths;
-            }
+            AltPaths = altPaths.ToList() ?? new List<string>();
         }
 
         /// <summary>

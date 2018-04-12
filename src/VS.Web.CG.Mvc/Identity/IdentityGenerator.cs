@@ -180,7 +180,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             foreach (var staticFile  in templateModel.FilesToGenerate.Where(f => !f.IsTemplate))
             {
                 var outputPath = Path.Combine(projectDir, staticFile.OutputPath);
-                if (staticFile.ShouldOverWrite != OverWriteCondition.Never || !_fileSystem.FileExists(outputPath))
+                if (staticFile.ShouldOverWrite != OverWriteCondition.Never || !DoesFileExist(staticFile, projectDir))
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
                     _logger.LogMessage($"Adding static file: {staticFile.Name}", LogMessageLevel.Trace);
@@ -201,7 +201,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             foreach (var template in templates)
             {
                 var outputPath = Path.Combine(projectDir, template.OutputPath);
-                if (template.ShouldOverWrite != OverWriteCondition.Never || !DoesTemplateFileExist(template, projectDir))
+                if (template.ShouldOverWrite != OverWriteCondition.Never || !DoesFileExist(template, projectDir))
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
                     _logger.LogMessage($"Adding template: {template.Name}", LogMessageLevel.Trace);
@@ -223,7 +223,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         }
 
         // Returns true if the template file exists in it's output path, or in an alt path (if any are specified)
-        private bool DoesTemplateFileExist(IdentityGeneratorFile template, string projectDir)
+        private bool DoesFileExist(IdentityGeneratorFile template, string projectDir)
         {
             string outputPath = Path.Combine(projectDir, template.OutputPath);
             if (_fileSystem.FileExists(outputPath))
@@ -231,16 +231,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 return true;
             }
 
-            foreach (string altPath in template.AltPaths)
-            {
-                string fullAltPath = Path.Combine(projectDir, altPath);
-                if (_fileSystem.FileExists(fullAltPath))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return template.AltPaths.Any(altPath => _fileSystem.FileExists(Path.Combine(projectDir, altPath)));
         }
 
         /// <summary>

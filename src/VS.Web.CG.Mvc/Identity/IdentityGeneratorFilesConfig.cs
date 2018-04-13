@@ -210,6 +210,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 }
             }
 
+            // add the _LoginPartial file. Its config will cause it to not be created if it already exists.
+            filesToGenerate.Add(new IdentityGeneratorFile()
+            {
+                IsTemplate = true,
+                Name = "_LoginPartial",
+                SourcePath = "_LoginPartial.cshtml",
+                OutputPath = "Pages/Shared/_LoginPartial.cshtml",
+                AltPaths = new List<string>() { "Pages/_LoginPartial.cshtml" },
+                ShouldOverWrite = OverWriteCondition.Never,
+                ShowInListFiles = false
+            });
+
             return filesToGenerate;
         }
 

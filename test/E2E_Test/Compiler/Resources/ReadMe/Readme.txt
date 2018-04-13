@@ -5,7 +5,7 @@ Add the following code to the Configure method in your Application's Startup cla
 
         app.UseMvc(routes =>
         {
-          route.MapRoute(
+          routes.MapRoute(
             name : "areas",
             template : "{area:exists}/{controller=Home}/{action=Index}/{id?}"
           );

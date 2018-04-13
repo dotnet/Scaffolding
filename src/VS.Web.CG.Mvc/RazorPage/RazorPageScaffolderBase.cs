@@ -75,7 +75,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             IEnumerable<RequiredFileEntity> requiredFiles = GetRequiredFiles(razorGeneratorModel);
             foreach (var file in requiredFiles)
             {
-                if (!File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath)))
+                if (ShouldFileBeAdded(file))
                 {
                     await _codeGeneratorActionsService.AddFileAsync(
                         Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
@@ -83,6 +83,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                     _logger.LogMessage($"Added additional file :{file.OutputPath}");
                 }
             }
+        }
+
+        private bool ShouldFileBeAdded(RequiredFileEntity fileEntity)
+        {
+            if (File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, fileEntity.OutputPath)))
+            {
+                return false;
+            }
+
+            foreach (string altPath in fileEntity.AltPaths)
+            {
+                if (File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, altPath)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public abstract Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel);

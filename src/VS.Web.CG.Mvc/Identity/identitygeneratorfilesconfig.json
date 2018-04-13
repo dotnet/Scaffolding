@@ -1,13 +1,5 @@
 ﻿{
   "NamedFileConfig": {
-    "_LoginPartial": [
-      {
-        "Name": "_LoginPartial",
-        "SourcePath": "_LoginPartial.cshtml",
-        "OutputPath": "Pages/Shared/_LoginPartial.cshtml",
-        "IsTemplate": true
-      }
-    ],
     "_ValidationScriptsPartial": [
       {
         "Name": "_ValidationScriptsPartial",

@@ -57,6 +57,12 @@ namespace @thisNamespace
 
         public string AuthenticatorUri { get; set; }
 
+        [TempData]
+        public string[] RecoveryCodes { get; set; }
+
+        [TempData]
+        public string StatusMessage { get; set; }
+
         [BindProperty]
         public InputModel Input { get; set; }
 
@@ -74,15 +80,10 @@ namespace @thisNamespace
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             await LoadSharedKeyAndQrCodeUriAsync(user);
-            if (string.IsNullOrEmpty(SharedKey))
-            {
-                await _userManager.ResetAuthenticatorKeyAsync(user);
-                await LoadSharedKeyAndQrCodeUriAsync(user);
-            }
 
             return Page();
         }
@@ -115,19 +116,37 @@ namespace @thisNamespace
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", user.Id);
-            return RedirectToPage("./GenerateRecoveryCodes");
+            var userId = await _userManager.GetUserIdAsync(user);
+            _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+
+            StatusMessage = "Your authenticator app has been verified.";
+
+            if (await _userManager.CountRecoveryCodesAsync(user) == 0)
+            {
+                var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+                RecoveryCodes = recoveryCodes.ToArray();
+                return RedirectToPage("./ShowRecoveryCodes");
+            }
+            else
+            {
+                return RedirectToPage("./TwoFactorAuthentication");
+            }
         }
 
         private async Task LoadSharedKeyAndQrCodeUriAsync(@(Model.UserClass) user)
         {
             // Load the authenticator key & QR code URI to display on the form
             var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
-            if (!string.IsNullOrEmpty(unformattedKey))
+            if (string.IsNullOrEmpty(unformattedKey))
             {
-                SharedKey = FormatKey(unformattedKey);
-                AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             }
+
+            SharedKey = FormatKey(unformattedKey);
+
+            var email = await _userManager.GetEmailAsync(user);
+            AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
         }
 
         private string FormatKey(string unformattedKey)

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" PrivateAssets="All" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+  </ItemGroup>
+</Project>

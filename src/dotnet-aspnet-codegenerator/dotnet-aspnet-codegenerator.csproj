@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="$(MsBuildThisFileDirectory)\..\..\tools\GlobalToolShimGenerator\ShimGenerator.targets" />
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <OutputType>exe</OutputType>
@@ -36,7 +36,7 @@
   <ItemGroup>
     <None Include="..\VS.Web.CG.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="..\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
-    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
+    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\netcoreapp2.1\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
   </ItemGroup>
 
@@ -48,9 +48,9 @@
       PackagePath="$(PackageBasePath)toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
       Visible="false" />
     <SignedPackageFile
-      Include="$(PublishDir)toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
+      Include="$(PublishDir)toolAssets\netcoreapp2.1\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
       Certificate="$(AssemblySigningCertName)"
-      PackagePath="$(PackageBasePath)toolassets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
+      PackagePath="$(PackageBasePath)toolassets\netcoreapp2.1\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
       Visible="false" />
     <SignedPackageFile
       Include="$(PublishDir)\Microsoft.Extensions.FileProviders.Abstractions.dll"
@@ -100,11 +100,11 @@
       Include="$(PublishDir)System.Numerics.Vectors.dll"
       PackagePath="$(PackagebasePath)System.Numerics.Vectors.dll" />
     <ExcludePackageFileFromSigning
-      Include="$(PublishDir)runtimes/unix/lib/netcoreapp2.0/System.Buffers.dll"
-      PackagePath="$(PackagebasePath)runtimes/unix/lib/netcoreapp2.0/System.Buffers.dll" />
+      Include="$(PublishDir)runtimes/unix/lib/netcoreapp2.1/System.Buffers.dll"
+      PackagePath="$(PackagebasePath)runtimes/unix/lib/netcoreapp2.1/System.Buffers.dll" />
     <ExcludePackageFileFromSigning
-      Include="$(PublishDir)runtimes/win/lib/netcoreapp2.0/System.Buffers.dll"
-      PackagePath="$(PackagebasePath)runtimes/win/lib/netcoreapp2.0/System.Buffers.dll" />
+      Include="$(PublishDir)runtimes/win/lib/netcoreapp2.1/System.Buffers.dll"
+      PackagePath="$(PackagebasePath)runtimes/win/lib/netcoreapp2.1/System.Buffers.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -121,5 +121,17 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Target Name="SetShimGenerationProperties">
+    <PropertyGroup>
+      <AppTargetFramework>$(TargetFramework)</AppTargetFramework>
+      <ShimOutputDirectoryBase>$(MsBuildThisFileDirectory)\$(OutputPath)\Shims\</ShimOutputDirectoryBase>
+      <IntermediateDirectoryForShimsBase>$(MsBuildThisFileDirectory)\$(IntermediateOutputPath)</IntermediateDirectoryForShimsBase>
+      <ShimTargetName>dotnet-aspnet-codegenerator</ShimTargetName>
+      <ShimTargetFileName>dotnet-aspnet-codegenerator.dll</ShimTargetFileName>
+    </PropertyGroup>
+  </Target>
+  <Target Name="GenerateShimsForGlobalTool" DependsOnTargets="SetShimGenerationProperties;GenerateShims" AfterTargets="Build">
+  </Target>
 
 </Project>

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Manage your external logins";
 }
 
-<partial name="_StatusMessage" model="Model.StatusMessage"/>
+@Html.Partial("_StatusMessage", Model.StatusMessage)
 @if (Model.CurrentLogins?.Count > 0)
 {
     <h4>Registered Logins</h4>

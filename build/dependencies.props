@@ -41,6 +41,7 @@
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>2.1.0-rc1-30613</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <MicrosoftNETCoreApp20PackageVersion>2.0.0</MicrosoftNETCoreApp20PackageVersion>
     <MicrosoftNETCoreApp21PackageVersion>2.1.0-rc1-26419-02</MicrosoftNETCoreApp21PackageVersion>
+    <MicrosoftNETCoreDotNetAppHostPackageVersion>2.1.0-rc1-26419-02</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftVisualStudioWebBrowserLinkPackageVersion>2.1.0-rc1-30613</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
     <MoqPackageVersion>4.7.49</MoqPackageVersion>

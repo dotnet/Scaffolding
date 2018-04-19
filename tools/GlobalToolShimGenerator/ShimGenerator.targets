@@ -2,11 +2,14 @@
   <Import Project="$(MSBuildThisFileDirectory)\ShimGeneratorInner.targets" />
 
   <Target Name="BuildEmbedAppNameInHostTask">
-  <MSBuild BuildInParallel="False"
-           Targets="Restore;Build"
-           Projects="$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\EmbedAppNameInHostTask.csproj"
-           Properties="MicrosoftBuildPackageVersion=$(MicrosoftBuildPackageVersion);MicrosoftBuildUtilitiesCorePackageVersion=$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <!--<Message Text="*** BuildEmbedAppNameInHostTask ***" Importance="high"/>-->
+
+    <MSBuild BuildInParallel="False"
+             Targets="Restore;Build"
+             Projects="$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\EmbedAppNameInHostTask.csproj"
+             Properties="MicrosoftBuildPackageVersion=$(MicrosoftBuildPackageVersion);MicrosoftBuildUtilitiesCorePackageVersion=$(MicrosoftBuildUtilitiesCorePackageVersion)" />
   </Target>
+
 
   <PropertyGroup>
       <AppTargetFramework Condition="'$(AppTargetFramework)' == '' ">netcoreapp2.1</AppTargetFramework>
@@ -16,9 +19,12 @@
       <ShimTargetFileName Condition="'$(ShimTargetFileName)' == '' ">dotnet-aspnet-codegenerator.dll</ShimTargetFileName>
   </PropertyGroup>
 
-  <Target Name="GenerateShims" DependsOnTargets="GenerateShims1;GenerateShims2;GenerateShims3" />
+  <Target Name="GenerateShims" DependsOnTargets="GenerateShims1;GenerateShims2;GenerateShims3">
+    <!--<Message Text="Target = GenerateShims [master]" Importance="high"/>-->
+  </Target>
 
   <Target Name="GenerateShims1" DependsOnTargets="BuildEmbedAppNameInHostTask">
+    <!--<Message Text="*** GenerateShims1 ***" Importance="high"/>-->
     <PropertyGroup>
       <Rid>win-x86</Rid>
       <NativeExecutableExtension Condition=" $(Rid.StartsWith('win'))">.exe</NativeExecutableExtension>
@@ -27,7 +33,15 @@
       <ShimOutputDirectory>$(ShimOutputDirectoryBase)\$(Rid)</ShimOutputDirectory>
     </PropertyGroup>
 
+    <!--<Message Text="AppHost = $(AppHost)"  Importance="High"/>
+    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)"  Importance="High"/>
+    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)"  Importance="High"/>
+
+    <Message Text="IntermediateDirectoryForShims = $(IntermediateDirectoryForShims)"  Importance="High"/>
+    <Message Text="ShimOutputDirectory = $(ShimOutputDirectory)"  Importance="High"/>-->
+
     <Message Importance="high" Text="Rid = $(Rid) " />
+    
     <!-- win-x86 -->
     <MSBuild Targets="ExtractAppHostToOutput"
              Projects="$(MSBuildThisFileDirectory)\ShimGeneratorInner.targets"
@@ -44,7 +58,10 @@
                         AppTargetFramework=$(AppTargetFramework)"
              BuildInParallel="False" />
   </Target>
+  
   <Target Name="GenerateShims2" DependsOnTargets="BuildEmbedAppNameInHostTask">
+    <!--<Message Text="*** GenerateShims2 ***" Importance="high"/>-->
+
     <PropertyGroup>
       <Rid>win-x64</Rid>
       <NativeExecutableExtension Condition=" $(Rid.StartsWith('win'))">.exe</NativeExecutableExtension>
@@ -69,7 +86,10 @@
                         AppTargetFramework=$(AppTargetFramework)" />
              <!-- Properties="Rid=win-x64;ShimOutputDirectory=$(ShimOutputDirectoryBase)\win-x64\;IntermediateDirectoryForShims=$(IntermediateDirectoryForShimsBase)\win-x64" -->
   </Target>
+  
   <Target Name="GenerateShims3" DependsOnTargets="BuildEmbedAppNameInHostTask">
+    <!--<Message Text="*** GenerateShims3 ***" Importance="high"/>-->
+
     <PropertyGroup>
       <Rid>osx-x64</Rid>
       <NativeExecutableExtension></NativeExecutableExtension>

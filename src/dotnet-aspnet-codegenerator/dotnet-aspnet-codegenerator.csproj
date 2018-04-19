@@ -130,8 +130,19 @@
       <ShimTargetName>dotnet-aspnet-codegenerator</ShimTargetName>
       <ShimTargetFileName>dotnet-aspnet-codegenerator.dll</ShimTargetFileName>
     </PropertyGroup>
+    <!--<Message Text="*** SetShimGenerationProperties ***" Importance="high"/>
+    <Message Text="AppTargetFramework = $(AppTargetFramework)" Importance="high"/>
+    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)" Importance="high"/>
+    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)" Importance ="high"/>
+    <Message Text="ShimTargetName = $(ShimTargetName)" Importance="high"/>-->
   </Target>
+  
   <Target Name="GenerateShimsForGlobalTool" DependsOnTargets="SetShimGenerationProperties;GenerateShims" AfterTargets="Build">
+    <!--<Message Text="*** GenerateShimsForGlobalTool ***" Importance="high"/>
+    <Message Text="AppTargetFramework = $(AppTargetFramework)" Importance="high"/>
+    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)" Importance="high"/>
+    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)" Importance ="high"/>
+    <Message Text="ShimTargetName = $(ShimTargetName)" Importance="high"/>-->
   </Target>
 
 </Project>

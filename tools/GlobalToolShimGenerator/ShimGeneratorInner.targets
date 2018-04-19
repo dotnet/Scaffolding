@@ -1,4 +1,5 @@
-<Project DefaultTargets="ExtractAppHostToOutput">
+<!--<Project DefaultTargets="ExtractAppHostToOutput">-->
+<Project>
   <Import Project="$(MsbuildThisFileDirectory)\..\..\build\dependencies.props" />
 
   <!-- 
@@ -18,7 +19,7 @@
   <UsingTask TaskName="EmbedAppNameInHost"
              AssemblyFile = "$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(configuration)\netstandard2.0\EmbedAppNameInHostTask.dll" />
 
-    <!-- <PropertyGroup>
+  <!-- <PropertyGroup>
       <Rid>win-x86</Rid>
       <NativeExecutableExtension Condition=" $(Rid.StartsWith('win'))">.exe</NativeExecutableExtension>
       <AppHostExecutableName>AppHost$(NativeExecutableExtension)</AppHostExecutableName>
@@ -33,6 +34,11 @@
   <Target Name="ExtractAppHostToOutput"
           DependsOnTargets="EnsureAppHostPackageRestored">
 
+    <!--<Message Text="*** ExtractAppHostToOutput ***" Importance="high" />
+    <Message Text="Rid = $(Rid)"  Importance="High"/>
+    <Message Text="IntermediateDirectoryForShims = $(IntermediateDirectoryForShims)"  Importance="High"/>
+    <Message Text="ShimOutputDirectory = $(ShimOutputDirectory)"  Importance="High"/>-->
+
     <Message Text="Restore $(Rid) 'Microsoft.NETCore.DotNetAppHost' from $(IntermediateDirectoryForShims) to $(ShimOutputDirectory)."
              Importance="High" />
 
@@ -42,7 +48,7 @@
                                     Condition="'%(FileName)%(Extension)' == '$(AppHostExecutableName)'"/>
     </ItemGroup>
     <Error Condition="@(NativeRestoredAppHostNETCore->Distinct()->Count()) != 1"
-           Text="Failed to determine the $(AppHostExecutableName) executable in $(IntermediateDirectoryForShims)." />
+           Text="Failed to determine the [$(AppHostExecutableName)] executable in [$(IntermediateDirectoryForShims)]." />
 
     <Error Condition="!Exists('$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(Configuration)\netstandard2.0\EmbedAppNameInHostTask.dll')"
            Text="Task Assembly not found: '$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(Configuration)\netstandard2.0\EmbedAppNameInHostTask.dll'" />
@@ -54,6 +60,7 @@
   </Target>
 
   <Target Name="EnsureAppHostPackageRestored">
+    <!--<Message Text="*** EnsureAppHostPackageRestored ***" Importance="high"/>-->
 
     <MSBuild
       BuildInParallel="False"

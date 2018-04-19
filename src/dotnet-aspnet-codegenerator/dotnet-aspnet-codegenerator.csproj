@@ -28,17 +28,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" PrivateAssets="All" 
+                      Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\VS.Web.CG.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
-    <None Include="..\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
-    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\netcoreapp2.1\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
-    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
+    <None Include="..\VS.Web.CG.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" 
+          CopyToPublishDirectory="Always" 
+          Link="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
+    <None Include="..\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" 
+          CopyToPublishDirectory="Always" 
+          Link="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
+    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" 
+          CopyToPublishDirectory="Always" 
+          Link="toolassets\netcoreapp2.1\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
+    <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" 
+          CopyToPublishDirectory="Always" 
+          Link="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
   </ItemGroup>
 
   <!-- Additional package files for signing-->
@@ -89,17 +98,17 @@
       PackagePath="$(PackageBasePath)Newtonsoft.Json.dll"
       Visible="false" />
     <SignedPackageFile
-      Include="$(PublishDir)../Shims/osx-x64/dotnet-aspnet-codegenerator"
+      Include="$(PublishDir)../shims/osx-x64/dotnet-aspnet-codegenerator"
       Certificate="$(AssemblySigningCertName)"
       PackagePath="$(ShimPackageBasePath)osx-x64/dotnet-aspnet-codegenerator" 
       Visible="false" />
     <SignedPackageFile
-      Include="$(PublishDir)../Shims/win-x64/dotnet-aspnet-codegenerator.exe"
+      Include="$(PublishDir)../shims/win-x64/dotnet-aspnet-codegenerator.exe"
       Certificate="$(AssemblySigningCertName)"
       PackagePath="$(ShimPackageBasePath)win-x64/dotnet-aspnet-codegenerator.exe" 
       Visible="false" />
     <SignedPackageFile
-      Include="$(PublishDir)../Shims/win-x86/dotnet-aspnet-codegenerator.exe"
+      Include="$(PublishDir)../shims/win-x86/dotnet-aspnet-codegenerator.exe"
       Certificate="$(AssemblySigningCertName)"
       PackagePath="$(ShimPackageBasePath)win-x86/dotnet-aspnet-codegenerator.exe" 
       Visible="false" />
@@ -146,24 +155,24 @@
   <Target Name="SetShimGenerationProperties">
     <PropertyGroup>
       <AppTargetFramework>$(TargetFramework)</AppTargetFramework>
-      <ShimOutputDirectoryBase>$(MsBuildThisFileDirectory)\$(OutputPath)\Shims\</ShimOutputDirectoryBase>
+      <ShimOutputDirectoryBase>$(MsBuildThisFileDirectory)\$(OutputPath)\shims\</ShimOutputDirectoryBase>
       <IntermediateDirectoryForShimsBase>$(MsBuildThisFileDirectory)\$(IntermediateOutputPath)</IntermediateDirectoryForShimsBase>
       <ShimTargetName>dotnet-aspnet-codegenerator</ShimTargetName>
       <ShimTargetFileName>dotnet-aspnet-codegenerator.dll</ShimTargetFileName>
     </PropertyGroup>
-    <!--<Message Text="*** SetShimGenerationProperties ***" Importance="high"/>
-    <Message Text="AppTargetFramework = $(AppTargetFramework)" Importance="high"/>
-    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)" Importance="high"/>
-    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)" Importance ="high"/>
-    <Message Text="ShimTargetName = $(ShimTargetName)" Importance="high"/>-->
+    <Message Text="*** SetShimGenerationProperties ***" />
+    <Message Text="AppTargetFramework = $(AppTargetFramework)" />
+    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)" />
+    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)" />
+    <Message Text="ShimTargetName = $(ShimTargetName)" />
   </Target>
   
   <Target Name="GenerateShimsForGlobalTool" DependsOnTargets="SetShimGenerationProperties;GenerateShims" AfterTargets="Build">
-    <!--<Message Text="*** GenerateShimsForGlobalTool ***" Importance="high"/>
-    <Message Text="AppTargetFramework = $(AppTargetFramework)" Importance="high"/>
-    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)" Importance="high"/>
-    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)" Importance ="high"/>
-    <Message Text="ShimTargetName = $(ShimTargetName)" Importance="high"/>-->
+    <Message Text="*** GenerateShimsForGlobalTool ***" />
+    <Message Text="AppTargetFramework = $(AppTargetFramework)" />
+    <Message Text="ShimOutputDirectoryBase = $(ShimOutputDirectoryBase)" />
+    <Message Text="IntermediateDirectoryForShimsBase = $(IntermediateDirectoryForShimsBase)" />
+    <Message Text="ShimTargetName = $(ShimTargetName)" />
   </Target>
 
 </Project>

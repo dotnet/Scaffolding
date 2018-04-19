@@ -8,7 +8,8 @@
     <OutputType>exe</OutputType>
     <PackageType>DotnetTool</PackageType>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <PackageBasePath>tools/any/any/</PackageBasePath>
+    <PackageBasePath>tools/$(TargetFramework)/any/</PackageBasePath>
+    <ShimPackageBasePath>$(PackageBasePath)shims/</ShimPackageBasePath>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -42,6 +43,11 @@
 
   <!-- Additional package files for signing-->
   <ItemGroup>
+    <SignedPackageFile
+      Include="$(PublishDir)dotnet-aspnet-codegenerator.dll"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(PackageBasePath)dotnet-aspnet-codegenerator.dll" 
+      Visible="false" />
     <SignedPackageFile
       Include="$(PublishDir)toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
       Certificate="$(AssemblySigningCertName)"
@@ -81,6 +87,21 @@
       Include="$(PublishDir)Newtonsoft.Json.dll"
       Certificate="3PartyDual"
       PackagePath="$(PackageBasePath)Newtonsoft.Json.dll"
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)../Shims/osx-x64/dotnet-aspnet-codegenerator"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(ShimPackageBasePath)osx-x64/dotnet-aspnet-codegenerator" 
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)../Shims/win-x64/dotnet-aspnet-codegenerator.exe"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(ShimPackageBasePath)win-x64/dotnet-aspnet-codegenerator.exe" 
+      Visible="false" />
+    <SignedPackageFile
+      Include="$(PublishDir)../Shims/win-x86/dotnet-aspnet-codegenerator.exe"
+      Certificate="$(AssemblySigningCertName)"
+      PackagePath="$(ShimPackageBasePath)win-x86/dotnet-aspnet-codegenerator.exe" 
       Visible="false" />
 
     <!-- Exclude the below files as they should already be signed -->

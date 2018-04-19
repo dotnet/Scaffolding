@@ -17,6 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils
         [Build.Framework.Required]
         public string AppBinaryFilePath { get; set; }
 
+        public EmbedAppNameInHost() { }
+
         public override bool Execute()
         {
             EmbedAppNameInHost.EmbedAndReturnModifiedAppHostPath(AppHostSourceFilePath,

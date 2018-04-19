@@ -1,7 +1,7 @@
 <Project DefaultTarget="GenerateShims">
   <Import Project="$(MSBuildThisFileDirectory)\ShimGeneratorInner.targets" />
 
-  <Target Name="BuildEmbedAppNameInHostTask">
+  <Target Name="BuildEmbedAppNameInHostTask" Condition="!Exists('$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(configuration)\netstandard2.0\EmbedAppNameInHostTask.dll')">
     <!--<Message Text="*** BuildEmbedAppNameInHostTask ***" Importance="high"/>-->
 
     <MSBuild BuildInParallel="False"

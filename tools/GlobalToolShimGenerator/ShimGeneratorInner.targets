@@ -1,0 +1,52 @@
+<Project>
+  <Import Project="$(MsbuildThisFileDirectory)\..\..\build\dependencies.props" />
+  <Import Project="$(MsbuildThisFileDirectory)\..\..\build\tasks\RepoTasks.tasks" />
+  <!-- 
+  To call the ExtractAppHostToOutput, the following properties need to be set.
+  - AppTargetFramework              (should be netcoreapp2.1 for now).
+  - ShimOutputDirectory             (Output path for the shims.)
+  - IntermediateDirectoryForShimsBase   (Directory to output the restored shims.)
+  - RID                             (win-x86, win-x64, osx-64.)
+  - ShimTargetName                  (Name of the tool for which this shim is being generated.)
+  - PackageId                       (PackageId of the tool.)
+  - PackageVersion                  (PackageVersion being generated.)
+  - ShimTargetFileName              (Name of the file to be invoked by the shim. (Usually the $(ShimTargetName).dll))
+  -->
+
+  <Target Name="ExtractAppHostToOutput"
+          DependsOnTargets="EnsureAppHostPackageRestored">
+
+    <Message Text="*** ExtractAppHostToOutput ***" />
+    <Message Text="Rid = $(Rid)" />
+    <Message Text="IntermediateDirectoryForShims = $(IntermediateDirectoryForShims)" />
+    <Message Text="ShimOutputDirectory = $(ShimOutputDirectory)" />
+
+    <Message Text="Restore $(Rid) 'Microsoft.NETCore.DotNetAppHost' from $(IntermediateDirectoryForShims) to $(ShimOutputDirectory)."
+             Importance="High" />
+
+    <ItemGroup>
+      <AllFileOfRestoredAppHostPackage Include="$(IntermediateDirectoryForShims)/**/*.*" />
+      <NativeRestoredAppHostNETCore Include="@(AllFileOfRestoredAppHostPackage)"
+                                    Condition="'%(FileName)%(Extension)' == '$(AppHostExecutableName)'"/>
+    </ItemGroup>
+    <Error Condition="@(NativeRestoredAppHostNETCore->Distinct()->Count()) != 1"
+           Text="Failed to determine the [$(AppHostExecutableName)] executable in [$(IntermediateDirectoryForShims)]." />
+
+    <EmbedAppNameInHost AppHostSourceFilePath="@(NativeRestoredAppHostNETCore)"
+                        AppHostDestinationFilePath="$(ShimOutputDirectory)/$(ShimTargetName)$(NativeExecutableExtension)"
+                        AppBinaryFilePath=".store/$(PackageId)/$(PackageVersion)/$(PackageId)/$(PackageVersion)/tools/$(AppTargetFramework)/any/$(ShimTargetFileName)"/>
+
+  </Target>
+
+  <Target Name="EnsureAppHostPackageRestored">
+    <Message Text="*** EnsureAppHostPackageRestored ***" />
+
+    <MSBuild
+      BuildInParallel="False"
+      Targets="Restore"
+      Properties="RuntimeIdentifiers=$(Rid);TargetFramework=$(AppTargetFramework);MicrosoftNETCoreDotNetAppHostPackageVersion=$(MicrosoftNETCoreDotNetAppHostPackageVersion);RestorePackagesPath=$(IntermediateDirectoryForShims)\"
+      Projects="$(MSBuildThisFileDirectory)/AppHostRestorerProject/AppHostRestorerProject.csproj">
+    </MSBuild>
+  </Target>
+
+</Project>

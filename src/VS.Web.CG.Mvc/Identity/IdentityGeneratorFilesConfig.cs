@@ -47,25 +47,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             ShowInListFiles = false
         };
 
-        private static IdentityGeneratorFile Layout = new IdentityGeneratorFile()
-        {
-            Name= "_Layout",
-            SourcePath = "_Layout.cshtml",
-            OutputPath = "Pages/Shared/_Layout.cshtml",
-            IsTemplate = true,
-            ShowInListFiles = false
-        };
-
         private static IdentityGeneratorFile ViewStart = new IdentityGeneratorFile()
         {
             Name = "_ViewStart",
             SourcePath = "_ViewStart.cshtml",
             OutputPath = "Areas/Identity/Pages/_ViewStart.cshtml",
             IsTemplate = true,
-            ShowInListFiles = false
+            ShowInListFiles = false,
+            ShouldOverWrite = OverWriteCondition.Never
         };
 
-        private static IdentityGeneratorFile[] ViewImports = new []
+        private static IdentityGeneratorFile[] ViewImports = new[]
         {
             // Order is important here.
             new IdentityGeneratorFile()
@@ -105,7 +97,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (templateModel.GenerateLayout)
             {
-                filesToGenerate.Add(Layout);
+                IdentityGeneratorFile layout = new IdentityGeneratorFile()
+                {
+                    Name = "_Layout",
+                    SourcePath = "_Layout.cshtml",
+                    OutputPath = Path.Combine(templateModel.SupportFileLocation, "_Layout.cshtml"),
+                    IsTemplate = true,
+                    ShowInListFiles = false
+                };
+                filesToGenerate.Add(layout);
+            }
+            else
+            {
+                IdentityGeneratorFile validationScriptsPartial = new IdentityGeneratorFile()
+                {
+                    Name = "_ValidationScriptsPartial",
+                    SourcePath = "Pages/_ValidationScriptsPartial.cshtml",
+                    OutputPath = "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
+                    IsTemplate = false
+                };
+                filesToGenerate.Add(validationScriptsPartial);
             }
 
             if (!string.IsNullOrEmpty(templateModel.Layout))
@@ -216,8 +227,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 IsTemplate = true,
                 Name = "_LoginPartial",
                 SourcePath = "_LoginPartial.cshtml",
-                OutputPath = "Pages/Shared/_LoginPartial.cshtml",
-                AltPaths = new List<string>() { "Pages/_LoginPartial.cshtml" },
+                //OutputPath = "Pages/Shared/_LoginPartial.cshtml",
+                OutputPath = Path.Combine(templateModel.SupportFileLocation, "_LoginPartial.cshtml"),
+                //AltPaths = new List<string>() { "Pages/_LoginPartial.cshtml" },
                 ShouldOverWrite = OverWriteCondition.Never,
                 ShowInListFiles = false
             });

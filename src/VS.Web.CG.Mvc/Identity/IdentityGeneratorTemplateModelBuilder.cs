@@ -148,27 +148,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = defaultDbContextNamespace;
             }
 
-            if (string.IsNullOrEmpty(_commandlineModel.UserClass))
+            // if an existing user class was determined from the DbContext, don't try to get it from here.
+            // Identity scaffolding must use the user class tied to the existing DbContext (when there is one).
+            if (string.IsNullOrEmpty(UserClass))
             {
-                IsGenerateCustomUser = false;
-                UserClass = "IdentityUser";
-                UserClassNamespace = "Microsoft.AspNetCore.Identity";
-            }
-            else
-            {
-                var existingUser = await FindExistingType(_commandlineModel.UserClass);
-                if (existingUser != null)
+                if (string.IsNullOrEmpty(_commandlineModel.UserClass))
                 {
-                    ValidateExistingUserType(existingUser);
                     IsGenerateCustomUser = false;
-                    UserType = existingUser;
+                    UserClass = "IdentityUser";
+                    UserClassNamespace = "Microsoft.AspNetCore.Identity";
                 }
                 else
                 {
-                    IsGenerateCustomUser = true;
-                    UserClass = GetClassNameFromTypeName(_commandlineModel.UserClass);
-                    UserClassNamespace = GetNamespaceFromTypeName(_commandlineModel.UserClass)
-                        ?? defaultDbContextNamespace;
+                    var existingUser = await FindExistingType(_commandlineModel.UserClass);
+                    if (existingUser != null)
+                    {
+                        ValidateExistingUserType(existingUser);
+                        IsGenerateCustomUser = false;
+                        UserType = existingUser;
+                    }
+                    else
+                    {
+                        IsGenerateCustomUser = true;
+                        UserClass = GetClassNameFromTypeName(_commandlineModel.UserClass);
+                        UserClassNamespace = GetNamespaceFromTypeName(_commandlineModel.UserClass)
+                            ?? defaultDbContextNamespace;
+                    }
                 }
             }
 

@@ -1,6 +1,6 @@
 <Project>
   <Import Project="$(MsbuildThisFileDirectory)\..\..\build\dependencies.props" />
-
+  <Import Project="$(MsbuildThisFileDirectory)\..\..\build\tasks\RepoTasks.tasks" />
   <!-- 
   To call the ExtractAppHostToOutput, the following properties need to be set.
   - AppTargetFramework              (should be netcoreapp2.1 for now).
@@ -12,9 +12,6 @@
   - PackageVersion                  (PackageVersion being generated.)
   - ShimTargetFileName              (Name of the file to be invoked by the shim. (Usually the $(ShimTargetName).dll))
   -->
-
-  <UsingTask TaskName="EmbedAppNameInHost"
-             AssemblyFile = "$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(configuration)\netstandard2.0\EmbedAppNameInHostTask.dll" />
 
   <Target Name="ExtractAppHostToOutput"
           DependsOnTargets="EnsureAppHostPackageRestored">
@@ -34,9 +31,6 @@
     </ItemGroup>
     <Error Condition="@(NativeRestoredAppHostNETCore->Distinct()->Count()) != 1"
            Text="Failed to determine the [$(AppHostExecutableName)] executable in [$(IntermediateDirectoryForShims)]." />
-
-    <Error Condition="!Exists('$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(Configuration)\netstandard2.0\EmbedAppNameInHostTask.dll')"
-           Text="Task Assembly not found: '$(MSBuildThisFileDirectory)\EmbedAppNameInHostTask\bin\$(Configuration)\netstandard2.0\EmbedAppNameInHostTask.dll'" />
 
     <EmbedAppNameInHost AppHostSourceFilePath="@(NativeRestoredAppHostNETCore)"
                         AppHostDestinationFilePath="$(ShimOutputDirectory)/$(ShimTargetName)$(NativeExecutableExtension)"

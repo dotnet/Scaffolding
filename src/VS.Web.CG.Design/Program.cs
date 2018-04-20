@@ -51,12 +51,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             }
 #endif
 
-            while (!System.Diagnostics.Debugger.IsAttached)
-            {
-                Console.WriteLine($"Attach a debugger to processID: { System.Diagnostics.Process.GetCurrentProcess().Id}");
-                System.Threading.Thread.Sleep(1000);
-            }
-
             app.OnExecute(async () =>
             {
                 var exitCode = 1;

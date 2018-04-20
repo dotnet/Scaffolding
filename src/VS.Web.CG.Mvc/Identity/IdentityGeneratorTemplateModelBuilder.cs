@@ -187,12 +187,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ValidateFilesOption();
             }
 
-            var layout = _commandlineModel.Layout;
-            if (_commandlineModel.GenerateLayout)
-            {
-                layout = "/Pages/Shared/_Layout.cshtml";
-            }
-
+            bool generateLayout = DetermineSupportFileLocation(out string supportFileLocation, out string layout);
 
             var templateModel = new IdentityGeneratorTemplateModel()
             {
@@ -207,8 +202,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 IsGenerateCustomUser = IsGenerateCustomUser,
                 IsGeneratingIndividualFiles = IsFilesSpecified,
                 UseDefaultUI = _commandlineModel.UseDefaultUI,
-                GenerateLayout = _commandlineModel.GenerateLayout,
-                Layout = layout
+                GenerateLayout = generateLayout,
+                Layout = layout,
+                SupportFileLocation = supportFileLocation
             };
 
             var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
@@ -224,6 +220,75 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             ValidateFilesToGenerate(templateModel.FilesToGenerate);
 
             return templateModel;
+        }
+
+        private static readonly IReadOnlyList<string> _ExistingLayoutFileCheckLocations = new List<string>()
+        {
+            "Pages/Shared/",
+            "Views/Shared/"
+        };
+
+        // If there is no layout file, check the existence of the key directories, and put the support files in the value directory.
+        private static readonly IReadOnlyDictionary<string, string> _CheckDirectoryToTargetMapForSupportFiles = new Dictionary<string, string>()
+        {
+            { "Pages/", "Pages/Shared/" },
+            { "Views/", "Views/Shared/" }
+        };
+
+        private static readonly string _DefaultSupportLocation = "Pages/Shared/";
+
+        private static readonly string _LayoutFileName = "_Layout.cshtml";
+
+        // Checks if there is an existing layout page, and based on its location or lack of existence, determines where to put support pages.
+        // Returns true if there is an existing layout page.
+        private bool DetermineSupportFileLocation(out string supportFileLocation, out string layoutFile)
+        {
+            string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+
+            if (!string.IsNullOrEmpty(_commandlineModel.Layout))
+            {
+                supportFileLocation = Path.GetDirectoryName(_commandlineModel.Layout);
+                layoutFile = _commandlineModel.Layout;
+                return true;
+            }
+
+            bool hasExistingLayoutFile = false;
+            supportFileLocation = null;
+            layoutFile = null;
+
+            foreach (string checkDirectory in _ExistingLayoutFileCheckLocations)
+            {
+                string checkFile = Path.Combine(projectDir, checkDirectory, _LayoutFileName);
+                if (_fileSystem.FileExists(checkFile))
+                {
+                    hasExistingLayoutFile = true;
+                    supportFileLocation = checkDirectory;
+                    layoutFile = Path.Combine(supportFileLocation, _LayoutFileName);
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(supportFileLocation))
+            {
+                foreach (KeyValuePair<string, string> checkMapEntry in _CheckDirectoryToTargetMapForSupportFiles)
+                {
+                    string checkDirectory = Path.Combine(projectDir, checkMapEntry.Key);
+                    if (_fileSystem.DirectoryExists(checkDirectory))
+                    {
+                        supportFileLocation = checkMapEntry.Value;
+                        layoutFile = Path.Combine(supportFileLocation, _LayoutFileName);
+                        break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(supportFileLocation))
+            {
+                supportFileLocation = _DefaultSupportLocation;
+                layoutFile = Path.Combine(supportFileLocation, _LayoutFileName);
+            }
+
+            return hasExistingLayoutFile;
         }
 
         private void ValidateFilesToGenerate(IdentityGeneratorFile[] filesToGenerate)

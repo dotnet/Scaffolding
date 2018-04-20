@@ -1,13 +1,13 @@
 ﻿{
   "NamedFileConfig": {
-    "_ValidationScriptsPartial": [
-      {
-        "Name": "_ValidationScriptsPartial",
-        "SourcePath": "Pages/_ValidationScriptsPartial.cshtml",
-        "OutputPath": "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
-        "IsTemplate": false
-      }
-    ],
+    //"_ValidationScriptsPartial": [
+    //  {
+    //    "Name": "_ValidationScriptsPartial",
+    //    "SourcePath": "Pages/_ValidationScriptsPartial.cshtml",
+    //    "OutputPath": "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
+    //    "IsTemplate": false
+    //  }
+    //],
     "Account.AccessDenied": [
       {
         "Name": "Account.AccessDenied",

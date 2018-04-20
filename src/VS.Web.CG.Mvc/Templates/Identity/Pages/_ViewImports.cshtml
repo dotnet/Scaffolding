@@ -2,10 +2,11 @@
 @@using Microsoft.AspNetCore.Identity
 @@using @(Model.Namespace).Areas.Identity
 @{
-    if (Model.IsGenerateCustomUser)
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace))
     {
 @:@@using @(Model.UserClassNamespace)
     }
+
 }
 @@namespace @(Model.Namespace).Areas.Identity.Pages
 @@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

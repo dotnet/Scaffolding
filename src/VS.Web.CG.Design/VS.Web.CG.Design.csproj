@@ -14,6 +14,7 @@
     <ARM64ProjectDirectory>..\..\tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
     <AnyCpuProjectDirectory>..\..\tools\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
@@ -24,26 +25,55 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).dll" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).dll" Visible="false" />
-    <None Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).xml" Pack="true" PackagePath="lib\netcoreapp2.0\$(AssemblyName).xml" Visible="false" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(OS)'=='Windows_NT'">
-    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x64\lib\net461\$(AssemblyName).exe" Visible="false" />
-    <None Include="$(OutputPath)net461\win7-x64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win7-x64\lib\net461\$(AssemblyName).xml" Visible="false" />
-    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win7-x86\lib\net461\$(AssemblyName).exe" Visible="false" />
-    <None Include="$(X86ProjectDirectory)\bin\$(Configuration)\net461\win7-x86\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win7-x86\lib\net461\$(AssemblyName).xml" Visible="false" />
-    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm\lib\net461\$(AssemblyName).exe" Visible="false" />
-    <None Include="$(ARMProjectDirectory)\bin\$(Configuration)\net461\win-arm\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win-arm\lib\net461\$(AssemblyName).xml" Visible="false" />
-    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe" Pack="true" PackagePath="runtimes\win-arm64\lib\net461\$(AssemblyName).exe" Visible="false" />
-    <None Include="$(ARM64ProjectDirectory)\bin\$(Configuration)\net461\win-arm64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes\win-arm64\lib\net461\$(AssemblyName).xml" Visible="false" />
-    <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).exe" Pack="true" PackagePath="lib\net461\$(AssemblyName).exe" Visible="false" />
-    <None Include="$(AnyCpuProjectDirectory)\bin\$(Configuration)\net461\$(AssemblyName).xml" Pack="true" PackagePath="lib\net461\$(AssemblyName).xml" Visible="false" />
-  </ItemGroup>
-
-  <ItemGroup>
     <!-- Set to PrivateAssets=All so the package does not appear in the generated nuspec. This prevents issues such as https://github.com/aspnet/Scaffolding/issues/645. -->
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
   </ItemGroup>
+
+  <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
+
+    <PropertyGroup>
+      <!-- Make sure we create a symbols.nupkg. -->
+      <IncludeSymbols>true</IncludeSymbols>
+
+      <NuspecProperties>
+        id=$(PackageId);
+        version=$(PackageVersion);
+        authors=$(Authors);
+        description=$(Description);
+        tags=$(PackageTags.Replace(';', ' '));
+        licenseUrl=$(PackageLicenseUrl);
+        projectUrl=$(PackageProjectUrl);
+        iconUrl=$(PackageIconUrl);
+        repositoryUrl=$(RepositoryUrl);
+        repositoryCommit=$(RepositoryCommit);
+        copyright=$(Copyright);
+        AssemblyName=$(AssemblyName);
+
+        OutputBinary=$(OutputPath)netcoreapp2.0\$(AssemblyName).dll;
+        OutputDocumentation=$(OutputPath)netcoreapp2.0\$(AssemblyName).xml;
+        OutputSymbol=$(OutputPath)netcoreapp2.0\$(AssemblyName).pdb;
+
+        OutputAnyExe=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).exe;
+        OutputAnyDocumentation=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).xml;
+        OutputAnySymbol=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).pdb;
+
+        OutputX64Exe=$(OutputPath)net461\win7-x64\$(AssemblyName).exe;
+        OutputX64Documentation=$(OutputPath)net461\win7-x64\$(AssemblyName).xml;
+        OutputX64Symbol=$(OutputPath)net461\win7-x64\$(AssemblyName).pdb;
+
+        OutputX86Exe=$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe;
+        OutputX86Documentation=$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).xml;
+        OutputX86Symbol=$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).pdb;
+
+        OutputARMExe=$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe;
+        OutputARMDocumentation=$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).xml;
+        OutputARMSymbol=$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).pdb;
+
+        OutputARM64Exe=$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe;
+        OutputARM64Documentation=$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).xml;
+        OutputARM64Symbol=$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).pdb;
+      </NuspecProperties>
+    </PropertyGroup>
+  </Target>
 
 </Project>

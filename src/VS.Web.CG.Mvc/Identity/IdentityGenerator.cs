@@ -185,18 +185,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     // We never overwrite some files like _ViewImports.cshtml.
                     _logger.LogMessage($"Adding static file: {staticFile.Name}", LogMessageLevel.Trace);
 
-                    try
-                    {
-                        await _codegeneratorActionService.AddFileAsync(
-                            outputPath,
-                            Path.Combine(TemplateFolderRoot, staticFile.SourcePath)
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogMessage($"Error adding static file {staticFile.Name} {ex.Message}", LogMessageLevel.Trace);
-                        throw;
-                    }
+                    await _codegeneratorActionService.AddFileAsync(
+                        outputPath,
+                        Path.Combine(TemplateFolderRoot, staticFile.SourcePath)
+                    );
                 }
             }
         }
@@ -213,19 +205,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
                     _logger.LogMessage($"Adding template: {template.Name}", LogMessageLevel.Trace);
-                    try
-                    {
-                        await _codegeneratorActionService.AddFileFromTemplateAsync(
-                            outputPath,
-                            template.SourcePath,
-                            TemplateFolders,
-                            templateModel);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogMessage($"Error adding template {template.Name} {ex.Message}", LogMessageLevel.Trace);
-                        throw;
-                    }
+
+                    await _codegeneratorActionService.AddFileFromTemplateAsync(
+                        outputPath,
+                        template.SourcePath,
+                        TemplateFolders,
+                        templateModel);
                 }
             }
 

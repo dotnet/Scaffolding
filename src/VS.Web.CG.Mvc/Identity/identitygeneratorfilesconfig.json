@@ -1,13 +1,5 @@
 ﻿{
   "NamedFileConfig": {
-    //"_ValidationScriptsPartial": [
-    //  {
-    //    "Name": "_ValidationScriptsPartial",
-    //    "SourcePath": "Pages/_ValidationScriptsPartial.cshtml",
-    //    "OutputPath": "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
-    //    "IsTemplate": false
-    //  }
-    //],
     "Account.AccessDenied": [
       {
         "Name": "Account.AccessDenied",
@@ -509,6 +501,295 @@
         "SourcePath": "Error.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Error.cshtml.cs",
         "IsTemplate": true,
+        "ShowInListFiles": false
+      }
+    ],
+    "WwwRoot": [
+      {
+        "Name": "Site.css",
+        "SourcePath": "wwwroot/css/site.css",
+        "OutputPath": "wwwroot/css/site.css",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Site.min.css",
+        "SourcePath": "wwwroot/css/site.min.css",
+        "OutputPath": "wwwroot/css/site.min.css",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Banner1.svg",
+        "SourcePath": "wwwroot/images/banner1.svg",
+        "OutputPath": "wwwroot/images/banner1.svg",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Banner2.svg",
+        "SourcePath": "wwwroot/images/banner2.svg",
+        "OutputPath": "wwwroot/images/banner2.svg",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Banner3.svg",
+        "SourcePath": "wwwroot/images/banner3.svg",
+        "OutputPath": "wwwroot/images/banner3.svg",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Site.js",
+        "SourcePath": "wwwroot/js/site.js",
+        "OutputPath": "wwwroot/js/site.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Site.min.js",
+        "SourcePath": "wwwroot/js/site.min.js",
+        "OutputPath": "wwwroot/js/site.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.css",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.css.map",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css.map",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css.map",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.min.css",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.min.css.map",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap-theme.css",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap-theme.css.map",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css.map",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css.map",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap-theme.min.css",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap-theme.min.css.map",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css.map",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css.map",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Glyphicons-halflings-regular.eot",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.eot",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.eot",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Glyphicons-halflings-regular.svg",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.svg",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.svg",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Glyphicons-halflings-regular.ttf",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Glyphicons-halflings-regular.woff",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Glyphicons-halflings-regular.woff2",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.js",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.min.js",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Npm.js",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/js/npm.js",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/js/npm.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Lib.Bootstrap.bower.json",
+        "SourcePath": "wwwroot/lib/bootstrap/.bower.json",
+        "OutputPath": "wwwroot/lib/bootstrap/.bower.json",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Lib.Bootstrap.License",
+        "SourcePath": "wwwroot/lib/bootstrap/LICENSE",
+        "OutputPath": "wwwroot/lib/bootstrap/LICENSE",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.js",
+        "SourcePath": "wwwroot/lib/jquery/dist/jquery.js",
+        "OutputPath": "wwwroot/lib/jquery/dist/jquery.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.min.js",
+        "SourcePath": "wwwroot/lib/jquery/dist/jquery.min.js",
+        "OutputPath": "wwwroot/lib/jquery/dist/jquery.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.min.map",
+        "SourcePath": "wwwroot/lib/jquery/dist/jquery.min.map",
+        "OutputPath": "wwwroot/lib/jquery/dist/jquery.min.map",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.Bower.json",
+        "SourcePath": "wwwroot/lib/jquery/.bower.json",
+        "OutputPath": "wwwroot/lib/jquery/.bower.json",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.License.txt",
+        "SourcePath": "wwwroot/lib/jquery/LICENSE.txt",
+        "OutputPath": "wwwroot/lib/jquery/LICENSE.txt",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Additional-methods.js",
+        "SourcePath": "wwwroot/lib/jquery-validation/dist/additional-methods.js",
+        "OutputPath": "wwwroot/lib/jquery-validation/dist/additional-methods.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Additional-methods.min.js",
+        "SourcePath": "wwwroot/lib/jquery-validation/dist/additional-methods.min.js",
+        "OutputPath": "wwwroot/lib/jquery-validation/dist/additional-methods.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery-validate.js",
+        "SourcePath": "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
+        "OutputPath": "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.validate.min.js",
+        "SourcePath": "wwwroot/lib/jquery-validation/dist/Jquery.validate.min.js",
+        "OutputPath": "wwwroot/lib/jquery-validation/dist/Jquery.validate.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery-validation.bower.json",
+        "SourcePath": "wwwroot/lib/jquery-validation/.bower.json",
+        "OutputPath": "wwwroot/lib/jquery-validation/.bower.json",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery-validation.License.md",
+        "SourcePath": "wwwroot/lib/jquery-validation/LICENSE.md",
+        "OutputPath": "wwwroot/lib/jquery-validation/LICENSE.md",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery-validation-unobtrusive.bower.json",
+        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/.bower.json",
+        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/.bower.json",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.validate.unobtrusive.js",
+        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.validate.unobtrusive.min.js",
+        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
+        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Jquery.License.txt",
+        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
+        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "favicon.ico",
+        "SourcePath": "wwwroot/favicon.ico",
+        "OutputPath": "wwwroot/favicon.ico",
+        "IsTemplate": false,
         "ShowInListFiles": false
       }
     ]

@@ -114,7 +114,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Name = "_ValidationScriptsPartial",
                     SourcePath = "Pages/_ValidationScriptsPartial.cshtml",
                     OutputPath = "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
-                    IsTemplate = false
+                    IsTemplate = false,
+                    ShouldOverWrite = OverWriteCondition.Never
                 };
                 filesToGenerate.Add(validationScriptsPartial);
             }

@@ -24,5 +24,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string Layout { get; set; }
         public string LayoutPageNoExtension { get; set; }
         public string SupportFileLocation { get; set; }
+        public bool HasExistingNonEmptyWwwRoot { get; set; }
     }
 }

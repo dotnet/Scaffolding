@@ -205,7 +205,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 GenerateLayout = !hasExistingLayout,
                 Layout = layout,
                 LayoutPageNoExtension = Path.GetFileNameWithoutExtension(layout),
-                SupportFileLocation = supportFileLocation
+                SupportFileLocation = supportFileLocation,
+                HasExistingNonEmptyWwwRoot = HasExistingNonEmptyWwwRootDirectory
             };
 
             var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
@@ -219,6 +220,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (IdentityGeneratorFilesConfig.TryGetLayoutPeerFiles(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles))
             {
                 filesToGenerate.AddRange(layoutPeerFiles);
+            }
+
+            if (IdentityGeneratorFilesConfig.TryGetCookieConsentPartialFile(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IdentityGeneratorFile cookieConsentPartialConfig))
+            {
+                filesToGenerate.Add(cookieConsentPartialConfig);
             }
 
             templateModel.FilesToGenerate = filesToGenerate.ToArray();
@@ -312,6 +318,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         MessageStrings.UseForceOption,
                         string.Join(Environment.NewLine, filesToOverWrite.Select(f => f.OutputPath)));
                 throw new InvalidOperationException(msg);
+            }
+        }
+
+        // returns true if, at the project root, there is a wwwroot directory that contains at least 1 file.
+        // return false otherwise.
+        private bool HasExistingNonEmptyWwwRootDirectory
+        {
+            get
+            {
+                string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+                string wwwrootCheckLocation = Path.Combine(projectDir, "wwwroot");
+
+                return _fileSystem.DirectoryExists(wwwrootCheckLocation)
+                    && _fileSystem.EnumerateFiles(wwwrootCheckLocation, "*", SearchOption.AllDirectories).Any();
             }
         }
 

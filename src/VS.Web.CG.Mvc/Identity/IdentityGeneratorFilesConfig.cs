@@ -150,6 +150,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 }
             }
 
+            if (!templateModel.HasExistingNonEmptyWwwRoot)
+            {
+                filesToGenerate.AddRange(_config.NamedFileConfig["WwwRoot"]);
+            }
+
             filesToGenerate.Add(IdentityHostingStartup);
             filesToGenerate.Add(ReadMe);
 
@@ -203,6 +208,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private static readonly string _ViewImportFileName = "_ViewImports";
 
+        // Note: "peer" is somewhat of a misnomer, not all of the "peer" files are in the same directory as the layout file.
         internal static bool TryGetLayoutPeerFiles(IFileSystem fileSystem, string rootPath, IdentityGeneratorTemplateModel templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles)
         {
             string viewImportsFileNameWithExtension = string.Concat(_ViewImportFileName, ".cshtml");
@@ -249,6 +255,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             peerFiles.Add(layoutPeerViewStart);
 
             layoutPeerFiles = peerFiles;
+            return true;
+        }
+
+        private static readonly string _CookieConsentPartialFileName = "_CookieConsentPartial.cshtml";
+
+        // Look for a cookie consent file in the same location as the layout file. If there isn't one, setup the config to add one there.
+        internal static bool TryGetCookieConsentPartialFile(IFileSystem fileSystem, string rootPath, IdentityGeneratorTemplateModel templateModel, out IdentityGeneratorFile cookieConsentPartialConfig)
+        {
+            string layoutDir = Path.GetDirectoryName(templateModel.Layout);
+
+            string cookieConsentCheckLocation = Path.Combine(layoutDir, _CookieConsentPartialFileName);
+            if (fileSystem.FileExists(cookieConsentCheckLocation))
+            {
+                cookieConsentPartialConfig = null;
+                return false;
+            }
+
+            cookieConsentPartialConfig = new IdentityGeneratorFile()
+            {
+                Name = "_CookieConsentPartial",
+                SourcePath = "SupportPages._CookieConsentPartial.cshtml",
+                OutputPath = Path.Combine(layoutDir, _CookieConsentPartialFileName),
+                IsTemplate = false,
+                ShowInListFiles = false,
+                ShouldOverWrite = OverWriteCondition.Never
+            };
             return true;
         }
 

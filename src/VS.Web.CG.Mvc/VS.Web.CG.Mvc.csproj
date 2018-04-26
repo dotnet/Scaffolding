@@ -45,17 +45,10 @@
     <None Pack="true" Include="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Templates\Identity\SupportPages\**" />
-    <EmbeddedResource Remove="Templates\Identity\SupportPages\**" />
-    <None Remove="Templates\Identity\SupportPages\**" />
+    <Compile Remove="Templates\**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VS.Web.CG\VS.Web.CG.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Templates\Identity\wwwroot\" />
-  </ItemGroup>
-
 </Project>

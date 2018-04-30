@@ -50,6 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 Console.ReadKey();
             }
 #endif
+
             app.OnExecute(async () =>
             {
                 var exitCode = 1;

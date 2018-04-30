@@ -14,14 +14,11 @@ using System.Threading.Tasks;
             "Microsoft.EntityFrameworkCore"
         });
 
-    if (Model.IsGenerateCustomUser)
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace))
     {
-        if (Model.DbContextNamespace != Model.UserClassNamespace)
-        {
-            namespaceSet.Add(Model.UserClassNamespace);
-        }
+        namespaceSet.Add(Model.UserClassNamespace);
     }
-    foreach(var name in namespaceSet.OrderBy(n => n))
+    foreach (var name in namespaceSet.OrderBy(n => n))
     {
 @:using @name;
     }

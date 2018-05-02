@@ -1,3 +1,0 @@
-<Project>
-  <UsingTask TaskName="EmbedAppNameInHost" AssemblyFile="$(MSBuildThisFileDirectory)bin\publish\RepoTasks.dll" />
-</Project>

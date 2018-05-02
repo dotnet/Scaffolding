@@ -14,7 +14,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" ReferenceOutputAssembly="false" CopyToOutputDirectory="Always" OutputItemType="Content" />
     <ProjectReference Include="..\..\src\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj" />
   </ItemGroup>

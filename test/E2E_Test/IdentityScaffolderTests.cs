@@ -43,7 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Template file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
 
-                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles)
+                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles(IdentityGeneratorFilesConfig.LayoutFileDisposition.Generate))
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Static file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
@@ -77,7 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Template file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
 
-                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles)
+                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles(IdentityGeneratorFilesConfig.LayoutFileDisposition.Generate))
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Static file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }

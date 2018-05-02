@@ -21,7 +21,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 DbContextClass = dbContextClass,
                 UserClass = userClass,
                 IsUsingExistingDbContext = isUsingExistingDbContext,
-                IsGenerateCustomUser = isGenerateCustomUser
+                IsGenerateCustomUser = isGenerateCustomUser,
+                SupportFileLocation = "Pages/Shared/"
             };
 
             var templateFiles = IdentityGeneratorFilesConfig.GetFilesToGenerate(null, templateModel);

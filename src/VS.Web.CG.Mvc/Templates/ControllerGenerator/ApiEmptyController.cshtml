@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace @Model.NamespaceName
 {
-    [Produces("application/json")]
     [Route("api/[controller]")]
-    public class @Model.ClassName : Controller
+    [ApiController]
+    public class @Model.ClassName : ControllerBase
     {
     }
 }

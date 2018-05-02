@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 @{string modelName = (Model.ClassName.EndsWith("Controller") ? Model.ClassName.Substring(0, Model.ClassName.Length - 10) : Model.ClassName);}
 namespace @Model.NamespaceName
 {
-    [Produces("application/json")]
     [Route("api/[controller]")]
-    public class @Model.ClassName : Controller
+    [ApiController]
+    public class @Model.ClassName : ControllerBase
     {
         // GET: api/@modelName
         [HttpGet]
@@ -29,13 +29,13 @@ namespace @Model.NamespaceName
 
         // POST: api/@modelName
         [HttpPost]
-        public void Post([FromBody]string value)
+        public void Post([FromBody] string value)
         {
         }
 
         // PUT: api/@modelName/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public void Put(int id, [FromBody] string value)
         {
         }
 

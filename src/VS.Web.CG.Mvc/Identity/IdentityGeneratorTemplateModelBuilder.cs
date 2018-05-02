@@ -187,13 +187,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ValidateFilesOption();
             }
 
-            var layout = _commandlineModel.Layout;
-            if (_commandlineModel.GenerateLayout)
-            {
-                layout = "/Pages/Shared/_Layout.cshtml";
-            }
-
-
+            bool hasExistingLayout = DetermineSupportFileLocation(out string supportFileLocation, out string layout);
+            
             var templateModel = new IdentityGeneratorTemplateModel()
             {
                 ApplicationName = _applicationInfo.ApplicationName,
@@ -207,8 +202,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 IsGenerateCustomUser = IsGenerateCustomUser,
                 IsGeneratingIndividualFiles = IsFilesSpecified,
                 UseDefaultUI = _commandlineModel.UseDefaultUI,
-                GenerateLayout = _commandlineModel.GenerateLayout,
-                Layout = layout
+                GenerateLayout = !hasExistingLayout,
+                Layout = layout,
+                LayoutPageNoExtension = Path.GetFileNameWithoutExtension(layout),
+                SupportFileLocation = supportFileLocation,
+                HasExistingNonEmptyWwwRoot = HasExistingNonEmptyWwwRootDirectory
             };
 
             var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
@@ -219,11 +217,92 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.AddRange(IdentityGeneratorFilesConfig.GetViewImports(filesToGenerate, _fileSystem, _applicationInfo.ApplicationBasePath));
             }
 
+            if (IdentityGeneratorFilesConfig.TryGetLayoutPeerFiles(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles))
+            {
+                filesToGenerate.AddRange(layoutPeerFiles);
+            }
+
+            if (IdentityGeneratorFilesConfig.TryGetCookieConsentPartialFile(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IdentityGeneratorFile cookieConsentPartialConfig))
+            {
+                filesToGenerate.Add(cookieConsentPartialConfig);
+            }
+
             templateModel.FilesToGenerate = filesToGenerate.ToArray();
 
             ValidateFilesToGenerate(templateModel.FilesToGenerate);
 
             return templateModel;
+        }
+
+        private static readonly IReadOnlyList<string> _ExistingLayoutFileCheckLocations = new List<string>()
+        {
+            "Pages/Shared/",
+            "Views/Shared/"
+        };
+
+        // If there is no layout file, check the existence of the key directories, and put the support files in the value directory.
+        private static readonly IReadOnlyDictionary<string, string> _CheckDirectoryToTargetMapForSupportFiles = new Dictionary<string, string>()
+        {
+            { "Pages/", "Pages/Shared/" },
+            { "Views/", "Views/Shared/" }
+        };
+
+        private static readonly string _DefaultSupportLocation = "Pages/Shared/";
+
+        private static readonly string _LayoutFileName = "_Layout.cshtml";
+
+        // Checks if there is an existing layout page, and based on its location or lack of existence, determines where to put support pages.
+        // Returns true if there is an existing layout page.
+        // Note: layoutFile & supportFileLocation will always have a value when this exits.
+        //      supportFileLocation is rooted
+        private bool DetermineSupportFileLocation(out string supportFileLocation, out string layoutFile)
+        {
+            string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+
+            if (!string.IsNullOrEmpty(_commandlineModel.Layout))
+            {
+                supportFileLocation = Path.GetDirectoryName(_commandlineModel.Layout);
+                layoutFile = _commandlineModel.Layout;
+                return true;
+            }
+
+            bool hasExistingLayoutFile = false;
+            supportFileLocation = null;
+            layoutFile = null;
+
+            foreach (string checkDirectory in _ExistingLayoutFileCheckLocations)
+            {
+                string checkFile = Path.Combine(projectDir, checkDirectory, _LayoutFileName);
+                if (_fileSystem.FileExists(checkFile))
+                {
+                    hasExistingLayoutFile = true;
+                    supportFileLocation = checkDirectory;
+                    layoutFile = Path.Combine(supportFileLocation, _LayoutFileName);
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(supportFileLocation))
+            {
+                foreach (KeyValuePair<string, string> checkMapEntry in _CheckDirectoryToTargetMapForSupportFiles)
+                {
+                    string checkDirectory = Path.Combine(projectDir, checkMapEntry.Key);
+                    if (_fileSystem.DirectoryExists(checkDirectory))
+                    {
+                        supportFileLocation = checkMapEntry.Value;
+                        layoutFile = Path.Combine(supportFileLocation, _LayoutFileName);
+                        break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(supportFileLocation))
+            {
+                supportFileLocation = _DefaultSupportLocation;
+                layoutFile = Path.Combine(supportFileLocation, _LayoutFileName);
+            }
+
+            return hasExistingLayoutFile;
         }
 
         private void ValidateFilesToGenerate(IdentityGeneratorFile[] filesToGenerate)
@@ -239,6 +318,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         MessageStrings.UseForceOption,
                         string.Join(Environment.NewLine, filesToOverWrite.Select(f => f.OutputPath)));
                 throw new InvalidOperationException(msg);
+            }
+        }
+
+        // returns true if, at the project root, there is a wwwroot directory that contains at least 1 file.
+        // return false otherwise.
+        private bool HasExistingNonEmptyWwwRootDirectory
+        {
+            get
+            {
+                string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+                string wwwrootCheckLocation = Path.Combine(projectDir, "wwwroot");
+
+                return _fileSystem.DirectoryExists(wwwrootCheckLocation)
+                    && _fileSystem.EnumerateFiles(wwwrootCheckLocation, "*", SearchOption.AllDirectories).Any();
             }
         }
 

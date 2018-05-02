@@ -205,6 +205,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
                     _logger.LogMessage($"Adding template: {template.Name}", LogMessageLevel.Trace);
+
                     await _codegeneratorActionService.AddFileFromTemplateAsync(
                         outputPath,
                         template.SourcePath,

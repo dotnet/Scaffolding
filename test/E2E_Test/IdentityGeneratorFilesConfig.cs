@@ -10,6 +10,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public static class IdentityGeneratorFilesConfig
     {
+        public enum LayoutFileDisposition
+        {
+            Generate,
+            UseExisting,
+            NoLayout
+        }
+
         public static List<string> Templates = new List<string>()
         {
             Path.Combine("Pages", "Shared", "_Layout.cshtml"),
@@ -55,9 +62,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             Path.Combine("Pages", "Shared", "_LoginPartial.cshtml")
         };
 
-        public static List<string> StaticFiles = new List<string>()
+        // TODO: add more tests where some of the currently "invariant" content has dynamic locations
+        // Specifically, deal with the "support file location" varying based on initial content in the project being scaffolded.
+        // This currently assumes the support location is "Pages/Shared/", but it could possibly be "Views/Shared/" too.
+        public static List<string> StaticFiles(LayoutFileDisposition layoutFileDisposition)
         {
-            Path.Combine("Areas", "Identity", "Pages", "_ValidationScriptsPartial.cshtml"),
+            List<string> staticFiles = new List<string>(LocationInvariantStaticFiles);
+
+            if (layoutFileDisposition != LayoutFileDisposition.Generate)
+            {
+                staticFiles.Add(Path.Combine("Areas", "Identity", "Pages", "_ValidationScriptsPartial.cshtml"));
+            }
+
+            if (layoutFileDisposition != LayoutFileDisposition.NoLayout)
+            {
+                staticFiles.Add(Path.Combine("Pages", "Shared", "_ValidationScriptsPartial.cshtml"));
+            }
+
+            return staticFiles;
+        }
+
+        private static IReadOnlyList<string> LocationInvariantStaticFiles = new List<string>()
+        {
+            //Path.Combine("Areas", "Identity", "Pages", "_ValidationScriptsPartial.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "_ViewStart.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "Error.cshtml"),
 

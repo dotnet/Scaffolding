@@ -22,5 +22,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public bool UseDefaultUI { get; set; }
         public bool GenerateLayout { get; set; }
         public string Layout { get; set; }
+        public string LayoutPageNoExtension { get; set; }
+        public string SupportFileLocation { get; set; }
+        public bool HasExistingNonEmptyWwwRoot { get; set; }
     }
 }

@@ -31,6 +31,7 @@
         TargetFramework=$(TargetFramework);
         MicrosoftNETCoreApp20PackageVersion=$(MicrosoftNETCoreApp20PackageVersion);
         MicrosoftNETCoreApp21PackageVersion=$(MicrosoftNETCoreApp21PackageVersion);
+        MicrosoftNETCoreApp22PackageVersion=$(MicrosoftNETCoreApp22PackageVersion);
         MicrosoftApplicationInsightsAspNetCorePackageVersion=$(MicrosoftApplicationInsightsAspNetCorePackageVersion);
         MicrosoftAspNetCoreAuthenticationCookiesPackageVersion=$(MicrosoftAspNetCoreAuthenticationCookiesPackageVersion);
         MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion);

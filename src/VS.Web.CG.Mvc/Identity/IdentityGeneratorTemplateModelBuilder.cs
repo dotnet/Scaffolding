@@ -261,8 +261,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (!string.IsNullOrEmpty(_commandlineModel.Layout))
             {
-                supportFileLocation = Path.GetDirectoryName(_commandlineModel.Layout);
-                layoutFile = _commandlineModel.Layout;
+                if (_commandlineModel.Layout.StartsWith("~"))
+                {
+                    layoutFile = _commandlineModel.Layout.Substring(1);
+                }
+                else
+                {
+                    layoutFile = _commandlineModel.Layout;
+                }
+
+                while (layoutFile[0] == '\\' || layoutFile[0] == '/')
+                {
+                    layoutFile = layoutFile.Substring(1);
+                }
+
+                supportFileLocation = Path.GetDirectoryName(layoutFile);
+
                 return true;
             }
 

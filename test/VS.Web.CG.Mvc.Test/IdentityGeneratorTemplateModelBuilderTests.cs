@@ -77,17 +77,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         // Tests for determining the support file location when an existing layout path is specified.
         // The input layout file path is relative to the project root.
         [Theory]
-        [InlineData("Views/Shared/Layout.cshtml", "Views\\Shared", "Views/Shared/Layout.cshtml")]
-        [InlineData("/V/S/Layout.cshtml", "V\\S", "V/S/Layout.cshtml")]
-        [InlineData("~/Test/Dir/Layout.cshtml", "Test\\Dir", "Test/Dir/Layout.cshtml")]
+        [InlineData("Views/Shared/Layout.cshtml", new[] { "Views", "Shared" }, new[] { "Views", "Shared", "Layout.cshtml" })]   //  slash
+        [InlineData("/V/S/Layout.cshtml", new[] { "V", "S" }, new[] { "V", "S", "Layout.cshtml" })] // slash
+        [InlineData("~/Test/Dir/Layout.cshtml", new[] { "Test", "Dir" }, new[] { "Test", "Dir", "Layout.cshtml" })] //  slash
 
-        [InlineData("Custom\\Location\\Layout.cshtml", "Custom\\Location", "Custom\\Location\\Layout.cshtml")]
-        [InlineData("\\My\\Files\\Layout.cshtml", "My\\Files", "My\\Files\\Layout.cshtml")]
-        [InlineData("~\\Some\\Location\\Layout.cshtml", "Some\\Location", "Some\\Location\\Layout.cshtml")]
+        [InlineData("Custom\\Location\\Layout.cshtml", new[] { "Custom", "Location" }, new[] { "Custom", "Location", "Layout.cshtml" })]  //  empty
+        [InlineData("\\My\\Files\\Layout.cshtml", new[] { "My", "Files" }, new[] { "My", "Files", "Layout.cshtml" })] //  empty
+        [InlineData("~\\Some\\Location\\Layout.cshtml", new[] { "Some", "Location" }, new[] { "Some", "Location", "Layout.cshtml" })] //  empty
 
-        [InlineData("\\\\/\\///\\Crazy\\Input\\Layout.cshtml", "Crazy\\Input", "Crazy\\Input\\Layout.cshtml")]
-        public void SupportFileLocationForExistingLayoutFileTest(string existingLayoutFile, string expectedSupportFileLocation, string expectedLayoutFile)
+        [InlineData("\\\\/\\///\\Crazy\\Input\\Layout.cshtml", new[] { "Crazy", "Input" } , new[] { "Crazy", "Input", "Layout.cshtml" })]  //  empty
+        public void SupportFileLocationForExistingLayoutFileTest(string existingLayoutFile, string[] expectedSupportFileLocationParts, string[] expectedLayoutFileParts)
         {
+            string expectedSupportFileLocation = Path.Combine(expectedSupportFileLocationParts);
+            string expectedLayoutFile = Path.Combine(expectedLayoutFileParts);
+
             IdentityGeneratorCommandLineModel commandLineModel = new IdentityGeneratorCommandLineModel();
             commandLineModel.Layout = existingLayoutFile;
 

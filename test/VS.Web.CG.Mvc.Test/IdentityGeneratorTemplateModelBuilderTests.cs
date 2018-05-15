@@ -76,20 +76,63 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         // Tests for determining the support file location when an existing layout path is specified.
         // The input layout file path is relative to the project root.
+        //
+        // tests for layout file in a standard location
         [Theory]
-        [InlineData("Views/Shared/Layout.cshtml", new[] { "Views", "Shared" }, new[] { "Views", "Shared", "Layout.cshtml" })]   //  slash
-        [InlineData("/V/S/Layout.cshtml", new[] { "V", "S" }, new[] { "V", "S", "Layout.cshtml" })] // slash
-        [InlineData("~/Test/Dir/Layout.cshtml", new[] { "Test", "Dir" }, new[] { "Test", "Dir", "Layout.cshtml" })] //  slash
+        [InlineData(false, false, new[] { "Views", "Shared", "Layout.cshtml" }, new[] { "Views", "Shared" }, new[] { "Views", "Shared", "Layout.cshtml" })]
+        [InlineData(true, false, new[] { "Views", "Shared", "Layout.cshtml" }, new[] { "Views", "Shared" }, new[] { "Views", "Shared", "Layout.cshtml" })]
+        [InlineData(false, true, new[] { "Views", "Shared", "Layout.cshtml" }, new[] { "Views", "Shared" }, new[] { "Views", "Shared", "Layout.cshtml" })]
+        [InlineData(true, true, new[] { "Views", "Shared", "Layout.cshtml" }, new[] { "Views", "Shared" }, new[] { "Views", "Shared", "Layout.cshtml" })]
 
-        [InlineData("Custom\\Location\\Layout.cshtml", new[] { "Custom", "Location" }, new[] { "Custom", "Location", "Layout.cshtml" })]  //  empty
-        [InlineData("\\My\\Files\\Layout.cshtml", new[] { "My", "Files" }, new[] { "My", "Files", "Layout.cshtml" })] //  empty
-        [InlineData("~\\Some\\Location\\Layout.cshtml", new[] { "Some", "Location" }, new[] { "Some", "Location", "Layout.cshtml" })] //  empty
+        // test for no layout file / improper specification
+        [InlineData(false, false, new string[0], new string[0], new string[0])]
+        [InlineData(true, false, new string[0], new string[0], new string[0])]
+        [InlineData(false, true, new string[0], new string[0], new string[0])]
+        [InlineData(true, true, new string[0], new string[0], new string[0])]
 
-        [InlineData("\\\\/\\///\\Crazy\\Input\\Layout.cshtml", new[] { "Crazy", "Input" } , new[] { "Crazy", "Input", "Layout.cshtml" })]  //  empty
-        public void SupportFileLocationForExistingLayoutFileTest(string existingLayoutFile, string[] expectedSupportFileLocationParts, string[] expectedLayoutFileParts)
+        // tests for layout file in custom locations.
+        [InlineData(false, false, new[] { "Custom", "Location", "Layout.cshtml" }, new[] { "Custom", "Location" }, new[] { "Custom", "Location", "Layout.cshtml" })]
+        [InlineData(true, true, new[] { "My", "Files", "Layout.cshtml" }, new[] { "My", "Files" }, new[] { "My", "Files", "Layout.cshtml" })]
+        [InlineData(false, true, new[] { "My", "Files", "Layout.cshtml" }, new[] { "My", "Files" }, new[] { "My", "Files", "Layout.cshtml" })]
+        [InlineData(true, true, new[] { "Some", "Location", "Layout.cshtml" }, new[] { "Some", "Location" }, new[] { "Some", "Location", "Layout.cshtml" })]
+        public void SupportFileLocationForExistingLayoutFileTest(bool leadTilde, bool leadSeparator, string[] existingLayoutFileParts, string[] expectedSupportFileLocationParts, string[] expectedLayoutFileParts)
         {
-            string expectedSupportFileLocation = Path.Combine(expectedSupportFileLocationParts);
-            string expectedLayoutFile = Path.Combine(expectedLayoutFileParts);
+            string expectedSupportFileLocation;
+            string expectedLayoutFile;
+
+            if (expectedSupportFileLocationParts.Length > 0)
+            {
+                expectedSupportFileLocation = Path.Combine(expectedSupportFileLocationParts);
+            }
+            else
+            {
+                expectedSupportFileLocation = IdentityGeneratorTemplateModelBuilder._DefaultSupportLocation;
+            }
+
+            if (expectedLayoutFileParts.Length > 0)
+            {
+                expectedLayoutFile = Path.Combine(expectedLayoutFileParts);
+            }
+            else
+            {
+                expectedLayoutFile = Path.Combine(IdentityGeneratorTemplateModelBuilder._DefaultSupportLocation, IdentityGeneratorTemplateModelBuilder._LayoutFileName);
+            }
+
+            string existingLayoutFile = string.Empty;
+            if (leadTilde)
+            {
+                existingLayoutFile += "~";
+            }
+
+            if (leadSeparator)
+            {
+                existingLayoutFile += Path.DirectorySeparatorChar;
+            }
+
+            if (existingLayoutFileParts.Length > 0)
+            {
+                existingLayoutFile = existingLayoutFile + Path.Combine(existingLayoutFileParts);
+            }
 
             IdentityGeneratorCommandLineModel commandLineModel = new IdentityGeneratorCommandLineModel();
             commandLineModel.Layout = existingLayoutFile;

@@ -247,9 +247,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             { "Views/", "Views/Shared/" }
         };
 
-        private static readonly string _DefaultSupportLocation = "Pages/Shared/";
+        internal static readonly string _DefaultSupportLocation = "Pages/Shared/";
 
-        private static readonly string _LayoutFileName = "_Layout.cshtml";
+        internal static readonly string _LayoutFileName = "_Layout.cshtml";
 
         // Checks if there is an existing layout page, and based on its location or lack of existence, determines where to put support pages.
         // Returns true if there is an existing layout page.
@@ -271,7 +271,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 }
 
                 while (!string.IsNullOrEmpty(layoutFile) &&
-                    (layoutFile[0] == '\\' || layoutFile[0] == '/'))
+                    (layoutFile[0] == Path.DirectorySeparatorChar ||
+                    layoutFile[0] == Path.AltDirectorySeparatorChar))
                 {
                     layoutFile = layoutFile.Substring(1);
                 }

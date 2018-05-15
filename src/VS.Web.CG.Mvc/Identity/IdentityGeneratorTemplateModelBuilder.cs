@@ -255,7 +255,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         // Returns true if there is an existing layout page.
         // Note: layoutFile & supportFileLocation will always have a value when this exits.
         //      supportFileLocation is rooted
-        private bool DetermineSupportFileLocation(out string supportFileLocation, out string layoutFile)
+        internal bool DetermineSupportFileLocation(out string supportFileLocation, out string layoutFile)
         {
             string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
 

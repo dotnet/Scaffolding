@@ -4,6 +4,13 @@
       "AdxVerificationCompositeRule"
     ],
     "packages": {
+      "Microsoft.VisualStudio.Web.CodeGeneration.Utils": {
+        "Exclusions": {
+          "PACKAGE_DEPENDENCY_PRERELEASE": {
+            "NuGet.Frameworks": "NuGet does not use stable package versions for stable runtime releases"
+          }
+        }
+      },
       "dotnet-aspnet-codegenerator": {
         "Exclusions": {
           "NEUTRAL_RESOURCES_LANGUAGE": {

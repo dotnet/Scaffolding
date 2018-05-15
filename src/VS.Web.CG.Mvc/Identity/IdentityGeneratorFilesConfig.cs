@@ -220,7 +220,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 return false;
             }
 
-            const string sharedDirName = "Shared/";
+            const string sharedDirName = "Shared";
             string outputDirectory;
             if (templateModel.SupportFileLocation.EndsWith(sharedDirName))
             {

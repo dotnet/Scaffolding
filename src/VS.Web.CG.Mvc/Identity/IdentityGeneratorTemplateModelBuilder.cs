@@ -280,6 +280,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 // So we'll treat it as if no layout file was specified (handled below).
                 if (!string.IsNullOrEmpty(layoutFile))
                 {
+                    // normalize the path characters
+                    layoutFile = layoutFile.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
                     supportFileLocation = Path.GetDirectoryName(layoutFile);
 
                     return true;

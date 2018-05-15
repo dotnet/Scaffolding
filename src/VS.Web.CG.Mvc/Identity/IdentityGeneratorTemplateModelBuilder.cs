@@ -270,14 +270,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     layoutFile = _commandlineModel.Layout;
                 }
 
-                while (layoutFile[0] == '\\' || layoutFile[0] == '/')
+                while (!string.IsNullOrEmpty(layoutFile) &&
+                    (layoutFile[0] == '\\' || layoutFile[0] == '/'))
                 {
                     layoutFile = layoutFile.Substring(1);
                 }
 
-                supportFileLocation = Path.GetDirectoryName(layoutFile);
+                // if the input layout file path consists of only slashes (and possibly a lead ~), it'll be empty at this point.
+                // So we'll treat it as if no layout file was specified (handled below).
+                if (!string.IsNullOrEmpty(layoutFile))
+                {
+                    supportFileLocation = Path.GetDirectoryName(layoutFile);
 
-                return true;
+                    return true;
+                }
             }
 
             bool hasExistingLayoutFile = false;

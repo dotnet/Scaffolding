@@ -222,10 +222,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             const string sharedDirName = "Shared";
             string outputDirectory;
-            if (templateModel.SupportFileLocation.EndsWith(sharedDirName))
+
+            string checkSupportFileLocation = templateModel.SupportFileLocation;
+            if (checkSupportFileLocation.EndsWith("\\") || checkSupportFileLocation.EndsWith("/"))
             {
-                int directoryLengthWithoutShared = templateModel.SupportFileLocation.Length - sharedDirName.Length;
-                outputDirectory = templateModel.SupportFileLocation.Substring(0, directoryLengthWithoutShared);
+                checkSupportFileLocation = checkSupportFileLocation.Substring(0, checkSupportFileLocation.Length - 1);
+            }
+
+            //if (templateModel.SupportFileLocation.EndsWith(sharedDirName))
+            //{
+            //    int directoryLengthWithoutShared = templateModel.SupportFileLocation.Length - sharedDirName.Length;
+            //    outputDirectory = templateModel.SupportFileLocation.Substring(0, directoryLengthWithoutShared);
+            //}
+
+            if (checkSupportFileLocation.EndsWith(sharedDirName))
+            {
+                int directoryLengthWithoutShared = checkSupportFileLocation.Length - sharedDirName.Length;
+                outputDirectory = checkSupportFileLocation.Substring(0, directoryLengthWithoutShared);
             }
             else
             {

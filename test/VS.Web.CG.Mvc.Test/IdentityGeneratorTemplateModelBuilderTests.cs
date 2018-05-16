@@ -117,6 +117,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 expectedLayoutFile = Path.Combine(IdentityGeneratorTemplateModelBuilder._DefaultSupportLocation, IdentityGeneratorTemplateModelBuilder._LayoutFileName);
             }
+            expectedLayoutFile = expectedLayoutFile.Replace("\\", "/");
 
             string existingLayoutFile = string.Empty;
             if (leadTilde)

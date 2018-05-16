@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             Assert.All(scriptTags, t =>
             {
-                Assert.True(shasum[t.Src] == t.Integrity, userMessage: $"Expected integrity on script tag to be {shasum[t.Src]} but it was {t.Integrity}. {t.FileName}");
+                Assert.True(shasum[t.Src] == t.Integrity, userMessage: $"Expected integrity on script tag to be {shasum[t.Src]} but it was {t.Integrity}: {t.Path}");
             });
         }
 
@@ -67,6 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             public string Src;
             public string Integrity;
             public string FileName;
+            internal string Path;
         }
 
         private static readonly Regex _scriptRegex = new Regex(@"<script[^>]*src=""(?'src'http[^""]+)""[^>]*integrity=""(?'integrity'[^""]+)""([^>]*)>", RegexOptions.Multiline);
@@ -86,7 +87,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 {
                     Src = match.Groups["src"].Value,
                     Integrity = match.Groups["integrity"].Value,
-                    FileName = Path.GetFileName(cshtmlFile)
+                    FileName = Path.GetFileName(cshtmlFile),
+                    Path = cshtmlFile,
                 };
                 yield return tag;
                 _output.WriteLine($"Found script tag in '{tag.FileName}', src='{tag.Src}' integrity='{tag.Integrity}'");

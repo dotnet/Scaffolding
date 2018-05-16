@@ -247,23 +247,50 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             { "Views/", "Views/Shared/" }
         };
 
-        private static readonly string _DefaultSupportLocation = "Pages/Shared/";
+        internal static readonly string _DefaultSupportLocation = "Pages/Shared/";
 
-        private static readonly string _LayoutFileName = "_Layout.cshtml";
+        internal static readonly string _LayoutFileName = "_Layout.cshtml";
 
         // Checks if there is an existing layout page, and based on its location or lack of existence, determines where to put support pages.
         // Returns true if there is an existing layout page.
         // Note: layoutFile & supportFileLocation will always have a value when this exits.
         //      supportFileLocation is rooted
-        private bool DetermineSupportFileLocation(out string supportFileLocation, out string layoutFile)
+        internal bool DetermineSupportFileLocation(out string supportFileLocation, out string layoutFile)
         {
             string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
 
             if (!string.IsNullOrEmpty(_commandlineModel.Layout))
             {
-                supportFileLocation = Path.GetDirectoryName(_commandlineModel.Layout);
-                layoutFile = _commandlineModel.Layout;
-                return true;
+                if (_commandlineModel.Layout.StartsWith("~"))
+                {
+                    layoutFile = _commandlineModel.Layout.Substring(1);
+                }
+                else
+                {
+                    layoutFile = _commandlineModel.Layout;
+                }
+
+                while (!string.IsNullOrEmpty(layoutFile) &&
+                    (layoutFile[0] == Path.DirectorySeparatorChar ||
+                    layoutFile[0] == Path.AltDirectorySeparatorChar))
+                {
+                    layoutFile = layoutFile.Substring(1);
+                }
+
+                // if the input layout file path consists of only slashes (and possibly a lead ~), it'll be empty at this point.
+                // So we'll treat it as if no layout file was specified (handled below).
+                if (!string.IsNullOrEmpty(layoutFile))
+                {
+                    // normalize the path characters sp GetDirectoryName() works.
+                    layoutFile = layoutFile.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+                    supportFileLocation = Path.GetDirectoryName(layoutFile);
+
+                    // always use forward slashes for the layout file path.
+                    layoutFile = layoutFile.Replace("\\", "/");
+
+                    return true;
+                }
             }
 
             bool hasExistingLayoutFile = false;

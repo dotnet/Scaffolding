@@ -12,7 +12,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
@@ -122,7 +121,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             if (!controllerGeneratorModel.IsRestController && !controllerGeneratorModel.NoViews)
             {
-                var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
                 var viewGenerator = ActivatorUtilities.CreateInstance<EFModelBasedViewScaffolder>(ServiceProvider);
 
                 var areaPath = string.IsNullOrEmpty(_areaName) ? string.Empty : Path.Combine("Areas", _areaName);
@@ -132,7 +130,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                     Constants.ViewsFolderName,
                     controllerRootName);
 
-                await layoutDependencyInstaller.Execute();
                 var viewGeneratorModel = new ViewGeneratorModel()
                 {
                     UseDefaultLayout = controllerGeneratorModel.UseDefaultLayout,
@@ -150,7 +147,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                     viewAndTemplateNames.Add(viewName, viewTemplate);
                 }
                 await viewGenerator.GenerateViews(viewAndTemplateNames, viewGeneratorModel, modelTypeAndContextModel, viewBaseOutputPath);
-                await layoutDependencyInstaller.InstallDependencies();
             }
         }
 

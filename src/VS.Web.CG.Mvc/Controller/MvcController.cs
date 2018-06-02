@@ -3,11 +3,9 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
@@ -26,6 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
         }
+
         public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
         {
             if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))
@@ -40,8 +39,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 throw new ArgumentException(GetRequiredNameError);
             }
             ValidateNameSpaceName(controllerGeneratorModel);
-            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
-            await layoutDependencyInstaller.Execute();
             var namespaceName = string.IsNullOrEmpty(controllerGeneratorModel.ControllerNamespace)
                 ? GetDefaultControllerNamespace(controllerGeneratorModel.RelativeFolderPath)
                 : controllerGeneratorModel.ControllerNamespace;
@@ -50,9 +47,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);
             Logger.LogMessage(string.Format(MessageStrings.AddedController, outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)));
-
-            await layoutDependencyInstaller.InstallDependencies();
         }
+
         protected virtual string GetRequiredNameError
         {
             get

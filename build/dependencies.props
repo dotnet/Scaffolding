@@ -3,48 +3,48 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup Label="Package Versions">
-    <InternalAspNetCoreSdkPackageVersion>2.2.0-preview1-17064</InternalAspNetCoreSdkPackageVersion>
+    <InternalAspNetCoreSdkPackageVersion>2.2.0-preview1-17067</InternalAspNetCoreSdkPackageVersion>
     <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.1.1</MicrosoftApplicationInsightsAspNetCorePackageVersion>
-    <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreDiagnosticsPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreDiagnosticsPackageVersion>
-    <MicrosoftAspNetCoreHostingPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreHostingPackageVersion>
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreIdentityUIPackageVersion>
-    <MicrosoftAspNetCoreMvcPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreMvcPackageVersion>
-    <MicrosoftAspNetCorePackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCorePackageVersion>
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreRazorLanguagePackageVersion>
-    <MicrosoftAspNetCoreServerIISIntegrationPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreServerIISIntegrationPackageVersion>
-    <MicrosoftAspNetCoreServerKestrelPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreServerKestrelPackageVersion>
-    <MicrosoftAspNetCoreStaticFilesPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreStaticFilesPackageVersion>
-    <MicrosoftAspNetCoreTestingPackageVersion>2.2.0-preview1-34326</MicrosoftAspNetCoreTestingPackageVersion>
+    <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreDiagnosticsPackageVersion>
+    <MicrosoftAspNetCoreHostingPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreHostingPackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreMvcPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreMvcPackageVersion>
+    <MicrosoftAspNetCorePackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCorePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreServerIISIntegrationPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreServerIISIntegrationPackageVersion>
+    <MicrosoftAspNetCoreServerKestrelPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreServerKestrelPackageVersion>
+    <MicrosoftAspNetCoreStaticFilesPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreStaticFilesPackageVersion>
+    <MicrosoftAspNetCoreTestingPackageVersion>2.2.0-preview1-34373</MicrosoftAspNetCoreTestingPackageVersion>
     <MicrosoftBuildPackageVersion>15.6.82</MicrosoftBuildPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>15.6.82</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>2.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>2.2.0-preview1-34326</MicrosoftEntityFrameworkCoreDesignPackageVersion>
-    <MicrosoftEntityFrameworkCorePackageVersion>2.2.0-preview1-34326</MicrosoftEntityFrameworkCorePackageVersion>
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>2.2.0-preview1-34326</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
-    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsConfigurationJsonPackageVersion>
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsDependencyInjectionPackageVersion>
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <MicrosoftExtensionsLoggingConsolePackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <MicrosoftExtensionsLoggingDebugPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsLoggingDebugPackageVersion>
-    <MicrosoftExtensionsLoggingPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsLoggingPackageVersion>
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>2.2.0-preview1-34326</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>2.2.0-preview1-34373</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>2.2.0-preview1-34373</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>2.2.0-preview1-34373</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>2.2.0-preview1-34373</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <MicrosoftNETCoreApp20PackageVersion>2.0.0</MicrosoftNETCoreApp20PackageVersion>
-    <MicrosoftNETCoreApp21PackageVersion>2.1.0-rc1</MicrosoftNETCoreApp21PackageVersion>
-    <MicrosoftNETCoreApp22PackageVersion>2.2.0-preview1-26526-03</MicrosoftNETCoreApp22PackageVersion>
-    <MicrosoftNETCoreDotNetAppHostPackageVersion>2.2.0-preview1-26526-03</MicrosoftNETCoreDotNetAppHostPackageVersion>
+    <MicrosoftNETCoreApp21PackageVersion>2.1.0</MicrosoftNETCoreApp21PackageVersion>
+    <MicrosoftNETCoreApp22PackageVersion>2.2.0-preview1-26531-03</MicrosoftNETCoreApp22PackageVersion>
+    <MicrosoftNETCoreDotNetAppHostPackageVersion>2.2.0-preview1-26531-03</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
-    <MicrosoftVisualStudioWebBrowserLinkPackageVersion>2.2.0-preview1-34326</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
+    <MicrosoftVisualStudioWebBrowserLinkPackageVersion>2.2.0-preview1-34373</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
     <MoqPackageVersion>4.7.49</MoqPackageVersion>
     <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>

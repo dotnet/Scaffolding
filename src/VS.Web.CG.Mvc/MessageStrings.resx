@@ -205,7 +205,7 @@
     <value>Please provide a valid {0}</value>
   </data>
   <data name="RazorPageNameRequired" xml:space="preserve">
-    <value>Pazor Page Name is required.</value>
+    <value>Razor Page Name is required.</value>
   </data>
   <data name="ReadmeGenerationFailed" xml:space="preserve">
     <value>Failed to generate a readme: {0}</value>

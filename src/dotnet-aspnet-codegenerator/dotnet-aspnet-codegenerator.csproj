@@ -66,4 +66,22 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Assemblies from this project -->
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/toolassets/$(TargetFramework)/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/toolassets/net461/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/Microsoft.VisualStudio.Web.CodeGeneration.Contracts.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/Microsoft.Extensions.FileProviders.Abstractions.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/Microsoft.Extensions.FileProviders.Physical.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/Microsoft.Extensions.FileSystemGlobbing.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/Microsoft.Extensions.Primitives.dll" Certificate="$(AssemblySigningCertName)" />
+
+    <!-- Third-party assemblies -->
+    <SignedPackageFile Include="tools/$(TargetFramework)/any/Newtonsoft.Json.dll" Certificate="3PartyDual" />
+
+    <!-- Binaries from partner teams that should be signed already -->
+    <ExcludePackageFileFromSigning Include="tools/$(TargetFramework)/any/NuGet.Frameworks.dll" Certificate="$(AssemblySigningCertName)" />
+    <ExcludePackageFileFromSigning Include="tools/$(TargetFramework)/any/System.Runtime.CompilerServices.Unsafe.dll" Certificate="$(AssemblySigningCertName)" />
+  </ItemGroup>
+
 </Project>

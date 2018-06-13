@@ -1,0 +1,2010 @@
+{
+  "AssemblyIdentity": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60",
+  "Types": [
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.AssemblyAttributeGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "assembly",
+              "Type": "System.Reflection.Assembly"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ClassNameModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ClassName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ClassName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NamespaceName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NamespaceName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "fullTypeName",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.CodeModelMetadata",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ModelType",
+          "Parameters": [],
+          "ReturnType": "System.Type",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Navigations",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PrimaryKeys",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Properties",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "model",
+              "Type": "System.Type"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.CodeModelService",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ICodeModelService"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetModelMetadata",
+          "Parameters": [
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ICodeModelService",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "context",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "workspace",
+              "Type": "Microsoft.CodeAnalysis.Workspace"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            },
+            {
+              "Name": "loader",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ConnectionStringsWriter",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IConnectionStringsWriter"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddConnectionString",
+          "Parameters": [
+            {
+              "Name": "connectionStringName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "dataBaseName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "useSQLite",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IConnectionStringsWriter",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ContextProcessingStatus",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingStatus",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ContextProcessingStatus",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingStatus"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelMetadata",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ModelMetadata",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingStatus",
+      "Visibility": "Public",
+      "Kind": "Enumeration",
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Field",
+          "Name": "ContextAvailable",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "1"
+        },
+        {
+          "Kind": "Field",
+          "Name": "ContextAdded",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "2"
+        },
+        {
+          "Kind": "Field",
+          "Name": "ContextAddedButRequiresConfig",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "3"
+        },
+        {
+          "Kind": "Field",
+          "Name": "ContextEdited",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "4"
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.DbContextEditorServices",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IDbContextEditorServices"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddNewContext",
+          "Parameters": [
+            {
+              "Name": "dbContextTemplateModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.NewDbContextTemplateModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<Microsoft.CodeAnalysis.SyntaxTree>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IDbContextEditorServices",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddModelToContext",
+          "Parameters": [
+            {
+              "Name": "dbContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.EditSyntaxTreeResult",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IDbContextEditorServices",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "EditStartupForNewContext",
+          "Parameters": [
+            {
+              "Name": "startUp",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "dbContextTypeName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "dbContextNamespace",
+              "Type": "System.String"
+            },
+            {
+              "Name": "dataBaseName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.EditSyntaxTreeResult",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IDbContextEditorServices",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "filesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IFilesLocator"
+            },
+            {
+              "Name": "templatingService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Templating.ITemplating"
+            },
+            {
+              "Name": "connectionStringsWriter",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IConnectionStringsWriter"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.EditSyntaxTreeResult",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Edited",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Edited",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_OldTree",
+          "Parameters": [],
+          "ReturnType": "Microsoft.CodeAnalysis.SyntaxTree",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_OldTree",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.CodeAnalysis.SyntaxTree"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NewTree",
+          "Parameters": [],
+          "ReturnType": "Microsoft.CodeAnalysis.SyntaxTree",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NewTree",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.CodeAnalysis.SyntaxTree"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.EntityFrameworkServices",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetModelMetadata",
+          "Parameters": [
+            {
+              "Name": "dbContextFullTypeName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "modelTypeSymbol",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "areaName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "loader",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "dbContextEditorServices",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IDbContextEditorServices"
+            },
+            {
+              "Name": "packageInstaller",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "workspace",
+              "Type": "Microsoft.CodeAnalysis.Workspace"
+            },
+            {
+              "Name": "fileSystem",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ICodeModelService",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetModelMetadata",
+          "Parameters": [
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult>",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IConnectionStringsWriter",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddConnectionString",
+          "Parameters": [
+            {
+              "Name": "connectionStringName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "dataBaseName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "useSQLite",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IDbContextEditorServices",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddNewContext",
+          "Parameters": [
+            {
+              "Name": "dbContextTemplateModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.NewDbContextTemplateModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<Microsoft.CodeAnalysis.SyntaxTree>",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddModelToContext",
+          "Parameters": [
+            {
+              "Name": "dbContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.EditSyntaxTreeResult",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "EditStartupForNewContext",
+          "Parameters": [
+            {
+              "Name": "startup",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "dbContextTypeName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "dbContextNamespace",
+              "Type": "System.String"
+            },
+            {
+              "Name": "dataBaseName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.EditSyntaxTreeResult",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetModelMetadata",
+          "Parameters": [
+            {
+              "Name": "dbContextFullTypeName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "modelTypeName",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "areaName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult>",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Properties",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata[]",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PrimaryKeys",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata[]",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Navigations",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata[]",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelType",
+          "Parameters": [],
+          "ReturnType": "System.Type",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_AssociationPropertyName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_AssociationPropertyName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DisplayPropertyName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DisplayPropertyName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntitySetName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_EntitySetName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ForeignKeyPropertyNames",
+          "Parameters": [],
+          "ReturnType": "System.String[]",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ForeignKeyPropertyNames",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String[]"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PrimaryKeyNames",
+          "Parameters": [],
+          "ReturnType": "System.String[]",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PrimaryKeyNames",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String[]"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShortTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShortTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_TypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_IsAutoGenerated",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsAutoGenerated",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsEnum",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsEnum",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsEnumFlags",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsEnumFlags",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsForeignKey",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsForeignKey",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsPrimaryKey",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsPrimaryKey",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsReadOnly",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsReadOnly",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PropertyName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PropertyName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Scaffold",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Scaffold",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShortTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShortTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_TypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsMultilineText",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsMultilineText",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PropertyInfo",
+          "Parameters": [],
+          "ReturnType": "System.Reflection.PropertyInfo",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PropertyInfo",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Reflection.PropertyInfo"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ModelMetadata",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ModelType",
+          "Parameters": [],
+          "ReturnType": "System.Type",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntityType",
+          "Parameters": [],
+          "ReturnType": "Microsoft.EntityFrameworkCore.Metadata.IEntityType",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContexType",
+          "Parameters": [],
+          "ReturnType": "System.Type",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntitySetName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Properties",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PrimaryKeys",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Navigations",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "entityType",
+              "Type": "Microsoft.EntityFrameworkCore.Metadata.IEntityType"
+            },
+            {
+              "Name": "dbContextType",
+              "Type": "System.Type"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.NavigationMetadata",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_AssociationPropertyName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_AssociationPropertyName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DisplayPropertyName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DisplayPropertyName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntitySetName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_EntitySetName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ForeignKeyPropertyNames",
+          "Parameters": [],
+          "ReturnType": "System.String[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ForeignKeyPropertyNames",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String[]"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PrimaryKeyNames",
+          "Parameters": [],
+          "ReturnType": "System.String[]",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PrimaryKeyNames",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String[]"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShortTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShortTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_TypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.INavigationMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "navigation",
+              "Type": "Microsoft.EntityFrameworkCore.Metadata.INavigation"
+            },
+            {
+              "Name": "dbContextType",
+              "Type": "System.Type"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.NewDbContextTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelTypeFullName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ProgramTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ProgramNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_RequiredNamespaces",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.HashSet<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "dbContextName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "programType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.PropertyMetadata",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_IsAutoGenerated",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsAutoGenerated",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsEnum",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsEnum",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsEnumFlags",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsEnumFlags",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsForeignKey",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsForeignKey",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsPrimaryKey",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsPrimaryKey",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsReadOnly",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsReadOnly",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PropertyName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PropertyName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Scaffold",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Scaffold",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShortTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShortTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_TypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsMultilineText",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsMultilineText",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PropertyInfo",
+          "Parameters": [],
+          "ReturnType": "System.Reflection.PropertyInfo",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PropertyInfo",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Reflection.PropertyInfo"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IPropertyMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "property",
+              "Type": "System.Reflection.PropertyInfo"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ReflectedTypesProvider",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetAllTypesInProject",
+          "Parameters": [
+            {
+              "Name": "throwOnError",
+              "Type": "System.Boolean",
+              "DefaultValue": "False"
+            }
+          ],
+          "ReturnType": "System.Type[]",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetReflectedType",
+          "Parameters": [
+            {
+              "Name": "modelType",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Type",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetReflectedType",
+          "Parameters": [
+            {
+              "Name": "modelType",
+              "Type": "System.String"
+            },
+            {
+              "Name": "lookInDependencies",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Type",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetCompilationErrors",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "compilation",
+              "Type": "Microsoft.CodeAnalysis.Compilation"
+            },
+            {
+              "Name": "compilationModificationFunc",
+              "Type": "System.Func<Microsoft.CodeAnalysis.Compilation, Microsoft.CodeAnalysis.Compilation>"
+            },
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "loader",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    }
+  ]
+}

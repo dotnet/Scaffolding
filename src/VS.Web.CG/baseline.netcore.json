@@ -1,0 +1,43 @@
+{
+  "AssemblyIdentity": "Microsoft.VisualStudio.Web.CodeGeneration, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60",
+  "Types": [
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGenCommand",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "Execute",
+          "Parameters": [
+            {
+              "Name": "args",
+              "Type": "System.String[]"
+            }
+          ],
+          "ReturnType": "System.Int32",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            },
+            {
+              "Name": "locator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorLocator"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    }
+  ]
+}

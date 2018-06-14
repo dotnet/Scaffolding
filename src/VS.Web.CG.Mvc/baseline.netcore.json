@@ -1,0 +1,4649 @@
+{
+  "AssemblyIdentity": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60",
+  "Types": [
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.ClassNameModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ClassName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NamespaceName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "className",
+              "Type": "System.String"
+            },
+            {
+              "Name": "namespaceName",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "fullTypeName",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ModelClass",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ModelClass",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DataContextClass",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DataContextClass",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ReferenceScriptLibraries",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ReferenceScriptLibraries",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_LayoutPage",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_LayoutPage",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseDefaultLayout",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseDefaultLayout",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Force",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Force",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_RelativeFolderPath",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_RelativeFolderPath",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ControllerNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ControllerNamespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "Clone",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "copyFrom",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel"
+            }
+          ],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonGeneratorBase",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationInfo",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ValidateAndGetOutputPath",
+          "Parameters": [
+            {
+              "Name": "commandLineModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel"
+            },
+            {
+              "Name": "outputFileName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            }
+          ],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.ModelTypeAndContextModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ModelType",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ModelType",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ContextProcessingResult",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ContextProcessingResult",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextFullName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DbContextFullName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_OutputPath",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_AltPaths",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.List<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "templateName",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "templateName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "altPaths",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.ValidationUtil",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "ValidateType",
+          "Parameters": [
+            {
+              "Name": "typeName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "argumentName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "throwWhenNotFound",
+              "Type": "System.Boolean",
+              "DefaultValue": "True"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.NameSpaceUtilities",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetSafeNameSpaceName",
+          "Parameters": [
+            {
+              "Name": "namespaceName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetSafeNameSpaceFromPath",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "namespacePrefix",
+              "Type": "System.String",
+              "DefaultValue": "null"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.OverWriteCondition",
+      "Visibility": "Public",
+      "Kind": "Enumeration",
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Field",
+          "Name": "Always",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "0"
+        },
+        {
+          "Kind": "Field",
+          "Name": "Never",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "1"
+        },
+        {
+          "Kind": "Field",
+          "Name": "WithForce",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "2"
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.EFModelBasedViewScaffolder",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewScaffolderBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "entityFrameworkService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.EmptyViewScaffolder",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewScaffolderBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ModelBasedViewScaffolder",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewScaffolderBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "codeModelService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ICodeModelService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonGeneratorBase",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGenerator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ViewName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ViewName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_TemplateName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PartialView",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PartialView",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "Clone",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "copyFrom",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ViewDataTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ViewDataTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ViewDataTypeShortName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ViewDataTypeShortName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ViewName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ViewName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_LayoutPageFile",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_LayoutPageFile",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsPartialView",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsPartialView",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsLayoutPageSelected",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsLayoutPageSelected",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ReferenceScriptLibraries",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ReferenceScriptLibraries",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelMetadata",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ModelMetadata",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_JQueryVersion",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_JQueryVersion",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewScaffolderBase",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonGeneratorBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFolders",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Virtual": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetViewGeneratorTemplateModel",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorModel"
+            },
+            {
+              "Name": "modelTypeAndContextModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.ModelTypeAndContextModel"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewGeneratorTemplateModel",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectDependencyProvider",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_projectContext",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_codeGeneratorActionsService",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_serviceProvider",
+          "Parameters": [],
+          "ReturnType": "System.IServiceProvider",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_logger",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsModelRequired",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "EmptyViewTemplate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "CreateViewTemplate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "EditViewTemplate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "DeleteViewTemplate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "DetailsViewTemplate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "ListViewTemplate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "ViewTemplateNames",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.Dictionary<System.String, Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View.ViewTemplate>",
+          "Static": true,
+          "ReadOnly": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.EFModelBasedRazorPageScaffolder",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageScaffolderBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "viewGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "entityFrameworkService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.EmptyRazorPageScaffolder",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageScaffolderBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonGeneratorBase",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGenerator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "razorPageGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_RazorPageName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_RazorPageName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_TemplateName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PartialView",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PartialView",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NoPageModel",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NoPageModel",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NamespaceName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NamespaceName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "Clone",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "copyFrom",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_NamespaceName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NamespaceName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NoPageModel",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NoPageModel",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PageModelClassName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_PageModelClassName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_RazorPageName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_RazorPageName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_LayoutPageFile",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_LayoutPageFile",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsPartialView",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsPartialView",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsLayoutPageSelected",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsLayoutPageSelected",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ReferenceScriptLibraries",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ReferenceScriptLibraries",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelMetadata",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ModelMetadata",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_JQueryVersion",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_JQueryVersion",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageScaffolderBase",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonGeneratorBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.RequiredFileEntity>",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFolders",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Virtual": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddRequiredFiles",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRazorPageViewGeneratorTemplateModel",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorTemplateModel",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetRazorPageWithContextTemplateModel",
+          "Parameters": [
+            {
+              "Name": "razorGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorModel"
+            },
+            {
+              "Name": "modelTypeAndContextModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.ModelTypeAndContextModel"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageWithContextTemplateModel",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectDependencyProvider",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_projectContext",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_codeGeneratorActionsService",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_serviceProvider",
+          "Parameters": [],
+          "ReturnType": "System.IServiceProvider",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "_logger",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "ReadOnly": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageWithContextTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor.RazorPageGeneratorTemplateModel",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ViewDataTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ViewDataTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ViewDataTypeShortName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ViewDataTypeShortName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ContextTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ContextTypeName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelType",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelVariable",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntitySetVariable",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_RequiredNamespaces",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.HashSet<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "dbContextFullTypeName",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGenerator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFolders",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "commandlineModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorCommandLineModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "actionService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "connectionStringsWriter",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IConnectionStringsWriter"
+            },
+            {
+              "Name": "workspace",
+              "Type": "Microsoft.CodeAnalysis.Workspace"
+            },
+            {
+              "Name": "loader",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+            },
+            {
+              "Name": "fileSystem",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorCommandLineModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_RootNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_RootNamespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseSQLite",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseSQLite",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContext",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DbContext",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UserClass",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UserClass",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Files",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Files",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ListFiles",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ListFiles",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Force",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Force",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseDefaultUI",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseDefaultUI",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Layout",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Layout",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_GenerateLayout",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_GenerateLayout",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsGenerateCustomUser",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorFile",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Name",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_SourcePath",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_SourcePath",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_OutputPath",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_OutputPath",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsTemplate",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsTemplate",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShowInListFiles",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShowInListFiles",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShouldOverWrite",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.OverWriteCondition",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShouldOverWrite",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.OverWriteCondition"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_AltPaths",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.List<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_AltPaths",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Collections.Generic.List<System.String>"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorFilesConfig",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetAreaFolders",
+          "Parameters": [
+            {
+              "Name": "isDataRequired",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.String[]",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetFilesToList",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Namespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Namespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ApplicationName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UserClass",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UserClass",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UserClassNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UserClassNamespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextClass",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DbContextClass",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DbContextNamespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseSQLite",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseSQLite",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsUsingExistingDbContext",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsUsingExistingDbContext",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsGenerateCustomUser",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsGenerateCustomUser",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsGeneratingIndividualFiles",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsGeneratingIndividualFiles",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_FilesToGenerate",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorFile[]",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_FilesToGenerate",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.IdentityGeneratorFile[]"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseDefaultUI",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseDefaultUI",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_GenerateLayout",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_GenerateLayout",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Layout",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Layout",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_LayoutPageNoExtension",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_LayoutPageNoExtension",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_SupportFileLocation",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_SupportFileLocation",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_HasExistingNonEmptyWwwRoot",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_HasExistingNonEmptyWwwRoot",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "model",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyGeneratorModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_AddStaticFiles",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_AddStaticFiles",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_AddMvcLayout",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_AddMvcLayout",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyInstaller",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "Execute",
+          "Parameters": [],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "InstallDependencies",
+          "Parameters": [],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationEnvironment",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Logger",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_PackageInstaller",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ServiceProvider",
+          "Parameters": [],
+          "ReturnType": "System.IServiceProvider",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ProjectContext",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsMsBuildProject",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFolders",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Dependencies",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata>",
+          "Virtual": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_StartupContents",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent>",
+          "Virtual": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFoldersName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_MissingDepdencies",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata>",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "CopyFolderContentsRecursive",
+          "Parameters": [
+            {
+              "Name": "destinationPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "sourcePath",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            },
+            {
+              "Name": "packageInstaller",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            }
+          ],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.MvcLayoutDependencyInstaller",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyInstaller",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFoldersName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Dependencies",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_StartupContents",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            },
+            {
+              "Name": "packageInstaller",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.ReadMeGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFolders",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GenerateStartupOrReadme",
+          "Parameters": [
+            {
+              "Name": "startupList",
+              "Type": "System.Collections.Generic.List<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent>"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task<System.Boolean>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GenerateReadmeForArea",
+          "Parameters": [],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GenerateReadMeWithContent",
+          "Parameters": [
+            {
+              "Name": "content",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.ReadMeTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_StartupList",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.List<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_StartupList",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Collections.Generic.List<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent>"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_RootNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_RootNamespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsAreaReadMe",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsAreaReadMe",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_RequiredNamespaces",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.SortedSet<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ServiceStatements",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.List<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseStatements",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.List<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StaticFilesDependencyInstaller",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyInstaller",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Dependencies",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_StartupContents",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StartupContent>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFoldersName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            },
+            {
+              "Name": "packageInstaller",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGenerator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "model",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_UseAsync",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseAsync",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_NoViews",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_NoViews",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ControllerName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ControllerName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_IsRestController",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_IsRestController",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_GenerateReadWriteActions",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_GenerateReadWriteActions",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "Clone",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonCommandLineModel",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "copyFrom",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "Visibility": "Protected",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.ControllerGeneratorBase",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CommonGeneratorBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_CodeGeneratorActionsService",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ProjectContext",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ServiceProvider",
+          "Parameters": [],
+          "ReturnType": "System.IServiceProvider",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Logger",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TemplateFolders",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Virtual": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetDefaultControllerNamespace",
+          "Parameters": [
+            {
+              "Name": "relativeFolderPath",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ValidateNameSpaceName",
+          "Parameters": [
+            {
+              "Name": "generatorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ValidateAndGetOutputPath",
+          "Parameters": [
+            {
+              "Name": "generatorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetAreaName",
+          "Parameters": [
+            {
+              "Name": "appBasePath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "Generate",
+          "Parameters": [
+            {
+              "Name": "controllerGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetTemplateName",
+          "Parameters": [
+            {
+              "Name": "controllerGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.ControllerWithContextGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.ControllerGeneratorBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "Generate",
+          "Parameters": [
+            {
+              "Name": "controllerGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetTemplateName",
+          "Parameters": [
+            {
+              "Name": "generatorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelTypesLocator",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntityFrameworkService",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "entityFrameworkService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IEntityFrameworkService"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.ControllerWithContextTemplateModel",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ControllerName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ControllerName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_AreaName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_AreaName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_UseAsync",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_UseAsync",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ControllerNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ControllerNamespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelMetadata",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ModelMetadata",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.IModelMetadata"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelType",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ControllerRootName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ContextTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelTypeName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ModelVariable",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_EntitySetVariable",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_RequiredNamespaces",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.HashSet<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DbContextNamespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "modelType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType"
+            },
+            {
+              "Name": "dbContextFullTypeName",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.MvcController",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.ControllerGeneratorBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "Generate",
+          "Parameters": [
+            {
+              "Name": "controllerGeneratorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_GetRequiredNameError",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.MvcControllerEmpty",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.MvcController",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetTemplateName",
+          "Parameters": [
+            {
+              "Name": "generatorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_GetRequiredNameError",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.MvcControllerWithReadWriteActionGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.MvcController",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_GetRequiredNameError",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetTemplateName",
+          "Parameters": [
+            {
+              "Name": "generatorModel",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller.CommandLineGeneratorModel"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "codeGeneratorActionsService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas.AreaGenerator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGenerator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GenerateCode",
+          "Parameters": [
+            {
+              "Name": "model",
+              "Type": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas.AreaGeneratorCommandLine"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "modelTypesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas.AreaGeneratorCommandLine",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Name",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    }
+  ]
+}

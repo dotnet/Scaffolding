@@ -1,0 +1,1750 @@
+{
+  "AssemblyIdentity": "Microsoft.VisualStudio.Web.CodeGeneration.Core, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60",
+  "Types": [
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ActionDescriptor",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ActionMethod",
+          "Parameters": [],
+          "ReturnType": "System.Reflection.MethodInfo",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ActionModel",
+          "Parameters": [],
+          "ReturnType": "System.Type",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Generator",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Parameters",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.List<Microsoft.VisualStudio.Web.CodeGeneration.ParameterDescriptor>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "descriptor",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor"
+            },
+            {
+              "Name": "method",
+              "Type": "System.Reflection.MethodInfo"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ActionInvoker",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ActionDescriptor",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ActionDescriptor",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "Execute",
+          "Parameters": [
+            {
+              "Name": "args",
+              "Type": "System.String[]"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "descriptor",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ActionDescriptor"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorActionsService",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddFileAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "sourceFilePath",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddFileFromTemplateAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "templateName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "templateFolders",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            },
+            {
+              "Name": "templateModel",
+              "Type": "System.Object"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "templatingService",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Templating.ITemplating"
+            },
+            {
+              "Name": "filesLocator",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IFilesLocator"
+            },
+            {
+              "Name": "fileSystem",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Virtual": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_CodeGeneratorAction",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ActionDescriptor",
+          "Virtual": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_CodeGeneratorInstance",
+          "Parameters": [],
+          "ReturnType": "System.Object",
+          "Virtual": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "codeGeneratorType",
+              "Type": "System.Reflection.TypeInfo"
+            },
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorsLocator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorLocator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetCodeGenerator",
+          "Parameters": [
+            {
+              "Name": "codeGeneratorName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorLocator",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_CodeGenerators",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorLocator",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "serviceProvider",
+              "Type": "System.IServiceProvider"
+            },
+            {
+              "Name": "assemblyProvider",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorAssemblyProvider"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DefaultCodeGeneratorAssemblyProvider",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorAssemblyProvider"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_CandidateAssemblies",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.Reflection.Assembly>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorAssemblyProvider",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "loadContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DefaultFileSystem",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddFileAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "sourceStream",
+              "Type": "System.IO.Stream"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "CreateDirectory",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "DeleteFile",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "DirectoryExists",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "EnumerateFiles",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchPattern",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchOption",
+              "Type": "System.IO.SearchOption"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "FileExists",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "MakeFileWritable",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ReadAllText",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveDirectory",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "recursive",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "WriteAllText",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "contents",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "Instance",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.DefaultFileSystem",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ExceptionExtensions",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "Unwrap",
+          "Parameters": [
+            {
+              "Name": "ex",
+              "Type": "System.Exception"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+              "DefaultValue": "null"
+            }
+          ],
+          "ReturnType": "System.Exception",
+          "Static": true,
+          "Extension": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.FilesLocator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.IFilesLocator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetFilePath",
+          "Parameters": [
+            {
+              "Name": "fileName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchPaths",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFilesLocator",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.FileSystemChangeTracker",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Changes",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddChange",
+          "Parameters": [
+            {
+              "Name": "fileSystemChangeInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveChange",
+          "Parameters": [
+            {
+              "Name": "fileSystemChangeInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveChanges",
+          "Parameters": [
+            {
+              "Name": "fileSystemChanges",
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ClearChanges",
+          "Parameters": [],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGenerator",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorActionsService",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "AddFileFromTemplateAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "templateName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "templateFolders",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            },
+            {
+              "Name": "templateModel",
+              "Type": "System.Object"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddFileAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "sourceFilePath",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorAssemblyProvider",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_CandidateAssemblies",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.Reflection.Assembly>",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ICodeGeneratorLocator",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_CodeGenerators",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor>",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetCodeGenerator",
+          "Parameters": [
+            {
+              "Name": "codeGeneratorName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.CodeGeneratorDescriptor",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.IFilesLocator",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetFilePath",
+          "Parameters": [
+            {
+              "Name": "fileName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchPaths",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            }
+          ],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "FileExists",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "DirectoryExists",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "EnumerateFiles",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchPattern",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchOption",
+              "Type": "System.IO.SearchOption"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "MakeFileWritable",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ReadAllText",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "WriteAllText",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "contents",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddFileAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "sourceStream",
+              "Type": "System.IO.Stream"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "CreateDirectory",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "DeleteFile",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveDirectory",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "removeIfNotEmpty",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Changes",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddChange",
+          "Parameters": [
+            {
+              "Name": "info",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveChange",
+          "Parameters": [
+            {
+              "Name": "info",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ClearChanges",
+          "Parameters": [],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveChanges",
+          "Parameters": [
+            {
+              "Name": "subDirectoryChanges",
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetAllTypes",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.ModelType>",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetType",
+          "Parameters": [
+            {
+              "Name": "typeName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.ModelType>",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "InstallPackages",
+          "Parameters": [
+            {
+              "Name": "packages",
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata>"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Namespace",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Namespace",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Name",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_FullName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_FullName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_TypeSymbol",
+          "Parameters": [],
+          "ReturnType": "Microsoft.CodeAnalysis.ITypeSymbol",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "FromITypeSymbol",
+          "Parameters": [
+            {
+              "Name": "typeSymbol",
+              "Type": "Microsoft.CodeAnalysis.ITypeSymbol"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ModelType",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ModelTypesLocator",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetAllTypes",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.ModelType>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetType",
+          "Parameters": [
+            {
+              "Name": "typeName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.ModelType>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IModelTypesLocator",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectWorkspace",
+              "Type": "Microsoft.CodeAnalysis.Workspace"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.PackageInstaller",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "InstallPackages",
+          "Parameters": [
+            {
+              "Name": "packages",
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata>"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IPackageInstaller",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            },
+            {
+              "Name": "applicationInfo",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.PackageMetadata",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Name",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Version",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Version",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ParameterDescriptor",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Property",
+          "Parameters": [],
+          "ReturnType": "System.Reflection.PropertyInfo",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Value",
+          "Parameters": [],
+          "ReturnType": "System.Object",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "property",
+              "Type": "System.Reflection.PropertyInfo"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.SimulationModeFileSystem",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_FileSystemChanges",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "AddFileAsync",
+          "Parameters": [
+            {
+              "Name": "outputPath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "sourceStream",
+              "Type": "System.IO.Stream"
+            }
+          ],
+          "ReturnType": "System.Threading.Tasks.Task",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "FileExists",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "MakeFileWritable",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "ReadAllText",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "WriteAllText",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "contents",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "DeleteFile",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "CreateDirectory",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "DirectoryExists",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "RemoveDirectory",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "recursive",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "EnumerateFiles",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchPattern",
+              "Type": "System.String"
+            },
+            {
+              "Name": "searchOption",
+              "Type": "System.IO.SearchOption"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystem",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Field",
+          "Name": "Instance",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.SimulationModeFileSystem",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CommandLine.AliasAttribute",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "System.Attribute",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Alias",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "alias",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CommandLine.ArgumentAttribute",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "System.Attribute",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Description",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Description",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CommandLine.OptionAttribute",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "System.Attribute",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Name",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Name",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ShortName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ShortName",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Description",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Description",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DefaultValue",
+          "Parameters": [],
+          "ReturnType": "System.Object",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_DefaultValue",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Object"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    }
+  ]
+}

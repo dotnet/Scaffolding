@@ -1,0 +1,1095 @@
+{
+  "AssemblyIdentity": "Microsoft.VisualStudio.Web.CodeGeneration.Utils, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60",
+  "Types": [
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilities",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetAssemblyFromCompilation",
+          "Parameters": [
+            {
+              "Name": "loader",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+            },
+            {
+              "Name": "compilation",
+              "Type": "Microsoft.CodeAnalysis.Compilation"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.CompilationResult",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.CompilationResult",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_Success",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Success",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Boolean"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Assembly",
+          "Parameters": [],
+          "ReturnType": "System.Reflection.Assembly",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_Assembly",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Reflection.Assembly"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ErrorMessages",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<System.String>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "set_ErrorMessages",
+          "Parameters": [
+            {
+              "Name": "value",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "FromAssembly",
+          "Parameters": [
+            {
+              "Name": "assembly",
+              "Type": "System.Reflection.Assembly"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.CompilationResult",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "FromErrorMessages",
+          "Parameters": [
+            {
+              "Name": "errorMessages",
+              "Type": "System.Collections.Generic.IEnumerable<System.String>"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.CompilationResult",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ExceptionUtilities",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "ValidateStringArgument",
+          "Parameters": [
+            {
+              "Name": "parameterValue",
+              "Type": "System.String"
+            },
+            {
+              "Name": "parameterName",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.PlatformHelper",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_IsMono",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.TemplateFoldersUtilities",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetTemplateFolders",
+          "Parameters": [
+            {
+              "Name": "containingProject",
+              "Type": "System.String"
+            },
+            {
+              "Name": "applicationBasePath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "baseFolders",
+              "Type": "System.String[]"
+            },
+            {
+              "Name": "projectContext",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.List<System.String>",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ConsoleLogger",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_IsTracing",
+          "Parameters": [],
+          "ReturnType": "System.Boolean",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LogMessage",
+          "Parameters": [
+            {
+              "Name": "message",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LogMessage",
+          "Parameters": [
+            {
+              "Name": "message",
+              "Type": "System.String"
+            },
+            {
+              "Name": "level",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageLevel"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "LogMessage",
+          "Parameters": [
+            {
+              "Name": "message",
+              "Type": "System.String"
+            },
+            {
+              "Name": "level",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageLevel"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LogMessage",
+          "Parameters": [
+            {
+              "Name": "message",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageLevel",
+      "Visibility": "Public",
+      "Kind": "Enumeration",
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Field",
+          "Name": "Information",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "0"
+        },
+        {
+          "Kind": "Field",
+          "Name": "Warning",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "1"
+        },
+        {
+          "Kind": "Field",
+          "Name": "Trace",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "2"
+        },
+        {
+          "Kind": "Field",
+          "Name": "Error",
+          "Parameters": [],
+          "GenericParameter": [],
+          "Literal": "3"
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.ProjectContextExtensions",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetPackage",
+          "Parameters": [
+            {
+              "Name": "context",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "name",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.DependencyDescription",
+          "Static": true,
+          "Extension": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "GetReferencingPackages",
+          "Parameters": [
+            {
+              "Name": "context",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "name",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.DependencyDescription>",
+          "Static": true,
+          "Extension": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.RoslynWorkspace",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.CodeAnalysis.Workspace",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectInformation",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "configuration",
+              "Type": "System.String",
+              "DefaultValue": "\"debug\""
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.ProjectInformation",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_RootProject",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_DependencyProjects",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext>",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "root",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "projectReferences",
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext>"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Requires",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "NotNull",
+          "Parameters": [
+            {
+              "Name": "o",
+              "Type": "System.Object"
+            },
+            {
+              "Name": "name",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "NotNullOrEmpty",
+          "Parameters": [
+            {
+              "Name": "s",
+              "Type": "System.String"
+            },
+            {
+              "Name": "name",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Void",
+          "Static": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.FileSystemChangeMessageHandler",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.MessageHandlerBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_MessageTypesHandled",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.ISet<System.String>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "HandleMessageInternal",
+          "Parameters": [
+            {
+              "Name": "sender",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+            },
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageHandler",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "HandleMessage",
+          "Parameters": [
+            {
+              "Name": "sender",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+            },
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "Send",
+          "Parameters": [
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "CreateMessage",
+          "Parameters": [
+            {
+              "Name": "messageType",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.MessageType"
+            },
+            {
+              "Name": "o",
+              "Type": "System.Object"
+            },
+            {
+              "Name": "protocolVersion",
+              "Type": "System.Int32"
+            }
+          ],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.MessageHandlerBase",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageHandler"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_MessageTypesHandled",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.ISet<System.String>",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "HandleMessageInternal",
+          "Parameters": [
+            {
+              "Name": "sender",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+            },
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Virtual": true,
+          "Abstract": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_CurrentProtocolVersion",
+          "Parameters": [],
+          "ReturnType": "System.Int32",
+          "Virtual": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_Logger",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger",
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "HandleMessage",
+          "Parameters": [
+            {
+              "Name": "sender",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+            },
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageHandler",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "CanHandle",
+          "Parameters": [
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Virtual": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.ProjectInformationMessageHandler",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "BaseType": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.MessageHandlerBase",
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ProjectInformation",
+          "Parameters": [],
+          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_MessageTypesHandled",
+          "Parameters": [],
+          "ReturnType": "System.Collections.Generic.ISet<System.String>",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "HandleMessageInternal",
+          "Parameters": [
+            {
+              "Name": "sender",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+            },
+            {
+              "Name": "message",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+            }
+          ],
+          "ReturnType": "System.Boolean",
+          "Virtual": true,
+          "Override": true,
+          "Visibility": "Protected",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "projectInformation",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+            },
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "logger",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.ILogger"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ApplicationInfo",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationBasePath",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationConfiguration",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "appName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "appBasePath",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [
+            {
+              "Name": "appName",
+              "Type": "System.String"
+            },
+            {
+              "Name": "appBasePath",
+              "Type": "System.String"
+            },
+            {
+              "Name": "appConfiguration",
+              "Type": "System.String"
+            }
+          ],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.DefaultAssemblyLoadContext",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "ImplementedInterfaces": [
+        "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext"
+      ],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "LoadFromName",
+          "Parameters": [
+            {
+              "Name": "AssemblyName",
+              "Type": "System.Reflection.AssemblyName"
+            }
+          ],
+          "ReturnType": "System.Reflection.Assembly",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LoadStream",
+          "Parameters": [
+            {
+              "Name": "assembly",
+              "Type": "System.IO.Stream"
+            },
+            {
+              "Name": "symbols",
+              "Type": "System.IO.Stream"
+            }
+          ],
+          "ReturnType": "System.Reflection.Assembly",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LoadFromPath",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Reflection.Assembly",
+          "Sealed": true,
+          "Virtual": true,
+          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext",
+          "Visibility": "Public",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Constructor",
+          "Name": ".ctor",
+          "Parameters": [],
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.IApplicationInfo",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationBasePath",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationName",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "get_ApplicationConfiguration",
+          "Parameters": [],
+          "ReturnType": "System.String",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ICodeGenAssemblyLoadContext",
+      "Visibility": "Public",
+      "Kind": "Interface",
+      "Abstract": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "LoadStream",
+          "Parameters": [
+            {
+              "Name": "assembly",
+              "Type": "System.IO.Stream"
+            },
+            {
+              "Name": "symbols",
+              "Type": "System.IO.Stream"
+            }
+          ],
+          "ReturnType": "System.Reflection.Assembly",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LoadFromName",
+          "Parameters": [
+            {
+              "Name": "AssemblyName",
+              "Type": "System.Reflection.AssemblyName"
+            }
+          ],
+          "ReturnType": "System.Reflection.Assembly",
+          "GenericParameter": []
+        },
+        {
+          "Kind": "Method",
+          "Name": "LoadFromPath",
+          "Parameters": [
+            {
+              "Name": "path",
+              "Type": "System.String"
+            }
+          ],
+          "ReturnType": "System.Reflection.Assembly",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.DotNet.ResolvedReferenceExtensions",
+      "Visibility": "Public",
+      "Kind": "Class",
+      "Abstract": true,
+      "Static": true,
+      "Sealed": true,
+      "ImplementedInterfaces": [],
+      "Members": [
+        {
+          "Kind": "Method",
+          "Name": "GetMetadataReference",
+          "Parameters": [
+            {
+              "Name": "reference",
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.ResolvedReference"
+            },
+            {
+              "Name": "throwOnError",
+              "Type": "System.Boolean",
+              "DefaultValue": "True"
+            }
+          ],
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.CodeAnalysis.MetadataReference>",
+          "Static": true,
+          "Extension": true,
+          "Visibility": "Public",
+          "GenericParameter": []
+        }
+      ],
+      "GenericParameters": []
+    }
+  ]
+}

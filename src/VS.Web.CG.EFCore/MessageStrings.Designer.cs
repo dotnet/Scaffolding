@@ -105,7 +105,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore {
                 return ResourceManager.GetString("CompilingWithModifiedDbContext", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to The specified DbContext '{0}' could not be created. This is likely caused by a type name clash with '{1}'. Try renaming the DbContext and run scaffolding again.
+        /// </summary>
+        internal static string DbContextCompilationError {
+            get {
+                return ResourceManager.GetString("DbContextCompilationError", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to There was an error creating a DbContext :{0}.
         /// </summary>

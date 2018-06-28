@@ -339,6 +339,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     ? string.Empty
                     : string.Join(Environment.NewLine, compilationErrors)));
 
+            if (compilationErrors != null && compilationErrors.Any())
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.DbContextCompilationError, _dbContextFullTypeName, dbContextTemplateModel.DbContextTypeName));
+            }
+
             _dbContextSyntaxTree = _dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName, _areaName));
         }
 

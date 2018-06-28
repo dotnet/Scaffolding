@@ -132,6 +132,9 @@
   <data name="CompilingWithModifiedDbContext" xml:space="preserve">
     <value>Attempting to compile the application in memory with the modified DbContext.</value>
   </data>
+  <data name="DbContextCompilationError" xml:space="preserve">
+    <value>The specified DbContext '{0}' could not be created. This is likely caused by a type name clash with '{1}'. Try renaming the DbContext and run scaffolding again.</value>
+  </data>
   <data name="DbContextCreationError" xml:space="preserve">
     <value>There was an error creating a DbContext :{0}</value>
   </data>

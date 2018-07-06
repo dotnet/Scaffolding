@@ -39,9 +39,7 @@
     <MicrosoftExtensionsLoggingDebugPackageVersion>3.0.0-alpha1-10044</MicrosoftExtensionsLoggingDebugPackageVersion>
     <MicrosoftExtensionsLoggingPackageVersion>3.0.0-alpha1-10044</MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.0.0-alpha1-10044</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
-    <MicrosoftNETCoreApp20PackageVersion>2.0.0</MicrosoftNETCoreApp20PackageVersion>
-    <MicrosoftNETCoreApp21PackageVersion>2.1.0</MicrosoftNETCoreApp21PackageVersion>
-    <MicrosoftNETCoreApp22PackageVersion>2.2.0-preview1-26618-02</MicrosoftNETCoreApp22PackageVersion>
+    <MicrosoftNETCoreApp30PackageVersion>3.0.0-preview1-26629-04</MicrosoftNETCoreApp30PackageVersion>
     <MicrosoftNETCoreDotNetAppHostPackageVersion>3.0.0-preview1-26629-04</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftVisualStudioWebBrowserLinkPackageVersion>3.0.0-alpha1-10044</MicrosoftVisualStudioWebBrowserLinkPackageVersion>

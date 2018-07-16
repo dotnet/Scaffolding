@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>

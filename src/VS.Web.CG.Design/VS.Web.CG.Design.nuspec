@@ -16,7 +16,7 @@
       <group targetFramework=".NETFramework4.6.1">
         <dependency id="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" version="$version$" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework=".NETCoreApp2.0">
+      <group targetFramework=".netcoreapp3.0">
         <dependency id="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" version="$version$" exclude="Build,Analyzers" />
       </group>
     </dependencies>

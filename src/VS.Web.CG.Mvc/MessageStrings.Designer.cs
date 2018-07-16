@@ -322,7 +322,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pazor Page Name is required..
+        ///   Looks up a localized string similar to Razor Page Name is required..
         /// </summary>
         internal static string RazorPageNameRequired {
             get {

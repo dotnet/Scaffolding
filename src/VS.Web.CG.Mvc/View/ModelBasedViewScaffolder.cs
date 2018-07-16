@@ -3,15 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
@@ -65,11 +61,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetCodeModelMetadata(viewGeneratorModel, _codeModelService, _modelTypesLocator);
 
-            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
-            await layoutDependencyInstaller.Execute();
-
             await GenerateView(viewGeneratorModel, modelTypeAndContextModel, outputPath);
-            await layoutDependencyInstaller.InstallDependencies();
         }
 
         protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(ViewGeneratorModel viewGeneratorModel)

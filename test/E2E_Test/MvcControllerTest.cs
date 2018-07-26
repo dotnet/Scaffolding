@@ -82,6 +82,37 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         }
 
         [Fact]
+        public void TestApiController()
+        {
+            var controllerName = "TestApiController";
+
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                var args = new string[]
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "controller",
+                    "--controllerName",
+                    controllerName,
+                    "--model",
+                    "Library1.Models.Car",
+                    "--dataContext",
+                    "WebApplication1.Models.CarContext",
+                    "--restWithNoViews"
+                };
+
+                Scaffold(args, TestProjectPath);
+                var generatedFilePath = Path.Combine(TestProjectPath, $"{controllerName}.cs");
+                VerifyFileAndContent(generatedFilePath, $"{controllerName}.txt");
+            }
+        }
+
+        [Fact]
         public void TestControllerWithContext_WithViews()
         {
             using (var fileProvider = new TemporaryFileProvider())

@@ -16,6 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 UseDefaultUI = false,
                 HasExistingNonEmptyWwwRoot = true,
+                SupportFileLocation = "\\tmp\\"
             };
 
             IdentityGeneratorFile[] templateFiles = IdentityGeneratorFilesConfig.GetFilesToGenerate(null, model);

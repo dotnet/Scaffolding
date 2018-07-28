@@ -147,7 +147,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 }
                 else
                 {
-                    filesToGenerate.AddRange(_config.NamedFileConfig.SelectMany(f => f.Value));
+                    filesToGenerate.AddRange(_config.NamedFileConfig
+                                                    .Where(x => !string.Equals(x.Key, "wwwroot", StringComparison.OrdinalIgnoreCase))
+                                                    .SelectMany(f => f.Value));
                 }
             }
 

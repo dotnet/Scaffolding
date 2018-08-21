@@ -1,0 +1,52 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
+using System.Threading.Tasks;
+@{
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.Extensions.Logging",
+        });
+
+    var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account.Manage";
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace) && thisNamespace != Model.UserClassNamespace)
+    {
+        namespaceSet.Add(Model.UserClassNamespace);
+    }
+    foreach (var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
+    }
+}
+
+namespace @thisNamespace
+{
+    public class PersonalDataModel : PageModel
+    {
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly ILogger<PersonalDataModel> _logger;
+
+        public PersonalDataModel(
+            UserManager<@(Model.UserClass)> userManager,
+            ILogger<PersonalDataModel> logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        public async Task<IActionResult> OnGet()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            return Page();
+        }
+    }
+}

@@ -95,7 +95,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("CompilationFailedMessage", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Controller Name is required.
         /// </summary>
@@ -106,7 +106,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DbContext type '{0}' is found but it does not inherit from '{1}'.
+        ///   Looks up a localized string similar to DbContext type &apos;{0}&apos; is found but it does not inherit from &apos;{1}&apos;.
         /// </summary>
         internal static string DbContextNeedsToInheritFromIdentityContextMessage {
             get {
@@ -140,9 +140,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("EmptyControllerNameRequired", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Cannot use an existing DbContext with the '--useDefaultUI' option..
+        ///   Looks up a localized string similar to Cannot use an existing DbContext with the &apos;--useDefaultUI&apos; option..
         /// </summary>
         internal static string ExistingDbContextCannotBeUsedForDefaultUI {
             get {
@@ -178,6 +178,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please install the below packages to your project:.
+        /// </summary>
+        internal static string InstallPackageMessage {
+            get {
+                return ResourceManager.GetString("InstallPackageMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please install the following packages to your project for scaffolding identity: {0}.
         /// </summary>
         internal static string InstallPackagesForScaffoldingIdentity {
@@ -187,47 +196,29 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please install the below packages to your project:.
+        ///   Looks up a localized string similar to The specified bootstrap version &apos;{0}&apos; is not valid. The valid options are &apos;{1}&apos;..
         /// </summary>
-        internal static string InstallPackageMessage {
+        internal static string InvalidBootstrapVersionForScaffoldingIdentity {
             get {
-                return ResourceManager.GetString("InstallPackageMessage", resourceCulture);
+                return ResourceManager.GetString("InvalidBootstrapVersionForScaffoldingIdentity", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Value of --dbContext '{0}' is not a valid class name..
+        ///   Looks up a localized string similar to Value of --dbContext &apos;{0}&apos; is not a valid class name..
         /// </summary>
         internal static string InvalidDbContextClassName {
             get {
                 return ResourceManager.GetString("InvalidDbContextClassName", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Could not find the files below. (Please use '--listFiles' to check the list of available files).
+        ///   Looks up a localized string similar to Could not find the files below. (Please use &apos;--listFiles&apos; to check the list of available files).
         /// </summary>
         internal static string InvalidFilesListMessage {
             get {
                 return ResourceManager.GetString("InvalidFilesListMessage", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Option '{0}' cannot be used with '{1}'..
-        /// </summary>
-        internal static string InvalidOptionCombination {
-            get {
-                return ResourceManager.GetString("InvalidOptionCombination", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Value of --userClass '{0}' is not a valid class name..
-        /// </summary>
-        internal static string InvalidUserClassName {
-            get {
-                return ResourceManager.GetString("InvalidUserClassName", resourceCulture);
             }
         }
         
@@ -237,6 +228,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string InvalidNamespaceName {
             get {
                 return ResourceManager.GetString("InvalidNamespaceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Option &apos;{0}&apos; cannot be used with option &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidOptionCombination {
+            get {
+                return ResourceManager.GetString("InvalidOptionCombination", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value of --userClass &apos;{0}&apos; is not a valid class name..
+        /// </summary>
+        internal static string InvalidUserClassName {
+            get {
+                return ResourceManager.GetString("InvalidUserClassName", resourceCulture);
             }
         }
         
@@ -392,9 +401,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("TypeDoesNotExist", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to The below files exist. Use '--force' to overwrite: {0}.
+        ///   Looks up a localized string similar to The below files exist. Use &apos;--force&apos; to overwrite: {0}.
         /// </summary>
         internal static string UseForceOption {
             get {
@@ -403,7 +412,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to '--userClass' cannot be used to specify a user class when using an existing DbContext..
+        ///   Looks up a localized string similar to &apos;--userClass&apos; cannot be used to specify a user class when using an existing DbContext..
         /// </summary>
         internal static string UserClassAndDbContextCannotBeSpecifiedTogether {
             get {
@@ -411,15 +420,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
             }
         }
         
-         /// <summary>
-        ///   Looks up a localized string similar to Could not determine the user class from the DbContext class '{0}'.
+        /// <summary>
+        ///   Looks up a localized string similar to Could not determine the user class from the DbContext class &apos;{0}&apos;.
         /// </summary>
         internal static string UserClassCouldNotBeDetermined {
             get {
                 return ResourceManager.GetString("UserClassCouldNotBeDetermined", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Validation succeded but model type not set.
         /// </summary>

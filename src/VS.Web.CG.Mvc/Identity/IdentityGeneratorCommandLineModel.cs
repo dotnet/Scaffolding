@@ -34,6 +34,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name="generateLayout", ShortName="gl", Description="Use this option to generate a new _Layout.cshtml")]
         public bool GenerateLayout { get; set; }
 
+        [Option(Name ="bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        public string BootstrapVersion { get; set; }
+
         public bool IsGenerateCustomUser
         {
             get

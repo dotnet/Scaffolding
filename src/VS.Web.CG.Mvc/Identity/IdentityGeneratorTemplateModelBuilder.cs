@@ -182,13 +182,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ValidateDefaultUIOption();
             }
 
-            if (IsFilesSpecified)
-            {
-                ValidateFilesOption();
-            }
-
             bool hasExistingLayout = DetermineSupportFileLocation(out string supportFileLocation, out string layout);
-            
+
+            string boostrapVersion = string.IsNullOrEmpty(_commandlineModel.BootstrapVersion) ? IdentityGenerator.DefaultBootstrapVersion : _commandlineModel.BootstrapVersion;
+
             var templateModel = new IdentityGeneratorTemplateModel()
             {
                 ApplicationName = _applicationInfo.ApplicationName,
@@ -206,9 +203,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 Layout = layout,
                 LayoutPageNoExtension = Path.GetFileNameWithoutExtension(layout),
                 SupportFileLocation = supportFileLocation,
-                HasExistingNonEmptyWwwRoot = HasExistingNonEmptyWwwRootDirectory
+                HasExistingNonEmptyWwwRoot = HasExistingNonEmptyWwwRootDirectory,
+                BootstrapVersion = boostrapVersion,
+                IsRazorPagesProject = IsRazorPagesLayout()
             };
 
+            templateModel.ContentVersion = DetermineContentVersion(templateModel);
+            templateModel.FilesToGenerate = DetermineFilesToGenerate(templateModel);
+
+            if (IsFilesSpecified)
+            {
+                ValidateFilesOption(templateModel);
+            }
+
+            return templateModel;
+        }
+
+        private IdentityGeneratorFile[] DetermineFilesToGenerate(IdentityGeneratorTemplateModel templateModel)
+        {
             var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
 
             // Check if we need to add ViewImports and which ones.
@@ -227,11 +239,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.Add(cookieConsentPartialConfig);
             }
 
-            templateModel.FilesToGenerate = filesToGenerate.ToArray();
+            var filesToGenerateArray = filesToGenerate.ToArray();
+            ValidateFilesToGenerate(filesToGenerateArray);
 
-            ValidateFilesToGenerate(templateModel.FilesToGenerate);
+            return filesToGenerateArray;
+        }
 
-            return templateModel;
+        // Returns a string indicating which Identity content to use.
+        // Currently only pivots on the bootstrap version, but could pivot on anything.
+        private string DetermineContentVersion(IdentityGeneratorTemplateModel templateModel)
+        {
+            if (string.Equals(templateModel.BootstrapVersion, IdentityGenerator.DefaultBootstrapVersion, StringComparison.Ordinal))
+            {
+                return IdentityGenerator.ContentVersionDefault;
+            }
+            else if (string.Equals(templateModel.BootstrapVersion, "3", StringComparison.Ordinal))
+            {
+                return IdentityGenerator.ContentVersionBootstrap3;
+            }
+            else
+            {
+                // This should get caught by ValidateCommandLine() and emit the same error. 
+                // But best to be safe here.
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
+            }
         }
 
         private static readonly IReadOnlyList<string> _ExistingLayoutFileCheckLocations = new List<string>()
@@ -332,6 +363,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             return hasExistingLayoutFile;
         }
 
+        // A simple check to determine if the project being scaffolded appears to be a razor project.
+        internal bool IsRazorPagesLayout()
+        {
+            string pagesFilesCheckPath = Path.Combine(_applicationInfo.ApplicationBasePath, "Pages");
+            return Directory.Exists(pagesFilesCheckPath);
+        }
+
         private void ValidateFilesToGenerate(IdentityGeneratorFile[] filesToGenerate)
         {
             var rootPath = _applicationInfo.ApplicationBasePath;
@@ -382,12 +420,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private void ValidateFilesOption()
+        private void ValidateFilesOption(IdentityGeneratorTemplateModel templateModel)
         {
             var errors = new List<string>();
 
             NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            var invalidFiles = NamedFiles.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList().Contains(f));
+            var invalidFiles = NamedFiles.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList(templateModel.ContentVersion).Contains(f));
 
             if (invalidFiles.Any())
             {
@@ -570,15 +608,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private void ValidateCommandLine(IdentityGeneratorCommandLineModel model)
         {
-            var errorStrings = new List<string>();;
+            var errorStrings = new List<string>();
             if (!string.IsNullOrEmpty(model.UserClass) && !RoslynUtilities.IsValidNamespace(model.UserClass))
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidUserClassName, model.UserClass));;
+                errorStrings.Add(string.Format(MessageStrings.InvalidUserClassName, model.UserClass));
             }
 
             if (!string.IsNullOrEmpty(model.DbContext) && !RoslynUtilities.IsValidNamespace(model.DbContext))
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidDbContextClassName, model.DbContext));;
+                errorStrings.Add(string.Format(MessageStrings.InvalidDbContextClassName, model.DbContext));
             }
 
             if (!string.IsNullOrEmpty(model.RootNamespace) && !RoslynUtilities.IsValidNamespace(model.RootNamespace))
@@ -589,6 +627,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (!string.IsNullOrEmpty(model.Layout) && model.GenerateLayout)
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--layout", "--generateLayout"));
+            }
+
+            if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion))
+            {
+                errorStrings.Add(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, model.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
             }
 
             if (errorStrings.Any())

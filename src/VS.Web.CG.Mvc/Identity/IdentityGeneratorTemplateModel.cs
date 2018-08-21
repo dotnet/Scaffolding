@@ -1,9 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
     public class IdentityGeneratorTemplateModel
@@ -25,5 +22,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string LayoutPageNoExtension { get; set; }
         public string SupportFileLocation { get; set; }
         public bool HasExistingNonEmptyWwwRoot { get; set; }
+        public string BootstrapVersion { get; set; }
+
+        //
+        // TODO: evaluate the back-compat issues of adding new properties to this model.
+        //
+
+        // identifies which Identity content to scaffold.
+        public string ContentVersion { get; set; }
+        public bool IsRazorPagesProject { get; set; }
     }
 }

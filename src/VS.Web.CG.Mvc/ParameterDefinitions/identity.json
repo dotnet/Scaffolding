@@ -47,6 +47,11 @@
       "Name": "generateLayout",
       "ShortName": "gl",
       "Description": "Use this option to generate a new _Layout.cshtml"
+    },
+    {
+      "Name": "bootstrapVersion",
+      "ShortName": "b",
+      "Description": "Specify the bootstrap version. Valid values: '3', '4'. Default is 4."
     }
   ]
 }

@@ -186,7 +186,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             string boostrapVersion = string.IsNullOrEmpty(_commandlineModel.BootstrapVersion) ? IdentityGenerator.DefaultBootstrapVersion : _commandlineModel.BootstrapVersion;
 
-            var templateModel = new IdentityGeneratorTemplateModel()
+            var templateModel = new IdentityGeneratorTemplateModel2()
             {
                 ApplicationName = _applicationInfo.ApplicationName,
                 DbContextClass = DbContextClass,
@@ -249,19 +249,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         // Currently only pivots on the bootstrap version, but could pivot on anything.
         private string DetermineContentVersion(IdentityGeneratorTemplateModel templateModel)
         {
-            if (string.Equals(templateModel.BootstrapVersion, IdentityGenerator.DefaultBootstrapVersion, StringComparison.Ordinal))
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
             {
-                return IdentityGenerator.ContentVersionDefault;
-            }
-            else if (string.Equals(templateModel.BootstrapVersion, "3", StringComparison.Ordinal))
-            {
-                return IdentityGenerator.ContentVersionBootstrap3;
+                if (string.Equals(templateModel2.BootstrapVersion, IdentityGenerator.DefaultBootstrapVersion, StringComparison.Ordinal))
+                {
+                    return IdentityGenerator.ContentVersionDefault;
+                }
+                else if (string.Equals(templateModel2.BootstrapVersion, "3", StringComparison.Ordinal))
+                {
+                    return IdentityGenerator.ContentVersionBootstrap3;
+                }
+                else
+                {
+                    // This should get caught by ValidateCommandLine() and emit the same error.
+                    // But best to be safe here.
+                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel2.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
+                }
             }
             else
             {
-                // This should get caught by ValidateCommandLine() and emit the same error. 
-                // But best to be safe here.
-                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
+                return IdentityGenerator.ContentVersionDefault;
             }
         }
 
@@ -425,7 +432,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var errors = new List<string>();
 
             NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            var invalidFiles = NamedFiles.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList(templateModel.ContentVersion).Contains(f));
+
+            string contentVersion;
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                contentVersion = templateModel2.ContentVersion;
+            }
+            else
+            {
+                contentVersion = IdentityGenerator.ContentVersionDefault;
+            }
+
+            var invalidFiles = NamedFiles.Where(f => !IdentityGeneratorFilesConfig.GetFilesToList(contentVersion).Contains(f));
 
             if (invalidFiles.Any())
             {

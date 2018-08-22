@@ -136,7 +136,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.Add(layoutPeerValidationScriptsPartial);
             }
 
-            IdentityGeneratorFiles config = GetConfigContentVersion(templateModel.ContentVersion);
+            string contentVersion;
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                contentVersion = templateModel2.ContentVersion;
+            }
+            else
+            {
+                contentVersion = IdentityGenerator.ContentVersionDefault;
+            }
+
+            IdentityGeneratorFiles config = GetConfigContentVersion(contentVersion);
 
             if (!templateModel.UseDefaultUI)
             {

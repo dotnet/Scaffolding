@@ -58,10 +58,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     _applicationInfo.ApplicationBasePath,
                     new[]
                      {
-                         Path.Combine("Identity", "Controllers"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Controllers"),
                          Path.Combine(DefaultContentRelativeBaseDir, "Data"),
-                         Path.Combine("Identity", "Extensions"),
-                         Path.Combine("Identity", "Services"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Extensions"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Services"),
                          Path.Combine(DefaultContentRelativeBaseDir, "Pages"),
                          DefaultContentRelativeBaseDir
                      },
@@ -72,21 +72,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         // Returns the set of template folders appropriate for templateModel.ContentVersion
         private IEnumerable<string> GetTemplateFoldersForContentVersion(IdentityGeneratorTemplateModel templateModel)
         {
+            if (!(templateModel is IdentityGeneratorTemplateModel2 templateModel2))
+            {   // for back-compat
+                return TemplateFolders;
+            }
+
             // The default content is packaged under the default location "Identity\*" (no subfolder).
-            if (string.Equals(templateModel.ContentVersion, ContentVersionDefault, StringComparison.Ordinal))
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionDefault, StringComparison.Ordinal))
             {
                 return TemplateFolders;
             }
 
             // For non-default bootstrap versions, the content is packaged under "Identity_Versioned\[Version_Identifier]\*"
             // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
-            if (string.Equals(templateModel.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     Constants.ThisAssemblyName,
                     _applicationInfo.ApplicationBasePath,
                     new[] {
-                    Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel.BootstrapVersion}")
+                    Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}")
                     },
                     _projectContext);
             }
@@ -94,7 +99,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
             // But best to be safe here.
             // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
         }
 
         // Returns the root directory of the template folders appropriate for templateModel.ContentVersion
@@ -102,23 +107,29 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             string relativePath = null;
 
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                if (string.Equals(templateModel2.ContentVersion, ContentVersionDefault, StringComparison.Ordinal))
+                {
+                    relativePath = DefaultContentRelativeBaseDir;
+                }
+                else if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+                {
+                    // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
+                    relativePath = Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}");
+                }
 
-            if (string.Equals(templateModel.ContentVersion, ContentVersionDefault, StringComparison.Ordinal))
+                if (string.IsNullOrEmpty(relativePath))
+                {
+                    // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
+                    // But best to be safe here.
+                    // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
+                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+                }
+            }
+            else
             {
                 relativePath = DefaultContentRelativeBaseDir;
-            }
-            else if (string.Equals(templateModel.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
-            {
-                // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
-                relativePath = Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel.BootstrapVersion}");
-            }
-
-            if (string.IsNullOrEmpty(relativePath))
-            {
-                // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
-                // But best to be safe here.
-                // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
             }
 
             return TemplateFoldersUtilities.GetTemplateFolders(
@@ -230,7 +241,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private void ShowFileList(IdentityGeneratorTemplateModel templateModel)
         {
             _logger.LogMessage("File List:");
-            var files = IdentityGeneratorFilesConfig.GetFilesToList(templateModel.ContentVersion);
+
+            string contentVersion;
+            // For back-compat
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                contentVersion = templateModel2.ContentVersion;
+            }
+            else
+            {
+                contentVersion = ContentVersionDefault;
+            }
+
+            var files = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
             _logger.LogMessage(string.Join(Environment.NewLine, files));
         }
 

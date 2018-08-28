@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity;
 using Xunit;
@@ -8,6 +9,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     public class IdentityGeneratorFilesConfigTests
     {
+        [Fact]
+        public void TestExistingWwwRootDataIsNotOverwrittenWhenScaffoldAllFilesSelected()
+        {
+            IdentityGeneratorTemplateModel model = new IdentityGeneratorTemplateModel()
+            {
+                UseDefaultUI = false,
+                HasExistingNonEmptyWwwRoot = true,
+                SupportFileLocation = "\\tmp\\"
+            };
+
+            IdentityGeneratorFile[] templateFiles = IdentityGeneratorFilesConfig.GetFilesToGenerate(null, model);
+
+            Assert.DoesNotContain(templateFiles, x => x.SourcePath.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase) > -1);
+        }
+
         [Theory, MemberData(nameof(TestData))]
         public void TestGetTemplates(string dbContextClass,
             string userClass,

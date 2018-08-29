@@ -243,7 +243,7 @@
   <data name="ViewNameRequired" xml:space="preserve">
     <value>The ViewName cannot be empty.</value>
   </data>
-  <data name="InvalidBootstrapVersionForScaffoldingIdentity" xml:space="preserve">
+  <data name="InvalidBootstrapVersionForScaffolding" xml:space="preserve">
     <value>The specified bootstrap version '{0}' is not valid. The valid options are '{1}'.</value>
   </data>
 </root>

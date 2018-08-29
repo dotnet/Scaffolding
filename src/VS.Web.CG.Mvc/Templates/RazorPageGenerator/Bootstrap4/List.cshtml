@@ -1,0 +1,140 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
+@using System.Collections.Generic
+@using System.Linq
+@@page
+@@model @Model.NamespaceName.@Model.PageModelClassName
+
+@{
+    if (Model.IsPartialView)
+    {
+    }
+    else if (Model.IsLayoutPageSelected)
+    {
+@:@@{
+    @:ViewData["Title"] = "@Model.RazorPageName";
+        if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+        {
+    @:Layout = "@Model.LayoutPageFile";
+        }
+@:}
+@:
+@:<h2>@Model.RazorPageName</h2>
+@:
+    }
+    else
+    {
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.RazorPageName</title>
+@:</head>
+@:<body>
+        //    PushIndent("    ");
+    }
+@:<p>
+    @:<a asp-page="Create">Create New</a>
+@:</p>
+@:<table class="table">
+    @:<thead>
+        @:<tr>
+        Dictionary<string, IPropertyMetadata> propertyLookup = ((IModelMetadata)Model.ModelMetadata).Properties.ToDictionary(x => x.PropertyName, x => x);
+        Dictionary<string, INavigationMetadata> navigationLookup = ((IModelMetadata)Model.ModelMetadata).Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
+
+        foreach (var item in Model.ModelMetadata.ModelType.GetProperties())
+        {
+            if (propertyLookup.TryGetValue(item.Name, out IPropertyMetadata property)
+                && property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
+            {
+            <th>
+                @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName)[0].@GetValueExpression(property))
+            </th>
+            }
+            else if (navigationLookup.TryGetValue(item.Name, out INavigationMetadata navigation))
+            {
+            <th>
+                @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName)[0].@GetValueExpression(navigation))
+            </th>
+            }
+        }
+            @:<th></th>
+        @:</tr>
+    @:</thead>
+    @:<tbody>
+@:@@foreach (var item in Model.@(Model.ModelTypeName)) {
+        @:<tr>
+        foreach (var item in Model.ModelMetadata.ModelType.GetProperties())
+        {
+            if (propertyLookup.TryGetValue(item.Name, out IPropertyMetadata property)
+                && property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
+            {
+            <td>
+                @@Html.DisplayFor(modelItem => item.@GetValueExpression(property))
+            </td>
+            }
+            else if (navigationLookup.TryGetValue(item.Name, out INavigationMetadata navigation))
+            {
+            <td>
+                @@Html.DisplayFor(modelItem => item.@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+            </td>
+            }
+        }
+        string pkName = GetPrimaryKeyName();
+        if (pkName != null)
+        {
+            @:<td>
+                @:<a asp-page="./Edit" asp-route-id="@@item.@pkName">Edit</a> |
+                @:<a asp-page="./Details" asp-route-id="@@item.@pkName">Details</a> |
+                @:<a asp-page="./Delete" asp-route-id="@@item.@pkName">Delete</a>
+            @:</td>
+        }
+        else
+        {
+            <td>
+                @@Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        }
+        @:</tr>
+@:}
+    @:</tbody>
+
+@:</table>
+    if(!Model.IsPartialView && !Model.IsLayoutPageSelected)
+    {
+        //ClearIndent();
+@:</body>
+@:</html>
+    }
+}
+@functions
+{
+    string GetPrimaryKeyName()
+    {
+        return (Model.ModelMetadata.PrimaryKeys != null && Model.ModelMetadata.PrimaryKeys.Length == 1)
+        ? Model.ModelMetadata.PrimaryKeys[0].PropertyName
+        : null;
+    }
+
+    string GetValueExpression(IPropertyMetadata property)
+    {
+        return property.PropertyName;
+    }
+
+    string GetValueExpression(INavigationMetadata navigation)
+    {
+        return navigation.AssociationPropertyName;
+    }
+
+    string GetEnumerableTypeExpression(string typeName)
+    {
+        return "IEnumerable<" + typeName + ">";
+    }
+}

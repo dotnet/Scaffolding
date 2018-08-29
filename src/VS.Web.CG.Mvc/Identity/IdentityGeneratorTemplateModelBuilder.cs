@@ -263,7 +263,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     // This should get caught by ValidateCommandLine() and emit the same error.
                     // But best to be safe here.
-                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel2.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
+                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
                 }
             }
             else
@@ -649,7 +649,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion))
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, model.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
+                errorStrings.Add(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
             }
 
             if (errorStrings.Any())

@@ -198,9 +198,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         /// <summary>
         ///   Looks up a localized string similar to The specified bootstrap version &apos;{0}&apos; is not valid. The valid options are &apos;{1}&apos;..
         /// </summary>
-        internal static string InvalidBootstrapVersionForScaffoldingIdentity {
+        internal static string InvalidBootstrapVersionForScaffolding {
             get {
-                return ResourceManager.GetString("InvalidBootstrapVersionForScaffoldingIdentity", resourceCulture);
+                return ResourceManager.GetString("InvalidBootstrapVersionForScaffolding", resourceCulture);
             }
         }
         

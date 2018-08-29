@@ -19,6 +19,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
+        internal static readonly string DefaultBootstrapVersion = "4";
+        // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
+        // Also, with a list this small, the lookup perf hit will be largely irrelevant.
+        internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
+        {
+            "3",
+            "4"
+        };
+
+        internal static readonly string ContentVersionDefault = "Default";
+        internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
+
+        internal static readonly string DefaultContentRelativeBaseDir = "RazorPageGenerator";
+        internal static readonly string VersionedContentRelativeBaseDir = "RazorPageGenerator_Versioned";
+
         public RazorPageScaffolderBase(
             IProjectContext projectDependencyProvider,
             IApplicationInfo applicationInfo,
@@ -58,6 +73,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             _logger = logger;
         }
 
+        // TODO: At the next major release, this should be refactored in conjunction with changes to the razor scaffolding API's
+        // that take in the command line model (RazorPageGeneratorModel) and make a TemplateModel from it.
+        private RazorPageGeneratorTemplateModel _templateModel;
+        internal RazorPageGeneratorTemplateModel TemplateModel
+        {
+            get
+            {
+                if (_templateModel == null)
+                {
+                    throw new Exception("TemplateModel needs to be set before being used.");
+                }
+
+                return _templateModel;
+            }
+            set
+            {
+                _templateModel = value;
+            }
+        }
+
         public virtual IEnumerable<string> TemplateFolders
         {
             get
@@ -65,21 +100,67 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
-                    baseFolders: new[] { "RazorPageGenerator" },
+                    baseFolders: new[] { DefaultContentRelativeBaseDir },
                     projectContext: _projectContext);
             }
+        }
+
+        internal IEnumerable<string> GetTemplateFoldersForContentVersion()
+        {
+            string contentVersion = null;
+            string bootstrapVersion = null;
+
+            if (TemplateModel is RazorPageGeneratorTemplateModel2 templateModel2)
+            {
+                bootstrapVersion = templateModel2.BootstrapVersion;
+                contentVersion = templateModel2.ContentVersion;
+            }
+            else if (TemplateModel is RazorPageWithContextTemplateModel2 templateWithContextModel2)
+            {
+                bootstrapVersion = templateWithContextModel2.BootstrapVersion;
+                contentVersion = templateWithContextModel2.ContentVersion;
+            }
+            else
+            {   // for back-compat
+                return TemplateFolders;
+            }
+
+            // The default content is packaged under the default location "RazorPageGenerator\*" (no subfolder).
+            // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
+            if (string.Equals(contentVersion, ContentVersionDefault, StringComparison.Ordinal))
+            {
+                return TemplateFolders;
+            }
+
+            // For non-default content versions, the content is packaged under "RazorPageGenerator_Versioned\[Version_Identifier]\*"
+            if (string.Equals(contentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+            {
+                return TemplateFoldersUtilities.GetTemplateFolders(
+                    containingProject: Constants.ThisAssemblyName,
+                    applicationBasePath: ApplicationInfo.ApplicationBasePath,
+                    baseFolders: new[] {
+                        Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{bootstrapVersion}")
+                    },
+                    projectContext: _projectContext);
+            }
+
+            // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
+            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, bootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
         }
 
         protected async Task AddRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)
         {
             IEnumerable<RequiredFileEntity> requiredFiles = GetRequiredFiles(razorGeneratorModel);
+
+            string templateFolderRoot = GetTemplateFoldersForContentVersion().First();
+
             foreach (var file in requiredFiles)
             {
                 if (ShouldFileBeAdded(file))
                 {
                     await _codeGeneratorActionsService.AddFileAsync(
                         Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
-                        Path.Combine(TemplateFolders.First(), file.TemplateName));
+                        Path.Combine(templateFolderRoot, file.TemplateName));
                     _logger.LogMessage($"Added additional file :{file.OutputPath}");
                 }
             }
@@ -105,26 +186,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         public abstract Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel);
 
+        // TODO: rework this to use the TemplateModel, as opposed to the RazorPageGeneratorModel (command line model)
         internal async Task GenerateView(RazorPageGeneratorModel razorGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string outputPath)
         {
+            IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion();
+
             if (razorGeneratorModel.RazorPageName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
             {
                 int viewNameLength = razorGeneratorModel.RazorPageName.Length - Constants.ViewExtension.Length;
                 razorGeneratorModel.RazorPageName = razorGeneratorModel.RazorPageName.Substring(0, viewNameLength);
             }
 
-            var templateModel = modelTypeAndContextModel == null
-                ? GetRazorPageViewGeneratorTemplateModel(razorGeneratorModel)
-                : GetRazorPageWithContextTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
-
             var templateName = razorGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
             var pageModelTemplateName = razorGeneratorModel.TemplateName + "PageModel" + Constants.RazorTemplateExtension;
             var pageModelOutputPath = outputPath + ".cs";
-            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, templateFolders, TemplateModel);
             _logger.LogMessage("Added RazorPage : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
             if (!razorGeneratorModel.NoPageModel)
             {
-                await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, TemplateFolders, templateModel);
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, templateFolders, TemplateModel);
                 _logger.LogMessage("Added PageModel : " + pageModelOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
             }
 
@@ -142,7 +222,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
                 : razorGeneratorModel.NamespaceName;
 
-            RazorPageGeneratorTemplateModel templateModel = new RazorPageGeneratorTemplateModel()
+            RazorPageGeneratorTemplateModel2 templateModel = new RazorPageGeneratorTemplateModel2()
             {
                 NamespaceName = namespaceName,
                 NoPageModel = razorGeneratorModel.NoPageModel,
@@ -152,7 +232,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 IsLayoutPageSelected = isLayoutSelected,
                 IsPartialView = razorGeneratorModel.PartialView,
                 ReferenceScriptLibraries = razorGeneratorModel.ReferenceScriptLibraries,
-                JQueryVersion = "1.10.2" //Todo
+                JQueryVersion = "1.10.2", //Todo
+                BootstrapVersion = razorGeneratorModel.BootstrapVersion,
+                ContentVersion = DetermineContentVersion(razorGeneratorModel)
             };
 
             return templateModel;
@@ -167,7 +249,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
                 : razorGeneratorModel.NamespaceName;
 
-            RazorPageWithContextTemplateModel templateModel = new RazorPageWithContextTemplateModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
+            RazorPageWithContextTemplateModel2 templateModel = new RazorPageWithContextTemplateModel2(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {
                 NamespaceName = namespaceName,
                 NoPageModel = razorGeneratorModel.NoPageModel,
@@ -181,7 +263,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 IsPartialView = razorGeneratorModel.PartialView,
                 ReferenceScriptLibraries = razorGeneratorModel.ReferenceScriptLibraries,
                 ModelMetadata = modelTypeAndContextModel?.ContextProcessingResult?.ModelMetadata,
-                JQueryVersion = "1.10.2" //Todo
+                JQueryVersion = "1.10.2", //Todo
+                BootstrapVersion = razorGeneratorModel.BootstrapVersion,
+                ContentVersion = DetermineContentVersion(razorGeneratorModel)
             };
 
             return templateModel;
@@ -190,6 +274,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         private string GetDefaultPageModelNamespaceName(string relativeFolderPath)
         {
             return NameSpaceUtilities.GetSafeNameSpaceFromPath(relativeFolderPath, ApplicationInfo.ApplicationName);
+        }
+
+        private static string DetermineContentVersion(RazorPageGeneratorModel razorGeneratorModel)
+        {
+            if (string.Equals(razorGeneratorModel.BootstrapVersion, DefaultBootstrapVersion, StringComparison.Ordinal))
+            {
+                return ContentVersionDefault;
+            }
+            else if (string.Equals(razorGeneratorModel.BootstrapVersion, "3", StringComparison.Ordinal))
+            {
+                return ContentVersionBootstrap3;
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, razorGeneratorModel.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+            }
         }
     }
 }

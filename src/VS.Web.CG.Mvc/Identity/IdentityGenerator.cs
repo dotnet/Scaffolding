@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Constants.ThisAssemblyName,
                     _applicationInfo.ApplicationBasePath,
                     new[] {
-                    Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}")
+                        Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}")
                     },
                     _projectContext);
             }
@@ -99,7 +99,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
             // But best to be safe here.
             // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
         }
 
         // Returns the root directory of the template folders appropriate for templateModel.ContentVersion
@@ -124,7 +124,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
                     // But best to be safe here.
                     // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffoldingIdentity, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
                 }
             }
             else

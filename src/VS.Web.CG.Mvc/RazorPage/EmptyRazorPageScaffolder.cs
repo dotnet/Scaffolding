@@ -41,6 +41,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.TemplateNameRequired);
             }
 
+            TemplateModel = GetRazorPageViewGeneratorTemplateModel(razorGeneratorModel);
+
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
             await GenerateView(razorGeneratorModel, null, outputPath);

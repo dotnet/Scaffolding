@@ -72,16 +72,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.PageModelFlagNotSupported);
             }
 
-            ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
             EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
 
-            modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
+            ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
                 string.Empty);
+
+            TemplateModel = GetRazorPageWithContextTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
 
             await GenerateView(razorGeneratorModel, modelTypeAndContextModel, outputPath);
 
@@ -136,6 +137,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 _modelTypesLocator,
                 string.Empty);
 
+            TemplateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);
+
             await BaseGenerateViews(viewAndTemplateNames, razorPageGeneratorModel, modelTypeAndContextModel, outputPath);
         }
 
@@ -161,6 +164,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 baseOutputPath = ApplicationInfo.ApplicationBasePath;
             }
 
+            IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion();
             foreach (KeyValuePair<string, string> entry in viewsAndTemplates)
             {
                 string viewName = entry.Key;
@@ -177,9 +181,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 var pageModelTemplateName = templateName + "PageModel" + Constants.RazorTemplateExtension;
                 templateName = templateName + Constants.RazorTemplateExtension;
 
-                await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, templateFolders, templateModel);
                 _logger.LogMessage($"Added Razor Page : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
-                await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, TemplateFolders, templateModel);
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(pageModelOutputPath, pageModelTemplateName, templateFolders, templateModel);
                 _logger.LogMessage($"Added PageModel : {pageModelOutputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
             }
 

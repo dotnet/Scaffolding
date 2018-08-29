@@ -22,9 +22,14 @@
     <None Pack="true" Include="Templates\MvcLayout\*" PackagePath="Templates\MvcLayout\" />
     <None Pack="true" Include="Templates\Startup\*" PackagePath="Templates\Startup\" />
     <None Pack="true" Include="Templates\StaticFiles\*" PackagePath="Templates\StaticFiles\" />
-    <None Pack="true" Include="Templates\ViewGenerator\*" PackagePath="Templates\ViewGenerator\" />
-    <None Pack="true" Include="Templates\RazorPageGenerator\*" PackagePath="Templates\RazorPageGenerator\" />
-    <!-- Bootstrap3 -->
+
+    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap3\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap3\" />
+    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap4\*" PackagePath="Templates\ViewGenerator\" />
+
+    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap3\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap3\" />
+    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap4\*" PackagePath="Templates\RazorPageGenerator\" />
+
+    <!-- Identity Bootstrap3 -->
     <None Pack="true" Include="Templates\Identity\Bootstrap3\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap3\Data\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\Data\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap3\Pages\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\Pages\" />
@@ -44,7 +49,7 @@
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation\dist\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation-unobtrusive\" />
     
-    <!-- Bootstrap4 - The current default, so it gets moved to Templates\Identity\ -->
+    <!-- Identity Bootstrap4 - The current default, so it gets moved to Templates\Identity\ -->
     <None Pack="true" Include="Templates\Identity\Bootstrap4\*" PackagePath="Templates\Identity\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap4\Data\*" PackagePath="Templates\Identity\Data\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\*" PackagePath="Templates\Identity\Pages\" />

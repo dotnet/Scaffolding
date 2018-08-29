@@ -1,0 +1,105 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
+@using System.Collections.Generic
+@using System.Linq
+@@page
+@@model @Model.NamespaceName.@Model.PageModelClassName
+
+@{
+    if (Model.IsPartialView)
+    {
+    }
+    else if (Model.IsLayoutPageSelected)
+    {
+@:@@{
+    @:ViewData["Title"] = "@Model.RazorPageName";
+        if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+        {
+    @:Layout = "@Model.LayoutPageFile";
+        }
+@:}
+@:
+@:<h2>@Model.RazorPageName</h2>
+@:
+    }
+    else
+    {
+@:@@{
+    @:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.RazorPageName</title>
+@:</head>
+@:<body>
+@:
+        //    PushIndent("    ");
+    }
+}
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>@Model.ViewDataTypeShortName</h4>
+    <hr />
+    <dl class="dl-horizontal">
+@{
+    Dictionary<string, IPropertyMetadata> propertyLookup = ((IModelMetadata)Model.ModelMetadata).Properties.ToDictionary(x => x.PropertyName, x => x);
+    Dictionary<string, INavigationMetadata> navigationLookup = ((IModelMetadata)Model.ModelMetadata).Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
+
+    foreach (var item in Model.ModelMetadata.ModelType.GetProperties())
+    {
+        if (propertyLookup.TryGetValue(item.Name, out IPropertyMetadata property)
+            && property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
+        {
+        <dt>
+            @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
+        </dt>
+        <dd>
+            @@Html.DisplayFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
+        </dd>
+        }
+        else if (navigationLookup.TryGetValue(item.Name, out INavigationMetadata navigation))
+        {
+        <dt>
+            @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(navigation))
+        </dt>
+        <dd>
+            @@Html.DisplayFor(model => model.@(Model.ModelTypeName).@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+        </dd>
+        }
+    }
+    @:</dl>
+    @:
+    @:<form method="post">
+        foreach (var property in Model.ModelMetadata.Properties)
+        {
+            if(property.IsPrimaryKey){
+        @:<input type="hidden" asp-for="@(Model.ModelTypeName).@GetValueExpression(property)" />
+            }
+        }
+        @:<input type="submit" value="Delete" class="btn btn-default" /> |
+        @:<a asp-page="./Index">Back to List</a>
+    @:</form>
+@:</div>
+    if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
+    {
+        //ClearIndent();
+@:</body>
+@:</html>
+    }
+}
+@functions
+{
+    string GetValueExpression(IPropertyMetadata property)
+    {
+        return property.PropertyName;
+    }
+
+    string GetValueExpression(INavigationMetadata navigation)
+    {
+        return navigation.AssociationPropertyName;
+    }
+}

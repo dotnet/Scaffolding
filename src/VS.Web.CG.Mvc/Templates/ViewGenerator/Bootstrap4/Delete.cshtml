@@ -53,21 +53,21 @@
         if (propertyLookup.TryGetValue(item.Name, out IPropertyMetadata property)
             && property.Scaffold && !property.IsForeignKey && !property.IsPrimaryKey)
         {
-        <dt>
+        <dt class = "col-sm-2">
             @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
         </dt>
-        <dd>
-            @@Html.DisplayFor(model => model.@GetValueExpression(property), new { @@class = "col-sm-10"})
+        <dd class = "col-sm-10">
+            @@Html.DisplayFor(model => model.@GetValueExpression(property))
         </dd>
         }
         else if (navigationLookup.TryGetValue(item.Name, out INavigationMetadata navigation))
         {
-        <dt>
+        <dt class = "col-sm-2">
             @@Html.DisplayNameFor(model => model.@GetValueExpression(navigation))
         </dt>
-        <dd>
-            @@Html.DisplayFor(model => model.@GetValueExpression(navigation).@navigation.DisplayPropertyName, new { @@class = "col-sm-10"})
-        </dd>
+        <dd class = "col-sm-10">
+            @@Html.DisplayFor(model => model.@GetValueExpression(navigation).@navigation.DisplayPropertyName)
+        </dd class>
         }
     }
     @:</dl>

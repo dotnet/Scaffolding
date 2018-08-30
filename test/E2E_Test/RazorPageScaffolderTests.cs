@@ -100,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj")}
+                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj"), "--bootstrapVersion", "3" }
                     .Concat(args)
                     .ToArray();
 
@@ -120,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjectsWithDbContextInDependency(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj")}
+                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj"), "--bootstrapVersion", "3" }
                     .Concat(PAGE_WITH_DATACONTEXT_IN_DEPENDENCY)
                     .ToArray();
 

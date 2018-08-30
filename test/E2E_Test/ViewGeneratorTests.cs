@@ -42,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj")}
+                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj"), "--bootstrapVersion", "3" }
                     .Concat(args)
                     .ToArray();
 

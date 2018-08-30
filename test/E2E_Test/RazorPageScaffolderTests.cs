@@ -14,10 +14,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     public class RazorPageScaffolderTests : E2ETestBase
     {
 
-        private static string[] EMPTY_PAGE_ARGS = new string[] { "-c", Configuration, "razorpage", "EmptyPage", "Empty" };
-        private static string[] PAGE_WITH_DATACONTEXT = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries" };
-        private static string[] CRUD_PAGES = new string[] { "-c", Configuration, "razorpage", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--partialView" };
-        private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries" };
+        private static string[] EMPTY_PAGE_ARGS = new string[] { "-c", Configuration, "razorpage", "EmptyPage", "Empty", "--bootstrapVersion", "3" };
+        private static string[] PAGE_WITH_DATACONTEXT = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "3" };
+        private static string[] CRUD_PAGES = new string[] { "-c", Configuration, "razorpage", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--partialView", "--bootstrapVersion", "3" };
+        private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "3" };
 
         public RazorPageScaffolderTests(ITestOutputHelper output)
             :base (output)
@@ -100,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj"), "--bootstrapVersion", "3" }
+                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj") }
                     .Concat(args)
                     .ToArray();
 
@@ -120,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjectsWithDbContextInDependency(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj"), "--bootstrapVersion", "3" }
+                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj") }
                     .Concat(PAGE_WITH_DATACONTEXT_IN_DEPENDENCY)
                     .ToArray();
 

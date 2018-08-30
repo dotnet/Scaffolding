@@ -61,7 +61,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         protected void VerifyFileAndContent(string generatedFilePath, string baselineFile)
         {
             Output.WriteLine($"Checking if file is generated at {generatedFilePath}");
-            Assert.True(File.Exists(generatedFilePath));
+            Assert.True(File.Exists(generatedFilePath), $"file [{generatedFilePath}] does not exist");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // TODO: This is currently to fix the tests on Non windows machine.

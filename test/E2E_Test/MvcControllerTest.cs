@@ -138,9 +138,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "WebApplication1.Models.CarContext",
                     "--referenceScriptLibraries",
                     "--relativeFolderPath",
+                    Path.Combine("Areas", "Test", "Controllers"),
                     "--bootstrapVersion",
-                    "3",
-                    Path.Combine("Areas", "Test", "Controllers")
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -250,9 +250,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "DAL.CarContext",
                     "--referenceScriptLibraries",
                     "--relativeFolderPath",
+                    Path.Combine("Areas", "Test", "Controllers"),
                     "--bootstrapVersion",
-                    "3",
-                    Path.Combine("Areas", "Test", "Controllers")
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);

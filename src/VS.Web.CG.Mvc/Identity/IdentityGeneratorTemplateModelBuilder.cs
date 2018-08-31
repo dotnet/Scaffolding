@@ -210,7 +210,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             templateModel.ContentVersion = DetermineContentVersion(templateModel);
 
-            NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (!string.IsNullOrEmpty(_commandlineModel.Files))
+            {
+                NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            }
             templateModel.FilesToGenerate = DetermineFilesToGenerate(templateModel);
 
             if (IsFilesSpecified)

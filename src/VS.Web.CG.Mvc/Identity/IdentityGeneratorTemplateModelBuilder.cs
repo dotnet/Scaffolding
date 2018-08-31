@@ -209,6 +209,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             };
 
             templateModel.ContentVersion = DetermineContentVersion(templateModel);
+
+            NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             templateModel.FilesToGenerate = DetermineFilesToGenerate(templateModel);
 
             if (IsFilesSpecified)
@@ -430,8 +432,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private void ValidateFilesOption(IdentityGeneratorTemplateModel templateModel)
         {
             var errors = new List<string>();
-
-            NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
             string contentVersion;
             if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)

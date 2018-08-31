@@ -17,13 +17,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ? new string[]
                 {
                     "Data",
-                    "Pages",
-                    "Services"
+                    "Pages"
                 }
                 : new string[]
                 {
-                    "Pages",
-                    "Services"
+                    "Pages"
                 };
         }
 

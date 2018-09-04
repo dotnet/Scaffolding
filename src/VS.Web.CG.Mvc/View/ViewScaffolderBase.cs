@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
-    public abstract class ViewScaffolderBase: CommonGeneratorBase
+    public abstract class ViewScaffolderBase : CommonGeneratorBase
     {
         protected readonly IProjectContext _projectContext;
         protected readonly ICodeGeneratorActionsService _codeGeneratorActionsService;
@@ -66,21 +66,69 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
-                    baseFolders: new[] { "ViewGenerator" },
+                    baseFolders: new[] { ViewGenerator.DefaultContentRelativeBaseDir },
                     projectContext: _projectContext);
             }
+        }
+
+        private static string ContentVersionFromModel(ViewGeneratorModel model)
+        {
+            if (string.IsNullOrEmpty(model.BootstrapVersion)
+                || string.Equals(model.BootstrapVersion, ViewGenerator.DefaultBootstrapVersion, StringComparison.Ordinal))
+            {
+                return ViewGenerator.ContentVersionDefault;
+            }
+            else if (string.Equals(model.BootstrapVersion, "3", StringComparison.Ordinal))
+            {
+                return ViewGenerator.ContentVersionBootstrap3;
+            }
+            else
+            {
+                // this should be caught by ViewGenerator.ValidateViewGeneratorModel(), but best to be safe.
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", ViewGenerator.ValidBootstrapVersions)));
+            }
+        }
+
+        protected IEnumerable<string> GetTemplateFoldersForContentVersion(ViewGeneratorModel model)
+        {
+            if (string.IsNullOrEmpty(model.BootstrapVersion))
+            {   // for back-compat
+                return TemplateFolders;
+            }
+
+            string contentVersion = ContentVersionFromModel(model);
+
+            // the default content is packaged under the default location (no subfolder)
+            if (string.Equals(contentVersion, ViewGenerator.ContentVersionDefault, StringComparison.Ordinal))
+            {
+                return TemplateFolders;
+            }
+
+            if (string.Equals(contentVersion, ViewGenerator.ContentVersionBootstrap3, StringComparison.Ordinal))
+            {
+                return TemplateFoldersUtilities.GetTemplateFolders(
+                    containingProject: Constants.ThisAssemblyName,
+                    applicationBasePath: ApplicationInfo.ApplicationBasePath,
+                    baseFolders: new[] { Path.Combine(ViewGenerator.VersionedContentRelativeBaseDir, ViewGenerator.ContentVersionBootstrap3) },
+                    projectContext: _projectContext);
+            }
+
+            // this should be caught by ViewGenerator.ValidateViewGeneratorModel(), but best to be safe.
+            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", ViewGenerator.ValidBootstrapVersions)));
         }
 
         protected async Task AddRequiredFiles(ViewGeneratorModel viewGeneratorModel)
         {
             IEnumerable<RequiredFileEntity> requiredFiles = GetRequiredFiles(viewGeneratorModel);
+            string templateFolder = GetTemplateFoldersForContentVersion(viewGeneratorModel).First();
+
             foreach (var file in requiredFiles)
             {
                 if (!File.Exists(Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath)))
                 {
                     await _codeGeneratorActionsService.AddFileAsync(
                         Path.Combine(ApplicationInfo.ApplicationBasePath, file.OutputPath),
-                        Path.Combine(TemplateFolders.First(), file.TemplateName));
+                        Path.Combine(templateFolder, file.TemplateName));
                     _logger.LogMessage($"Added additional file :{file.OutputPath}");
                 }
             }
@@ -90,6 +138,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
         internal async Task GenerateView(ViewGeneratorModel viewGeneratorModel, ModelTypeAndContextModel modelTypeAndContextModel, string outputPath)
         {
+            IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion(viewGeneratorModel);
+
             if (viewGeneratorModel.ViewName.EndsWith(Constants.ViewExtension, StringComparison.OrdinalIgnoreCase))
             {
                 int viewNameLength = viewGeneratorModel.ViewName.Length - Constants.ViewExtension.Length;
@@ -98,7 +148,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             var templateModel = GetViewGeneratorTemplateModel(viewGeneratorModel, modelTypeAndContextModel);
             var templateName = viewGeneratorModel.TemplateName + Constants.RazorTemplateExtension;
-            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+            await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, templateFolders, templateModel);
             _logger.LogMessage("Added View : " + outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length));
 
             await AddRequiredFiles(viewGeneratorModel);

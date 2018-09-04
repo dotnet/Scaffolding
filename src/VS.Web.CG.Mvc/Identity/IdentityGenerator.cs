@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -21,6 +20,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     {
         private const string IdentityAreaName = "Identity";
 
+        internal static readonly string DefaultBootstrapVersion = "4";
+        // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
+        // Also, with a list this small, the lookup perf hit will be largely irrelevant.
+        internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
+        {
+            "3",
+            "4"
+        };
+
+        internal static readonly string ContentVersionDefault = "Default";
+        internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
+
+        internal static readonly string DefaultContentRelativeBaseDir = "Identity";
+        internal static readonly string VersionedContentRelativeBaseDir = "Identity_Versioned";
+
         private ILogger _logger;
         private IApplicationInfo _applicationInfo;
         private IServiceProvider _serviceProvider;
@@ -31,6 +45,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private ICodeGenAssemblyLoadContext _loader;
         private IFileSystem _fileSystem;
 
+        // The default-version content files will go in the default location: "Identity\" - (DefaultContentRelativeBaseDir)
+        //      other content versions will go in "Identity_Versioned\[VersionIndicator]\" - (VersionedContentRelativeBaseDir)
+        // Doing it this way is to maintain back-compat from before multiple content versions were supported.
+        // The default content goes in the place where the only content used to be.
         public IEnumerable<string> TemplateFolders
         {
             get
@@ -39,35 +57,89 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Constants.ThisAssemblyName,
                     _applicationInfo.ApplicationBasePath,
                     new[]
-                     { 
-                         Path.Combine("Identity", "Controllers"),
-                         Path.Combine("Identity", "Data"),
-                         Path.Combine("Identity", "Extensions"),
-                         Path.Combine("Identity", "Services"),
-                         Path.Combine("Identity", "Pages"),
-                         "Identity"
+                     {
+                         Path.Combine(DefaultContentRelativeBaseDir, "Controllers"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Data"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Extensions"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Services"),
+                         Path.Combine(DefaultContentRelativeBaseDir, "Pages"),
+                         DefaultContentRelativeBaseDir
                      },
                     _projectContext);
             }
         }
 
-        private string _templateFolderRoot;
-        private string TemplateFolderRoot
+        // Returns the set of template folders appropriate for templateModel.ContentVersion
+        private IEnumerable<string> GetTemplateFoldersForContentVersion(IdentityGeneratorTemplateModel templateModel)
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_templateFolderRoot))
-                {
-                    _templateFolderRoot = TemplateFoldersUtilities.GetTemplateFolders(
-                        Constants.ThisAssemblyName,
-                        _applicationInfo.ApplicationBasePath,
-                        new [] { "Identity" },
-                        _projectContext
-                    ).First();
-                }
-                
-                return _templateFolderRoot;
+            if (!(templateModel is IdentityGeneratorTemplateModel2 templateModel2))
+            {   // for back-compat
+                return TemplateFolders;
             }
+
+            // The default content is packaged under the default location "Identity\*" (no subfolder).
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionDefault, StringComparison.Ordinal))
+            {
+                return TemplateFolders;
+            }
+
+            // For non-default bootstrap versions, the content is packaged under "Identity_Versioned\[Version_Identifier]\*"
+            // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+            {
+                return TemplateFoldersUtilities.GetTemplateFolders(
+                    Constants.ThisAssemblyName,
+                    _applicationInfo.ApplicationBasePath,
+                    new[] {
+                        Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}")
+                    },
+                    _projectContext);
+            }
+
+            // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
+            // But best to be safe here.
+            // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
+            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+        }
+
+        // Returns the root directory of the template folders appropriate for templateModel.ContentVersion
+        private string GetTemplateFolderRootForContentVersion(IdentityGeneratorTemplateModel templateModel)
+        {
+            string relativePath = null;
+
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                if (string.Equals(templateModel2.ContentVersion, ContentVersionDefault, StringComparison.Ordinal))
+                {
+                    relativePath = DefaultContentRelativeBaseDir;
+                }
+                else if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+                {
+                    // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
+                    relativePath = Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}");
+                }
+
+                if (string.IsNullOrEmpty(relativePath))
+                {
+                    // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
+                    // But best to be safe here.
+                    // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
+                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+                }
+            }
+            else
+            {
+                relativePath = DefaultContentRelativeBaseDir;
+            }
+
+            return TemplateFoldersUtilities.GetTemplateFolders(
+                Constants.ThisAssemblyName,
+                _applicationInfo.ApplicationBasePath,
+                new[] {
+                    relativePath
+                },
+                _projectContext
+            ).First();
         }
 
         public IdentityGenerator(IApplicationInfo applicationInfo,
@@ -143,12 +215,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(commandlineModel));
             }
 
-            if (commandlineModel.ListFiles)
-            {
-                ShowFileList();
-                return;
-            }
-
             var templateModelBuilder = new IdentityGeneratorTemplateModelBuilder(
                 commandlineModel,
                 _applicationInfo,
@@ -160,26 +226,45 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             var templateModel = await templateModelBuilder.ValidateAndBuild();
 
+            if (commandlineModel.ListFiles)
+            {
+                ShowFileList(templateModel);
+                return;
+            }
+
             EnsureFolderLayout(IdentityAreaName, templateModel);
 
             await AddTemplateFiles(templateModel);
             await AddStaticFiles(templateModel);
         }
 
-        private void ShowFileList()
+        private void ShowFileList(IdentityGeneratorTemplateModel templateModel)
         {
             _logger.LogMessage("File List:");
-            var files = IdentityGeneratorFilesConfig.GetFilesToList();
+
+            string contentVersion;
+            // For back-compat
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                contentVersion = templateModel2.ContentVersion;
+            }
+            else
+            {
+                contentVersion = ContentVersionDefault;
+            }
+
+            var files = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
             _logger.LogMessage(string.Join(Environment.NewLine, files));
         }
 
         private async Task AddStaticFiles(IdentityGeneratorTemplateModel templateModel)
         {
+            string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+            string templateFolderRoot = GetTemplateFolderRootForContentVersion(templateModel);
 
-            var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
-            foreach (var staticFile  in templateModel.FilesToGenerate.Where(f => !f.IsTemplate))
+            foreach (IdentityGeneratorFile staticFile in templateModel.FilesToGenerate.Where(f => !f.IsTemplate))
             {
-                var outputPath = Path.Combine(projectDir, staticFile.OutputPath);
+                string outputPath = Path.Combine(projectDir, staticFile.OutputPath);
                 if (staticFile.ShouldOverWrite != OverWriteCondition.Never || !DoesFileExist(staticFile, projectDir))
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
@@ -187,7 +272,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
                     await _codegeneratorActionService.AddFileAsync(
                         outputPath,
-                        Path.Combine(TemplateFolderRoot, staticFile.SourcePath)
+                        Path.Combine(templateFolderRoot, staticFile.SourcePath)
                     );
                 }
             }
@@ -195,12 +280,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private async Task AddTemplateFiles(IdentityGeneratorTemplateModel templateModel)
         {
-            var projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
-            var templates = templateModel.FilesToGenerate.Where(t => t.IsTemplate);
+            string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
+            IEnumerable<IdentityGeneratorFile> templates = templateModel.FilesToGenerate.Where(t => t.IsTemplate);
+            IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion(templateModel);
 
-            foreach (var template in templates)
+            foreach (IdentityGeneratorFile template in templates)
             {
-                var outputPath = Path.Combine(projectDir, template.OutputPath);
+                string outputPath = Path.Combine(projectDir, template.OutputPath);
                 if (template.ShouldOverWrite != OverWriteCondition.Never || !DoesFileExist(template, projectDir))
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
@@ -209,7 +295,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     await _codegeneratorActionService.AddFileFromTemplateAsync(
                         outputPath,
                         template.SourcePath,
-                        TemplateFolders,
+                        templateFolders,
                         templateModel);
                 }
             }

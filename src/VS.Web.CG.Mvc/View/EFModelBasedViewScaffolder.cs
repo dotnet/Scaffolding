@@ -119,6 +119,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 baseOutputPath = ApplicationInfo.ApplicationBasePath;
             }
 
+            IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion(viewGeneratorModel);
+
             foreach (var entry in viewsAndTemplates)
             {
                 var viewName = entry.Key;
@@ -137,7 +139,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 templateModel.ViewName = viewName;
 
                 templateName = templateName + Constants.RazorTemplateExtension;
-                await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, TemplateFolders, templateModel);
+                await _codeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, templateName, templateFolders, templateModel);
                 _logger.LogMessage($"Added View : {outputPath.Substring(ApplicationInfo.ApplicationBasePath.Length)}");
             }
 

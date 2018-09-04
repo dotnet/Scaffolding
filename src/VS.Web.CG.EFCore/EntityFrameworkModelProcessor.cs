@@ -80,7 +80,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var dbContextSymbols = _modelTypesLocator.GetType(_dbContextFullTypeName).ToList();
             var startupType = _modelTypesLocator.GetType("Startup").FirstOrDefault();
             var programType = _modelTypesLocator.GetType("Program").FirstOrDefault();
-            string dbContextError = string.Empty;
 
             ModelType dbContextSymbolInWebProject = null;
             if (!dbContextSymbols.Any())
@@ -102,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (dbContextType == null)
             {
-                throw new InvalidOperationException(dbContextError);
+                throw new InvalidOperationException(_dbContextError);
             }
 
             var modelReflectionType = _reflectedTypesProvider.GetReflectedType(

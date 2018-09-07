@@ -3,7 +3,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup Label="Package Versions">
-    <InternalAspNetCoreSdkPackageVersion>2.2.0-preview1-20180821.1</InternalAspNetCoreSdkPackageVersion>
+    <InternalAspNetCoreSdkPackageVersion>2.2.0-preview1-20180907.3</InternalAspNetCoreSdkPackageVersion>
     <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.1.1</MicrosoftApplicationInsightsAspNetCorePackageVersion>
     <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>2.2.0-preview2-35143</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
     <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>2.2.0-preview2-35143</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>

@@ -1,6 +1,4 @@
-<Project>
-  <Sdk Name="Microsoft.NET.Sdk" />
-  <Sdk Name="Microsoft.DotNet.GlobalTools.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
@@ -10,7 +8,7 @@
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>
-    <GenerateToolShims>true</GenerateToolShims>
+    <PackAsToolShimRuntimeIdentifiers>win-x64;win-x86</PackAsToolShimRuntimeIdentifiers>
     <PackageTags>dotnet;aspnet-codegenerator</PackageTags>
   </PropertyGroup>
 

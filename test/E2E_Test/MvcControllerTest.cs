@@ -269,5 +269,47 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
             }
         }
+
+        [Fact]
+        public void TestApiControllerWithModelPropertyInParentDbContextClass()
+        {
+            using (TemporaryFileProvider fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectWithModelPropertyInParentDbContextClass(fileProvider, Output);
+                TestProjectPath = fileProvider.Root;
+
+                string[] args = new string[]
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "controller",
+                    "--controllerName",
+                    "BlogsController",
+                    "--model",
+                    "Test.Models.Blog",
+                    "--dataContext",
+                    "Test.Data.DerivedDbContext",
+                    "--referenceScriptLibraries",
+                    "--relativeFolderPath",
+                    "Controllers",
+                    "--restWithNoViews",
+                    "--bootstrapVersion",
+                    "3"
+                };
+
+                Scaffold(args, TestProjectPath);
+                string generatedFilePath = Path.Combine(TestProjectPath, "Controllers", "BlogsController.cs");
+
+                VerifyFileAndContent(generatedFilePath, "BlogsController.txt");
+
+                // verify that the db context wasn't modified, since the model is refernced in the base class.
+                string derivedDataContextPath = Path.Combine(TestProjectPath, "Data", MsBuildProjectStrings.DerivedDbContextFileName);
+                VerifyFileAndContent(derivedDataContextPath, "BlogsDerivedDbContext.txt");
+            }
+
+            Assert.True(false, "dummy assert to force failure");
+        }
     }
 }

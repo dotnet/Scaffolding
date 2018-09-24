@@ -798,8 +798,8 @@
       },
       {
         "Name": "Jquery.validate.min.js",
-        "SourcePath": "wwwroot/lib/jquery-validation/dist/Jquery.validate.min.js",
-        "OutputPath": "wwwroot/lib/jquery-validation/dist/Jquery.validate.min.js",
+        "SourcePath": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
+        "OutputPath": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

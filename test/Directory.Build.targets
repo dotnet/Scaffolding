@@ -52,6 +52,7 @@
         MicrosoftExtensionsLoggingDebugPackageVersion=$(MicrosoftExtensionsLoggingDebugPackageVersion);
         MicrosoftExtensionsLoggingPackageVersion=$(MicrosoftExtensionsLoggingPackageVersion);
         MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion=$(MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion);
+        MicrosoftNETSdkRazorPackageVersion=$(MicrosoftNETSdkRazorPackageVersion);
         MicrosoftVisualStudioWebBrowserLinkPackageVersion=$(MicrosoftVisualStudioWebBrowserLinkPackageVersion);
         MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion=$(Version);
         MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion=$(Version);

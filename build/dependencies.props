@@ -43,6 +43,7 @@
     <MicrosoftNETCoreDotNetAppHostPackageVersion>3.0.0-preview1-26907-05</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftVisualStudioWebBrowserLinkPackageVersion>3.0.0-alpha1-10495</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10495</MicrosoftNETSdkRazorPackageVersion>
     <MoqPackageVersion>4.9.0</MoqPackageVersion>
     <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>

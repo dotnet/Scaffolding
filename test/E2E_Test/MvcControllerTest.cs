@@ -291,7 +291,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "Test.Models.Blog",
                     "--dataContext",
                     "Test.Data.DerivedDbContext",
-                    "--referenceScriptLibraries",
                     "--relativeFolderPath",
                     "Controllers",
                     "--restWithNoViews",
@@ -308,8 +307,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 string derivedDataContextPath = Path.Combine(TestProjectPath, "Data", MsBuildProjectStrings.DerivedDbContextFileName);
                 VerifyFileAndContent(derivedDataContextPath, "BlogsDerivedDbContext.txt");
             }
-
-            Assert.True(false, "dummy assert to force failure");
         }
     }
 }

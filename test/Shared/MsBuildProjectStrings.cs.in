@@ -736,8 +736,8 @@ namespace Test
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <RootNamespace>Microsoft.TestProject</RootNamespace>
-    <ProjectName>TestProject</ProjectName>
+    <RootNamespace>Microsoft.Test</RootNamespace>
+    <ProjectName>Test</ProjectName>
     <NoWarn>NU1605</NoWarn>
     <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
     <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
@@ -747,19 +747,18 @@ namespace Test
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.ApplicationInsights.AspNetCore"" Version=""${MicrosoftApplicationInsightsAspNetCorePackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
-    <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""${MicrosoftVisualStudioWebBrowserLinkPackageVersion}"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"" Version=""${MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion}"" />
-    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""${MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion}"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"" />
     <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""${MicrosoftEntityFrameworkCoreSqlServerPackageVersion}"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
     <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
   </ItemGroup>
@@ -859,6 +858,63 @@ namespace Test.Models
         public string Message { get; set; }
     }
 }
+";
+      public const string DbContextInheritanceTestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationDependsOn>
+      $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      ResolveReferences;
+      ResolvePackageDependenciesDesignTime;
+    </EvaluateProjectInfoForCodeGenerationDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
+    <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
+      <PropertyGroup>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup >
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <UsingTask TaskName=""ProjectContextWriter""
+             AssemblyFile=""$(EvaluateProjectInfoForCodeGenerationAssemblyPath)"" />
+
+  <Target Name=""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
+
+    <ProjectContextWriter TargetFramework =""$(TargetFramework)""
+                          OutputFile =""$(OutputFile)""
+                          Name =""$(ProjectName)""
+                          ResolvedReferences =""@(ReferencePath)""
+                          PackageDependencies =""@(_DependenciesDesignTime)""
+                          ProjectReferences =""@(ProjectReference)""
+                          AssemblyFullPath =""$(TargetPath)""
+                          OutputType=""$(OutputType)""
+                          Platform=""$(Platform)""
+                          RootNameSpace =""$(RootNamespace)""
+                          CompilationItems =""@(Compile)""
+                          TargetDirectory=""$(TargetDir)""
+                          EmbeddedItems=""@(EmbeddedResource)""
+                          Configuration=""$(Configuration)""
+                          ProjectFullPath=""$(MSBuildProjectFullPath)""
+                          ProjectDepsFileName=""$(ProjectDepsFileName)""
+                          ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""/>
+
+  </Target>
+</Project>
 ";
     }
 }

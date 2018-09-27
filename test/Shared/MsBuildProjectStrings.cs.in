@@ -735,7 +735,7 @@ namespace Test
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
     <NoWarn>NU1605</NoWarn>

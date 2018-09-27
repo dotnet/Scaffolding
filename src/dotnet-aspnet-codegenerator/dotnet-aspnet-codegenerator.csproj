@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <OutputType>exe</OutputType>
@@ -43,7 +43,7 @@
           Link="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
           CopyToPublishDirectory="Always"
-          Link="toolassets\netcoreapp2.1\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
+          Link="toolassets\netcoreapp3.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />
     <None Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll"
           CopyToPublishDirectory="Always"
           Link="toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />

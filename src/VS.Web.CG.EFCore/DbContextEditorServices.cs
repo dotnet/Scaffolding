@@ -278,24 +278,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
         }
 
-        // Check for the model property on the input dbContext, as well as anything it inherits from.
         private bool IsModelPropertyExists(ITypeSymbol dbContext, string modelTypeFullName)
-        {
-            ITypeSymbol workingDbContext = dbContext;
-            do
-            {
-                if (IsModelPropertyExistsOnSymbol(workingDbContext, modelTypeFullName))
-                {
-                    return true;
-                }
-
-                workingDbContext = workingDbContext.BaseType;
-            } while (workingDbContext != null);
-
-            return false;
-        }
-
-        private bool IsModelPropertyExistsOnSymbol(ITypeSymbol dbContext, string modelTypeFullName)
         {
             var propertySymbols = dbContext.GetMembers().Select(m => m as IPropertySymbol).Where(s => s != null);
             foreach (var pSymbol in propertySymbols)

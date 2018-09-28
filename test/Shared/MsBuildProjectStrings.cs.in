@@ -20,7 +20,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -63,7 +65,9 @@ public const string RootProjectTxtWithoutEF = @"
     <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -342,11 +346,13 @@ namespace Library1.Models
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -512,11 +518,13 @@ namespace DAL
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -591,7 +599,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
     <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
       <PropertyGroup>
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netcoreapp3.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </When>
     <Otherwise>

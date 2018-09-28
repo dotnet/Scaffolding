@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp3.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp2.0"));
             fileProvider.Add("global.json", GlobalJsonText);
 
             var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
@@ -67,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             // Copy Msbuild task dlls.
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
 
@@ -82,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp3.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp2.0"));
 
             fileProvider.Add("global.json", GlobalJsonText);
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.RootProjectTxt);
@@ -90,7 +90,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             // Copy Msbuild task dlls.
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupForIdentityTxt);
             fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.ProgramFileText);
             fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.IdentityContextText);
@@ -131,14 +131,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp3.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp2.0"));
 
             fileProvider.Add("global.json", GlobalJsonText);
             fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
 
             // Copy Msbuild task dlls.
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
             var rootProjectTxt = MsBuildProjectStrings.RootProjectTxtWithoutEF;
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
             fileProvider.Add($"Root/Startup.cs", MsBuildProjectStrings.StartupTxtWithoutEf);
@@ -158,13 +158,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "DAL"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp3.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp2.0"));
 
             fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
 
             // Copy Msbuild task dlls.
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
 
             var rootProjectTxt = MsBuildProjectStrings.WebProjectTxt;
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);

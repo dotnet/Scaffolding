@@ -183,5 +183,31 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }
+
+        public void SetupProjectWithModelPropertyInParentDbContextClass(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            fileProvider.Add("global.json", GlobalJsonText);
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Models"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Data"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Controllers"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netcoreapp2.0"));
+
+            fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.DbContextInheritanceTestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/netcoreapp2.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+
+            var rootProjectTxt = MsBuildProjectStrings.DbContextInheritanceProjectTxt;
+            fileProvider.Add(MsBuildProjectStrings.RootProjectName, rootProjectTxt);
+            fileProvider.Add("Startup.cs", MsBuildProjectStrings.DerivedContextTestStartupText);
+            fileProvider.Add(MsBuildProjectStrings.DbContextInheritanceProgramName, MsBuildProjectStrings.DbContextInheritanceProjectProgramText);
+            fileProvider.Add(MsBuildProjectStrings.AppSettingsFileName, MsBuildProjectStrings.AppSettingsFileTxt);
+
+            fileProvider.Add("Models/Blog.cs", MsBuildProjectStrings.BlogModelText);
+            fileProvider.Add("Data/BaseDbContext.cs", MsBuildProjectStrings.BaseDbContextText);
+            fileProvider.Add($"Data/{MsBuildProjectStrings.DerivedDbContextFileName}", MsBuildProjectStrings.DerivedDbContextText);
+
+            RestoreAndBuild(fileProvider.Root, output);
+        }
     }
 }

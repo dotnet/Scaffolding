@@ -44,7 +44,6 @@
     <MicrosoftNETCoreApp22PackageVersion>2.2.0-preview2-26905-02</MicrosoftNETCoreApp22PackageVersion>
     <MicrosoftNETCoreDotNetAppHostPackageVersion>2.2.0-preview2-26905-02</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>2.2.0-preview3-35301</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>2.2.0-preview3-35301</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftVisualStudioWebBrowserLinkPackageVersion>2.2.0-preview3-35301</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
     <MoqPackageVersion>4.7.49</MoqPackageVersion>

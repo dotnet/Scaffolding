@@ -30,12 +30,12 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == ''">
-    <SignedPackageFile Include="lib/netstandard2.0/dotnet-aspnet-codegenerator-design.dll" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="runtimes/win7-x64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="runtimes/win7-x86/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="runtimes/win-arm/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="runtimes/win-arm64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="$(OutputPath)netcoreapp2.0\$(AssemblyName).dll;" PackagePath="lib/netstandard2.0/dotnet-aspnet-codegenerator-design.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).exe" PackagePath="lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe;" PackagePath="runtimes/win7-x64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" PackagePath="runtimes/win7-x86/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe" PackagePath="runtimes/win-arm/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe" PackagePath="runtimes/win-arm64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
   </ItemGroup>
 
   <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">

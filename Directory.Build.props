@@ -12,14 +12,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <!-- Sign Options -->
-  <PropertyGroup>
+    <!-- Strong name options -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PackageSigningCertName>MicrosoftNuGet</PackageSigningCertName>
-    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
-    <AssemblySigningCertName>Microsoft</AssemblySigningCertName>
   </PropertyGroup>
+
 </Project>

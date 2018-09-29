@@ -29,7 +29,9 @@
       <TestProjectProperties>
         RestoreSources=$([MSBuild]::Escape($(RestoreSources.Trim())));
         TargetFramework=$(TargetFramework);
-        MicrosoftNETCoreApp30PackageVersion=$(MicrosoftNETCoreApp30PackageVersion);
+        MicrosoftNETCoreApp20PackageVersion=$(MicrosoftNETCoreApp20PackageVersion);
+        MicrosoftNETCoreApp21PackageVersion=$(MicrosoftNETCoreApp21PackageVersion);
+        MicrosoftNETCoreApp22PackageVersion=$(MicrosoftNETCoreApp22PackageVersion);
         MicrosoftApplicationInsightsAspNetCorePackageVersion=$(MicrosoftApplicationInsightsAspNetCorePackageVersion);
         MicrosoftAspNetCoreAuthenticationCookiesPackageVersion=$(MicrosoftAspNetCoreAuthenticationCookiesPackageVersion);
         MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion);

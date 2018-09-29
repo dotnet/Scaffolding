@@ -20,7 +20,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -63,7 +65,9 @@ public const string RootProjectTxtWithoutEF = @"
     <TargetFramework>${TargetFramework}</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -342,11 +346,13 @@ namespace Library1.Models
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -512,11 +518,13 @@ namespace DAL
 
   <PropertyGroup>
     <RestoreSources>${RestoreSources}</RestoreSources>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <NoWarn>NU1605</NoWarn>
-    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp3.0'"">${MicrosoftNETCoreApp30PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
     <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
   </PropertyGroup>
@@ -591,7 +599,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
     <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
       <PropertyGroup>
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netcoreapp3.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </When>
     <Otherwise>
@@ -695,6 +703,218 @@ namespace Test.Data
 
     }
 }
+";
+
+// Strings for model property defined in db context base class
+        public const string DbContextInheritanceProgramName = "Program.cs";
+        public const string DbContextInheritanceProjectProgramText = @"using System;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+
+namespace Test
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            BuildWebHost(args).Run();
+        }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost
+                .CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .Build();
+    }
+}
+";
+
+    public const string DbContextInheritanceProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <RestoreSources>${RestoreSources}</RestoreSources>
+    <TargetFramework>${TargetFramework}</TargetFramework>
+    <RootNamespace>Microsoft.Test</RootNamespace>
+    <ProjectName>Test</ProjectName>
+    <NoWarn>NU1605</NoWarn>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.0'"">${MicrosoftNETCoreApp20PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.1'"">${MicrosoftNETCoreApp21PackageVersion}</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition=""'$(TargetFramework)'=='netcoreapp2.2'"">${MicrosoftNETCoreApp22PackageVersion}</RuntimeFrameworkVersion>
+    <!-- aspnet/BuildTools#662 Don't police what version of NetCoreApp we use -->
+    <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
+    <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""${MicrosoftEntityFrameworkCoreSqlServerPackageVersion}"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include=""Microsoft.Extensions.Configuration.UserSecrets"" Version=""${MicrosoftExtensionsConfigurationUserSecretsPackageVersion}"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""${MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=""Controllers\"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string BaseDbContextText = @"
+using Microsoft.EntityFrameworkCore;
+using Test.Models;
+
+namespace Test.Data
+{
+    public class BaseDbContext : DbContext
+    {
+        public BaseDbContext(DbContextOptions<BaseDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Blog> Base_Blogs { get; set; }
+    }
+}
+";
+        public const string DerivedDbContextFileName = "DerivedDbContext.cs";
+        public const string DerivedDbContextText = @"
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
+namespace Test.Data
+{
+    public class DerivedDbContext : BaseDbContext
+    {
+        public DerivedDbContext(DbContextOptions<DerivedDbContext> options)
+            : base(new DbContextOptions<BaseDbContext>(options.Extensions.ToDictionary(x => x.GetType(), x => x)))
+        {
+        }
+
+        public DerivedDbContext(DbContextOptions<BaseDbContext> options)
+            : base(options)
+        {
+        }
+    }
+}
+";
+
+        public const string DerivedContextTestStartupText = @"
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Test.Models;
+using Test.Data;
+
+namespace Test
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+
+            services.AddDbContext<DerivedDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString(""DefaultConnection"")));
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            app.UseStaticFiles();
+            app.UseMvc();
+        }
+    }
+}
+";
+
+        public const string BlogModelText = @"
+namespace Test.Models
+{
+    public class Blog
+    {
+        public int Id { get; set; }
+        public string User { get; set; }
+        public string Message { get; set; }
+    }
+}
+";
+      public const string DbContextInheritanceTestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationDependsOn>
+      $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      ResolveReferences;
+      ResolvePackageDependenciesDesignTime;
+    </EvaluateProjectInfoForCodeGenerationDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
+    <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
+      <PropertyGroup>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\netcoreapp2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup >
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <UsingTask TaskName=""ProjectContextWriter""
+             AssemblyFile=""$(EvaluateProjectInfoForCodeGenerationAssemblyPath)"" />
+
+  <Target Name=""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
+
+    <ProjectContextWriter TargetFramework =""$(TargetFramework)""
+                          OutputFile =""$(OutputFile)""
+                          Name =""$(ProjectName)""
+                          ResolvedReferences =""@(ReferencePath)""
+                          PackageDependencies =""@(_DependenciesDesignTime)""
+                          ProjectReferences =""@(ProjectReference)""
+                          AssemblyFullPath =""$(TargetPath)""
+                          OutputType=""$(OutputType)""
+                          Platform=""$(Platform)""
+                          RootNameSpace =""$(RootNamespace)""
+                          CompilationItems =""@(Compile)""
+                          TargetDirectory=""$(TargetDir)""
+                          EmbeddedItems=""@(EmbeddedResource)""
+                          Configuration=""$(Configuration)""
+                          ProjectFullPath=""$(MSBuildProjectFullPath)""
+                          ProjectDepsFileName=""$(ProjectDepsFileName)""
+                          ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""/>
+
+  </Target>
+</Project>
 ";
     }
 }

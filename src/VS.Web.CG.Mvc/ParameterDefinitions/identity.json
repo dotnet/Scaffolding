@@ -11,7 +11,7 @@
     {
       "Name": "files",
       "ShortName": "fi",
-      "Description": "List of semicolon separated files to scaffold. Use the --listFiles option to see the available options."
+      "Description": "List of semicolon separated files to scaffold. Use the --list-files option to see the available options."
     },
     {
       "Name": "listFiles",

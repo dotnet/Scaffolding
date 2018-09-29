@@ -480,32 +480,6 @@
         "IsTemplate": true
       }
     ],
-    "Account.Manage.ShowRecoveryCodes": [
-      {
-        "Name": "Account.Manage.ShowRecoveryCodes",
-        "SourcePath": "Pages/Account/Manage/Account.Manage.ShowRecoveryCodes.cshtml",
-        "OutputPath": "Areas/Identity/Pages/Account/Manage/ShowRecoveryCodes.cshtml",
-        "IsTemplate": false
-      },
-      {
-        "Name": "Account.Manage.ShowRecoveryCodes.cs",
-        "SourcePath": "Account.Manage.ShowRecoveryCodes.cs.cshtml",
-        "OutputPath": "Areas/Identity/Pages/Account/Manage/ShowRecoveryCodes.cshtml.cs",
-        "IsTemplate": true
-      },
-      {
-        "Name": "Account.Manage._ManageNav",
-        "SourcePath": "Account.Manage._ManageNav.cshtml",
-        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
-        "IsTemplate": true
-      },
-      {
-        "Name": "Account.Manage.ManageNavPages",
-        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
-        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
-        "IsTemplate": true
-      }
-    ],
     "Account.Manage.TwoFactorAuthentication": [
       {
         "Name": "Account.Manage.TwoFactorAuthentication",
@@ -824,8 +798,8 @@
       },
       {
         "Name": "Jquery.validate.min.js",
-        "SourcePath": "wwwroot/lib/jquery-validation/dist/Jquery.validate.min.js",
-        "OutputPath": "wwwroot/lib/jquery-validation/dist/Jquery.validate.min.js",
+        "SourcePath": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
+        "OutputPath": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

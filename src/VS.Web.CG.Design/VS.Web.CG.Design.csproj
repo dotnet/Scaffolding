@@ -5,10 +5,10 @@
       -->
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp3.0</TargetFrameworks>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp2.0' ">win7-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp3.0' ">win7-x64</RuntimeIdentifier>
     <X86ProjectDirectory>..\..\tools\VS.Web.CG.Design-x86\</X86ProjectDirectory>
     <ARMProjectDirectory>..\..\tools\VS.Web.CG.Design-arm\</ARMProjectDirectory>
     <ARM64ProjectDirectory>..\..\tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
@@ -58,9 +58,9 @@
         copyright=$(Copyright);
         AssemblyName=$(AssemblyName);
 
-        OutputBinary=$(OutputPath)netcoreapp2.0\$(AssemblyName).dll;
-        OutputDocumentation=$(OutputPath)netcoreapp2.0\$(AssemblyName).xml;
-        OutputSymbol=$(OutputPath)netcoreapp2.0\$(AssemblyName).pdb;
+        OutputBinary=$(OutputPath)netcoreapp3.0\$(AssemblyName).dll;
+        OutputDocumentation=$(OutputPath)netcoreapp3.0\$(AssemblyName).xml;
+        OutputSymbol=$(OutputPath)netcoreapp3.0\$(AssemblyName).pdb;
 
         OutputAnyExe=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).exe;
         OutputAnyDocumentation=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).xml;

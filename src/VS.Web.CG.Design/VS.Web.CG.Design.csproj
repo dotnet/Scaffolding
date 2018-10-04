@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Internal.AspNetCore.Sdk">
   <!--
    NOTE: Do not add package/ project references to this file.
    Edit the Shared.proj file to add additional package/ project references.

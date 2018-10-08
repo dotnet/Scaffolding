@@ -713,13 +713,6 @@
         "ShowInListFiles": false
       },
       {
-        "Name": "Lib.Bootstrap.bower.json",
-        "SourcePath": "wwwroot/lib/bootstrap/.bower.json",
-        "OutputPath": "wwwroot/lib/bootstrap/.bower.json",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
         "Name": "Lib.Bootstrap.License",
         "SourcePath": "wwwroot/lib/bootstrap/LICENSE",
         "OutputPath": "wwwroot/lib/bootstrap/LICENSE",
@@ -744,13 +737,6 @@
         "Name": "Jquery.min.map",
         "SourcePath": "wwwroot/lib/jquery/dist/jquery.min.map",
         "OutputPath": "wwwroot/lib/jquery/dist/jquery.min.map",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Jquery.Bower.json",
-        "SourcePath": "wwwroot/lib/jquery/.bower.json",
-        "OutputPath": "wwwroot/lib/jquery/.bower.json",
         "IsTemplate": false,
         "ShowInListFiles": false
       },
@@ -790,23 +776,9 @@
         "ShowInListFiles": false
       },
       {
-        "Name": "Jquery-validation.bower.json",
-        "SourcePath": "wwwroot/lib/jquery-validation/.bower.json",
-        "OutputPath": "wwwroot/lib/jquery-validation/.bower.json",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
         "Name": "Jquery-validation.License.md",
         "SourcePath": "wwwroot/lib/jquery-validation/LICENSE.md",
         "OutputPath": "wwwroot/lib/jquery-validation/LICENSE.md",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Jquery-validation-unobtrusive.bower.json",
-        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/.bower.json",
-        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/.bower.json",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

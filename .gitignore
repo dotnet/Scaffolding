@@ -30,7 +30,6 @@ test/*/Properties
 .testpublish
 .vs
 project.fragment.lock.json
-**/bower_components/*
 **/*.nuget.props
 **/*.nuget.targets
 .vscode/**

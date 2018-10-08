@@ -573,23 +573,9 @@
         "ShowInListFiles": false
       },
       {
-        "Name": "Site.min.css",
-        "SourcePath": "wwwroot/css/site.min.css",
-        "OutputPath": "wwwroot/css/site.min.css",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
         "Name": "Site.js",
         "SourcePath": "wwwroot/js/site.js",
         "OutputPath": "wwwroot/js/site.js",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Site.min.js",
-        "SourcePath": "wwwroot/js/site.min.js",
-        "OutputPath": "wwwroot/js/site.min.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

@@ -222,6 +222,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
                 : razorGeneratorModel.NamespaceName;
 
+            if (string.IsNullOrEmpty(razorGeneratorModel.BootstrapVersion))
+            {
+                razorGeneratorModel.BootstrapVersion = RazorPageScaffolderBase.DefaultBootstrapVersion;
+            }
+
             RazorPageGeneratorTemplateModel2 templateModel = new RazorPageGeneratorTemplateModel2()
             {
                 NamespaceName = namespaceName,
@@ -248,6 +253,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             var namespaceName = string.IsNullOrEmpty(razorGeneratorModel.NamespaceName)
                 ? GetDefaultPageModelNamespaceName(razorGeneratorModel.RelativeFolderPath)
                 : razorGeneratorModel.NamespaceName;
+
+            if (string.IsNullOrEmpty(razorGeneratorModel.BootstrapVersion))
+            {
+                razorGeneratorModel.BootstrapVersion = RazorPageScaffolderBase.DefaultBootstrapVersion;
+            }
 
             RazorPageWithContextTemplateModel2 templateModel = new RazorPageWithContextTemplateModel2(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {

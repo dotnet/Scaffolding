@@ -37,6 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             ControllerName = copyFrom.ControllerName;
             IsRestController = copyFrom.IsRestController;
             GenerateReadWriteActions = copyFrom.GenerateReadWriteActions;
+            BootstrapVersion = copyFrom.BootstrapVersion;
         }
 
         public override CommonCommandLineModel Clone()

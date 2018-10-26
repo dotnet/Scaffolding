@@ -1,6 +1,4 @@
-<Project>
-  <Sdk Name="Microsoft.NET.Sdk" />
-  <Sdk Name="Microsoft.DotNet.GlobalTools.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
@@ -10,7 +8,7 @@
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>
-    <GenerateToolShims>true</GenerateToolShims>
+    <PackAsToolShimRuntimeIdentifiers>win-x64;win-x86</PackAsToolShimRuntimeIdentifiers>
     <PackageTags>dotnet;aspnet-codegenerator</PackageTags>
   </PropertyGroup>
 
@@ -64,6 +62,24 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <!-- Assemblies from this project -->
+    <SignedPackageFile Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" PackagePath="tools/$(TargetFramework)/any/toolassets/$(TargetFramework)/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" />
+    <SignedPackageFile Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" PackagePath="tools/$(TargetFramework)/any/toolassets/net461/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" />
+
+    <!-- Third-party assemblies -->
+    <SignedPackageFile Include="$(PublishDir)Newtonsoft.Json.dll" PackagePath="tools/$(TargetFramework)/any/Newtonsoft.Json.dll" Certificate="$(AssemblySigning3rdPartyCertName)" />
+
+    <!-- Binaries from other projects that should be signed already -->
+    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.FileProviders.Physical.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.FileProviders.Physical.dll" />
+    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.FileSystemGlobbing.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.FileSystemGlobbing.dll" />
+    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.Primitives.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.Primitives.dll" />
+    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.FileProviders.Abstractions.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.FileProviders.Abstractions.dll" />
+    <ExcludePackageFileFromSigning Include="tools/$(TargetFramework)/any/NuGet.Frameworks.dll" />
+    <ExcludePackageFileFromSigning Include="tools/$(TargetFramework)/any/System.Runtime.CompilerServices.Unsafe.dll" />
   </ItemGroup>
 
 </Project>

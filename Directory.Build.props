@@ -11,14 +11,9 @@
     <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <!-- Sign Options -->
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
-    <AssemblySigningCertName>Microsoft</AssemblySigningCertName>
-  </PropertyGroup>
 </Project>

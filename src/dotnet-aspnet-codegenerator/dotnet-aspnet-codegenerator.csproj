@@ -12,6 +12,11 @@
     <PackageTags>dotnet;aspnet-codegenerator</PackageTags>
   </PropertyGroup>
 
+  <!-- workaround for https://github.com/dotnet/sdk/issues/2698 -->
+  <PropertyGroup>
+    <Version>$(PackageVersion)</Version>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\Shared\**\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>

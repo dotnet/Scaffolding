@@ -11,9 +11,10 @@
     <RepositoryUrl>https://github.com/aspnet/scaffolding</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Strong name options -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
 </Project>

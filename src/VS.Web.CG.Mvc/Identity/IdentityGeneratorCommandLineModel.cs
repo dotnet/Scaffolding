@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "files", ShortName = "fi", Description = "List of semicolon separated files to scaffold. Use the --list-files option to see the available options.")]
         public string Files { get; set; }
 
-        [Option(Name = "listFiles", Description = "Lists the files that can be scaffolded by using the '--files' option.")]
+        [Option(Name = "listFiles", ShortName ="lf", Description = "Lists the files that can be scaffolded by using the '--files' option.")]
         public bool ListFiles { get; set; }
 
         [Option(Name = "force", ShortName = "f", Description = "Use this option to overwrite existing files.")]
@@ -33,6 +33,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         [Option(Name="generateLayout", ShortName="gl", Description="Use this option to generate a new _Layout.cshtml")]
         public bool GenerateLayout { get; set; }
+
+        [Option(Name ="bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        public string BootstrapVersion { get; set; }
 
         public bool IsGenerateCustomUser
         {

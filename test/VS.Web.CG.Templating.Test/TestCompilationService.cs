@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
 #if NET461
             projectPath = projectPath ?? Path.Combine("..", "..", "..", "..");
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NET461.GetShortFolderName();
-#elif NETCOREAPP2_0 || NETCOREAPP2_1
+#elif NETCOREAPP2_2
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
 #else

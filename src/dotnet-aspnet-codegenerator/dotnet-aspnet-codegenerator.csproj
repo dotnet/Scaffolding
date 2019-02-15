@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Internal.AspNetCore.Sdk">
 
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
@@ -10,6 +10,11 @@
     <PackAsTool>true</PackAsTool>
     <PackAsToolShimRuntimeIdentifiers>win-x64;win-x86</PackAsToolShimRuntimeIdentifiers>
     <PackageTags>dotnet;aspnet-codegenerator</PackageTags>
+  </PropertyGroup>
+
+  <!-- workaround for https://github.com/dotnet/sdk/issues/2698 -->
+  <PropertyGroup>
+    <Version>$(PackageVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -63,7 +68,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 
   <ItemGroup>
     <!-- Assemblies from this project -->

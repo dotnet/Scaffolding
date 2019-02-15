@@ -72,12 +72,47 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "Library1.Models.Car",
                     "--dataContext",
                     "WebApplication1.Models.CarContext",
-                    "--noViews"
+                    "--noViews",
+                    "--bootstrapVersion",
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);
                 var generatedFilePath = Path.Combine(TestProjectPath, "CarsController.cs");
                 VerifyFileAndContent(generatedFilePath, "CarsController.txt");
+            }
+        }
+
+        [Fact]
+        public void TestApiController()
+        {
+            var controllerName = "TestApiController";
+
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                var args = new string[]
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "controller",
+                    "--controllerName",
+                    controllerName,
+                    "--model",
+                    "Library1.Models.Car",
+                    "--dataContext",
+                    "WebApplication1.Models.CarContext",
+                    "--restWithNoViews",
+                    "--bootstrapVersion",
+                    "3"
+                };
+
+                Scaffold(args, TestProjectPath);
+                var generatedFilePath = Path.Combine(TestProjectPath, $"{controllerName}.cs");
+                VerifyFileAndContent(generatedFilePath, $"{controllerName}.txt");
             }
         }
 
@@ -103,7 +138,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "WebApplication1.Models.CarContext",
                     "--referenceScriptLibraries",
                     "--relativeFolderPath",
-                    Path.Combine("Areas", "Test", "Controllers")
+                    Path.Combine("Areas", "Test", "Controllers"),
+                    "--bootstrapVersion",
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -141,7 +178,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "--model",
                     "WebApplication1.Models.Product",
                     "--dataContext",
-                    "WebApplication1.Models.ProductContext"
+                    "WebApplication1.Models.ProductContext",
+                    "--bootstrapVersion",
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -176,7 +215,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "controller",
                     "--controllerName",
                     "ActionsController",
-                    "--readWriteActions"
+                    "--readWriteActions",
+                    "--bootstrapVersion",
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -209,7 +250,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "DAL.CarContext",
                     "--referenceScriptLibraries",
                     "--relativeFolderPath",
-                    Path.Combine("Areas", "Test", "Controllers")
+                    Path.Combine("Areas", "Test", "Controllers"),
+                    "--bootstrapVersion",
+                    "3"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -224,6 +267,45 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                 VerifyFileAndContent(Path.Combine(viewFolder, "Edit.cshtml"), Path.Combine("CarViews", "Edit.cshtml"));
                 VerifyFileAndContent(Path.Combine(viewFolder, "Index.cshtml"), Path.Combine("CarViews", "Index.cshtml"));
                 VerifyFileAndContent(Path.Combine(TestProjectPath, "Views", "Shared", "_ValidationScriptsPartial.cshtml"), Path.Combine("SharedViews", "_ValidationScriptsPartial.cshtml"));
+            }
+        }
+
+        [Fact]
+        public void TestApiControllerWithModelPropertyInParentDbContextClass()
+        {
+            using (TemporaryFileProvider fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectWithModelPropertyInParentDbContextClass(fileProvider, Output);
+                TestProjectPath = fileProvider.Root;
+
+                string[] args = new string[]
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "controller",
+                    "--controllerName",
+                    "BlogsController",
+                    "--model",
+                    "Test.Models.Blog",
+                    "--dataContext",
+                    "Test.Data.DerivedDbContext",
+                    "--relativeFolderPath",
+                    "Controllers",
+                    "--restWithNoViews",
+                    "--bootstrapVersion",
+                    "3"
+                };
+
+                Scaffold(args, TestProjectPath);
+                string generatedFilePath = Path.Combine(TestProjectPath, "Controllers", "BlogsController.cs");
+
+                VerifyFileAndContent(generatedFilePath, "BlogsController.txt");
+
+                // verify that the db context wasn't modified, since the model is refernced in the base class.
+                string derivedDataContextPath = Path.Combine(TestProjectPath, "Data", MsBuildProjectStrings.DerivedDbContextFileName);
+                VerifyFileAndContent(derivedDataContextPath, "BlogsDerivedDbContext.txt");
             }
         }
     }

@@ -105,7 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore {
                 return ResourceManager.GetString("CompilingWithModifiedDbContext", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to There was an error creating a DbContext :{0}.
         /// </summary>

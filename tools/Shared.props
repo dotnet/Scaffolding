@@ -1,7 +1,6 @@
 <Project>
   <Import Project="$(MSBuildThisFileDirectory)..\src\VS.Web.CG.Design\Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
     <CodeGenDesignSrcPath>$(MSBuildThisFileDirectory)..\src\VS.Web.CG.Design\</CodeGenDesignSrcPath>
   </PropertyGroup>
   <ItemGroup>

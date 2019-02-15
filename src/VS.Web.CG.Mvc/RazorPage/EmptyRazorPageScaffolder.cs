@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {
@@ -43,12 +41,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.TemplateNameRequired);
             }
 
+            TemplateModel = GetRazorPageViewGeneratorTemplateModel(razorGeneratorModel);
+
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
-            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(_serviceProvider);
-            await layoutDependencyInstaller.Execute();
 
             await GenerateView(razorGeneratorModel, null, outputPath);
-            await layoutDependencyInstaller.InstallDependencies();
         }
 
         protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)

@@ -21,6 +21,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         [Option(Name ="namespaceName", ShortName ="namespace", Description = "Specify the name of the namespace to use for the generated PageModel")]
         public string NamespaceName { get; set; }
 
+        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        public string BootstrapVersion { get; set; }
+
         public RazorPageGeneratorModel()
         {
         }

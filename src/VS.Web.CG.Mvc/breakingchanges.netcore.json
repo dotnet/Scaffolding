@@ -1,0 +1,22 @@
+[
+    {
+        "TypeId": "public abstract class Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyInstaller",
+        "Kind": "Removal"
+    },
+    {
+        "TypeId": "public class Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyGenerator",
+        "Kind": "Removal"
+    },
+    {
+        "TypeId": "public class Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyGeneratorModel",
+        "Kind": "Removal"
+    },
+    {
+        "TypeId": "public class Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.MvcLayoutDependencyInstaller : Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyInstaller",
+        "Kind": "Removal"
+    },
+    {
+        "TypeId": "public class Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.StaticFilesDependencyInstaller : Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency.DependencyInstaller",
+        "Kind": "Removal"
+    }
+]

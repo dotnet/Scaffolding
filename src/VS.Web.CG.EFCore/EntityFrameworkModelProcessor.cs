@@ -80,7 +80,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var dbContextSymbols = _modelTypesLocator.GetType(_dbContextFullTypeName).ToList();
             var startupType = _modelTypesLocator.GetType("Startup").FirstOrDefault();
             var programType = _modelTypesLocator.GetType("Program").FirstOrDefault();
-            string dbContextError = string.Empty;
 
             ModelType dbContextSymbolInWebProject = null;
             if (!dbContextSymbols.Any())
@@ -102,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (dbContextType == null)
             {
-                throw new InvalidOperationException(dbContextError);
+                throw new InvalidOperationException(_dbContextError);
             }
 
             var modelReflectionType = _reflectedTypesProvider.GetReflectedType(
@@ -392,21 +391,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             try
             {
                 // Use EF design APIs to get the DBContext instance.
-                var operationHandler = new OperationReportHandler();
-                var operationReporter = new OperationReporter(operationHandler);
                 // EF infers the environment (Development/ Production) based on the environment variable
                 // ASPNETCORE_ENVIRONMENT. This should already be set up by the CodeGeneration.Design process.
-                var dbContextOperations = new DbContextOperations(
-                    operationReporter,
-                    dbContextType.GetTypeInfo().Assembly,
-                    startupType.GetTypeInfo().Assembly,
-                    Array.Empty<string>());
+                OperationReportHandler operationHandler = new OperationReportHandler();
 
-                var dbContextService = dbContextOperations.CreateContext(dbContextType.FullName);
-
-                return dbContextService;
+                return DbContextActivator.CreateInstance(dbContextType, startupType.GetTypeInfo().Assembly, operationHandler);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex.Unwrap(_logger);
             }

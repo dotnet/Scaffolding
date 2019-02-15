@@ -17,13 +17,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ? new string[]
                 {
                     "Data",
-                    "Pages",
-                    "Services"
+                    "Pages"
                 }
                 : new string[]
                 {
-                    "Pages",
-                    "Services"
+                    "Pages"
                 };
         }
 
@@ -136,24 +134,38 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.Add(layoutPeerValidationScriptsPartial);
             }
 
+            string contentVersion;
+            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+            {
+                contentVersion = templateModel2.ContentVersion;
+            }
+            else
+            {
+                contentVersion = IdentityGenerator.ContentVersionDefault;
+            }
+
+            IdentityGeneratorFiles config = GetConfigContentVersion(contentVersion);
+
             if (!templateModel.UseDefaultUI)
             {
                 if (names != null && names.Any())
                 {
                     foreach (var name in names)
                     {
-                        filesToGenerate.AddRange(_config.NamedFileConfig[name]);
+                        filesToGenerate.AddRange(config.NamedFileConfig[name]);
                     }
                 }
                 else
                 {
-                    filesToGenerate.AddRange(_config.NamedFileConfig.SelectMany(f => f.Value));
+                    filesToGenerate.AddRange(config.NamedFileConfig
+                                                    .Where(x => !string.Equals(x.Key, "wwwroot", StringComparison.OrdinalIgnoreCase))
+                                                    .SelectMany(f => f.Value));
                 }
             }
 
             if (!templateModel.HasExistingNonEmptyWwwRoot)
             {
-                filesToGenerate.AddRange(_config.NamedFileConfig["WwwRoot"]);
+                filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
 
             filesToGenerate.Add(IdentityHostingStartup);
@@ -228,12 +240,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 checkSupportFileLocation = checkSupportFileLocation.Substring(0, checkSupportFileLocation.Length - 1);
             }
-
-            //if (templateModel.SupportFileLocation.EndsWith(sharedDirName))
-            //{
-            //    int directoryLengthWithoutShared = templateModel.SupportFileLocation.Length - sharedDirName.Length;
-            //    outputDirectory = templateModel.SupportFileLocation.Substring(0, directoryLengthWithoutShared);
-            //}
 
             if (checkSupportFileLocation.EndsWith(sharedDirName))
             {
@@ -341,26 +347,56 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             return filesToGenerate;
         }
 
-        private static IdentityGeneratorFiles _config;
-
-        static IdentityGeneratorFilesConfig()
+        // Maps the valid values for ContentVersion to the filename prefix for the appropriate {prefix}_identitygeneratorfilesconfig.json
+        private static readonly IReadOnlyDictionary<string, string> _contentVersionToConfigPrefixMap = new Dictionary<string, string>()
         {
-            string configStr = string.Empty;
-            const string configFileName = "Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.identitygeneratorfilesconfig.json";
-            using (var configStream = typeof(IdentityGeneratorFilesConfig).Assembly.GetManifestResourceStream(configFileName))
-            using (var reader = new StreamReader(configStream))
-            {
-                configStr = reader.ReadToEnd();
-            }
+            { IdentityGenerator.ContentVersionBootstrap3, "bootstrap3" },
+            { IdentityGenerator.ContentVersionDefault, "bootstrap4" },
+        };
 
-            _config = Newtonsoft.Json.JsonConvert.DeserializeObject<IdentityGeneratorFiles>(configStr);
-        }
+        // Lazy-Caches the deserialized versions of {prefix}_identitygeneratorfilesconfig.json
+        private static Dictionary<string, IdentityGeneratorFiles> _versionedConfigCache = new Dictionary<string, IdentityGeneratorFiles>();
 
-        public static IEnumerable<string> GetFilesToList()
+        // Returns the list of files for the specified content version.
+        public static IEnumerable<string> GetFilesToList(string contentVersion)
         {
-            return _config.NamedFileConfig
+            IdentityGeneratorFiles config = GetConfigContentVersion(contentVersion);
+
+            return config.NamedFileConfig
                 .Where(c => c.Value.Any(f => f.ShowInListFiles))
                 .Select(c => c.Key);
+        }
+
+        // Returns the list of files for the default content version.
+        public static IEnumerable<string> GetFilesToList()
+        {
+            return GetFilesToList(IdentityGenerator.ContentVersionDefault);
+        }
+
+        private static IdentityGeneratorFiles GetConfigContentVersion(string contentVersion)
+        {
+            IdentityGeneratorFiles config;
+
+            if (!_versionedConfigCache.TryGetValue(contentVersion, out config))
+            {
+                string configString = string.Empty;
+
+                if (_contentVersionToConfigPrefixMap.TryGetValue(contentVersion, out string configFileNamePrefix))
+                {
+                    string configFileName = $"Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity.{configFileNamePrefix}_identitygeneratorfilesconfig.json";
+                    using (var configStream = typeof(IdentityGeneratorFilesConfig).Assembly.GetManifestResourceStream(configFileName))
+                    using (var reader = new StreamReader(configStream))
+                    {
+                        configString = reader.ReadToEnd();
+                    }
+                }
+
+                config = Newtonsoft.Json.JsonConvert.DeserializeObject<IdentityGeneratorFiles>(configString);
+
+                _versionedConfigCache[contentVersion] = config;
+            }
+
+            return config;
         }
     }
 }

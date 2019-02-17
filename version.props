@@ -1,10 +1,13 @@
 ﻿<Project>
   <PropertyGroup>
-    <MajorVersion>2</MajorVersion>
-    <MinorVersion>2</MinorVersion>
-    <PatchVersion>2</PatchVersion>
-    <PreReleaseLabel>servicing</PreReleaseLabel>
-    <OfficialBuildId Condition="'$(OfficialBuildId)' == ''">$(BUILD_BUILDNUMBER)</OfficialBuildId>
+    <VersionPrefix>3.0.0</VersionPrefix>
+    <VersionSuffix>alpha1</VersionSuffix>
+    <PackageVersion Condition="'$(IsFinalBuild)' == 'true' AND '$(VersionSuffix)' == 'rtm' ">$(VersionPrefix)</PackageVersion>
+    <PackageVersion Condition="'$(IsFinalBuild)' == 'true' AND '$(VersionSuffix)' != 'rtm' ">$(VersionPrefix)-$(VersionSuffix)-final</PackageVersion>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">t000</BuildNumber>
+    <FeatureBranchVersionPrefix Condition="'$(FeatureBranchVersionPrefix)' == ''">a-</FeatureBranchVersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' != '' And '$(FeatureBranchVersionSuffix)' != ''">$(FeatureBranchVersionPrefix)$(VersionSuffix)-$([System.Text.RegularExpressions.Regex]::Replace('$(FeatureBranchVersionSuffix)', '[^\w-]', '-'))</VersionSuffix>
+    <VersionSuffix Condition="'$(VersionSuffix)' != '' And '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OfficialBuildId)' != '' ">

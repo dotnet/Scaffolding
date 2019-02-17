@@ -5,78 +5,61 @@
 
   <!-- These package versions may be overridden or updated by automation. -->
   <PropertyGroup Label="Package Versions: Auto">
-    <InternalAspNetCoreSdkPackageVersion>2.1.7-build-20190104.4</InternalAspNetCoreSdkPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.6</MicrosoftNETCoreAppPackageVersion>
-    <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
-    <SystemDataSqlClientPackageVersion>4.5.2-servicing-27114-05</SystemDataSqlClientPackageVersion>
-    <SystemDiagnosticsDiagnosticSourcePackageVersion>4.5.0</SystemDiagnosticsDiagnosticSourcePackageVersion>
-    <SystemDiagnosticsEventLogPackageVersion>4.5.0</SystemDiagnosticsEventLogPackageVersion>
-    <SystemIOPipelinesPackageVersion>4.5.3-servicing-27114-05</SystemIOPipelinesPackageVersion>
-    <SystemMemoryPackageVersion>4.5.2-servicing-27114-05</SystemMemoryPackageVersion>
-    <SystemReflectionMetadataPackageVersion>1.6.0</SystemReflectionMetadataPackageVersion>
-    <SystemRuntimeCompilerServicesUnsafePackageVersion>4.5.2</SystemRuntimeCompilerServicesUnsafePackageVersion>
-    <SystemSecurityCryptographyCngPackageVersion>4.5.1-servicing-27114-05</SystemSecurityCryptographyCngPackageVersion>
-    <SystemSecurityCryptographyXmlPackageVersion>4.5.0</SystemSecurityCryptographyXmlPackageVersion>
-    <SystemTextEncodingsWebPackageVersion>4.5.0</SystemTextEncodingsWebPackageVersion>
-    <SystemThreadingTasksExtensionsPackageVersion>4.5.2-servicing-27114-05</SystemThreadingTasksExtensionsPackageVersion>
-    <SystemValueTuplePackageVersion>4.5.0</SystemValueTuplePackageVersion>
   </PropertyGroup>
 
   <!-- This may import a generated file which may override the variables above. -->
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
 
-  <ItemGroup Label=".NET Core dependencies">
-    <LatestPackageReference Include="System.Data.SqlClient" Version="$(SystemDataSqlClientPackageVersion)" />
-    <LatestPackageReference Include="System.Diagnostics.DiagnosticSource" Version="$(SystemDiagnosticsDiagnosticSourcePackageVersion)" />
-    <LatestPackageReference Include="System.Diagnostics.EventLog" Version="$(SystemDiagnosticsEventLogPackageVersion)" />
-    <LatestPackageReference Include="System.IO.Pipelines" Version="$(SystemIOPipelinesPackageVersion)" />
-    <LatestPackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
-    <LatestPackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataPackageVersion)" />
-    <LatestPackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
-    <LatestPackageReference Include="System.Security.Cryptography.Cng" Version="$(SystemSecurityCryptographyCngPackageVersion)" />
-    <LatestPackageReference Include="System.Security.Cryptography.Xml" Version="$(SystemSecurityCryptographyXmlPackageVersion)" />
-    <LatestPackageReference Include="System.Text.Encodings.Web" Version="$(SystemTextEncodingsWebPackageVersion)" />
-    <LatestPackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
-    <LatestPackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
-  </ItemGroup>
+  <!-- These are package versions that should not be overridden or updated by automation. -->
+  <PropertyGroup Label="Package Versions: Pinned">
+    <InternalAspNetCoreSdkPackageVersion>2.1.3-rtm-15831</InternalAspNetCoreSdkPackageVersion>
+    <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.1.1</MicrosoftApplicationInsightsAspNetCorePackageVersion>
+    <MicrosoftBuildPackageVersion>15.6.82</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>15.6.82</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>2.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
+    <MicrosoftNETCoreApp20PackageVersion>2.0.9</MicrosoftNETCoreApp20PackageVersion>
+    <MicrosoftNETCoreApp21PackageVersion>2.1.5</MicrosoftNETCoreApp21PackageVersion>
+    <MicrosoftNETCoreDotNetAppHostPackageVersion>2.1.2</MicrosoftNETCoreDotNetAppHostPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
+    <MoqPackageVersion>4.7.49</MoqPackageVersion>
+    <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
+    <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
+    <NuGetFrameworksPackageVersion>4.7.0</NuGetFrameworksPackageVersion>
+    <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
+    <XunitPackageVersion>2.4.0</XunitPackageVersion>
+    <XunitRunnerVisualStudioPackageVersion>2.4.0</XunitRunnerVisualStudioPackageVersion>
 
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' != '.NETFramework' " Label="MSBuild">
-    <LatestPackageReference Include="Microsoft.Build" Version="15.6.82" />
-    <LatestPackageReference Include="Microsoft.Build.Framework" Version="15.6.82" />
-    <LatestPackageReference Include="Microsoft.Build.Tasks.Core" Version="15.6.82" />
-    <LatestPackageReference Include="Microsoft.Build.Utilities.Core" Version="15.6.82" />
-  </ItemGroup>
-
-  <ItemGroup Label="External dependencies">
-    <LatestPackageReference Include="BenchmarkDotNet" Version="0.10.13" />
-    <LatestPackageReference Include="Microsoft.AspNetCore.Testing" Version="2.1.0" />
-    <LatestPackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.6" />
-    <LatestPackageReference Include="Microsoft.Azure.KeyVault" Version="2.3.2" />
-    <LatestPackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.0.1" />
-    <LatestPackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.8.0" />
-    <LatestPackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <LatestPackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-    <LatestPackageReference Include="Moq" Version="4.10.0" />
-    <LatestPackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <LatestPackageReference Include="Polly.Extensions.Http" Version="2.0.1" />
-    <LatestPackageReference Include="Polly" Version="6.0.1" />
-    <LatestPackageReference Include="Serilog.Extensions.Logging" Version="1.4.0" />
-    <LatestPackageReference Include="Serilog.Sinks.File" Version="3.2.0" />
-    <LatestPackageReference Include="StackExchange.Redis.StrongName" Version="1.2.4" />
-    <LatestPackageReference Include="xunit.abstractions" Version="2.0.1" />
-    <LatestPackageReference Include="xunit.analyzers" Version="0.10.0" />
-    <LatestPackageReference Include="xunit.assert" Version="2.3.1" />
-    <LatestPackageReference Include="xunit.extensibility.execution" Version="2.3.1" />
-    <LatestPackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-    <LatestPackageReference Include="xunit" Version="2.4.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">
-    <Reference Include="Microsoft.AspNetCore.Testing" />
-    <Reference Include="Microsoft.NET.Test.Sdk" />
-    <Reference Include="Moq" />
-    <Reference Include="xunit" />
-    <Reference Include="xunit.analyzers" />
-    <Reference Include="xunit.runner.visualstudio" />
-  </ItemGroup>
+    <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>2.1.1</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>2.1.1</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsPackageVersion>2.1.1</MicrosoftAspNetCoreDiagnosticsPackageVersion>
+    <MicrosoftAspNetCoreHostingPackageVersion>2.1.1</MicrosoftAspNetCoreHostingPackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>2.1.1</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>2.1.1</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreMvcPackageVersion>2.1.1</MicrosoftAspNetCoreMvcPackageVersion>
+    <MicrosoftAspNetCorePackageVersion>2.1.1</MicrosoftAspNetCorePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>2.1.1</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreServerIISIntegrationPackageVersion>2.1.1</MicrosoftAspNetCoreServerIISIntegrationPackageVersion>
+    <MicrosoftAspNetCoreServerKestrelPackageVersion>2.1.1</MicrosoftAspNetCoreServerKestrelPackageVersion>
+    <MicrosoftAspNetCoreStaticFilesPackageVersion>2.1.1</MicrosoftAspNetCoreStaticFilesPackageVersion>
+    <MicrosoftAspNetCoreTestingPackageVersion>2.1.0</MicrosoftAspNetCoreTestingPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>2.1.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>2.1.1</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>2.1.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>2.1.1</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>2.1.1</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>2.1.1</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>2.1.1</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>2.1.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>2.1.1</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>2.1.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>2.1.1</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>2.1.1</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>2.1.1</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>2.1.1</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>2.1.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftVisualStudioWebBrowserLinkPackageVersion>2.1.1</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
+  </PropertyGroup>
 </Project>

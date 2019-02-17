@@ -1,5 +1,5 @@
 <Project>
-  <Import Project="..\eng\Dependencies.props" />
+  <Import Project="dependencies.props" />
 
   <PropertyGroup>
     <!-- These properties are use by the automation that updates dependencies.props -->

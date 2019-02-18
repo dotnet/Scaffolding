@@ -8,6 +8,7 @@
     <LineupPackageRestoreSource>https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json</LineupPackageRestoreSource>
 
     <SignCheckExclusionsFile>signcheck.exclusions.txt</SignCheckExclusionsFile>
+    <SkipArtifactVerification>true</SkipArtifactVerification>
   </PropertyGroup>
 
   <ItemGroup>

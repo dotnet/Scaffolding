@@ -6,6 +6,8 @@
     <LineupPackageId>Internal.AspNetCore.Universe.Lineup</LineupPackageId>
     <LineupPackageVersion>2.1.0-rc1-*</LineupPackageVersion>
     <LineupPackageRestoreSource>https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json</LineupPackageRestoreSource>
+
+    <SignCheckExclusionsFile>signcheck.exclusions.txt</SignCheckExclusionsFile>
   </PropertyGroup>
 
   <ItemGroup>

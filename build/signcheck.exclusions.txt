@@ -1,0 +1,4 @@
+*.js;; Exclude all JavaScript files from codesigning because these are user editable files.
+*.exe;; Exclude exes
+*.symbols.nupkg;; Exclude NuGet symbols packages. These are not shipped to customers and should not be code signed.
+;*.symbols.nupkg; Exclude everything inside NuGet symbols packages. These are not shipped to customers and should not be code signed.

@@ -18,7 +18,6 @@ repo_path="$DIR"
 channel=''
 tools_source=''
 tools_source_suffix=''
-package_version_props_url="${PB_PACKAGEVERSIONPROPSURL:-}"
 props_file_path=''
 ci=false
 msbuild_args=()
@@ -194,12 +193,6 @@ while [[ $# -gt 0 ]]; do
         --verbose|-Verbose)
             verbose=true
             ;;
-        --package-version-props-url|-PackageVersionPropsUrl)
-            shift
-            # This parameter can be an empty string, but it should be set
-            [ -z "${1+x}" ] && __error "Missing value for parameter --package-version-props-url" && __usage
-            package_version_props_url="$1"
-            ;;
         *)
             msbuild_args[${#msbuild_args[*]}]="$1"
             ;;
@@ -257,14 +250,6 @@ fi
 [ -z "$tools_source" ] && tools_source='https://aspnetcore.blob.core.windows.net/buildtools'
 
 prodcon_args=()
-
-if [ ! -z "$package_version_props_url" ]; then
-    intermediate_dir="$repo_path/obj"
-    props_file_path="$intermediate_dir/PackageVersions.props"
-    mkdir -p "$intermediate_dir"
-    __get_remote_file "${package_version_props_url}" "$props_file_path" "${PB_ACCESSTOKENSUFFIX:-}"
-    prodcon_args[${#prodcon_args[*]}]="-p:DotNetPackageVersionPropsPath=$props_file_path"
-fi
 
 # PipeBuild parameters
 prodcon_args[${#prodcon_args[*]}]="-p:DotNetAssetRootUrl=${PB_ASSETROOTURL:-}"

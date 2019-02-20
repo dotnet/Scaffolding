@@ -6,6 +6,9 @@
     <LineupPackageId>Internal.AspNetCore.Universe.Lineup</LineupPackageId>
     <LineupPackageVersion>2.2.0-*</LineupPackageVersion>
     <LineupPackageRestoreSource>https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json</LineupPackageRestoreSource>
+    
+    <!-- https://github.com/aspnet/BuildTools/blob/e4e248edfc6eb9c30d2897a65f69f00c27bc66c7/modules/KoreBuild.Tasks/CodeSign.targets#L57 -->
+    <SignCheckExclusionsFile>$(RepositoryRoot)eng\signcheck.exclusions.txt</SignCheckExclusionsFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -15,6 +15,7 @@
     <AnyCpuProjectDirectory>..\..\tools\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
+    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">

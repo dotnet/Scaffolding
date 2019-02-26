@@ -667,13 +667,6 @@
         "ShowInListFiles": false
       },
       {
-        "Name": "Lib.Bootstrap.bower.json",
-        "SourcePath": "wwwroot/lib/bootstrap/.bower.json",
-        "OutputPath": "wwwroot/lib/bootstrap/.bower.json",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
         "Name": "Lib.Bootstrap.License",
         "SourcePath": "wwwroot/lib/bootstrap/LICENSE",
         "OutputPath": "wwwroot/lib/bootstrap/LICENSE",

@@ -634,69 +634,6 @@
         "ShowInListFiles": false
       },
       {
-        "Name": "Bootstrap-theme.css",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Bootstrap-theme.css.map",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css.map",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.css.map",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Bootstrap-theme.min.css",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Bootstrap-theme.min.css.map",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css.map",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap-theme.min.css.map",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Glyphicons-halflings-regular.eot",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.eot",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.eot",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Glyphicons-halflings-regular.svg",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.svg",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.svg",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Glyphicons-halflings-regular.ttf",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Glyphicons-halflings-regular.woff",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Glyphicons-halflings-regular.woff2",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
         "Name": "Bootstrap.js",
         "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
         "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
@@ -707,13 +644,6 @@
         "Name": "Bootstrap.min.js",
         "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
         "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
-        "IsTemplate": false,
-        "ShowInListFiles": false
-      },
-      {
-        "Name": "Npm.js",
-        "SourcePath": "wwwroot/lib/bootstrap/dist/js/npm.js",
-        "OutputPath": "wwwroot/lib/bootstrap/dist/js/npm.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

@@ -17,7 +17,24 @@
     <AssemblyToSign Include="None" PublicKeyToken="b77a5c561934e089" CertificateName="Microsoft400" />
     <!-- The MsftOpenStrongName strong name. -->
     <AssemblyToSign Include="None" PublicKeyToken="cc7b13ffcd2ddd51" CertificateName="Microsoft400" />
-    <FilesToSign Include="$(RedistNetCorePath)\**\dotnet-aspnet-codegenerator.exe" Certificate="Microsoft400" />
+
+    <!-- Native .dll's. These don't have a public key token, but are from Microsoft and should be signed. -->
+
+    <FileNamesToSign Include="dotnet-aspnet-codegenerator.exe" CertificateName="Microsoft400" />
+
+    <!-- Third-party components which should be signed.  -->
+  </ItemGroup>
+
+  <ItemGroup Label="Code sign exclusions">
+    <!-- We don't need to code sign .js files because they are not used in Windows Script Host. -->
+    <FileExtensionsToSign Include=".js" CertificateName="None" />
+    <!-- We don't produce font files. We rebundle some for using the web brower, so they do not need to be signed. -->
+    <FileExtensionsToSign Include=".otf" CertificateName="None" />
+    <FileExtensionsToSign Include=".ttf" CertificateName="None" />
+    <!-- This is a text file which doesn't need to be code signed, even though some .mof files can be signed. -->
+    <FileNamesToSign Include="ancm.mof" CertificateName="None" />
+    <!-- Exclude the apphost because this is expected to be code-signed by customers after the SDK modifies it. -->
+    <FileNamesToSign Include="apphost.exe" CertificateName="None" />
   </ItemGroup>
 
 </Project>

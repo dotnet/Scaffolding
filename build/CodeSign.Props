@@ -9,6 +9,14 @@
     -->
     <!-- The AspNetCore strong name. -->
     <AssemblyToSign Include="None" PublicKeyToken="adb9793829ddae60" CertificateName="Microsoft400" />
+    <!-- The MsSharedLib72 strong name. -->
+    <AssemblyToSign Include="None" PublicKeyToken="31bf3856ad364e35" CertificateName="Microsoft400" />
+    <!-- The MsftStrongName strong name. -->
+    <AssemblyToSign Include="None" PublicKeyToken="b03f5f7f11d50a3a" CertificateName="Microsoft400" />
+    <!-- The MsftStrongName2 strong name. -->
+    <AssemblyToSign Include="None" PublicKeyToken="b77a5c561934e089" CertificateName="Microsoft400" />
+    <!-- The MsftOpenStrongName strong name. -->
+    <AssemblyToSign Include="None" PublicKeyToken="cc7b13ffcd2ddd51" CertificateName="Microsoft400" />
     <FilesToSign Include="$(RedistNetCorePath)\**\dotnet-aspnet-codegenerator.exe" Certificate="Microsoft400" />
   </ItemGroup>
 

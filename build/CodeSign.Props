@@ -10,10 +10,6 @@
     <!-- The AspNetCore strong name. -->
     <AssemblyToSign Include="None" PublicKeyToken="adb9793829ddae60" CertificateName="Microsoft400" />
     <FilesToSign Include="$(RedistNetCorePath)\**\dotnet-aspnet-codegenerator.exe" Certificate="Microsoft400" />
-
-	<FilesToExcludeFromSigning Include="$(RedistNetCorePath)dotnet.exe" />
-	<FilesToExcludeFromSigning Include="hostpolicy.dll" />
-	<FilesToExcludeFromSigning Include="hostfxr.dll" />
   </ItemGroup>
 
 </Project>

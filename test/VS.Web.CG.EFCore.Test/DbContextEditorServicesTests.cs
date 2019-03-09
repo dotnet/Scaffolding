@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         [Theory]
         [InlineData("DbContext_Before.txt", "MyModel.txt", "DbContext_After.txt")]
-        public void AddModelToContext_Adds_Model_From_Same_Project_Tothis.context(string beforeContextResource, string modelResource, string afterContextResource)
+        public void AddModelToContext_Adds_Model_From_Same_Project_To_Context(string beforeContextResource, string modelResource, string afterContextResource)
         {
             string resourcePrefix = "compiler/resources/";
 
@@ -51,7 +51,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         [Theory]
         [InlineData("Startup_RegisterContext_Before.txt", "Startup_RegisterContext_After.txt", "DbContext_Before.txt")]
         [InlineData("Startup_Empty_Method_RegisterContext_Before.txt", "Startup_Empty_Method_RegisterContext_After.txt", "DbContext_Before.txt")]
-        public void TryEditStartupForNewContext_Addsthis.context_Registration_To_ConfigureServices(string beforeStartupResource, string afterStartupResource, string dbContextResource)
+        public void TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices(string beforeStartupResource, string afterStartupResource, string dbContextResource)
         {
             string resourcePrefix = "compiler/resources/";
 

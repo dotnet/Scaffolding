@@ -258,7 +258,7 @@
       "Members": [
         {
           "Kind": "Method",
-          "Name": "get_ContextProcessingStatus",
+          "Name": "getthis.contextProcessingStatus",
           "Parameters": [],
           "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingStatus",
           "Visibility": "Public",
@@ -266,7 +266,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "set_ContextProcessingStatus",
+          "Name": "setthis.contextProcessingStatus",
           "Parameters": [
             {
               "Name": "value",

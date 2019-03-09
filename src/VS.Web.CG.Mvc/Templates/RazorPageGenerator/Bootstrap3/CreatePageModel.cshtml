@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -31,11 +31,11 @@ namespace @Model.NamespaceName
 {
     public class @Model.PageModelClassName : PageModel
     {
-        private readonly @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName context;
 
         public @(Model.PageModelClassName)(@Model.ContextTypeName context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IActionResult OnGet()
@@ -43,7 +43,7 @@ namespace @Model.NamespaceName
 @{
     foreach (var property in relatedProperties.Values)
     {
-        @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
+        @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(this.context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
     }
 }
             return Page();
@@ -59,8 +59,8 @@ namespace @Model.NamespaceName
                 return Page();
             }
 
-            _context.@(entitySetName).Add(@Model.ViewDataTypeShortName);
-            await _context.SaveChangesAsync();
+            this.context.@(entitySetName).Add(@Model.ViewDataTypeShortName);
+            await this.context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }

@@ -12,11 +12,11 @@ namespace TestProject
 {
     public class DetailsModel : PageModel
     {
-        private readonly WebApplication1.Models.CarContext _context;
+        private readonly WebApplication1.Models.CarContext context;
 
         public DetailsModel(WebApplication1.Models.CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public Car Car { get; set; }
@@ -28,7 +28,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            Car = await _context.Car
+            Car = await this.context.Car
                 .Include(c => c.Manufacturer).FirstOrDefaultAsync(m => m.ID == id);
 
             if (Car == null)

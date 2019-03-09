@@ -36,18 +36,18 @@ namespace @Model.NamespaceName
 {
     public class @Model.PageModelClassName : PageModel
     {
-        private readonly @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName context;
 
         public @(Model.PageModelClassName)(@Model.ContextTypeName context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IList<@Model.ViewDataTypeShortName> @Model.ViewDataTypeShortName { get;set; }
 
         public async Task OnGetAsync()
         {
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).ToListAsync();
+            @Model.ViewDataTypeShortName = await this.context.@(entitySetName)@(inlineIncludes).ToListAsync();
         }
     }
 }

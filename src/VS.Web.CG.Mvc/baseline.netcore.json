@@ -337,7 +337,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "get_ContextProcessingResult",
+          "Name": "getthis.contextProcessingResult",
           "Parameters": [],
           "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.ContextProcessingResult",
           "Visibility": "Public",
@@ -345,7 +345,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "set_ContextProcessingResult",
+          "Name": "setthis.contextProcessingResult",
           "Parameters": [
             {
               "Name": "value",
@@ -2157,7 +2157,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "get_ContextTypeName",
+          "Name": "getthis.contextTypeName",
           "Parameters": [],
           "ReturnType": "System.String",
           "Visibility": "Public",
@@ -2165,7 +2165,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "set_ContextTypeName",
+          "Name": "setthis.contextTypeName",
           "Parameters": [
             {
               "Name": "value",
@@ -4306,7 +4306,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "get_ContextTypeName",
+          "Name": "getthis.contextTypeName",
           "Parameters": [],
           "ReturnType": "System.String",
           "Visibility": "Public",

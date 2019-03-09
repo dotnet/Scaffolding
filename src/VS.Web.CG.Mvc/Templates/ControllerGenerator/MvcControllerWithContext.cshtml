@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using System.Collections.Generic;
 @using System.Linq;
 using System;
@@ -67,11 +67,11 @@ namespace @Model.ControllerNamespace
 }
     public class @Model.ControllerName : Controller
     {
-        private readonly @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName context;
 
         public @(Model.ControllerName)(@Model.ContextTypeName context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: @routePrefix
@@ -84,12 +84,12 @@ namespace @Model.ControllerNamespace
         .Select(property => String.Format(".Include({0} => {0}.{1})", lambdaVar, property.AssociationPropertyName)));
     if (!String.IsNullOrEmpty(includeExpressions))
     {
-            @:var @entitySetVar = _context.@entitySetName@includeExpressions;
+            @:var @entitySetVar = this.context.@entitySetName@includeExpressions;
             @:return View(await @(entitySetVar).ToListAsync());
     }
     else
     {
-            @:return View(await _context.@(entitySetName).ToListAsync());
+            @:return View(await this.context.@(entitySetName).ToListAsync());
     }
 }        }
 
@@ -101,7 +101,7 @@ namespace @Model.ControllerNamespace
                 return NotFound();
             }
 
-            var @Model.ModelVariable = await _context.@(entitySetName)@inlineIncludes
+            var @Model.ModelVariable = await this.context.@(entitySetName)@inlineIncludes
                 .FirstOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
@@ -117,7 +117,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(this.context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
     }
 }            return View();
         }
@@ -136,14 +136,14 @@ namespace @Model.ControllerNamespace
     {
                 @:@(Model.ModelVariable).@primaryKeyName = Guid.NewGuid();
     }
-                @:_context.Add(@Model.ModelVariable);
-                @:await _context.SaveChangesAsync();
+                @:this.context.Add(@Model.ModelVariable);
+                @:await this.context.SaveChangesAsync();
 }                return RedirectToAction(nameof(Index));
             }
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(this.context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
     }
 }
             return View(@Model.ModelVariable);
@@ -157,7 +157,7 @@ namespace @Model.ControllerNamespace
                 return NotFound();
             }
 
-            var @Model.ModelVariable = await _context.@(entitySetName).FindAsync(id);
+            var @Model.ModelVariable = await this.context.@(entitySetName).FindAsync(id);
             if (@Model.ModelVariable == null)
             {
                 return NotFound();
@@ -165,7 +165,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(this.context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
     }
 }
             return View(@Model.ModelVariable);
@@ -187,8 +187,8 @@ namespace @Model.ControllerNamespace
             {
                 try
                 {
-                    _context.Update(@Model.ModelVariable);
-                    await _context.SaveChangesAsync();
+                    this.context.Update(@Model.ModelVariable);
+                    await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -206,7 +206,7 @@ namespace @Model.ControllerNamespace
 @{
     foreach (var property in relatedProperties.Values)
     {
-            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(this.context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName", @(Model.ModelVariable).@property.ForeignKeyPropertyNames[0]);
     }
 }
             return View(@Model.ModelVariable);
@@ -220,7 +220,7 @@ namespace @Model.ControllerNamespace
                 return NotFound();
             }
 
-            var @Model.ModelVariable = await _context.@(entitySetName)@inlineIncludes
+            var @Model.ModelVariable = await this.context.@(entitySetName)@inlineIncludes
                 .FirstOrDefaultAsync(m => m.@primaryKeyName == id);
             if (@Model.ModelVariable == null)
             {
@@ -235,15 +235,15 @@ namespace @Model.ControllerNamespace
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
         {
-            var @Model.ModelVariable = await _context.@(entitySetName).FindAsync(id);
-            _context.@(entitySetName).Remove(@Model.ModelVariable);
-            await _context.SaveChangesAsync();
+            var @Model.ModelVariable = await this.context.@(entitySetName).FindAsync(id);
+            this.context.@(entitySetName).Remove(@Model.ModelVariable);
+            await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+            return this.context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
     }
 }

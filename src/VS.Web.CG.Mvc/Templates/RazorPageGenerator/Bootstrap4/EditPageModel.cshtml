@@ -38,11 +38,11 @@ namespace @Model.NamespaceName
 {
     public class @Model.PageModelClassName : PageModel
     {
-        private readonly @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName context;
 
         public @(Model.PageModelClassName)(@Model.ContextTypeName context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -55,7 +55,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
+            @Model.ViewDataTypeShortName = await this.context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {
@@ -64,7 +64,7 @@ namespace @Model.NamespaceName
 @{
     foreach (var property in relatedProperties.Values)
     {
-           @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
+           @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(this.context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
     }
 }
             return Page();
@@ -77,11 +77,11 @@ namespace @Model.NamespaceName
                 return Page();
             }
 
-            _context.Attach(@(Model.ModelTypeName)).State = EntityState.Modified;
+            this.context.Attach(@(Model.ModelTypeName)).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await this.context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -100,7 +100,7 @@ namespace @Model.NamespaceName
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+            return this.context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
     }
 }

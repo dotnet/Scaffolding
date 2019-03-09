@@ -14,25 +14,25 @@ namespace Test.Controllers
     [ApiController]
     public class BlogsController : ControllerBase
     {
-        private readonly DerivedDbContext _context;
+        private readonly DerivedDbContext context;
 
         public BlogsController(DerivedDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: api/Blogs
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Blog>>> GetBase_Blogs()
         {
-            return await _context.Base_Blogs.ToListAsync();
+            return await this.context.Base_Blogs.ToListAsync();
         }
 
         // GET: api/Blogs/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Blog>> GetBlog(int id)
         {
-            var blog = await _context.Base_Blogs.FindAsync(id);
+            var blog = await this.context.Base_Blogs.FindAsync(id);
 
             if (blog == null)
             {
@@ -51,11 +51,11 @@ namespace Test.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(blog).State = EntityState.Modified;
+            this.context.Entry(blog).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await this.context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -76,8 +76,8 @@ namespace Test.Controllers
         [HttpPost]
         public async Task<ActionResult<Blog>> PostBlog(Blog blog)
         {
-            _context.Base_Blogs.Add(blog);
-            await _context.SaveChangesAsync();
+            this.context.Base_Blogs.Add(blog);
+            await this.context.SaveChangesAsync();
 
             return CreatedAtAction("GetBlog", new { id = blog.Id }, blog);
         }
@@ -86,21 +86,21 @@ namespace Test.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Blog>> DeleteBlog(int id)
         {
-            var blog = await _context.Base_Blogs.FindAsync(id);
+            var blog = await this.context.Base_Blogs.FindAsync(id);
             if (blog == null)
             {
                 return NotFound();
             }
 
-            _context.Base_Blogs.Remove(blog);
-            await _context.SaveChangesAsync();
+            this.context.Base_Blogs.Remove(blog);
+            await this.context.SaveChangesAsync();
 
             return blog;
         }
 
         private bool BlogExists(int id)
         {
-            return _context.Base_Blogs.Any(e => e.Id == id);
+            return this.context.Base_Blogs.Any(e => e.Id == id);
         }
     }
 }

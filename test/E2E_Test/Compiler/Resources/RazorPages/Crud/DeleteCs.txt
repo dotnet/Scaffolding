@@ -12,11 +12,11 @@ namespace TestProject
 {
     public class DeleteModel : PageModel
     {
-        private readonly WebApplication1.Models.CarContext _context;
+        private readonly WebApplication1.Models.CarContext context;
 
         public DeleteModel(WebApplication1.Models.CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -29,7 +29,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            Car = await _context.Car
+            Car = await this.context.Car
                 .Include(c => c.Manufacturer).FirstOrDefaultAsync(m => m.ID == id);
 
             if (Car == null)
@@ -46,12 +46,12 @@ namespace TestProject
                 return NotFound();
             }
 
-            Car = await _context.Car.FindAsync(id);
+            Car = await this.context.Car.FindAsync(id);
 
             if (Car != null)
             {
-                _context.Car.Remove(Car);
-                await _context.SaveChangesAsync();
+                this.context.Car.Remove(Car);
+                await this.context.SaveChangesAsync();
             }
 
             return RedirectToPage("./Index");

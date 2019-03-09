@@ -37,11 +37,11 @@ namespace @Model.NamespaceName
 {
     public class @Model.PageModelClassName : PageModel
     {
-        private readonly @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName context;
 
         public @(Model.PageModelClassName)(@Model.ContextTypeName context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
@@ -53,7 +53,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
+            @Model.ViewDataTypeShortName = await this.context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {

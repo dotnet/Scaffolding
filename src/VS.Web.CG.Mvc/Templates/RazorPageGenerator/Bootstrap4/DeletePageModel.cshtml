@@ -42,11 +42,11 @@ namespace @Model.NamespaceName
 {
     public class @Model.PageModelClassName : PageModel
     {
-        private readonly @Model.ContextTypeName _context;
+        private readonly @Model.ContextTypeName context;
 
         public @(Model.PageModelClassName)(@Model.ContextTypeName context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -59,7 +59,7 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
+            @Model.ViewDataTypeShortName = await this.context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
 
             if (@Model.ViewDataTypeShortName == null)
             {
@@ -75,12 +75,12 @@ namespace @Model.NamespaceName
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName).FindAsync(id);
+            @Model.ViewDataTypeShortName = await this.context.@(entitySetName).FindAsync(id);
 
             if (@Model.ViewDataTypeShortName != null)
             {
-                _context.@(entitySetName).Remove(@Model.ViewDataTypeShortName);
-                await _context.SaveChangesAsync();
+                this.context.@(entitySetName).Remove(@Model.ViewDataTypeShortName);
+                await this.context.SaveChangesAsync();
             }
 
             return RedirectToPage("./Index");

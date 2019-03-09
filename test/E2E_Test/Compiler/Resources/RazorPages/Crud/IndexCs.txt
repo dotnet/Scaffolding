@@ -12,18 +12,18 @@ namespace TestProject
 {
     public class IndexModel : PageModel
     {
-        private readonly WebApplication1.Models.CarContext _context;
+        private readonly WebApplication1.Models.CarContext context;
 
         public IndexModel(WebApplication1.Models.CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IList<Car> Car { get;set; }
 
         public async Task OnGetAsync()
         {
-            Car = await _context.Car
+            Car = await this.context.Car
                 .Include(c => c.Manufacturer).ToListAsync();
         }
     }

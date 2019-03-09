@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,25 +14,25 @@ namespace TestProject
     [ApiController]
     public class TestApiController : ControllerBase
     {
-        private readonly CarContext _context;
+        private readonly CarContext context;
 
         public TestApiController(CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: api/TestApi
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Car>>> GetCar()
         {
-            return await _context.Car.ToListAsync();
+            return await this.context.Car.ToListAsync();
         }
 
         // GET: api/TestApi/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Car>> GetCar(string id)
         {
-            var car = await _context.Car.FindAsync(id);
+            var car = await this.context.Car.FindAsync(id);
 
             if (car == null)
             {
@@ -51,11 +51,11 @@ namespace TestProject
                 return BadRequest();
             }
 
-            _context.Entry(car).State = EntityState.Modified;
+            this.context.Entry(car).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await this.context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -76,8 +76,8 @@ namespace TestProject
         [HttpPost]
         public async Task<ActionResult<Car>> PostCar(Car car)
         {
-            _context.Car.Add(car);
-            await _context.SaveChangesAsync();
+            this.context.Car.Add(car);
+            await this.context.SaveChangesAsync();
 
             return CreatedAtAction("GetCar", new { id = car.ID }, car);
         }
@@ -86,21 +86,21 @@ namespace TestProject
         [HttpDelete("{id}")]
         public async Task<ActionResult<Car>> DeleteCar(string id)
         {
-            var car = await _context.Car.FindAsync(id);
+            var car = await this.context.Car.FindAsync(id);
             if (car == null)
             {
                 return NotFound();
             }
 
-            _context.Car.Remove(car);
-            await _context.SaveChangesAsync();
+            this.context.Car.Remove(car);
+            await this.context.SaveChangesAsync();
 
             return car;
         }
 
         private bool CarExists(string id)
         {
-            return _context.Car.Any(e => e.ID == id);
+            return this.context.Car.Any(e => e.ID == id);
         }
     }
 }

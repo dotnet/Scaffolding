@@ -12,17 +12,17 @@ namespace TestProject
 {
     public class CarsController : Controller
     {
-        private readonly CarContext _context;
+        private readonly CarContext context;
 
         public CarsController(CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: Cars
         public async Task<IActionResult> Index()
         {
-            var carContext = _context.Car.Include(c => c.Manufacturer);
+            var carContext = this.context.Car.Include(c => c.Manufacturer);
             return View(await carContext.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            var car = await _context.Car
+            var car = await this.context.Car
                 .Include(c => c.Manufacturer)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (car == null)
@@ -48,7 +48,7 @@ namespace TestProject
         // GET: Cars/Create
         public IActionResult Create()
         {
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ID", "ID");
             return View();
         }
 
@@ -61,11 +61,11 @@ namespace TestProject
         {
             if (ModelState.IsValid)
             {
-                _context.Add(car);
-                await _context.SaveChangesAsync();
+                this.context.Add(car);
+                await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
         }
 
@@ -77,12 +77,12 @@ namespace TestProject
                 return NotFound();
             }
 
-            var car = await _context.Car.FindAsync(id);
+            var car = await this.context.Car.FindAsync(id);
             if (car == null)
             {
                 return NotFound();
             }
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
         }
 
@@ -102,8 +102,8 @@ namespace TestProject
             {
                 try
                 {
-                    _context.Update(car);
-                    await _context.SaveChangesAsync();
+                    this.context.Update(car);
+                    await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,7 +118,7 @@ namespace TestProject
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ID", "ID", car.ManufacturerID);
             return View(car);
         }
 
@@ -130,7 +130,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            var car = await _context.Car
+            var car = await this.context.Car
                 .Include(c => c.Manufacturer)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (car == null)
@@ -146,15 +146,15 @@ namespace TestProject
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var car = await _context.Car.FindAsync(id);
-            _context.Car.Remove(car);
-            await _context.SaveChangesAsync();
+            var car = await this.context.Car.FindAsync(id);
+            this.context.Car.Remove(car);
+            await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CarExists(string id)
         {
-            return _context.Car.Any(e => e.ID == id);
+            return this.context.Car.Any(e => e.ID == id);
         }
     }
 }

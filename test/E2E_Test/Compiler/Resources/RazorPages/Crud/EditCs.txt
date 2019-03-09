@@ -13,11 +13,11 @@ namespace TestProject
 {
     public class EditModel : PageModel
     {
-        private readonly WebApplication1.Models.CarContext _context;
+        private readonly WebApplication1.Models.CarContext context;
 
         public EditModel(WebApplication1.Models.CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -30,14 +30,14 @@ namespace TestProject
                 return NotFound();
             }
 
-            Car = await _context.Car
+            Car = await this.context.Car
                 .Include(c => c.Manufacturer).FirstOrDefaultAsync(m => m.ID == id);
 
             if (Car == null)
             {
                 return NotFound();
             }
-           ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
+           ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ID", "ID");
             return Page();
         }
 
@@ -48,11 +48,11 @@ namespace TestProject
                 return Page();
             }
 
-            _context.Attach(Car).State = EntityState.Modified;
+            this.context.Attach(Car).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await this.context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -71,7 +71,7 @@ namespace TestProject
 
         private bool CarExists(string id)
         {
-            return _context.Car.Any(e => e.ID == id);
+            return this.context.Car.Any(e => e.ID == id);
         }
     }
 }

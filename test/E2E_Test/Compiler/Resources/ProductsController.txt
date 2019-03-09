@@ -11,17 +11,17 @@ namespace TestProject
 {
     public class ProductsController : Controller
     {
-        private readonly ProductContext _context;
+        private readonly ProductContext context;
 
         public ProductsController(ProductContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            var productContext = _context.Product.Include(p => p.Manufacturer);
+            var productContext = this.context.Product.Include(p => p.Manufacturer);
             return View(await productContext.ToListAsync());
         }
 
@@ -33,7 +33,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            var product = await _context.Product
+            var product = await this.context.Product
                 .Include(p => p.Manufacturer)
                 .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
@@ -47,7 +47,7 @@ namespace TestProject
         // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID");
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID");
             return View();
         }
 
@@ -60,11 +60,11 @@ namespace TestProject
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                this.context.Add(product);
+                await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
             return View(product);
         }
 
@@ -76,12 +76,12 @@ namespace TestProject
                 return NotFound();
             }
 
-            var product = await _context.Product.FindAsync(id);
+            var product = await this.context.Product.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
             return View(product);
         }
 
@@ -101,8 +101,8 @@ namespace TestProject
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    this.context.Update(product);
+                    await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,7 +117,7 @@ namespace TestProject
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
+            ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ManufacturerID", "ManufacturerID", product.ManufacturerID);
             return View(product);
         }
 
@@ -129,7 +129,7 @@ namespace TestProject
                 return NotFound();
             }
 
-            var product = await _context.Product
+            var product = await this.context.Product
                 .Include(p => p.Manufacturer)
                 .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
@@ -145,15 +145,15 @@ namespace TestProject
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Product.FindAsync(id);
-            _context.Product.Remove(product);
-            await _context.SaveChangesAsync();
+            var product = await this.context.Product.FindAsync(id);
+            this.context.Product.Remove(product);
+            await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)
         {
-            return _context.Product.Any(e => e.ProductID == id);
+            return this.context.Product.Any(e => e.ProductID == id);
         }
     }
 }

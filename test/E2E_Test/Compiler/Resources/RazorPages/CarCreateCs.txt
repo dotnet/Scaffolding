@@ -12,16 +12,16 @@ namespace TestProject
 {
     public class CarCreateModel : PageModel
     {
-        private readonly WebApplication1.Models.CarContext _context;
+        private readonly WebApplication1.Models.CarContext context;
 
         public CarCreateModel(WebApplication1.Models.CarContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IActionResult OnGet()
         {
-        ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
+        ViewData["ManufacturerID"] = new SelectList(this.context.Set<Manufacturer>(), "ID", "ID");
             return Page();
         }
 
@@ -35,8 +35,8 @@ namespace TestProject
                 return Page();
             }
 
-            _context.Car.Add(Car);
-            await _context.SaveChangesAsync();
+            this.context.Car.Add(Car);
+            await this.context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }

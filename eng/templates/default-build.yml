@@ -47,11 +47,9 @@ jobs:
       vmImage: macOS-10.13
     ${{ if and(eq(parameters.poolName, ''), eq(parameters.agentOs, 'Linux')) }}:
       name: Hosted Ubuntu 1604
-      vmImage: ubuntu-16.04
     ${{ if and(eq(parameters.poolName, ''), eq(parameters.agentOs, 'Windows')) }}:
       ${{ if ne(variables['System.TeamProject'], 'internal') }}:
         name: Hosted VS2017
-        vmImage: vs2017-win2016
       ${{ if eq(variables['System.TeamProject'], 'internal') }}:
         name: dotnet-internal-temp
   variables:

@@ -160,7 +160,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory, MemberData(nameof(TestData))]
+        [Theory(Skip = "Not yet compatible with 3.0"), MemberData(nameof(TestData))]
+        //[Theory, MemberData(nameof(TestData))]
         public void TestIdentityGenerator_IndividualFiles_AllFilesBuild(string fileName)
         {
             using (var fileProvider = new TemporaryFileProvider())

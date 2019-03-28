@@ -11,6 +11,62 @@
           }
         }
       },
+      "Microsoft.VisualStudio.Web.CodeGeneration.Utils": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration.Contracts": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration.Core": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration.Templating": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
+        "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": {
+            "Exclusions": {
+            "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
+            }
+            }
+        },
       "dotnet-aspnet-codegenerator": {
         "Exclusions": {
           "NEUTRAL_RESOURCES_LANGUAGE": {
@@ -18,7 +74,10 @@
             "tools/netcoreapp3.0/any/System.Buffers.dll": "Third party assembly bundled in our nupkg.",
             "tools/netcoreapp3.0/any/runtimes/unix/lib/netcoreapp2.0/System.Buffers.dll": "Third party assembly bundled in our nupkg.",
             "tools/netcoreapp3.0/any/runtimes/win/lib/netcoreapp2.0/System.Buffers.dll": "Third party assembly bundled in our nupkg.",
-            "tools/netcoreapp3.0/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg."
+            "tools/netcoreapp3.0/any/System.Runtime.CompilerServices.Unsafe.dll": "Assembly built by another project but bundled in our nupkg.",
+          },
+          "PACKAGE_MISSING_REPO_COMMIT": {
+                "*": "Fixing it as part of Arcade Migration"
           },
           "SERVICING_ATTRIBUTE": {
             "tools/netcoreapp3.0/any/Newtonsoft.Json.dll": "Third party assembly bundled in our nupkg.",

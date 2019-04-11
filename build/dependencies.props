@@ -6,46 +6,110 @@
   </PropertyGroup>
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
   <PropertyGroup Label="Package Versions: Pinned" >
-    <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.1.1</MicrosoftApplicationInsightsAspNetCorePackageVersion>
-    <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreDiagnosticsPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreDiagnosticsPackageVersion>
-    <MicrosoftAspNetCoreHostingPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreHostingPackageVersion>
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreIdentityUIPackageVersion>
-    <MicrosoftAspNetCoreMvcPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreMvcPackageVersion>
+    <!-- Microsoft.AspNetCore.Hosting -->
+    <MicrosoftAspNetCoreHostingPackageVersion>3.0.0-preview3-19153-02</MicrosoftAspNetCoreHostingPackageVersion>
+
+    <!-- Microsoft.AspNetCore.Server.Kestrel -->
+    <MicrosoftAspNetCoreServerKestrelPackageVersion>3.0.0-preview3-19153-02 </MicrosoftAspNetCoreServerKestrelPackageVersion>
+
+    <!-- Microsoft.AspNetCore.Server.IISIntegration -->
+    <MicrosoftAspNetCoreServerIISIntegrationPackageVersion>3.0.0-preview3-19153-02 </MicrosoftAspNetCoreServerIISIntegrationPackageVersion>
+
+    <!-- Microsoft.ApplicationInsights.AspNetCore -->
+    <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.6.1</MicrosoftApplicationInsightsAspNetCorePackageVersion>
+
+    <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>3.0.0-preview3-19153-02</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+
+    <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>3.0.0-preview3-19153-02</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+
+    <!-- Microsoft.AspNetCore.Identity.UI -->
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>3.0.0-preview3-19153-02</MicrosoftAspNetCoreIdentityUIPackageVersion>
+
+    <!-- Microsoft.Extensions.Identity.Stores -->
+    <MicrosoftExtensionsIdentityStoresPackageVersion>3.0.0-preview3-19153-02</MicrosoftExtensionsIdentityStoresPackageVersion>
+
+    <!-- Microsoft.AspNetCore -->
     <MicrosoftAspNetCorePackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCorePackageVersion>
+
+    <!-- Microsoft.AspNetCore.Razor.Language-->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreRazorLanguagePackageVersion>
-    <MicrosoftAspNetCoreServerIISIntegrationPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreServerIISIntegrationPackageVersion>
-    <MicrosoftAspNetCoreServerKestrelPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreServerKestrelPackageVersion>
-    <MicrosoftAspNetCoreStaticFilesPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreStaticFilesPackageVersion>
-    <MicrosoftAspNetCoreTestingPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreTestingPackageVersion>
+
     <MicrosoftBuildPackageVersion>15.6.82</MicrosoftBuildPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>15.6.82</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>2.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+
+    <MicrosoftAspNetCoreMvcPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreMvcPackageVersion>
+    <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
+    <MicrosoftAspNetCoreStaticFilesPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreStaticFilesPackageVersion>
+
+    <!-- Microsoft.CodeAnalysis.CSharp -->
+    <MicrosoftCodeAnalysisCSharpPackageVersion>3.0.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+
+    <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.0.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+
+    <!-- Microsoft.DotNet.ProjectModel -->
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.0.0-alpha1-10584</MicrosoftEntityFrameworkCoreDesignPackageVersion>
-    <MicrosoftEntityFrameworkCorePackageVersion>3.0.0-alpha1-10584</MicrosoftEntityFrameworkCorePackageVersion>
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>3.0.0-alpha1-10584</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
-    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsConfigurationJsonPackageVersion>
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsDependencyInjectionPackageVersion>
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <MicrosoftExtensionsLoggingConsolePackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <MicrosoftExtensionsLoggingDebugPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsLoggingDebugPackageVersion>
-    <MicrosoftExtensionsLoggingPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsLoggingPackageVersion>
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.0.0-alpha1-10584</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+
+    <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
+    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
+
+    <!-- Microsoft.EntityFrameworkCore.Design -->
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.0.0-preview3.19153.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+
+    <!-- Microsoft.EntityFrameworkCore -->
+    <MicrosoftEntityFrameworkCorePackageVersion>3.0.0-preview3.19153.1</MicrosoftEntityFrameworkCorePackageVersion>
+
+    <!-- Microsoft.EntityFrameworkCore.SqlServer -->
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>3.0.0-preview3.19153.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+
+    <!-- Microsoft.Extensions.Configuration.Abstractions -->
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+
+    <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+
+    <!-- Microsoft.Extensions.Configuration.Json -->
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsConfigurationJsonPackageVersion>
+
+    <!-- Microsoft.Extensions.Configuration.UserSecrets -->
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+
+    <!-- Microsoft.Extensions.DependencyInjection -->
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsDependencyInjectionPackageVersion>
+
+    <!-- Microsoft.Extensions.FileProviders.Embedded -->
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+
+    <!-- Microsoft.Extensions.FileProviders.Physical -->
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+
+    <!-- Microsoft.Extensions.Logging.Console -->
+    <MicrosoftExtensionsLoggingConsolePackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsLoggingConsolePackageVersion>
+
+    <!-- Microsoft.Extensions.Logging.Debug -->
+    <MicrosoftExtensionsLoggingDebugPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsLoggingDebugPackageVersion>
+
+    <!-- Microsoft.Extensions.Logging -->
+    <MicrosoftExtensionsLoggingPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsLoggingPackageVersion>
+
+    <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.0.0-preview3.19153.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+
+    <!-- TFM -->
     <MicrosoftNETCoreApp30PackageVersion>3.0.0-preview1-26907-05</MicrosoftNETCoreApp30PackageVersion>
-    <MicrosoftNETCoreDotNetAppHostPackageVersion>3.0.0-preview1-26907-05</MicrosoftNETCoreDotNetAppHostPackageVersion>
+
+    <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10584</MicrosoftNETSdkRazorPackageVersion>
+
+    <!-- Microsoft.NET.Test.Sdk-->
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
-    <MicrosoftVisualStudioWebBrowserLinkPackageVersion>3.0.0-alpha1-10584</MicrosoftVisualStudioWebBrowserLinkPackageVersion>
+
+    <!-- *** Probably remove -->
+<!--    <MicrosoftVisualStudioWebBrowserLinkPackageVersion>3.0.0-alpha1-10584</MicrosoftVisualStudioWebBrowserLinkPackageVersion>	-->
+
     <MoqPackageVersion>4.9.0</MoqPackageVersion>
     <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>

@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -31,9 +31,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     <PackageReference Include=""Microsoft.AspNetCore.Identity.UI"" Version=""${MicrosoftAspNetCoreIdentityUIPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Identity.Stores"" Version=""${MicrosoftExtensionsIdentityStoresPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
     <PackageReference Include=""Microsoft.NET.Sdk.Razor"" Version=""${MicrosoftNETSdkRazorPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""${MicrosoftVisualStudioWebBrowserLinkPackageVersion}"" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
@@ -73,9 +73,9 @@ public const string RootProjectTxtWithoutEF = @"
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Identity.Stores"" Version=""${MicrosoftExtensionsIdentityStoresPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
     <PackageReference Include=""Microsoft.NET.Sdk.Razor"" Version=""${MicrosoftNETSdkRazorPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""${MicrosoftVisualStudioWebBrowserLinkPackageVersion}"" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
@@ -119,6 +119,7 @@ public const string RootProjectTxtWithoutEF = @"
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"" Version=""${MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Configuration.Json"" Version=""${MicrosoftExtensionsConfigurationJsonPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Identity.Stores"" Version=""${MicrosoftExtensionsIdentityStoresPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging"" Version=""${MicrosoftExtensionsLoggingPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Console"" Version=""${MicrosoftExtensionsLoggingConsolePackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
@@ -356,9 +357,9 @@ namespace Library1.Models
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Identity.Stores"" Version=""${MicrosoftExtensionsIdentityStoresPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
     <PackageReference Include=""Microsoft.NET.Sdk.Razor"" Version=""${MicrosoftNETSdkRazorPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""${MicrosoftVisualStudioWebBrowserLinkPackageVersion}"" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
@@ -526,9 +527,9 @@ namespace DAL
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Identity.Stores"" Version=""${MicrosoftExtensionsIdentityStoresPackageVersion}"" />
     <PackageReference Include=""Microsoft.Extensions.Logging.Debug"" Version=""${MicrosoftExtensionsLoggingDebugPackageVersion}"" />
     <PackageReference Include=""Microsoft.NET.Sdk.Razor"" Version=""${MicrosoftNETSdkRazorPackageVersion}"" />
-    <PackageReference Include=""Microsoft.VisualStudio.Web.BrowserLink"" Version=""${MicrosoftVisualStudioWebBrowserLinkPackageVersion}"" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include=""Microsoft.AspNetCore.Authentication.Cookies"" Version=""${MicrosoftAspNetCoreAuthenticationCookiesPackageVersion}"" />
@@ -634,6 +635,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -740,6 +742,7 @@ namespace Test
     <PackageReference Include=""Microsoft.AspNetCore"" Version=""${MicrosoftAspNetCorePackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.Mvc"" Version=""${MicrosoftAspNetCoreMvcPackageVersion}"" />
     <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"" Version=""${MicrosoftAspNetCoreStaticFilesPackageVersion}"" />
+    <PackageReference Include=""Microsoft.Extensions.Identity.Stores"" Version=""${MicrosoftExtensionsIdentityStoresPackageVersion}"" />
     <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""${MicrosoftEntityFrameworkCoreDesignPackageVersion}"" />
   </ItemGroup>
   <ItemGroup>

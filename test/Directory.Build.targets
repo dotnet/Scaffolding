@@ -54,6 +54,7 @@
         MicrosoftVisualStudioWebBrowserLinkPackageVersion=$(MicrosoftVisualStudioWebBrowserLinkPackageVersion);
         MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion=$(Version);
         MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion=$(Version);
+        MicrosoftExtensionsIdentityStoresPackageVersion=$(MicrosoftExtensionsIdentityStoresPackageVersion);
       </TestProjectProperties>
     </PropertyGroup>
 

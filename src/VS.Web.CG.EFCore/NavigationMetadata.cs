@@ -21,8 +21,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Contract.Assert(navigation.IsDependentToPrincipal());
 
             AssociationPropertyName = navigation.Name;
-
+#pragma warning disable EF1001 // Internal EF Core API usage.
             var otherEntityType = navigation.ForeignKey.ResolveOtherEntityType(navigation.DeclaringEntityType);
+#pragma warning restore EF1001 // Internal EF Core API usage.
             EntitySetName = ModelMetadata.GetEntitySetName(dbContextType, otherEntityType.ClrType);
             TypeName = otherEntityType.ClrType.GetTypeInfo().FullName;
             ShortTypeName = otherEntityType.ClrType.GetTypeInfo().Name;

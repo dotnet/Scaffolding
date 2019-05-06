@@ -19,7 +19,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
         {
             get
             {
+#pragma warning disable EF1001 // Internal EF Core API usage.
                 var builder = new ModelBuilder(SqlServerConventionSetBuilder.Build());
+#pragma warning restore EF1001 // Internal EF Core API usage.
 
                 builder.Entity<Product>();
                 builder.Entity<Category>();
@@ -32,7 +34,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
         {
             get
             {
+#pragma warning disable EF1001 // Internal EF Core API usage.
                 var builder = new ModelBuilder(SqlServerConventionSetBuilder.Build());
+#pragma warning restore EF1001 // Internal EF Core API usage.
 
                 builder.Entity<Customer>();
                 builder.Entity<Order>();

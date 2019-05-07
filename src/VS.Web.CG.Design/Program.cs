@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -8,6 +8,7 @@ using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {
+    // Dummy comment for build/test test
     public class Program
     {
         public const string TOOL_NAME = "dotnet-aspnet-codegenerator-design";

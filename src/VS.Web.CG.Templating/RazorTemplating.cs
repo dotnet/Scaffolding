@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Razor;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
@@ -35,8 +37,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             var fileSystem = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
             var projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, fileSystem, (builder) =>
             {
-                FunctionsDirective.Register(builder);
-                InheritsDirective.Register(builder);
+                builder.SetCSharpLanguageVersion(LanguageVersion.CSharp5);
+
                 SectionDirective.Register(builder);
 
                 builder.AddTargetExtension(new TemplateTargetExtension()

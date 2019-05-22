@@ -41,7 +41,26 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
-#region File operations
+        /// <summary>
+        /// Adds a piece of metadata to communicate back to the scaffolding server.
+        /// This currently uses the FileSystemChangeInformation message.
+        /// At some point an additional message type should be added specifically for metadata exchange.
+        /// </summary>
+        /// <param name="metadata">The data to send back. It will be put in the FullPath property of the message.</param>
+        public void AddMetadataMessage(string metadata)
+        {
+            FileSystemChangeInformation metadataInfo = new FileSystemChangeInformation()
+            {
+                FullPath = metadata,
+                FileSystemChangeType = FileSystemChangeType.AddFile,
+                FileContents = string.Empty
+            };
+
+            FileSystemChangeTracker.AddChange(metadataInfo);
+        }
+
+
+        #region File operations
         public async Task AddFileAsync(string outputPath, Stream sourceStream)
         {
             using (var reader = new StreamReader(sourceStream))

@@ -18,9 +18,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
         }
 
-        [Fact]
+        [SkippableFact]
         public void TestIdentityGenerator()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
@@ -50,9 +53,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [SkippableFact]
         public void TestIdentityGenerator_WithExistingUser()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
@@ -86,9 +92,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [SkippableFact]
         public void TestIdentityGenerator_IndividualFiles()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
@@ -120,9 +129,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Fact]
+        [SkippableFact]
         public void TestIdentityGenerator_IndividualFiles_ViewImports()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
@@ -160,10 +172,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [Theory(Skip = "Not yet compatible with 3.0"), MemberData(nameof(TestData))]
-        //[Theory, MemberData(nameof(TestData))]
+        [SkippableTheory, MemberData(nameof(TestData))]
         public void TestIdentityGenerator_IndividualFiles_AllFilesBuild(string fileName)
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             using (var fileProvider = new TemporaryFileProvider())
             {
                 new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);

@@ -22,7 +22,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             AssociationPropertyName = navigation.Name;
 
-            var otherEntityType = navigation.ForeignKey.ResolveOtherEntityType(navigation.DeclaringEntityType);
+            IEntityType otherEntityType = navigation.GetTargetType();
+
             EntitySetName = ModelMetadata.GetEntitySetName(dbContextType, otherEntityType.ClrType);
             TypeName = otherEntityType.ClrType.GetTypeInfo().FullName;
             ShortTypeName = otherEntityType.ClrType.GetTypeInfo().Name;

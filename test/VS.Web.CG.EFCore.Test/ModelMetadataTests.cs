@@ -4,14 +4,18 @@
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TestModels;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
     public class ModelMetadataTests
     {
-        [Fact]
+        [SkippableFact]
         public void Number_Of_Properties_And_Navigations_Is_Correct()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var productMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
@@ -45,9 +49,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Single(orderMetadata.Navigations);
         }
 
-        [Fact]
+        [SkippableFact]
         public void PrimaryKeys_Are_Returned_Correct()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
@@ -61,9 +68,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(nameof(Product.ProductId), primaryKey.PropertyName);
         }
 
-        [Fact]
+        [SkippableFact]
         public void EntitySetName_Uses_DbContext_PropertyName()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var categoryEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Category));
             var modelMetadata = new ModelMetadata(categoryEntity, typeof(TestDbContext));
@@ -75,9 +85,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(nameof(TestDbContext.Categories), entitySetName);
         }
 
-        [Fact]
+        [SkippableFact]
         public void EntitySetName_Fallsback_To_GenericSetMethod()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
@@ -89,9 +102,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal("Set<Product>()", entitySetName);
         }
 
-        [Fact]
+        [SkippableFact]
         public void Properties_Are_Sorted_According_To_Reflection_order()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             // Arrange
             var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));

@@ -1,18 +1,23 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TestModels;
 using Xunit;
+//using Xunit.SkippableFact;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {
     public class NavigationMetadataTests
     {
-        [Fact]
+        [SkippableFact]
         public void ManyToOneRelation_Metadata_Is_Correct()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var productEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Product));
             var modelMetadata = new ModelMetadata(productEntity, typeof(TestDbContext));
@@ -33,9 +38,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(typeof(Category).Name, navigationMetadata.ShortTypeName);
         }
 
-        [Fact]
-        public void ForiengKeyRelation_Metadata_Is_Correct()
+        [SkippableFact]
+        public void ForeignKeyRelation_Metadata_Is_Correct()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var orderEntity = TestModel.CustomerOrderModel.FindEntityType(typeof(Order));
             var modelMetadata = new ModelMetadata(orderEntity, typeof(TestDbContext));
@@ -56,9 +64,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Equal(typeof(Customer).Name, navigationMetadata.ShortTypeName);
         }
 
-        [Fact]
+        [SkippableFact]
         public void OneToManyNavigation_Excluded_From_Metadata()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var categoryEntity = TestModel.CategoryProductModel.FindEntityType(typeof(Category));
             var modelMetadata = new ModelMetadata(categoryEntity, typeof(TestDbContext));
@@ -70,9 +81,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             Assert.Null(navigationMetadata);
         }
 
-        [Fact]
+        [SkippableFact]
         public void Independent_Association_Excluded_From_Metadata()
         {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
             //Arrange
             var customerEntity = TestModel.CustomerOrderModel.FindEntityType(typeof(Customer));
             var modelMetadata = new ModelMetadata(customerEntity, typeof(TestDbContext));

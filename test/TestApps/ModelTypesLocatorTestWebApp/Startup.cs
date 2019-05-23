@@ -12,7 +12,7 @@ namespace ModelTypesLocatorTestWebApp
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
         }
 
@@ -23,7 +23,7 @@ namespace ModelTypesLocatorTestWebApp
                     options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=CarContext-3ae1a974-3117-4483-853a-06d90fdb3bd0;Trusted_Connection=True;MultipleActiveResultSets=true"));
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
         }
     }

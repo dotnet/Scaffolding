@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -215,6 +215,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new ArgumentNullException(nameof(commandlineModel));
             }
 
+            if (commandlineModel.ListFiles)
+            {
+                ShowFileList(commandlineModel.BootstrapVersion);
+                return;
+            }
+
             var templateModelBuilder = new IdentityGeneratorTemplateModelBuilder(
                 commandlineModel,
                 _applicationInfo,
@@ -225,36 +231,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 _logger);
 
             var templateModel = await templateModelBuilder.ValidateAndBuild();
-
-            if (commandlineModel.ListFiles)
-            {
-                ShowFileList(templateModel);
-                return;
-            }
-
             EnsureFolderLayout(IdentityAreaName, templateModel);
 
             await AddTemplateFiles(templateModel);
             await AddStaticFiles(templateModel);
         }
 
-        private void ShowFileList(IdentityGeneratorTemplateModel templateModel)
+        private void ShowFileList(string commandBootstrapVersion)
         {
+            string contentVersion = string.Equals(commandBootstrapVersion, "3", StringComparison.Ordinal)
+                ? ContentVersionBootstrap3
+                : ContentVersionDefault;
+
             _logger.LogMessage("File List:");
 
-            string contentVersion;
-            // For back-compat
-            if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
-            {
-                contentVersion = templateModel2.ContentVersion;
-            }
-            else
-            {
-                contentVersion = ContentVersionDefault;
-            }
+            IEnumerable<string> files = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
 
-            var files = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
             _logger.LogMessage(string.Join(Environment.NewLine, files));
+
+            if (_fileSystem is SimulationModeFileSystem simModefileSystem)
+            {
+                foreach (string fileName in files)
+                {
+                    simModefileSystem.AddMetadataMessage(fileName);
+                }
+            }
         }
 
         private async Task AddStaticFiles(IdentityGeneratorTemplateModel templateModel)

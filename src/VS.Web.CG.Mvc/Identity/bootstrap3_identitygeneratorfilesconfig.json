@@ -1,5 +1,13 @@
 ﻿{
   "NamedFileConfig": {
+    "Account._StatusMessage": [
+      {
+        "Name": "Account._StatusMessage",
+        "SourcePath": "Pages/Account/Manage/Account._StatusMessage.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/_StatusMessage.cshtml",
+        "IsTemplate": false
+      }
+    ],
     "Account.AccessDenied": [
       {
         "Name": "Account.AccessDenied",
@@ -25,6 +33,20 @@
         "Name": "Account.ConfirmEmail.cs",
         "SourcePath": "Account.ConfirmEmail.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmail.cshtml.cs",
+        "IsTemplate": true
+      }
+    ],
+    "Account.ConfirmEmailChange": [
+      {
+        "Name": "Account.ConfirmEmailChange",
+        "SourcePath": "Pages/Account/Account.ConfirmEmailChange.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmailChange.cshtml",
+        "IsTemplate": false
+      },
+      {
+        "Name": "Account.ConfirmEmailChange.cs",
+        "SourcePath": "Account.ConfirmEmailChange.cs.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmailChange.cshtml.cs",
         "IsTemplate": true
       }
     ],
@@ -298,6 +320,32 @@
         "IsTemplate": true
       }
     ],
+    "Account.Manage.Email": [
+      {
+        "Name": "Account.Manage.Email",
+        "SourcePath": "Pages/Account/Manage/Account.Manage.Email.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/Email.cshtml",
+        "IsTemplate": false
+      },
+      {
+        "Name": "Account.Manage.Email.cs",
+        "SourcePath": "Account.Manage.Email.cs.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/Email.cshtml.cs",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage._ManageNav",
+        "SourcePath": "Account.Manage._ManageNav.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+        "IsTemplate": true
+      },
+      {
+        "Name": "Account.Manage.ManageNavPages",
+        "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+        "IsTemplate": true
+      }
+    ],
     "Account.Manage.EnableAuthenticator": [
       {
         "Name": "Account.Manage.EnableAuthenticator",
@@ -543,6 +591,20 @@
         "Name": "Account.Register.cs",
         "SourcePath": "Account.Register.cs.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/Register.cshtml.cs",
+        "IsTemplate": true
+      }
+    ],
+    "Account.RegisterConfirmation": [
+      {
+        "Name": "Account.RegisterConfirmation",
+        "SourcePath": "Pages/Account/Account.RegisterConfirmation.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/RegisterConfirmation.cshtml",
+        "IsTemplate": false
+      },
+      {
+        "Name": "Account.RegisterConfirmation.cs",
+        "SourcePath": "Account.RegisterConfirmation.cs.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/RegisterConfirmation.cshtml.cs",
         "IsTemplate": true
       }
     ],

@@ -1,8 +1,8 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @@using Microsoft.AspNetCore.Identity
 @@using @(Model.Namespace).Areas.Identity
 @{
-    if (!string.IsNullOrEmpty(Model.UserClassNamespace))
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace) && Model.UserClassNamespace != "Microsoft.AspNetCore.Identity")
     {
 @:@@using @(Model.UserClassNamespace)
     }

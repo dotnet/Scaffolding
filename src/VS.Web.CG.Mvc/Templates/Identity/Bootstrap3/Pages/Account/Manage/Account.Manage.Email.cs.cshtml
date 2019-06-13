@@ -35,7 +35,7 @@ namespace @thisNamespace
         private readonly SignInManager<@(Model.UserClass)> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public IndexModel(
+        public EmailModel(
             UserManager<@(Model.UserClass)> userManager,
             SignInManager<@(Model.UserClass)> signInManager,
             IEmailSender emailSender)
@@ -122,7 +122,7 @@ namespace @thisNamespace
             return RedirectToPage();
         }
 
-        public override async Task<IActionResult> OnPostSendVerificationEmailAsync()
+        public async Task<IActionResult> OnPostSendVerificationEmailAsync()
         {
             if (!ModelState.IsValid)
             {

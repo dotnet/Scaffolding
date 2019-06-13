@@ -2,7 +2,7 @@
 @@using Microsoft.AspNetCore.Identity
 @@using @(Model.Namespace).Areas.Identity
 @{
-    if (!string.IsNullOrEmpty(Model.UserClassNamespace))
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace) && Model.UserClassNamespace != "Microsoft.AspNetCore.Identity")
     {
 @:@@using @(Model.UserClassNamespace)
     }

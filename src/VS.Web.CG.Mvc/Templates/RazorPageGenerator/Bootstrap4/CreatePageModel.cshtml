@@ -40,12 +40,6 @@ namespace @Model.NamespaceName
 
         public IActionResult OnGet()
         {
-@{
-    foreach (var property in relatedProperties.Values)
-    {
-        @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
-    }
-}
             return Page();
         }
 
@@ -64,5 +58,20 @@ namespace @Model.NamespaceName
 
             return RedirectToPage("./Index");
         }
+@if (relatedProperties.Any())
+{
+
+        public override Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
+        {
+@{
+    foreach (var property in relatedProperties.Values)
+    {
+            @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
+    }
+}
+
+            return base.OnPageHandlerExecutionAsync(context, next);
+        }
+}
     }
 }

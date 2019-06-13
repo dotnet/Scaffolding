@@ -37,7 +37,7 @@ namespace TestProject
             {
                 return NotFound();
             }
-           ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
+
             return Page();
         }
 
@@ -67,6 +67,13 @@ namespace TestProject
             }
 
             return RedirectToPage("./Index");
+        }
+
+        public override Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
+        {
+            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
+
+            return base.OnPageHandlerExecutionAsync(context, next);
         }
 
         private bool CarExists(string id)

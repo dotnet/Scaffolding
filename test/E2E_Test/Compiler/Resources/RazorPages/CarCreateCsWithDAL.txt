@@ -21,7 +21,6 @@ namespace TestProject
 
         public IActionResult OnGet()
         {
-        ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
             return Page();
         }
 
@@ -39,6 +38,13 @@ namespace TestProject
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
+        }
+
+        public override Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
+        {
+            ViewData["ManufacturerID"] = new SelectList(_context.Set<Manufacturer>(), "ID", "ID");
+
+            return base.OnPageHandlerExecutionAsync(context, next);
         }
     }
 }

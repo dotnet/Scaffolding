@@ -32,9 +32,9 @@ namespace @thisNamespace
     public class ConfirmEmailChangeModel : PageModel
     {
         private readonly UserManager<@(Model.UserClass)> _userManager;
-        private readonly SignInManager<TUser> _signInManager;
+        private readonly SignInManager<@(Model.UserClass> _signInManager;
 
-        public ConfirmEmailChangeModel(UserManager<TUser> userManager, SignInManager<TUser> signInManager)
+        public ConfirmEmailChangeModel(UserManager<@(Model.UserClass> userManager, SignInManager<@(Model.UserClass> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -43,7 +43,7 @@ namespace @thisNamespace
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string userId, string code)
+        public async Task<IActionResult> OnGetAsync(string userId, string email, string code)
         {
             if (userId == null || email == null || code == null)
             {

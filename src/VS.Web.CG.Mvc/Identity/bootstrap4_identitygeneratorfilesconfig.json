@@ -3,7 +3,7 @@
     "Account._StatusMessage": [
       {
         "Name": "Account._StatusMessage",
-        "SourcePath": "Pages/Account/Manage/Account._StatusMessage.cshtml",
+        "SourcePath": "Pages/Account/Account._StatusMessage.cshtml",
         "OutputPath": "Areas/Identity/Pages/Account/_StatusMessage.cshtml",
         "IsTemplate": false
       }

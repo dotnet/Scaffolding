@@ -2,10 +2,12 @@
 @using System.Collections.Generic
 @using System.Linq
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 @{
     var namespaceSet = new HashSet<string>(
         new string[]
         {
+            "Microsoft.AspNetCore.Identity.UI.Services",
             "Microsoft.AspNetCore.Mvc",
             "Microsoft.AspNetCore.Mvc.RazorPages",
         });
@@ -41,7 +43,7 @@ namespace @thisNamespace
 
         public string EmailConfirmationUrl { get; set; }
 
-        public void OnGet()
+        public async Task<IActionResult> OnGetAsync(string email)
         {
             if (email == null)
             {
@@ -55,8 +57,8 @@ namespace @thisNamespace
             }
 
             Email = email;
-            // This sender is a no-op, so we should auto confirm the account
-            DisplayConfirmAccountLink = _sender is EmailSender;
+            // Once you add a real email sender, you should remove this code that lets you confirm the account
+            DisplayConfirmAccountLink = true;
             if (DisplayConfirmAccountLink)
             {
                 var userId = await _userManager.GetUserIdAsync(user);

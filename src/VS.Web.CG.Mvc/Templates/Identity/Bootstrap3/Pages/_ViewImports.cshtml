@@ -1,6 +1,8 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @@using Microsoft.AspNetCore.Identity
 @@using @(Model.Namespace).Areas.Identity
+@@using @(Model.Namespace).Areas.Identity.Pages
+@@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     if (!string.IsNullOrEmpty(Model.UserClassNamespace) && Model.UserClassNamespace != "Microsoft.AspNetCore.Identity")
     {
@@ -8,5 +10,3 @@
     }
 
 }
-@@using @(Model.Namespace).Areas.Identity.Pages
-@@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

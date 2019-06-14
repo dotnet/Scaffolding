@@ -29,21 +29,23 @@ using Microsoft.AspNetCore.Authorization;
 namespace @thisNamespace
 {
     [AllowAnonymous]
-    public class ConfirmEmailModel : PageModel
+    public class ConfirmEmailChangeModel : PageModel
     {
         private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
 
-        public ConfirmEmailModel(UserManager<@(Model.UserClass)> userManager)
+        public ConfirmEmailChangeModel(UserManager<@(Model.UserClass)> userManager, SignInManager<@(Model.UserClass)> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string userId, string code)
+        public async Task<IActionResult> OnGetAsync(string userId, string email, string code)
         {
-            if (userId == null || code == null)
+            if (userId == null || email == null || code == null)
             {
                 return RedirectToPage("/Index");
             }
@@ -54,8 +56,24 @@ namespace @thisNamespace
                 return NotFound($"Unable to load user with ID '{userId}'.");
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, code);
-            StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            var result = await _userManager.ChangeEmailAsync(user, email, code);
+            if (!result.Succeeded)
+            {
+                StatusMessage = "Error changing email.";
+                return Page();
+            }
+
+            // In our UI email and user name are one and the same, so when we update the email
+            // we need to update the user name.
+            var setUserNameResult = await _userManager.SetUserNameAsync(user, email);
+            if (!setUserNameResult.Succeeded)
+            {
+                StatusMessage = "Error changing user name.";
+                return Page();
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
+            StatusMessage = "Thank you for confirming your email change.";
             return Page();
         }
     }

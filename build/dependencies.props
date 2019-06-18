@@ -17,13 +17,13 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>3.0.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>3.2.0-beta1-final</MicrosoftCodeAnalysisCSharpPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.Razor -->
     <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-preview6.19304.1</MicrosoftCodeAnalysisRazorPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.0.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.2.0-beta1-final</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
 
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
 	<!-- from aspnetcore-dev	-->

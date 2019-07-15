@@ -60,6 +60,10 @@ namespace @(thisNamespace)
 @:
 
 @:                services.AddDefaultIdentity<@(Model.UserClass)>()
+        if (Model.UseDefaultUI)
+        {
+@:                    .AddDefaultUI(UIFramework.Bootstrap3);
+        }
 @:                    .AddEntityFrameworkStores<@Model.DbContextClass>();
 
     } // End Model.IsUsingExstingDbContext

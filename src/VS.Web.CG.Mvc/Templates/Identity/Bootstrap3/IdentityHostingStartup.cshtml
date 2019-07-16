@@ -62,7 +62,7 @@ namespace @(thisNamespace)
 @:                services.AddDefaultIdentity<@(Model.UserClass)>()
         if (Model.UseDefaultUI)
         {
-@:                    .AddDefaultUI(UIFramework.Bootstrap3);
+@:                    .AddDefaultUI(UIFramework.Bootstrap3)
         }
 @:                    .AddEntityFrameworkStores<@Model.DbContextClass>();
 

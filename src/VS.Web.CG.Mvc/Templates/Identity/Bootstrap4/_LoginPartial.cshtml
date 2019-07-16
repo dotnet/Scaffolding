@@ -1,8 +1,7 @@
-@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using System.Collections.Generic
 @using System.Linq
 @@using Microsoft.AspNetCore.Identity
-
 @{
     if (Model.UserClassNamespace != "Microsoft.AspNetCore.Identity")
     {
@@ -10,10 +9,11 @@
     }
 }
 
-@{ 
+@{
 @:@@inject SignInManager<@Model.UserClass> SignInManager
 @:@@inject UserManager<@Model.UserClass> UserManager
 }
+
 @{
 @:<ul class="navbar-nav">
 @:@@if (SignInManager.IsSignedIn(User))

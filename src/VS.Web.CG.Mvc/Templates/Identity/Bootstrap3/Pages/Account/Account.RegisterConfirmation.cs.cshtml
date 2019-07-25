@@ -2,6 +2,7 @@
 @using System.Collections.Generic
 @using System.Linq
 using Microsoft.AspNetCore.Authorization;
+using System.Text;
 using System.Threading.Tasks;
 @{
     var namespaceSet = new HashSet<string>(
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
             "Microsoft.AspNetCore.Identity.UI.Services",
             "Microsoft.AspNetCore.Mvc",
             "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.WebUtilities",
         });
 
     var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account";
@@ -63,10 +65,11 @@ namespace @thisNamespace
             {
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 EmailConfirmationUrl = Url.Page(
                     "/Account/ConfirmEmail",
                     pageHandler: null,
-                    values: new { userId = userId, code = code },
+                    values: new { area = "Identity", userId = userId, code = code },
                     protocol: Request.Scheme);
             }
 

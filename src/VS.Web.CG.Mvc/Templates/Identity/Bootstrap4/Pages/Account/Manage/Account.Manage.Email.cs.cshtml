@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
             "Microsoft.AspNetCore.Identity.UI.Services",
             "Microsoft.AspNetCore.Mvc",
             "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.WebUtilities",
         });
 
     var thisNamespace = $"{Model.Namespace}.Areas.Identity.Pages.Account.Manage";
@@ -66,15 +68,9 @@ namespace @thisNamespace
             public string NewEmail { get; set; }
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        private async Task LoadAsync(@(Model.UserClass) user)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
             var email = await _userManager.GetEmailAsync(user);
-
             Email = email;
 
             Input = new InputModel
@@ -83,21 +79,32 @@ namespace @thisNamespace
             };
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
-
-            return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            await LoadAsync(user);
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostChangeEmailAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await LoadAsync(user);
+                return Page();
             }
 
             var email = await _userManager.GetEmailAsync(user);
@@ -125,24 +132,26 @@ namespace @thisNamespace
 
         public async Task<IActionResult> OnPostSendVerificationEmailAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            if (!ModelState.IsValid)
+            {
+                await LoadAsync(user);
+                return Page();
+            }
+
             var userId = await _userManager.GetUserIdAsync(user);
             var email = await _userManager.GetEmailAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
-                values: new { userId = userId, code = code },
+                values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 email,

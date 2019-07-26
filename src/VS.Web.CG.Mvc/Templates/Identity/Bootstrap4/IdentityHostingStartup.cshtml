@@ -59,7 +59,7 @@ namespace @(thisNamespace)
         } // End else
 @:
 
-@:                services.AddDefaultIdentity<@(Model.UserClass)>()
+@:                services.AddDefaultIdentity<@(Model.UserClass)>(options => options.SignIn.RequireConfirmedAccount = true)
 @:                    .AddEntityFrameworkStores<@Model.DbContextClass>();
 
     } // End Model.IsUsingExstingDbContext

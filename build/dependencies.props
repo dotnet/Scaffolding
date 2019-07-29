@@ -8,7 +8,7 @@
   <PropertyGroup Label="Package Versions: Pinned" >
 
     <!-- Microsoft.AspNetCore.Razor.Language -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-preview6.19304.1</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-preview7.19362.5</MicrosoftAspNetCoreRazorLanguagePackageVersion>
 
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
@@ -20,23 +20,23 @@
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.2.0-beta1-final</MicrosoftCodeAnalysisCSharpPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-preview6.19304.1</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-preview7.19362.5</MicrosoftCodeAnalysisRazorPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.2.0-beta1-final</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
 
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
-	<!-- from aspnetcore-dev	-->
+    <!-- from aspnetcore-dev	-->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>3.0.0-preview6.19253.5</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
 
     <!-- Microsoft.EntityFrameworkCore.Design -->
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.0.0-preview6.19304.10</MicrosoftEntityFrameworkCoreDesignPackageVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-preview6.19304.6</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-preview7.19362.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
 
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-preview6.19304.6</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-preview7.19362.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
 
     <!-- TFM -->
     <MicrosoftNETCoreApp30PackageVersion>3.0.0-preview1-26907-05</MicrosoftNETCoreApp30PackageVersion>

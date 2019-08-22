@@ -64,7 +64,16 @@
                 {
             @:<div class="form-group">
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
+                    if (property.IsNullable)
+                    {
+                        @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName">
+                            @:<option value="" selected>---</option>
+                        @:</select>
+                    }
+                    else
+                    {
+                        @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
+                    }
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                     continue;
@@ -83,7 +92,16 @@
                 {
             @:<div class="form-group">
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></select>
+                    if (property.IsNullable)
+                    {
+                        @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control">
+                            @:<option value="" selected>---</option>
+                        @:</select>
+                    }
+                    else
+                    {
+                        @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></select>
+                    }
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                 }

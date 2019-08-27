@@ -9,8 +9,10 @@
     }
 }
 
-@@inject SignInManager<@Model.UserClass> SignInManager
-@@inject UserManager<@Model.UserClass> UserManager
+@{
+@:@@inject SignInManager<@Model.UserClass> SignInManager
+@:@@inject UserManager<@Model.UserClass> UserManager
+}
 
 @{
 @:<ul class="navbar-nav">

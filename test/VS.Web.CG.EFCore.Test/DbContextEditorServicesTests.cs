@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             Assert.True(result.Edited);
 
-            Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString());
+            Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
         }
 
         [Theory]
@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid");
 
             Assert.True(result.Edited);
-            Assert.Equal(afterStartupText, result.NewTree.GetText().ToString());
+            Assert.Equal(afterStartupText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
         }
 
 

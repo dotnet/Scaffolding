@@ -1,6 +1,7 @@
 <Project>
   <Import Project="$(DotNetRestoreSourcePropsPath)" Condition="'$(DotNetRestoreSourcePropsPath)' != ''"/>
 
+<!-- Adding the 3.0 preview 9 feed. Should be removed once the packages are available in NuGet -->
   <PropertyGroup Label="RestoreSources">
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true' AND '$(AspNetUniverseBuildOffline)' != 'true' ">

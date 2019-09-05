@@ -8,7 +8,7 @@
   <PropertyGroup Label="Package Versions: Pinned" >
 
     <!-- Microsoft.AspNetCore.Razor.Language -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-preview8.19405.5</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-preview9.19423.3</MicrosoftAspNetCoreRazorLanguagePackageVersion>
 
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
@@ -17,13 +17,13 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>3.2.0-beta1-final</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>3.3.0</MicrosoftCodeAnalysisCSharpPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-preview8.19405.5</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-preview9.19423.3</MicrosoftCodeAnalysisRazorPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.2.0-beta1-final</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.3.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
 
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <!-- from aspnetcore-dev	-->
@@ -33,10 +33,10 @@
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.0.0-preview6.19304.10</MicrosoftEntityFrameworkCoreDesignPackageVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-preview8.19405.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-preview9.19423.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
 
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-preview8.19405.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-preview9.19423.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
 
     <!-- TFM -->
     <MicrosoftNETCoreApp30PackageVersion>3.0.0-preview1-26907-05</MicrosoftNETCoreApp30PackageVersion>

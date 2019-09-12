@@ -8,7 +8,7 @@
   <PropertyGroup Label="Package Versions: Pinned" >
 
     <!-- Microsoft.AspNetCore.Razor.Language -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-preview9.19423.3</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.0.0-rc1.19457.3</MicrosoftAspNetCoreRazorLanguagePackageVersion>
 
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
@@ -20,7 +20,7 @@
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.3.0</MicrosoftCodeAnalysisCSharpPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-preview9.19423.3</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>3.0.0-rc1.19457.3</MicrosoftCodeAnalysisRazorPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.3.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
@@ -33,10 +33,10 @@
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.0.0-preview6.19304.10</MicrosoftEntityFrameworkCoreDesignPackageVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-preview9.19423.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>3.0.0-rc1.19456.10</MicrosoftExtensionsDependencyInjectionPackageVersion>
 
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-preview9.19423.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.0.0-rc1.19456.10</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
 
     <!-- TFM -->
     <MicrosoftNETCoreApp30PackageVersion>3.0.0-preview1-26907-05</MicrosoftNETCoreApp30PackageVersion>

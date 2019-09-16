@@ -66,10 +66,10 @@
     <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>3.0.0-preview5-19227-01</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
 
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>3.0.0-preview5-19227-01</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>3.0.0</MicrosoftAspNetCoreIdentityUIPackageVersion>
 
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>3.0.0-preview4-19123-01</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>3.0.0</MicrosoftExtensionsIdentityStoresPackageVersion>
 
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
@@ -99,31 +99,31 @@
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>3.0.0-preview5.19227.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>3.0.0-preview6.19304.6</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>3.0.0</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.0.0</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.UserSecrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.0.0</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
 
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.0.0</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
 
     <!-- Microsoft.Extensions.Logging.Console -->
-    <MicrosoftExtensionsLoggingConsolePackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>3.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
 
     <!-- Microsoft.Extensions.Logging.Debug -->
-    <MicrosoftExtensionsLoggingDebugPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>3.0.0</MicrosoftExtensionsLoggingDebugPackageVersion>
 
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>3.0.0</MicrosoftExtensionsLoggingPackageVersion>
 
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.0.0-preview5.19227.9</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.0.0</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
 
     <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview5.19227.1</MicrosoftNETSdkRazorPackageVersion>

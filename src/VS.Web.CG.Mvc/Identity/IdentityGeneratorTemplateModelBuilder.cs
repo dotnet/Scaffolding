@@ -239,11 +239,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.AddRange(layoutPeerFiles);
             }
 
-            if (IdentityGeneratorFilesConfig.TryGetCookieConsentPartialFile(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IdentityGeneratorFile cookieConsentPartialConfig))
-            {
-                filesToGenerate.Add(cookieConsentPartialConfig);
-            }
-
             var filesToGenerateArray = filesToGenerate.ToArray();
             ValidateFilesToGenerate(filesToGenerateArray);
 

@@ -3,14 +3,14 @@
     <MajorVersion>3</MajorVersion>
     <MinorVersion>0</MinorVersion>
     <PatchVersion>0</PatchVersion>
-    <PreReleaseLabel>rc2</PreReleaseLabel>
+    <PreReleaseLabel>rtm</PreReleaseLabel>
     <OfficialBuildId Condition="'$(OfficialBuildId)' == ''">$(BUILD_BUILDNUMBER)</OfficialBuildId>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OfficialBuildId)' != '' ">
     <!-- This implements core versioning. Spec: https://github.com/dotnet/arcade/blob/master/Documentation/CorePackages/Versioning.md -->
     <_BuildNumber>$(OfficialBuildId)</_BuildNumber>
-
+    <IsFinalBuild>true</IsFinalBuild>
     <!-- _BuildNumber from CI is assumed to have format "yyyyMMdd.r". -->
     <_BuildNumberYY>$(_BuildNumber.Substring(2, 2))</_BuildNumberYY>
     <_BuildNumberMM>$(_BuildNumber.Substring(4, 2))</_BuildNumberMM>

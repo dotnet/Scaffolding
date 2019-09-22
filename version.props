@@ -1,9 +1,9 @@
 ﻿<Project>
   <PropertyGroup>
-    <MajorVersion>3</MajorVersion>
-    <MinorVersion>1</MinorVersion>
+    <MajorVersion>5</MajorVersion>
+    <MinorVersion>0</MinorVersion>
     <PatchVersion>0</PatchVersion>
-    <PreReleaseLabel>preview1</PreReleaseLabel>
+    <PreReleaseLabel>alpha1</PreReleaseLabel>
     <OfficialBuildId Condition="'$(OfficialBuildId)' == ''">$(BUILD_BUILDNUMBER)</OfficialBuildId>
   </PropertyGroup>
 

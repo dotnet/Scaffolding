@@ -10,7 +10,6 @@
   <PropertyGroup Condition=" '$(OfficialBuildId)' != '' ">
     <!-- This implements core versioning. Spec: https://github.com/dotnet/arcade/blob/master/Documentation/CorePackages/Versioning.md -->
     <_BuildNumber>$(OfficialBuildId)</_BuildNumber>
-
     <!-- _BuildNumber from CI is assumed to have format "yyyyMMdd.r". -->
     <_BuildNumberYY>$(_BuildNumber.Substring(2, 2))</_BuildNumberYY>
     <_BuildNumberMM>$(_BuildNumber.Substring(4, 2))</_BuildNumberMM>

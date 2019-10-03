@@ -1,4 +1,4 @@
-﻿<Project Sdk="Internal.AspNetCore.Sdk">
+﻿<Project Sdk="Microsoft.Net.Sdk">
   <Import Project="..\Shared.props" />
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>

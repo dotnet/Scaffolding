@@ -5,10 +5,9 @@
     <version>$version$</version>
     <authors>$authors$</authors>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <licenseUrl>$licenseUrl$</licenseUrl>
-    <projectUrl>$projectUrl$</projectUrl>
-    <iconUrl>$iconUrl$</iconUrl>
+    <license type="expression">$license$</license>
     <description>$description$</description>
+    <icon>eng\packageIcon.png</icon>
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
     <repository type="git" url="$repositoryUrl$" commit="$repositoryCommit$" />
@@ -23,9 +22,10 @@
   </metadata>
 
   <files>
-    <file src="$OutputBinary$" target="lib\netstandard2.0\$AssemblyName$.dll" />
-    <file src="$OutputDocumentation$" target="lib\netstandard2.0\$AssemblyName$.xml" />
-    <file src="$OutputSymbol$" target="lib\netstandard2.0\$AssemblyName$.pdb" />
+    <file src="$packageIconFullPath$" target="eng\" />
+    <file src="$OutputBinary$" target="lib\netcoreapp3.0\$AssemblyName$.dll" />
+    <file src="$OutputDocumentation$" target="lib\netcoreapp3.0\$AssemblyName$.xml" />
+    <file src="$OutputSymbol$" target="lib\netcoreapp3.0\$AssemblyName$.pdb" />
 
     <file src="$OutputAnyExe$" target="lib\net461\$AssemblyName$.exe" />
     <file src="$OutputAnyDocumentation$" target="lib\net461\$AssemblyName$.xml" />

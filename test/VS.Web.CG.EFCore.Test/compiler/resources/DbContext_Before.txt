@@ -1,9 +1,0 @@
-﻿namespace ContextNamespace
-{
-    public class MyContext : DbContext
-    {
-        public MyContext() : base()
-        {
-        }
-    }
-}

@@ -8,7 +8,7 @@
     <IsPackable>true</IsPackable>
     <DebugType>full</DebugType>
     <DebugSymbol>true</DebugSymbol>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)eng\Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
   </PropertyGroup>
 
   <PropertyGroup>

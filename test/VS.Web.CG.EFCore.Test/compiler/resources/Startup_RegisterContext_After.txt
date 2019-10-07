@@ -1,0 +1,20 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using ContextNamespace;
+
+namespace WebAppNamespace
+{
+    public class Startup
+    {
+        public Microsoft.Extensions.Configuration.IConfiguration ConfigurationProp { get; set; }
+
+        public void ConfigureServices(IServiceCollection servicesVar)
+        {
+            // Add EF services to the services container.
+            servicesVar.AddEntityFramework();
+
+            servicesVar.AddDbContext<MyContext>(options =>
+                    options.UseSqlServer(ConfigurationProp.GetConnectionString("MyContext")));
+        }
+    }
+}

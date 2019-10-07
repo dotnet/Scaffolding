@@ -1,0 +1,11 @@
+﻿using Microsoft.Extensions.Configuration;
+namespace WebAppNamespace
+{
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection servicesVar)
+        {
+        }
+        public IConfiguration ConfigurationProp { get; set; }
+    }
+}

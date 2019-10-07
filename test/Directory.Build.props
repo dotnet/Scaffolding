@@ -4,6 +4,7 @@
   <PropertyGroup>
     <DeveloperBuildTestTfms>netcoreapp3.0</DeveloperBuildTestTfms>
     <StandardTestTfms>$(DeveloperBuildTestTfms)</StandardTestTfms>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,5 +13,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitExtensibilityExecutionPackageVersion)" />
     <PackageReference Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
   </ItemGroup>
 </Project>

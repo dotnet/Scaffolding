@@ -8,6 +8,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4057ACF-27F
 		src\Directory.Build.props = src\Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{81B64EBF-613D-43AE-82DA-B375FB751921}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+		test\Directory.Build.targets = test\Directory.Build.targets
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{98547032-3A5C-4368-8168-D48DB6E9B30F}"
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
@@ -60,6 +66,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Design-x86", "tools\VS.Web.CG.Design-x86\VS.Web.CG.Design-x86.csproj", "{8A75336B-A55F-42F6-B8BA-B55EFDA39705}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-aspnet-codegenerator", "src\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj", "{0294A050-806F-4FF5-989E-9755DF3D56B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.Test", "test\VS.Web.CG.Core.Test\VS.Web.CG.Core.Test.csproj", "{B88965E6-D92E-450C-B78B-D5FF81D35E7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -326,6 +334,24 @@ Global
 		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x64.Build.0 = Release|Any CPU
 		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x86.ActiveCfg = Release|Any CPU
 		{0294A050-806F-4FF5-989E-9755DF3D56B1}.Release|x86.Build.0 = Release|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Debug|x64.Build.0 = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Debug|x86.Build.0 = Debug|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Release|x64.ActiveCfg = Release|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Release|x64.Build.0 = Release|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Release|x86.ActiveCfg = Release|Any CPU
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -345,6 +371,7 @@ Global
 		{867AB4D3-0EE0-4A3E-B0F0-78E2B612495A} = {4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}
 		{8A75336B-A55F-42F6-B8BA-B55EFDA39705} = {4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}
 		{0294A050-806F-4FF5-989E-9755DF3D56B1} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
+		{B88965E6-D92E-450C-B78B-D5FF81D35E7A} = {81B64EBF-613D-43AE-82DA-B375FB751921}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

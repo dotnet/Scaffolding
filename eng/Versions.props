@@ -132,9 +132,9 @@
 
     <MoqPackageVersion>4.9.0</MoqPackageVersion>
     <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
-    <XunitPackageVersion>2.4.0</XunitPackageVersion>
+    <XunitPackageVersion>2.4.1</XunitPackageVersion>
     <XunitSkippableFactPackageVersion>1.3.12</XunitSkippableFactPackageVersion>
-    <XunitExtensibilityExecutionPackageVersion>2.4.0</XunitExtensibilityExecutionPackageVersion>
-    <XunitRunnerVisualStudioPackageVersion>2.4.0</XunitRunnerVisualStudioPackageVersion>
+    <XunitExtensibilityExecutionPackageVersion>2.4.1</XunitExtensibilityExecutionPackageVersion>
+    <XunitRunnerVisualStudioPackageVersion>2.4.1</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
 </Project>

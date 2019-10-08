@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.1" />
     <ProjectReference Include="..\..\src\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
     <ProjectReference Include="..\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj" />
   </ItemGroup>

@@ -3,7 +3,7 @@
     <MajorVersion>3</MajorVersion>
     <MinorVersion>1</MinorVersion>
     <PatchVersion>0</PatchVersion>
-    <PreReleaseLabel>rtm</PreReleaseLabel>
+    <PreReleaseLabel>preview1</PreReleaseLabel>
     <OfficialBuildId Condition="'$(OfficialBuildId)' == ''">$(BUILD_BUILDNUMBER)</OfficialBuildId>
   </PropertyGroup>
 

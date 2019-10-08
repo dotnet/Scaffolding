@@ -69,7 +69,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>3.0.0</MicrosoftAspNetCoreIdentityUIPackageVersion>
 
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>3.0.0</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>3.1.0-preview1.19506.2</MicrosoftExtensionsIdentityStoresPackageVersion>
 
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->

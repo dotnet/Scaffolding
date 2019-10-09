@@ -67,23 +67,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Design-x86", "too
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-aspnet-codegenerator", "src\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj", "{0294A050-806F-4FF5-989E-9755DF3D56B1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.Test", "test\VS.Web.CG.Core.Test\VS.Web.CG.Core.Tests.csproj", "{B88965E6-D92E-450C-B78B-D5FF81D35E7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.Tests", "test\VS.Web.CG.Core.Test\VS.Web.CG.Core.Tests.csproj", "{B88965E6-D92E-450C-B78B-D5FF81D35E7A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E2E_Test", "test\E2E_Test\E2E_Test.csproj", "{D3BB8134-3864-4C66-A3BE-1025310FFC75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E2E_Test.Tests", "test\E2E_Test\E2E_Test.Tests.csproj", "{D3BB8134-3864-4C66-A3BE-1025310FFC75}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Tools.Tests", "test\VS.Web.CG.Tools.Test\VS.Web.CG.Tools.Tests.csproj", "{64CA7759-DE6A-4D52-9952-7696525C044E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Templating.Test", "test\VS.Web.CG.Templating.Test\VS.Web.CG.Templating.Tests.csproj", "{6C635494-31A4-4664-9883-0242838DC664}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Templating.Tests", "test\VS.Web.CG.Templating.Test\VS.Web.CG.Templating.Tests.csproj", "{6C635494-31A4-4664-9883-0242838DC664}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Sources.Test", "test\VS.Web.CG.Sources.Test\VS.Web.CG.Sources.Tests.csproj", "{4A14E2F6-871E-4B77-B74A-A4AE3F989EFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Sources.Tests", "test\VS.Web.CG.Sources.Test\VS.Web.CG.Sources.Tests.csproj", "{4A14E2F6-871E-4B77-B74A-A4AE3F989EFA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Mvc.Test", "test\VS.Web.CG.Mvc.Test\VS.Web.CG.Mvc.Tests.csproj", "{FE1D7C08-F4B9-4637-BD12-4D19E0DE81D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Mvc.Tests", "test\VS.Web.CG.Mvc.Test\VS.Web.CG.Mvc.Tests.csproj", "{FE1D7C08-F4B9-4637-BD12-4D19E0DE81D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.MSBuild.Test", "test\VS.Web.CG.MSBuild.Test\VS.Web.CG.MSBuild.Tests.csproj", "{B50D6EFB-9F08-4261-B517-27F71FB448D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.MSBuild.Tests", "test\VS.Web.CG.MSBuild.Test\VS.Web.CG.MSBuild.Tests.csproj", "{B50D6EFB-9F08-4261-B517-27F71FB448D0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.EFCore.Test", "test\VS.Web.CG.EFCore.Test\VS.Web.CG.EFCore.Tests.csproj", "{39F94016-923D-4BC4-B0AF-2CB569886569}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.EFCore.Tests", "test\VS.Web.CG.EFCore.Test\VS.Web.CG.EFCore.Tests.csproj", "{39F94016-923D-4BC4-B0AF-2CB569886569}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.FunctionalTest", "test\VS.Web.CG.Core.FunctionalTest\VS.Web.CG.Core.FunctionalTests.csproj", "{331E5212-844E-43B3-AC91-B35BABE4C520}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VS.Web.CG.Core.FunctionalTests.Tests", "test\VS.Web.CG.Core.FunctionalTest\VS.Web.CG.Core.FunctionalTests.Tests.csproj", "{331E5212-844E-43B3-AC91-B35BABE4C520}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{1406501A-8B25-47A5-BBFD-7AEECD2A7BBC}"
 	ProjectSection(SolutionItems) = preProject

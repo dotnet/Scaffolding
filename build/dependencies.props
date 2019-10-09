@@ -8,7 +8,7 @@
   <PropertyGroup Label="Package Versions: Pinned" >
 
     <!-- 3.1.0-preview1.19506.2 -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.1.0-preview1.19506.2</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.1.0-preview1.19508.6</MicrosoftAspNetCoreRazorLanguagePackageVersion>
 
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
@@ -20,7 +20,7 @@
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.4.0-beta2-19477-01</MicrosoftCodeAnalysisCSharpPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>3.1.0-preview1.19506.2</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>3.1.0-preview1.19508.6</MicrosoftCodeAnalysisRazorPackageVersion>
 
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.4.0-beta2-19477-01</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
@@ -69,7 +69,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>3.0.0</MicrosoftAspNetCoreIdentityUIPackageVersion>
 
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>3.1.0-preview1.19506.2</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>3.1.0-preview1.19508.20</MicrosoftExtensionsIdentityStoresPackageVersion>
 
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
@@ -102,13 +102,13 @@
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.0.0</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationJsonPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.UserSecrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.0.0</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
 
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
@@ -120,10 +120,10 @@
     <MicrosoftExtensionsLoggingDebugPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsLoggingDebugPackageVersion>
 
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>3.0.0</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsLoggingPackageVersion>
 
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.0.0</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
 
     <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview5.19227.1</MicrosoftNETSdkRazorPackageVersion>

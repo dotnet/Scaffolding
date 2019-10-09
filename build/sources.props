@@ -8,7 +8,7 @@
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
       https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-core-3-1-preview1-014455/index.json
+      https://dotnetfeed.blob.core.windows.net/dotnet-core-3-1-preview1-014459/index.json
     </RestoreSources>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
       $(RestoreSources);

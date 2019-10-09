@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <!-- Set to PrivateAssets=All so the package does not appear in the generated nuspec. This prevents issues such as https://github.com/aspnet/Scaffolding/issues/645. -->
-    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
+      <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == ''">

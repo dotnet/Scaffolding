@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
     <PackageReference Include="Microsoft.Build" PrivateAssets="All" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(VisualStudio_NewtonsoftJsonPackageVersion)" PrivateAssets="All">
@@ -27,11 +26,4 @@
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks" PrivateAssets="All" Version="$(NuGetFrameworksPackageVersion)" />
   </ItemGroup>
-
-  <PropertyGroup> 	
-    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
-  </PropertyGroup>
-  
 </Project>

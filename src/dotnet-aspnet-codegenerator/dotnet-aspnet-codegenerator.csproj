@@ -15,8 +15,6 @@
   <!-- workaround for https://github.com/dotnet/sdk/issues/2698 -->
   <PropertyGroup>
     <Version>$(PackageVersion)</Version>
-
-    <DelaySign>true</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +36,6 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>

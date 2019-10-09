@@ -18,17 +18,9 @@
        https://github.com/aspnet/scaffolding/issues/434
        -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion)" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Pack="true" Include="Templates\DbContext\*" PackagePath="Templates\DbContext\" />
   </ItemGroup>
-
-  <PropertyGroup> 	
-    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
-  </PropertyGroup>
-
 </Project>

@@ -22,13 +22,13 @@
     <VersionSuffixBuildOfTheDay>$([System.Convert]::ToInt32($(_BuildNumberR)))</VersionSuffixBuildOfTheDay>
     <VersionSuffixBuildOfTheDayPadded>$(VersionSuffixBuildOfTheDay.PadLeft($([System.Convert]::ToInt32(2)), '0'))</VersionSuffixBuildOfTheDayPadded>
 
-    <_BuildNumberSuffix>$(_BuildNumberShortDate)-$(VersionSuffixBuildOfTheDayPadded)</_BuildNumberSuffix>
+    <_BuildNumberSuffix>$(_BuildNumberShortDate).$(VersionSuffixBuildOfTheDayPadded)</_BuildNumberSuffix>
   </PropertyGroup>
 
   <PropertyGroup>
     <_BuildNumberSuffix Condition=" '$(_BuildNumberSuffix)' == '' ">t000</_BuildNumberSuffix>
     <VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
-    <VersionSuffix>$(PreReleaseLabel)-$(_BuildNumberSuffix)</VersionSuffix>
+    <VersionSuffix>$(PreReleaseLabel).$(_BuildNumberSuffix)</VersionSuffix>
     <BrandingVersionSuffix>$(PreReleaseBrandingLabel) Build $(_BuildNumberSuffix)</BrandingVersionSuffix>
 
     <ExperimentalVersionPrefix>0.1.$(PatchVersion)</ExperimentalVersionPrefix>

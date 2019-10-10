@@ -12,7 +12,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-  
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
@@ -20,14 +19,5 @@
   <PropertyGroup Label="Package and Assembly Metadata">
     <Product>Microsoft ASP.NET Core</Product>
   </PropertyGroup>
-
-  <PropertyGroup Label="Warning Suppressions">
-    <!--
-      Suppress a warning about upcoming deprecation of PackageLicenseUrl. When embedding licenses are supported,
-      replace PackageLicenseUrl with PackageLicenseExpression.
-    -->
-    <NoWarn>$(NoWarn);NU5125</NoWarn>
-  </PropertyGroup>
-
 
 </Project>

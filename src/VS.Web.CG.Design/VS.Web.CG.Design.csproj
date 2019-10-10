@@ -36,15 +36,6 @@
       <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == ''">
-    <SignedPackageFile Include="$(OutputPath)netcoreapp3.0\$(AssemblyName).dll;" PackagePath="lib/netcoreapp3.0/dotnet-aspnet-codegenerator-design.dll" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).exe" PackagePath="lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe;" PackagePath="runtimes/win7-x64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).exe" PackagePath="runtimes/win7-x86/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(ARMBinirectory)$(Configuration)\net461\win-arm\$(AssemblyName).exe" PackagePath="runtimes/win-arm/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).exe" PackagePath="runtimes/win-arm64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-  </ItemGroup>
-
   <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
 
     <PropertyGroup>

@@ -60,21 +60,4 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Assemblies from this project -->
-    <SignedPackageFile Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" PackagePath="tools/$(TargetFramework)/any/toolassets/$(TargetFramework)/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="..\VS.Web.CG.Msbuild\bin\$(Configuration)\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" PackagePath="tools/$(TargetFramework)/any/toolassets/net461/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" Certificate="$(AssemblySigningCertName)" />
-
-    <!-- Third-party assemblies -->
-    <SignedPackageFile Include="$(PublishDir)Newtonsoft.Json.dll" PackagePath="tools/$(TargetFramework)/any/Newtonsoft.Json.dll" Certificate="$(AssemblySigning3rdPartyCertName)" />
-
-    <!-- Binaries from other projects that should be signed already -->
-    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.FileProviders.Physical.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.FileProviders.Physical.dll" />
-    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.FileSystemGlobbing.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.FileSystemGlobbing.dll" />
-    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.Primitives.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.Primitives.dll" />
-    <ExcludePackageFileFromSigning Include="$(PublishDir)Microsoft.Extensions.FileProviders.Abstractions.dll" PackagePath="tools/$(TargetFramework)/any/Microsoft.Extensions.FileProviders.Abstractions.dll" />
-    <ExcludePackageFileFromSigning Include="tools/$(TargetFramework)/any/NuGet.Frameworks.dll" />
-    <ExcludePackageFileFromSigning Include="tools/$(TargetFramework)/any/System.Runtime.CompilerServices.Unsafe.dll" />
-  </ItemGroup>
-
 </Project>

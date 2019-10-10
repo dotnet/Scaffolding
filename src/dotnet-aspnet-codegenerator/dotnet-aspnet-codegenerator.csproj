@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.Net.Sdk">
+  <Import Project="$(RepositoryEngineeringDir)\Package.props" />
 
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>

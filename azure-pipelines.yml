@@ -4,12 +4,11 @@ trigger:
     include:
     - master
     - release/*
-
+    - 'internal/release/*'
 pr:
   branches:
     include:
-    - master
-    - release/*
+    - *
 
 variables:
   # Cannot use key:value syntax in root defined variables

@@ -1,5 +1,10 @@
 <Project>
     <ItemGroup>
+    <!-- Reset some Arcade defaults -->
+        <FileExtensionSignInfo Remove=".js" CertificateName="None" />
+    </ItemGroup>
+
+    <ItemGroup>
         <FileSignInfo Include = "Newtonsoft.Json.dll" CertificateName="3PartySHA2"/>
         <FileExtensionSignInfo Include=".ttf" CertificateName="None" />
         <FileExtensionSignInfo Include=".js" CertificateName="None" />

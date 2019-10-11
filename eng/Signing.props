@@ -1,7 +1,9 @@
 <Project>
-  <ItemGroup>
-      <FileExtensionSignInfo Remove=".js" />
-  </ItemGroup>
+<ItemGroup>
+  <_FileExtensionSignInfo Include="@(FileExtensionSignInfo)" Exclude=".js" />
+  <FileExtensionSignInfo Remove="@(FileExtensionSignInfo)" />
+  <FileExtensionSignInfo Include="@(_FileExtensionSignInfo)" />
+<ItemGroup>
 
   <ItemGroup>
       <FileSignInfo Include = "Newtonsoft.Json.dll" CertificateName="3PartySHA2"/>

@@ -3,13 +3,13 @@ trigger:
   branches:
     include:
     - master
-    - release/3*
+    - release/*
 
 pr:
   branches:
     include:
     - master
-    - release/3*
+    - release/*
 
 variables:
   # Cannot use key:value syntax in root defined variables

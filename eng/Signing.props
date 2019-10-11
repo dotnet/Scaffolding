@@ -2,6 +2,6 @@
     <ItemGroup>
         <FileSignInfo Include = "Newtonsoft.Json.dll" CertificateName="3PartySHA2"/>
         <FileExtensionSignInfo Include=".ttf" CertificateName="None" />
-        <FileExtensionsSignInfo Include=".js" CertificateName="None" />
+        <FileExtensionSignInfo Include=".js" CertificateName="None" />
     </ItemGroup>
 </Project>

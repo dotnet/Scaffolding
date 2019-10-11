@@ -48,6 +48,7 @@
         description=$(Description);
         tags=$(PackageTags.Replace(';', ' '));
         license=$(PackageLicenseExpression);
+        projectUrl=$(PackageProjectUrl);
         repositoryUrl=$(RepositoryUrl);
         repositoryCommit=$(RepositoryCommit);
         copyright=$(Copyright);

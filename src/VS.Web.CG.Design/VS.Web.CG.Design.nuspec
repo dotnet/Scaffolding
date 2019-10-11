@@ -8,6 +8,7 @@
     <license type="expression">$license$</license>
     <description>$description$</description>
     <icon>packageIcon.png</icon>
+    <projectUrl>https://github.com/aspnet/scaffolding</projectUrl>
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
     <repository type="git" url="$repositoryUrl$" commit="$repositoryCommit$" />

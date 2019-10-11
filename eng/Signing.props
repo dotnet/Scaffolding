@@ -1,6 +1,6 @@
 <Project>
     <ItemGroup>
-        <FileExtensionSignInfo Remove=".js" CertificateName="None" />
+        <FileExtensionSignInfo Remove=".js" />
     </ItemGroup>
 
     <ItemGroup>
@@ -9,7 +9,6 @@
 
   <ItemGroup Label="Code sign exclusions">
     <FileExtensionSignInfo Include=".js" CertificateName="None" />
-    <FileExtensionSignInfo Include=".otf" CertificateName="None" />
     <FileExtensionSignInfo Include=".ttf" CertificateName="None" />
   </ItemGroup>
 </Project>

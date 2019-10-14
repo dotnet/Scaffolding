@@ -4,13 +4,12 @@
     <FileExtensionSignInfo Remove="@(FileExtensionSignInfo)" />
     <FileExtensionSignInfo Include="@(_FileExtensionSignInfo)" />
   </ItemGroup>
-
   <ItemGroup>
       <FileSignInfo Include = "Newtonsoft.Json.dll" CertificateName="3PartySHA2"/>
   </ItemGroup>
 
   <ItemGroup Label="Code sign exclusions">
-    <FileExtensionSignInfo Include=".js" CertificateName="None" />
+    <FileExtensionSignInfo Include=".js" CertificateName="Microsoft400" />
     <FileExtensionSignInfo Include=".ttf" CertificateName="None" />
   </ItemGroup>
 </Project>

@@ -15,6 +15,10 @@ artifacts:
 - contains all binaries, logs, obj and package files. 
 - the generated nupkgs are in artifacts/packages/$Configuration$/Shipping
 
+eng:
+- Build.props :
+- Signing.props : adding third-party, excluding, and including anything for signing purposes.
+
 Notes:
 - project builds in VS fine but packages are not created(kinda crucial)
 - cmd does not good error messages for test. Use text explorer on VS to debug problems with tests.

@@ -1,6 +1,8 @@
 <Project>
   <ItemGroup>
-      <FileExtensionSignInfo Remove=".js" />
+    <_FileExtensionSignInfo Include="@(FileExtensionSignInfo)" Exclude=".js" />
+    <FileExtensionSignInfo Remove="@(FileExtensionSignInfo)" />
+    <FileExtensionSignInfo Include="@(_FileExtensionSignInfo)" />
   </ItemGroup>
 
   <ItemGroup>

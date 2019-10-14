@@ -4,7 +4,6 @@
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core.Test</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Core</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

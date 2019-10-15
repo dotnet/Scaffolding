@@ -1,4 +1,3 @@
-apphost.exe;; Exclude the apphost because this is expected to be code-signed by customers after the SDK modifies it.
-.js;; We do not sign JavaScript files.
-.binlog;; MSBuild binary logs are not signed though they are sometimes placed where validation thinks they should be.
-WixUIWixca|WixDepCA;; We do not sign WiX content in our installers.
+;; Exclusions for SignCheck. Corresponds to info in Signing.props.
+;; Format: https://github.com/dotnet/arcade/blob/397316e195639450b6c76bfeb9823b40bee72d6d/src/SignCheck/Microsoft.SignCheck/Verification/Exclusion.cs#L23-L35
+*.js;; We do not sign JavaScript files.

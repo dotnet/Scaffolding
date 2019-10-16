@@ -6,7 +6,7 @@ To learn more about ASP.NET Scaffolding see http://go.microsoft.com/fwlink/?Link
 
 This project is part of ASP.NET Core. You can find samples, documentation and getting started instructions for ASP.NET Core at the Home repo.
 
-### ***Build instructions: ***
+### ***Build instructions:***
 - "build.cmd" builds, restores, packs and runs the tests.
 
 ### src:

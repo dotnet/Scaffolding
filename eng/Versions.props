@@ -30,7 +30,7 @@
     </RestoreSources>
   </PropertyGroup>
 
-  <PropertyGroup Label="Automated">
+  <PropertyGroup>
     <!-- adding packages from old dependencies.prop file-->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.3.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.AspNetCore.Razor.Language -->

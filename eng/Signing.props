@@ -1,5 +1,5 @@
 <Project>
-  <ItemGroup>
+  <ItemGroup Label="Excluding default arcade .js exclusions">
     <_FileExtensionSignInfo Include="@(FileExtensionSignInfo)" Exclude=".js" />
     <FileExtensionSignInfo Remove="@(FileExtensionSignInfo)" />
     <FileExtensionSignInfo Include="@(_FileExtensionSignInfo)" />

@@ -2,5 +2,4 @@
 <Project>
   <!-- Leave this file here, even if it's empty. It stops chaining imports. -->
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
-  
 </Project>

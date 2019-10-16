@@ -1,0 +1,6 @@
+//TODO 
+Migrating from Korebuild to Aracde
+
+1. Delete the following folders:
+    - eng
+    - 

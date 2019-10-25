@@ -2,18 +2,12 @@
   <Import Project="..\Directory.Build.targets" />
 
   <PropertyGroup>
-    <TestProjectTemplateFile>$(MSBuildThisFileDirectory)Shared\MsBuildProjectStrings.cs.in</TestProjectTemplateFile>
     <GeneratedTestProjectFile>$(IntermediateOutputPath)MSBuildProjectStrings.cs</GeneratedTestProjectFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(TestProjectTemplateFile)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <TestProjectGenInputs Include="$(ProjectAssetsFile)" />
     <TestProjectGenInputs Include="$(MSBuildAllProjects)" />
-    <TestProjectGenInputs Include="$(TestProjectTemplateFile)" />
     <TestProjectGenInputs Include="$(MSBuildThisFileDirectory)..\build\dependencies.props" />
     <TestProjectGenInputs Include="$(MSBuildThisFileDirectory)..\build\sources.props" />
     <TestProjectGenInputs Include="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
@@ -29,7 +23,6 @@
       <TestProjectProperties>
         RestoreSources=$([MSBuild]::Escape($(RestoreSources.Trim())));
         TargetFramework=$(TargetFramework);
-        MicrosoftNETCoreApp30PackageVersion=$(MicrosoftNETCoreApp30PackageVersion);
         MicrosoftApplicationInsightsAspNetCorePackageVersion=$(MicrosoftApplicationInsightsAspNetCorePackageVersion);
         MicrosoftAspNetCoreAuthenticationCookiesPackageVersion=$(MicrosoftAspNetCoreAuthenticationCookiesPackageVersion);
         MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion);

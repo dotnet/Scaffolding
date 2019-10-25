@@ -64,9 +64,6 @@
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
 
-    <!-- TFM -->
-    <MicrosoftNETCoreApp30PackageVersion>3.0.0</MicrosoftNETCoreApp30PackageVersion>
-
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
     <NuGetFrameworksPackageVersion>4.7.0</NuGetFrameworksPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>

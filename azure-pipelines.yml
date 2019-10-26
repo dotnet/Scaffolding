@@ -4,7 +4,6 @@ trigger:
     include:
     - 'master'
     - 'release/*'
-    - 'internal/release/*'
 pr:
   branches:
     include:

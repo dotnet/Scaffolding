@@ -132,7 +132,10 @@
 
     <!-- Microsoft.Extensions.Configuration.UserSecrets -->
     <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
-
+    
+    <!--Microsoft.Extensions.DependencyModel -->
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
+    
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
 

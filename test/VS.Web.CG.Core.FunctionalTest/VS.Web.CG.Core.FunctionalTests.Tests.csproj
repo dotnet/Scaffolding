@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestPackage.props" />
+  
   <PropertyGroup>
     <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest</AssemblyName>

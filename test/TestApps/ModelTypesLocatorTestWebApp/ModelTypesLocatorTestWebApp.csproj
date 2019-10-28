@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+    <Import Project="..\..\TestPackage.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.csproj" />  

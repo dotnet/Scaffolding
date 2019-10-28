@@ -3,6 +3,8 @@
    NOTE: Do not add package/ project references to this file.
    Edit the Shared.proj file to add additional package/ project references.
       -->
+
+  <Import Project="$(RepositoryEngineeringDir)\Package.props" />
   <Import Project="Shared.props" />
   <PropertyGroup>
     <TargetFrameworks>net461;netcoreapp3.0</TargetFrameworks>

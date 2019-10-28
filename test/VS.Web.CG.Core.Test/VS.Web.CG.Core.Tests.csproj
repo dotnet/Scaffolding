@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
+    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core.Test</AssemblyName>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Core</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\FileSystem\*.cs">
+      <Link>Shared\FileSystem\%(FileName)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
+  </ItemGroup>
+
+</Project>

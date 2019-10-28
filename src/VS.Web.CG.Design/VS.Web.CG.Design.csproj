@@ -1,4 +1,4 @@
-﻿<Project Sdk="Internal.AspNetCore.Sdk">
+﻿<Project Sdk="Microsoft.Net.Sdk">
   <!--
    NOTE: Do not add package/ project references to this file.
    Edit the Shared.proj file to add additional package/ project references.
@@ -9,6 +9,11 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp3.0' ">win7-x64</RuntimeIdentifier>
+    <X86BinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-x86\</X86BinDirectory>
+    <ARMBinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-arm\</ARMBinDirectory>
+    <ARM64BinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-arm64\</ARM64BinDirectory>
+    <AnyCpuBinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-anycpu\</AnyCpuBinDirectory>
+
     <X86ProjectDirectory>..\..\tools\VS.Web.CG.Design-x86\</X86ProjectDirectory>
     <ARMProjectDirectory>..\..\tools\VS.Web.CG.Design-arm\</ARMProjectDirectory>
     <ARM64ProjectDirectory>..\..\tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
@@ -16,6 +21,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
     <IncludeSymbols>true</IncludeSymbols>
+    <packageIconFullPath>..\..\eng\packageIcon.png</packageIconFullPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
@@ -27,16 +33,7 @@
 
   <ItemGroup>
     <!-- Set to PrivateAssets=All so the package does not appear in the generated nuspec. This prevents issues such as https://github.com/aspnet/Scaffolding/issues/645. -->
-    <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == ''">
-    <SignedPackageFile Include="$(OutputPath)netcoreapp3.0\$(AssemblyName).dll;" PackagePath="lib/netstandard2.0/dotnet-aspnet-codegenerator-design.dll" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).exe" PackagePath="lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(OutputPath)net461\win7-x64\$(AssemblyName).exe;" PackagePath="runtimes/win7-x64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe" PackagePath="runtimes/win7-x86/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe" PackagePath="runtimes/win-arm/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
-    <SignedPackageFile Include="$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe" PackagePath="runtimes/win-arm64/lib/net461/dotnet-aspnet-codegenerator-design.exe" Certificate="$(AssemblySigningCertName)" />
+      <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
@@ -44,44 +41,43 @@
     <PropertyGroup>
       <!-- Make sure we create a symbols.nupkg. -->
       <IncludeSymbols>true</IncludeSymbols>
-
       <NuspecProperties>
         id=$(PackageId);
         version=$(PackageVersion);
         authors=$(Authors);
         description=$(Description);
         tags=$(PackageTags.Replace(';', ' '));
-        licenseUrl=$(PackageLicenseUrl);
+        license=$(PackageLicenseExpression);
         projectUrl=$(PackageProjectUrl);
-        iconUrl=$(PackageIconUrl);
         repositoryUrl=$(RepositoryUrl);
         repositoryCommit=$(RepositoryCommit);
         copyright=$(Copyright);
         AssemblyName=$(AssemblyName);
+        packageIconFullPath=$(packageIconFullPath);
 
         OutputBinary=$(OutputPath)netcoreapp3.0\$(AssemblyName).dll;
         OutputDocumentation=$(OutputPath)netcoreapp3.0\$(AssemblyName).xml;
         OutputSymbol=$(OutputPath)netcoreapp3.0\$(AssemblyName).pdb;
 
-        OutputAnyExe=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).exe;
-        OutputAnyDocumentation=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).xml;
-        OutputAnySymbol=$(AnyCpuProjectDirectory)bin\$(Configuration)\net461\$(AssemblyName).pdb;
+        OutputAnyExe=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).exe;
+        OutputAnyDocumentation=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).xml;
+        OutputAnySymbol=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).pdb;
 
         OutputX64Exe=$(OutputPath)net461\win7-x64\$(AssemblyName).exe;
         OutputX64Documentation=$(OutputPath)net461\win7-x64\$(AssemblyName).xml;
         OutputX64Symbol=$(OutputPath)net461\win7-x64\$(AssemblyName).pdb;
 
-        OutputX86Exe=$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).exe;
-        OutputX86Documentation=$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).xml;
-        OutputX86Symbol=$(X86ProjectDirectory)bin\$(Configuration)\net461\win7-x86\$(AssemblyName).pdb;
+        OutputX86Exe=$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).exe;
+        OutputX86Documentation=$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).xml;
+        OutputX86Symbol=$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).pdb;
 
-        OutputARMExe=$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).exe;
-        OutputARMDocumentation=$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).xml;
-        OutputARMSymbol=$(ARMProjectDirectory)bin\$(Configuration)\net461\win-arm\$(AssemblyName).pdb;
+        OutputARMExe=$(ARMBinDirectory)$(Configuration)\net461\win-arm\$(AssemblyName).exe;
+        OutputARMDocumentation=$(ARMBinDirectory)$(Configuration)\net461\win-arm\$(AssemblyName).xml;
+        OutputARMSymbol=$(ARMBinDirectory)$(Configuration)\net461\win-arm\$(AssemblyName).pdb;
 
-        OutputARM64Exe=$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).exe;
-        OutputARM64Documentation=$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).xml;
-        OutputARM64Symbol=$(ARM64ProjectDirectory)bin\$(Configuration)\net461\win-arm64\$(AssemblyName).pdb;
+        OutputARM64Exe=$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).exe;
+        OutputARM64Documentation=$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).xml;
+        OutputARM64Symbol=$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).pdb;
       </NuspecProperties>
     </PropertyGroup>
   </Target>

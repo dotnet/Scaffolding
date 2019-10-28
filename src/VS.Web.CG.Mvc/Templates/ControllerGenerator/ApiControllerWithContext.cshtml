@@ -56,8 +56,6 @@ namespace @Model.ControllerNamespace
         }
 
         // PUT: @routePrefix/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
         public async Task<IActionResult> Put@(Model.ModelTypeName)(@primaryKeyShortTypeName id, @Model.ModelTypeName @Model.ModelVariable)
         {
@@ -88,8 +86,6 @@ namespace @Model.ControllerNamespace
         }
 
         // POST: @routePrefix
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
         public async Task<ActionResult<@(Model.ModelTypeName)>> Post@(Model.ModelTypeName)(@Model.ModelTypeName @Model.ModelVariable)
         {

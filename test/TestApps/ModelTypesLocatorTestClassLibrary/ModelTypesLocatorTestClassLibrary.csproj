@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
-  <Import Project="..\..\TestPackage.props" />
+  <Import Project="$(RepoRoot)test\TestPackage.props" />
   <ItemGroup>
     <ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />
     <ProjectReference Include="..\..\..\src\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />

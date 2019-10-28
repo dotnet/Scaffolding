@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\TestPackage.props" />
-  
+  <Import Project="$(RepoRoot)test\TestPackage.props" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test</AssemblyName>

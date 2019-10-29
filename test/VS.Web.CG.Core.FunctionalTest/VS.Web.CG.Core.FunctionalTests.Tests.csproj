@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="$(RepoRoot)test\TestPackage.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
+    <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest</AssemblyName>
+    <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
+    <ProjectReference Include="..\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -3,7 +3,7 @@
   <!-- Shared package properties -->
   <PropertyGroup> 	
     <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 </Project>

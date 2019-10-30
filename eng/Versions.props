@@ -116,7 +116,7 @@
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
 
     <!-- Microsoft.EntityFrameworkCore -->
-    <MicrosoftEntityFrameworkCorePackageVersion>3.0.0-preview6.19304.10</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>3.1.0-preview1.19506.2</MicrosoftEntityFrameworkCorePackageVersion>
 
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>3.0.0-preview5.19227.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
@@ -134,7 +134,7 @@
     <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     
     <!--Microsoft.Extensions.DependencyModel -->
-    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsDependencyModelPackageVersion>
     
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
@@ -152,7 +152,7 @@
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
 
     <!-- Microsoft.NET.Sdk.Razor -->
-    <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview5.19227.1</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>3.1.0-preview1.19506.2</MicrosoftNETSdkRazorPackageVersion>
 
     <!-- Microsoft.NET.Test.Sdk-->
     <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>

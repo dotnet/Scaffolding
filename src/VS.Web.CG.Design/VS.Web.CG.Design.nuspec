@@ -7,7 +7,6 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <license type="expression">$license$</license>
     <description>$description$</description>
-    <icon>packageIcon.png</icon>
     <projectUrl>https://github.com/aspnet/scaffolding</projectUrl>
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
@@ -23,7 +22,6 @@
   </metadata>
 
   <files>
-    <file src="$packageIconFullPath$" target="" />
     <file src="$OutputBinary$" target="lib\netcoreapp3.0\$AssemblyName$.dll" />
     <file src="$OutputDocumentation$" target="lib\netcoreapp3.0\$AssemblyName$.xml" />
     <file src="$OutputSymbol$" target="lib\netcoreapp3.0\$AssemblyName$.pdb" />

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.Net.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!--
    NOTE: Do not add package/ project references to this file.
    Edit the Shared.proj file to add additional package/ project references.

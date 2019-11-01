@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.Net.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!--
    NOTE: Do not add package/ project references to this file.
    Edit the Shared.proj file to add additional package/ project references.
@@ -23,7 +23,6 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
     <IncludeSymbols>true</IncludeSymbols>
-    <packageIconFullPath>..\..\eng\packageIcon.png</packageIconFullPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
@@ -55,7 +54,6 @@
         repositoryCommit=$(RepositoryCommit);
         copyright=$(Copyright);
         AssemblyName=$(AssemblyName);
-        packageIconFullPath=$(packageIconFullPath);
 
         OutputBinary=$(OutputPath)netcoreapp3.0\$(AssemblyName).dll;
         OutputDocumentation=$(OutputPath)netcoreapp3.0\$(AssemblyName).xml;

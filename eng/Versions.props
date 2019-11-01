@@ -126,13 +126,13 @@
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsConfigurationJsonPackageVersion>
 
     <!-- Microsoft.Extensions.Configuration.UserSecrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     
     <!--Microsoft.Extensions.DependencyModel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>3.1.0-preview2.19525.6</MicrosoftExtensionsDependencyModelPackageVersion>
@@ -147,10 +147,10 @@
     <MicrosoftExtensionsLoggingDebugPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsLoggingDebugPackageVersion>
 
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsLoggingPackageVersion>
 
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.1.0-preview1.19506.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
 
     <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>3.1.0-preview2.19528.1</MicrosoftNETSdkRazorPackageVersion>

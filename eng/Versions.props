@@ -16,7 +16,8 @@
 
   <PropertyGroup>
     <VersionPrefix>3.1.0</VersionPrefix>
-    <PreReleaseVersionLabel>rc1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
   </PropertyGroup>
 
   <PropertyGroup>

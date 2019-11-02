@@ -34,9 +34,9 @@ namespace @thisNamespace
     public class ConfirmEmailChangeModel : PageModel
     {
         private readonly UserManager<@(Model.UserClass)> _userManager;
-        private readonly SignInManager<@(Model.UserClass> _signInManager;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
 
-        public ConfirmEmailChangeModel(UserManager<@(Model.UserClass> userManager, SignInManager<@(Model.UserClass> signInManager)
+        public ConfirmEmailChangeModel(UserManager<@(Model.UserClass)> userManager, SignInManager<@(Model.UserClass)> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

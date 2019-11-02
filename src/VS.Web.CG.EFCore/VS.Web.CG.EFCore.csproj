@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepositoryEngineeringDir)\Package.props" />
 
   <PropertyGroup>
     <Description>Contains Entity Framework Core Services used by ASP.NET Core Code Generators.</Description>

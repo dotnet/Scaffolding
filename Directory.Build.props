@@ -6,6 +6,7 @@
     <Copyright>$(CopyrightMicrosoft)</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <IsPackable>true</IsPackable>
+    <IncludeSymbols>true</IncludeSymbols>
     <DebugType>pdbonly</DebugType>
     <DebugSymbol>true</DebugSymbol>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>

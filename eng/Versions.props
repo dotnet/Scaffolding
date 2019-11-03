@@ -16,8 +16,7 @@
 
   <PropertyGroup>
     <VersionPrefix>3.1.0</VersionPrefix>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
+    <PreReleaseVersionLabel>preview2</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -32,10 +31,17 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- adding packages from old dependencies.prop file-->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.3.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.4.0-beta2-final</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+
+    <!-- Microsoft.CodeAnalysis.CSharp -->
+    <MicrosoftCodeAnalysisCSharpPackageVersion>3.4.0-beta2-final</MicrosoftCodeAnalysisCSharpPackageVersion>
+
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.1.0-preview2.19528.1</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+
+    <!-- Microsoft.CodeAnalysis.Razor -->
+    <MicrosoftCodeAnalysisRazorPackageVersion>3.1.0-preview2.19528.1</MicrosoftCodeAnalysisRazorPackageVersion>
 
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
@@ -43,21 +49,11 @@
     <MicrosoftBuildPackageVersion>15.6.82</MicrosoftBuildPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
 
-    <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>3.4.0-beta3-19525-13</MicrosoftCodeAnalysisCSharpPackageVersion>
-
-    <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>3.1.0-preview2.19528.1</MicrosoftCodeAnalysisRazorPackageVersion>
-
-    <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.4.0-beta3-19525-13</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
-
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
-    <!-- from aspnetcore-dev	-->
-    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>3.0.0-preview6.19253.5</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
+    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>3.0.0-rc1.19456.10</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
 
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.0.0-preview6.19304.10</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>3.1.0-preview2.19525.5</MicrosoftEntityFrameworkCoreDesignPackageVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>3.1.0-preview2.19525.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
@@ -68,7 +64,7 @@
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
     <NuGetFrameworksPackageVersion>4.7.0</NuGetFrameworksPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
-    <SystemCollectionsImmutablePackageVersion>1.6.0</SystemCollectionsImmutablePackageVersion>
+    <SystemCollectionsImmutablePackageVersion>1.7.0-preview2.19523.17</SystemCollectionsImmutablePackageVersion>
 
 <!-- Everything below here are Packages only used by test projects -->
 

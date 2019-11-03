@@ -7,7 +7,6 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <license type="expression">$license$</license>
     <description>$description$</description>
-    <icon>packageIcon.png</icon>
     <projectUrl>https://github.com/aspnet/scaffolding</projectUrl>
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
@@ -16,14 +15,13 @@
       <group targetFramework=".NETFramework4.6.1">
         <dependency id="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" version="$version$" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework=".netcoreapp3.1">
+      <group targetFramework=".NETCoreApp3.1">
         <dependency id="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" version="$version$" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>
 
   <files>
-    <file src="$packageIconFullPath$" target="" />
     <file src="$OutputBinary$" target="lib\netcoreapp3.1\$AssemblyName$.dll" />
     <file src="$OutputDocumentation$" target="lib\netcoreapp3.1\$AssemblyName$.xml" />
     <file src="$OutputSymbol$" target="lib\netcoreapp3.1\$AssemblyName$.pdb" />

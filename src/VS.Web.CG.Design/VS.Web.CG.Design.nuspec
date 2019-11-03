@@ -10,6 +10,7 @@
     <projectUrl>https://github.com/aspnet/scaffolding</projectUrl>
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
+    <developmentDependency>true</developmentDependency>
     <repository type="git" url="$repositoryUrl$" commit="$repositoryCommit$" />
     <dependencies>
       <group targetFramework=".NETFramework4.6.1">

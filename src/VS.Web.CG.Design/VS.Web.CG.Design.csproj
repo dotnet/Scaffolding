@@ -22,7 +22,6 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
     <IncludeSymbols>true</IncludeSymbols>
-    <packageIconFullPath>$(RepositoryEngineeringDir)packageIcon.png</packageIconFullPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">

@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
 
             catch(DirectoryNotFoundException) 
             {
-                zipPrevious = ZipFile.OpenRead(remotePackagePrevious);
+                zipPrevious = ZipFile.OpenRead(remotePackagePreviousPath);
             }
             
 
@@ -66,7 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             }
             catch(DirectoryNotFoundException)
             {
-                zipStable = ZipFile.OpenRead(remotePackageStable);
+                zipStable = ZipFile.OpenRead(remotePackageStablePath);
             }
             using (zipStable)
             {

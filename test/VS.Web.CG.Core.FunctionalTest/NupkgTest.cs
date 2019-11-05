@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Net;
 using Xunit;
@@ -16,16 +17,30 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
         {
             string nuget300Package = "https://www.nuget.org/api/v2/package/Microsoft.VisualStudio.Web.CodeGeneration.Design/3.0.0";
             string nugetOrgPkg = "Microsoft.VisualStudio.Web.CodeGeneration.Design.3.0.0.nupkg";
-            string buildPkg = "../../../../packages/Debug/Shipping/Microsoft.VisualStudio.Web.CodeGeneration.Design.3.1.0-dev.nupkg";
+            string artifactsPath = "../../../../packages/Debug/Shipping/";
+            DirectoryInfo taskDirectory = new DirectoryInfo(artifactsPath);
+            string buildPkg = "Microsoft.VisualStudio.Web.CodeGeneration.Design*.nupkg";
+            string fileToUse = "";
+
+            foreach (var file in taskDirectory.GetFiles(buildPkg))
+            {
+                if (!file.Name.Contains("symbols"))
+                {
+                    fileToUse = artifactsPath + file.Name;
+                }
+            }
+
+            Assert.False(string.IsNullOrEmpty(fileToUse));
             using (WebClient myWebClient = new WebClient())
             {
-                myWebClient.DownloadFile(nuget300Package, buildPkg);
+                myWebClient.DownloadFile(nuget300Package, fileToUse);
             }
 
             ZipArchive zipOne, zipTwo;
             Dictionary<string, string> nuget300files = new Dictionary<string, string>();
 
-            using(zipOne = ZipFile.OpenRead(buildPkg))
+            
+            using(zipOne = ZipFile.OpenRead(fileToUse))
             {
                 foreach (ZipArchiveEntry entry in zipOne.Entries)
                 {

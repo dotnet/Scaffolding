@@ -14,56 +14,49 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
     public class NupkgTest
     {
         private string tfm20 = "lib/netstandard2.0";
-        private string tfm30 = "lib/netcoreapp3.0";
+        private string tfm31 = "lib/netcoreapp3.1";
 
         [Fact]
         public void CheckFolderStructure()
         {
-            string nugetPackageUser = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\3.0.0\\microsoft.visualstudio.web.codegeneration.design.3.0.0.nupkg";
-            string stableNugetPackagePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageUser;
-            string artifactsPath = "../../../../packages/Debug/Shipping/";
-            DirectoryInfo taskDirectory = new DirectoryInfo(artifactsPath);
-            string buildPkg = "Microsoft.VisualStudio.Web.CodeGeneration.Design*.nupkg";
 
-            string fileToUse = "";
+            string stableVersion = "3.0.0";
+            string previousVersion = "3.1.0-preview2.19553.1";
 
-            foreach (var file in taskDirectory.GetFiles(buildPkg))
-            {
-                if (!file.Name.Contains("symbols"))
-                {
-                    fileToUse = artifactsPath + file.Name;
-                }
-            }
+            string codeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";
+            string nugetPackageStable = codeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
+            string nugetPackagePrevious = codeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
 
-            Assert.False(string.IsNullOrEmpty(fileToUse));
+            string nugetPackageStablePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageStable;
+            string nugetPackagePreviousPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackagePrevious;
 
-            ZipArchive zipOne, zipTwo;
+            ZipArchive zipStable, zipPrevious;
             Dictionary<string, string> artifactFiles = new Dictionary<string, string>();
 
-            using (zipOne = ZipFile.OpenRead(fileToUse))
+            using (zipPrevious = ZipFile.OpenRead(nugetPackagePreviousPath))
             {
-                foreach (ZipArchiveEntry entry in zipOne.Entries)
+                foreach (ZipArchiveEntry entry in zipPrevious.Entries)
                 {
                     //use full path name as key due to duplicate exes, xmls.
                     artifactFiles.Add(entry.FullName, entry.Name);
                 }
             }
 
-            using (zipTwo = ZipFile.OpenRead(stableNugetPackagePath))
+            using (zipStable = ZipFile.OpenRead(nugetPackageStablePath))
             {
-                foreach (ZipArchiveEntry entry in zipTwo.Entries)
+                foreach (ZipArchiveEntry entry in zipStable.Entries)
                 {
                     //make sure new pkg has atleast all the old pkg files
                     if (artifactFiles.ContainsKey(entry.FullName))
                     {
-                        artifactFiles.TryGetValue(entry.FullName, out string nuget300value);
-                        Assert.Equal(entry.Name, nuget300value);
+                        artifactFiles.TryGetValue(entry.FullName, out string stableValue);
+                        Assert.Equal(entry.Name, stableValue);
                     }
                     else
                     {
                         if (entry.FullName.Contains(tfm20))
                         {
-                            string newKey = entry.FullName.Replace(tfm20, tfm30);
+                            string newKey = entry.FullName.Replace(tfm20, tfm31);
                             artifactFiles.TryGetValue(newKey, out string artifactsValue);
                             Assert.Equal(entry.Name, artifactsValue);
                         }

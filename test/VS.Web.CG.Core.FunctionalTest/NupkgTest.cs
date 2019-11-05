@@ -14,7 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
     public class NupkgTest
     {
         private string tfm20 = "lib/netstandard2.0";
-        //private string tfm31 = "lib/netcoreapp3.1";
         private string tfm30 = "lib/netcoreapp3.0";
 
         [Fact]
@@ -39,7 +38,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
 
             ZipArchive zipOne, zipTwo;
             Dictionary<string, string> artifactFiles = new Dictionary<string, string>();
-            Dictionary<string, string> nuget301files = new Dictionary<string, string>();
 
             using (zipOne = ZipFile.OpenRead(fileToUse))
             {
@@ -62,13 +60,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
                     }
                     else
                     {
-                        if(entry.FullName.Contains(tfm20))
+                        if (entry.FullName.Contains(tfm20))
                         {
                             string newKey = entry.FullName.Replace(tfm20, tfm30);
                             artifactFiles.TryGetValue(newKey, out string artifactsValue);
                             Assert.Equal(entry.Name, artifactsValue);
                         }
-
                     }
                 }
             }

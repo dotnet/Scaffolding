@@ -19,7 +19,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
         [Fact]
         public void CheckFolderStructure()
         {
-            string stableNugetPackagePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\3.0.0\\microsoft.visualstudio.web.codegeneration.design.3.0.0.nupkg";
+            string nugetPackageUser = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\3.0.0\\microsoft.visualstudio.web.codegeneration.design.3.0.0.nupkg";
+            string stableNugetPackagePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageUser;
             string artifactsPath = "../../../../packages/Debug/Shipping/";
             DirectoryInfo taskDirectory = new DirectoryInfo(artifactsPath);
             string buildPkg = "Microsoft.VisualStudio.Web.CodeGeneration.Design*.nupkg";

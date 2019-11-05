@@ -23,17 +23,32 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             string stableVersion = "3.0.0";
             string previousVersion = "3.1.0-preview2.19553.1";
 
-            string codeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";
-            string nugetPackageStable = codeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
-            string nugetPackagePrevious = codeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
+            string localCodeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";
+            string remoteCodeGenPackage = "\\.packages\\";
+
+            string nugetPackageStable = localCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
+            string nugetPackagePrevious = localCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
 
             string nugetPackageStablePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageStable;
             string nugetPackagePreviousPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackagePrevious;
 
+            string remotePackageStable = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
+            string remotePackagePrevious = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
+
             ZipArchive zipStable, zipPrevious;
             Dictionary<string, string> artifactFiles = new Dictionary<string, string>();
+            try 
+            {
+                zipPrevious = ZipFile.OpenRead(nugetPackagePreviousPath);
+            }
 
-            using (zipPrevious = ZipFile.OpenRead(nugetPackagePreviousPath))
+            catch(DirectoryNotFoundException) 
+            {
+                zipPrevious = ZipFile.OpenRead(remotePackagePrevious);
+            }
+            
+
+            using (zipPrevious)
             {
                 foreach (ZipArchiveEntry entry in zipPrevious.Entries)
                 {
@@ -41,8 +56,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
                     artifactFiles.Add(entry.FullName, entry.Name);
                 }
             }
-
-            using (zipStable = ZipFile.OpenRead(nugetPackageStablePath))
+            
+            try 
+            {
+                zipStable = ZipFile.OpenRead(nugetPackageStablePath);
+            }
+            catch(DirectoryNotFoundException)
+            {
+                zipStable = ZipFile.OpenRead(remotePackageStable);
+            }
+            using (zipStable)
             {
                 foreach (ZipArchiveEntry entry in zipStable.Entries)
                 {

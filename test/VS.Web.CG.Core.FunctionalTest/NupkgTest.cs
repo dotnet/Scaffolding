@@ -22,34 +22,37 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
 
             string stableVersion = "3.0.0";
             string previousVersion = "3.1.0-preview2.19553.1";
+            string repoRoot = GetRepoRoot();
+            string nugetPackages = GetEnvVariable("NUGET_PACKAGES") ?? Path.Combine(repoRoot, ".packages");
 
-            string localCodeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";
-            string remoteCodeGenPackage = "..\\..\\..\\..\\..\\.packages\\microsoft.visualstudio.web.codegeneration.design\\";
+           /* string localCodeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";*/
 
-            string nugetPackageStable = localCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
-            string nugetPackagePrevious = localCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
+            string nugetPackageStable = nugetPackages + string.Format("\\microsoft.visualstudio.web.codegeneration.design\\{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
+            string nugetPackagePrevious = nugetPackages + string.Format("\\microsoft.visualstudio.web.codegeneration.design\\{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
 
-            string nugetPackageStablePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageStable;
-            string nugetPackagePreviousPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackagePrevious;
+            /* string nugetPackageStablePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageStable;
+             string nugetPackagePreviousPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackagePrevious;*/
+            /*           string path = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
 
-            string remotePackageStable = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
-            string remotePackagePrevious = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
+                       string remotePackageStable = path + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
+                       string remotePackagePrevious = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);*/
 
-            string remotePackageStablePath = remotePackageStable;
-            string remotePackagePreviousPath = remotePackagePrevious;
+            string nugetPackageStablePath = nugetPackageStable;
+            string nugetPackagePreviousPath = nugetPackagePrevious;
 
             ZipArchive zipStable, zipPrevious;
             Dictionary<string, string> artifactFiles = new Dictionary<string, string>();
-            try 
-            {
-                zipPrevious = ZipFile.OpenRead(nugetPackagePreviousPath);
-            }
+            zipPrevious = ZipFile.OpenRead(nugetPackagePreviousPath);
+            /*            try 
+                        {
+                            zipPrevious = ZipFile.OpenRead(localCodeGenPackage);
+                        }
 
-            catch(DirectoryNotFoundException) 
-            {
-                zipPrevious = ZipFile.OpenRead(remotePackagePreviousPath);
-            }
-            
+                        catch(DirectoryNotFoundException) 
+                        {
+                            zipPrevious = ZipFile.OpenRead(remotePackagePreviousPath);
+                        }*/
+
 
             using (zipPrevious)
             {
@@ -59,15 +62,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
                     artifactFiles.Add(entry.FullName, entry.Name);
                 }
             }
-            
-            try 
-            {
-                zipStable = ZipFile.OpenRead(nugetPackageStablePath);
-            }
-            catch(DirectoryNotFoundException)
-            {
-                zipStable = ZipFile.OpenRead(remotePackageStablePath);
-            }
+            zipStable = ZipFile.OpenRead(nugetPackageStablePath);
+            /*            try 
+                        {
+                            zipStable = ZipFile.OpenRead(nugetPackageStablePath);
+                        }
+                        catch(DirectoryNotFoundException)
+                        {
+                            zipStable = ZipFile.OpenRead(nugetPackageStablePath);
+                        }*/
             using (zipStable)
             {
                 foreach (ZipArchiveEntry entry in zipStable.Entries)
@@ -89,6 +92,31 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
                     }
                 }
             }
+        }
+
+        private string GetRepoRoot()
+        {
+
+            string currentDirectory = Directory.GetCurrentDirectory();
+            while (currentDirectory != null)
+            {
+                string gitDirOrFile = Path.Combine(currentDirectory, ".git");
+                if (Directory.Exists(gitDirOrFile) || File.Exists(gitDirOrFile))
+                {
+                    break;
+                }
+                currentDirectory = Directory.GetParent(currentDirectory)?.FullName;
+            }
+            if (currentDirectory == null)
+            {
+                throw new Exception("Cannot find the git repository root");
+            }
+            return currentDirectory;
+        }
+
+        private string GetEnvVariable(string var)
+        {
+            return Environment.GetEnvironmentVariable(var);
         }
     }
 }

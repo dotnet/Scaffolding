@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             string previousVersion = "3.1.0-preview2.19553.1";
 
             string localCodeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";
-            string remoteCodeGenPackage = "\\.packages\\microsoft.visualstudio.web.codegeneration.design\\";
+            string remoteCodeGenPackage = "..\\..\\..\\..\\.packages\\microsoft.visualstudio.web.codegeneration.design\\";
 
             string nugetPackageStable = localCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
             string nugetPackagePrevious = localCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
@@ -35,8 +35,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             string remotePackageStable = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
             string remotePackagePrevious = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
 
-            string remotePackageStablePath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName + remotePackageStable;
-            string remotePackagePreviousPath = Environment.CurrentDirectory + remotePackagePrevious;
+            string remotePackageStablePath = remotePackageStable;
+            string remotePackagePreviousPath = remotePackagePrevious;
 
             ZipArchive zipStable, zipPrevious;
             Dictionary<string, string> artifactFiles = new Dictionary<string, string>();

@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             string remotePackageStable = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
             string remotePackagePrevious = remoteCodeGenPackage + string.Format("{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
 
-            string remotePackageStablePath = Environment.CurrentDirectory + remotePackageStable;
+            string remotePackageStablePath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName + remotePackageStable;
             string remotePackagePreviousPath = Environment.CurrentDirectory + remotePackagePrevious;
 
             ZipArchive zipStable, zipPrevious;

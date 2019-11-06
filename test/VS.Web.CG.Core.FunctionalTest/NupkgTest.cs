@@ -27,8 +27,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
 
            /* string localCodeGenPackage = "\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\";*/
 
-            string nugetPackageStable = nugetPackages + string.Format("\\microsoft.visualstudio.web.codegeneration.design\\{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
-            string nugetPackagePrevious = nugetPackages + string.Format("\\microsoft.visualstudio.web.codegeneration.design\\{0}\\microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
+            string nugetPackageStable = nugetPackages + string.Format("/microsoft.visualstudio.web.codegeneration.design/{0}/microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", stableVersion);
+            string nugetPackagePrevious = nugetPackages + string.Format("/microsoft.visualstudio.web.codegeneration.design/{0}/microsoft.visualstudio.web.codegeneration.design.{0}.nupkg", previousVersion);
 
             /* string nugetPackageStablePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackageStable;
              string nugetPackagePreviousPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + nugetPackagePrevious;*/

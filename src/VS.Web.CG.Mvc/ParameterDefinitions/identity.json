@@ -1,6 +1,6 @@
 {
   "Alias": "identity",
-  "Description": "Generates an MVC Area with controllers and ",
+  "Description": "Generates a Razor Pages area.",
   "Arguments": [ ],
   "Options": [
     {
@@ -42,7 +42,7 @@
       "Name": "layout",
       "ShortName": "l",
       "Description": "Specify a custom layout file to use."
-    }, 
+    },
     {
       "Name": "generateLayout",
       "ShortName": "gl",

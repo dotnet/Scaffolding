@@ -15,7 +15,6 @@
   <PropertyGroup>
     <VersionPrefix>5.0.0</VersionPrefix>
     <PreReleaseVersionLabel>alpha1</PreReleaseVersionLabel>
-    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreSources>

@@ -4,22 +4,21 @@
    Edit the Shared.proj file to add additional package/ project references.
       -->
 
-  <Import Project="$(RepositoryEngineeringDir)\Package.props" />
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp3.0' ">win7-x64</RuntimeIdentifier>
-    <X86BinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-x86\</X86BinDirectory>
-    <ARMBinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-arm\</ARMBinDirectory>
-    <ARM64BinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-arm64\</ARM64BinDirectory>
-    <AnyCpuBinDirectory>..\..\artifacts\bin\VS.Web.CG.Design-anycpu\</AnyCpuBinDirectory>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp3.1' ">win7-x64</RuntimeIdentifier>
+    <X86BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-x86\</X86BinDirectory>
+    <ARMBinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-arm\</ARMBinDirectory>
+    <ARM64BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-arm64\</ARM64BinDirectory>
+    <AnyCpuBinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-anycpu\</AnyCpuBinDirectory>
 
-    <X86ProjectDirectory>..\..\tools\VS.Web.CG.Design-x86\</X86ProjectDirectory>
-    <ARMProjectDirectory>..\..\tools\VS.Web.CG.Design-arm\</ARMProjectDirectory>
-    <ARM64ProjectDirectory>..\..\tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
-    <AnyCpuProjectDirectory>..\..\tools\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
+    <X86ProjectDirectory>$(RepoRoot)tools\VS.Web.CG.Design-x86\</X86ProjectDirectory>
+    <ARMProjectDirectory>$(RepoRoot)tools\VS.Web.CG.Design-arm\</ARMProjectDirectory>
+    <ARM64ProjectDirectory>$(RepoRoot)tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
+    <AnyCpuProjectDirectory>$(RepoRoot)tools\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
     <IncludeSymbols>true</IncludeSymbols>
@@ -30,11 +29,6 @@
     <ProjectReference Include="$(ARMProjectDirectory)\VS.Web.CG.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(ARM64ProjectDirectory)\VS.Web.CG.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Set to PrivateAssets=All so the package does not appear in the generated nuspec. This prevents issues such as https://github.com/aspnet/Scaffolding/issues/645. -->
-      <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
@@ -55,9 +49,9 @@
         copyright=$(Copyright);
         AssemblyName=$(AssemblyName);
 
-        OutputBinary=$(OutputPath)netcoreapp3.0\$(AssemblyName).dll;
-        OutputDocumentation=$(OutputPath)netcoreapp3.0\$(AssemblyName).xml;
-        OutputSymbol=$(OutputPath)netcoreapp3.0\$(AssemblyName).pdb;
+        OutputBinary=$(OutputPath)netcoreapp3.1\$(AssemblyName).dll;
+        OutputDocumentation=$(OutputPath)netcoreapp3.1\$(AssemblyName).xml;
+        OutputSymbol=$(OutputPath)netcoreapp3.1\$(AssemblyName).pdb;
 
         OutputAnyExe=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).exe;
         OutputAnyDocumentation=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).xml;

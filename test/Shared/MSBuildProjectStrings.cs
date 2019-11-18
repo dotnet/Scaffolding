@@ -656,7 +656,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
     <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
       <PropertyGroup>
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netcoreapp3.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </When>
     <Otherwise>

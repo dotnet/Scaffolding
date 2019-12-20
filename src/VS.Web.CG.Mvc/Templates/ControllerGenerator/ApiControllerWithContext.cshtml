@@ -124,7 +124,7 @@ namespace @Model.ControllerNamespace
 
         // DELETE: @routePrefix/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<@(Model.ModelTypeName)>> Delete@(Model.ModelTypeName)(@primaryKeyShortTypeName id)
+        public async Task<IActionResult> Delete@(Model.ModelTypeName)(@primaryKeyShortTypeName id)
         {
             var @Model.ModelVariable = await _context.@(entitySetName).FindAsync(id);
             if (@Model.ModelVariable == null)
@@ -135,7 +135,7 @@ namespace @Model.ControllerNamespace
             _context.@(entitySetName).Remove(@Model.ModelVariable);
             await _context.SaveChangesAsync();
 
-            return @Model.ModelVariable;
+            return NoContent();
         }
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)

@@ -78,7 +78,7 @@ namespace @thisNamespace
             if (!result.Succeeded)
             {
                 StatusMessage = "The external login was not removed.";
-                return RedirectToPage();onException($"Unexpected error occurred removing external login for user with ID '{userId}'.");
+                return RedirectToPage();
             }
 
             await _signInManager.RefreshSignInAsync(user);

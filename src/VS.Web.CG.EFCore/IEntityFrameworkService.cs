@@ -22,7 +22,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <param name="dbContextFullTypeName">Full name (including namespace) of the context class.</param>
         /// <param name="modelTypeName">Model type for which the EF metadata has to be returned.</param>
         /// <param name="areaName">Name of the area on which scaffolding is being run. Used for generating path for new DbContext.</param>
+        /// <param name="useSqlite">flag for using sqlite instead of sqlserver </param>
         /// <returns>Returns <see cref="ContextProcessingResult"/>.</returns>
-        Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName, string areaName);
+        Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName, string areaName, bool useSqlite);
     }
 }

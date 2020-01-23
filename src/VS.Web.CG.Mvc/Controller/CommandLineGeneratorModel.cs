@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
         public string BootstrapVersion { get; set; }
-
+  
         public CommandLineGeneratorModel()
         {
         }

@@ -10,13 +10,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     internal static class EFValidationUtil
     {
+        const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
+        const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
+        const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies)
         {
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
             var isEFDesignPackagePresent = dependencies
                 .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
-            const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
             var isSqlServerPackagePresent = dependencies
                 .Any(package => package.Name.Equals(SqlServerPackageName, StringComparison.OrdinalIgnoreCase));
 
@@ -24,6 +25,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlServerPackageName}"));
+            }
+        }
+
+        internal static void ValidateSQLiteDependency(IEnumerable<DependencyDescription> dependencies)
+        { 
+            var isSqlitePackagePresent = dependencies
+                .Any(package => package.Name.Equals(SqlitePackageName, StringComparison.OrdinalIgnoreCase));
+            
+            if (!isSqlitePackagePresent) 
+            {
+                throw new InvalidOperationException(
+                    string.Format(MessageStrings.InstallSqlitePackage, $"{SqlitePackageName}"));
             }
         }
     }

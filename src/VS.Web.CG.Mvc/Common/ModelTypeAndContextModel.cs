@@ -13,5 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public ContextProcessingResult ContextProcessingResult { get; set; }
 
         public string DbContextFullName { get; set; }
+
+        public bool UseSqlite { get; set; }
     }
 }

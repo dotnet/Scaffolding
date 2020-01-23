@@ -77,7 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var startupType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "Startup").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
-            var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid");
+            var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid", false);
 
             Assert.True(result.Edited);
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);

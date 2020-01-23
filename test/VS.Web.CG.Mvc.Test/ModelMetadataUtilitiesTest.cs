@@ -110,7 +110,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty))
+            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, false))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -132,7 +132,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, false))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act

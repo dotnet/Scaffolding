@@ -75,6 +75,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
             EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
+            if (razorGeneratorModel.UseSqlite) 
+            {
+                EFValidationUtil.ValidateSQLiteDependency(_projectContext.PackageDependencies);
+            }
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,

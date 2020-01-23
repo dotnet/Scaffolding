@@ -78,9 +78,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
             var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid", false);
+            var resultSqlite = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid", true);
 
             Assert.True(result.Edited);
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
+
+            Assert.True(resultSqlite.Edited);
+            Assert.Equal(afterStartupText, resultSqlite.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
         }
 
 

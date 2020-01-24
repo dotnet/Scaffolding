@@ -61,6 +61,11 @@
             "Name": "noPageModel",
             "ShortName": "npm",
             "Description": "Switch to not generate a PageModel class for Empty template"
+        },
+        {
+            "Name" : "useSqlite",
+            "ShortName" : "sqlite",
+            "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
         }
     ]
 }

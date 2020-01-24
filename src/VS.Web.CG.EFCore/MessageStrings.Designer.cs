@@ -152,6 +152,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please install the package &apos;Microsoft.EntityFrameworkCore.Sqlite&apos; and retry again..
+        /// </summary>
+        internal static string EFSqlitePackageNotAvailable {
+            get {
+                return ResourceManager.GetString("EFSqlitePackageNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Make sure there is a Startup class and a ConfigureServices method and Configuration property in it..
         /// </summary>
         internal static string EnsureStartupClassExists {

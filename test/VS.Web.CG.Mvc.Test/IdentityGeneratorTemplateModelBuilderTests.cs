@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 var commandLineModel = new IdentityGeneratorCommandLineModel()
                 {
                     RootNamespace = "Test.Namespace",
-                    UseSQLite = false
+                    UseSqlite = false
                 };
 
                 var applicationInfo = new ApplicationInfo("TestApp", "Sample");

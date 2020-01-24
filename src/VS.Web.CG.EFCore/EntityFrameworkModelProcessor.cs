@@ -23,8 +23,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     internal class EntityFrameworkModelProcessor
     {
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
+        private const string EFSqlLitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         private const string NewDbContextFolderName = "Data";
-
+        private bool _useSqlite;
         private string _dbContextFullTypeName;
         private ModelType _modelTypeSymbol;
         private string _areaName;
@@ -46,6 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             string dbContextFullTypeName,
             ModelType modelTypeSymbol,
             string areaName,
+            bool useSqlite,
             ICodeGenAssemblyLoadContext loader,
             IDbContextEditorServices dbContextEditorServices,
             IModelTypesLocator modelTypesLocator,
@@ -71,6 +73,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _applicationInfo = applicationInfo;
             _fileSystem = fileSystem;
             _workspace = workspace;
+            _useSqlite = useSqlite;
 
             _assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
         }
@@ -301,7 +304,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _startupEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType,
                     dbContextTemplateModel.DbContextTypeName,
                     dbContextTemplateModel.DbContextNamespace,
-                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString());
+                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
+                    _useSqlite);
             }
 
             if (!_startupEditResult.Edited)
@@ -408,6 +412,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             if (_projectContext.GetPackage(EFSqlServerPackageName) == null)
             {
                 throw new InvalidOperationException(MessageStrings.EFSqlServerPackageNotAvailable);
+            }
+        }
+
+        private void ValidateEFSqliteDependency() 
+        {
+            if (_projectContext.GetPackage(EFSqlLitePackageName) == null)
+            {
+                throw new InvalidOperationException(MessageStrings.EFSqlitePackageNotAvailable);
             }
         }
 

@@ -11,7 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string UserClassNamespace { get; set; }
         public string DbContextClass { get; set; }
         public string DbContextNamespace { get; set; }
-        public bool UseSqlite { get; set; }
+        public bool UseSQLite { get; set; }
         public bool IsUsingExistingDbContext { get; set; }
         public bool IsGenerateCustomUser { get; set; }
         public bool IsGeneratingIndividualFiles { get; set; }

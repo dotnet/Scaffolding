@@ -193,7 +193,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = DbContextNamespace,
                 UserClass = UserClass,
                 UserClassNamespace = UserClassNamespace,
-                UseSqlite = _commandlineModel.UseSqlite,
+                UseSQLite = _commandlineModel.UseSqlite,
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,

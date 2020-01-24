@@ -306,7 +306,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 _connectionStringsWriter.AddConnectionString(
                     connectionStringName: $"{templateModel.DbContextClass}Connection",
                     dataBaseName: templateModel.ApplicationName,
-                    useSqlite: templateModel.UseSqlite);
+                    useSqlite: templateModel.UseSQLite);
             }
         }
 

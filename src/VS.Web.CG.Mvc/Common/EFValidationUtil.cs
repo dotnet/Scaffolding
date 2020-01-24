@@ -32,24 +32,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         internal static void ValidateSQLiteDependency(IEnumerable<DependencyDescription> dependencies)
         { 
-            var isSqlitePackagePresent = dependencies
-                .Any(package => package.Name.Equals(SqlitePackageName, StringComparison.OrdinalIgnoreCase));
-
             var isSqliteCorePackagePresent = dependencies
                 .Any(package => package.Name.Equals(SqliteCorePackageName, StringComparison.OrdinalIgnoreCase));
             
             if (!isSqliteCorePackagePresent) 
             {
                 throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallSqlitePackage, $"{SqliteCorePackageName}."));
-            }
-
-            if (!isSqlitePackagePresent) 
-            {
-                throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallSqlitePackage, $"{SqlitePackageName}."));
-            } 
-
+            }
         }
     }
 }

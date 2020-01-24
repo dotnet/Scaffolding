@@ -26,6 +26,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             DbContextNamespace = classNameModel.NamespaceName;
         }
 
+        public bool UseSqlite { get; set; }
+        
         public string ViewDataTypeName { get; set; }
 
         public string ViewDataTypeShortName { get; set; }

@@ -144,6 +144,9 @@
   <data name="DbContextTypeNotFound" xml:space="preserve">
     <value>Could not get the reflection type for DbContext : {0}</value>
   </data>
+  <data name="EFSqlitePackageNotAvailable" xml:space="preserve">
+    <value>Please install the package 'Microsoft.EntityFrameworkCore.Sqlite' and retry again.</value>
+  </data>
   <data name="EFSqlServerPackageNotAvailable" xml:space="preserve">
     <value>Please install the package 'Microsoft.EntityFrameworkCore.SqlServer' and retry again.</value>
   </data>

@@ -8,7 +8,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string RootNamespace { get; set; }
 
         [Option(Name = "useSqLite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSQLite { get; set; }
+        public bool UseSqlite { get; set; }
 
         [Option(Name = "dbContext", ShortName = "dc", Description = "Name of the DbContext to use, or generate (if it does not exist).")]
         public string DbContext { get; set; }

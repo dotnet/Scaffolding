@@ -145,7 +145,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return safeName;
         }
 
-        public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName)
+        public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName, bool useSqlite)
         {
             Contract.Assert(startUp != null && startUp.TypeSymbol != null);
             Contract.Assert(!String.IsNullOrEmpty(dbContextTypeName));
@@ -169,16 +169,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     var servicesParam = configServicesMethod.ParameterList.Parameters
                         .FirstOrDefault(p => p.Type.ToString() == "IServiceCollection") as ParameterSyntax;
-
+                    string textToAddAtEnd;
+                    var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
                     if (servicesParam != null)
                     {
-                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSQLite: false);
-                        var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
+                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
+                        if (useSqlite)
+                        {
 
-                        string textToAddAtEnd =
-                            statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
-                            statementLeadingTrivia + "        options.UseSqlServer({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
-
+                            textToAddAtEnd =
+                                statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
+                                statementLeadingTrivia + "        options.UseSqlite({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
+                        }
+                        else 
+                        {
+                            textToAddAtEnd =
+                                statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
+                                statementLeadingTrivia + "        options.UseSqlServer({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
+                        }
+                        
                         if (configServicesMethod.Body.Statements.Any())
                         {
                             textToAddAtEnd = Environment.NewLine + textToAddAtEnd;

@@ -5,6 +5,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public interface IConnectionStringsWriter
     {
-        void AddConnectionString(string connectionStringName, string dataBaseName, bool useSQLite);
+        void AddConnectionString(string connectionStringName, string dataBaseName, bool useSqlite);
     }
 }

@@ -275,7 +275,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 ModelMetadata = modelTypeAndContextModel?.ContextProcessingResult?.ModelMetadata,
                 JQueryVersion = "1.10.2", //Todo
                 BootstrapVersion = razorGeneratorModel.BootstrapVersion,
-                ContentVersion = DetermineContentVersion(razorGeneratorModel)
+                ContentVersion = DetermineContentVersion(razorGeneratorModel),
+                UseSqlite = razorGeneratorModel.UseSqlite
             };
 
             return templateModel;

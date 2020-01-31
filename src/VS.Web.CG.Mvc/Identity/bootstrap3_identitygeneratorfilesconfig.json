@@ -608,6 +608,20 @@
         "IsTemplate": true
       }
     ],
+    "Account.ResendEmailConfirmation": [
+      {
+        "Name": "Account.ResendEmailConfirmation",
+        "SourcePath": "Pages/Account/Account.ResendEmailConfirmation.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/ResendEmailConfirmation.cshtml",
+        "IsTemplate": false
+      },
+      {
+        "Name": "Account.ResendEmailConfirmation.cs",
+        "SourcePath": "Account.ResendEmailConfirmation.cs.cshtml",
+        "OutputPath": "Areas/Identity/Pages/Account/ResendEmailConfirmation.cshtml.cs",
+        "IsTemplate": true
+      }
+    ],
     "Account.ResetPassword": [
       {
         "Name": "Account.ResetPassword",

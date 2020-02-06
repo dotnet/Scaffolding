@@ -40,7 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             Name = "ScaffoldingReadme",
             SourcePath = "ScaffoldingReadme.cshtml",
             OutputPath = $"./{Constants.ReadMeOutputFileName}",
-            IsTemplate = true,
+            IsTemplate = false,
             ShouldOverWrite = OverWriteCondition.Always,
             ShowInListFiles = false
         };

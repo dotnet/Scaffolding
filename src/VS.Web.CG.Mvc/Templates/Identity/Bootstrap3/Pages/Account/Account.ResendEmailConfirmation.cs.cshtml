@@ -43,6 +43,16 @@ namespace @thisNamespace
             _emailSender = emailSender;
         }
 
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+        }
+
         public void OnGet()
         {
         }

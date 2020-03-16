@@ -88,10 +88,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
 
         private static ProjectContext CreateProjectContext(string projectPath)
         {
-#if NET461
-            projectPath = projectPath ?? Path.Combine("..", "..", "..", "..");
-            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NET461.GetShortFolderName();
-#elif NETCOREAPP3_0
+#if NETCOREAPP3_1
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
 #else

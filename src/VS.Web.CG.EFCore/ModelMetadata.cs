@@ -133,7 +133,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 if (_navigations == null)
                 {
                     _navigations = EntityType.GetNavigations()
-                        .Where(n => n.IsDependentToPrincipal() == true && n.ForeignKey.Properties.All(p => !p.IsShadowProperty()))
+                        .Where(n => n.IsOnDependent == true && n.ForeignKey.Properties.All(p => !p.IsShadowProperty()))
                         .Select(n => new NavigationMetadata(n, DbContexType))
                         .ToArray();
                 }

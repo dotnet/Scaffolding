@@ -20,19 +20,10 @@ Outputs the Project Information needed for CodeGeneration to a file.
       ResolvePackageDependenciesDesignTime;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
-  <Choose>
-    <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
-    <When Condition="'$(MSBuildRuntimeType)' == 'Core'">
-      <PropertyGroup>
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\netstandard2.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+  </PropertyGroup>
 
   <UsingTask TaskName="ProjectContextWriter"
              AssemblyFile="$(EvaluateProjectInfoForCodeGenerationAssemblyPath)" />

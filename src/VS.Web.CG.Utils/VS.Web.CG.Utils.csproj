@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains utilities used by ASP.NET Core Code Generation packages.</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Utils</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Utils</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

@@ -12,38 +12,31 @@
     <tags>$tags$</tags>
     <repository type="git" url="$repositoryUrl$" commit="$repositoryCommit$" />
     <dependencies>
-      <group targetFramework=".NETFramework4.6.1">
-        <dependency id="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" version="$version$" exclude="Build,Analyzers" />
-      </group>
-      <group targetFramework=".NETCoreApp3.1">
+      <group targetFramework=".NET5.0">
         <dependency id="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" version="$version$" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>
 
   <files>
-    <file src="$OutputBinary$" target="lib\netcoreapp3.1\$AssemblyName$.dll" />
-    <file src="$OutputDocumentation$" target="lib\netcoreapp3.1\$AssemblyName$.xml" />
-    <file src="$OutputSymbol$" target="lib\netcoreapp3.1\$AssemblyName$.pdb" />
+    <file src="$OutputBinary$" target="lib\net5.0\$AssemblyName$.dll" />
+    <file src="$OutputDocumentation$" target="lib\net5.0\$AssemblyName$.xml" />
+    <file src="$OutputSymbol$" target="lib\net5.0\$AssemblyName$.pdb" />
 
-    <file src="$OutputAnyExe$" target="lib\net461\$AssemblyName$.exe" />
-    <file src="$OutputAnyDocumentation$" target="lib\net461\$AssemblyName$.xml" />
-    <file src="$OutputAnySymbol$" target="lib\net461\$AssemblyName$.pdb" />
+    <file src="$OutputX64Exe$" target="runtimes\win7-x64\lib\net5.0\$AssemblyName$.exe" />
+    <file src="$OutputX64Documentation$" target="runtimes\win7-x64\lib\net5.0\$AssemblyName$.xml" />
+    <file src="$OutputX64Symbol$" target="runtimes\win7-x64\lib\net5.0\$AssemblyName$.pdb" />
 
-    <file src="$OutputX64Exe$" target="runtimes\win7-x64\lib\net461\$AssemblyName$.exe" />
-    <file src="$OutputX64Documentation$" target="runtimes\win7-x64\lib\net461\$AssemblyName$.xml" />
-    <file src="$OutputX64Symbol$" target="runtimes\win7-x64\lib\net461\$AssemblyName$.pdb" />
+    <file src="$OutputX86Exe$" target="runtimes\win7-x86\lib\net5.0\$AssemblyName$.exe" />
+    <file src="$OutputX86Documentation$" target="runtimes\win7-x86\lib\net5.0\$AssemblyName$.xml" />
+    <file src="$OutputX86Symbol$" target="runtimes\win7-x86\lib\net5.0\$AssemblyName$.pdb" />
 
-    <file src="$OutputX86Exe$" target="runtimes\win7-x86\lib\net461\$AssemblyName$.exe" />
-    <file src="$OutputX86Documentation$" target="runtimes\win7-x86\lib\net461\$AssemblyName$.xml" />
-    <file src="$OutputX86Symbol$" target="runtimes\win7-x86\lib\net461\$AssemblyName$.pdb" />
+    <file src="$OutputARMExe$" target="runtimes\win-arm\lib\net5.0\$AssemblyName$.exe" />
+    <file src="$OutputARMDocumentation$" target="runtimes\win-arm\lib\net5.0\$AssemblyName$.xml" />
+    <file src="$OutputARMSymbol$" target="runtimes\win-arm\lib\net5.0\$AssemblyName$.pdb" />
 
-    <file src="$OutputARMExe$" target="runtimes\win-arm\lib\net461\$AssemblyName$.exe" />
-    <file src="$OutputARMDocumentation$" target="runtimes\win-arm\lib\net461\$AssemblyName$.xml" />
-    <file src="$OutputARMSymbol$" target="runtimes\win-arm\lib\net461\$AssemblyName$.pdb" />
-
-    <file src="$OutputARM64Exe$" target="runtimes\win-arm64\lib\net461\$AssemblyName$.exe" />
-    <file src="$OutputARM64Documentation$" target="runtimes\win-arm64\lib\net461\$AssemblyName$.xml" />
-    <file src="$OutputARM64Symbol$" target="runtimes\win-arm64\lib\net461\$AssemblyName$.pdb" />
+    <file src="$OutputARM64Exe$" target="runtimes\win-arm64\lib\net5.0\$AssemblyName$.exe" />
+    <file src="$OutputARM64Documentation$" target="runtimes\win-arm64\lib\net5.0\$AssemblyName$.xml" />
+    <file src="$OutputARM64Symbol$" target="runtimes\win-arm64\lib\net5.0\$AssemblyName$.pdb" />
   </files>
 </package>

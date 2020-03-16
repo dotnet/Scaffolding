@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -11,9 +11,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
-    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\netstandard2.0\" />
+    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net5.0\" />
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\netstandard2.0\" />
+    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net5.0\" />
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
   </ItemGroup>
   <ItemGroup>

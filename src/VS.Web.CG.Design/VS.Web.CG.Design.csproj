@@ -6,10 +6,9 @@
 
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' != 'netcoreapp3.1' ">win7-x64</RuntimeIdentifier>
     <X86BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-x86\</X86BinDirectory>
     <ARMBinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-arm\</ARMBinDirectory>
     <ARM64BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-arm64\</ARM64BinDirectory>
@@ -24,13 +23,13 @@
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+  <ItemGroup>
     <ProjectReference Include="$(X86ProjectDirectory)\VS.Web.CG.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(ARMProjectDirectory)\VS.Web.CG.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(ARM64ProjectDirectory)\VS.Web.CG.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
   </ItemGroup>
-
+  
   <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
 
     <PropertyGroup>
@@ -49,29 +48,29 @@
         copyright=$(Copyright);
         AssemblyName=$(AssemblyName);
 
-        OutputBinary=$(OutputPath)netcoreapp3.1\$(AssemblyName).dll;
-        OutputDocumentation=$(OutputPath)netcoreapp3.1\$(AssemblyName).xml;
-        OutputSymbol=$(OutputPath)netcoreapp3.1\$(AssemblyName).pdb;
+        OutputBinary=$(OutputPath)$(AssemblyName).dll;
+        OutputDocumentation=$(OutputPath)$(AssemblyName).xml;
+        OutputSymbol=$(OutputPath)$(AssemblyName).pdb;
 
-        OutputAnyExe=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).exe;
-        OutputAnyDocumentation=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).xml;
-        OutputAnySymbol=$(AnyCpuBinDirectory)$(Configuration)\net461\$(AssemblyName).pdb;
+        OutputAnyExe=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).exe;
+        OutputAnyDocumentation=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).xml;
+        OutputAnySymbol=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).pdb;
 
-        OutputX64Exe=$(OutputPath)net461\win7-x64\$(AssemblyName).exe;
-        OutputX64Documentation=$(OutputPath)net461\win7-x64\$(AssemblyName).xml;
-        OutputX64Symbol=$(OutputPath)net461\win7-x64\$(AssemblyName).pdb;
+        OutputX64Exe=$(OutputPath)$(AssemblyName).exe;
+        OutputX64Documentation=$(OutputPath)$(AssemblyName).xml;
+        OutputX64Symbol=$(OutputPath)$(AssemblyName).pdb;
 
-        OutputX86Exe=$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).exe;
-        OutputX86Documentation=$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).xml;
-        OutputX86Symbol=$(X86BinDirectory)$(Configuration)\net461\win7-x86\$(AssemblyName).pdb;
+        OutputX86Exe=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).exe;
+        OutputX86Documentation=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).xml;
+        OutputX86Symbol=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).pdb;
 
-        OutputARMExe=$(ARMBinDirectory)$(Configuration)\net461\win-arm\$(AssemblyName).exe;
-        OutputARMDocumentation=$(ARMBinDirectory)$(Configuration)\net461\win-arm\$(AssemblyName).xml;
-        OutputARMSymbol=$(ARMBinDirectory)$(Configuration)\net461\win-arm\$(AssemblyName).pdb;
+        OutputARMExe=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).exe;
+        OutputARMDocumentation=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).xml;
+        OutputARMSymbol=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).pdb;
 
-        OutputARM64Exe=$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).exe;
-        OutputARM64Documentation=$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).xml;
-        OutputARM64Symbol=$(ARM64BinDirectory)$(Configuration)\net461\win-arm64\$(AssemblyName).pdb;
+        OutputARM64Exe=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).exe;
+        OutputARM64Documentation=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).xml;
+        OutputARM64Symbol=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).pdb;
       </NuspecProperties>
     </PropertyGroup>
   </Target>

@@ -125,9 +125,8 @@ public const string RootProjectTxtWithoutEF = @"
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <OutputType>EXE</OutputType>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
-    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
@@ -661,7 +660,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </When>
     <Otherwise>
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\netcoreapp5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -950,7 +949,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </When>
     <Otherwise>
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net461\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\netcoreapp5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>

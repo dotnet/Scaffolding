@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains the core infrastructure used by ASP.NET Core Code Generators.</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Core</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

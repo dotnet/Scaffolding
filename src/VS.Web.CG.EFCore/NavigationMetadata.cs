@@ -18,11 +18,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public NavigationMetadata(INavigation navigation, Type dbContextType)
         {
             Contract.Assert(navigation != null);
-            Contract.Assert(navigation.IsDependentToPrincipal());
+            Contract.Assert(navigation.IsOnDependent);
 
             AssociationPropertyName = navigation.Name;
 
-            IEntityType otherEntityType = navigation.GetTargetType();
+            IEntityType otherEntityType = navigation.TargetEntityType;
 
             EntitySetName = ModelMetadata.GetEntitySetName(dbContextType, otherEntityType.ClrType);
             TypeName = otherEntityType.ClrType.GetTypeInfo().FullName;
@@ -38,7 +38,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             // If there is a non nullable string property in the navigation's target type, we use that instead. 
             var displayPropertyCandidate = navigation
-                .GetTargetType()
+                .TargetEntityType
                 .GetProperties()
                 .FirstOrDefault(p => !p.IsNullable && p.ClrType == typeof(string));
 

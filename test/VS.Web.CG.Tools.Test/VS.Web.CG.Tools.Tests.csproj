@@ -3,7 +3,7 @@
   <Import Project="$(RepoRoot)test\TestPackage.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>

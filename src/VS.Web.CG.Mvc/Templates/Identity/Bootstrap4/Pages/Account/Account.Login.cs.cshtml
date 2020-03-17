@@ -82,15 +82,15 @@ namespace @thisNamespace
 
             returnUrl = returnUrl ?? Url.Content("~/");
             
-            if (_signInManager.IsSignedIn(User))
-                return Redirect(returnUrl);
         
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            ReturnUrl = returnUrl;
+            if (_signInManager.IsSignedIn(User))
+                return Redirect(returnUrl);
+        
             return Page();
         }
 

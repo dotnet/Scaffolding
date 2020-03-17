@@ -88,6 +88,7 @@ namespace @thisNamespace
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            ReturnUrl = returnUrl;
             if (_signInManager.IsSignedIn(User))
                 return Redirect(returnUrl);
         

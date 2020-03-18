@@ -125,9 +125,8 @@ public const string RootProjectTxtWithoutEF = @"
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <OutputType>EXE</OutputType>
-    <TargetFrameworks>netcoreapp5.0</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
-    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 

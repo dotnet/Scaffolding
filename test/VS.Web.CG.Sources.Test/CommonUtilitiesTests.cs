@@ -15,11 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class CommonUtilitiesTests : TestBase
     {
-#if NETCOREAPP3_1
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
-#else
-#error target frameworks need to be updated.
-#endif
         ICodeGenAssemblyLoadContext loadContext;
         private ITestOutputHelper _outputHelper;
 

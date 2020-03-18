@@ -88,12 +88,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
 
         private static ProjectContext CreateProjectContext(string projectPath)
         {
-#if NETCOREAPP3_1
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
             var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
-#else
-#error target frameworks need to be updated.
-#endif
             if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
             {
                 projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);

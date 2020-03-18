@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard2.1;netcoreapp5.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 

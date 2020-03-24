@@ -160,7 +160,7 @@
     <value>Install the following packages to your project for scaffolding identity: {0}</value>
   </data>
   <data name="InstallPackageMessage" xml:space="preserve">
-    <value>Install the below packages to your project:</value>
+    <value>Install the following packages to your project:</value>
   </data>
   <data name="InvalidDbContextClassName" xml:space="preserve">
     <value>Value of --dbContext '{0}' is not a valid class name.</value>

@@ -181,6 +181,6 @@
     <value>Scaffolding failed.</value>
   </data>
   <data name="NoCodeGeneratorsFound" xml:space="preserve">
-    <value>No code generators are available in this project. Please add the 'Microsoft.VisualStudio.Web.CodeGeneration.Design' NuGet package to the project.</value>
+    <value>No code generators are available in this project. Add the 'Microsoft.VisualStudio.Web.CodeGeneration.Design' NuGet package to the project.</value>
   </data>
 </root>

@@ -57,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
-            ValidateEFDependencies();
+            ValidateEFDependencies(controllerGeneratorModel);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
@@ -96,22 +96,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             }
         }
 
-        private void ValidateEFDependencies()
-        {
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-            var isEFDesignPackagePresent = ProjectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
-
-            const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-            var isSqlServerPackagePresent = ProjectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(SqlServerPackageName, StringComparison.OrdinalIgnoreCase));
-
-            if (!isEFDesignPackagePresent || !isSqlServerPackagePresent)
+        private void ValidateEFDependencies(CommandLineGeneratorModel controllerGeneratorModel)
+        {   
+            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies);
+            if (controllerGeneratorModel.UseSqlite) 
             {
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}, {SqlServerPackageName}"));
+                EFValidationUtil.ValidateSQLiteDependency(ProjectContext.PackageDependencies);
             }
         }
 

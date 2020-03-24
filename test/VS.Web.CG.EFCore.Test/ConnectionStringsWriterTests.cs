@@ -83,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         [InlineData(true, "{}",
                     @"{
   ""ConnectionStrings"": {
-    ""MyDbContext"": ""DataSource=MyDbContext-NewGuid.db""
+    ""MyDbContext"": ""Data Source=MyDbContext-NewGuid.db""
   }
 }")]
         // File with no node for connection name
@@ -93,7 +93,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 }",
                     @"{
   ""ConnectionStrings"": {
-    ""MyDbContext"": ""DataSource=MyDbContext-NewGuid.db""
+    ""MyDbContext"": ""Data Source=MyDbContext-NewGuid.db""
   }
 }")]
         // File with node for connection name and also existing ConnectionString property

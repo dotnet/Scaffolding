@@ -144,8 +144,11 @@
   <data name="DbContextTypeNotFound" xml:space="preserve">
     <value>Could not get the reflection type for DbContext : {0}</value>
   </data>
+  <data name="EFSqlitePackageNotAvailable" xml:space="preserve">
+    <value>Install the package 'Microsoft.EntityFrameworkCore.Sqlite' and retry.</value>
+  </data>
   <data name="EFSqlServerPackageNotAvailable" xml:space="preserve">
-    <value>Please install the package 'Microsoft.EntityFrameworkCore.SqlServer' and retry again.</value>
+    <value>Install the package 'Microsoft.EntityFrameworkCore.SqlServer' and retry.</value>
   </data>
   <data name="EnsureStartupClassExists" xml:space="preserve">
     <value>Make sure there is a Startup class and a ConfigureServices method and Configuration property in it.</value>
@@ -163,7 +166,7 @@
     <value>Attempting to figure out the EntityFramework metadata for the model and DbContext: '{0}'</value>
   </data>
   <data name="ModelTypeCouldNotBeAdded" xml:space="preserve">
-    <value>Could not add Model type '{0}' to DbContext '{1}'. Please make sure that '{1}' has a DbSet property for '{0}'.</value>
+    <value>Could not add Model type '{0}' to DbContext '{1}'. Make sure that '{1}' has a DbSet property for '{0}'.</value>
   </data>
   <data name="ModelTypeNotFound" xml:space="preserve">
     <value>Could not get the reflection type for Model : {0}</value>

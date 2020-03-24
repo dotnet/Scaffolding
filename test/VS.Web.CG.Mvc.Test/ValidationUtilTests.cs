@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         public void ValidateType_Throws_When_TypeName_Is_Null_Or_Empty(string typeName)
         {
             var ex = Assert.Throws<ArgumentException>(() => ValidationUtil.ValidateType(typeName, "parameterName", modelTypesLocator:null));
-            Assert.Equal(@"Please provide a valid parameterName", ex.Message);
+            Assert.Equal(@"Provide a valid parameterName", ex.Message);
         }
     }
 }

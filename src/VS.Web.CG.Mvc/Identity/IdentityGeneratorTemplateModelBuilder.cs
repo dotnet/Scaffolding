@@ -116,7 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ? _projectContext.RootNamespace
                 : _commandlineModel.RootNamespace;
 
-            ValidateRequiredDependencies(_commandlineModel.UseSQLite);
+            ValidateRequiredDependencies(_commandlineModel.UseSqlite);
 
             var defaultDbContextNamespace = $"{RootNamespace}.Areas.Identity.Data";
 
@@ -193,7 +193,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = DbContextNamespace,
                 UserClass = UserClass,
                 UserClassNamespace = UserClassNamespace,
-                UseSQLite = _commandlineModel.UseSQLite,
+                UseSQLite = _commandlineModel.UseSqlite,
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,

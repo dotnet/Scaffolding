@@ -142,7 +142,7 @@
     <value>Path to .csproj file in the project.</value>
   </data>
   <data name="RunWithoutSimulationMode" xml:space="preserve">
-    <value>Please run scaffolding without --simulation-mode switch</value>
+    <value>Run scaffolding without the --simulation-mode switch</value>
   </data>
   <data name="SimulationModeOptionDesc" xml:space="preserve">
     <value>Specifies whether to persist any file changes.</value>

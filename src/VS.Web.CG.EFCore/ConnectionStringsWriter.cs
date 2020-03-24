@@ -11,7 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     public class ConnectionStringsWriter : IConnectionStringsWriter
     {
         private const string SQLConnectionStringFormat = "Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true";
-        private const string SQLiteConnectionStringFormat = "DataSource={0}.db";
+        private const string SQLiteConnectionStringFormat = "Data Source={0}.db";
 
         private IApplicationInfo _applicationInfo;
         private IFileSystem _fileSystem;
@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
-        public void AddConnectionString(string connectionStringName, string dataBaseName, bool useSQLite)
+        public void AddConnectionString(string connectionStringName, string dataBaseName, bool useSqlite)
         {
             var appSettingsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "appsettings.json");
             JObject content;
@@ -56,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             if (content[connectionStringNodeName][connectionStringName] == null)
             {
                 var connectionString = string.Format(
-                    useSQLite ? SQLiteConnectionStringFormat : SQLConnectionStringFormat,
+                    useSqlite ? SQLiteConnectionStringFormat : SQLConnectionStringFormat,
                     dataBaseName);
                 writeContent = true;
                 content[connectionStringNodeName][connectionStringName] = connectionString;

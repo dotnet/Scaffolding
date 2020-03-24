@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             _output = output;
         }
 
-        private EntityFrameworkServices GetEfServices(string path, string applicationName)
+        private EntityFrameworkServices GetEfServices(string path, string applicationName, bool useSqlite)
         {
             _appInfo = new ApplicationInfo(applicationName, Path.GetDirectoryName(path), "Debug");
             _logger = new ConsoleLogger();
@@ -54,7 +54,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             dbContextMock.Setup(db => db.EditStartupForNewContext(It.IsAny<ModelType>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()))
+                It.IsAny<string>(),
+                useSqlite))
                 .Returns(editSyntaxTreeResult);
 
             var connectionStringsWriter = new Mock<IConnectionStringsWriter>();
@@ -101,13 +102,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
                 var appName = MsBuildProjectStrings.RootProjectName;
                 var path = Path.Combine(fileProvider.Root, "Root", appName);
-                var efServices = GetEfServices(path, appName);
+                var efServices = GetEfServices(path, appName, false);
+                var efServicesSqlite = GetEfServices(path, appName, true);
 
                 var modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
-                var metadata = await efServices.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty);
+                var metadata = await efServices.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty, false);
+                var metadataSqlite = await efServicesSqlite.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty, true);
 
                 Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
                 Assert.Equal(3, metadata.ModelMetadata.Properties.Length);
+
+                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadataSqlite.ContextProcessingStatus);
+                Assert.Equal(3, metadataSqlite.ModelMetadata.Properties.Length);
             }
         }
     }

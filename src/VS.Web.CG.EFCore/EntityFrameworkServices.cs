@@ -111,7 +111,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _fileSystem = fileSystem;
         }
 
-        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName)
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, bool useSqlite)
         {
             if (string.IsNullOrEmpty(dbContextFullTypeName))
             {
@@ -121,6 +121,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var processor = new EntityFrameworkModelProcessor(dbContextFullTypeName,
                 modelTypeSymbol,
                 areaName,
+                useSqlite,
                 _loader,
                 _dbContextEditorServices,
                 _modelTypesLocator,

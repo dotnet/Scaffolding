@@ -154,19 +154,19 @@
     <value>Specify whether to overwrite existing files.</value>
   </data>
   <data name="InstallEfPackages" xml:space="preserve">
-    <value>To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}</value>
+    <value>To scaffold controllers and views using models, install Entity Framework core packages and try again: {0}</value>
   </data>
   <data name="InstallPackagesForScaffoldingIdentity" xml:space="preserve">
-    <value>Please install the following packages to your project for scaffolding identity: {0}</value>
+    <value>Install the following packages to your project for scaffolding identity: {0}</value>
   </data>
   <data name="InstallPackageMessage" xml:space="preserve">
-    <value>Please install the below packages to your project:</value>
+    <value>Install the following packages to your project:</value>
   </data>
   <data name="InvalidDbContextClassName" xml:space="preserve">
     <value>Value of --dbContext '{0}' is not a valid class name.</value>
   </data>
   <data name="InvalidFilesListMessage" xml:space="preserve">
-    <value>Could not find the files below. (Please use '--listFiles' to check the list of available files)</value>
+    <value>Could not find the files below. (Use '--listFiles' to check the list of available files)</value>
   </data>
   <data name="InvalidOptionCombination" xml:space="preserve">
     <value>Option '{0}' cannot be used with option '{1}'.</value>
@@ -180,6 +180,9 @@
   <data name="InvalidViewTemplateName" xml:space="preserve">
     <value>The template name '{0}' is not valid. Supported view templates: 'Empty|Create|Edit|Delete|Details|List'"</value>
   </data>
+  <data name="InstallSqlitePackage" xml:space="preserve">
+    <value>To scaffold using Sqlite, install Entity Framework core packages and try again: {0}</value>
+  </data>
   <data name="LayoutOptionsDesc" xml:space="preserve">
     <value>Custom Layout page to use.</value>
   </data>
@@ -187,10 +190,10 @@
     <value>Model class to use.</value>
   </data>
   <data name="ModelClassRequiredForTemplate" xml:space="preserve">
-    <value>The '{0}' template cannot be used without specifying a model class. Please provide a model using '--model' option.</value>
+    <value>The '{0}' template cannot be used without specifying a model class. Provide a model using '--model' option.</value>
   </data>
   <data name="MultipleTypesMatchingName" xml:space="preserve">
-    <value>Multiple types matching the name {0} exist:{1}, please use a fully qualified name"</value>
+    <value>Multiple types matching the name {0} exist:{1}, use a fully qualified name"</value>
   </data>
   <data name="NamespaceOptionDesc" xml:space="preserve">
     <value>Specify the name of the namespace to use for the generated controller.</value>
@@ -202,7 +205,7 @@
     <value>'--noPageModel' flag cannot be used for scaffolding model based Razor Pages.</value>
   </data>
   <data name="ProvideValidArgument" xml:space="preserve">
-    <value>Please provide a valid {0}</value>
+    <value>Provide a valid {0}</value>
   </data>
   <data name="RazorPageNameRequired" xml:space="preserve">
     <value>Razor Page Name is required.</value>

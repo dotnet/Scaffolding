@@ -158,7 +158,6 @@ stages:
         enable: true
         continueOnError: false
         params: ' -SourceToolsList @("policheck","credscan")
-        -TsaInstanceURL $(_TsaInstanceURL)
         -TsaProjectName $(_TsaProjectName)
         -TsaNotificationEmail $(_TsaNotificationEmail)
         -TsaCodebaseAdmin $(_TsaCodebaseAdmin)

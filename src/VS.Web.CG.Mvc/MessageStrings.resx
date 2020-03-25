@@ -181,7 +181,7 @@
     <value>The template name '{0}' is not valid. Supported view templates: 'Empty|Create|Edit|Delete|Details|List'"</value>
   </data>
   <data name="InstallSqlPackage" xml:space="preserve">
-    <value>To scaffold, install Entity Framework core packages and try again: {0}</value>
+    <value>To scaffold, install the following Entity Framework core packages and try again: {0}</value>
   </data>
   <data name="LayoutOptionsDesc" xml:space="preserve">
     <value>Custom Layout page to use.</value>

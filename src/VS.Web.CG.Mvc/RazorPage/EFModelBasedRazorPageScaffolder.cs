@@ -79,6 +79,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 EFValidationUtil.ValidateSQLiteDependency(_projectContext.PackageDependencies);
             }
+            else 
+            {
+                EFValidationUtil.ValidateSqlServerDependency(_projectContext.PackageDependencies);
+            }
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,

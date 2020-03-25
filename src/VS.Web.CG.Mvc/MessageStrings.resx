@@ -249,4 +249,7 @@
   <data name="InvalidBootstrapVersionForScaffolding" xml:space="preserve">
     <value>The specified bootstrap version '{0}' is not valid. The valid options are '{1}'.</value>
   </data>
+  <data name="InstallSqlPackages" xml:space="preserve">
+    <value>To scaffold controllers and views using models, install one of the Entity Framework core packages and try again: {0}</value>
+  </data>
 </root>

@@ -169,7 +169,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}.
+        ///   Looks up a localized string similar to To scaffold controllers and views using models, install Entity Framework core packages and try again: {0}.
         /// </summary>
         internal static string InstallEfPackages {
             get {
@@ -192,6 +192,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string InstallPackagesForScaffoldingIdentity {
             get {
                 return ResourceManager.GetString("InstallPackagesForScaffoldingIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To scaffold controllers and views using models, install one of the Entity Framework core packages and try again: {0}.
+        /// </summary>
+        internal static string InstallSqlPackages {
+            get {
+                return ResourceManager.GetString("InstallSqlPackages", resourceCulture);
             }
         }
         
@@ -259,7 +268,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}.
+        ///   Looks up a localized string similar to To scaffold controllers and views using models please install the following Entity Framework core packages and try again: {0}.
         /// </summary>
         internal static string InstallSqlitePackage
         {

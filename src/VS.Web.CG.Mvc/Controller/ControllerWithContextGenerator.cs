@@ -57,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
-            ValidateEFDependencies();
+            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
@@ -93,35 +93,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 throw new Exception(string.Format("{0} {1}" ,MessageStrings.ScaffoldingSuccessful_unregistered,
                     MessageStrings.Scaffolding_additionalSteps));
-            }
-        }
-
-        private void ValidateEFDependencies()
-        {
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-            var isEFDesignPackagePresent = ProjectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
-
-            const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-            var isSqlServerPackagePresent = ProjectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(SqlServerPackageName, StringComparison.OrdinalIgnoreCase));
-
-            const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
-            var isSqlitePackagePresent = ProjectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(SqlitePackageName, StringComparison.OrdinalIgnoreCase));
-
-            if (!isEFDesignPackagePresent)
-            {
-                 throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}"));
-            }
-            if (!isSqlitePackagePresent && !isSqlServerPackagePresent) 
-            {
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallSqlPackages, $"{SqlitePackageName}, {SqlServerPackageName}"));
             }
         }
 

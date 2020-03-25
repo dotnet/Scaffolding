@@ -169,7 +169,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}.
+        ///   Looks up a localized string similar to To scaffold controllers and views using models, install Entity Framework core packages and try again: {0}.
         /// </summary>
         internal static string InstallEfPackages {
             get {
@@ -178,7 +178,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please install the below packages to your project:.
+        ///   Looks up a localized string similar to Install the following packages to your project:.
         /// </summary>
         internal static string InstallPackageMessage {
             get {
@@ -187,11 +187,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please install the following packages to your project for scaffolding identity: {0}.
+        ///   Looks up a localized string similar to Install the following packages to your project for scaffolding identity: {0}.
         /// </summary>
         internal static string InstallPackagesForScaffoldingIdentity {
             get {
                 return ResourceManager.GetString("InstallPackagesForScaffoldingIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To scaffold, install the following Entity Framework core packages and try again: {0}.
+        /// </summary>
+        internal static string InstallSqlPackage {
+            get {
+                return ResourceManager.GetString("InstallSqlPackage", resourceCulture);
             }
         }
         
@@ -214,7 +223,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not find the files below. (Please use &apos;--listFiles&apos; to check the list of available files).
+        ///   Looks up a localized string similar to Could not find the files below. (Use &apos;--listFiles&apos; to check the list of available files).
         /// </summary>
         internal static string InvalidFilesListMessage {
             get {
@@ -257,18 +266,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
                 return ResourceManager.GetString("InvalidViewTemplateName", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to To scaffold controllers and views using models please install Entity Framework core packages and try again: {0}.
-        /// </summary>
-        internal static string InstallSqlitePackage
-        {
-            get
-            {
-                return ResourceManager.GetString("InstallSqlitePackage", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Custom Layout page to use..
         /// </summary>
@@ -288,7 +286,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; template cannot be used without specifying a model class. Please provide a model using &apos;--model&apos; option..
+        ///   Looks up a localized string similar to The &apos;{0}&apos; template cannot be used without specifying a model class. Provide a model using &apos;--model&apos; option..
         /// </summary>
         internal static string ModelClassRequiredForTemplate {
             get {
@@ -297,7 +295,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Multiple types matching the name {0} exist:{1}, please use a fully qualified name&quot;.
+        ///   Looks up a localized string similar to Multiple types matching the name {0} exist:{1}, use a fully qualified name&quot;.
         /// </summary>
         internal static string MultipleTypesMatchingName {
             get {
@@ -333,7 +331,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please provide a valid {0}.
+        ///   Looks up a localized string similar to Provide a valid {0}.
         /// </summary>
         internal static string ProvideValidArgument {
             get {

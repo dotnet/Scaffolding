@@ -57,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
-            ValidateEFDependencies(controllerGeneratorModel);
+            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
@@ -93,15 +93,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 throw new Exception(string.Format("{0} {1}" ,MessageStrings.ScaffoldingSuccessful_unregistered,
                     MessageStrings.Scaffolding_additionalSteps));
-            }
-        }
-
-        private void ValidateEFDependencies(CommandLineGeneratorModel controllerGeneratorModel)
-        {   
-            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies);
-            if (controllerGeneratorModel.UseSqlite) 
-            {
-                EFValidationUtil.ValidateSQLiteDependency(ProjectContext.PackageDependencies);
             }
         }
 

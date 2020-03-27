@@ -291,7 +291,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            ValidateEFSqlServerDependency();
+            if (_useSqlite)
+            {
+                ValidateEFSqliteDependency();
+            }
+            else 
+            {
+                ValidateEFSqlServerDependency();
+            } 
 
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));

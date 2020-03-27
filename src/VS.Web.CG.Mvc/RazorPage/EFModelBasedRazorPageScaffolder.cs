@@ -74,11 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
-            if (razorGeneratorModel.UseSqlite) 
-            {
-                EFValidationUtil.ValidateSQLiteDependency(_projectContext.PackageDependencies);
-            }
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.UseSqlite);
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,
@@ -133,7 +129,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             string outputPath = ValidateAndGetOutputPath(razorPageGeneratorModel, string.Empty);
 
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies);
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.UseSqlite);
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorPageGeneratorModel,

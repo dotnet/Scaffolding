@@ -18,6 +18,10 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
 
+  # used for post-build phases, internal builds only
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - group: DotNet-AspNet-SDLValidation-Params
+    
 resources:
   containers:
   - container: LinuxContainer
@@ -148,3 +152,22 @@ stages:
       # Symbol validation isn't being very reliable lately. This should be enabled back
       # once this issue is resolved: https://github.com/dotnet/arcade/issues/2871
       enableSymbolValidation: false
+      # Sourcelink validation isn't passing for Arcade due to some regressions. This should be
+      # enabled back once this issue is resolved: https://github.com/dotnet/arcade/issues/2912
+      enableSourceLinkValidation: false
+      publishDependsOn:
+      - Validate
+      # This is to enable SDL runs part of Post-Build Validation Stage
+      SDLValidationParameters:
+        enable: true
+        continueOnError: false
+        params: ' -SourceToolsList @("policheck","credscan")
+        -TsaInstanceURL $(_TsaInstanceURL)
+        -TsaProjectName $(_TsaProjectName)
+        -TsaNotificationEmail $(_TsaNotificationEmail)
+        -TsaCodebaseAdmin $(_TsaCodebaseAdmin)
+        -TsaBugAreaPath $(_TsaBugAreaPath)
+        -TsaIterationPath $(_TsaIterationPath)
+        -TsaRepositoryName "Scaffolding"
+        -TsaCodebaseName "Scaffolding"
+        -TsaPublish $True'

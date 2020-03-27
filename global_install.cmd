@@ -1,4 +1,4 @@
-set VERSION=3.1.1
+set VERSION=
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 call build.cmd  

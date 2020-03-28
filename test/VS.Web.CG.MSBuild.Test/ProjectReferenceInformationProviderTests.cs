@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
   <ItemGroup>
     <ProjectReference Include=""..\Library2\Library2.csproj"" />
   </ItemGroup>
-  <ItemGroup Condition=""'$(TargetFramework)' == 'netcoreapp5.0' "">
+  <ItemGroup Condition=""'$(TargetFramework)' == 'net5.0' "">
     <Reference Include=""System"" />
     <Reference Include=""System.Data"" />
   </ItemGroup>

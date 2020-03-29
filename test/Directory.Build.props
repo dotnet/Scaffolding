@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <DeveloperBuildTestTfms>netcoreapp3.0</DeveloperBuildTestTfms>
+    <DeveloperBuildTestTfms>net5.0</DeveloperBuildTestTfms>
     <StandardTestTfms>$(DeveloperBuildTestTfms)</StandardTestTfms>
   </PropertyGroup>
 

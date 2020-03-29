@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Msbuild</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Msbuild</RootNamespace>
     <IsPackable>false</IsPackable>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains Razor based templating host used by ASP.NET Core Code Generators.</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Templating</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Templating</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

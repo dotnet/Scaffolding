@@ -39,7 +39,7 @@ stages:
       enablePublishBuildAssets: true
       enablePublishUsingPipelines: ${{ variables._PublishUsingPipelines }}
       enableTelemetry: true
-      helixRepo: aspnet/scaffolding
+      helixRepo: dotnet/scaffolding
       codeSign: true
       jobs:
       - job: Windows_NT

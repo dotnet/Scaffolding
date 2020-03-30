@@ -7,7 +7,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <license type="expression">$license$</license>
     <description>$description$</description>
-    <projectUrl>https://github.com/aspnet/scaffolding</projectUrl>
+    <projectUrl>https://github.com/dotnet/scaffolding</projectUrl>
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
     <repository type="git" url="$repositoryUrl$" commit="$repositoryCommit$" />

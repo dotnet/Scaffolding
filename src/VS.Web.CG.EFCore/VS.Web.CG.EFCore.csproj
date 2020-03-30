@@ -16,7 +16,7 @@
        project to provide this dependency, rather than introducing the dependency.
        This way if the user wants to scaffold non-ef related controller/view, they could do so
        without adding EntityFrameworkCore dependency.
-       https://github.com/aspnet/scaffolding/issues/434
+       https://github.com/dotnet/scaffolding/issues/434
        -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion)" />
   </ItemGroup>

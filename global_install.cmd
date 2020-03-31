@@ -1,4 +1,4 @@
-set VERSION=5.0.0-dev
+set VERSION=
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 call git clean -xdf

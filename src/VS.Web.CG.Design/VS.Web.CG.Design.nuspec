@@ -23,10 +23,6 @@
     <file src="$OutputDocumentation$" target="lib\net5.0\$AssemblyName$.xml" />
     <file src="$OutputSymbol$" target="lib\net5.0\$AssemblyName$.pdb" />
 
-    <file src="$OutputAnyExe$" target="runtimes\anycpu\lib\net5.0\$AssemblyName$.exe" />
-    <file src="$OutputAnyDocumentation$" target="runtimes\anycpu\lib\net5.0\$AssemblyName$.xml" />
-    <file src="$OutputAnySymbol$" target="runtimes\anycpu\lib\net5.0\$AssemblyName$.pdb" />
-
     <file src="$OutputX86Exe$" target="runtimes\win7-x86\lib\net5.0\$AssemblyName$.exe" />
     <file src="$OutputX86Documentation$" target="runtimes\win7-x86\lib\net5.0\$AssemblyName$.xml" />
     <file src="$OutputX86Symbol$" target="runtimes\win7-x86\lib\net5.0\$AssemblyName$.pdb" />

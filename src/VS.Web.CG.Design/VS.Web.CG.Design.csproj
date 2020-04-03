@@ -22,13 +22,6 @@
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(X86ProjectDirectory)\VS.Web.CG.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(ARMProjectDirectory)\VS.Web.CG.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(ARM64ProjectDirectory)\VS.Web.CG.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-  </ItemGroup>
   
   <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
 
@@ -51,26 +44,6 @@
         OutputBinary=$(OutputPath)$(AssemblyName).dll;
         OutputDocumentation=$(OutputPath)$(AssemblyName).xml;
         OutputSymbol=$(OutputPath)$(AssemblyName).pdb;
-
-        OutputAnyExe=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).exe;
-        OutputAnyDocumentation=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).xml;
-        OutputAnySymbol=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).pdb;
-
-        OutputX64Exe=$(OutputPath)$(AssemblyName).exe;
-        OutputX64Documentation=$(OutputPath)$(AssemblyName).xml;
-        OutputX64Symbol=$(OutputPath)$(AssemblyName).pdb;
-
-        OutputX86Exe=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).exe;
-        OutputX86Documentation=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).xml;
-        OutputX86Symbol=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).pdb;
-
-        OutputARMExe=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).exe;
-        OutputARMDocumentation=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).xml;
-        OutputARMSymbol=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).pdb;
-
-        OutputARM64Exe=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).exe;
-        OutputARM64Documentation=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).xml;
-        OutputARM64Symbol=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).pdb;
       </NuspecProperties>
     </PropertyGroup>
   </Target>

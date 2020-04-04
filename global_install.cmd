@@ -1,7 +1,7 @@
 set VERSION=
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
-call git clean -xdf
+call taskkill /f /im dotnet.exe
 call build.cmd  
 call dotnet tool uninstall -g dotnet-aspnet-codegenerator 
 call cd  %NUPKG% 

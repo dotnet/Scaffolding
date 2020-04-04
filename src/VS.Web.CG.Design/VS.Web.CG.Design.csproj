@@ -51,15 +51,7 @@
         OutputBinary=$(OutputPath)$(AssemblyName).dll;
         OutputDocumentation=$(OutputPath)$(AssemblyName).xml;
         OutputSymbol=$(OutputPath)$(AssemblyName).pdb;
-
-        OutputAnyExe=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).exe;
-        OutputAnyDocumentation=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).xml;
-        OutputAnySymbol=$(AnyCpuBinDirectory)$(Configuration)\net5.0\$(AssemblyName).pdb;
-
-        OutputX64Exe=$(OutputPath)$(AssemblyName).exe;
-        OutputX64Documentation=$(OutputPath)$(AssemblyName).xml;
-        OutputX64Symbol=$(OutputPath)$(AssemblyName).pdb;
-
+        
         OutputX86Exe=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).exe;
         OutputX86Documentation=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).xml;
         OutputX86Symbol=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).pdb;

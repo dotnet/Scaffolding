@@ -19,8 +19,6 @@
     <ARM64ProjectDirectory>$(RepoRoot)tools\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
     <AnyCpuProjectDirectory>$(RepoRoot)tools\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
-    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,41 +28,33 @@
     <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
-  <Target Name="PopulateNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="Build">
+  <ItemGroup>
+    <Content Include="$(OutputPath)$(AssemblyName).dll;
+                      $(OutputPath)$(AssemblyName).xml;"
+             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>lib\net5.0\</PackagePath>
+    </Content>
 
-    <PropertyGroup>
-      <!-- Make sure we create a symbols.nupkg. -->
-      <IncludeSymbols>true</IncludeSymbols>
-      <NuspecProperties>
-        id=$(PackageId);
-        version=$(PackageVersion);
-        authors=$(Authors);
-        description=$(Description);
-        tags=$(PackageTags.Replace(';', ' '));
-        license=$(PackageLicenseExpression);
-        projectUrl=$(PackageProjectUrl);
-        repositoryUrl=$(RepositoryUrl);
-        repositoryCommit=$(RepositoryCommit);
-        copyright=$(Copyright);
-        AssemblyName=$(AssemblyName);
+    <Content Include="$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).exe;
+                      $(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).xml;" 
+             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win7-x86\lib\net5.0</PackagePath>
+    </Content>
 
-        OutputBinary=$(OutputPath)$(AssemblyName).dll;
-        OutputDocumentation=$(OutputPath)$(AssemblyName).xml;
-        OutputSymbol=$(OutputPath)$(AssemblyName).pdb;
-        
-        OutputX86Exe=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).exe;
-        OutputX86Documentation=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).xml;
-        OutputX86Symbol=$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).pdb;
+    <Content Include="$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).exe;
+                      $(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).xml;"
+             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win-arm\lib\net5.0\</PackagePath>
+    </Content>
 
-        OutputARMExe=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).exe;
-        OutputARMDocumentation=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).xml;
-        OutputARMSymbol=$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).pdb;
-
-        OutputARM64Exe=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).exe;
-        OutputARM64Documentation=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).xml;
-        OutputARM64Symbol=$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).pdb;
-      </NuspecProperties>
-    </PropertyGroup>
-  </Target>
-
+    <Content Include="$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).exe;
+                      $(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).xml;" 
+             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win-arm64\lib\net5.0\</PackagePath>
+    </Content>
+  </ItemGroup>
 </Project>

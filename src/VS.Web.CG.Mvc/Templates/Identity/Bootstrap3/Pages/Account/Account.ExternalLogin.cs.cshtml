@@ -41,24 +41,19 @@ namespace @thisNamespace
     {
         private readonly SignInManager<@(Model.UserClass)> _signInManager;
         private readonly UserManager<@(Model.UserClass)> _userManager;
-        private readonly IUserStore<@(Model.UserClass)> _userStore;
-        private readonly IUserEmailStore<@(Model.UserClass)> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         public ExternalLoginModel(
             SignInManager<@(Model.UserClass)> signInManager,
             UserManager<@(Model.UserClass)> userManager,
-            IUserStore<@(Model.UserClass)> userStore,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _userStore = userStore;
             _logger = logger;
             _emailSender = emailSender;
-            _emailStore = GetEmailStore();
         }
 
         [BindProperty]
@@ -148,9 +143,6 @@ namespace @thisNamespace
             {
                 var user = new @(Model.UserClass) { UserName = Input.Email, Email = Input.Email };
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -191,15 +183,6 @@ namespace @thisNamespace
             ProviderDisplayName = info.ProviderDisplayName;
             ReturnUrl = returnUrl;
             return Page();
-        }
-
-        private IUserEmailStore<@(Model.UserClass)> GetEmailStore()
-        {
-            if (!_userManager.SupportsUserEmail)
-            {
-                throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
-            return (IUserEmailStore<@(Model.UserClass)>)_userStore;
         }
     }
 }

@@ -32,16 +32,13 @@ namespace @thisNamespace
     {
         private readonly UserManager<@(Model.UserClass)> _userManager;
         private readonly SignInManager<@(Model.UserClass)> _signInManager;
-        private readonly IUserStore<@(Model.UserClass)> _userStore;
 
         public ExternalLoginsModel(
             UserManager<@(Model.UserClass)> userManager,
-            SignInManager<@(Model.UserClass)> signInManager,
-            IUserStore<@(Model.UserClass)> userStore)
+            SignInManager<@(Model.UserClass)> signInManager))
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _userStore = userStore;
         }
 
         public IList<UserLoginInfo> CurrentLogins { get; set; }
@@ -65,12 +62,6 @@ namespace @thisNamespace
             OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
                 .Where(auth => CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
                 .ToList();
-
-            string passwordHash = null;
-            if (_userStore is IUserPasswordStore<@(Model.UserClass)> userPasswordStore)
-            {
-                passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
-            }
 
             ShowRemoveButton = passwordHash != null || CurrentLogins.Count > 1;
             return Page();
@@ -115,8 +106,7 @@ namespace @thisNamespace
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var userId = await _userManager.GetUserIdAsync(user);
-            var info = await _signInManager.GetExternalLoginInfoAsync(userId);
+            var info = await _signInManager.GetExternalLoginInfoAsync(user.Id);
             if (info == null)
             {
                 throw new InvalidOperationException($"Unexpected error occurred loading external login info for user with ID '{userId}'.");

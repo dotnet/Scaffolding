@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "userClass", ShortName = "u", Description = "Name of the User class to generate.")]
         public string UserClass { get; set; }
 
-        [Option(Name = "files", ShortName = "fi", Description = "List of semicolon separated files to scaffold. Use the --listFiles option to see the available options.")]
+        [Option(Name = "files", ShortName = "fi", Description = "List of semicolon separated files to scaffold. Use --listFiles option to see the available options.")]
         public string Files { get; set; }
 
         [Option(Name = "listFiles", ShortName ="lf", Description = "Lists the files that can be scaffolded by using the '--files' option.")]
@@ -36,6 +36,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         [Option(Name ="bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
         public string BootstrapVersion { get; set; }
+
+        [Option(Name ="excludeFiles", ShortName="exf", Description = "Use this option to overwrite all but list of semicolon seperated files.  Use --listFiles option to see the available options.")]
+        public string ExcludeFiles { get; set; }
 
         public bool IsGenerateCustomUser
         {

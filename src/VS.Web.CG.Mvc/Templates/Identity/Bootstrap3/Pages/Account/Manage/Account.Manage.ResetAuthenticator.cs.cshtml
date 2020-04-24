@@ -52,7 +52,7 @@ namespace @thisNamespace
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{user.Id}'.");
             }
 
             return Page();
@@ -63,7 +63,7 @@ namespace @thisNamespace
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID 'user.Id'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);

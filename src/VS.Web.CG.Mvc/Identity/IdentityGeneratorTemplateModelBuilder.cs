@@ -198,7 +198,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,
-                IsGeneratingIndividualFiles = IsFilesSpecified || IsExcludeSpecificed,
                 UseDefaultUI = _commandlineModel.UseDefaultUI,
                 GenerateLayout = !hasExistingLayout,
                 Layout = layout,
@@ -227,11 +226,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     contentVersion = IdentityGenerator.ContentVersionDefault;
                 }
-                IEnumerable<string> excludedFiles = _commandlineModel.ExcludeFiles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                const IEnumerable<string> allFiles = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
+                IEnumerable<string> excludedFiles = _commandlineModel.ExcludeFiles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+                IEnumerable<string> allFiles = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
                 //validate excluded files
                 var errors = new List<string>();
-                var invalidFiles = excludedFiles.Where(f => allFiles.Contains(f));
+                var invalidFiles = excludedFiles.Where(f => !allFiles.Contains(f));
                 if (invalidFiles.Any())
                 {
                     errors.Add(MessageStrings.InvalidFilesListMessage);

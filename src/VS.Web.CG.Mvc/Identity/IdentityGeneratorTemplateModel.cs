@@ -14,7 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public bool UseSQLite { get; set; }
         public bool IsUsingExistingDbContext { get; set; }
         public bool IsGenerateCustomUser { get; set; }
-        public bool IsGeneratingIndividualFiles { get; set; }
         public IdentityGeneratorFile[] FilesToGenerate { get; set; }
         public bool UseDefaultUI { get; set; }
         public bool GenerateLayout { get; set; }

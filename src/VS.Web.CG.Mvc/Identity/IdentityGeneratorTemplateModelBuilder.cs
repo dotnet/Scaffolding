@@ -80,6 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         }
 
         internal bool IsFilesSpecified => !string.IsNullOrEmpty(_commandlineModel.Files);
+        internal bool IsExcludeSpecificed => !string.IsNullOrEmpty(_commandlineModel.ExcludeFiles);
         internal bool IsDbContextSpecified => !string.IsNullOrEmpty(_commandlineModel.DbContext);
         internal bool IsUsingExistingDbContext { get; set; }
 
@@ -197,7 +198,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,
-                IsGeneratingIndividualFiles = IsFilesSpecified,
                 UseDefaultUI = _commandlineModel.UseDefaultUI,
                 GenerateLayout = !hasExistingLayout,
                 Layout = layout,
@@ -210,13 +210,50 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             templateModel.ContentVersion = DetermineContentVersion(templateModel);
 
+            ValidateIndividualFileOptions();
             if (!string.IsNullOrEmpty(_commandlineModel.Files))
             {
                 NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             }
+            else if(!string.IsNullOrEmpty(_commandlineModel.ExcludeFiles))
+            {
+                string contentVersion;
+                if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
+                {
+                    contentVersion = templateModel2.ContentVersion;
+                }
+                else
+                {
+                    contentVersion = IdentityGenerator.ContentVersionDefault;
+                }
+                IEnumerable<string> excludedFiles = _commandlineModel.ExcludeFiles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+                IEnumerable<string> allFiles = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
+                //validate excluded files
+                var errors = new List<string>();
+                var invalidFiles = excludedFiles.Where(f => !allFiles.Contains(f));
+                if (invalidFiles.Any())
+                {
+                    errors.Add(MessageStrings.InvalidFilesListMessage);
+                    errors.AddRange(invalidFiles);
+                }
+
+                if (errors.Any())
+                {
+                    throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
+                }
+                
+                //get files to overwrite
+                NamedFiles = allFiles.Except(excludedFiles);
+            }
+
             templateModel.FilesToGenerate = DetermineFilesToGenerate(templateModel);
 
             if (IsFilesSpecified)
+            {
+                ValidateFilesOption(templateModel);
+            }
+
+            if (IsExcludeSpecificed)
             {
                 ValidateFilesOption(templateModel);
             }
@@ -407,6 +444,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
+        private void ValidateIndividualFileOptions() 
+        {
+            //Both options should not be selected. Users should either scaffold a particular set of files OR exclude a particular set of files.
+            if(IsFilesSpecified && IsExcludeSpecificed)
+            {
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--excludeFiles"));
+            }
+        }
         private void ValidateDefaultUIOption()
         {
             var errorStrings = new List<string>();
@@ -414,6 +459,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (IsFilesSpecified)
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--useDefaultUI"));
+            }
+
+            if(IsExcludeSpecificed)
+            {
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--excludeFiles", "--useDefaultUI"));
             }
 
             if (IsUsingExistingDbContext)

@@ -284,7 +284,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         private string GetDefaultPageModelNamespaceName(string relativeFolderPath)
         {
-            return NameSpaceUtilities.GetSafeNameSpaceFromPath(relativeFolderPath, ApplicationInfo.ApplicationName);
+            return NameSpaceUtilities.GetSafeNameSpaceFromPath(relativeFolderPath, _projectContext.RootNamespace);
         }
 
         private static string DetermineContentVersion(RazorPageGeneratorModel razorGeneratorModel)

@@ -446,7 +446,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private void ValidateIndividualFileOptions() 
         {
-            //both options should not be selected. Users should either scaffold a particular set of files OR exclude a particular set of files.
+            //Both options should not be selected. Users should either scaffold a particular set of files OR exclude a particular set of files.
             if(IsFilesSpecified && IsExcludeSpecificed)
             {
                 throw new InvalidOperationException(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--excludeFiles"));

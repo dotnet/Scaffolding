@@ -33,7 +33,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace @thisNamespace
 {
     [AllowAnonymous]
-    public abstract class ResendEmailConfirmationModel : PageModel
+    public class ResendEmailConfirmationModel : PageModel
     {
         private readonly UserManager<@(Model.UserClass)> _userManager;
         private readonly IEmailSender _emailSender;

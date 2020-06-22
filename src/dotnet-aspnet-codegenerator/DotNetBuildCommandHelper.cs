@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 project,
                 "--configuration", configuration,
-                "--framework", framework.GetShortFolderName(),
+                "--framework", GetFrameworkShortName(framework),
             };
 
             if (buildBasePath != null)
@@ -45,7 +45,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     configuration: configuration)
                     .OnErrorLine((str) => stdOutMsgs.Add(str))
                     .OnOutputLine((str) => stdErrorMsgs.Add(str));
-
             var result = command.Execute();
             return new BuildResult()
             {
@@ -53,6 +52,23 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 StdErr = stdErrorMsgs,
                 StdOut = stdOutMsgs
             };
+        }
+
+        private static string GetFrameworkShortName(NuGetFramework framework)
+        {
+            string shortFramework = string.Empty;
+            if (framework != null)
+            {
+                if (framework.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.Net))
+                {
+                    if (framework.Version.Major >= 5)
+                    {
+                        return "net5.0";
+                    }
+                }
+                shortFramework = framework.GetShortFolderName();
+            }
+            return shortFramework;
         }
     }
 

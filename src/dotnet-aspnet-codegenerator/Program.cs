@@ -194,7 +194,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     configuration,
                     frameworkToUse,
                     server);
-
                 var exitCode = command
                     .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
                     .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
@@ -231,8 +230,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var depsFile = Path.Combine(targetDir, context.DepsFile);
 
             string dotnetCodeGenInsideManPath = string.Empty;
-            
-            if (IsNetCoreAppFramework(frameworkToUse))
+            if (IsNetCoreAppFramework(frameworkToUse) || IsNet5OrAbove(frameworkToUse))
             {
                 dotnetCodeGenInsideManPath = context.CompilationAssemblies
                 .Where(c => Path.GetFileNameWithoutExtension(c.Name)
@@ -273,10 +271,26 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         private static bool IsNetCoreAppFramework(NuGetFramework framework)
         {
             // Only need to compare the framework name to be netcoreapp. Version doesn't matter.
+            // adding support for net5.0
+            return NuGetFramework.FrameworkNameComparer.Equals(framework, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+        }
 
-            return NuGetFramework.FrameworkNameComparer.Equals(
-                framework,
-                NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10);
+        //checks for NET Frameworks major version to be 5 or above(since netcoreapp5.0 == net5.0)
+        private static bool IsNet5OrAbove(NuGetFramework framework)
+        {
+            if (framework!=null)
+            {
+                //its a .NETFramework
+                if (framework.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.Net))
+                {
+                    //5 and above are supported
+                    if (framework.Version.Major >= 5)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private IProjectContext GetProjectInformation(string projectPath, string configuration)

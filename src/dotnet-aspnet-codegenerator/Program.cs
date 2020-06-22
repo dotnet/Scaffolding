@@ -280,14 +280,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         {
             if (framework!=null)
             {
-                //its a .NETFramework
-                if (framework.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.Net))
+                //its a .NETFramework and 5/above.
+                if (framework.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.Net) &&
+                    framework.Version.Major >= 5)
                 {
-                    //5 and above are supported
-                    if (framework.Version.Major >= 5)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
             return false;

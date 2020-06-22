@@ -60,12 +60,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             string shortFramework = string.Empty;
             if (framework != null)
             {
-                if (framework.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.Net))
+                if (framework.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.Net) &&
+                    framework.Version.Major >= 5)
                 {
-                    if (framework.Version.Major >= 5)
-                    {
-                        return string.Concat(NetFrameworkShortFolderName, framework.Version.Major, ".", framework.Version.Minor);
-                    }
+                    return string.Concat(NetFrameworkShortFolderName, framework.Version.Major, ".", framework.Version.Minor);
                 }
                 shortFramework = framework.GetShortFolderName();
             }

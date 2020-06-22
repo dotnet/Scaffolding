@@ -233,10 +233,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             if (IsNetCoreAppFramework(frameworkToUse) || IsNet5OrAbove(frameworkToUse))
             {
                 dotnetCodeGenInsideManPath = context.CompilationAssemblies
-                .Where(c => Path.GetFileNameWithoutExtension(c.Name)
-                            .Equals(DESIGN_TOOL_NAME, StringComparison.OrdinalIgnoreCase))
-                .Select(reference => reference.ResolvedPath)
-                .FirstOrDefault();
+                    .Where(c => Path.GetFileNameWithoutExtension(c.Name)
+                                    .Equals(DESIGN_TOOL_NAME, StringComparison.OrdinalIgnoreCase))
+                    .Select(reference => reference.ResolvedPath)
+                    .FirstOrDefault();
                 if (string.IsNullOrEmpty(dotnetCodeGenInsideManPath))
                 {
                     throw new InvalidOperationException(Resources.AddDesignPackage);

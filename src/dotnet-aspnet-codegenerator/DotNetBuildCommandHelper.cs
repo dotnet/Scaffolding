@@ -11,6 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
     internal class DotNetBuildCommandHelper
     {
+        private const string NetFrameworkShortFolderName = "net";
         internal static BuildResult Build(
             string project,
             string configuration,
@@ -63,7 +64,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 {
                     if (framework.Version.Major >= 5)
                     {
-                        return "net5.0";
+                        return string.Concat(NetFrameworkShortFolderName, framework.Version.Major, ".", framework.Version.Minor);
                     }
                 }
                 shortFramework = framework.GetShortFolderName();

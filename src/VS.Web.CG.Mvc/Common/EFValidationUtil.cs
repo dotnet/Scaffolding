@@ -12,8 +12,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
     {
         const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
         const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-        const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
-        const string SqliteCorePackageName = "Microsoft.EntityFrameworkCore.Sqlite.Core";
 
         internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, bool useSqlite)
         {
@@ -25,26 +23,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                  throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}"));
             }
-            if (useSqlite)
-            {
-                ValidateSQLiteDependency(dependencies);
-            } 
-            else 
+            if (!useSqlite)
             {
                 ValidateSqlServerDependency(dependencies);
-            }
-        }
-
-        internal static void ValidateSQLiteDependency(IEnumerable<DependencyDescription> dependencies)
-        { 
-            var isSqliteCorePackagePresent = dependencies
-                .Any(package => package.Name.Equals(SqliteCorePackageName, StringComparison.OrdinalIgnoreCase));
-            
-            if (!isSqliteCorePackagePresent) 
-            {
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallSqlPackage, $"{SqlitePackageName}."));
-            }
+            } 
         }
 
         internal static void ValidateSqlServerDependency(IEnumerable<DependencyDescription> dependencies)

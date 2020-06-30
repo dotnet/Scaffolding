@@ -720,11 +720,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 .PackageDependencies
                 .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
-            if (useSqlite)
-            {
-                dependencies.Add("Microsoft.EntityFrameworkCore.Sqlite");
-            }
-            else
+            if (!useSqlite)
             {
                 dependencies.Add("Microsoft.EntityFrameworkCore.SqlServer");
             }

@@ -23,7 +23,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     internal class EntityFrameworkModelProcessor
     {
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-        private const string EFSqlLitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         private const string NewDbContextFolderName = "Data";
         private bool _useSqlite;
         private string _dbContextFullTypeName;
@@ -291,15 +290,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            if (_useSqlite)
-            {
-                ValidateEFSqliteDependency();
-            }
-            else 
+            if (!_useSqlite)
             {
                 ValidateEFSqlServerDependency();
-            } 
-
+            }
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
             var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType);
@@ -419,14 +413,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             if (_projectContext.GetPackage(EFSqlServerPackageName) == null)
             {
                 throw new InvalidOperationException(MessageStrings.EFSqlServerPackageNotAvailable);
-            }
-        }
-
-        private void ValidateEFSqliteDependency() 
-        {
-            if (_projectContext.GetPackage(EFSqlLitePackageName) == null)
-            {
-                throw new InvalidOperationException(MessageStrings.EFSqlitePackageNotAvailable);
             }
         }
 

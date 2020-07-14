@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" />
+    <ProjectReference Include="..\VS.Web.CG.Sources.Test\VS.Web.CG.Sources.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

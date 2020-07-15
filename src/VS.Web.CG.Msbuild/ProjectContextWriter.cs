@@ -78,7 +78,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         public override bool Execute()
         {
-            Debugger.Launch();
             var msBuildContext = new CommonProjectContext()
             {
                 AssemblyFullPath = this.AssemblyFullPath,
@@ -113,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return true;
         }
 
-        internal IEnumerable<DependencyDescription> GetPackageDependencies(string projectAssetsFile)
+        private IEnumerable<DependencyDescription> GetPackageDependencies(string projectAssetsFile)
         {
             IList<DependencyDescription> packageDependencies = new List<DependencyDescription>();
             if (!string.IsNullOrEmpty(projectAssetsFile) && File.Exists(projectAssetsFile) && !string.IsNullOrEmpty(TargetFramework))
@@ -153,10 +152,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                                                 {
                                                     DependencyTypeEnum = (DependencyType)dependencyType;
                                                 }
-                                                
+
+                                                string packagePath = GetPath(path, nameAndVersion);
                                                 DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
                                                                                                              nameAndVersion.Item2,
-                                                                                                             GetPath(path, nameAndVersion),
+                                                                                                             Directory.Exists(path) ? path : string.Empty,
                                                                                                              targetFrameworkMoniker,
                                                                                                              DependencyTypeEnum,
                                                                                                              true);
@@ -194,16 +194,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         internal string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
         {
-            if (!string.IsNullOrEmpty(nugetPath))
+            string path = string.Empty;
+            if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
             {
-                string path = Path.Combine(nugetPath, nameAndVersion.Item1, nameAndVersion.Item2);
-                if (Directory.Exists(path))
-                {
-                    return path;
-                }
+                path = Path.Combine(nugetPath, nameAndVersion.Item1, nameAndVersion.Item2);
             }
 
-            return string.Empty;
+            return path;
         }
 
         private Tuple<string, string> GetName(string fullName)

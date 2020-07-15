@@ -838,7 +838,6 @@ namespace Test
   <PropertyGroup>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
-      C:\scaffolding\artifacts\packages\Debug\Shipping;
     </RestoreSources>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
@@ -1049,30 +1048,19 @@ Outputs the Project Information needed for CodeGeneration to a file.
       ResolveReferences;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
-  <Choose>
-    <!-- For Portable Msbuild, MSBuildRuntimeType = 'Core'. For Desktop MsBuild, MSBuildRuntimeType = 'Full'-->
-    <When Condition=""'$(MSBuildRuntimeType)' == 'Core'"">
-      <PropertyGroup>
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+  </PropertyGroup>
 
   <UsingTask TaskName=""ProjectContextWriter""
              AssemblyFile=""$(EvaluateProjectInfoForCodeGenerationAssemblyPath)"" />
 
-  <Target Name=""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
+  <Target Name = ""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
 
-    <ProjectContextWriter TargetFramework =""$(TargetFramework)""
+    <ProjectContextWriter TargetFramework = ""$(TargetFramework)""
                           OutputFile =""$(OutputFile)""
                           Name =""$(ProjectName)""
                           ResolvedReferences =""@(ReferencePath)""
-                          PackageDependencies =""@(_DependenciesDesignTime)""
                           ProjectReferences =""@(ProjectReference)""
                           AssemblyFullPath =""$(TargetPath)""
                           OutputType=""$(OutputType)""
@@ -1086,7 +1074,6 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           ProjectDepsFileName=""$(ProjectDepsFileName)""
                           ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""
                           ProjectAssetsFile=""$(ProjectAssetsFile)""/>
-
   </Target>
 </Project>
 ";

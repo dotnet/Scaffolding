@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Web.CodeGeneration.Msbuild;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,15 +40,34 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             }
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\packages\\X.Y.Z\\1.2.3")]
         [InlineData("C:\\Users\\User\\.nuget\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\X.Y.Z\\1.2.3")]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", null, null, "")]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", "X.Y.Z", null, "")]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", null, "1.2.3", "")]
         [InlineData(null, "X.Y.Z", "1.2.3", "")]
-        public void GetPathTest(string nugetPath, string packageName, string version, string expectedPath)
+        public void GetPathTestWindows(string nugetPath, string packageName, string version, string expectedPath)
         {
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
+                ProjectContextWriter writer = new ProjectContextWriter();
+                Assert.Equal(expectedPath, writer.GetPath(nugetPath, nameAndVersion));
+            }
+        }
+
+        [SkippableTheory]
+        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//X.Y.Z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//X.Y.Z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//packages//", null, null, "")]
+        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", null, "")]
+        [InlineData("C://Users//User//.nuget//packages//", null, "1.2.3", "")]
+        [InlineData(null, "X.Y.Z", "1.2.3", "")]
+        public void GetPathTestOSX(string nugetPath, string packageName, string version, string expectedPath)
+        {
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);

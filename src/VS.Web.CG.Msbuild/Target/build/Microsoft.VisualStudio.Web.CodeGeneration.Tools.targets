@@ -1,4 +1,4 @@
-﻿<!--
+<!--
  Copyright (c) .NET Foundation. All rights reserved.
  Licensed under the Apache License, Version 2.0.
 -->
@@ -17,7 +17,6 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <EvaluateProjectInfoForCodeGenerationDependsOn>
       $(EvaluateProjectInfoForCodeGenerationDependsOn);
       ResolveReferences;
-      ResolvePackageDependenciesDesignTime;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
 
@@ -34,7 +33,6 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           OutputFile ="$(OutputFile)"
                           Name ="$(ProjectName)"
                           ResolvedReferences ="@(ReferencePath)"
-                          PackageDependencies ="@(_DependenciesDesignTime)"
                           ProjectReferences ="@(ProjectReference)"
                           AssemblyFullPath ="$(TargetPath)"
                           OutputType="$(OutputType)"
@@ -46,7 +44,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           Configuration="$(Configuration)"
                           ProjectFullPath="$(MSBuildProjectFullPath)"
                           ProjectDepsFileName="$(ProjectDepsFileName)"
-                          ProjectRuntimeConfigFileName="$(ProjectRuntimeConfigFileName)"/>
-
+                          ProjectRuntimeConfigFileName="$(ProjectRuntimeConfigFileName)"
+                          ProjectAssetsFile="$(ProjectAssetsFile)"/>
   </Target>
 </Project>

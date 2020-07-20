@@ -231,7 +231,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var depsFile = Path.Combine(targetDir, context.DepsFile);
 
             string dotnetCodeGenInsideManPath = string.Empty;
-            
             if (IsNetCoreAppFramework(frameworkToUse))
             {
                 dotnetCodeGenInsideManPath = context.CompilationAssemblies

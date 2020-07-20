@@ -1,19 +1,25 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
-using Newtonsoft.Json;
+using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 {
     public class ProjectContextWriter : Build.Utilities.Task
     {
+        private const string TargetsProperty = "targets";
+        private const string PackageFoldersProperty = "packageFolders";
+        private const string DependencyProperty = "dependencies";
+        private const string TypeProperty = "type";
         #region Inputs
         [Build.Framework.Required]
         public string OutputFile { get; set; }
@@ -21,8 +27,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         [Build.Framework.Required]
         public ITaskItem[] ResolvedReferences { get; set; }
 
-        [Build.Framework.Required]
-        public ITaskItem[] PackageDependencies { get; set; }
 
         [Build.Framework.Required]
         public ITaskItem[] ProjectReferences { get; set; }
@@ -67,6 +71,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         [Build.Framework.Required]
         public string ProjectDepsFileName { get; set; }
+
+        [Build.Framework.Required]
+        public string ProjectAssetsFile { get; set; }
         #endregion
 
         public override bool Execute()
@@ -77,12 +84,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 AssemblyName = string.IsNullOrEmpty(this.AssemblyName) ? Path.GetFileName(this.AssemblyFullPath) : this.AssemblyName,
                 CompilationAssemblies = GetCompilationAssemblies(this.ResolvedReferences),
                 CompilationItems = this.CompilationItems.Select(i => i.ItemSpec),
+                PackageDependencies = GetPackageDependencies(this.ProjectAssetsFile),
                 Config = this.AssemblyFullPath + ".config",
                 Configuration = this.Configuration,
                 DepsFile = this.ProjectDepsFileName,
                 EmbededItems = this.EmbeddedItems.Select(i => i.ItemSpec),
                 IsClassLibrary = "Library".Equals(this.OutputType, StringComparison.OrdinalIgnoreCase),
-                PackageDependencies = this.GetPackageDependencies(PackageDependencies),
                 Platform = this.Platform,
                 ProjectFullPath = this.ProjectFullPath,
                 ProjectName = this.Name,
@@ -98,11 +105,116 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             msBuildContext.ProjectReferenceInformation = projReferenceInformation;
             using(var streamWriter = new StreamWriter(File.Create(OutputFile)))
             {
-                var json = JsonConvert.SerializeObject(msBuildContext);
+                var json = JsonSerializer.Serialize(msBuildContext);
                 streamWriter.Write(json);
             }
 
             return true;
+        }
+
+        private IEnumerable<DependencyDescription> GetPackageDependencies(string projectAssetsFile)
+        {
+            IList<DependencyDescription> packageDependencies = new List<DependencyDescription>();
+            if (!string.IsNullOrEmpty(projectAssetsFile) && File.Exists(projectAssetsFile) && !string.IsNullOrEmpty(TargetFramework))
+            {
+                //target framework moniker for the current project. We use this to get all targets for said moniker.
+                var targetFrameworkMoniker = NuGetFramework.Parse(TargetFramework)?.DotNetFrameworkName;
+                string json = File.ReadAllText(projectAssetsFile);
+                if (!string.IsNullOrEmpty(json) && !string.IsNullOrEmpty(targetFrameworkMoniker))
+                {
+                    try
+                    {
+                        JsonDocument baseDocument = JsonDocument.Parse(json);
+                        if (baseDocument != null)
+                        {
+                            JsonElement root = baseDocument.RootElement;
+                            //"targets" gives us all top-level and transitive dependencies. "packageFolders" gives us the path where the dependencies are on disk.
+                            if (root.TryGetProperty(TargetsProperty, out var targets) && root.TryGetProperty(PackageFoldersProperty, out var packageFolderPath))
+                            {
+                                if (targets.TryGetProperty(targetFrameworkMoniker, out var packages))
+                                {
+                                    var packagesEnumerator = packages.EnumerateObject();
+                                    //populate are our own List<DependencyDescription> of all the dependencies we find.
+                                    foreach (var package in packagesEnumerator)
+                                    {
+                                        var fullName = package.Name;
+                                        //get default nuget package path.
+                                        var path = packageFolderPath.EnumerateObject().Any() ? packageFolderPath.EnumerateObject().First().Name : string.Empty;
+                                        if (!string.IsNullOrEmpty(fullName) && !string.IsNullOrEmpty(path) && package.Value.TryGetProperty(TypeProperty, out var type))
+                                        {
+                                            //fullName is in the format {Package Name}/{Version} for example "System.Text.MoreText/2.1.1" Split into tuple. 
+                                            Tuple<string, string> nameAndVersion = GetName(fullName);
+                                            if (nameAndVersion != null)
+                                            {
+                                                var dependencyTypeValue = type.ToString();
+                                                var DependencyTypeEnum = DependencyType.Unknown;
+                                                if (Enum.TryParse(typeof(DependencyType), dependencyTypeValue, true, out var dependencyType))
+                                                {
+                                                    DependencyTypeEnum = (DependencyType)dependencyType;
+                                                }
+
+                                                string packagePath = GetPath(path, nameAndVersion);
+                                                DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
+                                                                                                             nameAndVersion.Item2,
+                                                                                                             Directory.Exists(path) ? path : string.Empty,
+                                                                                                             targetFrameworkMoniker,
+                                                                                                             DependencyTypeEnum,
+                                                                                                             true);
+                                                if (package.Value.TryGetProperty(DependencyProperty, out var dependencies))
+                                                {
+                                                    var dependenciesList = dependencies.EnumerateObject();
+                                                    //Add all transitive dependencies
+                                                    foreach (var dep in dependenciesList)
+                                                    {
+                                                        if (!string.IsNullOrEmpty(dep.Name))
+                                                        {
+                                                            Dependency transitiveDependency = new Dependency(dep.Name, dep.Value.ToString());
+                                                            dependency.AddDependency(transitiveDependency);
+                                                        }
+                                                    }
+                                                }
+                                                packageDependencies.Add(dependency);
+                                            } 
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        Debug.Assert(false, "Completely empty json.");
+                    }
+                }
+            }
+
+            return packageDependencies;
+        }
+
+
+        internal string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
+        {
+            string path = string.Empty;
+            if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
+            {
+                path = Path.Combine(nugetPath, nameAndVersion.Item1, nameAndVersion.Item2);
+            }
+
+            return path;
+        }
+
+        private Tuple<string, string> GetName(string fullName)
+        {
+            Tuple<string, string> nameAndVersion = null;
+            if (!string.IsNullOrEmpty(fullName))
+            {
+                string[] splitName = fullName.Split("/");
+                if (splitName.Length  > 1)
+                {
+                    nameAndVersion = new Tuple<string, string>(splitName[0], splitName[1]);
+                }
+            }
+            return nameAndVersion;
         }
 
         private IEnumerable<ProjectReferenceInformation> GetProjectDependency(
@@ -112,77 +224,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return ProjectReferenceInformationProvider.GetProjectReferenceInformation(
                 rootProjectFullpath,
                 projectReferences);
-        }
-
-        private IEnumerable<DependencyDescription> GetPackageDependencies(ITaskItem[] packageDependecyItems)
-        {
-            Requires.NotNull(packageDependecyItems, nameof(packageDependecyItems));
-            var packages = packageDependecyItems.Select(item => new { key = item.ItemSpec, value = GetPackageDependency(item) })
-                .Where(package => package != null && package.value != null);
-            var packageMap = new Dictionary<string, DependencyDescription>(StringComparer.OrdinalIgnoreCase);
-            foreach(var package in packages)
-            {
-                packageMap.Add(package.key, package.value);
-            }
-
-            PopulateDependencies(packageMap, packageDependecyItems);
-
-            return packageMap.Values;
-        }
-
-        private void PopulateDependencies(Dictionary<string, DependencyDescription> packageMap, ITaskItem[] packageDependecyItems)
-        {
-            Requires.NotNull(packageMap, nameof(packageMap));
-            Requires.NotNull(packageDependecyItems, nameof(packageDependecyItems));
-            foreach (var item in packageDependecyItems)
-            {
-                var depSpecs = item.GetMetadata("Dependencies")
-                    ?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                DependencyDescription current = null;
-                if (depSpecs == null || !packageMap.TryGetValue(item.ItemSpec, out current))
-                {
-                    return;
-                }
-
-                foreach (var depSpec in depSpecs)
-                {
-                    var spec = item.ItemSpec.Split('/').FirstOrDefault() +"/"+ depSpec;
-                    DependencyDescription d = null;
-                    if (packageMap.TryGetValue(spec, out d))
-                    {
-                        current.AddDependency(new Dependency(d.Name, d.Version));
-                    }
-                }
-            }
-        }
-
-        private DependencyDescription GetPackageDependency(ITaskItem item)
-        {
-            Requires.NotNull(item, nameof(item));
-
-            var type = item.GetMetadata("Type");
-            var name = ("Target".Equals(type, StringComparison.OrdinalIgnoreCase))
-                ? item.ItemSpec
-                : item.GetMetadata("Name");
-
-            if (string.IsNullOrEmpty(name))
-            {
-                return null;
-            }
-            var version = item.GetMetadata("Version");
-            var path = item.GetMetadata("Path");
-            var resolved = item.GetMetadata("Resolved");
-
-            var isResolved = false;
-            bool.TryParse(resolved, out isResolved);
-
-            var framework = item.ItemSpec.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).First();
-            DependencyType dt;
-            dt = Enum.TryParse(type, out dt)
-                ? dt
-                : DependencyType.Unknown;
-
-            return new DependencyDescription(name, version, path, framework, dt, isResolved);
         }
 
         private IEnumerable<ResolvedReference> GetCompilationAssemblies(ITaskItem[] resolvedReferences)

@@ -833,6 +833,24 @@ namespace Test
 </Project>
 ";
 
+        public const string SimpleNet50ProjectText = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
+  <PropertyGroup>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+    </RestoreSources>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Microsoft.Test</RootNamespace>
+    <ProjectName>Test</ProjectName>
+    <NoWarn>NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""5.0.0-preview.6.20323.1"" />
+  </ItemGroup>
+</Project>
+";
         public const string BaseDbContextText = @"
 using Microsoft.EntityFrameworkCore;
 using Test.Models;
@@ -913,6 +931,39 @@ namespace Test
 }
 ";
 
+        public const string EmptyTestStartupText = @"
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Test
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            app.UseStaticFiles();
+        }
+    }
+}
+";
         public const string BlogModelText = @"
 namespace Test.Models
 {
@@ -978,6 +1029,52 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           ProjectDepsFileName=""$(ProjectDepsFileName)""
                           ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""/>
 
+  </Target>
+</Project>
+";
+
+ public const string ProjectContextWriterMsbuildHelperText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationDependsOn>
+      $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      ResolveReferences;
+    </EvaluateProjectInfoForCodeGenerationDependsOn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName=""ProjectContextWriter""
+             AssemblyFile=""$(EvaluateProjectInfoForCodeGenerationAssemblyPath)"" />
+
+  <Target Name = ""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
+
+    <ProjectContextWriter TargetFramework = ""$(TargetFramework)""
+                          OutputFile =""$(OutputFile)""
+                          Name =""$(ProjectName)""
+                          ResolvedReferences =""@(ReferencePath)""
+                          ProjectReferences =""@(ProjectReference)""
+                          AssemblyFullPath =""$(TargetPath)""
+                          OutputType=""$(OutputType)""
+                          Platform=""$(Platform)""
+                          RootNameSpace =""$(RootNamespace)""
+                          CompilationItems =""@(Compile)""
+                          TargetDirectory=""$(TargetDir)""
+                          EmbeddedItems=""@(EmbeddedResource)""
+                          Configuration=""$(Configuration)""
+                          ProjectFullPath=""$(MSBuildProjectFullPath)""
+                          ProjectDepsFileName=""$(ProjectDepsFileName)""
+                          ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""
+                          ProjectAssetsFile=""$(ProjectAssetsFile)""/>
   </Target>
 </Project>
 ";

@@ -13,7 +13,7 @@
     <!-- Ref packages -->
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>3.1.3</VersionPrefix>
+    <VersionPrefix>3.1.4</VersionPrefix>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
@@ -33,8 +33,8 @@
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>3.1.0</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
-    <MicrosoftBuildPackageVersion>15.6.82</MicrosoftBuildPackageVersion>
-    <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildPackageVersion>15.6.82 </MicrosoftBuildPackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>15.6.82 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.3.1</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
@@ -53,6 +53,7 @@
     <NuGetFrameworksPackageVersion>4.7.0</NuGetFrameworksPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
     <SystemCollectionsImmutablePackageVersion>1.7.0</SystemCollectionsImmutablePackageVersion>
+    <SystemTextJson>4.7.2</SystemTextJson>
     <!-- Everything below here are Packages only used by test projects -->
     <!-- Microsoft.AspNetCore.Hosting -->
     <MicrosoftAspNetCoreHostingPackageVersion>3.0.0-preview4-19123-01</MicrosoftAspNetCoreHostingPackageVersion>
@@ -73,7 +74,7 @@
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
     <MicrosoftAspNetCorePackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCorePackageVersion>
-    <MicrosoftBuildRuntimePackageVersion>15.6.82</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>16.6.0</MicrosoftBuildRuntimePackageVersion>
     <!-- Microsoft.AspNetCore.Mvc -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreMvcPackageVersion>3.0.0-alpha1-10584</MicrosoftAspNetCoreMvcPackageVersion>

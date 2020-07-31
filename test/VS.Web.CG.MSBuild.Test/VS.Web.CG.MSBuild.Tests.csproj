@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   
   <Import Project="$(RepoRoot)test\TestPackage.props" />
 
@@ -18,12 +18,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" />
+    <Compile Include="..\..\src\Ext.ProjectModel.MsBuild.Sources\**\*.cs;">
+      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
   </ItemGroup>
-
+ 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
+    <PackageReference Include="System.Text.Json" PrivateAssets="All" Version="$(SystemTextJson)" />
   </ItemGroup>
-
 </Project>

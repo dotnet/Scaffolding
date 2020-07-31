@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
@@ -25,5 +25,6 @@
       <NoWarn>KRB4002</NoWarn>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks" PrivateAssets="All" Version="$(NuGetFrameworksPackageVersion)" />
+    <PackageReference Include="System.Text.Json" PrivateAssets="All" Version="$(SystemTextJson)" />
   </ItemGroup>
 </Project>

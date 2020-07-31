@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
 #if NET461
         static string testAppPath = Path.Combine("..", "..", "..", "..", "..", "TestApps", "ModelTypesLocatorTestClassLibrary");
-#elif NETCOREAPP3_0
+#elif NETCOREAPP3_1
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
 #else
 #error target frameworks need to be updated.

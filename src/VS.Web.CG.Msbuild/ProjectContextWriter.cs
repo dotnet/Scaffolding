@@ -156,7 +156,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                                                 string packagePath = GetPath(path, nameAndVersion);
                                                 DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
                                                                                                              nameAndVersion.Item2,
-                                                                                                             Directory.Exists(path) ? path : string.Empty,
+                                                                                                             Directory.Exists(packagePath) ? packagePath : string.Empty,
                                                                                                              targetFrameworkMoniker,
                                                                                                              DependencyTypeEnum,
                                                                                                              true);

@@ -13,6 +13,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
 {
     public class ProjectContextWriterTests : TestBase
     {
+        public const string NetCoreApp31ShortTfm = "netcoreapp3.1";
+
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
         private ITestOutputHelper _outputHelper;
 
@@ -26,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
-                new MsBuildProjectSetupHelper().SetupEmptyCodeGenerationProject(fileProvider, _outputHelper);
+                new MsBuildProjectSetupHelper().SetupEmptyCodeGenerationProject(fileProvider, _outputHelper, NetCoreApp31ShortTfm);
                 var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName);
 
                 var projectContext = GetProjectContext(path, true);

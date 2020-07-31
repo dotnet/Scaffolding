@@ -148,7 +148,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                                             {
                                                 var dependencyTypeValue = type.ToString();
                                                 var DependencyTypeEnum = DependencyType.Unknown;
-                                                if (Enum.TryParse(typeof(DependencyType), dependencyTypeValue, true, out var dependencyType))
+                                                if (Enum.TryParse<DependencyType>(dependencyTypeValue, true, out var dependencyType))
                                                 {
                                                     DependencyTypeEnum = (DependencyType)dependencyType;
                                                 }
@@ -156,7 +156,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                                                 string packagePath = GetPath(path, nameAndVersion);
                                                 DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
                                                                                                              nameAndVersion.Item2,
-                                                                                                             Directory.Exists(path) ? path : string.Empty,
+                                                                                                             Directory.Exists(packagePath) ? packagePath : string.Empty,
                                                                                                              targetFrameworkMoniker,
                                                                                                              DependencyTypeEnum,
                                                                                                              true);
@@ -208,7 +208,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             Tuple<string, string> nameAndVersion = null;
             if (!string.IsNullOrEmpty(fullName))
             {
-                string[] splitName = fullName.Split("/");
+                string[] splitName = fullName.Split('/');
                 if (splitName.Length  > 1)
                 {
                     nameAndVersion = new Tuple<string, string>(splitName[0], splitName[1]);

@@ -54,17 +54,26 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
-        internal void SetupEmptyCodeGenerationProject(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
+        internal void SetupEmptyCodeGenerationProject(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper, string shortTfm)
         {
             fileProvider.Add("global.json", GlobalJsonText);
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net5.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", shortTfm));
 
-            fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
+            string rootProjectTxt;
+            if (shortTfm.Equals("netcoreapp3.1"))
+            {
+                fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText31);
+                rootProjectTxt = MsBuildProjectStrings.SimpleNet31ProjectText;
+            }
+            else
+            {
+                fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
+                rootProjectTxt = MsBuildProjectStrings.SimpleNet50ProjectText;
+            }
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net5.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-
-            var rootProjectTxt = MsBuildProjectStrings.SimpleNet50ProjectText;
+            fileProvider.Copy(msbuildTaskDllPath, $"toolAssets/{shortTfm}/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
             fileProvider.Add(MsBuildProjectStrings.RootProjectName, rootProjectTxt);
             fileProvider.Add("Startup.cs", MsBuildProjectStrings.EmptyTestStartupText);
             fileProvider.Add(MsBuildProjectStrings.DbContextInheritanceProgramName, MsBuildProjectStrings.DbContextInheritanceProjectProgramText);

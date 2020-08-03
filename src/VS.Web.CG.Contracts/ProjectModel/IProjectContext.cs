@@ -50,6 +50,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel
         string TargetFramework { get; }
 
         /// <summary>
+        /// TargetFrameworkMoniker for the project.
+        /// If the project has multiple frameworks, all of the
+        /// information in the ProjectContext is specific to this
+        /// TargetFramework.
+        /// </summary>
+        string TargetFrameworkMoniker { get; }
+
+        /// <summary>
         /// Full path to config file for the assembly.
         /// Usually <see cref="AssemblyFullPath"/> + ".config"
         /// </summary>

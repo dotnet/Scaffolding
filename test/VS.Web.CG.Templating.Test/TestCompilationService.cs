@@ -89,7 +89,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
         private static ProjectContext CreateProjectContext(string projectPath)
         {
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
-            var framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName();
+            const string framework = "net1.0";
             if (!projectPath.EndsWith(Microsoft.DotNet.ProjectModel.Project.FileName))
             {
                 projectPath = Path.Combine(projectPath, Microsoft.DotNet.ProjectModel.Project.FileName);

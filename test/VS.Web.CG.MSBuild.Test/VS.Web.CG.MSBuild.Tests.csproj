@@ -26,6 +26,5 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
   </ItemGroup>
 </Project>

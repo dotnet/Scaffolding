@@ -34,6 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 Assert.True(string.Equals(projectContext.DepsFile, "Test.deps.json", StringComparison.OrdinalIgnoreCase));
                 Assert.True(string.Equals(projectContext.RuntimeConfig, "Test.runtimeconfig.json", StringComparison.OrdinalIgnoreCase));
                 Assert.False(string.IsNullOrEmpty(projectContext.TargetFramework));
+                Assert.False(string.IsNullOrEmpty(projectContext.TargetFrameworkMoniker));
                 Assert.True(projectContext.PackageDependencies.Any());
                 Assert.True(projectContext.CompilationAssemblies.Any());
                 Assert.True(projectContext.PackageDependencies.Where(x => x.Name.Equals("Microsoft.VisualStudio.Web.CodeGeneration.Design")).Any());

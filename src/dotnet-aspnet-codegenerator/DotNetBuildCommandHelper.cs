@@ -1,11 +1,10 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Internal;
-using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
@@ -14,14 +13,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         internal static BuildResult Build(
             string project,
             string configuration,
-            NuGetFramework framework,
+            string shortFramework,
             string buildBasePath)
         {
             var args = new List<string>()
             {
                 project,
                 "--configuration", configuration,
-                "--framework", framework.GetShortFolderName(),
+                "--framework", shortFramework,
             };
 
             if (buildBasePath != null)
@@ -40,9 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             var command = Command.CreateDotNet(
                     "build",
-                    args,
-                    framework,
-                    configuration: configuration)
+                    args)
                     .OnErrorLine((str) => stdOutMsgs.Add(str))
                     .OnOutputLine((str) => stdErrorMsgs.Add(str));
 

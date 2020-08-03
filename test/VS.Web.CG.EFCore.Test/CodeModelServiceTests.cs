@@ -9,7 +9,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Moq;
-using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
 using IProjectContext = Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext;

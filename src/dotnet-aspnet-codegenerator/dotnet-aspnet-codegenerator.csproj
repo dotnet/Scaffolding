@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
     <TargetFramework>net5.0</TargetFramework>
@@ -35,7 +35,6 @@
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

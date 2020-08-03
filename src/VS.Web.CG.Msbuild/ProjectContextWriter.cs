@@ -10,7 +10,6 @@ using System.Text.Json;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
-using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 {
@@ -39,6 +38,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         [Build.Framework.Required]
         public string TargetFramework { get; set; }
+
+        [Build.Framework.Required]
+        public string TargetFrameworkMoniker { get; set; }
 
         [Build.Framework.Required]
         public string Name { get; set; }
@@ -97,7 +99,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 RootNamespace = this.RootNamespace,
                 RuntimeConfig = this.ProjectRuntimeConfigFileName,
                 TargetDirectory = this.TargetDirectory,
-                TargetFramework = this.TargetFramework
+                TargetFramework = this.TargetFramework,
+                TargetFrameworkMoniker = this.TargetFrameworkMoniker
             };
 
             var projectReferences = msBuildContext.ProjectReferences;
@@ -118,7 +121,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             if (!string.IsNullOrEmpty(projectAssetsFile) && File.Exists(projectAssetsFile) && !string.IsNullOrEmpty(TargetFramework))
             {
                 //target framework moniker for the current project. We use this to get all targets for said moniker.
-                var targetFrameworkMoniker = NuGetFramework.Parse(TargetFramework)?.DotNetFrameworkName;
+                var targetFrameworkMoniker = TargetFrameworkMoniker;
                 string json = File.ReadAllText(projectAssetsFile);
                 if (!string.IsNullOrEmpty(json) && !string.IsNullOrEmpty(targetFrameworkMoniker))
                 {

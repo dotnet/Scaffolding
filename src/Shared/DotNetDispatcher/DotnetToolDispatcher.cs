@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -7,13 +7,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using NuGet.Frameworks;
+using System.Runtime.Versioning;
 
 namespace Microsoft.Extensions.Internal
 {
     internal static class DotnetToolDispatcher
     {
         private const string DispatcherVersionArgumentName = "--dispatcher-version";
+        public const string NETCoreApp = ".NETCoreApp";
 
         private static readonly string DispatcherName = Assembly.GetEntryAssembly().GetName().Name;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Extensions.Internal
         /// <param name="depsFile">Full path to the deps.json for the user's project.</param>
         /// <param name="dependencyToolPath">The executable which needs to be invoked.</param>
         /// <param name="dispatchArgs">Arguments to pass to the executable.</param>
-        /// <param name="framework"></param>
+        /// <param name="tfmMoniker"></param>
         /// <param name="configuration"></param>
         /// <param name="projectDirectory"></param>
         /// <param name="assemblyFullPath"></param>
@@ -33,7 +34,7 @@ namespace Microsoft.Extensions.Internal
             string depsFile,
             string dependencyToolPath,
             IEnumerable<string> dispatchArgs,
-            NuGetFramework framework,
+            string tfmMoniker,
             string configuration,
             string projectDirectory,
             string assemblyFullPath)
@@ -45,16 +46,8 @@ namespace Microsoft.Extensions.Internal
             dispatchArgsList.Add(DispatcherVersionArgumentName);
             dispatchArgsList.Add(dispatcherVersionArgumentValue);
 
-            if (IsNetCoreAppFramework(framework))
+            if (IsNetCoreAppFramework(tfmMoniker))
             {
-                // For projects targeting netcoreapp1.x invoke the inside man in the below fashion:
-                //
-                // C:\Program Files\dotnet\dotnet.exe exec 
-                //  --runtimeconfig (appname).runtimeconfig.json 
-                //  --depsfile (appname).deps.json 
-                //  --additionalprobingpath (Path to local nuget cache) (path to command name .dll)
-                //  --no-dispatch
-                //  (dispatchArgs)
 
                 var commandResolutionArgs = new string[]
                 {
@@ -65,7 +58,7 @@ namespace Microsoft.Extensions.Internal
                     dependencyToolPath
                 };
 
-                command = Command.CreateDotNet("exec", commandResolutionArgs.Concat(dispatchArgsList), framework, configuration);
+                command = Command.CreateDotNet("exec", commandResolutionArgs.Concat(dispatchArgsList));
             }
             else
             {
@@ -77,13 +70,24 @@ namespace Microsoft.Extensions.Internal
             return command;
         }
 
-        private static bool IsNetCoreAppFramework(NuGetFramework framework)
+        internal static bool IsNetCoreAppFramework(string targetFrameworkMoniker)
         {
-            //Only need to compare the framework name to be netcoreapp. Version doesn't matter.
+            if (string.IsNullOrEmpty(targetFrameworkMoniker))
+            {
+                return false;
+            }
 
-            return NuGetFramework.FrameworkNameComparer.Equals(
-                framework,
-                NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            try
+            {
+                FrameworkName framework = new FrameworkName(targetFrameworkMoniker);
+                return framework.Identifier.Equals(NETCoreApp, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                Debug.Fail(ex.Message);
+            }
+
+            return false;
         }
 
         private static void EnsureBindingRedirects(string assemblyFullPath, string toolName)

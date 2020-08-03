@@ -7,12 +7,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
-using NuGet.Frameworks;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
@@ -173,10 +171,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             var context = GetProjectInformation(projectPath, configuration);
-            var frameworkToUse = NuGetFramework.Parse(context.TargetFramework);
+            var tfmMoniker = context.TargetFrameworkMoniker;
+            var shortFramework = context.TargetFramework;
             if (!noBuild)
             {
-                var result = Build(logger, projectPath, configuration, frameworkToUse, buildBasePath);
+                var result = Build(logger, projectPath, configuration, shortFramework, buildBasePath);
                 if (result != 0)
                 {
                     return result;
@@ -192,7 +191,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     args,
                     buildBasePath,
                     configuration,
-                    frameworkToUse,
+                    tfmMoniker,
+                    shortFramework,
                     server);
 
                 var exitCode = command
@@ -215,7 +215,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             string[] args,
             string buildBasePath,
             string configuration,
-            NuGetFramework frameworkToUse,
+            string tfmMoniker,
+            string shortFramework,
             ScaffoldingServer server)
         {
             var projectDirectory = Directory.GetParent(context.ProjectFullPath).FullName;
@@ -229,9 +230,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var targetDir = Path.GetDirectoryName(context.AssemblyFullPath);
             var runtimeConfigPath = Path.Combine(targetDir, context.RuntimeConfig);
             var depsFile = Path.Combine(targetDir, context.DepsFile);
-
             string dotnetCodeGenInsideManPath = string.Empty;
-            if (IsNetCoreAppFramework(frameworkToUse))
+            if (DotnetToolDispatcher.IsNetCoreAppFramework(tfmMoniker))
             {
                 dotnetCodeGenInsideManPath = context.CompilationAssemblies
                 .Where(c => Path.GetFileNameWithoutExtension(c.Name)
@@ -254,7 +254,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,
-                     frameworkToUse.GetShortFolderName(),
+                     shortFramework,
                      server.Port.ToString());
 
             return DotnetToolDispatcher.CreateDispatchCommand(
@@ -262,20 +262,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     depsFile: depsFile,
                     dependencyToolPath: dotnetCodeGenInsideManPath,
                     dispatchArgs: dependencyArgs,
-                    framework: frameworkToUse,
+                    tfmMoniker: tfmMoniker,
                     configuration: configuration,
                     projectDirectory: projectDirectory,
                     assemblyFullPath: context.AssemblyFullPath)
                 .InWorkingDirectory(projectDirectory);
-        }
-
-        private static bool IsNetCoreAppFramework(NuGetFramework framework)
-        {
-            // Only need to compare the framework name to be netcoreapp. Version doesn't matter.
-
-            return NuGetFramework.FrameworkNameComparer.Equals(
-                framework,
-                NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10);
         }
 
         private IProjectContext GetProjectInformation(string projectPath, string configuration)
@@ -322,14 +313,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return string.Empty;
         }
 
-        private int Build(ILogger logger, string projectPath, string configuration, NuGetFramework frameworkToUse, string buildBasePath)
+        private int Build(ILogger logger, string projectPath, string configuration, string shortFramework, string buildBasePath)
         {
 
             logger.LogMessage(Resources.BuildingProject);
             var buildResult = DotNetBuildCommandHelper.Build(
                 projectPath,
                 configuration,
-                frameworkToUse,
+                shortFramework,
                 buildBasePath);
 
             if (buildResult.Result.ExitCode != 0)

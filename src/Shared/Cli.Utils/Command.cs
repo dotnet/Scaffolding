@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.Internal
 {
@@ -17,17 +16,17 @@ namespace Microsoft.Extensions.Internal
         private Action<string> _stdErrorHandler;
         private Action<string> _stdOutHandler;
 
-        internal static Command CreateDotNet(string commandName, IEnumerable<string> args, NuGetFramework framework = null, string configuration = "Debug")
+        internal static Command CreateDotNet(string commandName, IEnumerable<string> args)
         {
-            return Create(DotNetMuxer.MuxerPathOrDefault(), new[] { commandName }.Concat(args), framework, configuration);
+            return Create(DotNetMuxer.MuxerPathOrDefault(), new[] { commandName }.Concat(args));
         }
 
-        internal static Command Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null, string configuration = "Debug")
+        internal static Command Create(string commandName, IEnumerable<string> args)
         {
-            return new Command(commandName, args, framework, configuration);
+            return new Command(commandName, args);
         }
 
-        private Command(string commandName, IEnumerable<string> args, NuGetFramework framework, string configuration)
+        private Command(string commandName, IEnumerable<string> args)
         {
             var psi = new ProcessStartInfo
             {

@@ -671,6 +671,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <Target Name=""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
 
     <ProjectContextWriter TargetFramework =""$(TargetFramework)""
+                          TargetFrameworkMoniker=""$(TargetFrameworkMoniker)""
                           OutputFile =""$(OutputFile)""
                           Name =""$(ProjectName)""
                           ResolvedReferences =""@(ReferencePath)""
@@ -1058,6 +1059,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <Target Name = ""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
 
     <ProjectContextWriter TargetFramework = ""$(TargetFramework)""
+                          TargetFrameworkMoniker = ""$(TargetFrameworkMoniker)""
                           OutputFile =""$(OutputFile)""
                           Name =""$(ProjectName)""
                           ResolvedReferences =""@(ReferencePath)""

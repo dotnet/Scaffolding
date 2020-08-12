@@ -48,7 +48,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
             get
             {
-
                 var list = _codeGenerationFrameworkAssemblies
                     .SelectMany(_projectContext.GetReferencingPackages)
                     .Distinct()

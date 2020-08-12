@@ -18,7 +18,7 @@
     <VersionSDKMinor>0</VersionSDKMinor>
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionSDKMinor)</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>7</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration>8</PreReleaseVersionIteration>
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
   </PropertyGroup>
   <PropertyGroup>

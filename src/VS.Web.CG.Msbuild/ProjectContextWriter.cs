@@ -121,6 +121,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             if (!string.IsNullOrEmpty(projectAssetsFile) && File.Exists(projectAssetsFile) && !string.IsNullOrEmpty(TargetFramework))
             {
                 //target framework moniker for the current project. We use this to get all targets for said moniker.
+                var targetFramework = TargetFramework;
                 var targetFrameworkMoniker = TargetFrameworkMoniker;
                 string json = File.ReadAllText(projectAssetsFile);
                 if (!string.IsNullOrEmpty(json) && !string.IsNullOrEmpty(targetFrameworkMoniker))
@@ -134,52 +135,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                             //"targets" gives us all top-level and transitive dependencies. "packageFolders" gives us the path where the dependencies are on disk.
                             if (root.TryGetProperty(TargetsProperty, out var targets) && root.TryGetProperty(PackageFoldersProperty, out var packageFolderPath))
                             {
-                                if (targets.TryGetProperty(targetFrameworkMoniker, out var packages))
+                                if (targets.TryGetProperty(targetFramework, out var packages))
                                 {
-                                    var packagesEnumerator = packages.EnumerateObject();
-                                    //populate are our own List<DependencyDescription> of all the dependencies we find.
-                                    foreach (var package in packagesEnumerator)
-                                    {
-                                        var fullName = package.Name;
-                                        //get default nuget package path.
-                                        var path = packageFolderPath.EnumerateObject().Any() ? packageFolderPath.EnumerateObject().First().Name : string.Empty;
-                                        if (!string.IsNullOrEmpty(fullName) && !string.IsNullOrEmpty(path) && package.Value.TryGetProperty(TypeProperty, out var type))
-                                        {
-                                            //fullName is in the format {Package Name}/{Version} for example "System.Text.MoreText/2.1.1" Split into tuple. 
-                                            Tuple<string, string> nameAndVersion = GetName(fullName);
-                                            if (nameAndVersion != null)
-                                            {
-                                                var dependencyTypeValue = type.ToString();
-                                                var DependencyTypeEnum = DependencyType.Unknown;
-                                                if (Enum.TryParse(typeof(DependencyType), dependencyTypeValue, true, out var dependencyType))
-                                                {
-                                                    DependencyTypeEnum = (DependencyType)dependencyType;
-                                                }
-
-                                                string packagePath = GetPath(path, nameAndVersion);
-                                                DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
-                                                                                                             nameAndVersion.Item2,
-                                                                                                             Directory.Exists(packagePath) ? packagePath : string.Empty,
-                                                                                                             targetFrameworkMoniker,
-                                                                                                             DependencyTypeEnum,
-                                                                                                             true);
-                                                if (package.Value.TryGetProperty(DependencyProperty, out var dependencies))
-                                                {
-                                                    var dependenciesList = dependencies.EnumerateObject();
-                                                    //Add all transitive dependencies
-                                                    foreach (var dep in dependenciesList)
-                                                    {
-                                                        if (!string.IsNullOrEmpty(dep.Name))
-                                                        {
-                                                            Dependency transitiveDependency = new Dependency(dep.Name, dep.Value.ToString());
-                                                            dependency.AddDependency(transitiveDependency);
-                                                        }
-                                                    }
-                                                }
-                                                packageDependencies.Add(dependency);
-                                            } 
-                                        }
-                                    }
+                                    packageDependencies = DeserializePackages(packages, packageFolderPath, targetFrameworkMoniker);
+                                }
+                                else if(targets.TryGetProperty(targetFrameworkMoniker, out var legacyPackages))
+                                {
+                                    packageDependencies = DeserializePackages(legacyPackages, packageFolderPath, targetFrameworkMoniker);
                                 }
                             }
                         }
@@ -190,10 +152,59 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                     }
                 }
             }
-
             return packageDependencies;
         }
 
+        private IList<DependencyDescription> DeserializePackages(JsonElement packages, JsonElement packageFolderPath, string targetFrameworkMoniker)
+        {
+            IList<DependencyDescription> packageDependencies = new List<DependencyDescription>();
+            var packagesEnumerator = packages.EnumerateObject();
+            //populate are our own List<DependencyDescription> of all the dependencies we find.
+            foreach (var package in packagesEnumerator)
+            {
+                var fullName = package.Name;
+                //get default nuget package path.
+                var path = packageFolderPath.EnumerateObject().Any() ? packageFolderPath.EnumerateObject().First().Name : string.Empty;
+                if (!string.IsNullOrEmpty(fullName) && !string.IsNullOrEmpty(path) && package.Value.TryGetProperty(TypeProperty, out var type))
+                {
+                    //fullName is in the format {Package Name}/{Version} for example "System.Text.MoreText/2.1.1" Split into tuple. 
+                    Tuple<string, string> nameAndVersion = GetName(fullName);
+                    if (nameAndVersion != null)
+                    {
+                        var dependencyTypeValue = type.ToString();
+                        var DependencyTypeEnum = DependencyType.Unknown;
+                        if (Enum.TryParse(typeof(DependencyType), dependencyTypeValue, true, out var dependencyType))
+                        {
+                            DependencyTypeEnum = (DependencyType)dependencyType;
+                        }
+
+                        string packagePath = GetPath(path, nameAndVersion);
+                        DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
+                                                                                        nameAndVersion.Item2,
+                                                                                        Directory.Exists(packagePath) ? packagePath : string.Empty,
+                                                                                        targetFrameworkMoniker,
+                                                                                        DependencyTypeEnum,
+                                                                                        true);
+                        if (package.Value.TryGetProperty(DependencyProperty, out var dependencies))
+                        {
+                            var dependenciesList = dependencies.EnumerateObject();
+                            //Add all transitive dependencies
+                            foreach (var dep in dependenciesList)
+                            {
+                                if (!string.IsNullOrEmpty(dep.Name))
+                                {
+                                    Dependency transitiveDependency = new Dependency(dep.Name, dep.Value.ToString());
+                                    dependency.AddDependency(transitiveDependency);
+                                }
+                            }
+                        }
+                        packageDependencies.Add(dependency);
+                    }
+                }
+            }
+
+            return packageDependencies;
+        }
 
         internal string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
         {

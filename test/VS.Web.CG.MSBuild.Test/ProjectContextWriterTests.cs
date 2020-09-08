@@ -69,7 +69,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         [InlineData(null, "X.Y.Z", "1.2.3", "")]
         public void GetPathTestOSX(string nugetPath, string packageName, string version, string expectedPath)
         {
-            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
@@ -79,15 +79,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         }
 
         [SkippableTheory]
-        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//X.Y.Z//1.2.3")]
-        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//X.Y.Z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//X.Y.Z/1.2.3")]
+        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//X.Y.Z/1.2.3")]
         [InlineData("C://Users//User//.nuget//packages//", null, null, "")]
         [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", null, "")]
         [InlineData("C://Users//User//.nuget//packages//", null, "1.2.3", "")]
         [InlineData(null, "X.Y.Z", "1.2.3", "")]
         public void GetPathTestLinux(string nugetPath, string packageName, string version, string expectedPath)
         {
-            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);

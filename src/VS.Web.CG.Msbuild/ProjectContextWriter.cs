@@ -197,8 +197,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             string path = string.Empty;
             if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
             {
-                string nameAndVersion = Path.Combine(nameAndVersion.Item1, nameAndVersion.Item2);
-                path = Path.Combine(nugetPath, nameAndVersion);
+                string nameAndVersion2 = Path.Combine(nameAndVersion.Item1, nameAndVersion.Item2);
+                path = Path.Combine(nugetPath, nameAndVersion2);
 
             }
 

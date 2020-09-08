@@ -23,10 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             _outputHelper = outputHelper;
         }
 
-        //Strangely test is failing in a cmdline build. It passes in VS test explorer and have not
-        //been able to debug the error since it does not occur. Tried the build of the temp project
-        //manually and it all looked good. Only skipping it on 3.1 tfm for now.
-        [Fact(Skip="Will fix in a future update.")]
+        [Fact]
         public void TestProjectContextFromMsBuild()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -73,6 +70,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         public void GetPathTestOSX(string nugetPath, string packageName, string version, string expectedPath)
         {
             Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
+                ProjectContextWriter writer = new ProjectContextWriter();
+                Assert.Equal(expectedPath, writer.GetPath(nugetPath, nameAndVersion));
+            }
+        }
+
+        [SkippableTheory]
+        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//X.Y.Z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//X.Y.Z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//packages//", null, null, "")]
+        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", null, "")]
+        [InlineData("C://Users//User//.nuget//packages//", null, "1.2.3", "")]
+        [InlineData(null, "X.Y.Z", "1.2.3", "")]
+        public void GetPathTestLinux(string nugetPath, string packageName, string version, string expectedPath)
+        {
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);

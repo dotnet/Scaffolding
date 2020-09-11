@@ -1,6 +1,6 @@
 {
   "Alias": "identity",
-  "Description": "Generates an MVC Area with controllers and ",
+  "Description": "Generates identity files.",
   "Arguments": [ ],
   "Options": [
     {

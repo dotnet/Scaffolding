@@ -1,6 +1,6 @@
 {
   "Alias": "identity",
-  "Description": "Generates a Razor Pages area.",
+  "Description": "Generates identity files.",
   "Arguments": [ ],
   "Options": [
     {

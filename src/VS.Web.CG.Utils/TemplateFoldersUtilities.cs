@@ -67,6 +67,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                     rootFolders.Add(containingProjectPath);
                 }
             }
+            else 
+            {
+                var assembly = projectContext.GetAssembly(containingProject);
+                if (assembly != null)
+                {
+                    rootFolders.Add(GetPackagePathFromAssembly(containingProject, assembly.ResolvedPath));
+                }
+            }
 
             foreach (var rootFolder in rootFolders)
             {
@@ -81,6 +89,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 }
             }
             return templateFolders;
+        }
+
+        public static string GetPackagePathFromAssembly(string assemblyName, string resolvedPath)
+        {
+            if (!string.IsNullOrEmpty(resolvedPath) && !string.IsNullOrEmpty(assemblyName))
+            {
+                string path = Path.GetFullPath(Path.Combine(resolvedPath, @"..\..\..\"));
+                if (Directory.Exists(path))
+                {
+                    return path;
+                }
+            }
+            return string.Empty;
         }
     }
 }

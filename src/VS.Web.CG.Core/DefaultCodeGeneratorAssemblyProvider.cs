@@ -13,17 +13,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class DefaultCodeGeneratorAssemblyProvider : ICodeGeneratorAssemblyProvider
     {
+        //we need this assembly to get the ICodeGenerators and templates. 
+        //instead of looking assemblies referencing "Microsoft,VisualStudio.Web.CodeGeneration",
+        //we just try to find "Microsoft.VisualStudio.Web.CodeGenerators.Mvc."
         private static readonly HashSet<string> _codeGenerationFrameworkAssemblies =
             new HashSet<string>(StringComparer.Ordinal)
             {
-                "Microsoft.VisualStudio.Web.CodeGeneration",
-            };
-        private static readonly HashSet<string> _exclusions =
-            new HashSet<string>(StringComparer.Ordinal)
-            {
-                "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
-                "Microsoft.VisualStudio.Web.CodeGeneration",
-                "Microsoft.VisualStudio.Web.CodeGeneration.Design"
+                "Microsoft.VisualStudio.Web.CodeGenerators.Mvc",
             };
 
         private readonly ICodeGenAssemblyLoadContext _assemblyLoadContext;
@@ -49,16 +45,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             get
             {
                 var list = _codeGenerationFrameworkAssemblies
-                    .SelectMany(_projectContext.GetReferencingPackages)
-                    .Distinct()
-                    .Where(IsCandidateLibrary);
-                return list.Select(lib => _assemblyLoadContext.LoadFromName(new AssemblyName(lib.Name)));
+                    .Where(assembly => _projectContext.GetAssembly(assembly) != null);
+                    
+                return list.Select(lib => _assemblyLoadContext.LoadFromName(new AssemblyName(lib)));
             }
-        }
-
-        private bool IsCandidateLibrary(DependencyDescription library)
-        {
-            return !_exclusions.Contains(library.Name);
         }
     }
 }

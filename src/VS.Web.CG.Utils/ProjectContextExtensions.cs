@@ -4,30 +4,28 @@
 using System;
 using System.Linq;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
-using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
     public static class ProjectContextExtensions
     {
+        public const string DllExtension = ".dll";
         public static DependencyDescription GetPackage(this IProjectContext context, string name)
         {
             Requires.NotNullOrEmpty(name, nameof(name));
             Requires.NotNull(context, nameof(context));
-
             return context.PackageDependencies.FirstOrDefault(package => package.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static IEnumerable<DependencyDescription> GetReferencingPackages(this IProjectContext context, string name)
+        public static ResolvedReference GetAssembly(this IProjectContext context, string name)
         {
             Requires.NotNullOrEmpty(name, nameof(name));
             Requires.NotNull(context, nameof(context));
-
+            string assemblyWithExtension = string.Concat(name, ProjectContextExtensions.DllExtension);
             return context
-                .PackageDependencies
-                .Where(package => package
-                    .Dependencies
-                    .Any(dep => dep.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+                .CompilationAssemblies
+                .Where(assembly => assembly.Name.Equals(assemblyWithExtension, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault();
         }
     }
 }

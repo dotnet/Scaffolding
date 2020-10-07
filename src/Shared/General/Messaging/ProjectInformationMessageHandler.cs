@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
@@ -64,6 +65,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging
             return true;
         }
 
+        [SuppressMessage("supressing re-throw exception", "CA2200")]
         private void BuildProjectInformation(Message msg)
         {
             try

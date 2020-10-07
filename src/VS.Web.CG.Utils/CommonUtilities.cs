@@ -2,17 +2,18 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public static class CommonUtilities
     {
+        [SuppressMessage("supressing re-throw exception", "CA2200")]
         public static CompilationResult GetAssemblyFromCompilation(
             ICodeGenAssemblyLoadContext loader,
             CodeAnalysis.Compilation compilation)

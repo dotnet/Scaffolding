@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection.PortableExecutable;
 using Microsoft.CodeAnalysis;
@@ -12,6 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 {
     public static class ResolvedReferenceExtensions
     {
+        [SuppressMessage("supressing re-throw exception", "CA2200")]
         public static IEnumerable<MetadataReference> GetMetadataReference(this ResolvedReference reference, bool throwOnError = true)
         {
             var references = new List<MetadataReference>();

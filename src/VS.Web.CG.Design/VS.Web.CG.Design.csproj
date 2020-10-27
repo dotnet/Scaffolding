@@ -22,7 +22,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(X86ProjectDirectory)\VS.Web.CG.Design-x86.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(ARMProjectDirectory)\VS.Web.CG.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(ARM64ProjectDirectory)\VS.Web.CG.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
@@ -34,13 +33,6 @@
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
       <PackagePath>lib\net5.0\</PackagePath>
-    </Content>
-
-    <Content Include="$(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).exe;
-                      $(X86BinDirectory)$(Configuration)\net5.0\win7-x86\$(AssemblyName).xml;" 
-             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
-      <Pack>true</Pack>
-      <PackagePath>runtimes\win7-x86\lib\net5.0</PackagePath>
     </Content>
 
     <Content Include="$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).exe;

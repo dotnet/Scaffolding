@@ -14,6 +14,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>5.0.0</VersionPrefix>
+    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages

@@ -30,11 +30,11 @@
     <MicrosoftBuildPackageVersion>16.6.0 </MicrosoftBuildPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>16.6.0 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>3.7.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
     <MicrosoftCodeAnalysisRazorPackageVersion>5.0.0</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.7.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>5.0.0-rtm.20520.1</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->

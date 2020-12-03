@@ -13,7 +13,7 @@
     <!-- Ref packages -->
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>5.0.0</VersionPrefix>
+    <VersionPrefix>5.0.1</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--

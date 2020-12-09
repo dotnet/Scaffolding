@@ -12,6 +12,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public static class TemplateFoldersUtilities
     {
+        private const string NupkgExtension = ".nupkg";
         public static List<string> GetTemplateFolders(
             string containingProject,
             string applicationBasePath,
@@ -45,36 +46,35 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             var dependency = projectContext.GetPackage(containingProject);
 
-            if (dependency != null)
-            {
-                string containingProjectPath = "";
+            // if (dependency != null)
+            // {
+            //     string containingProjectPath = "";
+            //     if (dependency.Type == DependencyType.Project)
+            //     {
+            //         containingProjectPath = Path.GetDirectoryName(dependency.Path);
+            //     }
+            //     else if (dependency.Type == DependencyType.Package)
+            //     {
+            //         containingProjectPath = dependency.Path;
+            //     }
+            //     else
+            //     {
+            //         Debug.Assert(false, Resource.UnexpectedTypeLibraryForTemplates);
+            //     }
 
-                if (dependency.Type == DependencyType.Project)
-                {
-                    containingProjectPath = Path.GetDirectoryName(dependency.Path);
-                }
-                else if (dependency.Type == DependencyType.Package)
-                {
-                    containingProjectPath = dependency.Path;
-                }
-                else
-                {
-                    Debug.Assert(false, Resource.UnexpectedTypeLibraryForTemplates);
-                }
-
-                if (Directory.Exists(containingProjectPath))
-                {
-                    rootFolders.Add(containingProjectPath);
-                }
-            }
-            else 
-            {
+            //     if (Directory.Exists(containingProjectPath))
+            //     {
+            //         rootFolders.Add(containingProjectPath);
+            //     }
+            // }
+            // else 
+            // {
                 var assembly = projectContext.GetAssembly(containingProject);
                 if (assembly != null)
                 {
                     rootFolders.Add(GetPackagePathFromAssembly(containingProject, assembly.ResolvedPath));
                 }
-            }
+            //}
 
             foreach (var rootFolder in rootFolders)
             {
@@ -98,7 +98,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 string path = Path.GetFullPath(Path.Combine(resolvedPath, @"..\..\..\"));
                 if (Directory.Exists(path))
                 {
-                    return path;
+                    //should leave us at the directory name. 
+                    string version = new DirectoryInfo(path).Name;
+                    if (!string.IsNullOrEmpty(version))
+                    {
+                        //Check if nupkg exists at this path.
+                        string nupkg = string.Concat(assemblyName, ".", version, NupkgExtension);
+                        string nupkgPath = Path.Combine(path, nupkg);
+                        if (File.Exists(nupkgPath))
+                        {
+                            return path;
+                        }
+                    }
                 }
             }
             return string.Empty;

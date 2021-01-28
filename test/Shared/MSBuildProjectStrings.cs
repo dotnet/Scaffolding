@@ -17,14 +17,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -68,14 +65,11 @@ public const string RootProjectTxtWithoutEF = @"
 
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -114,14 +108,11 @@ public const string RootProjectTxtWithoutEF = @"
 
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <OutputType>EXE</OutputType>
@@ -292,14 +283,11 @@ namespace WebApplication1
 <Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
@@ -375,14 +363,11 @@ namespace Library1.Models
 
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -425,15 +410,11 @@ namespace Library1.Models
 <Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
-
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
@@ -518,15 +499,11 @@ namespace WebApplication1
 <Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
-
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
@@ -569,14 +546,11 @@ namespace DAL
 
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -793,14 +767,11 @@ namespace Test
 
   <PropertyGroup>
     <RestoreSources>;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json
-    ;
-      https://api.nuget.org/v3/index.json;
-    ;
-        C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;</RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+    </RestoreSources>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
@@ -838,7 +809,7 @@ namespace Test
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://api.nuget.org/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
@@ -857,7 +828,7 @@ namespace Test
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://api.nuget.org/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>

@@ -46,8 +46,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         }
 
         [SkippableTheory]
-        [InlineData("C:\\Users\\User\\.nuget\\packages\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\packages\\X.Y.Z\\1.2.3")]
-        [InlineData("C:\\Users\\User\\.nuget\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\X.Y.Z\\1.2.3")]
+        [InlineData("C:\\Users\\User\\.nuget\\packages\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\packages\\x.y.z\\1.2.3")]
+        [InlineData("C:\\Users\\User\\.nuget\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\x.y.z\\1.2.3")]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", null, null, "")]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", "X.Y.Z", null, "")]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", null, "1.2.3", "")]
@@ -64,8 +64,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         }
 
         [SkippableTheory]
-        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//X.Y.Z//1.2.3")]
-        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//X.Y.Z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//x.y.z//1.2.3")]
+        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//x.y.z//1.2.3")]
         [InlineData("C://Users//User//.nuget//packages//", null, null, "")]
         [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", null, "")]
         [InlineData("C://Users//User//.nuget//packages//", null, "1.2.3", "")]

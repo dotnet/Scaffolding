@@ -198,6 +198,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
             {
                 path = Path.Combine(nugetPath, nameAndVersion.Item1, nameAndVersion.Item2);
+                path =  Directory.Exists(path) ? path : Path.Combine(nugetPath, nameAndVersion.Item1.ToLower(), nameAndVersion.Item2);
             }
 
             return path;

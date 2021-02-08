@@ -116,4 +116,9 @@
     <XunitExtensibilityExecutionPackageVersion>2.4.1</XunitExtensibilityExecutionPackageVersion>
     <XunitRunnerVisualStudioPackageVersion>2.4.1</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <SystemCollectionsImmutableVersion>6.0.0-preview.1.21102.12</SystemCollectionsImmutableVersion>
+    <SystemComponentModelAnnotationsVersion>6.0.0-preview.1.21102.12</SystemComponentModelAnnotationsVersion>
+  </PropertyGroup>
 </Project>

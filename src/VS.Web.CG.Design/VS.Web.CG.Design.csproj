@@ -6,7 +6,7 @@
 
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <X86BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-x86\</X86BinDirectory>
@@ -32,21 +32,21 @@
                       $(OutputPath)$(AssemblyName).xml;"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
-      <PackagePath>lib\net6.0\</PackagePath>
+      <PackagePath>lib\net5.0\</PackagePath>
     </Content>
 
-    <Content Include="$(ARMBinDirectory)$(Configuration)\net6.0\win-arm\$(AssemblyName).exe;
-                      $(ARMBinDirectory)$(Configuration)\net6.0\win-arm\$(AssemblyName).xml;"
+    <Content Include="$(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).exe;
+                      $(ARMBinDirectory)$(Configuration)\net5.0\win-arm\$(AssemblyName).xml;"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
-      <PackagePath>runtimes\win-arm\lib\net6.0\</PackagePath>
+      <PackagePath>runtimes\win-arm\lib\net5.0\</PackagePath>
     </Content>
 
-    <Content Include="$(ARM64BinDirectory)$(Configuration)\net6.0\win-arm64\$(AssemblyName).exe;
-                      $(ARM64BinDirectory)$(Configuration)\net6.0\win-arm64\$(AssemblyName).xml;" 
+    <Content Include="$(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).exe;
+                      $(ARM64BinDirectory)$(Configuration)\net5.0\win-arm64\$(AssemblyName).xml;" 
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
-      <PackagePath>runtimes\win-arm64\lib\net6.0\</PackagePath>
+      <PackagePath>runtimes\win-arm64\lib\net5.0\</PackagePath>
     </Content>
   </ItemGroup>
 </Project>

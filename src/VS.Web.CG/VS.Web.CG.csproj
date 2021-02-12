@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -17,6 +17,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)"/>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="$(SystemComponentModelAnnotationsVersion)"/>
   </ItemGroup>
 
 </Project>

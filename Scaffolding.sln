@@ -100,6 +100,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StablePackage", "test\TestA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PreviousPackage", "test\TestApps\PreviousPackage\PreviousPackage.csproj", "{4E2CFEBE-AAE3-4F4C-A79B-62EFD0BD1B2F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-scaffold", "src\dotnet-scaffold\dotnet-scaffold.csproj", "{D99232AD-54B9-49F7-938F-0C687183C516}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_x86|Any CPU = debug_x86|Any CPU
@@ -617,6 +619,24 @@ Global
 		{4E2CFEBE-AAE3-4F4C-A79B-62EFD0BD1B2F}.Release|x64.Build.0 = Release|Any CPU
 		{4E2CFEBE-AAE3-4F4C-A79B-62EFD0BD1B2F}.Release|x86.ActiveCfg = Release|Any CPU
 		{4E2CFEBE-AAE3-4F4C-A79B-62EFD0BD1B2F}.Release|x86.Build.0 = Release|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Debug|x64.Build.0 = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Debug|x86.Build.0 = Debug|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Release|x64.ActiveCfg = Release|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Release|x64.Build.0 = Release|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Release|x86.ActiveCfg = Release|Any CPU
+		{D99232AD-54B9-49F7-938F-0C687183C516}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -651,6 +671,7 @@ Global
 		{09E0CE7A-77BE-4367-9253-23DBA636E5ED} = {1406501A-8B25-47A5-BBFD-7AEECD2A7BBC}
 		{94D5A783-BA0B-4EAE-BFFE-8691C31AEFC8} = {1406501A-8B25-47A5-BBFD-7AEECD2A7BBC}
 		{4E2CFEBE-AAE3-4F4C-A79B-62EFD0BD1B2F} = {1406501A-8B25-47A5-BBFD-7AEECD2A7BBC}
+		{D99232AD-54B9-49F7-938F-0C687183C516} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

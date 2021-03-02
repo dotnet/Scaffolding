@@ -286,12 +286,29 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 IsRequired = false
             };
 
+        private static Argument RazorPageNameArgument() =>
+            new Argument<string>(
+                name: "RazorpageNameToGenerate",
+                description: "The name of the razor page to generate.")
+            {
+                Arity = ArgumentArity.ZeroOrOne
+            };
+
+        private static Argument RazorPageTemplateArgument() =>
+            new Argument<string>(
+                name: "RazorpageTemplate",
+                description: "Razor Pages can be individually scaffolded by specifying the name of the new page and the template to use. The supported templates are: Empty, Create, Edit, Delete, Details, List")
+            {
+                Arity = ArgumentArity.ZeroOrOne
+            };
+
         private static Command ScaffoldRazorPageCommand() =>
             new Command(
                 name: RAZORPAGE_COMMAND,
                 description: "Scaffolds Razor pages.")
             {
                 // Arguments & Options
+                RazorPageNameArgument(), RazorPageTemplateArgument(),
                 NamespaceNameOption(), PartialViewOption(), NoPageModelOption(),
                 ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption()
             };

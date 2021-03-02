@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Scaffold
@@ -34,12 +31,13 @@ namespace Microsoft.DotNet.Tools.Scaffold
 
         */
 
-        public async static Task Main(string[] args)
+        public static int Main(string[] args)
         {
             var rootCommand = ScaffoldCommand();
+
             rootCommand.AddCommand(ScaffoldAreaCommand());
             rootCommand.AddCommand(ScaffoldControllerCommand());
-            rootCommand.AddCommand(RazorPageCommand());
+            rootCommand.AddCommand(ScaffoldRazorPageCommand());
 
             var identityCommand = new Command(IDENTITY_COMMAND, "Scaffolds Identity");
             rootCommand.AddCommand(identityCommand);
@@ -54,28 +52,27 @@ namespace Microsoft.DotNet.Tools.Scaffold
             }
 
             var commandLineBuilder = new CommandLineBuilder(rootCommand);
-            commandLineBuilder.UseMiddleware(async (context, next) =>
-            {
-                string parsedCommandName = context.ParseResult.CommandResult.Command.Name;
-                switch (parsedCommandName)
-                {
-                    case AREA_COMMAND:
-                    case CONTROLLER_COMMAND:
-                    case IDENTITY_COMMAND:
-                    case RAZORPAGE_COMMAND:
-                    case VIEW_COMMAND:
-                        await next(context);
-                        VisualStudio.Web.CodeGeneration.Tools.Program.Main(args);
-                        return;
-                    default:
-                        await next(context);
-                        break;
-                }
-            });
-
             commandLineBuilder.UseDefaults();
             var parser = commandLineBuilder.Build();
-            var result = await parser.InvokeAsync(args);
+            int parseExitCode = parser.Invoke(args);
+            if (parseExitCode != 0)
+            {
+                return parseExitCode;
+            }
+
+            ParseResult parseResult = parser.Parse(args);
+            string parsedCommandName = parseResult.CommandResult.Command.Name;
+            switch (parsedCommandName)
+            {
+                case AREA_COMMAND:
+                case CONTROLLER_COMMAND:
+                case IDENTITY_COMMAND:
+                case RAZORPAGE_COMMAND:
+                case VIEW_COMMAND:
+                    return VisualStudio.Web.CodeGeneration.Tools.Program.Main(args);
+                default:
+                    return 0;
+            }
         }
 
         private static Option ProjectOption() =>
@@ -289,7 +286,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 IsRequired = false
             };
 
-        private static Command RazorPageCommand() =>
+        private static Command ScaffoldRazorPageCommand() =>
             new Command(
                 name: RAZORPAGE_COMMAND,
                 description: "Scaffolds Razor pages.")

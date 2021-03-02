@@ -69,9 +69,16 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 case IDENTITY_COMMAND:
                 case RAZORPAGE_COMMAND:
                 case VIEW_COMMAND:
+                    if (parseResult.CommandResult.Children.Count == 1 &&
+                        string.Equals(parseResult.CommandResult.Children[0].Symbol?.Name, "help", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // The help option for the commands are handled by System.Commandline.
+                        return 0;
+                    }
                     return VisualStudio.Web.CodeGeneration.Tools.Program.Main(args);
                 default:
-                    return 0;
+                    // The command is not handled by 'dotnet scaffold'.
+                    return -1;
             }
         }
 

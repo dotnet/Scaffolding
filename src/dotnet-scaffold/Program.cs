@@ -38,12 +38,10 @@ namespace Microsoft.DotNet.Tools.Scaffold
             rootCommand.AddCommand(ScaffoldAreaCommand());
             rootCommand.AddCommand(ScaffoldControllerCommand());
             rootCommand.AddCommand(ScaffoldRazorPageCommand());
+            rootCommand.AddCommand(ScaffoldViewCommand());
 
             var identityCommand = new Command(IDENTITY_COMMAND, "Scaffolds Identity");
             rootCommand.AddCommand(identityCommand);
-
-            var viewCommand = new Command(VIEW_COMMAND, "Scaffolds a View");
-            rootCommand.AddCommand(viewCommand);
 
             rootCommand.Description = "dotnet scaffold [command] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build] ";
             if (args.Length == 0)
@@ -259,6 +257,23 @@ namespace Microsoft.DotNet.Tools.Scaffold
             {
                 IsRequired = false
             };
+
+        private static Option ControllerNamespaceOption() =>
+            new Option<string>(
+                aliases: new[] { "-namespace", "--controllerNamespace" },
+                description: "Specify the name of the namespace to use for the generated controller.")
+            {
+                IsRequired = false
+            };
+
+        private static Option UseSQLliteOption() =>
+            new Option<bool>(
+                aliases: new[] { "-sqlite", "--useSqlite" },
+                description: "Flag to specify if DbContext should use SQLite instead of SQL Server.")
+            {
+                IsRequired = false
+            };
+
         private static Command ScaffoldControllerCommand() =>
             new Command(
                 name: CONTROLLER_COMMAND,
@@ -266,10 +281,11 @@ namespace Microsoft.DotNet.Tools.Scaffold
             {
                 // Arguments & Options
                ControllerNameOption(), AsyncActionsOption(), GenerateNoViewOption(), RestWithNoViewOption(), ReadWriteActionOption(),
-               ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption()
+               ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption(),
+               ControllerNamespaceOption(), UseSQLliteOption()
             };
 
-        private static Option NamespaceNameOption() =>
+        private static Option RazorpageNamespaceNameOption() =>
             new Option<string>(
                 aliases: new[] { "-namespace", "--namespaceName" },
                 description: "The name of the namespace to use for the generated PageModel.")
@@ -301,10 +317,10 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 Arity = ArgumentArity.ZeroOrOne
             };
 
-        private static Argument RazorPageTemplateArgument() =>
+        private static Argument TemplateNameArgument() =>
             new Argument<string>(
-                name: "RazorpageTemplate",
-                description: "Razor Pages can be individually scaffolded by specifying the name of the new page and the template to use. The supported templates are: Empty, Create, Edit, Delete, Details, List")
+                name: "TemplateName",
+                description: "Razor Pages or Views can be individually scaffolded by specifying the name of the new page/view and the template to use. The supported templates are: Empty|Create|Edit|Delete|Details|List")
             {
                 Arity = ArgumentArity.ZeroOrOne
             };
@@ -314,10 +330,34 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 name: RAZORPAGE_COMMAND,
                 description: "Scaffolds Razor pages.")
             {
-                // Arguments & Options
-                RazorPageNameArgument(), RazorPageTemplateArgument(),
-                NamespaceNameOption(), PartialViewOption(), NoPageModelOption(),
-                ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption()
+                // Arguments
+                RazorPageNameArgument(), TemplateNameArgument(),
+
+                // Options
+                RazorpageNamespaceNameOption(), PartialViewOption(), NoPageModelOption(),
+                ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption(),
+                UseSQLliteOption()
+            };
+
+        private static Argument ViewNameArgument() =>
+            new Argument<string>(
+                name: "ViewNameToGenerate",
+                description: "The name of the View to generate.")
+            {
+                Arity = ArgumentArity.ZeroOrOne
+            };
+
+        private static Command ScaffoldViewCommand() =>
+            new Command(
+                name: VIEW_COMMAND,
+                description: "Scaffolds a View")
+            {
+                // Arguments
+                ViewNameArgument(),TemplateNameArgument(),
+
+                // Options
+                ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption(),
+                ControllerNamespaceOption(), UseSQLliteOption(), PartialViewOption()
             };
     }
 }

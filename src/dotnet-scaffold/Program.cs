@@ -39,9 +39,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
             rootCommand.AddCommand(ScaffoldControllerCommand());
             rootCommand.AddCommand(ScaffoldRazorPageCommand());
             rootCommand.AddCommand(ScaffoldViewCommand());
-
-            var identityCommand = new Command(IDENTITY_COMMAND, "Scaffolds Identity");
-            rootCommand.AddCommand(identityCommand);
+            rootCommand.AddCommand(ScaffoldIdentityCommand());
 
             rootCommand.Description = "dotnet scaffold [command] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build] ";
             if (args.Length == 0)
@@ -358,6 +356,64 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 // Options
                 ModelClassOption(), DataContextOption(), BootStrapVersionOption(), ReferenceScriptLibrariesOption(), CustomLayoutOption(), UseDefaultLayoutOption(), OverwriteFilesOption(), RelativeFolderPathOption(),
                 ControllerNamespaceOption(), UseSQLliteOption(), PartialViewOption()
+            };
+
+        private static Option DBContextOption() =>
+            new Option<string>(
+                aliases: new[] { "-dc", "--dbContext" },
+                description: "Name of the DbContext to use, or generate (if it does not exist).")
+            {
+                IsRequired = false
+            };
+
+        private static Option FilesListOption() =>
+            new Option<string>(
+                aliases: new[] { "-fi", "--files" },
+                description: "List of semicolon separated files to scaffold. Use the --listFiles option to see the available options.")
+            {
+                IsRequired = false
+            };
+
+        private static Option ListFilesOption() =>
+            new Option<string>(
+                aliases: new[] { "-lf", "--listFiles" },
+                description: "Lists the files that can be scaffolded by using the '--files' option.")
+            {
+                IsRequired = false
+            };
+
+        private static Option UserClassOption() =>
+            new Option<string>(
+                aliases: new[] { "-u", "--userClass" },
+                description: "Name of the User class to generate.")
+            {
+                IsRequired = false
+            };
+
+        private static Option UseDefaultUIOption() =>
+            new Option<string>(
+                aliases: new[] { "-udui", "--useDefaultUI" },
+                description: "Use this option to setup identity and to use Default UI.")
+            {
+                IsRequired = false
+            };
+
+        private static Option GenerateLayoutOption() =>
+            new Option<string>(
+                aliases: new[] { "-gl", "--generateLayout" },
+                description: "Use this option to generate a new _Layout.cshtml")
+            {
+                IsRequired = false
+            };
+
+        private static Command ScaffoldIdentityCommand() =>
+            new Command(
+                name: IDENTITY_COMMAND,
+                description: "Scaffolds Identity")
+            {
+                // Options
+                DBContextOption(), FilesListOption(), ListFilesOption(), UserClassOption(), UseSQLliteOption(), OverwriteFilesOption(), UseDefaultUIOption(), CustomLayoutOption(), 
+                GenerateLayoutOption(), BootStrapVersionOption()
             };
     }
 }

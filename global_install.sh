@@ -8,7 +8,7 @@ NUPKG=artifacts/packages/Debug/Shipping/
 
 #kill all dotnet procs
 pkill -f dotnet
-git clean -xdf
+rm -rf artifacts
 ./build.sh 
 dotnet tool uninstall -g dotnet-aspnet-codegenerator 
 cd $DEFAULT_NUPKG_PATH

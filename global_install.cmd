@@ -3,7 +3,7 @@ set DEFAULT_NUPKG_PATH=%userprofile%/.nuget/packages
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 call taskkill /f /im dotnet.exe
-call git clean -xdf
+call rd /Q /S artifacts
 call build.cmd  
 call dotnet tool uninstall -g dotnet-aspnet-codegenerator 
 

@@ -15,7 +15,7 @@
   <PropertyGroup>
     <VersionPrefix>6.0.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Microsoft.AspNetCore.Razor.Language -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0-preview.1.21103.6</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0-preview.2.21125.25</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
     <!-- Microsoft.Build-->
@@ -35,17 +35,17 @@
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.1.21103.6</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.2.21125.25</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.1.21076.2</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0-preview.1.21102.2</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0-preview.2.21124.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.1.21102.12</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.2.21123.7</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.1.21102.12</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.2.21123.7</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
     <SystemCollectionsImmutablePackageVersion>5.0.0</SystemCollectionsImmutablePackageVersion>
@@ -83,6 +83,8 @@
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
     <MicrosoftEntityFrameworkCorePackageVersion>6.0.0-preview.1.21102.2</MicrosoftEntityFrameworkCorePackageVersion>
+    <!-- Microsoft.EntityFramework.Design for test-->
+    <MicrosoftEntityFrameworkCoreDesignTestPackageVersion>6.0.0-preview.1.21102.2</MicrosoftEntityFrameworkCoreDesignTestPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>6.0.0-preview.1.21102.2</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
@@ -117,7 +119,7 @@
     <XunitRunnerVisualStudioPackageVersion>2.4.1</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <SystemCollectionsImmutableVersion>6.0.0-preview.1.21102.12</SystemCollectionsImmutableVersion>
-    <SystemComponentModelAnnotationsVersion>6.0.0-preview.1.21102.12</SystemComponentModelAnnotationsVersion>
+    <SystemCollectionsImmutableVersion>6.0.0-preview.2.21123.7</SystemCollectionsImmutableVersion>
+    <SystemComponentModelAnnotationsVersion>6.0.0-preview.2.21123.7</SystemComponentModelAnnotationsVersion>
   </PropertyGroup>
 </Project>

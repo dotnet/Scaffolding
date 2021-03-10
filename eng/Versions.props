@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Microsoft.AspNetCore.Razor.Language -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0-preview.2.21125.25</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0-preview.2.21154.6</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
     <!-- Microsoft.Build-->
@@ -35,20 +35,22 @@
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.2.21125.25</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.2.21154.6</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.1.21076.2</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0-preview.2.21124.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0-preview.2.21154.2</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.2.21123.7</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.2.21123.7</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
     <SystemCollectionsImmutablePackageVersion>5.0.0</SystemCollectionsImmutablePackageVersion>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
     <!-- Microsoft.AspNetCore.Hosting -->
     <MicrosoftAspNetCoreHostingPackageVersion>3.0.0-preview4-19123-01</MicrosoftAspNetCoreHostingPackageVersion>

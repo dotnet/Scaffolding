@@ -121,7 +121,7 @@
     <XunitRunnerVisualStudioPackageVersion>2.4.1</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <SystemCollectionsImmutableVersion>6.0.0-preview.2.21123.7</SystemCollectionsImmutableVersion>
-    <SystemComponentModelAnnotationsVersion>6.0.0-preview.2.21123.7</SystemComponentModelAnnotationsVersion>
+    <SystemCollectionsImmutableVersion>6.0.0-preview.2.21154.6</SystemCollectionsImmutableVersion>
+    <SystemComponentModelAnnotationsVersion>6.0.0-preview.2.21154.6</SystemComponentModelAnnotationsVersion>
   </PropertyGroup>
 </Project>

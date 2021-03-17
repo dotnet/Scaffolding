@@ -11,6 +11,7 @@
    <Import Project="$(RepoRoot)eng\Versions.MsIdentity.props" />
   <!-- package settings -->
   <PropertyGroup>
+    <PackageId>Microsoft.dotnet-msidentity</PackageId>
     <PackAsTool>true</PackAsTool>
     <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>

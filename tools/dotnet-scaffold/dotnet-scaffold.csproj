@@ -6,6 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>
     <PackageTags>dotnet;scaffold</PackageTags>
+    <PackageId>Microsoft.dotnet-scaffold</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

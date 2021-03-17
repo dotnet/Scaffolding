@@ -1,0 +1,10 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\Scaffolding\VS.Web.CG.Design\Shared.props" />
+  <PropertyGroup>
+    <CodeGenDesignSrcPath>$(MSBuildThisFileDirectory)..\Scaffolding\VS.Web.CG.Design\</CodeGenDesignSrcPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(CodeGenDesignSrcPath)\*.cs" />
+    <EmbeddedResource Include="$(CodeGenDesignSrcPath)\*.resx" />
+  </ItemGroup>
+</Project>

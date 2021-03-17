@@ -1,0 +1,30 @@
+{
+  "Identifier": "dotnet-webapp",
+  "ProjectRelativeFolder": "",
+  "BasedOnProjectDescription": "dotnet-web",
+  "MatchesForProjectType": [
+    {
+      "FileRelativePath": "Startup.cs",
+      "MatchAny": [ ".AddAzureAD", ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebAppAuthentication" ]
+    },
+    {
+      "FolderRelativePath": "Views",
+      "Sets": "IsWebApp"
+    },
+    {
+      "FileRelativePath": "Pages\\*.cshtml",
+      "Sets": "IsWebApp"
+    }
+  ],
+  "ConfigurationProperties": [
+    {
+      "FileRelativePath": "Startup.cs",
+      "Properties": [
+        {
+          "MatchAny": [ ".AddAzureAD", ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebAppAuthentication" ],
+          "Sets": "HasAuthentication"
+        }
+      ]
+    }
+  ]
+}

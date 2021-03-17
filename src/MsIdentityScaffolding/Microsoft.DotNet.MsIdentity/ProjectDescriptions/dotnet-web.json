@@ -1,0 +1,139 @@
+{
+  "Identifier": "dotnet-web",
+  "ProjectRelativeFolder": "",
+  "BasedOnProjectDescription": "",
+  "ConfigurationProperties": [
+    {
+      "FileRelativePath": "appsettings.json",
+        "Properties": [
+            {
+                "Property": "AzureAd:ClientId",
+                "Represents": "Application.ClientId",
+                "Sets": "IsAAD",
+                "Default": "11111111-1111-1111-11111111111111111"
+            },
+            {
+                "Property": "AzureAd:Domain",
+                "Represents": "Directory.Domain",
+                "Sets": "IsAAD",
+                "Default": "qualified.domain.name"
+            },
+            {
+                "Property": "AzureAd:TenantId",
+                "Represents": "Directory.TenantId",
+                "Sets": "IsAAD",
+                "Default": "22222222-2222-2222-2222-222222222222"
+            },
+            {
+                "Property": "AzureAd:ClientSecret",
+                "Represents": "Application.ClientSecret",
+                "Sets": "IsAAD"
+            },
+            {
+                "Property": "AzureAd:CallbackPath",
+                "Represents": "Application.CallbackPath",
+                "Default": "/signin-oidc"
+            },
+            {
+                "Property": "AzureAdB2C:ClientId",
+                "Represents": "Application.ClientId",
+                "Sets": "IsB2C",
+                "Default": "11111111-1111-1111-11111111111111111"
+            },
+            {
+                "Property": "AzureAdB2C:Domain",
+                "Represents": "Directory.Domain",
+                "Sets": "IsB2C",
+                "Default": "qualified.domain.name"
+            },
+            {
+                "Property": "AzureAdB2C:TenantId",
+                "Represents": "Directory.TenantId",
+                "Sets": "IsB2C",
+                "Default": "22222222-2222-2222-2222-222222222222"
+            },
+            {
+                "Property": "AzureAdB2C:ClientSecret",
+                "Represents": "Application.ClientSecret",
+                "Sets": "IsB2C"
+            },
+            {
+                "Property": "AzureAdB2C:CallbackPath",
+                "Represents": "Application.CallbackPath",
+                "Default": "/signin-oidc"
+            },
+            {
+                "Property": "AzureAdB2C:Instance",
+                "Represents": "Application.Instance"
+            },
+            {
+                "Property": "DownstreamApi:Scopes",
+                "Represents": "Application.CalledApiScopes"
+            },
+            {
+                "Property": "DownstreamAPI:Scopes",
+                "Represents": "Application.CalledApiScopes"
+            },
+            {
+                "Property": "AzureAdB2C",
+                "Represents": "Application.ConfigurationSection",
+                "Sets": "IsB2C"
+            },
+            {
+                "Property": "AzureAd",
+                "Represents": "Application.ConfigurationSection",
+                "Sets": "IsAAD"
+            }
+        ]
+    },
+    {
+      "FileRelativePath": "Startup.cs",
+        "Properties": [
+            {
+                "MatchAny": [ ".AddMicrosoftGraph", ".AddMicrosoftGraphBeta" ],
+                "Sets": "CallsMicrosoftGraph"
+            },
+            {
+                "MatchAny": [ ".EnableTokenAcquisitionToCallDownstreamApi", ".AddDownstreamWebApi" ],
+                "Sets": "CallsDownstreamApi"
+            },
+            {
+                "Property": "\"AzureAdB2C\"",
+                "Represents": "Application.ConfigurationSection",
+                "Sets": "IsB2C"
+            },
+            {
+                "Property": "\"AzureAd\"",
+                "Represents": "Application.ConfigurationSection",
+                "Sets": "IsAAD"
+            }
+      ]
+    },
+    {
+      "FileRelativePath": "Properties\\launchSettings.json",
+      "Properties": [
+        {
+          "Property": "iisSettings:iisExpress:applicationUrl",
+          "Represents": "iisApplicationUrl"
+        },
+        {
+          "Property": "iisSettings:iisExpress:sslPort",
+          "Represents": "iisSslPort"
+        },
+        {
+          "Property": "profiles:*:applicationUrl",
+          "Represents": "profilesApplicationUrls"
+        }
+      ]
+    },
+    {
+      "FileRelativePath": "*.csproj",
+      "Properties": [
+        {
+          "Property": "Project:PropertyGroup:UserSecretsId",
+          "Represents": "secretsId"
+        }
+      ]
+    }
+  ]
+}

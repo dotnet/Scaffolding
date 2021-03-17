@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "All.sln",
+    "projects": [
+        "src\\MsIdentityScaffolding\\Microsoft.DotNet.MsIdentity\\Microsoft.DotNet.MsIdentity.csproj",
+        "tools\\dotnet-msidentity\\dotnet-msidentity.csproj",
+        "test\\MsIdentityScaffolding\\Microsoft.DotNet.MsIdentity.Tests\\Microsoft.DotNet.MsIdentity.Tests.csproj"
+    ]
+  }
+}

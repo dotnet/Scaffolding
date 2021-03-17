@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
+  </ItemGroup>
+
+</Project>

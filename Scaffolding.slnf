@@ -1,0 +1,27 @@
+{
+  "solution": {
+    "path": "All.sln",
+    "projects": [
+        "tools\\dotnet-aspnet-codegenerator\\dotnet-aspnet-codegenerator.csproj",
+        "tools\\dotnet-scaffold\\dotnet-scaffold.csproj",
+        "src\\Scaffolding\\VS.Web.CG\\VS.Web.CG.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Contracts\\VS.Web.CG.Contracts.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Core\\VS.Web.CG.Core.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Design\\VS.Web.CG.Design.csproj",
+        "src\\Scaffolding\\VS.Web.CG.EFCore\\VS.Web.CG.EFCore.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Msbuild\\VS.Web.CG.Msbuild.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Mvc\\VS.Web.CG.Mvc.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Templating\\VS.Web.CG.Templating.csproj",
+        "src\\Scaffolding\\VS.Web.CG.Utils\\VS.Web.CG.Utils.csproj",
+        "test\\Scaffolding\\VS.Web.CG.Core.FunctionalTest\\VS.Web.CG.Core.FunctionalTests.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.Core.Test\\VS.Web.CG.Core.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.EFCore.Test\\VS.Web.CG.EFCore.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.MSBuild.Test\\VS.Web.CG.MSBuild.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.Mvc.Test\\VS.Web.CG.Mvc.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.Sources.Test\\VS.Web.CG.Sources.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.Templating.Test\\VS.Web.CG.Templating.Tests.csproj",
+        "test\\Scaffolding\\VS.Web.CG.Tools.Test\\VS.Web.CG.Tools.Tests.csproj",
+        "test\\Scaffolding\\E2E_Test\\E2E_Test.Tests.csproj"
+    ]
+  }
+}

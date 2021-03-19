@@ -1,7 +1,7 @@
 ---
 name: Bug in Microsoft.DotNet.Identity/dotnet-msidentity
 about: Create a report about something that isn't working
-labels: area-adonet-sqlite, customer-reported
+labels: area-msidentity, customer-reported
 ---
 
 ## File a bug

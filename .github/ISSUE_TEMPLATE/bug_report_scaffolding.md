@@ -1,7 +1,7 @@
 ---
 name: Bug in Microsoft.VisualStudio.Web.CodeGeneration.Design/dotnet-aspnet-codegenerator/dotnet-scaffold
 about: Create a report about something that isn't working
-labels: customer-reported
+labels: customer-reported, scaffolding
 ---
 
 ## File a bug

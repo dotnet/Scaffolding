@@ -1,0 +1,155 @@
+{
+  "Identifier": "dotnet-blazorwasm",
+  "ProjectRelativeFolder": "",
+  "BasedOnProjectDescription": "",
+  "ConfigurationProperties": [
+    {
+      "FileRelativePath": "wwwroot\\appsettings.json",
+      "Properties": [
+        {
+          "Property": "AzureAd:ClientId",
+          "Represents": "Application.ClientId",
+          "Sets": "IsAAD",
+          "Default": "33333333-3333-3333-33333333333333333"
+        },
+        {
+          "Property": "AzureAd:ClientSecret",
+          "Represents": "Application.ClientSecret",
+          "Sets": "IsAAD"
+        },
+        {
+          "Property": "AzureAd:Authority",
+          "Represents": "Application.Authority",
+          "Sets": "IsAAD",
+          "Default": "https://login.microsoftonline.com/22222222-2222-2222-2222-222222222222"
+        },
+        {
+          "Property": "AzureAdB2C:ClientId",
+          "Represents": "Application.ClientId",
+          "Sets": "IsB2C",
+          "Default": "33333333-3333-3333-33333333333333333"
+        },
+        {
+          "Property": "AzureAdB2C:ClientSecret",
+          "Represents": "Application.ClientSecret",
+          "Sets": "IsB2C"
+        },
+        {
+          "Property": "AzureAdB2C:Authority",
+          "Represents": "Application.Authority",
+          "Sets": "IsB2C",
+          "Default": "https://aadB2CInstance.b2clogin.com/qualified.domain.name/MySignUpSignInPolicyId"
+        },
+        {
+            "Property": "AzureAdB2C",
+            "Represents": "Application.ConfigurationSection",
+            "Sets": "IsB2C"
+        },
+        {
+            "Property": "AzureAd",
+            "Represents": "Application.ConfigurationSection",
+            "Sets": "IsAAD"
+        }
+      ]
+    },
+    {
+      "FileRelativePath": "Startup.cs",
+      "Properties": [
+        {
+          "MatchAny": [ ".AddMicrosoftGraph", ".AddMicrosoftGraphBeta" ],
+          "Sets": "CallsMicrosoftGraph"
+        },
+        {
+          "MatchAny": [ ".EnableTokenAcquisitionToCallDownstreamApi", ".AddDownstreamWebApi" ],
+          "Sets": "CallsDownstreamApi"
+        },
+        {
+            "Property": "\"AzureAdB2C\"",
+            "Represents": "Application.ConfigurationSection",
+            "Sets": "IsB2C"
+        },
+        {
+            "Property": "\"AzureAd\"",
+            "Represents": "Application.ConfigurationSection",
+            "Sets": "IsAAD"
+        }
+      ]
+    },
+    {
+      "FileRelativePath": "Properties\\launchSettings.json",
+      "Properties": [
+        {
+          "Property": "iisSettings:iisExpress:applicationUrl",
+          "Represents": "iisApplicationUrl"
+        },
+        {
+          "Property": "iisSettings:iisExpress:sslPort",
+          "Represents": "iisSslPort"
+        },
+        {
+          "Property": "profiles:*:applicationUrl",
+          "Represents": "profilesApplicationUrls"
+        }
+      ]
+    },
+    {
+      "FileRelativePath": "*.csproj",
+      "Properties": [
+        {
+          "Property": "Project:PropertyGroup:UserSecretsId",
+          "Represents": "secretsId"
+        },
+        {
+          "Property": "Project:PropertyGroup:TargetFramework",
+          "Represents": "targetFramework"
+        }
+
+      ]
+    },
+    {
+        "FileRelativePath": "Program.cs",
+        "Properties": [
+            {
+                "Property": "builder.Configuration.Bind(\"AzureAd\", options.ProviderOptions.Authentication);",
+                "Represents": "MsalAuthenticationOptions"
+        },
+        {
+          "Property": "api://api.id.uri",
+          "Represents": "Application.AppIdUri",
+          "Default": "api://api.id.uri"
+        },
+        {
+            "Property": "qualified.domain.name",
+            "Represents": "Directory.Domain",
+            "Default": "qualified.domain.name"
+            },
+            {
+                "Property": "\"AzureAdB2C\"",
+                "Represents": "Application.ConfigurationSection",
+                "Sets": "IsB2C"
+            },
+            {
+                "Property": "\"AzureAd\"",
+                "Represents": "Application.ConfigurationSection",
+                "Sets": "IsAAD"
+            }
+        ]
+    },
+    {
+      "FileRelativePath": "Pages\\Authentication.razor",
+      "Properties": [
+        {
+          "MatchAny": [ "Authentication" ],
+          "Sets": "HasAuthentication"
+        }
+      ]
+    }
+  ],
+  "MatchesForProjectType": [
+    {
+      "FileRelativePath": "Program.cs",
+      "MatchAny": [ "WebAssemblyHostBuilder.CreateDefault" ],
+      "Sets": "IsBlazorWasm"
+    }
+  ]
+}

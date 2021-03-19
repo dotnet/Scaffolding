@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+  </PropertyGroup>
+</Project>

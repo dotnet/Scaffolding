@@ -1,0 +1,55 @@
+<Project>
+  <Import Project="..\..\Directory.Build.targets" />
+
+  <PropertyGroup>
+    <GeneratedTestProjectFile>$(IntermediateOutputPath)MSBuildProjectStrings.cs</GeneratedTestProjectFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TestProjectGenInputs Include="$(ProjectAssetsFile)" />
+    <TestProjectGenInputs Include="$(MSBuildAllProjects)" />
+    <TestProjectGenInputs Include="$(MSBuildThisFileDirectory)..\build\dependencies.props" />
+    <TestProjectGenInputs Include="$(MSBuildThisFileDirectory)..\build\sources.props" />
+    <TestProjectGenInputs Include="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
+    <TestProjectGenInputs Include="$(DotNetRestoreSourcePropsPath)" Condition=" '$(DotNetRestoreSourcePropsPath)' != '' " />
+  </ItemGroup>
+
+  <Target Name="GenerateTestProject" BeforeTargets="CoreCompile" Inputs="@(TestProjectGenInputs)" Outputs="$(GeneratedTestProjectFile)">
+    <PropertyGroup>
+      <RestoreSources>
+        $(RestoreSources);
+        $(MSBuildThisFileDirectory)..\artifacts\build;
+      </RestoreSources>
+      <TestProjectProperties>
+        RestoreSources=$([MSBuild]::Escape($(RestoreSources.Trim())));
+        TargetFramework=$(TargetFramework);
+        MicrosoftApplicationInsightsAspNetCorePackageVersion=$(MicrosoftApplicationInsightsAspNetCorePackageVersion);
+        MicrosoftAspNetCoreAuthenticationCookiesPackageVersion=$(MicrosoftAspNetCoreAuthenticationCookiesPackageVersion);
+        MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion);
+        MicrosoftAspNetCoreDiagnosticsPackageVersion=$(MicrosoftAspNetCoreDiagnosticsPackageVersion);
+        MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion=$(MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion);
+        MicrosoftAspNetCoreIdentityUIPackageVersion=$(MicrosoftAspNetCoreIdentityUIPackageVersion);
+        MicrosoftAspNetCoreMvcPackageVersion=$(MicrosoftAspNetCoreMvcPackageVersion);
+        MicrosoftAspNetCorePackageVersion=$(MicrosoftAspNetCorePackageVersion);
+        MicrosoftAspNetCoreServerIISIntegrationPackageVersion=$(MicrosoftAspNetCoreServerIISIntegrationPackageVersion);
+        MicrosoftAspNetCoreServerKestrelPackageVersion=$(MicrosoftAspNetCoreServerKestrelPackageVersion);
+        MicrosoftAspNetCoreStaticFilesPackageVersion=$(MicrosoftAspNetCoreStaticFilesPackageVersion);
+        MicrosoftEntityFrameworkCoreDesignPackageVersion=$(MicrosoftEntityFrameworkCoreDesignPackageVersion);
+        MicrosoftEntityFrameworkCoreSqlServerPackageVersion=$(MicrosoftEntityFrameworkCoreSqlServerPackageVersion);
+        MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion=$(MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion);
+        MicrosoftExtensionsConfigurationJsonPackageVersion=$(MicrosoftExtensionsConfigurationJsonPackageVersion);
+        MicrosoftExtensionsConfigurationUserSecretsPackageVersion=$(MicrosoftExtensionsConfigurationUserSecretsPackageVersion);
+        MicrosoftExtensionsLoggingConsolePackageVersion=$(MicrosoftExtensionsLoggingConsolePackageVersion);
+        MicrosoftExtensionsLoggingDebugPackageVersion=$(MicrosoftExtensionsLoggingDebugPackageVersion);
+        MicrosoftExtensionsLoggingPackageVersion=$(MicrosoftExtensionsLoggingPackageVersion);
+        MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion=$(MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion);
+        MicrosoftNETSdkRazorPackageVersion=$(MicrosoftNETSdkRazorPackageVersion);
+        MicrosoftVisualStudioWebBrowserLinkPackageVersion=$(MicrosoftVisualStudioWebBrowserLinkPackageVersion);
+        MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion=$(Version);
+        MicrosoftVisualStudioWebCodeGenerationToolsPackageVersion=$(Version);
+        MicrosoftExtensionsIdentityStoresPackageVersion=$(MicrosoftExtensionsIdentityStoresPackageVersion);
+      </TestProjectProperties>
+    </PropertyGroup>
+
+  </Target>
+</Project>

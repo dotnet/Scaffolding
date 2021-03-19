@@ -1,0 +1,27 @@
+{
+  "Identifier": "dotnet-webapi",
+  "ProjectRelativeFolder": "",
+  "BasedOnProjectDescription": "dotnet-web",
+  "MatchesForProjectType": [
+    {
+      "FileRelativePath": "Controllers\\*.cs",
+      "MatchAny": [ "[ApiController]" ],
+      "Sets": "IsWebApi"
+    },
+    {
+      "FileRelativePath": "Startup.cs",
+      "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ]
+    }
+  ],
+  "ConfigurationProperties": [
+    {
+      "FileRelativePath": "Startup.cs",
+      "Properties": [
+        {
+          "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ],
+          "Sets": "HasAuthentication"
+        }
+      ]
+    }
+  ]
+}

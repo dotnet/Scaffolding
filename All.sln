@@ -116,6 +116,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MsIdentity
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-msidentity", "tools\dotnet-msidentity\dotnet-msidentity.csproj", "{1DB98E3A-0749-4ACE-9EF2-EF6BC2C6648B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MsIdentity.UnitTests.Tests", "test\MsIdentityScaffolding\Microsoft.DotNet.MsIdentity.UnitTests.Tests\Microsoft.DotNet.MsIdentity.UnitTests.Tests.csproj", "{0711777C-64C2-49DC-A9CE-67BD641AA7A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_x86|Any CPU = debug_x86|Any CPU
@@ -705,6 +707,24 @@ Global
 		{1DB98E3A-0749-4ACE-9EF2-EF6BC2C6648B}.Release|x64.Build.0 = Release|Any CPU
 		{1DB98E3A-0749-4ACE-9EF2-EF6BC2C6648B}.Release|x86.ActiveCfg = Release|Any CPU
 		{1DB98E3A-0749-4ACE-9EF2-EF6BC2C6648B}.Release|x86.Build.0 = Release|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Debug|x64.Build.0 = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Debug|x86.Build.0 = Debug|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Release|x64.ActiveCfg = Release|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Release|x64.Build.0 = Release|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Release|x86.ActiveCfg = Release|Any CPU
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -747,6 +767,7 @@ Global
 		{35BA8FDE-4AF3-4EF5-94B3-123B4702AF7E} = {3354705C-5C05-41C3-95E1-31A45141A6C2}
 		{6B863A66-CFFC-42B4-9316-13B168CB6C62} = {49D385E7-A045-4C54-868F-CEA8F67EDBA8}
 		{1DB98E3A-0749-4ACE-9EF2-EF6BC2C6648B} = {4B56CCB9-2693-492A-A0C5-B4D15DDF00A4}
+		{0711777C-64C2-49DC-A9CE-67BD641AA7A6} = {49D385E7-A045-4C54-868F-CEA8F67EDBA8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

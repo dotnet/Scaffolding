@@ -6,7 +6,7 @@ NUPKG=artifacts/packages/Debug/Shipping/
 pkill -f dotnet
 rm -rf artifacts
 ./build.sh 
-dotnet tool uninstall -g dotnet-msidentity
+dotnet tool uninstall -g Microsoft.dotnet-msidentity
 cd $SRC_DIR/$NUPKG 
-dotnet tool install -g dotnet-msidentity --add-source $SRC_DIR/$NUPKG  --version $VERSION
+dotnet tool install -g Microsoft.dotnet-msidentity --add-source $SRC_DIR/$NUPKG  --version $VERSION
 cd "$OLDPWD"

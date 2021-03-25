@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.DotNet.MsIdentity;
-
 namespace Microsoft.DotNet.MsIdentity.Tool
 {
     internal static class MsAADToolFactory
@@ -13,6 +8,7 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             {
                 case Commands.LIST_AAD_APPS_COMMAND:
                 case Commands.LIST_SERVICE_PRINCIPALS_COMMAND:
+                case Commands.LIST_TENANTS_COMMAND:
                     return new MsAADTool(commandName, provisioningToolOptions);
                 default:
                     return new AppProvisioningTool(provisioningToolOptions);

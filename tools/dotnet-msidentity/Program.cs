@@ -15,14 +15,26 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             var rootCommand = MsIdentityCommand();
             var listAadAppsCommand = ListAADAppsCommand();
             var listServicePrincipalsCommand = ListServicePrincipalsCommand();
+            var listTenantsCommand = ListTenantsCommand();
             var provisionApplicationCommand = ProvisionApplicationCommand();
+
+            //hide internal commands.
+            listAadAppsCommand.IsHidden = true;
+            listServicePrincipalsCommand.IsHidden = true;
+            listTenantsCommand.IsHidden = true;
+
             listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListApps);
             listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListServicePrincipals);
+            listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListTenants);
             provisionApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleProvisionApplication);
+            
+            //add all commands to root command.
             rootCommand.AddCommand(listAadAppsCommand);
             rootCommand.AddCommand(listServicePrincipalsCommand);
+            rootCommand.AddCommand(listTenantsCommand);
             rootCommand.AddCommand(provisionApplicationCommand);
 
+            //if no args are present, show default help.
             if (args == null || args.Length == 0)
             {
                 args = new string[] { "-h" };
@@ -40,6 +52,17 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.LIST_AAD_APPS_COMMAND, provisioningToolOptions);
+                await msAADTool.Run();
+                return 0;
+            }
+            return -1;
+        }
+
+        private static async Task<int> HandleListTenants(ProvisioningToolOptions provisioningToolOptions)
+        {
+            if (provisioningToolOptions != null)
+            {
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.LIST_TENANTS_COMMAND, provisioningToolOptions);
                 await msAADTool.Run();
                 return 0;
             }
@@ -88,6 +111,14 @@ namespace Microsoft.DotNet.MsIdentity.Tool
                 description: "Lists AAD Service Principals.")
             {
                 TenantOption(), UsernameOption(), JsonOption(), ProjectPathOption()
+            };
+
+        private static Command ListTenantsCommand()=>
+            new Command(
+                name: Commands.LIST_TENANTS_COMMAND,
+                description: "Lists AAD and AAD B2C tenants for a given user.")
+            {
+                UsernameOption(), JsonOption()
             };
 
         private static Command ProvisionApplicationCommand()=>
@@ -176,10 +207,10 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             new Option<string>(
                 aliases: new[] {"-u", "--username"},
                 description:"Username to use to connect to the Azure AD or Azure AD B2C tenant." + 
-                            "\n\t- It's only needed when you are signed-in in Visual Studio, or Azure CLI with several identities." + 
-                            "\n\t- In that case, the username param is used to disambiguate which  identity to use to create the app in the tenant.")
-        {
-            IsRequired = false   
-        };
+                            "\n- It's only needed when you are signed-in in Visual Studio, or Azure CLI with several identities." + 
+                            "\n- In that case, the username param is used to disambiguate which  identity to use to create the app in the tenant.")
+            {
+                IsRequired = false   
+            };
     }
 }

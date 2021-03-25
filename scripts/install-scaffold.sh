@@ -10,7 +10,7 @@ NUPKG=artifacts/packages/Debug/Shipping/
 pkill -f dotnet
 rm -rf artifacts
 ./build.sh 
-dotnet tool uninstall -g dotnet-scaffold
+dotnet tool uninstall -g Microsoft.dotnet-scaffold
 cd $DEFAULT_NUPKG_PATH
 rm -rf microsoft.visualstudio.web.codegeneration
 rm -rf microsoft.visualstudio.web.codegeneration.contracts
@@ -21,5 +21,5 @@ rm -rf microsoft.visualstudio.web.codegeneration.templating
 rm -rf microsoft.visualstudio.web.codegeneration.utils
 rm -rf microsoft.visualstudio.web.codegenerators.mvc
 cd "$OLDPWD"/$NUPKG 
-dotnet tool install -g dotnet-scaffold --add-source $SRC_DIR/$NUPKG  --version $VERSION
+dotnet tool install -g Microsoft.dotnet-scaffold --add-source $SRC_DIR/$NUPKG  --version $VERSION
 cd "$OLDPWD"

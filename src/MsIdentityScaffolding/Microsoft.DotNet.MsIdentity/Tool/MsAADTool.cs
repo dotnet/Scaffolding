@@ -6,61 +6,69 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Graph;
-using Microsoft.DotNet.MsIdentity;
 using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
-
 namespace Microsoft.DotNet.MsIdentity
 {
-    public class MsAADTool : IMsAADTool
+    internal class MsAADTool : IMsAADTool
     {
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string _commandName { get; set; }
-        private GraphServiceClient _graphServiceClient;
-        private MsalTokenCredential _tokenCredential;
+        public IGraphServiceClient GraphServiceClient { get; set; }
+        public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set;}
+        private MsalTokenCredential TokenCredential { get; set; }
 
         public MsAADTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
             ProvisioningToolOptions = provisioningToolOptions;
             _commandName = commandName;
-            _tokenCredential = new MsalTokenCredential(provisioningToolOptions.TenantId, provisioningToolOptions.Username);
-            _graphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(_tokenCredential));
+            TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username);
+            GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
+            AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
         }
 
         public async Task<ApplicationParameters?> Run()
         {
-            if (_tokenCredential != null && _graphServiceClient != null)
+            string outputJsonString = string.Empty;    
+            if (TokenCredential != null && GraphServiceClient != null)
             {
-                var graphObjects = await _graphServiceClient.Me.OwnedObjects
-                                            .Request()
-                                            .GetAsync();
-
-                if (graphObjects.Any())
+                switch(_commandName)
                 {
-                    switch(_commandName)
-                    {
-                        //--list-aad-apps
-                        case Commands.LIST_AAD_APPS_COMMAND:
-                            PrintApplicationsList(graphObjects.ToList(), ProvisioningToolOptions.Json ?? false);
-                            break;
-                        //--list-service-principals
-                        case Commands.LIST_SERVICE_PRINCIPALS_COMMAND:
-                            PrintServicePrincipalList(graphObjects.ToList(), ProvisioningToolOptions.Json ?? false);
-                            break;
-                        default:
-                            break;
-                    }
+                    //--list-aad-apps
+                    case Commands.LIST_AAD_APPS_COMMAND:
+                        outputJsonString = await PrintApplicationsList();
+                        break;
+                    //--list-service-principals
+                    case Commands.LIST_SERVICE_PRINCIPALS_COMMAND:
+                        outputJsonString = await PrintServicePrincipalList();
+                        break;
+                    //list-tenants
+                    case Commands.LIST_TENANTS_COMMAND:
+                        outputJsonString = await PrintTenantsList();
+                        break;
+                    default:
+                        break;
                 }
-
+                if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
+                {
+                    Console.WriteLine(outputJsonString);
+                }
             }
             return null;
         }
 
-        private void PrintApplicationsList(IList<DirectoryObject> graphObjects, bool outputJson)
+        internal async Task<string> PrintApplicationsList()
         {
+            string outputJsonString = string.Empty;
+            var graphObjects = await GraphServiceClient.Me.OwnedObjects
+                            .Request()
+                            .GetAsync();
+            var grapphObjects = graphObjects.ToList();
+            string text = JsonSerializer.Serialize(grapphObjects);
+            Console.WriteLine(text);
             IList<Application> applicationList = new List<Application>();
-            if (graphObjects != null)
+            if (graphObjects != null && graphObjects.Any())
             {
                 foreach (var graphObj in graphObjects)
                 {
@@ -74,11 +82,9 @@ namespace Microsoft.DotNet.MsIdentity
 
                 if (applicationList.Any())
                 { 
-                    if (outputJson)
+                    if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
                     {
-                        string outputString = JsonSerializer.Serialize(applicationList);
-                        Console.WriteLine(outputString);
-                    }
+                        outputJsonString = JsonSerializer.Serialize(applicationList);                    }
                     else 
                     {
                         Console.Write(
@@ -92,12 +98,17 @@ namespace Microsoft.DotNet.MsIdentity
                     }
                 }
             }
+            return outputJsonString;
         }
 
-        private void PrintServicePrincipalList(IList<DirectoryObject> graphObjects, bool outputJson)
+        internal async Task<string> PrintServicePrincipalList()
         {
+            string outputJsonString = string.Empty;
             IList<ServicePrincipal> servicePrincipalList = new List<ServicePrincipal>();
-            if (graphObjects != null)
+            var graphObjects = await GraphServiceClient.Me.OwnedObjects
+                .Request()
+                .GetAsync();
+            if (graphObjects != null && graphObjects.Any())
             {
                 foreach (var graphObj in graphObjects)
                 {
@@ -106,13 +117,11 @@ namespace Microsoft.DotNet.MsIdentity
                         servicePrincipalList.Add(servicePrincipal);          
                     }
                 }
-
-                string outputString = string.Empty;
                 if (servicePrincipalList.Any())
                 { 
-                    if (outputJson)
+                    if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
                     {
-                        outputString = JsonSerializer.Serialize(servicePrincipalList);
+                        outputJsonString = JsonSerializer.Serialize(servicePrincipalList);
                     }
                     else 
                     {
@@ -125,10 +134,67 @@ namespace Microsoft.DotNet.MsIdentity
                            Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
                         }
                     }
-                    //TODO do we need an else scenario where we list Service Principals for the command line experience.
                 }
-                Console.WriteLine(outputString);
             }
+            return outputJsonString;
+        }
+
+        internal async Task<string> PrintTenantsList()
+        {
+            string outputJsonString = string.Empty;
+            IList<TenantInformation> tenantList = new List<TenantInformation>();
+            if (AzureManagementAPI != null)
+            {
+                var tenantsJsonString = await AzureManagementAPI.ListTenantsAsync();
+                Console.WriteLine(tenantsJsonString);
+                if (!string.IsNullOrEmpty(tenantsJsonString))
+                {
+                    using (JsonDocument document = JsonDocument.Parse(tenantsJsonString))
+                    {
+                        if (document.RootElement.TryGetProperty("value", out JsonElement jsonTenantElement))
+                        {
+                            var jsonTenantEnumerator = jsonTenantElement.EnumerateArray();
+                            if (jsonTenantEnumerator.Any())
+                            {
+                                while (jsonTenantEnumerator.MoveNext())
+                                {
+                                    JsonElement current = jsonTenantEnumerator.Current;
+                                    string? tenantId = current.GetProperty("tenantId").GetString();
+                                    string? tenantType = current.GetProperty("tenantType").GetString();
+                                    string? defaultDomain = current.GetProperty("defaultDomain").GetString();
+                                    string? displayName = current.GetProperty("displayName").GetString();
+
+                                    tenantList.Add(
+                                        new TenantInformation()
+                                        {
+                                            TenantId = tenantId,
+                                            TenantType = tenantType,
+                                            DefaultDomain = defaultDomain,
+                                            DisplayName = displayName
+                                        });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
+            {
+                outputJsonString = JsonSerializer.Serialize(tenantList);
+            }
+            else 
+            {
+                Console.Write(
+                    "--------------------------------------------------------------------------------------------------------------------------------\n" + 
+                    "Display Name\t\t\tDefault Domain\t\t\t\tTenant Type\tTenant Id\n" +
+                    "--------------------------------------------------------------------------------------------------------------------------------\n\n");
+                foreach(var tenant in tenantList)
+                {
+                    Console.WriteLine($"{(tenant.DisplayName ?? string.Empty).PadRight(16)}\t\t{(tenant.DefaultDomain ?? string.Empty).PadRight(20)}\t\t{(tenant.TenantType ?? string.Empty).PadRight(10)}\t{(tenant.TenantId ?? string.Empty)}");
+                }
+            }
+            return outputJsonString;
         }
     }
 }

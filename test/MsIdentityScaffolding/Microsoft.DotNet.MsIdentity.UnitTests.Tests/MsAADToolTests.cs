@@ -1,13 +1,10 @@
-using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
-using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
-using Microsoft.Graph;
-using Moq;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
+using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
+using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.MsIdentity.UnitTests.Tests

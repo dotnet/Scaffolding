@@ -22,3 +22,7 @@ Security issues and bugs should be reported privately, via email, to the Microso
 These are some other repos for related projects:
 * [Microsoft Identity Web](https://github.com/AzureAD/microsoft-identity-web) - is a library which contains a set of reusable classes used in conjunction with ASP.NET Core for integrating with the [Microsoft identity platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/) (formerly *Azure AD v2.0 endpoint*) and [AAD B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/).
 * [EF Core](https://github.com/dotnet/efcore) - source for [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/)
+
+## Code of conduct
+
+See [CODE-OF-CONDUCT](./CODE-OF-CONDUCT.md)

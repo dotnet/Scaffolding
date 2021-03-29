@@ -64,9 +64,6 @@ namespace Microsoft.DotNet.MsIdentity
             var graphObjects = await GraphServiceClient.Me.OwnedObjects
                             .Request()
                             .GetAsync();
-            var grapphObjects = graphObjects.ToList();
-            string text = JsonSerializer.Serialize(grapphObjects);
-            Console.WriteLine(text);
             IList<Application> applicationList = new List<Application>();
             if (graphObjects != null && graphObjects.Any())
             {
@@ -146,7 +143,6 @@ namespace Microsoft.DotNet.MsIdentity
             if (AzureManagementAPI != null)
             {
                 var tenantsJsonString = await AzureManagementAPI.ListTenantsAsync();
-                Console.WriteLine(tenantsJsonString);
                 if (!string.IsNullOrEmpty(tenantsJsonString))
                 {
                     using (JsonDocument document = JsonDocument.Parse(tenantsJsonString))

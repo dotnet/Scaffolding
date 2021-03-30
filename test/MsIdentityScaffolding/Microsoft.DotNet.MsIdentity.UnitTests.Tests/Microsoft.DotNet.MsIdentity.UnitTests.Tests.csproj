@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\MsIdentityScaffolding\Microsoft.DotNet.MsIdentity\Microsoft.DotNet.MsIdentity.csproj" />
+  </ItemGroup>
+
+</Project>

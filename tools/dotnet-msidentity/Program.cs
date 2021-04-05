@@ -16,23 +16,32 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             var listAadAppsCommand = ListAADAppsCommand();
             var listServicePrincipalsCommand = ListServicePrincipalsCommand();
             var listTenantsCommand = ListTenantsCommand();
-            var provisionApplicationCommand = ProvisionApplicationCommand();
-
+            var registerApplicationCommand = RegisterApplicationCommand();
+            var unregisterApplicationCommand = UnregisterApplicationCommand();
+            var updateApplicationCommand = UpdateApplicationCommand();
+            var updateProjectCommand = UpdateProjectCommand();
             //hide internal commands.
             listAadAppsCommand.IsHidden = true;
             listServicePrincipalsCommand.IsHidden = true;
             listTenantsCommand.IsHidden = true;
+            updateProjectCommand.IsHidden = true;
 
             listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListApps);
             listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListServicePrincipals);
             listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListTenants);
-            provisionApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleProvisionApplication);
-            
+            registerApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleRegisterApplication);
+            unregisterApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUnregisterApplication);
+            updateApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateApplication);
+            updateProjectCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateProject);
+
             //add all commands to root command.
             rootCommand.AddCommand(listAadAppsCommand);
             rootCommand.AddCommand(listServicePrincipalsCommand);
             rootCommand.AddCommand(listTenantsCommand);
-            rootCommand.AddCommand(provisionApplicationCommand);
+            rootCommand.AddCommand(registerApplicationCommand);
+            rootCommand.AddCommand(unregisterApplicationCommand);
+            rootCommand.AddCommand(updateApplicationCommand);
+            rootCommand.AddCommand(updateProjectCommand);
 
             //if no args are present, show default help.
             if (args == null || args.Length == 0)
@@ -80,11 +89,44 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             return -1;
         }
 
-        private static async Task<int> HandleProvisionApplication(ProvisioningToolOptions provisioningToolOptions)
+        private static async Task<int> HandleRegisterApplication(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.REGISTER_APPLICATIION_COMMAND, provisioningToolOptions);
+                await msAADTool.Run();
+                return 0;
+            }
+            return -1;
+        }
+
+        private static async Task<int> HandleUpdateApplication(ProvisioningToolOptions provisioningToolOptions)
+        {
+            if (provisioningToolOptions != null)
+            {
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_APPLICATION_COMMAND, provisioningToolOptions);
+                await msAADTool.Run();
+                return 0;
+            }
+            return -1;
+        }
+
+        private static async Task<int> HandleUnregisterApplication(ProvisioningToolOptions provisioningToolOptions)
+        {
+            if (provisioningToolOptions != null)
+            {
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UNREGISTER_APPLICATION_COMMAND, provisioningToolOptions);
+                await msAADTool.Run();
+                return 0;
+            }
+            return -1;
+        }
+
+        private static async Task<int> HandleUpdateProject(ProvisioningToolOptions provisioningToolOptions)
+        {
+            if (provisioningToolOptions != null)
+            {
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_APPLICATION_COMMAND, provisioningToolOptions);
                 await msAADTool.Run();
                 return 0;
             }
@@ -121,27 +163,48 @@ namespace Microsoft.DotNet.MsIdentity.Tool
                 UsernameOption(), JsonOption()
             };
 
-        private static Command ProvisionApplicationCommand()=>
+        private static Command RegisterApplicationCommand()=>
             new Command(
                 name: Commands.REGISTER_APPLICATIION_COMMAND,
-                description: "Register/update/unregister an AAD/AAD B2C application in Azure." + 
+                description: "Register an AAD/AAD B2C application in Azure and updates .NET application." + 
                              "\n\t- Updates the appsettings.json file.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), AppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), UnregisterOption(), ProjectPathOption()
+                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), AppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectPathOption()
+            };
+
+        private static Command UpdateProjectCommand()=>
+            new Command(
+                name: Commands.UPDATE_PROJECT_COMMAND,
+                description: "Update an AAD/AAD B2C application in Azure and .NET application." + 
+                             "\n\t- Updates the appsettings.json file." + 
+                             "\n\t- Updates the Startup.cs file." + 
+                             "\n\t- Updates the user secrets.")
+            {
+                TenantOption(), UsernameOption(), JsonOption(), ProjectPathOption(), ClientIdOption()
+            };
+
+        private static Command UpdateApplicationCommand() =>
+            new Command(
+                name: Commands.UPDATE_APPLICATION_COMMAND,
+                description: "Update an AAD/AAD B2C application in Azure." +
+                             "\n\t- Updates the appsettings.json file.")
+            {
+                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ClientIdOption(), ProjectPathOption()
+            };
+
+        private static Command UnregisterApplicationCommand() =>
+            new Command(
+                name: Commands.UNREGISTER_APPLICATION_COMMAND,
+                description: "Unregister an AAD/AAD B2C application in Azure." +
+                             "\n\t- Updates the appsettings.json file.")
+            {
+                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ProjectPathOption(), ClientIdOption()
             };
 
         private static Option JsonOption()=>
             new Option<bool>(
                 aliases: new [] {"-j", "--json"},
-                description: "Output format for list commands.")
-            {
-                IsRequired = false
-            };
-
-        private static Option UnregisterOption()=>
-            new Option<bool>(
-                aliases: new [] {"-ur", "--unregister"},
-                description: "Unregister the application, instead of registering it.")
+                description: "Output format for commands.")
             {
                 IsRequired = false
             };

@@ -1,4 +1,4 @@
-set VERSION=0.0.1-dev
+set VERSION=1.0.0-dev
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 

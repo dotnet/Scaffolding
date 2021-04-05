@@ -530,9 +530,12 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
             var readApplication = apps.FirstOrDefault();
             if (readApplication != null)
             {
+                var clientId = readApplication.Id;
                 await graphServiceClient.Applications[$"{readApplication.Id}"]
                     .Request()
                     .DeleteAsync();
+                
+                Console.WriteLine($"Unregistered the Azure AD w/ client id = {clientId}\n");
             }
         }
 

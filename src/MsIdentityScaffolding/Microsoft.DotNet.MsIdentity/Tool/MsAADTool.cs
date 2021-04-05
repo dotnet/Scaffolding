@@ -9,12 +9,13 @@ using Microsoft.Graph;
 using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
+
 namespace Microsoft.DotNet.MsIdentity
 {
     internal class MsAADTool : IMsAADTool
     {
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
-        private string _commandName { get; set; }
+        private string CommandName { get; }
         public IGraphServiceClient GraphServiceClient { get; set; }
         public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set;}
         private MsalTokenCredential TokenCredential { get; set; }
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.MsIdentity
         public MsAADTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
             ProvisioningToolOptions = provisioningToolOptions;
-            _commandName = commandName;
+            CommandName = commandName;
             TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username);
             GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.MsIdentity
             string outputJsonString = string.Empty;    
             if (TokenCredential != null && GraphServiceClient != null)
             {
-                switch(_commandName)
+                switch(CommandName)
                 {
                     //--list-aad-apps
                     case Commands.LIST_AAD_APPS_COMMAND:
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.MsIdentity
                     default:
                         break;
                 }
-                if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
+                if (ProvisioningToolOptions.Json)
                 {
                     Console.WriteLine(outputJsonString);
                 }
@@ -79,9 +80,10 @@ namespace Microsoft.DotNet.MsIdentity
 
                 if (applicationList.Any())
                 { 
-                    if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
+                    if (ProvisioningToolOptions.Json)
                     {
-                        outputJsonString = JsonSerializer.Serialize(applicationList);                    }
+                        outputJsonString = JsonSerializer.Serialize(applicationList);   
+                    }
                     else 
                     {
                         Console.Write(
@@ -116,7 +118,7 @@ namespace Microsoft.DotNet.MsIdentity
                 }
                 if (servicePrincipalList.Any())
                 { 
-                    if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
+                    if (ProvisioningToolOptions.Json)
                     {
                         outputJsonString = JsonSerializer.Serialize(servicePrincipalList);
                     }
@@ -175,7 +177,7 @@ namespace Microsoft.DotNet.MsIdentity
                 }
             }
 
-            if (ProvisioningToolOptions.Json.HasValue && ProvisioningToolOptions.Json.Value)
+            if (ProvisioningToolOptions.Json)
             {
                 outputJsonString = JsonSerializer.Serialize(tenantList);
             }

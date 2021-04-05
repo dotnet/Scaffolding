@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.MsIdentity
         /// <summary>
         /// Format for console output for list commands.
         /// </summary>
-        public bool? Json { get; set; }
+        public bool Json { get; set; } = false;
         
         /// <summary>
         /// Clones the options

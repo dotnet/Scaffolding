@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.MsIdentity.Tool
                 case Commands.LIST_TENANTS_COMMAND:
                     return new MsAADTool(commandName, provisioningToolOptions);
                 default:
-                    return new AppProvisioningTool(provisioningToolOptions);
+                    return new AppProvisioningTool(commandName, provisioningToolOptions);
             }
         }
     }

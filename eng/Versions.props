@@ -124,4 +124,17 @@
     <SystemCollectionsImmutableVersion>6.0.0-preview.2.21154.6</SystemCollectionsImmutableVersion>
     <SystemComponentModelAnnotationsVersion>6.0.0-preview.2.21154.6</SystemComponentModelAnnotationsVersion>
   </PropertyGroup>
+
+    <!-- Package versions for MSIdentity projects-->
+  <PropertyGroup>
+    <AzureIdentityVersion>1.3.0</AzureIdentityVersion>
+    <MicrosoftExtensionsConfigurationVersion>3.1.9</MicrosoftExtensionsConfigurationVersion>
+    <MicrosoftExtensionsConfigurationBinderVersion>3.1.9</MicrosoftExtensionsConfigurationBinderVersion>
+    <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.9</MicrosoftExtensionsConfigurationCommandLineVersion>
+    <MicrosoftGraphVersion>3.25.0</MicrosoftGraphVersion>
+    <MicrosoftIdentityClientExtensionsMsalVersion>2.18.0</MicrosoftIdentityClientExtensionsMsalVersion>
+    <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
+  </PropertyGroup>
+
 </Project>

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MsIdentity.Properties;
@@ -13,7 +13,6 @@ using Microsoft.DotNet.MsIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MsIdentity.Project;
-
 
 namespace Microsoft.DotNet.MsIdentity
 {
@@ -24,12 +23,15 @@ namespace Microsoft.DotNet.MsIdentity
     {
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
 
+        private string CommandName { get; }
+
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
 
         private ProjectDescriptionReader ProjectDescriptionReader { get; } = new ProjectDescriptionReader();
 
-        public AppProvisioningTool(ProvisioningToolOptions provisioningToolOptions)
+        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
+            CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;
         }
 
@@ -48,10 +50,7 @@ namespace Microsoft.DotNet.MsIdentity
             }
             else
             {
-                if (ProvisioningToolOptions.Json == null || ProvisioningToolOptions.Json == false)
-                {
-                    Console.WriteLine($"Detected project type {projectDescription.Identifier}. ");
-                }
+                Console.WriteLine($"Detected project type {projectDescription.Identifier}. ");
             }
 
             ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
@@ -69,7 +68,7 @@ namespace Microsoft.DotNet.MsIdentity
                 provisioningToolOptionsBlazorServer.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Server");
                 provisioningToolOptionsBlazorServer.ClientId = ProvisioningToolOptions.WebApiClientId;
                 provisioningToolOptionsBlazorServer.WebApiClientId = null;
-                AppProvisioningTool appProvisioningToolBlazorServer = new AppProvisioningTool(provisioningToolOptionsBlazorServer);
+                AppProvisioningTool appProvisioningToolBlazorServer = new AppProvisioningTool(CommandName, provisioningToolOptionsBlazorServer);
                 ApplicationParameters? applicationParametersServer = await appProvisioningToolBlazorServer.Run();
 
                 /// Processes the Blazorwasm client
@@ -78,7 +77,7 @@ namespace Microsoft.DotNet.MsIdentity
                 provisioningToolOptionsBlazorClient.WebApiClientId = applicationParametersServer?.ClientId;
                 provisioningToolOptionsBlazorClient.AppIdUri = applicationParametersServer?.AppIdUri;
                 provisioningToolOptionsBlazorClient.CalledApiScopes = $"{applicationParametersServer?.AppIdUri}/access_as_user";
-                AppProvisioningTool appProvisioningToolBlazorClient = new AppProvisioningTool(provisioningToolOptionsBlazorClient);
+                AppProvisioningTool appProvisioningToolBlazorClient = new AppProvisioningTool(CommandName, provisioningToolOptionsBlazorClient);
                 return await appProvisioningToolBlazorClient.Run();
             }
 
@@ -102,7 +101,7 @@ namespace Microsoft.DotNet.MsIdentity
                 projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
 
             // Unregister the app
-            if (ProvisioningToolOptions.Unregister)
+            if (CommandName.Equals(Commands.UNREGISTER_APPLICATION_COMMAND, StringComparison.OrdinalIgnoreCase))
             {
                 await UnregisterApplication(tokenCredential, projectSettings.ApplicationParameters);
                 return null;
@@ -118,35 +117,27 @@ namespace Microsoft.DotNet.MsIdentity
             // Reconciliate code configuration and app registration
             if (effectiveApplicationParameters != null)
             {
-                if (ProvisioningToolOptions.Json ?? false)
+                bool appNeedsUpdate = Reconciliate(
+                projectSettings.ApplicationParameters,
+                effectiveApplicationParameters);
+
+                // Update appp registration if needed
+                if (appNeedsUpdate)
                 {
-                    var jsonParameters = JsonSerializer.Serialize(effectiveApplicationParameters);
-                    Console.WriteLine(jsonParameters);
+                    await WriteApplicationRegistration(
+                        summary,
+                        effectiveApplicationParameters,
+                        tokenCredential);
                 }
-                else 
-                {
-                    bool appNeedsUpdate = Reconciliate(
-                    projectSettings.ApplicationParameters,
+
+                // Write code configuration if needed
+                WriteProjectConfiguration(
+                    summary,
+                    projectSettings,
                     effectiveApplicationParameters);
 
-                    // Update appp registration if needed
-                    if (appNeedsUpdate)
-                    {
-                        await WriteApplicationRegistration(
-                            summary,
-                            effectiveApplicationParameters,
-                            tokenCredential);
-                    }
-
-                    // Write code configuration if needed
-                    WriteProjectConfiguration(
-                        summary,
-                        projectSettings,
-                        effectiveApplicationParameters);
-
-                    // Summarizes what happened
-                    WriteSummary(summary);
-                }
+                // Summarizes what happened
+                WriteSummary(summary);
             }
                
             return effectiveApplicationParameters;
@@ -259,10 +250,7 @@ namespace Microsoft.DotNet.MsIdentity
             if (currentApplicationParameters == null && !ProvisioningToolOptions.Unregister)
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters);
-                if (ProvisioningToolOptions.Json == null || ProvisioningToolOptions.Json == false)
-                {
-                    Console.Write($"Created app {currentApplicationParameters.ClientId}. ");
-                }
+                Console.Write($"Created app {currentApplicationParameters.ClientId}. ");
             }
             return currentApplicationParameters;
         }

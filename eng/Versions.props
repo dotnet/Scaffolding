@@ -30,6 +30,8 @@
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
     <!-- Microsoft.Build-->
     <MicrosoftBuildPackageVersion>16.8.0 </MicrosoftBuildPackageVersion>
+    <!-- Microsoft.Build.Framework-->
+    <MicrosoftBuildFrameworkVersion>16.8.0</MicrosoftBuildFrameworkVersion>
     <!-- Microsoft.Build.Utilities-->
     <MicrosoftBuildUtilitiesCorePackageVersion>16.8.0 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
@@ -46,7 +48,7 @@
     <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.3.21201.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.3.21201.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
+    <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
     <SystemCollectionsImmutablePackageVersion>5.0.0</SystemCollectionsImmutablePackageVersion>
     
@@ -135,6 +137,8 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>2.18.0</MicrosoftIdentityClientExtensionsMsalVersion>
     <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
     <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
+    <MicrosoftCodeAnalysisWorkspacesMSBuildVersion>3.9.0</MicrosoftCodeAnalysisWorkspacesMSBuildVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesVersion>3.9.0</MicrosoftCodeAnalysisCSharpWorkspacesVersion>
   </PropertyGroup>
 
 </Project>

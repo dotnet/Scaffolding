@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -16,6 +16,11 @@ namespace Microsoft.DotNet.MsIdentity.AuthenticationParameters
         /// </summary>
         public string? ApplicationDisplayName { get; set; }
 
+        /// <summary>
+        /// Application project path
+        /// <summary>
+        public string? ProjectPath { get; set; }
+        
         /// <summary>
         /// Tenant in which the application is created.
         /// </summary>
@@ -178,6 +183,11 @@ namespace Microsoft.DotNet.MsIdentity.AuthenticationParameters
         /// Authentication options with MSAL .NET.
         /// </summary>
         public string? MsalAuthenticationOptions { get; set; }
+
+        /// <summary>
+        /// Graph.Application and Graph.ServicePrincipal object ids.
+        /// </summary>
+        public string? GraphEntityId { get; set; }
 
         /// <summary>
         /// Sets a bool property (from its name).

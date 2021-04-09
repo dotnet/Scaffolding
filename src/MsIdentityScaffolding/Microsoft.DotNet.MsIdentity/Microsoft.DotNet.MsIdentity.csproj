@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
@@ -32,9 +32,26 @@
     <PackageReference Include="Microsoft.Graph" Version="$(MicrosoftGraphVersion)" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="$(MicrosoftIdentityClientExtensionsMsalVersion)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildVersion)"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesVersion)"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="3.9.0"/>
+    <!-- <PackageReference Include="Microsoft.Build.Framework" PrivateAssets="All" Version="$(MicrosoftBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build" PrivateAssets="All" Version="$(MicrosoftBuildFrameworkVersion)" /> -->
+    <PackageReference Include="Microsoft.Build" Version="16.8.0" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="16.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\Scaffolding\Shared\Cli.Utils\*.cs">
+      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeGeneration\" />
     <Folder Include="Resources\" />
   </ItemGroup>
 

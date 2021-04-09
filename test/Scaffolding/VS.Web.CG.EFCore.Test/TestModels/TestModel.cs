@@ -26,7 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
                 builder.Entity<Product>();
                 builder.Entity<Category>();
 
-                return builder.Model;
+                return (IModel)builder.Model;
             }
         }
 
@@ -41,7 +41,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.Tes
                 builder.Entity<Customer>();
                 builder.Entity<Order>();
 
-                return builder.Model;
+                return (IModel)builder.Model;
             }
         }
     }

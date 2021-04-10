@@ -3,5 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <PlatformTarget>AnyCpu</PlatformTarget>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 </Project>

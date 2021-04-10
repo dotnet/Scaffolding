@@ -3,5 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 </Project>

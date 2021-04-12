@@ -34,10 +34,16 @@ Usage:
   dotnet-msidentity [command] [options]
 
 Commands:
-  --list--aad-apps                     Lists AAD Applications for a given tenant/username.
-  --list-service-principals            Lists AAD Service Principals.
-  --register-application               Registers/unregisters/updates an AAD/AAD B2C Application in Azure.
+  --register-app               Registers/updates an AAD/AAD B2C Application in Azure.
                                         - Updates the appsettings.json file.
+                                        - Updates local user secrets
+  --unregister-app             Unregister an AAD/AAD B2C Application in Azure.
+
+Internal Commands (These commands have little do with registering AAD/AAD B2C apps but are nice helpers):
+  --list--aad-apps                     Lists AAD Applications for a given tenant + username.
+  --list-service-principals            Lists AAD Service Principals for a given tenant + username.
+  --list-tenants                       Lists AAD + AAD B2C tenants for a given username.
+  --update-project                     Given client id for an Azure AD/AD B2C app, update appsettings.json, local user secrets. [TODO : and project code(Startup.cs, project references to get the app auth ready).]
 
 Options:
   --tenant-id <tenant-id>              Azure AD or Azure AD B2C tenant in which to create/update the app.

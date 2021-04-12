@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.MsIdentity
             if (CommandName.Equals(Commands.UPDATE_PROJECT_COMMAND, StringComparison.OrdinalIgnoreCase))
             {
                 // Read or provision Microsoft identity platform application
-                ApplicationParameters? applicationParameters = await ReadOrProvisionMicrosoftIdentityApplication(
+                ApplicationParameters? applicationParameters = await ReadMicrosoftIdentityApplication(
                     tokenCredential,
                     projectSettings.ApplicationParameters);
 
@@ -406,12 +406,28 @@ namespace Microsoft.DotNet.MsIdentity
             return needUpdate;
         }
 
-        private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
+        private async Task<ApplicationParameters?> ReadMicrosoftIdentityApplication(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters)
         {
             ApplicationParameters? currentApplicationParameters = null;
-            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || !string.IsNullOrEmpty(applicationParameters.ClientId))
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
+            {
+                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
+                if (currentApplicationParameters == null)
+                {
+                    Console.Write($"Couldn't find app {applicationParameters.EffectiveClientId} in tenant {applicationParameters.EffectiveTenantId}. ");
+                }
+            }
+            return currentApplicationParameters;
+        }
+
+            private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
+            TokenCredential tokenCredential,
+            ApplicationParameters applicationParameters)
+        {
+            ApplicationParameters? currentApplicationParameters = null;
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) &&  !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
                 if (currentApplicationParameters == null)

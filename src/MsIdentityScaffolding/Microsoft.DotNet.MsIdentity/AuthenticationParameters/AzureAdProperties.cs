@@ -18,8 +18,8 @@ namespace Microsoft.DotNet.MsIdentity.AuthenticationParameters
     public static class AzureAdDefaultProperties
     {
         public const string Domain = "qualified.domain.name";
-        public const string ClientId = "22222222-2222-2222-2222-222222222222";
-        public const string TenantId = "11111111-1111-1111-11111111111111111";
+        public const string TenantId = "22222222-2222-2222-2222-222222222222";
+        public const string ClientId = "11111111-1111-1111-11111111111111111";
         public const string Instance = "https://login.microsoftonline.com/";
         public const string CallbackPath = "/signin-oidc";
     }

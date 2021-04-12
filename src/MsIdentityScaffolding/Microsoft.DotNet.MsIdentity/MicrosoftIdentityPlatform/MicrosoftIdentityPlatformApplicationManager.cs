@@ -254,7 +254,7 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
         {
             var passwordCredential = new PasswordCredential
             {
-                DisplayName = "Password created by dotnet-msidentity tool"
+                DisplayName = "Secret created by dotnet-msidentity tool"
             };
 
             if (!string.IsNullOrEmpty(applicatonId) && graphServiceClient != null)

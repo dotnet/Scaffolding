@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -260,7 +259,6 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
 
             if (!string.IsNullOrEmpty(applicatonId) && graphServiceClient != null)
             {
-                //change app id to id
                 PasswordCredential returnedPasswordCredential = await graphServiceClient.Applications[$"{applicatonId}"]
                     .AddPassword(passwordCredential)
                     .Request()

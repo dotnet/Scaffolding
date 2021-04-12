@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.MsIdentity.AuthenticationParameters
         public string? Instance { get; set; }
     }
 
+    //getting default properties from https://github.com/dotnet/aspnetcore/blob/6bc4b79f4ee7af00edcbb435e5ee4c1de349a110/src/ProjectTemplates/Web.ProjectTemplates/content/StarterWeb-CSharp/appsettings.json
     public static class AzureAdDefaultProperties
     {
         public const string Domain = "qualified.domain.name";

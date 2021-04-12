@@ -30,8 +30,6 @@
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
     <!-- Microsoft.Build-->
     <MicrosoftBuildPackageVersion>16.8.0 </MicrosoftBuildPackageVersion>
-    <!-- Microsoft.Build.Framework-->
-    <MicrosoftBuildFrameworkVersion>16.8.0</MicrosoftBuildFrameworkVersion>
     <!-- Microsoft.Build.Utilities-->
     <MicrosoftBuildUtilitiesCorePackageVersion>16.8.0 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
@@ -137,8 +135,6 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>2.18.0</MicrosoftIdentityClientExtensionsMsalVersion>
     <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
     <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
-    <MicrosoftCodeAnalysisWorkspacesMSBuildVersion>3.9.0</MicrosoftCodeAnalysisWorkspacesMSBuildVersion>
-    <MicrosoftCodeAnalysisCSharpWorkspacesVersion>3.9.0</MicrosoftCodeAnalysisCSharpWorkspacesVersion>
   </PropertyGroup>
 
 </Project>

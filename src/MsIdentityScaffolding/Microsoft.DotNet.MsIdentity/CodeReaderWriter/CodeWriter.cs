@@ -1,18 +1,18 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
-using Microsoft.DotNet.MsIdentity.Project;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MsIdentity.Project;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
 {
-    public class CodeWriter
+    public static class CodeWriter
     {
-        internal void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconcialedApplicationParameters)
+        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconcialedApplicationParameters)
         {
             foreach (var replacementsInFile in replacements.GroupBy(r => r.FilePath))
             {
@@ -49,36 +49,88 @@ namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
             }
         }
 
-        private string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters)
+        //TODO : Add integration tests for testing instead of mocking for unit tests.
+        public static void AddUserSecrets(bool isB2C, string projectPath, string value)
+        {
+            //init regardless. If it's already initiated, dotnet-user-secrets confirms it.
+            InitUserSecrets(projectPath);
+            string section = isB2C ? "AzureADB2C" : "AzureAD";
+            string key = $"{section}:ClientSecret";
+            SetUserSecerets(projectPath, key, value);
+        }
+
+        private static void InitUserSecrets(string projectPath)
+        {
+            var errors = new List<string>();
+            var output = new List<string>();
+            
+            IList<string> arguments = new List<string>();
+            
+            //if project path is present, use it for dotnet user-secrets
+            if (!string.IsNullOrEmpty(projectPath))
+            {
+                arguments.Add("-p");
+                arguments.Add(projectPath);
+            }
+
+            arguments.Add("init");
+            var result = Command.CreateDotNet(
+                "user-secrets",
+                arguments.ToArray())
+                .OnErrorLine(e => errors.Add(e))
+                .OnOutputLine(o => output.Add(o))
+                .Execute();
+            
+            if (result.ExitCode != 0)
+            {
+                throw new Exception("Error while running dotnet-user-secrets init");
+            }
+        }
+
+        private static void SetUserSecerets(string projectPath, string key, string value)
+        {
+            var errors = new List<string>();
+            var output = new List<string>();
+
+            IList<string> arguments = new List<string>();
+
+            //if project path is present, use it for dotnet user-secrets
+            if (!string.IsNullOrEmpty(projectPath))
+            {
+                arguments.Add("-p");
+                arguments.Add(projectPath);
+            }
+
+            arguments.Add("set");
+            arguments.Add(key);
+            arguments.Add(value);
+            var result = Command.CreateDotNet(
+                "user-secrets",
+                arguments)
+                .OnErrorLine(e => errors.Add(e))
+                .OnOutputLine(o => output.Add(o))
+                .Execute();
+            
+            if (result.ExitCode != 0)
+            {
+                throw new Exception($"Error while running dotnet-user-secrets set {key} {value}");
+            }
+            else 
+            {
+                Console.WriteLine($"\nAdded {key} to user secrets.\n");
+            }
+        }
+
+        private static string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters)
         {
             string? replacement = replaceBy;
             switch(replaceBy)
             {
                 case "Application.ClientSecret":
                     string? password = reconciledApplicationParameters.PasswordCredentials.LastOrDefault();
-                    if (!string.IsNullOrEmpty(reconciledApplicationParameters.SecretsId))
+                    if (!string.IsNullOrEmpty(reconciledApplicationParameters.SecretsId) && !string.IsNullOrEmpty(password))
                     {
-                        // TODO: adapt for Linux: https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-5.0&tabs=windows#how-the-secret-manager-tool-works
-                        string? envVariable = Environment.GetEnvironmentVariable("UserProfile");
-                        if (!string.IsNullOrEmpty(envVariable))
-                        {
-                            string path = Path.Combine(
-                                envVariable,
-                                @"AppData\Roaming\Microsoft\UserSecrets\",
-                                reconciledApplicationParameters.SecretsId,
-                                "secrets.json")!;
-                            if (!File.Exists(path))
-                            {
-                                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-                                string section = reconciledApplicationParameters.IsB2C ? "AzureADB2C" : "AzureAD";
-                                File.WriteAllText(path, $"{{\n    \"{section}:ClientSecret\": \"{password}\"\n}}");
-                                replacement = "See user secrets";
-                            }
-                            else
-                            {
-                                replacement = password;
-                            }
-                        }
+                        AddUserSecrets(reconciledApplicationParameters.IsB2C, reconciledApplicationParameters.ProjectPath ?? string.Empty, password);
                     }
                     else
                     {

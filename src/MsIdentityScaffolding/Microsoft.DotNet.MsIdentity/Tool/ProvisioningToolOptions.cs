@@ -10,6 +10,16 @@ namespace Microsoft.DotNet.MsIdentity
         public string ProjectPath { get; set; } = System.IO.Directory.GetCurrentDirectory();
 
         /// <summary>
+        /// Path to csproj file 
+        /// </summary>
+        public string? ProjectCsProjPath { get; set; }
+
+        /// <summary>
+        /// Path to appsettings.json file
+        /// </summary>
+        public string? AppSettingsFilePath { get; set; }
+
+        /// <summary>
         /// Language/Framework for the project.
         /// </summary>
         public string LanguageOrFramework { get; set; } = "dotnet";
@@ -95,6 +105,16 @@ namespace Microsoft.DotNet.MsIdentity
         public bool CallsGraph { get; set; }
 
         /// <summary>
+        /// Calls Downstream API
+        /// </summary>
+        public bool CallsDownstreamApi { get; set; }
+
+        /// <summary>
+        /// Add secrets to user secrets.json file.
+        /// </summary>
+        public bool UpdateUserSecrets { get; set; }
+
+        /// <summary>
         /// The App ID Uri for the blazorwasm hosted API. It's only used
         /// on the case of a blazorwasm hosted application.
         /// </summary>
@@ -109,13 +129,14 @@ namespace Microsoft.DotNet.MsIdentity
         /// Clones the options
         /// </summary>
         /// <returns></returns>
-
         public ProvisioningToolOptions Clone()
         {
             return new ProvisioningToolOptions()
             {
                 CalledApiScopes = CalledApiScopes,
                 CalledApiUrl = CalledApiUrl,
+                CallsDownstreamApi = CallsDownstreamApi,
+                UpdateUserSecrets = UpdateUserSecrets,
                 CallsGraph = CallsGraph,
                 ClientId = ClientId,
                 ClientSecret = ClientSecret,
@@ -127,6 +148,8 @@ namespace Microsoft.DotNet.MsIdentity
                 Unregister = Unregister,
                 Username = Username,
                 ProjectPath = ProjectPath,
+                ProjectCsProjPath = ProjectCsProjPath,
+                AppSettingsFilePath = AppSettingsFilePath,
                 WebApiClientId = WebApiClientId,
                 AppIdUri = AppIdUri,
                 Json = Json

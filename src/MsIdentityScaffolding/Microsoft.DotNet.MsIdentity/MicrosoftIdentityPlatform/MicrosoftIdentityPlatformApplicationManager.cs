@@ -1,14 +1,13 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-using Azure.Core;
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
-using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Core;
+using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
+using Microsoft.Graph;
 
 namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
 {
@@ -123,7 +122,7 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
             {
                 await AddPasswordCredentials(
                     graphServiceClient,
-                    createdApplication,
+                    createdApplication.Id,
                     effectiveApplicationParameters);
             }
 
@@ -193,7 +192,7 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
             {
                 await AddPasswordCredentials(
                     graphServiceClient,
-                    existingApplication,
+                    existingApplication.Id,
                     reconcialedApplicationParameters).ConfigureAwait(false);
             }
         }
@@ -251,18 +250,21 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="createdApplication"></param>
         /// <param name="effectiveApplicationParameters"></param>
         /// <returns></returns>
-        private static async Task AddPasswordCredentials(GraphServiceClient graphServiceClient, Application createdApplication, ApplicationParameters effectiveApplicationParameters)
+        internal static async Task AddPasswordCredentials(GraphServiceClient graphServiceClient, string applicatonId, ApplicationParameters effectiveApplicationParameters)
         {
             var passwordCredential = new PasswordCredential
             {
-                DisplayName = "Password created by the provisioning tool"
+                DisplayName = "Secret created by dotnet-msidentity tool"
             };
 
-            PasswordCredential returnedPasswordCredential = await graphServiceClient.Applications[$"{createdApplication.Id}"]
-                .AddPassword(passwordCredential)
-                .Request()
-                .PostAsync();
-            effectiveApplicationParameters.PasswordCredentials.Add(returnedPasswordCredential.SecretText);
+            if (!string.IsNullOrEmpty(applicatonId) && graphServiceClient != null)
+            {
+                PasswordCredential returnedPasswordCredential = await graphServiceClient.Applications[$"{applicatonId}"]
+                    .AddPassword(passwordCredential)
+                    .Request()
+                    .PostAsync();
+                effectiveApplicationParameters.PasswordCredentials.Add(returnedPasswordCredential.SecretText);
+            }
         }
 
         /// <summary>
@@ -539,7 +541,7 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
             }
         }
 
-        private GraphServiceClient GetGraphServiceClient(TokenCredential tokenCredential)
+        internal GraphServiceClient GetGraphServiceClient(TokenCredential tokenCredential)
         {
             if (_graphServiceClient == null)
             {
@@ -551,10 +553,25 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
         public async Task<ApplicationParameters?> ReadApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
-
             // Get the tenant
             Organization? tenant = await GetTenant(graphServiceClient);
+            var application = await GetApplication(tokenCredential, applicationParameters);
+            if (application != null)
+            {
 
+                ApplicationParameters effectiveApplicationParameters = GetEffectiveApplicationParameters(
+                    tenant!,
+                    application,
+                    applicationParameters);
+
+                return effectiveApplicationParameters;
+            }
+            return null;
+        }
+
+        public async Task<Application?> GetApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        {
+            var graphServiceClient = GetGraphServiceClient(tokenCredential);
             var apps = await graphServiceClient.Applications
                 .Request()
                 .Filter($"appId eq '{applicationParameters.ClientId}'")
@@ -566,14 +583,7 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
             {
                 return null;
             }
-
-            ApplicationParameters effectiveApplicationParameters = GetEffectiveApplicationParameters(
-                tenant!,
-                readApplication,
-                applicationParameters);
-
-            return effectiveApplicationParameters;
-
+            return readApplication;
         }
 
         private ApplicationParameters GetEffectiveApplicationParameters(
@@ -607,7 +617,8 @@ namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
                 TargetFramework = originalApplicationParameters.TargetFramework,
                 MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
                 CalledApiScopes = originalApplicationParameters.CalledApiScopes,
-                AppIdUri = originalApplicationParameters.AppIdUri
+                AppIdUri = originalApplicationParameters.AppIdUri,
+                GraphEntityId = application.Id
             };
 
             if (application.Api != null && application.IdentifierUris.Any())

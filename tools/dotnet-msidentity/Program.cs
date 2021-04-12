@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.MsIdentity.Tool
         {
             if (provisioningToolOptions != null)
             {
-                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_APPLICATION_COMMAND, provisioningToolOptions);
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_PROJECT_COMMAND, provisioningToolOptions);
                 await msAADTool.Run();
                 return 0;
             }
@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.MsIdentity.Tool
                              "\n\t- Updates the Startup.cs file." + 
                              "\n\t- Updates the user secrets.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ProjectPathOption(), ClientIdOption()
+                TenantOption(), UsernameOption(), JsonOption(), ProjectPathOption(), ClientIdOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecrets()
             };
 
         private static Command UpdateApplicationCommand() =>
@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.MsIdentity.Tool
                 description: "Update an AAD/AAD B2C application in Azure." +
                              "\n\t- Updates the appsettings.json file.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ClientIdOption(), ProjectPathOption()
+                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ClientIdOption(), ProjectPathOption(), 
             };
 
         private static Command UnregisterApplicationCommand() =>
@@ -208,7 +208,32 @@ namespace Microsoft.DotNet.MsIdentity.Tool
             {
                 IsRequired = false
             };
-        
+
+        private static Option CallsGraphOption()=>
+            new Option<bool>(
+                aliases: new [] {"-cg", "--calls-graph"},
+                description: "App registration calls microsoft graph.")
+            {
+                IsRequired = false
+            };
+
+        private static Option CallsDownstreamApiOption()=>
+            new Option<bool>(
+                aliases: new [] {"-cda", "--calls-downstream-api"},
+                description: "App registration calls downstream api.")
+            {
+                IsRequired = false
+            };
+
+        private static Option UpdateUserSecrets()=>
+            new Option<bool>(
+                aliases: new [] {"-uus", "--update-user-secrets"},
+                description: "Add secrets to user secrets.json file." + 
+                             "\n\t- Using dotnet-user-secrets to init and set user secrets.")
+            {
+                IsRequired = false
+            };
+
         private static Option ClientIdOption()=>
             new Option<string>(
                 aliases: new [] {"-ci", "--client-id"},

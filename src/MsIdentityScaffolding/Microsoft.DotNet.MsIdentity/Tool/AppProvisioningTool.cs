@@ -7,12 +7,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Azure.Core;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.MsIdentity.Properties;
 using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MsIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MsIdentity.Project;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.MsIdentity
 {
@@ -42,7 +44,21 @@ namespace Microsoft.DotNet.MsIdentity
                 ProvisioningToolOptions.ProjectTypeIdentifier,
                 ProvisioningToolOptions.ProjectPath);
 
-            //need different error formatting when the output format is json.
+            //get csproj file path
+            var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
+            if (csProjfiles.Any())
+            {
+                var filePath = csProjfiles.First();
+                ProvisioningToolOptions.ProjectCsProjPath = filePath;
+            }
+            //get appsettings.json file path
+            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
+            if (appSettingsFile.Any())
+            {
+                var filePath = appSettingsFile.First();
+                ProvisioningToolOptions.AppSettingsFilePath = filePath;
+            }
+
             if (projectDescription == null)
             {
                 Console.WriteLine($"The code in {ProvisioningToolOptions.ProjectPath} wasn't recognized as supported by the tool. Rerun with --help for details.");
@@ -58,6 +74,48 @@ namespace Microsoft.DotNet.MsIdentity
                 projectDescription,
                 ProjectDescriptionReader.projectDescriptions);
 
+             // Get developer credentials
+            TokenCredential tokenCredential = GetTokenCredential(
+                ProvisioningToolOptions,
+                projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
+
+            //for now, update project command is handlded seperately.
+            //TODO: switch case to handle all the different commands.
+            if (CommandName.Equals(Commands.UPDATE_PROJECT_COMMAND, StringComparison.OrdinalIgnoreCase))
+            {
+                // Read or provision Microsoft identity platform application
+                ApplicationParameters? applicationParameters = await ReadMicrosoftIdentityApplication(
+                    tokenCredential,
+                    projectSettings.ApplicationParameters);
+
+                if (applicationParameters != null)
+                {
+                    //modify appsettings.json. 
+                    ModifyAppSettings(applicationParameters);
+
+                    //Add ClientSecret if the app wants to call graph/a downstream api.
+                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+                    {
+                        var graphServiceClient =  MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                        //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
+                        if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
+                        {
+                            await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
+                                graphServiceClient,
+                                applicationParameters.GraphEntityId,
+                                applicationParameters);
+
+                            string? password = applicationParameters.PasswordCredentials.LastOrDefault();
+                            //if user wants to update user secrets
+                            if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
+                            {
+                                CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password);
+                            }
+                        }
+                    }
+                }
+                return applicationParameters;
+            }
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
@@ -95,11 +153,6 @@ namespace Microsoft.DotNet.MsIdentity
                                   $"be created, but the tool does not add the code yet (work in progress). ");
             }
 
-            // Get developer credentials
-            TokenCredential tokenCredential = GetTokenCredential(
-                ProvisioningToolOptions,
-                projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
-
             // Unregister the app
             if (CommandName.Equals(Commands.UNREGISTER_APPLICATION_COMMAND, StringComparison.OrdinalIgnoreCase))
             {
@@ -121,7 +174,7 @@ namespace Microsoft.DotNet.MsIdentity
                 projectSettings.ApplicationParameters,
                 effectiveApplicationParameters);
 
-                // Update appp registration if needed
+                // Update app registration if needed
                 if (appNeedsUpdate)
                 {
                     await WriteApplicationRegistration(
@@ -143,6 +196,128 @@ namespace Microsoft.DotNet.MsIdentity
             return effectiveApplicationParameters;
         }
 
+        // add 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fill them default values if empty.
+        // Default values can be found https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content
+        private void ModifyAppSettings(ApplicationParameters applicationParameters)
+        {
+            string? filePath = ProvisioningToolOptions.AppSettingsFilePath;
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                bool changesMade = false;
+                //waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
+                JObject appSettings = JObject.Parse(File.ReadAllText(filePath));
+                if (appSettings != null)
+                {
+                    var azureAdToken = appSettings["AzureAd"];
+                    if (azureAdToken != null)
+                    {
+                        var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
+                        if (azureAdProperty != null)
+                        {
+                            // if property exists, and if suggested value is not already there.
+                            if (!string.IsNullOrEmpty(azureAdProperty.Domain) &&
+                                !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.TenantId) &&
+                                !azureAdProperty.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
+                                !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.Instance) &&
+                                !azureAdProperty.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.CallbackPath) &&
+                                !azureAdProperty.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        changesMade = true;
+                        appSettings.Add("AzureAd", JObject.FromObject(new 
+                        {
+                            Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
+                            Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
+                            TenantId = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId,
+                            ClientId = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId,
+                            CallbackPath = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath
+                        }));
+                    }
+
+                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+                    {
+
+                        if (azureAdToken != null)
+                        {
+                            if (azureAdToken["ClientSecret"] == null)
+                            {
+                                changesMade = true;
+                                azureAdToken["ClientSecret"] = "Client secret from app-registration. Check user secrets/azure portal.";
+                            }
+
+                            if (azureAdToken["ClientCertificates"] == null)
+                            {
+                                changesMade = true;
+                                azureAdToken["ClientCertificates"] = new JArray();
+                            }
+                        }
+
+                        if (ProvisioningToolOptions.CallsDownstreamApi)
+                        {
+                            if (appSettings["DownstreamApi"] == null)
+                            {
+                                changesMade = true;
+                                string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
+                                appSettings.Add("DownstreamApi", JObject.FromObject(new
+                                {   BaseUrl = apiURL,
+                                    Scopes = "user.read"
+                                }));
+                            }
+                        }
+
+                        if (ProvisioningToolOptions.CallsGraph)
+                        {
+                            if (appSettings["MicrosoftGraph"] == null)
+                            {
+                                changesMade = true;
+                                appSettings.Add("MicrosoftGraph", JObject.FromObject(new
+                                {
+                                    BaseUrl = "https://graph.microsoft.com/v1.0",
+                                    Scopes = "user.read"
+                                }));
+                            }
+                        }
+                    }
+                } 
+
+
+                //save comments somehow, only write to appsettings.json if changes are made
+                if (appSettings != null && changesMade)
+                {
+                    File.WriteAllText(filePath, appSettings.ToString());
+                }
+            }
+        }
         /// <summary>
         /// Converts an AAD application to a B2C application
         /// </summary>
@@ -206,8 +381,7 @@ namespace Microsoft.DotNet.MsIdentity
 
         private void WriteProjectConfiguration(Summary summary, ProjectAuthenticationSettings projectSettings, ApplicationParameters reconcialedApplicationParameters)
         {
-            CodeWriter codeWriter = new CodeWriter();
-            codeWriter.WriteConfiguration(summary, projectSettings.Replacements, reconcialedApplicationParameters);
+            CodeWriter.WriteConfiguration(summary, projectSettings.Replacements, reconcialedApplicationParameters);
         }
 
         private bool Reconciliate(ApplicationParameters applicationParameters, ApplicationParameters effectiveApplicationParameters)
@@ -233,12 +407,28 @@ namespace Microsoft.DotNet.MsIdentity
             return needUpdate;
         }
 
-        private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
+        private async Task<ApplicationParameters?> ReadMicrosoftIdentityApplication(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters)
         {
             ApplicationParameters? currentApplicationParameters = null;
-            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId))
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
+            {
+                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
+                if (currentApplicationParameters == null)
+                {
+                    Console.Write($"Couldn't find app {applicationParameters.EffectiveClientId} in tenant {applicationParameters.EffectiveTenantId}. ");
+                }
+            }
+            return currentApplicationParameters;
+        }
+
+            private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
+            TokenCredential tokenCredential,
+            ApplicationParameters applicationParameters)
+        {
+            ApplicationParameters? currentApplicationParameters = null;
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) &&  !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
                 if (currentApplicationParameters == null)
@@ -265,9 +455,9 @@ namespace Microsoft.DotNet.MsIdentity
 
             // Override with the tools options
             projectSettings.ApplicationParameters.ApplicationDisplayName ??= Path.GetFileName(provisioningToolOptions.ProjectPath);
-            projectSettings.ApplicationParameters.ClientId ??= provisioningToolOptions.ClientId;
-            projectSettings.ApplicationParameters.TenantId ??= provisioningToolOptions.TenantId;
-            projectSettings.ApplicationParameters.CalledApiScopes ??= provisioningToolOptions.CalledApiScopes;
+            projectSettings.ApplicationParameters.ClientId = !string.IsNullOrEmpty(provisioningToolOptions.ClientId) ? provisioningToolOptions.ClientId : projectSettings.ApplicationParameters.ClientId;
+            projectSettings.ApplicationParameters.TenantId = !string.IsNullOrEmpty(provisioningToolOptions.TenantId) ? provisioningToolOptions.TenantId : projectSettings.ApplicationParameters.TenantId;
+            projectSettings.ApplicationParameters.CalledApiScopes = !string.IsNullOrEmpty(provisioningToolOptions.CalledApiScopes) ? provisioningToolOptions.CalledApiScopes : projectSettings.ApplicationParameters.CalledApiScopes;
             if (!string.IsNullOrEmpty(provisioningToolOptions.AppIdUri))
             {
                 projectSettings.ApplicationParameters.AppIdUri = provisioningToolOptions.AppIdUri;

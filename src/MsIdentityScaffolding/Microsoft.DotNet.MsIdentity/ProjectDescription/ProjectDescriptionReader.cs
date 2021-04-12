@@ -70,7 +70,6 @@ namespace Microsoft.DotNet.MsIdentity.Project
                             {
                                 files = new string[0];
                             }
-
                             foreach (string filePath in files)
                             {
                                 // If there are matches, one at least needs to match

@@ -37,7 +37,10 @@ namespace Microsoft.Extensions.Internal
                 return mainModule.FileName;
             }
 
+            //TODO; fix to have a nullable Command and not resure scaffolding's.  Tracked https://github.com/dotnet/Scaffolding/issues/1549
+#pragma warning disable CS8603 // Possible null reference return.
             return null;
+#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }

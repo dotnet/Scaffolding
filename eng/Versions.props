@@ -46,7 +46,7 @@
     <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.3.21201.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.3.21201.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
+    <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
     <VisualStudio_NewtonsoftJsonPackageVersion>9.0.1</VisualStudio_NewtonsoftJsonPackageVersion>
     <SystemCollectionsImmutablePackageVersion>5.0.0</SystemCollectionsImmutablePackageVersion>
     
@@ -135,6 +135,7 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>2.18.0</MicrosoftIdentityClientExtensionsMsalVersion>
     <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
     <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
+    <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>
 
 </Project>

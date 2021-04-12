@@ -49,6 +49,7 @@ namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
             }
         }
 
+        //TODO : Add integration tests for testing instead of mocking for unit tests.
         public static void AddUserSecrets(bool isB2C, string projectPath, string value)
         {
             //init regardless. If it's already initiated, dotnet-user-secrets confirms it.
@@ -57,6 +58,7 @@ namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
             string key = $"{section}:ClientSecret";
             SetUserSecerets(projectPath, key, value);
         }
+
         private static void InitUserSecrets(string projectPath)
         {
             var errors = new List<string>();

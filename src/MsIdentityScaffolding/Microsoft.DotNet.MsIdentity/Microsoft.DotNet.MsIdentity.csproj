@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.Graph" Version="$(MicrosoftGraphVersion)" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="$(MicrosoftIdentityClientExtensionsMsalVersion)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonMsIdentityPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

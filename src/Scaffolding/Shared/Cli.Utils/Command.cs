@@ -26,7 +26,10 @@ namespace Microsoft.Extensions.Internal
             return new Command(commandName, args);
         }
 
+        //TODO; fix to have a nullable Command and not resure scaffolding's.  Tracked https://github.com/dotnet/Scaffolding/issues/1549
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private Command(string commandName, IEnumerable<string> args)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             var psi = new ProcessStartInfo
             {
@@ -115,7 +118,9 @@ namespace Microsoft.Extensions.Internal
             return this;
         }
 
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         private void ThrowIfRunning([CallerMemberName] string memberName = null)
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         {
             if (_running)
             {

@@ -214,6 +214,7 @@ namespace Microsoft.DotNet.MsIdentity
                         var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
                         if (azureAdProperty != null)
                         {
+                            // if property exists, and if suggested value is not already there.
                             if (!string.IsNullOrEmpty(azureAdProperty.Domain) &&
                                 !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
                             {

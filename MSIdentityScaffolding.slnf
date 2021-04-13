@@ -2,9 +2,9 @@
   "solution": {
     "path": "All.sln",
     "projects": [
-      "src\\MsIdentityScaffolding\\Microsoft.DotNet.MSIdentity\\Microsoft.DotNet.MSIdentity.csproj",
-      "test\\MsIdentityScaffolding\\Microsoft.DotNet.MSIdentity.Tests\\Microsoft.DotNet.MSIdentity.Tests.csproj",
-      "test\\MsIdentityScaffolding\\Microsoft.DotNet.MSIdentity.UnitTests.Tests\\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj",
+      "src\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity\\Microsoft.DotNet.MSIdentity.csproj",
+      "test\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity.Tests\\Microsoft.DotNet.MSIdentity.Tests.csproj",
+      "test\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity.UnitTests.Tests\\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj",
       "tools\\dotnet-msidentity\\dotnet-msidentity.csproj"
     ]
   }

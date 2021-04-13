@@ -100,7 +100,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-scaffold", "tools\do
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scaffolding", "Scaffolding", "{BDB7057B-B6C4-4DC9-9023-E6E78D25D5F0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MsIdentityScaffolding", "MsIdentityScaffolding", "{3354705C-5C05-41C3-95E1-31A45141A6C2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSIdentityScaffolding", "MSIdentityScaffolding", "{3354705C-5C05-41C3-95E1-31A45141A6C2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scaffolding", "Scaffolding", "{239DEEAE-9DE4-4886-9AB3-1A7A221E92F1}"
 	ProjectSection(SolutionItems) = preProject
@@ -108,15 +108,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scaffolding", "Scaffolding"
 		test\Scaffolding\Directory.Build.targets = test\Scaffolding\Directory.Build.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MsIdentityScaffolding", "MsIdentityScaffolding", "{49D385E7-A045-4C54-868F-CEA8F67EDBA8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSIdentityScaffolding", "MSIdentityScaffolding", "{49D385E7-A045-4C54-868F-CEA8F67EDBA8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSIdentity", "src\MsIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj", "{35BA8FDE-4AF3-4EF5-94B3-123B4702AF7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSIdentity", "src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj", "{35BA8FDE-4AF3-4EF5-94B3-123B4702AF7E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSIdentity.Tests", "test\MsIdentityScaffolding\Microsoft.DotNet.MSIdentity.Tests\Microsoft.DotNet.MSIdentity.Tests.csproj", "{6B863A66-CFFC-42B4-9316-13B168CB6C62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSIdentity.Tests", "test\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity.Tests\Microsoft.DotNet.MSIdentity.Tests.csproj", "{6B863A66-CFFC-42B4-9316-13B168CB6C62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-msidentity", "tools\dotnet-msidentity\dotnet-msidentity.csproj", "{1DB98E3A-0749-4ACE-9EF2-EF6BC2C6648B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSIdentity.UnitTests.Tests", "test\MsIdentityScaffolding\Microsoft.DotNet.MSIdentity.UnitTests.Tests\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj", "{0711777C-64C2-49DC-A9CE-67BD641AA7A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSIdentity.UnitTests.Tests", "test\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity.UnitTests.Tests\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj", "{0711777C-64C2-49DC-A9CE-67BD641AA7A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

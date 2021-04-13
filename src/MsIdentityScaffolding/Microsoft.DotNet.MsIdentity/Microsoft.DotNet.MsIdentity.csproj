@@ -22,7 +22,7 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
 
-   <Import Project="$(RepoRoot)eng\Versions.MsIdentity.props" />
+   <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(AzureIdentityVersion)" />

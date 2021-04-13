@@ -8,7 +8,7 @@
     <SignAssembly>true</SignAssembly>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
-   <Import Project="$(RepoRoot)eng\Versions.MsIdentity.props" />
+   <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
   <!-- package settings -->
   <PropertyGroup>
     <PackageId>Microsoft.dotnet-msidentity</PackageId>

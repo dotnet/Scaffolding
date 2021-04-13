@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.MsIdentity
+namespace Microsoft.DotNet.MSIdentity
 {
     public class Summary
     {

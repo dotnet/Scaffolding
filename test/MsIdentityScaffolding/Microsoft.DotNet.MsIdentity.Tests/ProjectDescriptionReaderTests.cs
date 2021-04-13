@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.DotNet.MsIdentity.CodeReaderWriter;
-using Microsoft.DotNet.MsIdentity.Project;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
+using Microsoft.DotNet.MSIdentity.Project;
 using System;
 using System.Globalization;
 using System.IO;

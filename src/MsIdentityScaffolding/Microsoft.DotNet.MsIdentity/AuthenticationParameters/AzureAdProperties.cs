@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.DotNet.MsIdentity.AuthenticationParameters
+namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
     public class AzureAdProperties
     {

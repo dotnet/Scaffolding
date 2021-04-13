@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 
-namespace Microsoft.DotNet.MsIdentity
+namespace Microsoft.DotNet.MSIdentity
 {
     public interface IMsAADTool 
     {

@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <RootNamespace>Microsoft.DotNet.MsIdentity</RootNamespace>
+    <RootNamespace>Microsoft.DotNet.MSIdentity</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
@@ -57,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\MsIdentityScaffolding\Microsoft.DotNet.MsIdentity\Microsoft.DotNet.MsIdentity.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\MsIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj" />
   </ItemGroup>
 
   <ItemGroup>

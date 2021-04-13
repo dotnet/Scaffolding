@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
-using Microsoft.DotNet.MsIdentity.Project;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.Extensions.Internal;
 
-namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
+namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     public static class CodeWriter
     {
@@ -71,6 +72,12 @@ namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
             {
                 arguments.Add("-p");
                 arguments.Add(projectPath);
+            }
+
+            Debugger.Launch();
+            if (arguments.Contains("-uus"))
+            {
+
             }
 
             arguments.Add("init");

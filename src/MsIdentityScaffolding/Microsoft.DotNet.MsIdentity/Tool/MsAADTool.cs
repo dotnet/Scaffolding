@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Graph;
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
-using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
-using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
+using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 
-namespace Microsoft.DotNet.MsIdentity
+namespace Microsoft.DotNet.MSIdentity
 {
     internal class MsAADTool : IMsAADTool
     {

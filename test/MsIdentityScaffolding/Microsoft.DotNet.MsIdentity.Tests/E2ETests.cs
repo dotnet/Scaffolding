@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.DotNet.MsIdentity;
+using Microsoft.DotNet.MSIdentity;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

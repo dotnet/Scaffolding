@@ -5,7 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.DotNet.MsIdentity.Project
+namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ConfigurationProperties
     {

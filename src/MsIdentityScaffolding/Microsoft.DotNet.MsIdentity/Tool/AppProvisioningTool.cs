@@ -8,15 +8,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.MsIdentity.Properties;
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
-using Microsoft.DotNet.MsIdentity.CodeReaderWriter;
-using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
-using Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication;
-using Microsoft.DotNet.MsIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Properties;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
+using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
+using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.DotNet.MSIdentity.Project;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.DotNet.MsIdentity
+namespace Microsoft.DotNet.MSIdentity
 {
     /// <summary>
     /// 

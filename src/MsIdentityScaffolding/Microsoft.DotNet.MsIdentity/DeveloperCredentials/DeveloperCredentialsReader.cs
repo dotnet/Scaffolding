@@ -3,7 +3,7 @@
 
 using Azure.Core;
 
-namespace Microsoft.DotNet.MsIdentity.DeveloperCredentials
+namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
     public class DeveloperCredentialsReader
     {

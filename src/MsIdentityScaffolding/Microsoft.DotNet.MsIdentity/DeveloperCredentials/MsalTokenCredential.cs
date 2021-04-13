@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.MsIdentity.DeveloperCredentials
+namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
     public class MsalTokenCredential : TokenCredential
     {

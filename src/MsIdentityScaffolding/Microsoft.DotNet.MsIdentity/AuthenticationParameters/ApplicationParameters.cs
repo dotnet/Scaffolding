@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.MsIdentity.AuthenticationParameters
+namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
     /// <summary>
     /// Application parameters.

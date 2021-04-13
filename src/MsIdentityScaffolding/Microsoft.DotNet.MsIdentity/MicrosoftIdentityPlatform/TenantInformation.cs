@@ -1,4 +1,4 @@
-namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
+namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     internal class TenantInformation
     {

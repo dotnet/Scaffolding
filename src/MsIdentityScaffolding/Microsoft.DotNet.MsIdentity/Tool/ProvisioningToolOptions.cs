@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.DotNet.MsIdentity.DeveloperCredentials;
+using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
-namespace Microsoft.DotNet.MsIdentity
+namespace Microsoft.DotNet.MSIdentity
 {
     public class ProvisioningToolOptions : IDeveloperCredentialsOptions
     {

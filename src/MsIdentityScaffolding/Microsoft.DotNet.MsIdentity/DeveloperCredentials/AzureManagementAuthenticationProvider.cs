@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.MsIdentity.DeveloperCredentials
+namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
     internal class AzureManagementAuthenticationProvider : IAzureManagementAuthenticationProvider
     {

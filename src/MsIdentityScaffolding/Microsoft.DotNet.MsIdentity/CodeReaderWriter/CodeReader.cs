@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.DotNet.MsIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Project;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,9 +10,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Xml;
-using ConfigurationProperties = Microsoft.DotNet.MsIdentity.Project.ConfigurationProperties;
+using ConfigurationProperties = Microsoft.DotNet.MSIdentity.Project.ConfigurationProperties;
 
-namespace Microsoft.DotNet.MsIdentity.CodeReaderWriter
+namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     /// <summary>
     /// 

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.DotNet.MsIdentity.Project
+namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescription
     {

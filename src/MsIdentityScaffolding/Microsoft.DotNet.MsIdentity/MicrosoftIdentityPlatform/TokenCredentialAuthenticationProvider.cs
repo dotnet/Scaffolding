@@ -10,7 +10,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
+namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     /// <summary>
     /// Graph SDK authentication provider based on an Azure SDK token credential provider.

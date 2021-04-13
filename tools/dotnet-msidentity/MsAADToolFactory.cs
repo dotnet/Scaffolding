@@ -1,4 +1,4 @@
-namespace Microsoft.DotNet.MsIdentity.Tool
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     internal static class MsAADToolFactory
     {

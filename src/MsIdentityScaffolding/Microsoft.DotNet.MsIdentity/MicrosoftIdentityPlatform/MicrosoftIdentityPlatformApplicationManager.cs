@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
@@ -6,10 +6,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Azure.Core;
-using Microsoft.DotNet.MsIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.Graph;
 
-namespace Microsoft.DotNet.MsIdentity.MicrosoftIdentityPlatformApplication
+namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     public class MicrosoftIdentityPlatformApplicationManager
     {

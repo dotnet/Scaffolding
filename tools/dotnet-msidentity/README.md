@@ -1,7 +1,11 @@
 # dotnet-msidentity
 Command line tool that creates Microsoft identity platform applications in a tenant (AAD or B2C) and updates the configuration code of your ASP.NET Core applications (mvc, webapp, blazorwasm, blazorwasm hosted, blazorserver). The tool can also be used to update code from an existing AAD/AAD B2C application.
 
-## Installing/Uninstalling the tool
+## Installing/Uninstalling the release/prerelease tool 
+Install the prerelease 1.0.0-Preview 1 version of the dotnet-msidentity tool (as a global tool) :
+  dotnet tool install Microsoft.dotnet-msidentity -g --version "1.0.0-preview.1.21212.1"
+
+## Installing/Uninstalling the tool from the repo
 Use the global_install.cmd global_install.sh command to install the package. 
 - Edit Version.props to match the version in global_install.
 

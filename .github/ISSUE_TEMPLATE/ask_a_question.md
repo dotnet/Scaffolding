@@ -1,6 +1,6 @@
 ---
 name: Ask a question
-about: Ask a question about dotnet-scaffold/dotnet-aspnet-codegenerator(Microsoft.VisualStudio.Web.Codegeneration) or dotnet-msidentity(Microsoft.DotNet.MsIdentity)
+about: Ask a question about dotnet-scaffold/dotnet-aspnet-codegenerator(Microsoft.VisualStudio.Web.Codegeneration) or dotnet-msidentity(Microsoft.DotNet.MSIdentity)
 labels: customer-reported
 ---
 
@@ -36,7 +36,7 @@ Unhandled exception. System.NullReferenceException: Object reference not set to 
 
 ### Include provider and version information
 
-Microsoft.VisualStudio.Web.CodeGeneration.Design/Microsoft.DotNet.MsIdentity version:
+Microsoft.VisualStudio.Web.CodeGeneration.Design/Microsoft.DotNet.MSIdentity version:
 Target framework: (e.g. .NET 5.0)
 Operating system:
 IDE: (e.g. Visual Studio 2019 16.3)

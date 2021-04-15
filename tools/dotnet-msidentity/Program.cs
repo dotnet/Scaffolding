@@ -6,7 +6,7 @@ using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.MsIdentity.Tool
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     public static class Program
     {

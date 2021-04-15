@@ -5,8 +5,8 @@ set NUPKG=artifacts/packages/Debug/Shipping/
 call taskkill /f /im dotnet.exe
 call rd /Q /S artifacts
 
-call dotnet build MsIdentityScaffolding.slnf
-call dotnet pack MsIdentityScaffolding.slnf
+call dotnet build MSIdentityScaffolding.slnf
+call dotnet pack MSIdentityScaffolding.slnf
 call dotnet tool uninstall -g Microsoft.dotnet-msidentity
 
 call cd  %SRC_DIR%/%NUPKG% 

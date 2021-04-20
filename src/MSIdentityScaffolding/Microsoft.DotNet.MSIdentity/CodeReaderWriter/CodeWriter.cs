@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             SetUserSecerets(projectPath, key, value);
         }
 
-        private static void InitUserSecrets(string projectPath)
+        public static void InitUserSecrets(string projectPath)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -81,6 +81,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             arguments.Add("init");
+            Console.Write("\nInitializing User Secrets . . . ");
             var result = Command.CreateDotNet(
                 "user-secrets",
                 arguments.ToArray())
@@ -90,8 +91,65 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             
             if (result.ExitCode != 0)
             {
+                Console.Write("FAILED\n");
                 throw new Exception("Error while running dotnet-user-secrets init");
             }
+            else
+            {
+                Console.Write("SUCCESS\n");
+            }
+        }
+
+        public static void AddPackage(string packageName, string packageVersion, string tfm)
+        {
+            if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
+            {
+                var errors = new List<string>();
+                var output = new List<string>();
+                var arguments = new List<string>();
+                arguments.Add("package");
+                arguments.Add(packageName);
+                if (!string.IsNullOrEmpty(packageVersion))
+                {
+                    arguments.Add("-v");
+                    arguments.Add(packageVersion);
+                }
+
+                if (IsTfmPreRelease(tfm))
+                {
+                    arguments.Add("--prerelease");
+                }
+
+                if (!string.IsNullOrEmpty(tfm))
+                {
+                    arguments.Add("-f");
+                    arguments.Add(tfm);
+                }
+
+                Console.Write($"\nAdding package {packageName} . . . ");
+
+                var result = Command.CreateDotNet(
+                    "add",
+                    arguments.ToArray())
+                    .OnErrorLine(e => errors.Add(e))
+                    .OnOutputLine(o => output.Add(o))
+                    .Execute();
+
+                if (result.ExitCode != 0)
+                {
+                    Console.Write("FAILED\n");
+                    Console.WriteLine($"Failed to add package {packageName}");
+                }
+                else
+                {
+                    Console.Write("SUCCESS\n");
+                }
+            }
+        }
+
+        private static bool IsTfmPreRelease(string tfm)
+        {
+            return tfm.Equals("net6.0", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void SetUserSecerets(string projectPath, string key, string value)

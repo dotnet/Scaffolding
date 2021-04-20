@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.CodeAnalysis;
@@ -14,7 +15,12 @@ using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
+using Directory = System.IO.Directory;
+using File = System.IO.File;
+using ProjectDescription = Microsoft.DotNet.MsIdentity.Project.ProjectDescription;
 
 namespace Microsoft.DotNet.MSIdentity
 {
@@ -39,18 +45,17 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            // If needed, infer project type from code
-            ProjectDescription? projectDescription = ProjectDescriptionReader.GetProjectDescription(
-                ProvisioningToolOptions.ProjectTypeIdentifier,
-                ProvisioningToolOptions.ProjectPath);
-
             //get csproj file path
-            var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
-            if (csProjfiles.Any())
+            if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
-                var filePath = csProjfiles.First();
-                ProvisioningToolOptions.ProjectCsProjPath = filePath;
+                var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
+                if (csProjfiles.Any())
+                {
+                    var filePath = csProjfiles.First();
+                    ProvisioningToolOptions.ProjectFilePath = filePath;
+                }
             }
+
             //get appsettings.json file path
             var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
             if (appSettingsFile.Any())
@@ -58,6 +63,47 @@ namespace Microsoft.DotNet.MSIdentity
                 var filePath = appSettingsFile.First();
                 ProvisioningToolOptions.AppSettingsFilePath = filePath;
             }
+
+            ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
+                ProvisioningToolOptions,
+                ProjectDescriptionReader.projectDescriptions);
+
+            // Get developer credentials
+            TokenCredential tokenCredential = GetTokenCredential(
+                ProvisioningToolOptions,
+                projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
+
+            //for now, update project command is handlded seperately.
+            //TODO: switch case to handle all the different commands.
+            ApplicationParameters? applicationParameters = null;
+
+            Debugger.Launch();
+            switch (CommandName)
+            {
+                case Commands.UPDATE_PROJECT_COMMAND:
+                    applicationParameters = await ReadMicrosoftIdentityApplication(tokenCredential, projectSettings.ApplicationParameters);
+                    await UpdateProject(tokenCredential, applicationParameters);
+                    return applicationParameters;
+
+                case Commands.UPDATE_APPLICATION_COMMAND:
+                    applicationParameters = await ReadMicrosoftIdentityApplication(tokenCredential, projectSettings.ApplicationParameters);
+                    await UpdateApplication(tokenCredential, applicationParameters);
+                    return applicationParameters;
+
+                case Commands.UNREGISTER_APPLICATION_COMMAND:
+                    await UnregisterApplication(tokenCredential, projectSettings.ApplicationParameters);
+                    return null;
+
+                case Commands.ADD_CLIENT_SECRET:
+                    applicationParameters = await ReadMicrosoftIdentityApplication(tokenCredential, projectSettings.ApplicationParameters);
+                    await AddClientSecret(tokenCredential, applicationParameters);
+                    return applicationParameters;
+
+            }
+            // If needed, infer project type from code
+            ProjectDescription? projectDescription = ProjectDescriptionReader.GetProjectDescription(
+                ProvisioningToolOptions.ProjectTypeIdentifier,
+                ProvisioningToolOptions.ProjectPath);
 
             if (projectDescription == null)
             {
@@ -69,53 +115,6 @@ namespace Microsoft.DotNet.MSIdentity
                 Console.WriteLine($"Detected project type {projectDescription.Identifier}. ");
             }
 
-            ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
-                ProvisioningToolOptions,
-                projectDescription,
-                ProjectDescriptionReader.projectDescriptions);
-
-             // Get developer credentials
-            TokenCredential tokenCredential = GetTokenCredential(
-                ProvisioningToolOptions,
-                projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
-
-            //for now, update project command is handlded seperately.
-            //TODO: switch case to handle all the different commands.
-            if (CommandName.Equals(Commands.UPDATE_PROJECT_COMMAND, StringComparison.OrdinalIgnoreCase))
-            {
-                // Read or provision Microsoft identity platform application
-                ApplicationParameters? applicationParameters = await ReadMicrosoftIdentityApplication(
-                    tokenCredential,
-                    projectSettings.ApplicationParameters);
-
-                if (applicationParameters != null)
-                {
-                    //modify appsettings.json. 
-                    ModifyAppSettings(applicationParameters);
-
-                    //Add ClientSecret if the app wants to call graph/a downstream api.
-                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
-                    {
-                        var graphServiceClient =  MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                        //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
-                        if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
-                        {
-                            await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
-                                graphServiceClient,
-                                applicationParameters.GraphEntityId,
-                                applicationParameters);
-
-                            string? password = applicationParameters.PasswordCredentials.LastOrDefault();
-                            //if user wants to update user secrets
-                            if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
-                            {
-                                CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password);
-                            }
-                        }
-                    }
-                }
-                return applicationParameters;
-            }
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
@@ -153,13 +152,6 @@ namespace Microsoft.DotNet.MSIdentity
                                   $"be created, but the tool does not add the code yet (work in progress). ");
             }
 
-            // Unregister the app
-            if (CommandName.Equals(Commands.UNREGISTER_APPLICATION_COMMAND, StringComparison.OrdinalIgnoreCase))
-            {
-                await UnregisterApplication(tokenCredential, projectSettings.ApplicationParameters);
-                return null;
-            }
-
             // Read or provision Microsoft identity platform application
             ApplicationParameters? effectiveApplicationParameters = await ReadOrProvisionMicrosoftIdentityApplication(
                 tokenCredential,
@@ -192,7 +184,7 @@ namespace Microsoft.DotNet.MSIdentity
                 // Summarizes what happened
                 WriteSummary(summary);
             }
-               
+
             return effectiveApplicationParameters;
         }
 
@@ -251,10 +243,10 @@ namespace Microsoft.DotNet.MSIdentity
                             }
                         }
                     }
-                    else 
+                    else
                     {
                         changesMade = true;
-                        appSettings.Add("AzureAd", JObject.FromObject(new 
+                        appSettings.Add("AzureAd", JObject.FromObject(new
                         {
                             Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
                             Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
@@ -289,7 +281,8 @@ namespace Microsoft.DotNet.MSIdentity
                                 changesMade = true;
                                 string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
                                 appSettings.Add("DownstreamApi", JObject.FromObject(new
-                                {   BaseUrl = apiURL,
+                                {
+                                    BaseUrl = apiURL,
                                     Scopes = "user.read"
                                 }));
                             }
@@ -308,7 +301,7 @@ namespace Microsoft.DotNet.MSIdentity
                             }
                         }
                     }
-                } 
+                }
 
 
                 //save comments somehow, only write to appsettings.json if changes are made
@@ -359,8 +352,8 @@ namespace Microsoft.DotNet.MSIdentity
             // reevaulate the project settings
             projectSettings = InferApplicationParameters(
                 ProvisioningToolOptions,
-                projectDescription,
-                ProjectDescriptionReader.projectDescriptions);
+                ProjectDescriptionReader.projectDescriptions,
+                projectDescription);
             return projectSettings;
         }
 
@@ -376,7 +369,7 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task WriteApplicationRegistration(Summary summary, ApplicationParameters reconcialedApplicationParameters, TokenCredential tokenCredential)
         {
             summary.changes.Add(new Change($"Writing the project AppId = {reconcialedApplicationParameters.ClientId}"));
-            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(tokenCredential, reconcialedApplicationParameters);
+            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(tokenCredential, reconcialedApplicationParameters, ProvisioningToolOptions);
         }
 
         private void WriteProjectConfiguration(Summary summary, ProjectAuthenticationSettings projectSettings, ApplicationParameters reconcialedApplicationParameters)
@@ -423,12 +416,12 @@ namespace Microsoft.DotNet.MSIdentity
             return currentApplicationParameters;
         }
 
-            private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
-            TokenCredential tokenCredential,
-            ApplicationParameters applicationParameters)
+        private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
+        TokenCredential tokenCredential,
+        ApplicationParameters applicationParameters)
         {
             ApplicationParameters? currentApplicationParameters = null;
-            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) &&  !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
                 if (currentApplicationParameters == null)
@@ -447,12 +440,16 @@ namespace Microsoft.DotNet.MSIdentity
 
         private ProjectAuthenticationSettings InferApplicationParameters(
             ProvisioningToolOptions provisioningToolOptions,
-            ProjectDescription projectDescription,
-            IEnumerable<ProjectDescription> projectDescriptions)
+            IEnumerable<ProjectDescription> projectDescriptions,
+            ProjectDescription? projectDescription = null)
         {
             CodeReader reader = new CodeReader();
-            ProjectAuthenticationSettings projectSettings = reader.ReadFromFiles(provisioningToolOptions.ProjectPath, projectDescription, projectDescriptions);
-
+            ProjectAuthenticationSettings projectSettings = new ProjectAuthenticationSettings();
+            if (projectDescription != null)
+            {
+                projectSettings = reader.ReadFromFiles(provisioningToolOptions.ProjectPath, projectDescription, projectDescriptions);
+            }
+            
             // Override with the tools options
             projectSettings.ApplicationParameters.ApplicationDisplayName ??= Path.GetFileName(provisioningToolOptions.ProjectPath);
             projectSettings.ApplicationParameters.ClientId = !string.IsNullOrEmpty(provisioningToolOptions.ClientId) ? provisioningToolOptions.ClientId : projectSettings.ApplicationParameters.ClientId;
@@ -476,6 +473,108 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task UnregisterApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             await MicrosoftIdentityPlatformApplicationManager.Unregister(tokenCredential, applicationParameters);
+        }
+
+        private async Task UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
+        {
+            bool updateSuccess = false;
+            if (applicationParameters != null)
+            {
+                updateSuccess = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
+                                            tokenCredential,
+                                            applicationParameters,
+                                            ProvisioningToolOptions);
+            }
+
+            JsonResponse jsonResponse = new JsonResponse(CommandName);
+
+            if (updateSuccess)
+            {
+                jsonResponse.Content = $"Success updating Azure AD app {applicationParameters?.ApplicationDisplayName} ({applicationParameters?.ClientId})";
+                jsonResponse.State = State.Success;
+            }
+            else
+            {
+                jsonResponse.Content = $"Failed to update Azure AD app {applicationParameters?.ApplicationDisplayName} ({applicationParameters?.ClientId})";
+                jsonResponse.State = State.Fail;
+            }
+
+            Console.WriteLine(ProvisioningToolOptions.Json ? jsonResponse.ToJsonString() : jsonResponse.Content);        }
+
+        private async Task AddClientSecret(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
+        {
+            JsonResponse jsonResponse = new JsonResponse(CommandName);
+            string outputString;
+
+            if (applicationParameters != null && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
+            {
+                var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+
+                string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
+                        graphServiceClient,
+                        applicationParameters.GraphEntityId,
+                        applicationParameters);
+
+                //if user wants to update user secrets
+                if (ProvisioningToolOptions.UpdateUserSecrets)
+                {
+                    CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password);
+                }
+
+                if (!string.IsNullOrEmpty(password))
+                {
+                    jsonResponse.State = State.Success;
+                    jsonResponse.Content = new KeyValuePair<string, string>("ClientSecret", password);
+                    string secretOutput = $"Client secret - {password}.";
+                    outputString = ProvisioningToolOptions.Json ? jsonResponse.ToJsonString() : secretOutput;
+
+                }
+                else
+                {
+                    string failedOutput = $"Failed to add client secret for Azure AD app : {applicationParameters.ApplicationDisplayName}({applicationParameters.ClientId})";
+                    jsonResponse.State = State.Fail;
+                    jsonResponse.Content = failedOutput;
+                    outputString = ProvisioningToolOptions.Json ? jsonResponse.ToJsonString() : failedOutput;
+                }
+            }
+            else
+            {
+                string failedOutput = $"Failed to add client secret.";
+                jsonResponse.State = State.Fail;
+                jsonResponse.Content = failedOutput;
+                outputString = ProvisioningToolOptions.Json ? jsonResponse.ToJsonString() : failedOutput;
+            }
+            Console.WriteLine(outputString);
+        }
+
+        private async Task UpdateProject(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
+        {
+            if (applicationParameters != null)
+            {
+                //modify appsettings.json. 
+                ModifyAppSettings(applicationParameters);
+
+                //Add ClientSecret if the app wants to call graph/a downstream api.
+                if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+                {
+                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                    //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
+                    if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
+                    {
+                        await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
+                            graphServiceClient,
+                            applicationParameters.GraphEntityId,
+                            applicationParameters);
+
+                        string? password = applicationParameters.PasswordCredentials.LastOrDefault();
+                        //if user wants to update user secrets
+                        if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
+                        {
+                            CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password);
+                        }
+                    }
+                }
+            }
         }
     }
 }

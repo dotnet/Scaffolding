@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
 namespace Microsoft.DotNet.MSIdentity
@@ -12,12 +13,27 @@ namespace Microsoft.DotNet.MSIdentity
         /// <summary>
         /// Path to csproj file 
         /// </summary>
-        public string? ProjectCsProjPath { get; set; }
+        public string? ProjectFilePath{ get; set; }
 
         /// <summary>
         /// Path to appsettings.json file
         /// </summary>
         public string? AppSettingsFilePath { get; set; }
+
+        ///<summary>
+        /// Web redirect URIs.
+        ///</summary>
+        public IList<string> RedirectUris { get; set; } = new List<string>();
+
+        ///<summary>
+        /// enable id tokens to be issued by the authZ endpoint
+        ///</summary>
+        public bool? EnableIdToken { get; set; }
+
+        /// <summary>
+        /// enable access token to be issued by the authZ endpoint
+        /// </summary>
+        public bool? EnableAccessToken { get; set; }
 
         /// <summary>
         /// Language/Framework for the project.
@@ -148,7 +164,7 @@ namespace Microsoft.DotNet.MSIdentity
                 Unregister = Unregister,
                 Username = Username,
                 ProjectPath = ProjectPath,
-                ProjectCsProjPath = ProjectCsProjPath,
+                ProjectFilePath = ProjectFilePath,
                 AppSettingsFilePath = AppSettingsFilePath,
                 WebApiClientId = WebApiClientId,
                 AppIdUri = AppIdUri,

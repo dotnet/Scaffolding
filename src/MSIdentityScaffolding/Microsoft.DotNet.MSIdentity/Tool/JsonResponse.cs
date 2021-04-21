@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json;
 
-namespace Microsoft.DotNet.MsIdentity.Tool
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     internal class JsonResponse
     {

@@ -1,4 +1,4 @@
-namespace Microsoft.DotNet.MSIdentity
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     public class Commands 
     {

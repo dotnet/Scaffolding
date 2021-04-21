@@ -74,7 +74,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 arguments.Add(projectPath);
             }
 
-            Debugger.Launch();
             if (arguments.Contains("-uus"))
             {
 

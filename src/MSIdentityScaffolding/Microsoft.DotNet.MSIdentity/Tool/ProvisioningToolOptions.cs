@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
-namespace Microsoft.DotNet.MSIdentity
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     public class ProvisioningToolOptions : IDeveloperCredentialsOptions
     {

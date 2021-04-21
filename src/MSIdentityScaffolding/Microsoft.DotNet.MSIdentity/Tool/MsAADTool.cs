@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
-using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
-namespace Microsoft.DotNet.MSIdentity
+
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     internal class MsAADTool : IMsAADTool
     {

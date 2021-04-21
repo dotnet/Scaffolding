@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -20,7 +19,7 @@ using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
 using File = System.IO.File;
-using ProjectDescription = Microsoft.DotNet.MsIdentity.Project.ProjectDescription;
+using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
 namespace Microsoft.DotNet.MSIdentity
 {
@@ -77,7 +76,6 @@ namespace Microsoft.DotNet.MSIdentity
             //TODO: switch case to handle all the different commands.
             ApplicationParameters? applicationParameters = null;
 
-            Debugger.Launch();
             switch (CommandName)
             {
                 case Commands.UPDATE_PROJECT_COMMAND:

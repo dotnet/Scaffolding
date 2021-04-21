@@ -1,4 +1,0 @@
-"SignedOutCallbackPath": "/signout/B2C_1_susi",
-    "SignUpSignInPolicyId": "b2c_1_susi",
-    "ResetPasswordPolicyId": "b2c_1_reset",
-    "EditProfilePolicyId": "b2c_1_edit_profile",

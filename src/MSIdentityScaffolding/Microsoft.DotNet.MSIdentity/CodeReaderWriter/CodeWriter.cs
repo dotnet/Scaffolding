@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     public static class CodeWriter
     {
-        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconcialedApplicationParameters, bool jsonOutput)
+        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconciledApplicationParameters, bool jsonOutput)
         {
             foreach (var replacementsInFile in replacements.GroupBy(r => r.FilePath))
             {
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 bool updated = false;
                 foreach (Replacement r in replacementsInFile.OrderByDescending(r => r.Index))
                 {
-                    string? replaceBy = ComputeReplacement(r.ReplaceBy, reconcialedApplicationParameters, jsonOutput);
+                    string? replaceBy = ComputeReplacement(r.ReplaceBy, reconciledApplicationParameters, jsonOutput);
                     if (replaceBy != null && replaceBy!=r.ReplaceFrom)
                     {
                         int index = fileContent.IndexOf(r.ReplaceFrom /*, r.Index*/);

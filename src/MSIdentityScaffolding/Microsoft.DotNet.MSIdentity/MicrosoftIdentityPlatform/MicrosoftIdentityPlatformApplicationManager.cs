@@ -237,7 +237,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 foreach (var uri in redirectUris)
                 {
-                    if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) && uriResult.Scheme == Uri.UriSchemeHttps)
+                    //either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+                    if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
+                       (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
                     {
                         validUris.Add(uri);
                     }

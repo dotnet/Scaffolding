@@ -297,7 +297,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         private static Option RedirectUriOption() =>
             new Option<IList<string>>(
                 aliases: new[] { "--redirect-uris" },
-                description: "Redirect URIs for web platform.")
+                description: "Add redirect URIs (web) for the app.")
             {
                 IsRequired = false
             };

@@ -19,7 +19,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         GraphServiceClient? _graphServiceClient;
 
-        internal async Task<ApplicationParameters> CreateNewApp(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        internal async Task<ApplicationParameters> CreateNewApp(
+            TokenCredential tokenCredential,
+            ApplicationParameters applicationParameters,
+            bool json)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -124,7 +127,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 await AddPasswordCredentials(
                     graphServiceClient,
                     createdApplication.Id,
-                    effectiveApplicationParameters);
+                    effectiveApplicationParameters,
+                    json);
             }
 
             return effectiveApplicationParameters;
@@ -186,10 +190,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 };
 
                 //update redirect uris
-                List<string> redirectUris = updatedApp.Web.RedirectUris.ToList();
-                List<string> validUris = ValidateUris(toolOptions.RedirectUris).ToList();
-                redirectUris.AddRange(validUris);
-                updatedApp.Web.RedirectUris = redirectUris.Distinct();
+                List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
+                List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
+                existingRedirectUris.AddRange(urisToEnsure);
+                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
 
                 //update implicit grant settings
                 if (updatedApp.Web.ImplicitGrantSettings == null)
@@ -295,7 +299,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="createdApplication"></param>
         /// <param name="effectiveApplicationParameters"></param>
         /// <returns></returns>
-        internal static async Task<string> AddPasswordCredentials(GraphServiceClient graphServiceClient, string applicatonId, ApplicationParameters effectiveApplicationParameters)
+        internal static async Task<string> AddPasswordCredentials(
+            GraphServiceClient graphServiceClient,
+            string applicatonId,
+            ApplicationParameters effectiveApplicationParameters,
+            bool json)
         {
             string? password = string.Empty;
             var passwordCredential = new PasswordCredential
@@ -316,7 +324,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
                 catch (ServiceException se)
                 {
-                    Console.WriteLine($"Failed to create password : {se.Error.Message}");
+                    if (!json)
+                    {
+                        Console.Error.WriteLine($"Failed to create password : {se.Error.Message}");
+                    }
                 }
             }
             return password;
@@ -690,10 +701,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             effectiveApplicationParameters.Instance = isB2C
                 ? $"https://{effectiveApplicationParameters.Domain1}.b2clogin.com/"
                 : originalApplicationParameters.Instance;
-            if (effectiveApplicationParameters.PasswordCredentials is List<string>)
-            {
-                ((List<string>) effectiveApplicationParameters.PasswordCredentials).AddRange(application.PasswordCredentials.Select(p => p.Hint + "******************"));
-            }
+
+            effectiveApplicationParameters.PasswordCredentials.AddRange(application.PasswordCredentials.Select(p => p.Hint + "******************"));
            
             if (application.Spa != null && application.Spa.RedirectUris != null)
             {

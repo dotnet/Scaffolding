@@ -372,7 +372,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private void WriteProjectConfiguration(Summary summary, ProjectAuthenticationSettings projectSettings, ApplicationParameters reconcialedApplicationParameters)
         {
-            CodeWriter.WriteConfiguration(summary, projectSettings.Replacements, reconcialedApplicationParameters);
+            CodeWriter.WriteConfiguration(summary, projectSettings.Replacements, reconcialedApplicationParameters, ProvisioningToolOptions.Json);
         }
 
         private bool Reconciliate(ApplicationParameters applicationParameters, ApplicationParameters effectiveApplicationParameters)
@@ -415,8 +415,8 @@ namespace Microsoft.DotNet.MSIdentity
         }
 
         private async Task<ApplicationParameters?> ReadOrProvisionMicrosoftIdentityApplication(
-        TokenCredential tokenCredential,
-        ApplicationParameters applicationParameters)
+            TokenCredential tokenCredential,
+            ApplicationParameters applicationParameters)
         {
             ApplicationParameters? currentApplicationParameters = null;
             if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
@@ -430,7 +430,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (currentApplicationParameters == null && !ProvisioningToolOptions.Unregister)
             {
-                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters);
+                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ProvisioningToolOptions.Json);
                 Console.Write($"Created app {currentApplicationParameters.ClientId}. ");
             }
             return currentApplicationParameters;
@@ -497,7 +497,8 @@ namespace Microsoft.DotNet.MSIdentity
                 jsonResponse.State = State.Fail;
             }
 
-            Console.WriteLine(ProvisioningToolOptions.Json ? jsonResponse.ToJsonString() : jsonResponse.Content);        }
+            Console.WriteLine(ProvisioningToolOptions.Json ? jsonResponse.ToJsonString() : jsonResponse.Content);
+        }
 
         private async Task AddClientSecret(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
@@ -511,12 +512,13 @@ namespace Microsoft.DotNet.MSIdentity
                 string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
                         graphServiceClient,
                         applicationParameters.GraphEntityId,
-                        applicationParameters);
+                        applicationParameters,
+                        ProvisioningToolOptions.Json);
 
                 //if user wants to update user secrets
                 if (ProvisioningToolOptions.UpdateUserSecrets)
                 {
-                    CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password);
+                    CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ProvisioningToolOptions.Json);
                 }
 
                 if (!string.IsNullOrEmpty(password))
@@ -562,13 +564,14 @@ namespace Microsoft.DotNet.MSIdentity
                         await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
                             graphServiceClient,
                             applicationParameters.GraphEntityId,
-                            applicationParameters);
+                            applicationParameters,
+                            ProvisioningToolOptions.Json);
 
                         string? password = applicationParameters.PasswordCredentials.LastOrDefault();
                         //if user wants to update user secrets
                         if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
                         {
-                            CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password);
+                            CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ProvisioningToolOptions.Json);
                         }
                     }
                 }

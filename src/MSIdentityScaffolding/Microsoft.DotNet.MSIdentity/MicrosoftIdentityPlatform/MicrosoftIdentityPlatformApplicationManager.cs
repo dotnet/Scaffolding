@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal async Task<ApplicationParameters> CreateNewApp(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
-            bool json)
+            bool jsonOutput)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     graphServiceClient,
                     createdApplication.Id,
                     effectiveApplicationParameters,
-                    json);
+                    jsonOutput);
             }
 
             return effectiveApplicationParameters;
@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             GraphServiceClient graphServiceClient,
             string applicatonId,
             ApplicationParameters effectiveApplicationParameters,
-            bool json)
+            bool jsonOutput)
         {
             string? password = string.Empty;
             var passwordCredential = new PasswordCredential
@@ -324,7 +324,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
                 catch (ServiceException se)
                 {
-                    if (!json)
+                    if (!jsonOutput)
                     {
                         Console.Error.WriteLine($"Failed to create password : {se.Error.Message}");
                     }

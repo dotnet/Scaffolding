@@ -4,7 +4,7 @@
 using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 
-namespace Microsoft.DotNet.MSIdentity
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     public interface IMsAADTool 
     {

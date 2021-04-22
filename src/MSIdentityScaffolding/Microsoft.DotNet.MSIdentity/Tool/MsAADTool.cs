@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Graph;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.Graph;
 
-namespace Microsoft.DotNet.MSIdentity
+namespace Microsoft.DotNet.MSIdentity.Tool
 {
     internal class MsAADTool : IMsAADTool
     {
@@ -79,10 +79,14 @@ namespace Microsoft.DotNet.MSIdentity
                 }
 
                 if (applicationList.Any())
-                { 
+                {
+                    //order list by created date.
+                    applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
+
                     if (ProvisioningToolOptions.Json)
                     {
-                        outputJsonString = JsonSerializer.Serialize(applicationList);   
+                        JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, applicationList);
+                        outputJsonString = jsonResponse.ToJsonString(); 
                     }
                     else 
                     {
@@ -117,10 +121,11 @@ namespace Microsoft.DotNet.MSIdentity
                     }
                 }
                 if (servicePrincipalList.Any())
-                { 
+                {
                     if (ProvisioningToolOptions.Json)
                     {
-                        outputJsonString = JsonSerializer.Serialize(servicePrincipalList);
+                        JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, servicePrincipalList);
+                        outputJsonString = jsonResponse.ToJsonString();
                     }
                     else 
                     {
@@ -179,7 +184,8 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (ProvisioningToolOptions.Json)
             {
-                outputJsonString = JsonSerializer.Serialize(tenantList);
+                JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, tenantList);
+                outputJsonString = jsonResponse.ToJsonString();
             }
             else 
             {

@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     public static class CodeWriter
     {
-        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconcialedApplicationParameters)
+        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconciledApplicationParameters, bool jsonOutput)
         {
             foreach (var replacementsInFile in replacements.GroupBy(r => r.FilePath))
             {
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 bool updated = false;
                 foreach (Replacement r in replacementsInFile.OrderByDescending(r => r.Index))
                 {
-                    string? replaceBy = ComputeReplacement(r.ReplaceBy, reconcialedApplicationParameters);
+                    string? replaceBy = ComputeReplacement(r.ReplaceBy, reconciledApplicationParameters, jsonOutput);
                     if (replaceBy != null && replaceBy!=r.ReplaceFrom)
                     {
                         int index = fileContent.IndexOf(r.ReplaceFrom /*, r.Index*/);
@@ -51,16 +51,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         }
 
         //TODO : Add integration tests for testing instead of mocking for unit tests.
-        public static void AddUserSecrets(bool isB2C, string projectPath, string value)
+        public static void AddUserSecrets(bool isB2C, string projectPath, string value, bool jsonOutput)
         {
             //init regardless. If it's already initiated, dotnet-user-secrets confirms it.
-            InitUserSecrets(projectPath);
+            InitUserSecrets(projectPath, jsonOutput);
             string section = isB2C ? "AzureADB2C" : "AzureAD";
             string key = $"{section}:ClientSecret";
-            SetUserSecerets(projectPath, key, value);
+            SetUserSecerets(projectPath, key, value, jsonOutput);
         }
 
-        private static void InitUserSecrets(string projectPath)
+        public static void InitUserSecrets(string projectPath, bool jsonOutput)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -74,13 +74,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 arguments.Add(projectPath);
             }
 
-            Debugger.Launch();
-            if (arguments.Contains("-uus"))
-            {
+            arguments.Add("init");
 
+            if (!jsonOutput)
+            {
+                Console.Write("\nInitializing User Secrets . . . ");
             }
 
-            arguments.Add("init");
             var result = Command.CreateDotNet(
                 "user-secrets",
                 arguments.ToArray())
@@ -90,11 +90,83 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             
             if (result.ExitCode != 0)
             {
+                if (!jsonOutput)
+                {
+                    Console.Write("FAILED\n");
+                }
                 throw new Exception("Error while running dotnet-user-secrets init");
+            }
+            else
+            {
+                if (!jsonOutput)
+                {
+                    Console.Write("SUCCESS\n");
+                }
             }
         }
 
-        private static void SetUserSecerets(string projectPath, string key, string value)
+        public static void AddPackage(string packageName, string packageVersion, string tfm, bool jsonOutput)
+        {
+            if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
+            {
+                var errors = new List<string>();
+                var output = new List<string>();
+                var arguments = new List<string>();
+                arguments.Add("package");
+                arguments.Add(packageName);
+                if (!string.IsNullOrEmpty(packageVersion))
+                {
+                    arguments.Add("-v");
+                    arguments.Add(packageVersion);
+                }
+
+                if (IsTfmPreRelease(tfm))
+                {
+                    arguments.Add("--prerelease");
+                }
+
+                if (!string.IsNullOrEmpty(tfm))
+                {
+                    arguments.Add("-f");
+                    arguments.Add(tfm);
+                }
+                if (!jsonOutput)
+                {
+                    Console.Write($"\nAdding package {packageName} . . . ");
+                }
+
+                var result = Command.CreateDotNet(
+                    "add",
+                    arguments.ToArray())
+                    .OnErrorLine(e => errors.Add(e))
+                    .OnOutputLine(o => output.Add(o))
+                    .Execute();
+
+                if (result.ExitCode != 0)
+                {
+                    if (!jsonOutput)
+                    {
+                        Console.Write("FAILED\n");
+                        Console.WriteLine($"Failed to add package {packageName}");
+                    }
+                }
+                else
+                {
+                    if (!jsonOutput)
+                    {
+                        Console.Write("SUCCESS\n");
+                    }
+
+                }
+            }
+        }
+
+        private static bool IsTfmPreRelease(string tfm)
+        {
+            return tfm.Equals("net6.0", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void SetUserSecerets(string projectPath, string key, string value, bool jsonOutput)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -124,11 +196,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             else 
             {
-                Console.WriteLine($"\nAdded {key} to user secrets.\n");
+                if (!jsonOutput)
+                {
+                    Console.WriteLine($"\nAdded {key} to user secrets.\n");
+                }
             }
         }
 
-        private static string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters)
+        private static string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters, bool jsonOutput)
         {
             string? replacement = replaceBy;
             switch(replaceBy)
@@ -137,7 +212,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     string? password = reconciledApplicationParameters.PasswordCredentials.LastOrDefault();
                     if (!string.IsNullOrEmpty(reconciledApplicationParameters.SecretsId) && !string.IsNullOrEmpty(password))
                     {
-                        AddUserSecrets(reconciledApplicationParameters.IsB2C, reconciledApplicationParameters.ProjectPath ?? string.Empty, password);
+                        AddUserSecrets(reconciledApplicationParameters.IsB2C, reconciledApplicationParameters.ProjectPath ?? string.Empty, password, jsonOutput);
                     }
                     else
                     {

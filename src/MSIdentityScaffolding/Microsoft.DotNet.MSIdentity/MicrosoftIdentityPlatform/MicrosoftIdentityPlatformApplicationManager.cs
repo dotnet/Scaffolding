@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
@@ -18,7 +19,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         GraphServiceClient? _graphServiceClient;
 
-        internal async Task<ApplicationParameters> CreateNewApp(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        internal async Task<ApplicationParameters> CreateNewApp(
+            TokenCredential tokenCredential,
+            ApplicationParameters applicationParameters,
+            bool jsonOutput)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -123,7 +127,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 await AddPasswordCredentials(
                     graphServiceClient,
                     createdApplication.Id,
-                    effectiveApplicationParameters);
+                    effectiveApplicationParameters,
+                    jsonOutput);
             }
 
             return effectiveApplicationParameters;
@@ -161,40 +166,86 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return tenant;
         }
 
-        internal async Task UpdateApplication(TokenCredential tokenCredential, ApplicationParameters reconcialedApplicationParameters)
+        internal async Task<bool> UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? reconcialedApplicationParameters, ProvisioningToolOptions toolOptions)
         {
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
-
-            var existingApplication = (await graphServiceClient.Applications
-               .Request()
-               .Filter($"appId eq '{reconcialedApplicationParameters.ClientId}'")
-               .GetAsync()).First();
-
-            // Updates the redirect URIs
-            var updatedApp = new Application
+            bool updateStatus = false;
+            if (reconcialedApplicationParameters != null)
             {
-                Web = existingApplication.Web
-            };
-            updatedApp.Web.RedirectUris = reconcialedApplicationParameters.WebRedirectUris;
+                var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
-            // TODO: update other fields. 
-            // See https://github.com/jmprieur/app-provisonning-tool/issues/10
-            await graphServiceClient.Applications[existingApplication.Id]
-                .Request()
-                .UpdateAsync(updatedApp).ConfigureAwait(false);
+                var existingApplication = (await graphServiceClient.Applications
+                   .Request()
+                   .Filter($"appId eq '{reconcialedApplicationParameters.ClientId}'")
+                   .GetAsync()).First();
 
-            if (existingApplication.RequiredResourceAccess != null
-                && !reconcialedApplicationParameters.IsBlazorWasm
-                && existingApplication.RequiredResourceAccess.Any()
-                && (existingApplication.PasswordCredentials == null
-                || !existingApplication.PasswordCredentials.Any()
-                || !existingApplication.PasswordCredentials.Any(password => !string.IsNullOrEmpty(password.SecretText))))
-            {
-                await AddPasswordCredentials(
-                    graphServiceClient,
-                    existingApplication.Id,
-                    reconcialedApplicationParameters).ConfigureAwait(false);
+                // Updates the redirect URIs
+                if (existingApplication.Web == null)
+                {
+                    existingApplication.Web = new WebApplication();
+                }
+
+                var updatedApp = new Application
+                {
+                    Web = existingApplication.Web
+                };
+
+                //update redirect uris
+                List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
+                List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
+                existingRedirectUris.AddRange(urisToEnsure);
+                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
+
+                //update implicit grant settings
+                if (updatedApp.Web.ImplicitGrantSettings == null)
+                {
+                    updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
+                }
+
+                if (toolOptions.EnableAccessToken.HasValue)
+                {
+                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+                }
+
+                if (toolOptions.EnableIdToken.HasValue)
+                {
+                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+                }
+
+                // TODO: update other fields. 
+                // See https://github.com/jmprieur/app-provisonning-tool/issues/10
+                try
+                {
+                    await graphServiceClient.Applications[existingApplication.Id]
+                        .Request()
+                        .UpdateAsync(updatedApp).ConfigureAwait(false);
+                    updateStatus = true;
+                }
+                //TODO update exception
+                catch (Exception)
+                {
+                }
             }
+            return updateStatus;
+        }
+
+        //checks for valid https uris.
+        //TODO Unit test
+        internal static IList<string> ValidateUris(IList<string> redirectUris)
+        {
+            IList<string> validUris = new List<string>();
+            if (redirectUris.Any())
+            {
+                foreach (var uri in redirectUris)
+                {
+                    //either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+                    if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
+                       (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
+                    {
+                        validUris.Add(uri);
+                    }
+                }
+            }
+            return validUris;
         }
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
@@ -250,8 +301,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="createdApplication"></param>
         /// <param name="effectiveApplicationParameters"></param>
         /// <returns></returns>
-        internal static async Task AddPasswordCredentials(GraphServiceClient graphServiceClient, string applicatonId, ApplicationParameters effectiveApplicationParameters)
+        internal static async Task<string> AddPasswordCredentials(
+            GraphServiceClient graphServiceClient,
+            string applicatonId,
+            ApplicationParameters effectiveApplicationParameters,
+            bool jsonOutput)
         {
+            string? password = string.Empty;
             var passwordCredential = new PasswordCredential
             {
                 DisplayName = "Secret created by dotnet-msidentity tool"
@@ -259,12 +315,24 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (!string.IsNullOrEmpty(applicatonId) && graphServiceClient != null)
             {
-                PasswordCredential returnedPasswordCredential = await graphServiceClient.Applications[$"{applicatonId}"]
-                    .AddPassword(passwordCredential)
-                    .Request()
-                    .PostAsync();
-                effectiveApplicationParameters.PasswordCredentials.Add(returnedPasswordCredential.SecretText);
+                try
+                {
+                    PasswordCredential returnedPasswordCredential = await graphServiceClient.Applications[$"{applicatonId}"]
+                        .AddPassword(passwordCredential)
+                        .Request()
+                        .PostAsync();
+                    password = returnedPasswordCredential.SecretText;
+                    effectiveApplicationParameters.PasswordCredentials.Add(password);
+                }
+                catch (ServiceException se)
+                {
+                    if (!jsonOutput)
+                    {
+                        Console.Error.WriteLine($"Failed to create password : {se.Error.Message}");
+                    }
+                }
             }
+            return password;
         }
 
         /// <summary>
@@ -610,7 +678,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
                 CallsDownstreamApi = application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
                 LogoutUrl = application.Web?.LogoutUrl,
-
+                GraphEntityId = application.Id,
                 // Parameters that cannot be infered from the registered app
                 SusiPolicy = originalApplicationParameters.SusiPolicy,
                 SecretsId = originalApplicationParameters.SecretsId,
@@ -618,7 +686,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
                 CalledApiScopes = originalApplicationParameters.CalledApiScopes,
                 AppIdUri = originalApplicationParameters.AppIdUri,
-                GraphEntityId = application.Id
+
             };
 
             if (application.Api != null && application.IdentifierUris.Any())
@@ -637,6 +705,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 : originalApplicationParameters.Instance;
 
             effectiveApplicationParameters.PasswordCredentials.AddRange(application.PasswordCredentials.Select(p => p.Hint + "******************"));
+           
             if (application.Spa != null && application.Spa.RedirectUris != null)
             {
                 effectiveApplicationParameters.WebRedirectUris.AddRange(application.Spa.RedirectUris);

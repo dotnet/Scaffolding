@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.DotNet.MSIdentity.Tool;
 using Moq;
 using Xunit;
 
@@ -42,7 +43,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 Assert.True(false, "Formatting tenants from Azure Management failed");
             }
-            var tenantJsonList = JsonSerializer.Deserialize<TenantInformation[]>(tenantsJsonFormatted);
+            var jsonResponse = JsonSerializer.Deserialize<JsonResponse>(tenantsJsonFormatted);
+            var tenantJsonList = JsonSerializer.Deserialize<TenantInformation[]>(jsonResponse.Content.ToString());
             Assert.True(tenantJsonList.Any());
             Assert.True(tenantJsonList.Length == 2);
             var aadApp = tenantJsonList.Where(x => x.DisplayName.Equals("NET AAD App")).FirstOrDefault();

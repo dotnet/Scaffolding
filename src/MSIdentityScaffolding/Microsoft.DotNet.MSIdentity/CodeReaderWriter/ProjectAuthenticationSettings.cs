@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     public class ProjectAuthenticationSettings
     {
-        public ProjectAuthenticationSettings(ProjectDescription projectDescription)
+        public ProjectAuthenticationSettings(ProjectDescription? projectDescription = null)
         {
             ProjectDescription = projectDescription;
         }
@@ -18,6 +18,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         public List<Replacement> Replacements { get; } = new List<Replacement>();
 
-        public ProjectDescription ProjectDescription { get; private set; }
+        public ProjectDescription? ProjectDescription { get; private set; }
     }
 }

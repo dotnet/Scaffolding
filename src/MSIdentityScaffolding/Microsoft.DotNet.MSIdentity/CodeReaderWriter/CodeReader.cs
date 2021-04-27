@@ -74,8 +74,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private static void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
         {
-            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue && projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.Value
-                && projectAuthenticationSettings.ApplicationParameters.IsWebApp.HasValue && !projectAuthenticationSettings.ApplicationParameters.IsWebApp.Value;
+            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue &&
+                                projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.Value &&
+                                projectAuthenticationSettings.ApplicationParameters.IsWebApp.HasValue &&
+                                !projectAuthenticationSettings.ApplicationParameters.IsWebApp.Value;
             string callbackPath = projectAuthenticationSettings.ApplicationParameters.CallbackPath ?? "/signin-oidc";
             if (isBlazorWasm)
             {

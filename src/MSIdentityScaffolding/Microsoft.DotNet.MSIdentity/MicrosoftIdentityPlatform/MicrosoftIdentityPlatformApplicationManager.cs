@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal async Task<ApplicationParameters> CreateNewApp(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
-            IConsoleLogger consoleLogger)
+            IConsoleLogger consoleLogger,
+            string commandName)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 Description = applicationParameters.Description
             };
 
-            if (applicationParameters.IsWebApi.HasValue && applicationParameters.IsWebApi.Value)
+            if (applicationParameters.IsWebApi.GetValueOrDefault())
             {
                 application.Api = new ApiApplication()
                 {
@@ -122,6 +123,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Filter($"appId eq '{createdApplication.AppId}'")
                 .GetAsync()).First();
 
+            //log json console message here since we need the Microsoft.Graph.Application
+            JsonResponse jsonResponse = new JsonResponse(commandName);
+            if (createdApplication != null)
+            {
+                jsonResponse.State = State.Success;
+                jsonResponse.Content = createdApplication;
+            }
+            else
+            {
+                jsonResponse.State = State.Fail;
+                jsonResponse.Content = "Failed to create Azure AD/AD B2C app registration";
+                consoleLogger.LogJsonMessage(jsonResponse);
+            }
+            consoleLogger.LogJsonMessage(jsonResponse);
+
             var effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
 
             // Add password credentials
@@ -197,12 +213,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 //update redirect uris
                 List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
                 List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
-                List<string> urisToAdd = existingRedirectUris.Except(urisToEnsure).ToList();
-                if (urisToAdd.Any())
+                int originalUrisCount = existingRedirectUris.Count;
+                existingRedirectUris.AddRange(urisToEnsure);
+                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
+                if (updatedApp.Web.RedirectUris.Count() > originalUrisCount)
                 {
                     needsUpdate = true;
-                    existingRedirectUris.AddRange(urisToAdd);
-                    updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
                 }
                 
                 if (updatedApp.Web.ImplicitGrantSettings == null)

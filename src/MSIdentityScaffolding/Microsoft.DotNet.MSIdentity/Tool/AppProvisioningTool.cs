@@ -51,9 +51,9 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     if (csProjfiles.Count() > 1)
                     {
-                        string errorMssg = "Specify one .csproj file for the --project-path";
-                        ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMssg));
-                        ConsoleLogger.LogMessage(errorMssg, LogMessageType.Error);
+                        string errorMsg = "Specify one .csproj file for the --project-path";
+                        ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMsg));
+                        ConsoleLogger.LogMessage(errorMsg, LogMessageType.Error);
                         return null;
                     }
                     var filePath = csProjfiles.First();
@@ -61,7 +61,13 @@ namespace Microsoft.DotNet.MSIdentity
                 }
             }
 
-            ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? Directory.GetCurrentDirectory();
+            string currentDirectory = Directory.GetCurrentDirectory();
+            //if its current directory, update it using the ProjectPath
+            if (ProvisioningToolOptions.ProjectPath.Equals(currentDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? currentDirectory;
+            }
+            
             //get appsettings.json file path
             var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
             if (appSettingsFile.Any())
@@ -208,22 +214,15 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters? resultAppParameters = null;
             if (applicationParameters != null)
             {
-                resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger);
-                JsonResponse jsonResponse = new JsonResponse(CommandName);
+                resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
                 if (resultAppParameters != null && !string.IsNullOrEmpty(resultAppParameters.ClientId))
                 {
-                    jsonResponse.State = State.Success;
-                    jsonResponse.Content = resultAppParameters;
                     ConsoleLogger.LogMessage($"Created app {resultAppParameters.ApplicationDisplayName} - {resultAppParameters.ClientId}.");
-                    ConsoleLogger.LogJsonMessage(jsonResponse);
                 }
                 else
                 {
                     string failMessage = "Failed to create Azure AD/AD B2C app";
-                    jsonResponse.State = State.Fail;
-                    jsonResponse.Content = failMessage;
                     ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
-                    ConsoleLogger.LogJsonMessage(jsonResponse);
                 }
             }
             return resultAppParameters;
@@ -473,7 +472,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (currentApplicationParameters == null && !ProvisioningToolOptions.Unregister)
             {
-                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger);
+                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
                 ConsoleLogger.LogMessage($"Created app {currentApplicationParameters.ApplicationDisplayName} - {currentApplicationParameters.ClientId}. ");
             }
             return currentApplicationParameters;

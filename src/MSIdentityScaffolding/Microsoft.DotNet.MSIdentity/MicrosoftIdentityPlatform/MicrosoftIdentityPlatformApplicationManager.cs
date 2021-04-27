@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         GraphServiceClient? _graphServiceClient;
 
-        internal async Task<ApplicationParameters?> CreateNewApp(
+        internal async Task<ApplicationParameters?> CreateNewAppAsync(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
             IConsoleLogger consoleLogger,
@@ -49,11 +49,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 };
             }
 
-            if (applicationParameters.IsWebApp.HasValue && applicationParameters.IsWebApp.Value)
+            if (applicationParameters.IsWebApp.GetValueOrDefault())
             {
                 AddWebAppPlatform(applicationParameters, application);
             }
-            else if (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value)
+            else if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
             {
                 // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
                 // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
@@ -100,14 +100,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI, 
             // and therefore we need to do it after the app is created (updating the app)
-            if (applicationParameters.IsWebApi.HasValue && applicationParameters.IsWebApi.Value
+            if (applicationParameters.IsWebApi.GetValueOrDefault()
                 && createdApplication.Api != null
                 && (createdApplication.IdentifierUris == null || !createdApplication.IdentifierUris.Any()))
             {
                 await ExposeScopes(graphServiceClient, createdApplication);
 
                 // Blazorwasm hosted: add permission to server web API from client SPA
-                if (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value)
+                if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
                 {
                     await AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
                         graphServiceClient,
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // Add password credentials
                 if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
                 {
-                    await AddPasswordCredentials(
+                    await AddPasswordCredentialsAsync(
                         graphServiceClient,
                         createdApplication.Id,
                         effectiveApplicationParameters,
@@ -332,7 +332,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="createdApplication"></param>
         /// <param name="effectiveApplicationParameters"></param>
         /// <returns></returns>
-        internal static async Task<string> AddPasswordCredentials(
+        internal static async Task<string> AddPasswordCredentialsAsync(
             GraphServiceClient graphServiceClient,
             string applicatonId,
             ApplicationParameters effectiveApplicationParameters,
@@ -617,7 +617,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             };
         }
 
-        internal async Task<bool> Unregister(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        internal async Task<bool> UnregisterAsync(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             bool unregisterSuccess = false;
             var graphServiceClient = GetGraphServiceClient(tokenCredential);

@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters? resultAppParameters = null;
             if (applicationParameters != null)
             {
-                resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
+                resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
                 if (resultAppParameters != null && !string.IsNullOrEmpty(resultAppParameters.ClientId))
                 {
                     ConsoleLogger.LogMessage($"Created app {resultAppParameters.ApplicationDisplayName} - {resultAppParameters.ClientId}.");
@@ -472,7 +472,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (currentApplicationParameters == null && !ProvisioningToolOptions.Unregister)
             {
-                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
+                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
                 if (currentApplicationParameters != null)
                 {
                     ConsoleLogger.LogMessage($"Created app {currentApplicationParameters.ApplicationDisplayName} - {currentApplicationParameters.ClientId}. ");
@@ -540,7 +540,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task UnregisterApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            bool unregisterSuccess = await MicrosoftIdentityPlatformApplicationManager.Unregister(tokenCredential, applicationParameters);
+            bool unregisterSuccess = await MicrosoftIdentityPlatformApplicationManager.UnregisterAsync(tokenCredential, applicationParameters);
             JsonResponse jsonResponse = new JsonResponse(CommandName);
             if (unregisterSuccess)
             {
@@ -596,7 +596,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
 
-                string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
+                string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
                         graphServiceClient,
                         applicationParameters.GraphEntityId,
                         applicationParameters,
@@ -650,7 +650,7 @@ namespace Microsoft.DotNet.MSIdentity
                     //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
                     if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
                     {
-                        await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentials(
+                        await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
                             graphServiceClient,
                             applicationParameters.GraphEntityId,
                             applicationParameters,

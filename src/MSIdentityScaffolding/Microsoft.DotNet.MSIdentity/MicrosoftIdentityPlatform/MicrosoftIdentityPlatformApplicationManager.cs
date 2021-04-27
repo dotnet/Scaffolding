@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         GraphServiceClient? _graphServiceClient;
 
-        internal async Task<ApplicationParameters> CreateNewApp(
+        internal async Task<ApplicationParameters?> CreateNewApp(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
             IConsoleLogger consoleLogger,
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         applicationParameters.IsB2C);
                 }
             }
-
+            ApplicationParameters? effectiveApplicationParameters = null;
             // Re-reading the app to be sure to have everything.
             createdApplication = (await graphServiceClient.Applications
                 .Request()
@@ -129,6 +129,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 jsonResponse.State = State.Success;
                 jsonResponse.Content = createdApplication;
+                effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
+
+                // Add password credentials
+                if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
+                {
+                    await AddPasswordCredentials(
+                        graphServiceClient,
+                        createdApplication.Id,
+                        effectiveApplicationParameters,
+                        consoleLogger);
+                }
+
             }
             else
             {
@@ -137,19 +149,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 consoleLogger.LogJsonMessage(jsonResponse);
             }
             consoleLogger.LogJsonMessage(jsonResponse);
-
-            var effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
-
-            // Add password credentials
-            if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
-            {
-                await AddPasswordCredentials(
-                    graphServiceClient,
-                    createdApplication.Id,
-                    effectiveApplicationParameters,
-                    consoleLogger);
-            }
-
             return effectiveApplicationParameters;
         }
 

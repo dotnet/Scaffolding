@@ -473,7 +473,14 @@ namespace Microsoft.DotNet.MSIdentity
             if (currentApplicationParameters == null && !ProvisioningToolOptions.Unregister)
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewApp(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
-                ConsoleLogger.LogMessage($"Created app {currentApplicationParameters.ApplicationDisplayName} - {currentApplicationParameters.ClientId}. ");
+                if (currentApplicationParameters != null)
+                {
+                    ConsoleLogger.LogMessage($"Created app {currentApplicationParameters.ApplicationDisplayName} - {currentApplicationParameters.ClientId}. ");
+                }
+                else
+                {
+                    ConsoleLogger.LogMessage("Failed to create Azure AD/AD B2C app registration", LogMessageType.Error);
+                }
             }
             return currentApplicationParameters;
         }

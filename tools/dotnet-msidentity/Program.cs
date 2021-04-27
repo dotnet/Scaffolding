@@ -5,7 +5,6 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
@@ -15,27 +14,35 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public static async Task<int> Main(string []args)
         {
             var rootCommand = MsIdentityCommand();
+
+            //internal commands
             var listAadAppsCommand = ListAADAppsCommand();
             var listServicePrincipalsCommand = ListServicePrincipalsCommand();
             var listTenantsCommand = ListTenantsCommand();
+            var addClientSecretCommand = AddClientSecretCommand();
+
+            //exposed commands
             var registerApplicationCommand = RegisterApplicationCommand();
             var unregisterApplicationCommand = UnregisterApplicationCommand();
-            var updateApplicationCommand = UpdateApplicationCommand();
+            var updateAppRegistrationCommand = UpdateAppRegistrationCommand();
             var updateProjectCommand = UpdateProjectCommand();
-            var addClientSecretCommand = AddClientSecretCommand();
+            var createAppRegistration = CreateAppRegistrationCommand();
+
             //hide internal commands.
             listAadAppsCommand.IsHidden = true;
             listServicePrincipalsCommand.IsHidden = true;
             listTenantsCommand.IsHidden = true;
             updateProjectCommand.IsHidden = true;
             addClientSecretCommand.IsHidden = true;
+            createAppRegistration.IsHidden = true;
 
             listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListApps);
             listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListServicePrincipals);
             listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListTenants);
             registerApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleRegisterApplication);
             unregisterApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUnregisterApplication);
-            updateApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateApplication);
+            createAppRegistration.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleCreateAppRegistration);
+            updateAppRegistrationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateApplication);
             updateProjectCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateProject);
             addClientSecretCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleClientSecrets);
 
@@ -45,9 +52,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             rootCommand.AddCommand(listTenantsCommand);
             rootCommand.AddCommand(registerApplicationCommand);
             rootCommand.AddCommand(unregisterApplicationCommand);
-            rootCommand.AddCommand(updateApplicationCommand);
+            rootCommand.AddCommand(updateAppRegistrationCommand);
             rootCommand.AddCommand(updateProjectCommand);
             rootCommand.AddCommand(addClientSecretCommand);
+            rootCommand.AddCommand(createAppRegistration);
 
             //if no args are present, show default help.
             if (args == null || args.Length == 0)
@@ -110,7 +118,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         {
             if (provisioningToolOptions != null)
             {
-                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_APPLICATION_COMMAND, provisioningToolOptions);
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_APP_REGISTRATION_COMMAND, provisioningToolOptions);
                 await msAADTool.Run();
                 return 0;
             }
@@ -122,6 +130,17 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UNREGISTER_APPLICATION_COMMAND, provisioningToolOptions);
+                await msAADTool.Run();
+                return 0;
+            }
+            return -1;
+        }
+
+        private static async Task<int> HandleCreateAppRegistration(ProvisioningToolOptions provisioningToolOptions)
+        {
+            if (provisioningToolOptions != null)
+            {
+                IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.CREATE_APP_REGISTRATION_COMMAND, provisioningToolOptions);
                 await msAADTool.Run();
                 return 0;
             }
@@ -185,7 +204,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.ADD_CLIENT_SECRET,
                 description: "Create client secret for an Azure AD/AD B2C application.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ProjectPathOption(), ProjectFilePathOption(), UpdateUserSecretsOption()
+                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ProjectFilePathOption(), UpdateUserSecretsOption()
             };
 
         private static Command RegisterApplicationCommand()=>
@@ -194,7 +213,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Register an AAD/AAD B2C application in Azure and updates .NET application." + 
                              "\n\t- Updates the appsettings.json file.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), AppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectPathOption(), ProjectFilePathOption()
+                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), AppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectFilePathOption()
             };
 
         private static Command UpdateProjectCommand()=>
@@ -205,16 +224,23 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." + 
                              "\n\t- Updates the user secrets.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ProjectPathOption(), ClientIdOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), ProjectFilePathOption(), RedirectUriOption()
+                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), ProjectFilePathOption(), RedirectUriOption()
             };
 
-        private static Command UpdateApplicationCommand() =>
+        private static Command UpdateAppRegistrationCommand() =>
             new Command(
-                name: Commands.UPDATE_APPLICATION_COMMAND,
-                description: "Update an AAD/AAD B2C application in Azure." +
-                             "\n\t- Updates the appsettings.json file.")
+                name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
+                description: "Update an AAD/AAD B2C application in Azure.")
             {
                 TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken()
+            };
+
+        private static Command CreateAppRegistrationCommand() =>
+            new Command(
+                name: Commands.CREATE_APP_REGISTRATION_COMMAND,
+                description: "Create an AAD/AAD B2C application in Azure.")
+            {
+                TenantOption(), UsernameOption(), JsonOption(), AppDisplayName(), ProjectFilePathOption(), ProjectType()
             };
 
         private static Command UnregisterApplicationCommand() =>
@@ -224,7 +250,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Unregister an AAD/AAD B2C application in Azure." +
                              "\n\t- Updates the appsettings.json file.")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ProjectPathOption(), ClientIdOption()
+                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ProjectFilePathOption(), ClientIdOption()
             };
 
         private static Option JsonOption()=>
@@ -286,6 +312,23 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
+        private static Option AppDisplayName() =>
+            new Option<string>(
+                aliases: new[] { "--app-display-name" },
+                description: "App display name for Azure AD/AD B2C app registration creation.")
+            {
+                IsRequired = false
+            };
+
+        private static Option ProjectType() =>
+            new Option<string>(
+                aliases: new[] { "--project-type" },
+                description: "Project type for which to register the azure ad app registration." +
+                             "\n\tFor eg., 'webapp', 'webapi', 'blazorwasm-hosted', 'blazorwasm'")
+            {
+                IsRequired = false
+            };
+
         private static Option ClientSecretOption()=>
             new Option<string>(
                 aliases: new [] {"--client-secret"},
@@ -302,17 +345,9 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ProjectPathOption()=>
-            new Option<string>(
-                aliases: new [] {"-p", "--project-path"},
-                description: "When specified, will analyze the application code in the specified folder. Otherwise analyzes the code in the current directory..")
-            {
-                IsRequired = false
-            };
-
         private static Option ProjectFilePathOption()=>
             new Option<string>(
-                aliases: new [] {"--project-file-path"},
+                aliases: new [] {"-p", "--project-file-path"},
                 description: "When specified, will analyze the application specified by the csproj file. Otherwise analyzes the csproj in the current directory..")
             {
                 IsRequired = false

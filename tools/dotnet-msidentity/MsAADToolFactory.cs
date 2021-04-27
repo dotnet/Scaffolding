@@ -4,7 +4,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     {
         internal static IMsAADTool CreateTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
-            switch(commandName)
+            switch (commandName)
             {
                 case Commands.LIST_AAD_APPS_COMMAND:
                 case Commands.LIST_SERVICE_PRINCIPALS_COMMAND:

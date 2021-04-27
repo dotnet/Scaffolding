@@ -21,6 +21,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public string? AppSettingsFilePath { get; set; }
 
         ///<summary>
+        /// Display name for Azure AD/AD B2C app registration
+        ///</summary>
+        public string? AppDisplayName { get; set; }
+
+        ///<summary>
         /// Web redirect URIs.
         ///</summary>
         public IList<string> RedirectUris { get; set; } = new List<string>();
@@ -168,7 +173,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 AppSettingsFilePath = AppSettingsFilePath,
                 WebApiClientId = WebApiClientId,
                 AppIdUri = AppIdUri,
-                Json = Json
+                Json = Json,
+                AppDisplayName = AppDisplayName
             };
         }
     }

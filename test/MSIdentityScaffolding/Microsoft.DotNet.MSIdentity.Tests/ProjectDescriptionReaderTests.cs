@@ -179,7 +179,10 @@ namespace Tests
 
         private void AssertAuthSettings(ProjectAuthenticationSettings authenticationSettings, bool isB2C = false)
         {
-            Assert.True(authenticationSettings.ApplicationParameters.IsWebApi || authenticationSettings.ApplicationParameters.IsWebApp || authenticationSettings.ApplicationParameters.IsBlazorWasm);
+            bool IsWebApi = authenticationSettings.ApplicationParameters.IsWebApi.HasValue && authenticationSettings.ApplicationParameters.IsWebApi.Value;
+            bool IsWebApp = authenticationSettings.ApplicationParameters.IsWebApp.HasValue && authenticationSettings.ApplicationParameters.IsWebApp.Value;
+            bool IsBlazorWasm = authenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue && authenticationSettings.ApplicationParameters.IsBlazorWasm.Value;
+            Assert.True(IsWebApi || IsWebApp || IsBlazorWasm);
             
             if (isB2C)
             {

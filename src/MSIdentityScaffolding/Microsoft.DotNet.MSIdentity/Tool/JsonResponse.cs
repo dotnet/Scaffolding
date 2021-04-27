@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
-    internal class JsonResponse
+    public class JsonResponse
     {
         public string Command { get; }
         public string? State { get; set; }

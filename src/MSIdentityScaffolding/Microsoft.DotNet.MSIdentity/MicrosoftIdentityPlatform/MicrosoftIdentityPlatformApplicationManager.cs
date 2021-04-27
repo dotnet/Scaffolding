@@ -22,13 +22,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal async Task<ApplicationParameters> CreateNewApp(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
-            bool jsonOutput)
+            IConsoleLogger consoleLogger)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             // Get the tenant
             Organization? tenant = await GetTenant(graphServiceClient);
-
+            if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+            {
+                applicationParameters.IsB2C = true;
+            }
             // Create the app.
             Application application = new Application()
             {
@@ -37,7 +40,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 Description = applicationParameters.Description
             };
 
-            if (applicationParameters.IsWebApi)
+            if (applicationParameters.IsWebApi.HasValue && applicationParameters.IsWebApi.Value)
             {
                 application.Api = new ApiApplication()
                 {
@@ -45,11 +48,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 };
             }
 
-            if (applicationParameters.IsWebApp)
+            if (applicationParameters.IsWebApp.HasValue && applicationParameters.IsWebApp.Value)
             {
                 AddWebAppPlatform(applicationParameters, application);
             }
-            else if (applicationParameters.IsBlazorWasm)
+            else if (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value)
             {
                 // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
                 // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
@@ -96,14 +99,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI, 
             // and therefore we need to do it after the app is created (updating the app)
-            if (applicationParameters.IsWebApi
+            if (applicationParameters.IsWebApi.HasValue && applicationParameters.IsWebApi.Value
                 && createdApplication.Api != null
                 && (createdApplication.IdentifierUris == null || !createdApplication.IdentifierUris.Any()))
             {
                 await ExposeScopes(graphServiceClient, createdApplication);
 
                 // Blazorwasm hosted: add permission to server web API from client SPA
-                if (applicationParameters.IsBlazorWasm)
+                if (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value)
                 {
                     await AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
                         graphServiceClient,
@@ -128,7 +131,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     graphServiceClient,
                     createdApplication.Id,
                     effectiveApplicationParameters,
-                    jsonOutput);
+                    consoleLogger);
             }
 
             return effectiveApplicationParameters;
@@ -166,17 +169,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return tenant;
         }
 
-        internal async Task<bool> UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? reconcialedApplicationParameters, ProvisioningToolOptions toolOptions)
+        internal async Task<bool> UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? reconciledApplicationParameters, ProvisioningToolOptions toolOptions)
         {
             bool updateStatus = false;
-            if (reconcialedApplicationParameters != null)
+            if (reconciledApplicationParameters != null)
             {
                 var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
                 var existingApplication = (await graphServiceClient.Applications
                    .Request()
-                   .Filter($"appId eq '{reconcialedApplicationParameters.ClientId}'")
+                   .Filter($"appId eq '{reconciledApplicationParameters.ClientId}'")
                    .GetAsync()).First();
+
+                bool needsUpdate = false;
 
                 // Updates the redirect URIs
                 if (existingApplication.Web == null)
@@ -192,44 +197,55 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 //update redirect uris
                 List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
                 List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
-                existingRedirectUris.AddRange(urisToEnsure);
-                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
-
-                //update implicit grant settings
+                List<string> urisToAdd = existingRedirectUris.Except(urisToEnsure).ToList();
+                if (urisToAdd.Any())
+                {
+                    needsUpdate = true;
+                    existingRedirectUris.AddRange(urisToAdd);
+                    updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
+                }
+                
                 if (updatedApp.Web.ImplicitGrantSettings == null)
                 {
                     updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 }
 
-                if (toolOptions.EnableAccessToken.HasValue)
+                //update implicit grant settings if need be.
+                if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
                 {
+                    needsUpdate = true;
                     updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
                 }
 
-                if (toolOptions.EnableIdToken.HasValue)
+                if (toolOptions.EnableIdToken.HasValue && (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
                 {
+                    needsUpdate = true;
                     updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
                 }
+                
 
-                // TODO: update other fields. 
-                // See https://github.com/jmprieur/app-provisonning-tool/issues/10
-                try
+                if (needsUpdate)
                 {
-                    await graphServiceClient.Applications[existingApplication.Id]
-                        .Request()
-                        .UpdateAsync(updatedApp).ConfigureAwait(false);
-                    updateStatus = true;
-                }
-                //TODO update exception
-                catch (Exception)
-                {
+                    try
+                    {
+                        // TODO: update other fields. 
+                        // See https://github.com/jmprieur/app-provisonning-tool/issues/10
+                        await graphServiceClient.Applications[existingApplication.Id]
+                            .Request()
+                            .UpdateAsync(updatedApp).ConfigureAwait(false);
+                        updateStatus = true;
+                    }
+                    //TODO update exception
+                    catch (ServiceException)
+                    {
+                        updateStatus = false;
+                    }
                 }
             }
             return updateStatus;
         }
 
         //checks for valid https uris.
-        //TODO Unit test
         internal static IList<string> ValidateUris(IList<string> redirectUris)
         {
             IList<string> validUris = new List<string>();
@@ -305,7 +321,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             GraphServiceClient graphServiceClient,
             string applicatonId,
             ApplicationParameters effectiveApplicationParameters,
-            bool jsonOutput)
+            IConsoleLogger consoleLogger)
         {
             string? password = string.Empty;
             var passwordCredential = new PasswordCredential
@@ -326,10 +342,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
                 catch (ServiceException se)
                 {
-                    if (!jsonOutput)
-                    {
-                        Console.Error.WriteLine($"Failed to create password : {se.Error.Message}");
-                    }
+                    consoleLogger.LogMessage($"Failed to create password : {se.Error.Message}", LogMessageType.Error);
                 }
             }
             return password;
@@ -485,7 +498,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // Explicit usage of MicrosoftGraph openid and offline_access, in the case
             // of Azure AD B2C.
-            if (applicationParameters.IsB2C && applicationParameters.IsWebApp || applicationParameters.IsBlazorWasm)
+            if (applicationParameters.IsB2C && (applicationParameters.IsWebApp.HasValue && applicationParameters.IsWebApp.Value)
+                || (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value))
             {
                 if (applicationParameters.CalledApiScopes == null)
                 {
@@ -588,25 +602,33 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             };
         }
 
-        internal async Task Unregister(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        internal async Task<bool> Unregister(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
+            bool unregisterSuccess = false;
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
-            var apps = await graphServiceClient.Applications
-                .Request()
-                .Filter($"appId eq '{applicationParameters.ClientId}'")
-                .GetAsync();
+            var readApplication = (await graphServiceClient.Applications
+               .Request()
+               .Filter($"appId eq '{applicationParameters.ClientId}'")
+               .GetAsync()).FirstOrDefault();
 
-            var readApplication = apps.FirstOrDefault();
             if (readApplication != null)
             {
-                var clientId = readApplication.Id;
-                await graphServiceClient.Applications[$"{readApplication.Id}"]
-                    .Request()
-                    .DeleteAsync();
-                
-                Console.WriteLine($"Unregistered the Azure AD w/ client id = {clientId}\n");
+                try
+                {
+                    var clientId = readApplication.Id;
+                    await graphServiceClient.Applications[$"{readApplication.Id}"]
+                        .Request()
+                        .DeleteAsync();
+                    unregisterSuccess = true;
+                }
+                catch (ServiceException)
+                {
+                    unregisterSuccess = false;
+                }
             }
+
+            return unregisterSuccess;
         }
 
         internal GraphServiceClient GetGraphServiceClient(TokenCredential tokenCredential)

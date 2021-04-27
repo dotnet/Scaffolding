@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 {
     internal class MsAADTool : IMsAADTool
     {
+        internal IConsoleLogger ConsoleLogger { get; }
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         public IGraphServiceClient GraphServiceClient { get; set; }
@@ -27,6 +28,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username);
             GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
+            ConsoleLogger = new ConsoleLogger(ProvisioningToolOptions.Json);
         }
 
         public async Task<ApplicationParameters?> Run()

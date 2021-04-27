@@ -107,17 +107,17 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// <summary>
         /// The project is a web API.
         /// </summary>
-        public bool IsWebApi { get; set; }
+        public bool? IsWebApi { get; set; }
 
         /// <summary>
         /// The project is a web app.
         /// </summary>
-        public bool IsWebApp { get; set; }
+        public bool? IsWebApp { get; set; }
 
         /// <summary>
         /// The project is a blazor web assembly.
         /// </summary>
-        public bool IsBlazorWasm { get; set; }
+        public bool? IsBlazorWasm { get; set; }
 
         /// <summary>
         /// The app calls Microsoft Graph.

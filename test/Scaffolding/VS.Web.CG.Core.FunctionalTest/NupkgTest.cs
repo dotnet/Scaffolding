@@ -16,7 +16,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
         private string tfm20 = "lib/netstandard2.0";
         private string tfm31 = "lib/netcoreapp3.1";
 
-        [Fact]
+        //TODO Test needs rework. We can't rely on "NUGET_PACKAGES" and those specific versions of packages existing without installing. Should work with the latest release package and newly built local package.
+        [Fact(Skip="Test needs rework")]
         public void CheckFolderStructure()
         {
 

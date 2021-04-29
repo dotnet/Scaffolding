@@ -85,9 +85,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                                 graphObjectsList.AddRange(additionalGraphObjects.ToList());
                                 nextPage = additionalGraphObjects.NextPageRequest;
                             }
+                            else
+                            {
+                                nextPage = null;
+                            }
                         }
                         catch (ServiceException)
                         {
+                            nextPage = null;
                             ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals", LogMessageType.Error);
                         }
                     }

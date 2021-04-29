@@ -67,42 +67,58 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             var graphObjects = await GraphServiceClient.Me.OwnedObjects
                             .Request()
                             .GetAsync();
-            IList<Application> applicationList = new List<Application>();
-            if (graphObjects != null && graphObjects.Any())
+
+            if (graphObjects != null)
             {
-                foreach (var graphObj in graphObjects)
+                var graphObjectsList = graphObjects.ToList();
+
+                var nextPage = graphObjects.NextPageRequest;
+                while (nextPage != null)
                 {
-                    if (graphObj is Application app)
-                    {
-                        {
-                            applicationList.Add(app);
-                        }
-                    }
+                    var additionalGraphObjects = await nextPage.GetAsync();
+                    graphObjectsList.AddRange(additionalGraphObjects.ToList());
+                    nextPage = additionalGraphObjects.NextPageRequest;
                 }
 
-                if (applicationList.Any())
-                {
-                    //order list by created date.
-                    applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
+                IList<Application> applicationList = new List<Application>();
 
-                    if (ProvisioningToolOptions.Json)
+                if (graphObjectsList != null && graphObjectsList.Any())
+                {
+                    foreach (var graphObj in graphObjectsList)
                     {
-                        JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, applicationList);
-                        outputJsonString = jsonResponse.ToJsonString(); 
-                    }
-                    else 
-                    {
-                        Console.Write(
-                            "--------------------------------------------------------------\n" + 
-                            "Application Name\t\t\t\tApplication ID\n" +
-                            "--------------------------------------------------------------\n\n");
-                        foreach(var app in applicationList)
+                        if (graphObj is Application app)
                         {
-                           Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
+                            {
+                                applicationList.Add(app);
+                            }
+                        }
+                    }
+
+                    if (applicationList.Any())
+                    {
+                        //order list by created date.
+                        applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
+
+                        if (ProvisioningToolOptions.Json)
+                        {
+                            JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, applicationList);
+                            outputJsonString = jsonResponse.ToJsonString();
+                        }
+                        else
+                        {
+                            Console.Write(
+                                "--------------------------------------------------------------\n" +
+                                "Application Name\t\t\t\tApplication ID\n" +
+                                "--------------------------------------------------------------\n\n");
+                            foreach (var app in applicationList)
+                            {
+                                Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
+                            }
                         }
                     }
                 }
             }
+
             return outputJsonString;
         }
 
@@ -113,31 +129,45 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             var graphObjects = await GraphServiceClient.Me.OwnedObjects
                 .Request()
                 .GetAsync();
-            if (graphObjects != null && graphObjects.Any())
+
+            if (graphObjects != null)
             {
-                foreach (var graphObj in graphObjects)
+                var graphObjectsList = graphObjects.ToList();
+
+                var nextPage = graphObjects.NextPageRequest;
+                while (nextPage != null)
                 {
-                    if (graphObj is ServicePrincipal servicePrincipal)
-                    {
-                        servicePrincipalList.Add(servicePrincipal);          
-                    }
+                    var additionalGraphObjects = await nextPage.GetAsync();
+                    graphObjectsList.AddRange(additionalGraphObjects.ToList());
+                    nextPage = additionalGraphObjects.NextPageRequest;
                 }
-                if (servicePrincipalList.Any())
+
+                if (graphObjectsList != null && graphObjectsList.Any())
                 {
-                    if (ProvisioningToolOptions.Json)
+                    foreach (var graphObj in graphObjectsList)
                     {
-                        JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, servicePrincipalList);
-                        outputJsonString = jsonResponse.ToJsonString();
-                    }
-                    else 
-                    {
-                        Console.Write(
-                            "--------------------------------------------------------------\n" + 
-                            "Application Name\t\t\t\tApplication ID\n" +
-                            "--------------------------------------------------------------\n\n");
-                        foreach(var app in servicePrincipalList)
+                        if (graphObj is ServicePrincipal servicePrincipal)
                         {
-                           Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
+                            servicePrincipalList.Add(servicePrincipal);
+                        }
+                    }
+                    if (servicePrincipalList.Any())
+                    {
+                        if (ProvisioningToolOptions.Json)
+                        {
+                            JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, servicePrincipalList);
+                            outputJsonString = jsonResponse.ToJsonString();
+                        }
+                        else
+                        {
+                            Console.Write(
+                                "--------------------------------------------------------------\n" +
+                                "Application Name\t\t\t\tApplication ID\n" +
+                                "--------------------------------------------------------------\n\n");
+                            foreach (var app in servicePrincipalList)
+                            {
+                                Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
+                            }
                         }
                     }
                 }

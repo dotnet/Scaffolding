@@ -88,14 +88,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                         }
                         catch (ServiceException)
                         {
-                            ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals");
+                            ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals", LogMessageType.Error);
                         }
                     }
                 }
             }
             catch (ServiceException)
             {
-                ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals");
+                ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals", LogMessageType.Error);
             }
 
             return graphObjectsList;

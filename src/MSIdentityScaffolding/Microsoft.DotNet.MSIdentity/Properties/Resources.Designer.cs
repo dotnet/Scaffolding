@@ -63,9 +63,39 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] dotnet_blazorwasm {
+        internal static byte[] cm_dotnet_blazorwasm {
             get {
-                object obj = ResourceManager.GetObject("dotnet_blazorwasm", resourceCulture);
+                object obj = ResourceManager.GetObject("cm-dotnet-blazorwasm", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_blazorwasm_hosted {
+            get {
+                object obj = ResourceManager.GetObject("cm-dotnet-blazorwasm-hosted", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_webapi {
+            get {
+                object obj = ResourceManager.GetObject("cm-dotnet-webapi", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_webapp {
+            get {
+                object obj = ResourceManager.GetObject("cm-dotnet-webapp", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -75,7 +105,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// </summary>
         internal static byte[] dotnet_blazorwasm_hosted {
             get {
-                object obj = ResourceManager.GetObject("dotnet_blazorwasm_hosted", resourceCulture);
+                object obj = ResourceManager.GetObject("dotnet-blazorwasm-hosted", resourceCulture);
                 return ((byte[])(obj));
             }
         }

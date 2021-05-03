@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
@@ -33,6 +33,20 @@
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="$(MicrosoftIdentityClientExtensionsMsalVersion)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonMsIdentityPackageVersion)" />
+  </ItemGroup>
+
+  <!-- Packages for CodeAnalysis code changes-->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0" />
+    <PackageReference Include="Microsoft.Build" Version="16.8.0" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="16.8.0" />
+    <PackageReference Include="NuGet.ProjectModel" Version="5.9.1" />
   </ItemGroup>
 
   <ItemGroup>

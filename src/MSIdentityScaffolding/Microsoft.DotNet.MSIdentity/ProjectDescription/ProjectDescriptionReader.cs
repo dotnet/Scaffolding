@@ -125,18 +125,21 @@ namespace Microsoft.DotNet.MSIdentity.Project
                 .ToArray();
             foreach (PropertyInfo propertyInfo in properties)
             {
-                byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-                ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
+                if (!propertyInfo.Name.StartsWith("cm"))
+                {
+                    byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+                    ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
 
-                if (projectDescription == null)
-                {
-                    throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                    if (projectDescription == null)
+                    {
+                        throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                    }
+                    if (!projectDescription.IsValid())
+                    {
+                        throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
+                    }
+                    projectDescriptions.Add(projectDescription);
                 }
-                if (!projectDescription.IsValid())
-                {
-                    throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
-                }
-                projectDescriptions.Add(projectDescription);
             }
 
             // TODO: provide an extension mechanism to add such files outside the tool.

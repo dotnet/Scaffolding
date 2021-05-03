@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
@@ -19,7 +18,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 string filePath = replacementsInFile.Key;
 
-                string fileContent = File.ReadAllText(filePath);
+                string fileContent = System.IO.File.ReadAllText(filePath);
                 bool updated = false;
                 foreach (Replacement r in replacementsInFile.OrderByDescending(r => r.Index))
                 {
@@ -41,11 +40,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (updated)
                 {
                     // Keep a copy of the original
-                    if (!File.Exists(filePath + "%"))
+                    if (!System.IO.File.Exists(filePath + "%"))
                     {
-                        File.Copy(filePath, filePath + "%");
+                        System.IO.File.Copy(filePath, filePath + "%");
                     }
-                    File.WriteAllText(filePath, fileContent);
+                    System.IO.File.WriteAllText(filePath, fileContent);
                 }
             }
         }
@@ -95,7 +94,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        public static void AddPackage(string packageName, string packageVersion, string tfm, IConsoleLogger consoleLogger)
+        public static void AddPackage(string packageName, string tfm, IConsoleLogger consoleLogger, string? packageVersion = null)
         {
             if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
             {
@@ -121,7 +120,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     arguments.Add(tfm);
                 }
 
-                consoleLogger.LogMessage($"\nAdding package {packageName} . . . ");
+                consoleLogger.LogMessage($"Adding package {packageName} . . . ");
 
                 var result = Command.CreateDotNet(
                     "add",

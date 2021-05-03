@@ -1,0 +1,57 @@
+{
+  "Identifier": "dotnet-webapp",
+  "Files": [
+    {
+      "FileName": "Startup.cs",
+      "Methods": {
+        "Configure": {
+          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
+          "CodeChanges": [
+            {
+              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "Block": "IApplicationBuilder.UseAuthentication()"
+            },
+            {
+              "Parent": "IApplicationBuilder.UseEndpoints",
+              "Type": "InBlock",
+              "InsertAfter": "endpoints.MapRazorPages()",
+              "Block": "endpoints.MapControllers()"
+            }
+          ]
+        },
+        "ConfigureServices": {
+          "Parameters": [ "IServiceCollection" ],
+          "CodeChanges": [
+            {
+              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)"
+            },
+            {
+              "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
+            },
+            {
+              "Parent": "IServiceCollection.AddRazorPages()",
+              "Type": "MemberAccess",
+              "Block": "AddMvcOptions(options => {})"
+            },
+            {
+              "Parent": "IServiceCollection.AddRazorPages()",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityUI()",
+              "Formatting": [ "Newline", "Tab" ]
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.UI",
+        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "Microsoft.AspNetCore.Authorization",
+        "Microsoft.AspNetCore.Mvc.Authorization"
+      ]
+    }
+  ]
+}

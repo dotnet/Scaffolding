@@ -29,7 +29,7 @@
       Azure AD or Azure AD B2C app registrations and updates the project. This tool automates the steps of going to the portal UI for app registration and also updates
       the corresponding code for that application. With this tool, you can develop and register an ASP.NET Core web app, web API, gRPC service or Azure Function 
       protected with the Microsoft identity platform, which can call Microsoft Graph or downstream web APIs.
-      For details see https://aka.ms/dotnet-msidentity.
+      For details see https://aka.ms/dotnet-msidentity. Works with ASP.NET Core 3.1 and .NET 5.0, 6.0 projects.
     </Description>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <PackageProjectUrl>https://github.com/dotnet/MSIdentityScaffolding/blob/main/README.md</PackageProjectUrl>

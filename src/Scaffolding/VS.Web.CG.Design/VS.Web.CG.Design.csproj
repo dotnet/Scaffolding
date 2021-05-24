@@ -20,12 +20,6 @@
     <AnyCpuProjectDirectory>$(RepoRoot)src\Scaffolding\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(ARMProjectDirectory)\VS.Web.CG.Design-arm.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(ARM64ProjectDirectory)\VS.Web.CG.Design-arm64.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(AnyCpuProjectDirectory)\VS.Web.CG.Design-anycpu.csproj" PrivateAssets="true" ReferenceOutputAssembly="false" />
-  </ItemGroup>
   
   <ItemGroup>
     <Content Include="$(OutputPath)$(AssemblyName).dll;

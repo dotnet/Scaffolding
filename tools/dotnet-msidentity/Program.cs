@@ -198,7 +198,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 UsernameOption(), JsonOption()
             };
 
-        private static Command AddClientSecretCommand()=>
+        private static Command CreateClientSecretCommand()=>
             new Command(
                 name: Commands.ADD_CLIENT_SECRET,
                 description: "Create client secret for an Azure AD or AD B2C app registration.\n")

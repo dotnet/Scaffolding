@@ -712,7 +712,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (ProvisioningToolOptions.CodeUpdate)
                 {
                     //if project is not setup for auth, add updates to Startup.cs, .csproj.
-                    ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions);
+                    ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions);
                     await startupModifier.AddAuth();
                 }  
             }

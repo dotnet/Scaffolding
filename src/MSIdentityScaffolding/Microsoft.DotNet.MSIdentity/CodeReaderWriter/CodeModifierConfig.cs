@@ -8,6 +8,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     {
         public string? InsertAfter { get; set; }
         public string? Block { get; set; }
+        public string? BlockB2C { get; set; }
         public string? Parent { get; set; }
         public string? Type { get; set; }
         public string[]? Formatting { get; set; }

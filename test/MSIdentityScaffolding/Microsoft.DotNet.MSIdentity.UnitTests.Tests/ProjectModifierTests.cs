@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Xunit;
@@ -12,7 +13,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
     public class ProjectModifierTests
     {
-        readonly ProjectModifier projectModifier = new ProjectModifier(new ProvisioningToolOptions());
+        readonly ProjectModifier projectModifier = new ProjectModifier(new ApplicationParameters(), new ProvisioningToolOptions());
 
         [Theory]
         [InlineData(new object[] { new string[] { "Microsoft.AspNetCore.Authentication", "Microsoft.Identity.Web", "Microsoft.Identity.Web.UI" } })]

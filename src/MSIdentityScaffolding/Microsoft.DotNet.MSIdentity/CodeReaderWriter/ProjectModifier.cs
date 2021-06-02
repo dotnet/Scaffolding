@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Tool;
 using System;
@@ -22,6 +23,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     {
         public List<CodeModifierConfig> CodeModifierConfigs { get; private set; } = new List<CodeModifierConfig>();
         private readonly ProvisioningToolOptions _toolOptions;
+        private readonly ApplicationParameters _appParameters;
 
         public SyntaxTrivia SemiColonTrivia
         {
@@ -31,9 +33,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     .WithTokens(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.SemicolonToken))));
             }
         }
-        public ProjectModifier(ProvisioningToolOptions toolOptions)
+        public ProjectModifier(ApplicationParameters applicationParameters, ProvisioningToolOptions toolOptions)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
+            _appParameters = applicationParameters ?? throw new ArgumentNullException(nameof(applicationParameters));
         }
 
         internal IDictionary<string, string>? VerfiyParameters(string[]? parametersToCheck, List<ParameterSyntax> foundParameters)
@@ -113,7 +116,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                     if (!string.IsNullOrEmpty(fileName))
                     {
-                        string filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
+                        string? filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
                         var classDoc = proj.CodeAnalysisProject.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
                         if (classDoc != null && !string.IsNullOrEmpty(filePath))
                         {
@@ -257,15 +260,24 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                                                 }
                                                                                 else if (change.Type.Equals(CodeChangeType.InBlock))
                                                                                 {
-                                                                                    string insertAfterBlock = FormatCodeBlock(change.InsertAfter, parameterValues);
-                                                                                    var nodess = modifiedBlockSyntaxNode.DescendantNodes();
-
-                                                                                    if (modifiedBlockSyntaxNode.DescendantNodes().Where(node =>
+                                                                                    BlockSyntax? blockToEdit;
+                                                                                    if (!string.IsNullOrEmpty(change.InsertAfter))
+                                                                                    {
+                                                                                        string insertAfterBlock = FormatCodeBlock(change.InsertAfter, parameterValues);
+                                                                                        blockToEdit = modifiedBlockSyntaxNode.DescendantNodes().Where(node =>
                                                                                                         node is BlockSyntax &&
                                                                                                         !node.ToString().Contains(parentBlock) &&
-                                                                                                        node.ToString().Contains(insertAfterBlock)).FirstOrDefault() is BlockSyntax blockToEdit)
+                                                                                                        node.ToString().Contains(insertAfterBlock)).FirstOrDefault() as BlockSyntax;
+                                                                                    }
+                                                                                    else
                                                                                     {
+                                                                                        blockToEdit = modifiedBlockSyntaxNode.DescendantNodes().Where(node =>
+                                                                                                        node is BlockSyntax &&
+                                                                                                        !node.ToString().Contains(parentBlock)).FirstOrDefault() as BlockSyntax;
+                                                                                    }
 
+                                                                                    if (blockToEdit != null)
+                                                                                    {
                                                                                         var innerTrailingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetTrailingTrivia() ?? trailingTrivia;
                                                                                         var innerLeadingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetLeadingTrivia() ?? leadingTrivia;
 
@@ -351,8 +363,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                             }
                                                         }
                                                     }
-                                                    modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(blockSyntaxNode, modifiedBlockSyntaxNode);
-
+                                                    if (blockSyntaxNode != null && modifiedBlockSyntaxNode != null && modifiedClassDeclarationSyntax != null)
+                                                    {
+                                                        modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(blockSyntaxNode, modifiedBlockSyntaxNode);
+                                                    }
                                                 }
                                             }
                                         }

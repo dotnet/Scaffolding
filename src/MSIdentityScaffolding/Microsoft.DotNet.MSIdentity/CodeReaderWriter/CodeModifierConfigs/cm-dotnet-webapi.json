@@ -23,7 +23,8 @@
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"))"
+              "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"))",
+              "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
             }
           ]
         }

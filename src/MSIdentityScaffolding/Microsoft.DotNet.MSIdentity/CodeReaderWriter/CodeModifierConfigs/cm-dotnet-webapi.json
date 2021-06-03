@@ -3,7 +3,6 @@
   "Files": [
     {
       "FileName": "Startup.cs",
-      "ClassAttributes" :  ["Authorize"],
       "Methods": {
         "Configure": {
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
@@ -37,6 +36,7 @@
     },
     {
       "FileName": "WeatherForecastController.cs",
+      "ClassAttributes": [ "Authorize" ],
       "ClassProperties": [
         "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }"
       ],
@@ -52,11 +52,12 @@
         },
         "Get": {
           "Parameters": [ "IEnumerable<WeatherForecast>" ],
-          "CodeChanges" : [
-          {
-            "Append": true,
-            "Block":"HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)"
-          }]
+          "CodeChanges": [
+            {
+              "Append": true,
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)"
+            }
+          ]
         }
       },
       "Usings": [

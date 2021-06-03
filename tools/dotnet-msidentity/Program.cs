@@ -198,7 +198,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 UsernameOption(), JsonOption()
             };
 
-        private static Command CreateClientSecretCommand()=>
+        private static Command CreateClientSecretCommand() =>
             new Command(
                 name: Commands.ADD_CLIENT_SECRET,
                 description: "Create client secret for an Azure AD or AD B2C app registration.\n")
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), ProjectFilePathOption(), RedirectUriOption()
+                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption(),
             };
 
         private static Command UpdateAppRegistrationCommand() =>
@@ -301,7 +301,32 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ClientIdOption()=>
+        private static Option ConfigUpdateOption() =>
+            new Option<bool>(
+                aliases: new[] { "--config-update" },
+                description: "Allow config changes for dotnet app to work with Azure AD/AD B2C app.")
+            {
+                IsRequired = false
+            };
+
+
+        private static Option CodeUpdateOption() =>
+            new Option<bool>(
+                aliases: new[] { "--code-update" },
+                description: "Allow Startup.cs and other code changes for dotnet app to work with Azure AD/AD B2C app (setup authentication).")
+            {
+                IsRequired = false
+            };
+
+        private static Option PackagesUpdateOption() =>
+            new Option<bool>(
+                aliases: new[] { "--packages-update" },
+                description: "Allow package updates for dotnet app to work with Azure AD/AD B2C app (setup authentication).")
+            {
+                IsRequired = false
+            };
+
+        private static Option ClientIdOption() =>
             new Option<string>(
                 aliases: new[] { "--client-id" },
                 description: "Client ID of an existing app registration to use." +

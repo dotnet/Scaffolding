@@ -16,9 +16,7 @@ using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
-using File = System.IO.File;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.MSIdentity
 {
@@ -712,46 +710,15 @@ namespace Microsoft.DotNet.MSIdentity
                 if (ProvisioningToolOptions.CodeUpdate)
                 {
                     //if project is not setup for auth, add updates to Startup.cs, .csproj.
-                    ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions);
+                    ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);
                     await startupModifier.AddAuth();
                 }  
             }
         }
-
-        private void EnableAuthInProject(ProjectDescription projectDescription, ApplicationParameters appParameters)
-        {
-/*            if (!string.IsNullOrEmpty(projectDescription.Identifier) && !string.IsNullOrEmpty(appParameters.TargetFramework))
-            {
-                //dotnet user secrets init
-                CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
-                //dotnet add package
-                if (projectDescription.Packages != null)
-                {
-                    foreach (var packageName in projectDescription.Packages)
-                    {
-                        if (!appParameters.HasPackage(packageName))
-                        {
-                            CodeWriter.AddPackage(packageName, string.Empty, appParameters.TargetFramework);
-                        }
-
-                    }
-                }
-
-                //Startup.cs imports and configure services
-                var startupFiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "Startup.cs");
-                if (startupFiles.Any())
-                {
-                    StartupModifier modifier = new StartupModifier(startupFiles.First());
-                    modifier.ModifyStartup();
-                }
+/*            
                 //Layout.cshtml
                 //LoginPartial.cshtml
                 //launchsettings.json --> update
-                //dotnet user-secrets init --> done dotnet user-secrets init
-                return;
-            }
-            throw new NotImplementedException();
 */
-        }
     }
 }

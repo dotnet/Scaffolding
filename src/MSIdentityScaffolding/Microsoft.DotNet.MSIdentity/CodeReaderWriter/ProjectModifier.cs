@@ -1,3 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,25 +15,15 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Tool;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     internal class ProjectModifier
     {
-        public List<CodeModifierConfig> CodeModifierConfigs { get; private set; } = new List<CodeModifierConfig>();
+        private List<CodeModifierConfig> _codeModifierConfigs;
         private readonly ProvisioningToolOptions _toolOptions;
         private readonly ApplicationParameters _appParameters;
-
+        private readonly IConsoleLogger _consoleLogger;
         public SyntaxTrivia SemiColonTrivia
         {
             get
@@ -33,10 +32,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     .WithTokens(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.SemicolonToken))));
             }
         }
-        public ProjectModifier(ApplicationParameters applicationParameters, ProvisioningToolOptions toolOptions)
+        public ProjectModifier(ApplicationParameters applicationParameters, ProvisioningToolOptions toolOptions, IConsoleLogger consoleLogger)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
             _appParameters = applicationParameters ?? throw new ArgumentNullException(nameof(applicationParameters));
+            _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
+            _codeModifierConfigs = new List<CodeModifierConfig>();
         }
 
         internal IDictionary<string, string>? VerfiyParameters(string[]? parametersToCheck, List<ParameterSyntax> foundParameters)
@@ -73,14 +74,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuth()
         {
-            Debugger.Launch();
-            string projectType = _toolOptions.ProjectTypeIdentifier;
-            //Read the jsons in CodeModifierConfigs for CodeChanges
-            ReadCodeModifierConfigs();
-            var codeModifierConfig = CodeModifierConfigs.Where(x => x.Identifier != null &&
-                                                                    x.Identifier.Equals(projectType, StringComparison.OrdinalIgnoreCase))
+            //init user secrets
+            CodeWriter.InitUserSecrets(_toolOptions.ProjectPath, _consoleLogger);
+
+            //Get CodeModifierConfig from CodeModifierConfigs folder.
+            _codeModifierConfigs = GetCodeModifierConfigs();
+            var codeModifierConfig = _codeModifierConfigs.Where(x => x.Identifier != null &&
+                                                                    x.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
                                                                     .FirstOrDefault();
-            var programFilePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, "Program.cs").FirstOrDefault();
 
             // CodeModifierConfig, .csproj path, Program.cs path cannot be null
             if (codeModifierConfig != null &&
@@ -100,6 +101,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                     if (!string.IsNullOrEmpty(file.FileName) && file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase))
                     {
+                        var programFilePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, "Program.cs").FirstOrDefault(); 
                         if (!string.IsNullOrEmpty(programFilePath))
                         {
                             var programDoc = proj.CodeAnalysisProject.Documents.Where(d => d.Name.Equals(programFilePath)).FirstOrDefault();
@@ -379,7 +381,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             }
                             var newdoc = documentEditor.GetChangedDocument();
                             var txt = await newdoc.GetTextAsync();
-                            System.IO.File.WriteAllText(filePath, txt.ToString());
+                            File.WriteAllText(filePath, txt.ToString());
                         }
                     }
                     
@@ -549,8 +551,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return formattedClassName;
         }
 
-        private void ReadCodeModifierConfigs()
+        private List<CodeModifierConfig> GetCodeModifierConfigs()
         {
+            List<CodeModifierConfig> codeModifierConfigs = new List<CodeModifierConfig>();
             if (!string.IsNullOrEmpty(_toolOptions.ProjectType))
             {
                 var properties = typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
@@ -568,10 +571,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         {
                             throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
                         }
-                        CodeModifierConfigs.Add(projectDescription);
+                        codeModifierConfigs.Add(projectDescription);
                     }
                 }
             }
+            return codeModifierConfigs;
         }
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
@@ -18,7 +19,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 string filePath = replacementsInFile.Key;
 
-                string fileContent = System.IO.File.ReadAllText(filePath);
+                string fileContent = File.ReadAllText(filePath);
                 bool updated = false;
                 foreach (Replacement r in replacementsInFile.OrderByDescending(r => r.Index))
                 {
@@ -40,11 +41,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (updated)
                 {
                     // Keep a copy of the original
-                    if (!System.IO.File.Exists(filePath + "%"))
+                    if (!File.Exists(filePath + "%"))
                     {
-                        System.IO.File.Copy(filePath, filePath + "%");
+                        File.Copy(filePath, filePath + "%");
                     }
-                    System.IO.File.WriteAllText(filePath, fileContent);
+                    File.WriteAllText(filePath, fileContent);
                 }
             }
         }

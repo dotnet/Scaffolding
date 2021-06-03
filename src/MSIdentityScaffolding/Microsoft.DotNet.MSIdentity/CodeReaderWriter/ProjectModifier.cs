@@ -175,11 +175,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                         if (classAttributes != null)
                                         {
                                             var leadingTrivia = classDeclarationSyntax.GetLeadingTrivia();
-                                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.AddAttributeLists(
-                                                classAttributes
-                                                    .WithAdditionalAnnotations(Formatter.Annotation)
-                                                    .WithLeadingTrivia(leadingTrivia)
-                                                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+                                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.WithAttributeLists(
+                                                modifiedClassDeclarationSyntax.AttributeLists
+                                                    .Insert(0, classAttributes
+                                                        .WithAdditionalAnnotations(Formatter.Annotation)
+                                                        .WithLeadingTrivia(leadingTrivia)
+                                                        .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed)));
                                         }
                                     }
 
@@ -397,7 +398,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         internal bool PropertyExists(string property, SyntaxList<MemberDeclarationSyntax> members)
         {
-            if (members.Where(m => m.ToString().Trim(' ', '\r', '\n').Equals(property, StringComparison.OrdinalIgnoreCase)).Any())
+            if (members.Where(m => m.ToString().Trim(' ', '\r', '\n', ';').Equals(property, StringComparison.OrdinalIgnoreCase)).Any())
             {
                 return true;
             }
@@ -408,7 +409,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             if (attributeList.Any() && !string.IsNullOrEmpty(attribute))
             {
-                attributeList.Where(al => al.Attributes.Where(attr => attr.Name.ToString().Equals(attribute, StringComparison.OrdinalIgnoreCase)).Any()).Any();
+                return attributeList.Where(al => al.Attributes.Where(attr => attr.ToString().Equals(attribute, StringComparison.OrdinalIgnoreCase)).Any()).Any();
             }
             return false;
         }
@@ -439,7 +440,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 foreach(var attribute in attributes)
                 {
-                    if (AttributeExists(attribute, attributeLists))
+                    if (!AttributeExists(attribute, attributeLists))
                     {
                         attributeList.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName(attribute)));
                     }
@@ -468,7 +469,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 foreach (var classPropertyString in classProperties)
                 {
-                    if (!string.IsNullOrEmpty(classPropertyString) && PropertyExists(classPropertyString, members))
+                    if (!string.IsNullOrEmpty(classPropertyString) && !PropertyExists(classPropertyString, members))
                     {
                         var additionalAnnotation = Formatter.Annotation;
                         var classPropertyDeclaration = SyntaxFactory.ParseMemberDeclaration(classPropertyString)

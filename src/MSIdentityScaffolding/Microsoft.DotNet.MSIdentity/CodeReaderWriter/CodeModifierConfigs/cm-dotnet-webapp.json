@@ -37,6 +37,9 @@
               "Block": "AddMvcOptions(options => {})"
             },
             {
+              "Block": "services.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
+            },
+            {
               "Parent": "IServiceCollection.AddRazorPages()",
               "Type": "MemberAccess",
               "Block": "AddMicrosoftIdentityUI()",

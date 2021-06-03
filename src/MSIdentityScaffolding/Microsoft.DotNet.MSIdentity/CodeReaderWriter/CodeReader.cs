@@ -154,9 +154,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             string? filePath,
             ConfigurationProperties file)
         {
-            if (!string.IsNullOrEmpty(filePath) && System.IO.File.Exists(filePath))
+            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
             {
-                string fileContent = System.IO.File.ReadAllText(filePath);
+                string fileContent = File.ReadAllText(filePath);
                 JsonElement jsonContent = default;
                 XmlDocument? xmlDocument = null;
 

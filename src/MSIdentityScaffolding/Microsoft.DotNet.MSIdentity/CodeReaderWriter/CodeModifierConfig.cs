@@ -24,11 +24,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     public class CodeModifierConfig
     {
         public string? Identifier { get; set; }
-        public File[]? Files { get; set; }
+        public CodeFile[]? Files { get; set; }
        
     }
 
-    public class File
+    public class CodeFile
     {
         public Dictionary<string, Method>? Methods { get; set; }
         public string[]? Usings { get; set; }

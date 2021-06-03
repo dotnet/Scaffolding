@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
     public class ProjectModifierTests
     {
-        readonly ProjectModifier projectModifier = new ProjectModifier(new ApplicationParameters(), new ProvisioningToolOptions());
+        readonly ProjectModifier projectModifier = new ProjectModifier(new ApplicationParameters(), new ProvisioningToolOptions(), new ConsoleLogger());
 
         [Theory]
         [InlineData(new object[] { new string[] { "Microsoft.AspNetCore.Authentication", "Microsoft.Identity.Web", "Microsoft.Identity.Web.UI" } })]

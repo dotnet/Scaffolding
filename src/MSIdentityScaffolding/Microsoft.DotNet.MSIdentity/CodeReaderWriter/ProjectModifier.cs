@@ -257,11 +257,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                                                         modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(node, modifiedExprNode);
                                                                                     }
                                                                                 }
-                                                                                else if (change.Type.Equals(CodeChangeType.LambdaMember))
-                                                                                {
-                                                                                    throw new NotImplementedException();
-                                                                                }
-                                                                                else if (change.Type.Equals(CodeChangeType.InBlock))
+                                                                                else if (change.Type.Equals(CodeChangeType.InLambdaBlock))
                                                                                 {
                                                                                     BlockSyntax? blockToEdit;
                                                                                     if (!string.IsNullOrEmpty(change.InsertAfter))

@@ -118,29 +118,35 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="cm-dotnet-blazorwasm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\CodeReaderWriter\CodeModifierConfigs\cm-dotnet-blazorwasm.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="cm_dotnet_blazorserver" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorserver.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="cm-dotnet-blazorwasm-hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\CodeReaderWriter\CodeModifierConfigs\cm-dotnet-blazorwasm-hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="cm_dotnet_blazorwasm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorwasm.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="cm-dotnet-webapi" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\CodeReaderWriter\CodeModifierConfigs\cm-dotnet-webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="cm_dotnet_blazorwasm_hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorwasm_hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="cm-dotnet-webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\CodeReaderWriter\CodeModifierConfigs\cm-dotnet-webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="cm_dotnet_webapi" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="dotnet-blazorwasm-hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ProjectDescriptions\dotnet-blazorwasm-hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="cm_dotnet_webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="dotnet_blazorwasm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ProjectDescriptions\dotnet_blazorwasm.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="dotnet_blazorwasm_hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ProjectDescriptions\dotnet_blazorwasm_hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="dotnet_web" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ProjectDescriptions\dotnet-web.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\ProjectDescriptions\dotnet_web.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="dotnet_webapi" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ProjectDescriptions\dotnet-webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\ProjectDescriptions\dotnet_webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="dotnet_webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ProjectDescriptions\dotnet-webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\ProjectDescriptions\dotnet_webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Policies" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Policies.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>

@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         public string? BlockB2C { get; set; }
         public string? Parent { get; set; }
         public string? Type { get; set; }
-        public string[]? Formatting { get; set; }
         public bool? Append { get; set; } = false;
     }
 
@@ -39,8 +38,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
     public class CodeChangeType
     {
-        public const string LambdaMember = nameof(LambdaMember);
         public const string MemberAccess = nameof(MemberAccess);
-        public const string InBlock = nameof(InBlock);
+        public const string InLambdaBlock = nameof(InLambdaBlock);
     }
 }

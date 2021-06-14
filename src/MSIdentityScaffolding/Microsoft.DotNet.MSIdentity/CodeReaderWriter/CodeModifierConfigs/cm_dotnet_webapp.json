@@ -1,0 +1,59 @@
+{
+  "Identifier": "dotnet-webapp",
+  "Files": [
+    {
+      "FileName": "Startup.cs",
+      "Methods": {
+        "Configure": {
+          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
+          "CodeChanges": [
+            {
+              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "Block": "IApplicationBuilder.UseAuthentication()"
+            },
+            {
+              "Parent": "IApplicationBuilder.UseEndpoints",
+              "Type": "InLambdaBlock",
+              "InsertAfter": "endpoints.MapRazorPages()",
+              "Block": "endpoints.MapControllers()"
+            }
+          ]
+        },
+        "ConfigureServices": {
+          "Parameters": [ "IServiceCollection" ],
+          "CodeChanges": [
+            {
+              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)"
+            },
+            {
+              "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
+            },
+            {
+              "Parent": "IServiceCollection.AddRazorPages()",
+              "Type": "MemberAccess",
+              "Block": "AddMvcOptions(options => {})"
+            },
+            {
+              "Block": "services.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
+            },
+            {
+              "Parent": "IServiceCollection.AddRazorPages()",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityUI()"
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.UI",
+        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "Microsoft.AspNetCore.Authorization",
+        "Microsoft.AspNetCore.Mvc.Authorization"
+      ]
+    }
+  ]
+}

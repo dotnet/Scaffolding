@@ -13,7 +13,7 @@
             },
             {
               "Parent": "IApplicationBuilder.UseEndpoints",
-              "Type": "InBlock",
+              "Type": "InLambdaBlock",
               "InsertAfter": "endpoints.MapRazorPages()",
               "Block": "endpoints.MapControllers()"
             }
@@ -28,8 +28,7 @@
             {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))",
-              "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
+              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
@@ -42,8 +41,7 @@
             {
               "Parent": "IServiceCollection.AddRazorPages()",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityUI()",
-              "Formatting": [ "Newline", "Tab" ]
+              "Block": "AddMicrosoftIdentityUI()"
             }
           ]
         }

@@ -18,7 +18,6 @@
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)"/>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="$(SystemComponentModelAnnotationsVersion)"/>
   </ItemGroup>
 
 </Project>

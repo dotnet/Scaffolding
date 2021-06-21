@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -74,6 +76,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuth()
         {
+            Debugger.Launch();
             //init user secrets
             CodeWriter.InitUserSecrets(_toolOptions.ProjectPath, _consoleLogger);
 
@@ -166,7 +169,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                                         if (classProperties.Length > 0)
                                         {
-                                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.AddMembers(classProperties);
+                                            modifiedClassDeclarationSyntax.Members.Insert(0, classProperties.First());
                                         }
                                     }
 
@@ -240,39 +243,65 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                                     if (!string.IsNullOrEmpty(parentBlock))
                                                                     {
                                                                         var statement = modifiedBlockSyntaxNode.Statements.Where(st => st.ToString().Contains(parentBlock));
+                                                                        //found parent statement
                                                                         if (statement.Any())
                                                                         {
                                                                             var statementToModify = statement.First();
-                                                                            var node = modifiedBlockSyntaxNode.DescendantNodes().Where(n => n is ExpressionStatementSyntax && n.ToString().Contains(parentBlock)).FirstOrDefault();
+                                                                            var parentNode = modifiedBlockSyntaxNode.DescendantNodes().Where(n => n is ExpressionStatementSyntax && n.ToString().Contains(parentBlock)).FirstOrDefault();
 
-                                                                            if (node != null && node is ExpressionStatementSyntax exprNode)
+                                                                            //add expression to parent exprNode.
+                                                                            if (parentNode != null && parentNode is ExpressionStatementSyntax exprNode)
                                                                             {
-                                                                                var dasdas = modifiedBlockSyntaxNode.DescendantNodes();
+                                                                                //add a SimpleMemberAccessExpression to parent node.
                                                                                 if (change.Type.Equals(CodeChangeType.MemberAccess))
                                                                                 {
                                                                                     if (!exprNode.ToString().Trim(' ', '\r', '\n').Contains(change.Block.Trim(' ', '\r', '\n')))
                                                                                     {
-
                                                                                         var modifiedExprNode = exprNode.WithExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, exprNode.Expression, SyntaxFactory.IdentifierName(change.Block)));
-                                                                                        modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(node, modifiedExprNode);
+                                                                                        modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(parentNode, modifiedExprNode);
                                                                                     }
                                                                                 }
+                                                                                else if (change.Type.Equals(CodeChangeType.LambdaExpression))
+                                                                                {
+                                                                                    Debugger.Launch();
+                                                                                    //if correct Parent.
+                                                                                    if (exprNode.ToString().Trim(' ', '\r', '\n').Contains(change.Parent.Trim(' ', '\r', '\n')))
+                                                                                    {
+                                                                                        //if arg doesn't already exist.
+                                                                                        if (!exprNode.ToString().Trim(' ', '\r', '\n').Contains(change.Block.Trim(' ', '\r', '\n')))
+                                                                                        {
+                                                                                            var arg = SyntaxFactory.Argument(
+                                                                                                SyntaxFactory.SimpleLambdaExpression(
+                                                                                                    SyntaxFactory.Parameter(
+                                                                                                        SyntaxFactory.Identifier(change.Block)))
+                                                                                                .WithBlock(SyntaxFactory.Block()));
+                                                                                            if (arg != null)
+                                                                                            {
+                                                                                                var argList = new SeparatedSyntaxList<ArgumentSyntax>();
+                                                                                                argList = argList.Add(arg);
+                                                                                                var modifiedExprNode = exprNode.WithExpression(SyntaxFactory.InvocationExpression(exprNode.Expression).WithArgumentList(SyntaxFactory.ArgumentList(argList)));
+                                                                                                modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(parentNode, modifiedExprNode);
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                                //add within Lambda block of parent node.
                                                                                 else if (change.Type.Equals(CodeChangeType.InLambdaBlock))
                                                                                 {
                                                                                     BlockSyntax? blockToEdit;
+                                                                                    var trimmedParent = parentBlock.Trim(' ', '\n', '\r');
                                                                                     if (!string.IsNullOrEmpty(change.InsertAfter))
                                                                                     {
                                                                                         string insertAfterBlock = FormatCodeBlock(change.InsertAfter, parameterValues);
-                                                                                        blockToEdit = modifiedBlockSyntaxNode.DescendantNodes().Where(node =>
+                                                                                        blockToEdit = parentNode.DescendantNodes().FirstOrDefault(node =>
                                                                                                         node is BlockSyntax &&
-                                                                                                        !node.ToString().Contains(parentBlock) &&
-                                                                                                        node.ToString().Contains(insertAfterBlock)).FirstOrDefault() as BlockSyntax;
+                                                                                                        node.ToString().Trim(' ', '\n', '\r').Contains(insertAfterBlock)) as BlockSyntax;
                                                                                     }
                                                                                     else
                                                                                     {
-                                                                                        blockToEdit = modifiedBlockSyntaxNode.DescendantNodes().Where(node =>
-                                                                                                        node is BlockSyntax &&
-                                                                                                        !node.ToString().Contains(parentBlock)).FirstOrDefault() as BlockSyntax;
+                                                                                        blockToEdit = parentNode.DescendantNodes()
+                                                                                            .Where(node => node is BlockSyntax)
+                                                                                            .FirstOrDefault() as BlockSyntax;
                                                                                     }
 
                                                                                     if (blockToEdit != null)
@@ -348,7 +377,31 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                                         //check if statement already exists.
                                                                         if (!StatementExists(modifiedBlockSyntaxNode, statement))
                                                                         {
-                                                                            if (change.Append.GetValueOrDefault())
+                                                                            if (!string.IsNullOrEmpty(change.Type))
+                                                                            {
+                                                                                if (change.Type.Equals(CodeChangeType.LambdaExpression, StringComparison.OrdinalIgnoreCase) &&
+                                                                                    !string.IsNullOrEmpty(change.Parameter))
+                                                                                {
+                                                                                    var arg = SyntaxFactory.Argument(
+                                                                                                SyntaxFactory.SimpleLambdaExpression(
+                                                                                                    SyntaxFactory.Parameter(
+                                                                                                        SyntaxFactory.Identifier(change.Parameter)))
+                                                                                                .WithBlock(SyntaxFactory.Block()));
+                                                                                    if (arg != null)
+                                                                                    {
+                                                                                        var argList = SyntaxFactory.ArgumentList(new SeparatedSyntaxList<ArgumentSyntax>().Add(arg));
+                                                                                        var parsedExpression = SyntaxFactory.ParseExpression(formattedCodeBlock);
+                                                                                        
+                                                                                        var expression = SyntaxFactory.ExpressionStatement(SyntaxFactory.InvocationExpression(parsedExpression, argList))
+                                                                                                            .WithAdditionalAnnotations(Formatter.Annotation)
+                                                                                                            .WithTrailingTrivia(trailingTrivia)
+                                                                                                            .WithLeadingTrivia(leadingTrivia); 
+                                                                                        modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.WithStatements(modifiedBlockSyntaxNode.Statements.Add(expression));
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            
+                                                                            else if (change.Append.GetValueOrDefault())
                                                                             {
                                                                                 modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.WithStatements(new SyntaxList<StatementSyntax>(modifiedBlockSyntaxNode.Statements.Insert(0, statement)));
                                                                             }
@@ -369,18 +422,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                 }
                                             }
                                         }
+                                        //replace class node with all the updates.
                                         documentEditor.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
-                                        //edit using documenteditor
-                                        //documentEditor.
                                     }
                                 }
                             }
-                            var newdoc = documentEditor.GetChangedDocument();
-                            var txt = await newdoc.GetTextAsync();
-                            File.WriteAllText(filePath, txt.ToString());
+                            var changedDocument = documentEditor.GetChangedDocument();
+                            var classFileTxt = await changedDocument.GetTextAsync();
+                            File.WriteAllText(filePath, classFileTxt.ToString());
                         }
                     }
-                    
                 }
             }
         }

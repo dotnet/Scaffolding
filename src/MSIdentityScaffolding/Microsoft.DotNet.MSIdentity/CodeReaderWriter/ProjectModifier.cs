@@ -168,7 +168,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                                         if (classProperties.Length > 0)
                                         {
-                                            modifiedClassDeclarationSyntax.Members.Insert(0, classProperties.First());
+                                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax
+                                                .WithMembers(modifiedClassDeclarationSyntax.Members
+                                                    .Insert(0, classProperties.First()));
                                         }
                                     }
 

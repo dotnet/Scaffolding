@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.</Description>

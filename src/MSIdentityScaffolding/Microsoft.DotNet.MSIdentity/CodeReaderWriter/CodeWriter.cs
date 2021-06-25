@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             arguments.Add("init");
-            consoleLogger.LogMessage("\nInitializing User Secrets . . . ", LogMessageType.Error);
+            consoleLogger.LogMessage("Initializing User Secrets . . . ", LogMessageType.Error);
 
             var result = Command.CreateDotNet(
                 "user-secrets",
@@ -86,12 +86,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             
             if (result.ExitCode != 0)
             {
-                consoleLogger.LogMessage("FAILED\n", LogMessageType.Error, removeNewLine: true);
+                consoleLogger.LogMessage("FAILED\n\n", LogMessageType.Error, removeNewLine: true);
                 throw new Exception("Error while running dotnet-user-secrets init");
             }
             else
             {
-                consoleLogger.LogMessage("SUCCESS\n", removeNewLine: true);
+                consoleLogger.LogMessage("SUCCESS\n\n", removeNewLine: true);
             }
         }
 
@@ -132,12 +132,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 if (result.ExitCode != 0)
                 {
-                    consoleLogger.LogMessage("FAILED\n", removeNewLine: true);
+                    consoleLogger.LogMessage("FAILED\n\n", removeNewLine: true);
                     consoleLogger.LogMessage($"Failed to add package {packageName}");
                 }
                 else
                 {
-                    consoleLogger.LogMessage("SUCCESS\n");
+                    consoleLogger.LogMessage("SUCCESS\n\n");
                 }
             }
         }

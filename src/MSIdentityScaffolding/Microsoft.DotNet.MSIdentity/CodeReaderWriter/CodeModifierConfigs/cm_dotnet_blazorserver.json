@@ -1,5 +1,5 @@
 {
-  "Identifier": "dotnet-webapp",
+  "Identifier": "dotnet-blazorserver",
   "Files": [
     {
       "FileName": "Startup.cs",
@@ -12,9 +12,12 @@
               "Block": "IApplicationBuilder.UseAuthentication()"
             },
             {
+              "InsertAfter": "IApplicationBuilder.UseAuthentication()",
+              "Block": "IApplicationBuilder.UseAuthorization()"
+            },
+            {
               "Parent": "IApplicationBuilder.UseEndpoints",
               "Type": "InLambdaBlock",
-              "InsertAfter": "endpoints.MapRazorPages()",
               "Block": "endpoints.MapControllers()"
             }
           ]
@@ -26,22 +29,25 @@
               "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)"
             },
             {
+              "Block": "IServiceCollection.AddControllersWithViews().AddMicrosoftIdentityUI()",
+              "InsertAfter":"IApplicationBuilder.AddAuthentication()"
+            },
+            {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
               "Type": "MemberAccess",
               "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
             },
             {
-              "Parent": "IServiceCollection.AddRazorPages()",
-              "Type": "MemberAccess",
-              "Block": "AddMvcOptions(options => {})"
+              "Block": "IServiceCollection.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
             },
             {
-              "Block": "services.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
+              "Block": "IServiceCollection.AddServerSideBlazor()",
+              "InsertAfter":"IServiceCollection.AddRazorPages()"
             },
             {
-              "Parent": "IServiceCollection.AddRazorPages()",
+              "Parent": "IServiceCollection.AddServerSideBlazor()",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityUI()"
+              "Block": "AddMicrosoftIdentityConsentHandler()"
             }
           ]
         }

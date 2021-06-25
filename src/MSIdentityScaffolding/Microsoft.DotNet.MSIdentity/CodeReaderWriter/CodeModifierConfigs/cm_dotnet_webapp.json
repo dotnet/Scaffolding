@@ -28,20 +28,30 @@
             {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
+              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))",
+              "Formatting": [ "Newline", "Spaced" ]
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
               "Type": "MemberAccess",
-              "Block": "AddMvcOptions(options => {})"
+              "Block": "AddMvcOptions(options => {})",
+              "Formatting": [ "Newline", "Spaced" ]
             },
             {
-              "Block": "services.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
+              "Block": "IServiceCollection.AddAuthorization",
+              "Type": "LambdaExpression",
+              "Parameter": "options"
+            },
+            {
+              "Parent": "services.AddAuthorization",
+              "Type": "InLambdaBlock",
+              "Block": "options.FallbackPolicy = options.DefaultPolicy"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityUI()"
+              "Block": "AddMicrosoftIdentityUI()",
+              "Formatting": [ "Newline", "Spaced" ]
             }
           ]
         }

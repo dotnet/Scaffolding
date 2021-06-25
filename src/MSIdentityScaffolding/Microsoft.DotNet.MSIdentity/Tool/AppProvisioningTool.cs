@@ -648,6 +648,9 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 if (ProvisioningToolOptions.ConfigUpdate)
                 {
+                    ConsoleLogger.LogMessage("=============================================");
+                    ConsoleLogger.LogMessage("Updating appsettings.json");
+                    ConsoleLogger.LogMessage("=============================================\n");
                     //dotnet user secrets init
                     CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
 
@@ -681,6 +684,10 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     if (projectDescription.Packages != null)
                     {
+                        ConsoleLogger.LogMessage("=============================================");
+                        ConsoleLogger.LogMessage("Updating project packages ...");
+                        ConsoleLogger.LogMessage("=============================================\n");
+                        
                         DependencyGraphService dependencyGraphService = new DependencyGraphService(ProvisioningToolOptions.ProjectFilePath);
                         var dependencyGraph = dependencyGraphService.GenerateDependencyGraph();
                         if (dependencyGraph != null)
@@ -709,16 +716,17 @@ namespace Microsoft.DotNet.MSIdentity
 
                 if (ProvisioningToolOptions.CodeUpdate)
                 {
+                    ConsoleLogger.LogMessage("=============================================");
+                    ConsoleLogger.LogMessage("Updating project files ...");
+                    ConsoleLogger.LogMessage("=============================================\n");
                     //if project is not setup for auth, add updates to Startup.cs, .csproj.
                     ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);
                     await startupModifier.AddAuth();
                 }  
             }
-        }
-/*            
+        }           
                 //Layout.cshtml
                 //LoginPartial.cshtml
                 //launchsettings.json --> update
-*/
     }
 }

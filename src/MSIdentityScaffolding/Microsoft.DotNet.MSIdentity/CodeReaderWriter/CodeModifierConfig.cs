@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         public string? Parent { get; set; }
         public string? Type { get; set; }
         public bool? Append { get; set; } = false;
+        public string[]? Formatting { get; set; }
+        public string? Parameter { get; set; }
     }
 
     public class Method
@@ -40,5 +42,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     {
         public const string MemberAccess = nameof(MemberAccess);
         public const string InLambdaBlock = nameof(InLambdaBlock);
+        public const string LambdaExpression = nameof(LambdaExpression);
     }
 }

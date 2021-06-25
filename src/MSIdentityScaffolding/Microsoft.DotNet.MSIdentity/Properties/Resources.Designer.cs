@@ -63,6 +63,56 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] cm_dotnet_blazorserver {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_blazorserver", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_blazorwasm {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_blazorwasm", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_blazorwasm_hosted {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_blazorwasm_hosted", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_webapi {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_webapi", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_webapp {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_webapp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] dotnet_blazorwasm {
             get {
                 object obj = ResourceManager.GetObject("dotnet_blazorwasm", resourceCulture);

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         public string? BasedOnProjectDescription { get; set; }
 
+        public string[]? Packages { get; set; }
         public override string? ToString()
         {
             return Identifier;

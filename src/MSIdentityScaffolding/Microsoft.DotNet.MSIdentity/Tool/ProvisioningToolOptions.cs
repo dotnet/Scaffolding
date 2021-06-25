@@ -145,7 +145,22 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// Format for console output for list commands.
         /// </summary>
         public bool Json { get; set; } = false;
-        
+
+        /// <summary>
+        /// Make config changes to appsettings.json 
+        /// </summary>
+        public bool ConfigUpdate { get; set; } = false;
+
+        /// <summary>
+        /// Make changes to Startup.cs 
+        /// </summary>
+        public bool CodeUpdate { get; set; } = false;
+
+        /// <summary>
+        /// Make PackageReferences in .csproj (add using `dotnet add package`
+        /// </summary>
+        public bool PackagesUpdate { get; set; } = false;
+
         /// <summary>
         /// Clones the options
         /// </summary>

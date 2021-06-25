@@ -23,5 +23,10 @@
         }
       ]
     }
+  ],
+  "Packages": [
+    "Microsoft.AspNetCore.Authentication.JwtBearer",
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+    "Microsoft.Identity.Web"
   ]
 }

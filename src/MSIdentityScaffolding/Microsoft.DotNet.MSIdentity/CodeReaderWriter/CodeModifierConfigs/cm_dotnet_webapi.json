@@ -1,0 +1,69 @@
+{
+  "Identifier": "dotnet-webapi",
+  "Files": [
+    {
+      "FileName": "Startup.cs",
+      "Methods": {
+        "Configure": {
+          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
+          "CodeChanges": [
+            {
+              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "Block": "IApplicationBuilder.UseAuthentication()"
+            }
+          ]
+        },
+        "ConfigureServices": {
+          "Parameters": [ "IServiceCollection" ],
+          "CodeChanges": [
+            {
+              "Block": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)"
+            },
+            {
+              "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"))",
+              "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.Identity.Web",
+        "Microsoft.AspNetCore.Authentication.JwtBearer"
+      ]
+    },
+    {
+      "FileName": "WeatherForecastController.cs",
+      "ClassAttributes": [ "Authorize" ],
+      "ClassProperties": [
+        "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }"
+      ],
+      "Methods": {
+        "Configure": {
+          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
+          "CodeChanges": [
+            {
+              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "Block": "IApplicationBuilder.UseAuthentication()"
+            }
+          ]
+        },
+        "Get": {
+          "Parameters": [ "IEnumerable<WeatherForecast>" ],
+          "CodeChanges": [
+            {
+              "Append": true,
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)"
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authorization",
+        "Microsoft.Identity.Web.Resource"
+      ]
+    }
+  ] 
+}

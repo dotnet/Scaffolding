@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        public static void AddPackage(string packageName, string packageVersion, string tfm, IConsoleLogger consoleLogger)
+        public static void AddPackage(string packageName, string tfm, IConsoleLogger consoleLogger, string? packageVersion = null)
         {
             if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
             {
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     arguments.Add(tfm);
                 }
 
-                consoleLogger.LogMessage($"\nAdding package {packageName} . . . ");
+                consoleLogger.LogMessage($"Adding package {packageName} . . . ");
 
                 var result = Command.CreateDotNet(
                     "add",

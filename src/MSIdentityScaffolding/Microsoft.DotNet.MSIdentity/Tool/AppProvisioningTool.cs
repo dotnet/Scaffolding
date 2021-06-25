@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -15,7 +16,6 @@ using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
-using File = System.IO.File;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
 namespace Microsoft.DotNet.MSIdentity
@@ -43,6 +43,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
+            //Debugger.Launch();
             //get csproj file path
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
@@ -87,6 +88,11 @@ namespace Microsoft.DotNet.MSIdentity
             else
             {
                 ConsoleLogger.LogMessage($"Detected project type {projectDescription.Identifier}.");
+                if (!string.IsNullOrEmpty(projectDescription.Identifier))
+                {
+                    string projectType = Regex.Replace(projectDescription.Identifier, "dotnet-", "");
+                    ProvisioningToolOptions.ProjectType ??= projectType;
+                }
             }
 
             ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
@@ -135,7 +141,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 case Commands.UPDATE_PROJECT_COMMAND:
                     applicationParameters = await ReadMicrosoftIdentityApplication(tokenCredential, projectSettings.ApplicationParameters);
-                    await UpdateProject(tokenCredential, applicationParameters);
+                    await UpdateProject(tokenCredential, applicationParameters, projectDescription);
                     return applicationParameters;
 
                 case Commands.UPDATE_APP_REGISTRATION_COMMAND:
@@ -636,35 +642,83 @@ namespace Microsoft.DotNet.MSIdentity
             }
         }
 
-        private async Task UpdateProject(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
+        private async Task UpdateProject(TokenCredential tokenCredential, ApplicationParameters? applicationParameters, ProjectDescription? projectDescription)
         {
-            if (applicationParameters != null)
+            if (applicationParameters != null && !string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath) && projectDescription != null)
             {
-                //modify appsettings.json. 
-                ModifyAppSettings(applicationParameters);
-
-                //Add ClientSecret if the app wants to call graph/a downstream api.
-                if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+                if (ProvisioningToolOptions.ConfigUpdate)
                 {
-                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                    //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
-                    if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
-                    {
-                        await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
-                            graphServiceClient,
-                            applicationParameters.GraphEntityId,
-                            applicationParameters,
-                            ConsoleLogger);
+                    //dotnet user secrets init
+                    CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
 
-                        string? password = applicationParameters.PasswordCredentials.LastOrDefault();
-                        //if user wants to update user secrets
-                        if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
+                    //modify appsettings.json. 
+                    ModifyAppSettings(applicationParameters);
+
+                    //Add ClientSecret if the app wants to call graph/a downstream api.
+                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+                    {
+                        var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                        //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
+                        if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
                         {
-                            CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
+                            await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
+                                graphServiceClient,
+                                applicationParameters.GraphEntityId,
+                                applicationParameters,
+                                ConsoleLogger);
+
+                            string? password = applicationParameters.PasswordCredentials.LastOrDefault();
+                            //if user wants to update user secrets
+                            if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
+                            {
+                                CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
+                            }
                         }
                     }
                 }
+
+                if (ProvisioningToolOptions.PackagesUpdate)
+                {
+                    if (projectDescription.Packages != null)
+                    {
+                        DependencyGraphService dependencyGraphService = new DependencyGraphService(ProvisioningToolOptions.ProjectFilePath);
+                        var dependencyGraph = dependencyGraphService.GenerateDependencyGraph();
+                        if (dependencyGraph != null)
+                        {
+                            var project = dependencyGraph.Projects.FirstOrDefault();
+                            var tfm = project?.TargetFrameworks.FirstOrDefault();
+
+                            if (tfm != null)
+                            {
+                                var shortTfm = tfm.FrameworkName?.GetShortFolderName();
+                                if (!string.IsNullOrEmpty(shortTfm))
+                                {
+                                    foreach (var packageToInstall in projectDescription.Packages)
+                                    {
+                                        //if package doesn't exist, add it.
+                                        if (!tfm.Dependencies.Where(x => x.Name.Equals(packageToInstall)).Any())
+                                        {
+                                            CodeWriter.AddPackage(packageToInstall, shortTfm, ConsoleLogger);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (ProvisioningToolOptions.CodeUpdate)
+                {
+                    //if project is not setup for auth, add updates to Startup.cs, .csproj.
+                    ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);
+                    await startupModifier.AddAuth();
+                }  
             }
         }
+/*            
+                //Layout.cshtml
+                //LoginPartial.cshtml
+                //launchsettings.json --> update
+*/
     }
 }

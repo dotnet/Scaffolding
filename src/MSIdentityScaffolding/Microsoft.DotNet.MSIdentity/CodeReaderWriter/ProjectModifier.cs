@@ -76,14 +76,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuth()
         {
-            //init user secrets
-            CodeWriter.InitUserSecrets(_toolOptions.ProjectPath, _consoleLogger);
-
             //Get CodeModifierConfig from CodeModifierConfigs folder.
             _codeModifierConfigs = GetCodeModifierConfigs();
-            var codeModifierConfig = _codeModifierConfigs.Where(x => x.Identifier != null &&
-                                                                    x.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
-                                                                    .FirstOrDefault();
+            var codeModifierConfig = _codeModifierConfigs
+                .Where(x => x.Identifier != null &&
+                       x.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
+                        .FirstOrDefault();
 
             // CodeModifierConfig, .csproj path, Program.cs path cannot be null
             if (codeModifierConfig != null &&
@@ -152,8 +150,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                         //else, create a using block
                                         else
                                         {
-                                            var newRoot = root.AddUsings(usingNode);
-                                            documentEditor.ReplaceNode(root, newRoot);
+                                            documentEditor.ReplaceNode(root, root.AddUsings(usingNode));
                                         }
                                     }
 
@@ -223,7 +220,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                         {
                                                             //using defaults for leading and trailing trivia
                                                             var trailingTrivia = new SyntaxTriviaList(SyntaxFactory.CarriageReturnLineFeed);
-                                                            var leadingTrivia = new SyntaxTriviaList(SyntaxFactory.Tab);
+                                                            var leadingTrivia = new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
                                                             //set leading and trailing trivia(spacing
                                                             if (modifiedBlockSyntaxNode != null)
                                                             {
@@ -262,30 +259,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                                                         modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(parentNode, modifiedExprNode);
                                                                                     }
                                                                                 }
-                                                                                else if (change.Type.Equals(CodeChangeType.LambdaExpression))
-                                                                                {
-                                                                                    Debugger.Launch();
-                                                                                    //if correct Parent.
-                                                                                    if (exprNode.ToString().Trim(' ', '\r', '\n').Contains(change.Parent.Trim(' ', '\r', '\n')))
-                                                                                    {
-                                                                                        //if arg doesn't already exist.
-                                                                                        if (!exprNode.ToString().Trim(' ', '\r', '\n').Contains(change.Block.Trim(' ', '\r', '\n')))
-                                                                                        {
-                                                                                            var arg = SyntaxFactory.Argument(
-                                                                                                SyntaxFactory.SimpleLambdaExpression(
-                                                                                                    SyntaxFactory.Parameter(
-                                                                                                        SyntaxFactory.Identifier(change.Block)))
-                                                                                                .WithBlock(SyntaxFactory.Block()));
-                                                                                            if (arg != null)
-                                                                                            {
-                                                                                                var argList = new SeparatedSyntaxList<ArgumentSyntax>();
-                                                                                                argList = argList.Add(arg);
-                                                                                                var modifiedExprNode = exprNode.WithExpression(SyntaxFactory.InvocationExpression(exprNode.Expression).WithArgumentList(SyntaxFactory.ArgumentList(argList)));
-                                                                                                modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(parentNode, modifiedExprNode);
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
                                                                                 //add within Lambda block of parent node.
                                                                                 else if (change.Type.Equals(CodeChangeType.InLambdaBlock))
                                                                                 {
@@ -307,8 +280,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                                                                                     if (blockToEdit != null)
                                                                                     {
-                                                                                        var innerTrailingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetTrailingTrivia() ?? trailingTrivia;
-                                                                                        var innerLeadingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetLeadingTrivia() ?? leadingTrivia;
+                                                                                        var innerTrailingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetTrailingTrivia() ?? new SyntaxTriviaList();
+                                                                                        var innerLeadingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetLeadingTrivia() ?? new SyntaxTriviaList();
 
                                                                                         if (!innerTrailingTrivia.Contains(SemiColonTrivia))
                                                                                         {
@@ -369,6 +342,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                                                 else
                                                                 {
                                                                     string formattedCodeBlock = FormatCodeBlock(change.Block, parameterValues);
+
+
                                                                     if (!string.IsNullOrEmpty(formattedCodeBlock))
                                                                     {
                                                                         StatementSyntax statement = SyntaxFactory.ParseStatement(formattedCodeBlock)
@@ -431,6 +406,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             var changedDocument = documentEditor.GetChangedDocument();
                             var classFileTxt = await changedDocument.GetTextAsync();
                             File.WriteAllText(filePath, classFileTxt.ToString());
+                            _consoleLogger.LogMessage($"Modified {fileName}.\n");
                         }
                     }
                 }

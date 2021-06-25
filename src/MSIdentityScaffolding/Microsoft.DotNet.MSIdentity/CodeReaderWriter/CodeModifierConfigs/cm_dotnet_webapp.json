@@ -45,7 +45,7 @@
             {
               "Parent": "services.AddAuthorization",
               "Type": "InLambdaBlock",
-              "Block": "options.FallbackPolicy = options.DefaultPolicy;"
+              "Block": "options.FallbackPolicy = options.DefaultPolicy"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",

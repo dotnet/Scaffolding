@@ -721,7 +721,7 @@ namespace Microsoft.DotNet.MSIdentity
                     ConsoleLogger.LogMessage("=============================================\n");
                     //if project is not setup for auth, add updates to Startup.cs, .csproj.
                     ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);
-                    await startupModifier.AddAuth();
+                    await startupModifier.AddAuthCodeAsync();
                 }  
             }
         }           

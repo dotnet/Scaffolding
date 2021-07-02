@@ -8,11 +8,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     {
         public string? InsertAfter { get; set; }
         public string? Block { get; set; }
-        public string? BlockB2C { get; set; }
         public string? Parent { get; set; }
         public string? Type { get; set; }
         public bool? Append { get; set; } = false;
-        public string[]? Formatting { get; set; }
         public string? Parameter { get; set; }
     }
 

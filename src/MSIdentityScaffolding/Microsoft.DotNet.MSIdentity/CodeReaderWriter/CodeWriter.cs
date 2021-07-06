@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Extensions.Internal;
 
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             arguments.Add("init");
-            consoleLogger.LogMessage("Initializing User Secrets . . . ", LogMessageType.Error);
+            consoleLogger.LogMessage(Resources.InitializeUserSecrets, LogMessageType.Error);
 
             var result = Command.CreateDotNet(
                 "user-secrets",
@@ -86,12 +87,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             
             if (result.ExitCode != 0)
             {
-                consoleLogger.LogMessage("FAILED\n\n", LogMessageType.Error, removeNewLine: true);
-                throw new Exception("Error while running dotnet-user-secrets init");
+                consoleLogger.LogMessage(Resources.Failed, LogMessageType.Error, removeNewLine: true);
+                throw new Exception(Resources.DotnetUserSecretsError);
             }
             else
             {
-                consoleLogger.LogMessage("SUCCESS\n\n", removeNewLine: true);
+                consoleLogger.LogMessage(Resources.Success, removeNewLine: true);
             }
         }
 
@@ -132,12 +133,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 if (result.ExitCode != 0)
                 {
-                    consoleLogger.LogMessage("FAILED\n\n", removeNewLine: true);
-                    consoleLogger.LogMessage($"Failed to add package {packageName}");
+                    consoleLogger.LogMessage(Resources.Success, removeNewLine: true);
+                    consoleLogger.LogMessage(string.Format(Resources.FailedAddPackage, packageName));
                 }
                 else
                 {
-                    consoleLogger.LogMessage("SUCCESS\n\n");
+                    consoleLogger.LogMessage(Resources.Success);
                 }
             }
         }

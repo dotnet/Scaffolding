@@ -52,9 +52,8 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     if (csProjfiles.Count() > 1)
                     {
-                        string errorMsg = "Specify one .csproj file for the --project-path";
-                        ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMsg));
-                        ConsoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+                        ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, Resources.ProjectPathError));
+                        ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
                         return null;
                     }
                     var filePath = csProjfiles.First();
@@ -83,11 +82,11 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (projectDescription == null)
             {
-                ConsoleLogger.LogMessage($"No project found in {ProvisioningToolOptions.ProjectPath}.", LogMessageType.Error);
+                ConsoleLogger.LogMessage(string.Format(Resources.NoProjectFound, ProvisioningToolOptions.ProjectPath), LogMessageType.Error);
             }
             else
             {
-                ConsoleLogger.LogMessage($"Detected project type {projectDescription.Identifier}.");
+                ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription.Identifier));
                 if (!string.IsNullOrEmpty(projectDescription.Identifier))
                 {
                     string projectType = Regex.Replace(projectDescription.Identifier, "dotnet-", "");
@@ -175,8 +174,7 @@ namespace Microsoft.DotNet.MSIdentity
             // Case where there is no code for the authentication
             if (!projectSettings.ApplicationParameters.HasAuthentication)
             {
-                ConsoleLogger.LogMessage($"Authentication is not enabled yet in this project. An app registration will " +
-                                  $"be created, but the tool does not add the code yet (work in progress). ");
+                ConsoleLogger.LogMessage(Resources.AuthNotEnabled);
             }
 
             // Read or provision Microsoft identity platform application
@@ -223,11 +221,11 @@ namespace Microsoft.DotNet.MSIdentity
                 resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
                 if (resultAppParameters != null && !string.IsNullOrEmpty(resultAppParameters.ClientId))
                 {
-                    ConsoleLogger.LogMessage($"Created app {resultAppParameters.ApplicationDisplayName} - {resultAppParameters.ClientId}.");
+                    ConsoleLogger.LogMessage(string.Format(Resources.CreatedAppRegistration, resultAppParameters.ApplicationDisplayName, resultAppParameters.ClientId));
                 }
                 else
                 {
-                    string failMessage = "Failed to create Azure AD/AD B2C app";
+                    string failMessage = Resources.FailedToCreateApp;
                     ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
                 }
             }
@@ -392,7 +390,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (projectSettings.ApplicationParameters.CallsMicrosoftGraph)
             {
-                ConsoleLogger.LogMessage("You'll need to remove the calls to Microsoft Graph as it's not supported by B2C apps.", LogMessageType.Error);
+                ConsoleLogger.LogMessage(Resources.MicrosoftGraphNotSupported, LogMessageType.Error);
             }
 
             // reevaulate the project settings
@@ -405,7 +403,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private void WriteSummary(Summary summary)
         {
-            ConsoleLogger.LogMessage("Summary");
+            ConsoleLogger.LogMessage(Resources.Summary);
             foreach (Change change in summary.changes)
             {
                 ConsoleLogger.LogMessage($"{change.Description}");
@@ -485,7 +483,7 @@ namespace Microsoft.DotNet.MSIdentity
                 }
                 else
                 {
-                    ConsoleLogger.LogMessage("Failed to create Azure AD/AD B2C app registration", LogMessageType.Error);
+                    ConsoleLogger.LogMessage(Resources.FailedToCreateApp, LogMessageType.Error);
                 }
             }
             return currentApplicationParameters;
@@ -618,14 +616,14 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     jsonResponse.State = State.Success;
                     jsonResponse.Content = new KeyValuePair<string, string>("ClientSecret", password);
-                    string secretOutput = $"Client secret - {password}.";
+                    string secretOutput = string.Format(Resources.ClientSecret, password);
                     ConsoleLogger.LogMessage(secretOutput);
                     ConsoleLogger.LogJsonMessage(jsonResponse);
 
                 }
                 else
                 {
-                    string failedOutput = $"Failed to add client secret for Azure AD app : {applicationParameters.ApplicationDisplayName}({applicationParameters.ClientId})";
+                    string failedOutput = string.Format(Resources.FailedClientSecretWithApp, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId);
                     jsonResponse.State = State.Fail;
                     jsonResponse.Content = failedOutput;
                     ConsoleLogger.LogMessage(failedOutput);
@@ -634,7 +632,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
             else
             {
-                string failedOutput = $"Failed to add client secret.";
+                string failedOutput = Resources.FailedClientSecret;
                 jsonResponse.State = State.Fail;
                 jsonResponse.Content = failedOutput;
                 ConsoleLogger.LogMessage(failedOutput);
@@ -649,7 +647,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (ProvisioningToolOptions.ConfigUpdate)
                 {
                     ConsoleLogger.LogMessage("=============================================");
-                    ConsoleLogger.LogMessage("Updating appsettings.json");
+                    ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
                     ConsoleLogger.LogMessage("=============================================\n");
                     //dotnet user secrets init
                     CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
@@ -685,7 +683,7 @@ namespace Microsoft.DotNet.MSIdentity
                     if (projectDescription.Packages != null)
                     {
                         ConsoleLogger.LogMessage("=============================================");
-                        ConsoleLogger.LogMessage("Updating project packages ...");
+                        ConsoleLogger.LogMessage(Resources.UpdatingProjectPackages);
                         ConsoleLogger.LogMessage("=============================================\n");
                         
                         DependencyGraphService dependencyGraphService = new DependencyGraphService(ProvisioningToolOptions.ProjectFilePath);
@@ -717,7 +715,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (ProvisioningToolOptions.CodeUpdate)
                 {
                     ConsoleLogger.LogMessage("=============================================");
-                    ConsoleLogger.LogMessage("Updating project files ...");
+                    ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
                     ConsoleLogger.LogMessage("=============================================\n");
                     //if project is not setup for auth, add updates to Startup.cs, .csproj.
                     ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);

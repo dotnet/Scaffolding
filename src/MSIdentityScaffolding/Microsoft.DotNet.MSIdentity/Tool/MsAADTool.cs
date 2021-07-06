@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.Graph;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
@@ -93,14 +94,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                         catch (ServiceException)
                         {
                             nextPage = null;
-                            ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals", LogMessageType.Error);
+                            ConsoleLogger.LogMessage(Resources.FailedToRetrieveADObjectsError, LogMessageType.Error);
                         }
                     }
                 }
             }
             catch (ServiceException)
             {
-                ConsoleLogger.LogMessage("Failed to retrieve all Azure AD/AD B2C objects(apps/service principals", LogMessageType.Error);
+                ConsoleLogger.LogMessage(Resources.FailedToRetrieveADObjectsError, LogMessageType.Error);
             }
 
             return graphObjectsList;

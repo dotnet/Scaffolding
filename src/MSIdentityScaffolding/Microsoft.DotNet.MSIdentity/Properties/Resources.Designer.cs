@@ -61,6 +61,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress)..
+        /// </summary>
+        internal static string AuthNotEnabled {
+            get {
+                return ResourceManager.GetString("AuthNotEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client secret - {0}..
+        /// </summary>
+        internal static string ClientSecret {
+            get {
+                return ResourceManager.GetString("ClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] cm_dotnet_blazorserver {
@@ -107,6 +125,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
             get {
                 object obj = ResourceManager.GetObject("cm_dotnet_webapp", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Created app {0} - {1}..
+        /// </summary>
+        internal static string CreatedAppRegistration {
+            get {
+                return ResourceManager.GetString("CreatedAppRegistration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detected project type {0}..
+        /// </summary>
+        internal static string DetectedProjectType {
+            get {
+                return ResourceManager.GetString("DetectedProjectType", resourceCulture);
             }
         }
         
@@ -161,6 +197,96 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while running dotnet-user-secrets init.
+        /// </summary>
+        internal static string DotnetUserSecretsError {
+            get {
+                return ResourceManager.GetString("DotnetUserSecretsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FAILED\n\n.
+        /// </summary>
+        internal static string Failed {
+            get {
+                return ResourceManager.GetString("Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add package {0}.
+        /// </summary>
+        internal static string FailedAddPackage {
+            get {
+                return ResourceManager.GetString("FailedAddPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add client secret..
+        /// </summary>
+        internal static string FailedClientSecret {
+            get {
+                return ResourceManager.GetString("FailedClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add client secret for Azure AD app : {0}({1}).
+        /// </summary>
+        internal static string FailedClientSecretWithApp {
+            get {
+                return ResourceManager.GetString("FailedClientSecretWithApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to create Azure AD/AD B2C app registration..
+        /// </summary>
+        internal static string FailedToCreateApp {
+            get {
+                return ResourceManager.GetString("FailedToCreateApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects(apps/service principals.
+        /// </summary>
+        internal static string FailedToRetrieveADObjectsError {
+            get {
+                return ResourceManager.GetString("FailedToRetrieveADObjectsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initializing User Secrets . . ..
+        /// </summary>
+        internal static string InitializeUserSecrets {
+            get {
+                return ResourceManager.GetString("InitializeUserSecrets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You&apos;ll need to remove the calls to Microsoft Graph as it&apos;s not supported by B2C apps..
+        /// </summary>
+        internal static string MicrosoftGraphNotSupported {
+            get {
+                return ResourceManager.GetString("MicrosoftGraphNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No project found in {0}..
+        /// </summary>
+        internal static string NoProjectFound {
+            get {
+                return ResourceManager.GetString("NoProjectFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &quot;SignedOutCallbackPath&quot;: &quot;/signout/B2C_1_susi&quot;,
         ///    &quot;SignUpSignInPolicyId&quot;: &quot;b2c_1_susi&quot;,
         ///    &quot;ResetPasswordPolicyId&quot;: &quot;b2c_1_reset&quot;,
@@ -170,6 +296,60 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string Policies {
             get {
                 return ResourceManager.GetString("Policies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify one .csproj file for the --project-path.
+        /// </summary>
+        internal static string ProjectPathError {
+            get {
+                return ResourceManager.GetString("ProjectPathError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SUCCESS\n\n.
+        /// </summary>
+        internal static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Summary.
+        /// </summary>
+        internal static string Summary {
+            get {
+                return ResourceManager.GetString("Summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating appsettings.json.
+        /// </summary>
+        internal static string UpdatingAppSettingsJson {
+            get {
+                return ResourceManager.GetString("UpdatingAppSettingsJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating project files ....
+        /// </summary>
+        internal static string UpdatingProjectFiles {
+            get {
+                return ResourceManager.GetString("UpdatingProjectFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating project packages ....
+        /// </summary>
+        internal static string UpdatingProjectPackages {
+            get {
+                return ResourceManager.GetString("UpdatingProjectPackages", resourceCulture);
             }
         }
     }

@@ -453,7 +453,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 var pars = foundParameters.ToList();
                 foreach (var parameter in parametersToCheck)
                 {
-                    var verifiedParams = pars.Where(p => p.Type != null && p.Type.ToFullString().Trim(' ').Equals(parameter));
+                    //Trim(' ') for the additional whitespace at the end of the parameter.Type string. Parameter.Type should be a singular word.
+                    var verifiedParams = pars.Where(p => (p.Type?.ToFullString()?.Trim(' ')?.Equals(parameter)).GetValueOrDefault(false));
                     if (verifiedParams.Any())
                     {
                         parametersWithNames.Add(parameter, verifiedParams.First().Identifier.ValueText);

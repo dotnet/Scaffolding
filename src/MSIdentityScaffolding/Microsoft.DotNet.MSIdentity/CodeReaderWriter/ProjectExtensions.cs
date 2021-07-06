@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.CodeAnalysis;
 
-static class ProjectExtensions
+internal static class ProjectExtensions
 {
     public static Project AddDocuments(this Project project, IEnumerable<string> files)
     {
@@ -11,12 +11,6 @@ static class ProjectExtensions
             project = project.AddDocument(file, File.ReadAllText(file)).Project;
         }
         return project;
-    }
-
-    private static IEnumerable<string> GetAllSourceFiles(string directoryPath)
-    {
-        var filePaths = Directory.GetFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
-        return filePaths;
     }
 
     public static Project? WithAllSourceFiles(this Project project)
@@ -33,4 +27,11 @@ static class ProjectExtensions
         }
         return null;
     }
+
+    private static IEnumerable<string> GetAllSourceFiles(string directoryPath)
+    {
+        var filePaths = Directory.GetFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
+        return filePaths;
+    }
+
 }

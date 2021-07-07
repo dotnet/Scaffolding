@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             InitUserSecrets(projectPath, consoleLogger);
             string section = isB2C ? "AzureADB2C" : "AzureAD";
             string key = $"{section}:ClientSecret";
-            SetUserSecerets(projectPath, key, value, consoleLogger);
+            SetUserSecrets(projectPath, key, value, consoleLogger);
         }
 
         public static void InitUserSecrets(string projectPath, IConsoleLogger consoleLogger)
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     arguments.Add(tfm);
                 }
 
-                consoleLogger.LogMessage($"Adding package {packageName} . . . ");
+                consoleLogger.LogMessage(string.Format(Resources.AddingPackage, packageName));
 
                 var result = Command.CreateDotNet(
                     "add",
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return tfm.Equals("net6.0", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void SetUserSecerets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
+        private static void SetUserSecrets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -178,7 +178,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             else 
             {
-                consoleLogger.LogMessage($"\nAdded {key} to user secrets.\n");
+                string consoleOutput = string.Format(Resources.AddingKeyToUserSecrets, key);    
+                consoleLogger.LogMessage($"\n{consoleOutput}\n");
             }
         }
 

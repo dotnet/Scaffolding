@@ -1,4 +1,3 @@
-  
 set VERSION=1.0.0-dev
 set NUPKG=artifacts\packages\Debug\Shipping\
 

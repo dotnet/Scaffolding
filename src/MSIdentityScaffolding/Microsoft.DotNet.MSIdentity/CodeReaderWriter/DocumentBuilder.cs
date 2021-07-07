@@ -3,14 +3,13 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter.CodeChange;
 using Microsoft.DotNet.MSIdentity.Tool;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -101,7 +100,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return modifiedClassDeclarationSyntax;
         }
 
-        public async Task WriteToClassFile(string fileName, string filePath)
+        public async Task WriteToClassFileAsync(string fileName, string filePath)
         {
             var changedDocument = GetDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
@@ -137,34 +136,33 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         //get method's BlockSyntax
                         var blockSyntaxNode = methodNode?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();
                         var modifiedBlockSyntaxNode = methodNode?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();
-
-                        //do all the CodeChanges for the method.
-                        foreach (var change in methodChanges.CodeChanges)
+                        if (modifiedBlockSyntaxNode != null && parameterValues != null && blockSyntaxNode != null && modifiedClassDeclarationSyntax != null)
                         {
-                            if (!string.IsNullOrEmpty(change.Block) && modifiedBlockSyntaxNode != null && parameterValues != null)
+                            //do all the CodeChanges for the method.
+                            foreach (var change in methodChanges.CodeChanges)
                             {
-                                //CodeChange.Parent and CodeChange.Type go together.
-                                if (!string.IsNullOrEmpty(change.Parent) && !string.IsNullOrEmpty(change.Type))
+                                if (!string.IsNullOrEmpty(change.Block))
                                 {
-                                    modifiedBlockSyntaxNode = AddCodeSnippetOnParent(change, modifiedBlockSyntaxNode, parameterValues);
-                                }
+                                    //CodeChange.Parent and CodeChange.Type go together.
+                                    if (!string.IsNullOrEmpty(change.Parent) && !string.IsNullOrEmpty(change.Type))
+                                    {
+                                        modifiedBlockSyntaxNode = AddCodeSnippetOnParent(change, modifiedBlockSyntaxNode, parameterValues);
+                                    }
 
-                                //if there is no CodeChange.Parent, check if to InsertAfter a statement.
-                                else if (!string.IsNullOrEmpty(change.InsertAfter))
-                                {
-                                    modifiedBlockSyntaxNode = AddCodeSnippetAfterNode(change, modifiedBlockSyntaxNode, parameterValues);
-                                }
-                                //if there are no Parent or InsertAfter in CodeChange,
-                                //just insert statement at the end of the block
-                                else
-                                {
-                                    modifiedBlockSyntaxNode = AddCodeSnippetInPlace(change, modifiedBlockSyntaxNode, parameterValues);
+                                    //if there is no CodeChange.Parent, check if to InsertAfter a statement.
+                                    else if (!string.IsNullOrEmpty(change.InsertAfter))
+                                    {
+                                        modifiedBlockSyntaxNode = AddCodeSnippetAfterNode(change, modifiedBlockSyntaxNode, parameterValues);
+                                    }
+                                    //if there are no Parent or InsertAfter in CodeChange,
+                                    //just insert statement at the end of the block
+                                    else
+                                    {
+                                        modifiedBlockSyntaxNode = AddCodeSnippetInPlace(change, modifiedBlockSyntaxNode, parameterValues);
+                                    }
                                 }
                             }
-                        }
-                        //replace the BlockSyntax of a MethodDeclarationSyntax of a ClassDeclarationSyntax
-                        if (blockSyntaxNode != null && modifiedBlockSyntaxNode != null && modifiedClassDeclarationSyntax != null)
-                        {
+                            //replace the BlockSyntax of a MethodDeclarationSyntax of a ClassDeclarationSyntax
                             modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(blockSyntaxNode, modifiedBlockSyntaxNode);
                         }
                     }
@@ -175,7 +173,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         //add code snippet to parent node
         internal BlockSyntax AddCodeSnippetOnParent(
-            CodeChange change,
+            CodeSnippet change,
             BlockSyntax modifiedBlockSyntaxNode,
             IDictionary<string, string> parameterValues)
         {
@@ -184,12 +182,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 //get the parent node to add CodeSnippet onto.
                 var parentNode = modifiedBlockSyntaxNode.DescendantNodes().Where(n => n is ExpressionStatementSyntax && n.ToString().Contains(parentBlock)).FirstOrDefault();
-                if (parentNode != null && parentNode is ExpressionStatementSyntax exprNode)
+                if (parentNode is ExpressionStatementSyntax exprNode)
                 {
                     //add a SimpleMemberAccessExpression to parent node.
-                    if ((change.Type?.Equals(CodeChangeType.MemberAccess)).GetValueOrDefault(false))
+                    if (CodeChangeType.MemberAccess.Equals(change.Type))
                     {
-                        Debugger.Launch();
                         var modifiedExprNode = AddSimpleMemberAccessExpression(exprNode, change.Block)?.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
                         if (modifiedExprNode != null)
                         {
@@ -199,7 +196,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         }
                     }
                     //add within Lambda block of parent node.
-                    else if ((change.Type?.Equals(CodeChangeType.InLambdaBlock)).GetValueOrDefault(false))
+                    else if (CodeChangeType.InLambdaBlock.Equals(change.Type))
                     {
                         var modifiedExprNode = AddExpressionInLambdaBlock(exprNode, change.InsertAfter, change.Block, parameterValues);
                         if (modifiedExprNode != null)
@@ -232,72 +229,80 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             IDictionary<string, string> parameterValues)
         {
             BlockSyntax? blockToEdit;
-            if (!string.IsNullOrEmpty(insertAfterBlock))
+            if (!string.IsNullOrEmpty(codeSnippet))
             {
-                string insertAfterFormattedBlock = FormatCodeBlock(insertAfterBlock, parameterValues);
-                blockToEdit = expression.DescendantNodes().FirstOrDefault(node =>
-                                node is BlockSyntax &&
-                                node.ToString().Trim(CodeSnippetTrimChars).Contains(insertAfterBlock)) as BlockSyntax;
-            }
-            else
-            {
-                blockToEdit = expression.DescendantNodes()
-                    .Where(node => node is BlockSyntax)
-                    .FirstOrDefault() as BlockSyntax;
-            }
-
-            if (blockToEdit != null && !string.IsNullOrEmpty(codeSnippet))
-            {
-                var innerTrailingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetTrailingTrivia() ?? new SyntaxTriviaList();
-                var innerLeadingTrivia = blockToEdit.Statements.FirstOrDefault()?.GetLeadingTrivia() ?? new SyntaxTriviaList();
-
-                if (!innerTrailingTrivia.Contains(SemiColonTrivia))
+                if (!string.IsNullOrEmpty(insertAfterBlock))
                 {
-                    innerTrailingTrivia = innerTrailingTrivia.Insert(0, SemiColonTrivia);
+                    string insertAfterFormattedBlock = FormatCodeBlock(insertAfterBlock, parameterValues);
+                    blockToEdit = expression.DescendantNodes().FirstOrDefault(node =>
+                                    node is BlockSyntax &&
+                                    node.ToString().Trim(CodeSnippetTrimChars).Contains(insertAfterBlock)) as BlockSyntax;
+                }
+                else
+                {
+                    blockToEdit = expression.DescendantNodes()
+                        .Where(node => node is BlockSyntax)
+                        .FirstOrDefault() as BlockSyntax;
                 }
 
-                StatementSyntax innerStatement = SyntaxFactory.ParseStatement(codeSnippet)
-                    .WithAdditionalAnnotations(Formatter.Annotation)
-                    .WithLeadingTrivia(innerLeadingTrivia)
-                    .WithTrailingTrivia(innerTrailingTrivia);
-
-                if (!StatementExists(blockToEdit, innerStatement))
+                if (blockToEdit != null)
                 {
-                    var newBlock = blockToEdit.WithStatements(blockToEdit.Statements.Add(innerStatement));
-                    return expression.ReplaceNode(blockToEdit, newBlock);
+                    var sampleStatement = blockToEdit.Statements.FirstOrDefault();
+                    var innerTrailingTrivia = sampleStatement?.GetTrailingTrivia() ?? new SyntaxTriviaList();
+                    var innerLeadingTrivia = sampleStatement?.GetLeadingTrivia() ?? new SyntaxTriviaList();
+
+                    if (!innerTrailingTrivia.Contains(SemiColonTrivia))
+                    {
+                        innerTrailingTrivia = innerTrailingTrivia.Insert(0, SemiColonTrivia);
+                    }
+
+                    StatementSyntax innerStatement = SyntaxFactory.ParseStatement(codeSnippet)
+                        .WithAdditionalAnnotations(Formatter.Annotation)
+                        .WithLeadingTrivia(innerLeadingTrivia)
+                        .WithTrailingTrivia(innerTrailingTrivia);
+
+                    if (!StatementExists(blockToEdit, innerStatement))
+                    {
+                        var newBlock = blockToEdit.WithStatements(blockToEdit.Statements.Add(innerStatement));
+                        return expression.ReplaceNode(blockToEdit, newBlock);
+                    }
                 }
             }
             return null;
         }
 
         internal BlockSyntax AddCodeSnippetAfterNode(
-            CodeChange change,
+            CodeSnippet change,
             BlockSyntax modifiedBlockSyntaxNode,
             IDictionary<string, string> parameterValues)
         {
             string insertAfterBlock = FormatCodeBlock(change.InsertAfter, parameterValues);
-            var insertAfterNode = modifiedBlockSyntaxNode.DescendantNodes().Where(node => node is ExpressionStatementSyntax && node.ToString().Contains(insertAfterBlock)).FirstOrDefault();
-            if (!string.IsNullOrEmpty(insertAfterBlock) && insertAfterNode != null)
+            
+            if (!string.IsNullOrEmpty(insertAfterBlock) && !string.IsNullOrEmpty(change.Block))
             {
-                var leadingTrivia = insertAfterNode.GetLeadingTrivia();
-                var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-                string formattedCodeBlock = FormatCodeBlock(change.Block, parameterValues);
-
-                StatementSyntax statement = SyntaxFactory.ParseStatement(formattedCodeBlock)
-                    .WithAdditionalAnnotations(Formatter.Annotation)
-                    .WithTrailingTrivia(trailingTrivia)
-                    .WithLeadingTrivia(leadingTrivia);
-                //check if statement already exists.
-                if (!StatementExists(modifiedBlockSyntaxNode, statement))
+                var insertAfterNode = modifiedBlockSyntaxNode.DescendantNodes().Where(node => node is ExpressionStatementSyntax && node.ToString().Contains(insertAfterBlock)).FirstOrDefault();
+                if (insertAfterNode != null)
                 {
-                    modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.InsertNodesAfter(insertAfterNode, new List<StatementSyntax>() { statement });
+                    var leadingTrivia = insertAfterNode.GetLeadingTrivia();
+                    var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+                    string formattedCodeBlock = FormatCodeBlock(change.Block, parameterValues);
+
+                    StatementSyntax statement = SyntaxFactory.ParseStatement(formattedCodeBlock)
+                        .WithAdditionalAnnotations(Formatter.Annotation)
+                        .WithTrailingTrivia(trailingTrivia)
+                        .WithLeadingTrivia(leadingTrivia);
+                    //check if statement already exists.
+                    if (!StatementExists(modifiedBlockSyntaxNode, statement))
+                    {
+                        modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.InsertNodesAfter(insertAfterNode, new List<StatementSyntax>() { statement });
+                    }
                 }
             }
             return modifiedBlockSyntaxNode;
         }
 
         internal BlockSyntax AddCodeSnippetInPlace(
-            CodeChange change,
+            CodeSnippet change,
             BlockSyntax modifiedBlockSyntaxNode,
             IDictionary<string, string> parameterValues)
         {
@@ -423,7 +428,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 string value = Regex.Replace(codeBlock, "^([^.]*).", "");
                 string param = Regex.Replace(codeBlock, "[*^.].*", "");
-                if (parameterDict != null && parameterDict.TryGetValue(param, out string? parameter))
+                if (parameterDict.TryGetValue(param, out string? parameter))
                 {
                     formattedCodeBlock = $"{parameter}.{value}";
                 }
@@ -437,7 +442,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         internal bool StatementExists(BlockSyntax blockSyntaxNode, StatementSyntax statement)
         {
-            if (blockSyntaxNode.Statements.Any(st => st.ToString().Contains(statement.ToString(), StringComparison.OrdinalIgnoreCase)))
+            if (blockSyntaxNode.Statements.Any(st => st.ToString().Contains(statement.ToString(), StringComparison.Ordinal)))
             {
                 return true;
             }
@@ -521,7 +526,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return false;
         }
 
-        private SyntaxTrivia SemiColonTrivia
+        private static SyntaxTrivia SemiColonTrivia
         {
             get
             {

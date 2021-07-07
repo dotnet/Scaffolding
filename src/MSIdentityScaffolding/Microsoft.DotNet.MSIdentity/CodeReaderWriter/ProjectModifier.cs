@@ -36,66 +36,69 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuthCodeAsync()
         {
-            CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
-            //Get CodeModifierConfig from CodeModifierConfigs folder.
-            if (codeModifierConfig != null &&
-                codeModifierConfig.Files != null &&
-                !string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
+            if (!string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
-                //Initialize CodeAnalysis.Project wrapper
-                CodeAnaylsisHelper project = new CodeAnaylsisHelper(_toolOptions.ProjectFilePath);
-
-                //Go through all the files, make changes using DocumentBuilder.
-                foreach(var file in codeModifierConfig.Files)
+                CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
+                //Get CodeModifierConfig from CodeModifierConfigs folder.
+                if (codeModifierConfig != null &&
+                    codeModifierConfig.Files != null)
                 {
-                    var fileName = file.FileName;
-                    string className = GetClassName(fileName);
+                    //Initialize CodeAnalysis.Project wrapper
+                    CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
 
-                    //if the file we are modifying is Startup.cs, use Program.cs to find the correct file to edit.
-                    if (!string.IsNullOrEmpty(file.FileName) && file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase))
+                    //Go through all the files, make changes using DocumentBuilder.
+                    foreach (var file in codeModifierConfig.Files)
                     {
-                        fileName = await GetStarupClass(project.CodeAnalysisProject);
-                    }
+                        var fileName = file.FileName;
+                        string className = GetClassName(fileName);
 
-                    if (!string.IsNullOrEmpty(fileName))
-                    {
-                        string? filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
-                        //get the file document to get the document root for editing.
-                        var fileDoc = project.CodeAnalysisProject.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
-                        if (!string.IsNullOrEmpty(filePath) && fileDoc != null)
+                        //if the file we are modifying is Startup.cs, use Program.cs to find the correct file to edit.
+                        if (!string.IsNullOrEmpty(file.FileName) && file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase))
                         {
-                            DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
-                            DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
-                            var docRoot = documentEditor.OriginalRoot as CompilationUnitSyntax;
-                            var namespaceNode = docRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+                            fileName = await GetStarupClass(project);
+                        }
 
-                            //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
-                            var classNode = namespaceNode?
-                                .DescendantNodes()?
-                                .Where(node =>
-                                    node is ClassDeclarationSyntax cds &&
-                                    cds.Identifier.ValueText.Contains(className))
-                                .FirstOrDefault();
-
-                            if (classNode != null && classNode is ClassDeclarationSyntax classDeclarationSyntax)
+                        if (!string.IsNullOrEmpty(fileName))
+                        {
+                            string? filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
+                            //get the file document to get the document root for editing.
+                            
+                            if (!string.IsNullOrEmpty(filePath))
                             {
-                                var modifiedClassDeclarationSyntax = classDeclarationSyntax;
-                                //adding usings
-                                documentBuilder.AddUsings();
-                                //add class properties
-                                modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax);
-                                //add class attributes
-                                modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax);
+                                var fileDoc = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
+                                DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
+                                DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
+                                var docRoot = documentEditor.OriginalRoot as CompilationUnitSyntax;
+                                var namespaceNode = docRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
 
-                                //add code snippets/changes.
-                                if (file.Methods != null && file.Methods.Any())
+                                //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
+                                var classNode = namespaceNode?
+                                    .DescendantNodes()?
+                                    .Where(node =>
+                                        node is ClassDeclarationSyntax cds &&
+                                        cds.Identifier.ValueText.Contains(className))
+                                    .FirstOrDefault();
+
+                                if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
                                 {
-                                    modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(file, modifiedClassDeclarationSyntax); ;
+                                    var modifiedClassDeclarationSyntax = classDeclarationSyntax;
+                                    //adding usings
+                                    documentBuilder.AddUsings();
+                                    //add class properties
+                                    modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax);
+                                    //add class attributes
+                                    modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax);
+
+                                    //add code snippets/changes.
+                                    if (file.Methods != null && file.Methods.Any())
+                                    {
+                                        modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(file, modifiedClassDeclarationSyntax); ;
+                                    }
+                                    //replace class node with all the updates.
+                                    documentEditor.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
                                 }
-                                //replace class node with all the updates.
-                                documentEditor.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
+                                await documentBuilder.WriteToClassFileAsync(fileName, filePath);
                             }
-                            await documentBuilder.WriteToClassFile(fileName, filePath);
                         }
                     }
                 }
@@ -154,7 +157,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!string.IsNullOrEmpty(className))
             {
                 string[] blocks = className.Split(".cs");
-                if (blocks.Length > 1)
+                if (blocks.Length == 1)
                 {
                     return blocks[0];
                 }
@@ -186,11 +189,20 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (programDoc != null && await programDoc.GetSyntaxRootAsync() is CompilationUnitSyntax root)
             {
                 var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                var programClassNode = namespaceNode?.DescendantNodes().Where(node => node is ClassDeclarationSyntax cds
-                && cds.Identifier.ValueText.Contains("Program")).First();
+                var programClassNode = namespaceNode?.DescendantNodes()
+                    .Where(node =>
+                        node is ClassDeclarationSyntax cds &&
+                        cds.Identifier
+                           .ValueText.Contains("Program"))
+                    .First();
+
                 var nodes = programClassNode?.DescendantNodes();
-                var useStartupNode = programClassNode?.DescendantNodes().Where(node => node is MemberAccessExpressionSyntax maes
-                && maes.ToString().Contains("webBuilder.UseStartup")).First();
+                var useStartupNode = programClassNode?.DescendantNodes()
+                    .Where(node =>
+                        node is MemberAccessExpressionSyntax maes &&
+                        maes.ToString()
+                            .Contains("webBuilder.UseStartup"))
+                    .First();
 
                 var useStartupTxt = useStartupNode?.ToString();
                 if (!string.IsNullOrEmpty(useStartupTxt))

@@ -30,7 +30,7 @@ internal static class ProjectExtensions
 
     private static IEnumerable<string> GetAllSourceFiles(string directoryPath)
     {
-        var filePaths = Directory.GetFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
+        var filePaths = Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
         return filePaths;
     }
 

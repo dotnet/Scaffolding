@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription.Identifier));
                 if (!string.IsNullOrEmpty(projectDescription.Identifier))
                 {
-                    string projectType = Regex.Replace(projectDescription.Identifier, "dotnet-", "");
+                    string projectType = projectDescription.Identifier.Replace("dotnet-", "");
                     ProvisioningToolOptions.ProjectType ??= projectType;
                 }
             }

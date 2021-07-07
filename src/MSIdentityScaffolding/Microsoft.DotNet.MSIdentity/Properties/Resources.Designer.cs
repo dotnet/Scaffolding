@@ -61,6 +61,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added {0} to user secrets..
+        /// </summary>
+        internal static string AddingKeyToUserSecrets {
+            get {
+                return ResourceManager.GetString("AddingKeyToUserSecrets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding package {0} . . ..
+        /// </summary>
+        internal static string AddingPackage {
+            get {
+                return ResourceManager.GetString("AddingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress)..
         /// </summary>
         internal static string AuthNotEnabled {

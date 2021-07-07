@@ -1,13 +1,13 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter.CodeChange;
 using Microsoft.DotNet.MSIdentity.Tool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests

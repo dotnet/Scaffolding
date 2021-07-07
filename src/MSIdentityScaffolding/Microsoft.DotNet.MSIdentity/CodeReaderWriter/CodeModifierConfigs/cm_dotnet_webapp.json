@@ -28,7 +28,7 @@
             {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
+              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"));"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",

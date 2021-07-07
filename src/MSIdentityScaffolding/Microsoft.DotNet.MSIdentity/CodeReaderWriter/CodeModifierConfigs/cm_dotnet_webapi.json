@@ -22,7 +22,7 @@
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
               "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"))",
+              "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"));",
               "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
             }
           ]
@@ -55,7 +55,7 @@
           "CodeChanges": [
             {
               "Append": true,
-              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)"
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);"
             }
           ]
         }

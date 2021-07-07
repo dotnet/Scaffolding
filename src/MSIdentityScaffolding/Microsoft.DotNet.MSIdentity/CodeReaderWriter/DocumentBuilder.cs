@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 var sampleMember = modifiedClassDeclarationSyntax.Members.FirstOrDefault();
                 var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
                 var memberTrailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-
+                
                 //create MemberDeclarationSyntax[] with all the Property strings. 
                 var classProperties = CreateClassProperties(modifiedClassDeclarationSyntax.Members, memberLeadingTrivia, memberTrailingTrivia);
 
@@ -187,10 +187,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     //add a SimpleMemberAccessExpression to parent node.
                     if (CodeChangeType.MemberAccess.Equals(change.Type))
                     {
-                        var modifiedExprNode = AddSimpleMemberAccessExpression(exprNode, change.Block)?.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                        var trailingTrivia = exprNode.GetTrailingTrivia();
+                        if (trailingTrivia.Where(x => x.ToString().Trim(' ').Equals(";")).Any())
+                        {
+                            trailingTrivia = trailingTrivia.Insert(0, SemiColonTrivia);
+                        }
+                        var modifiedExprNode = AddSimpleMemberAccessExpression(exprNode, change.Block)?.WithTrailingTrivia(trailingTrivia);
                         if (modifiedExprNode != null)
                         {
-                            var trailingTrivia = modifiedExprNode.GetTrailingTrivia();
                             modifiedExprNode = modifiedExprNode.WithTrailingTrivia(trailingTrivia);
                             modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.ReplaceNode(parentNode, modifiedExprNode);
                         }

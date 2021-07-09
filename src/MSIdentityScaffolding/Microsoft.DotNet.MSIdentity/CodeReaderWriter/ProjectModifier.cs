@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!string.IsNullOrEmpty(className))
             {
                 string[] blocks = className.Split(".cs");
-                if (blocks.Length == 1)
+                if (blocks.Length > 1)
                 {
                     return blocks[0];
                 }

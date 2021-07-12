@@ -33,11 +33,11 @@
     <!-- Microsoft.Build.Utilities-->
     <MicrosoftBuildUtilitiesCorePackageVersion>16.8.0 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>3.9.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
     <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.5.21301.17</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.8.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>3.9.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.1.21076.2</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
@@ -125,11 +125,13 @@
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
     <AzureIdentityVersion>1.3.0</AzureIdentityVersion>
+    <CodeAnalysisVersion>3.9.0</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>3.1.9</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.9</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.9</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>3.25.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>2.18.0</MicrosoftIdentityClientExtensionsMsalVersion>
+    <NuGetProjectModelVersion>5.9.1</NuGetProjectModelVersion>
     <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
     <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>

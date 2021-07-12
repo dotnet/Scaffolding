@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
   <ItemGroup>
     <ProjectReference Include=""..\Library2\Library2.csproj"" />
   </ItemGroup>
-  <ItemGroup Condition=""'$(TargetFramework)' == 'net5.0' "">
+  <ItemGroup Condition=""'$(TargetFramework)' == 'net6.0' "">
     <Reference Include=""System"" />
     <Reference Include=""System.Data"" />
   </ItemGroup>

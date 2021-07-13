@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Code Generation tool for ASP.NET Core. Contains the dotnet-aspnet-codegenerator command used for generating controllers and views. </Description>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <NoWarn>$(NoWarn);NU5118</NoWarn>
@@ -40,7 +40,7 @@
   <ItemGroup>
     <None Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
-    <None Include="$(ArtifactsBinDir)\VS.Web.CG.Msbuild\$(Configuration)\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />  
+    <None Include="$(ArtifactsBinDir)\VS.Web.CG.Msbuild\$(Configuration)\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />  
   </ItemGroup> 
 
   <ItemGroup>

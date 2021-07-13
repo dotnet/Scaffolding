@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <RootNamespace>Microsoft.DotNet.MSIdentity</RootNamespace>
     <SignAssembly>true</SignAssembly>
@@ -26,10 +26,10 @@
     <Product>Microsoft identity platform app registration tool</Product>
     <Description>
       This package is a dotnet global tool which registers new Azure AD or Azure AD B2C applications, and updates your code accordingly, or modifies/edits existing
-      Azure AD or Azure AD B2C applications and updates the code. This tool automates the steps of going to the portal UI for app registration and also updates
+      Azure AD or Azure AD B2C app registrations and updates the project. This tool automates the steps of going to the portal UI for app registration and also updates
       the corresponding code for that application. With this tool, you can develop and register an ASP.NET Core web app, web API, gRPC service or Azure Function 
       protected with the Microsoft identity platform, which can call Microsoft Graph or downstream web APIs.
-      For details see https://aka.ms/dotnet-msidentity.
+      For details see https://aka.ms/dotnet-msidentity. Works with ASP.NET Core 3.1 and .NET 5.0, 6.0 projects.
     </Description>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <PackageProjectUrl>https://github.com/dotnet/MSIdentityScaffolding/blob/main/README.md</PackageProjectUrl>

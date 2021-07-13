@@ -43,7 +43,7 @@ namespace Tests
         [InlineData(@"webapp\webapp-singleorg", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapp")]
         [InlineData(@"webapp\webapp-singleorg-callsgraph", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapp")]
         [InlineData(@"webapp\webapp-singleorg-callswebapi", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapp")]
-        [Theory]
+        [Theory(Skip="Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader(string folderPath, string command, string expectedProjectType, bool isB2C = false)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
@@ -122,7 +122,7 @@ namespace Tests
         //[InlineData(@"blazorwasm\blazorwasm-singleorg-callsgraph-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph --hosted", "dotnet-blazorwasm-hosted")]
         //[InlineData(@"blazorwasm\blazorwasm-singleorg-callswebapi-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\" --hosted", "dotnet-blazorwasm-hosted")]
         [InlineData(@"blazorwasm\blazorwasm-singleorg-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com  --hosted", "dotnet-blazorwasm-hosted")]
-        [Theory]
+        [Theory(Skip="Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader_TemplatesWithBlazorWasmHosted(string folderPath, string command, string expectedProjectType)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");

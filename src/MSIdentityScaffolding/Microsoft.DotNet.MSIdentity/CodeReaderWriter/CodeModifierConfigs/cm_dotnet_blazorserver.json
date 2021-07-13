@@ -1,0 +1,65 @@
+{
+  "Identifier": "dotnet-blazorserver",
+  "Files": [
+    {
+      "FileName": "Startup.cs",
+      "Methods": {
+        "Configure": {
+          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
+          "CodeChanges": [
+            {
+              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "Block": "IApplicationBuilder.UseAuthentication()"
+            },
+            {
+              "InsertAfter": "IApplicationBuilder.UseAuthentication()",
+              "Block": "IApplicationBuilder.UseAuthorization()"
+            },
+            {
+              "Parent": "IApplicationBuilder.UseEndpoints",
+              "Type": "InLambdaBlock",
+              "Block": "endpoints.MapControllers()"
+            }
+          ]
+        },
+        "ConfigureServices": {
+          "Parameters": [ "IServiceCollection" ],
+          "CodeChanges": [
+            {
+              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)"
+            },
+            {
+              "Block": "IServiceCollection.AddControllersWithViews().AddMicrosoftIdentityUI()",
+              "InsertAfter":"IApplicationBuilder.AddAuthentication()"
+            },
+            {
+              "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
+            },
+            {
+              "Block": "IServiceCollection.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
+            },
+            {
+              "Block": "IServiceCollection.AddServerSideBlazor()",
+              "InsertAfter":"IServiceCollection.AddRazorPages()"
+            },
+            {
+              "Parent": "IServiceCollection.AddServerSideBlazor()",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityConsentHandler()"
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.UI",
+        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "Microsoft.AspNetCore.Authorization",
+        "Microsoft.AspNetCore.Mvc.Authorization"
+      ]
+    }
+  ]
+}

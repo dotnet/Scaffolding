@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <RootNamespace>Microsoft.DotNet.MSIdentity</RootNamespace>
     <OutputType>Library</OutputType>
@@ -35,8 +35,22 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonMsIdentityPackageVersion)" />
   </ItemGroup>
 
+  <!-- Packages for CodeAnalysis code changes-->
   <ItemGroup>
-    <Compile Include="..\..\Scaffolding\Shared\Cli.Utils\*.cs">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(RepoRoot)src\Scaffolding\Shared\Cli.Utils\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
     </Compile>
   </ItemGroup>

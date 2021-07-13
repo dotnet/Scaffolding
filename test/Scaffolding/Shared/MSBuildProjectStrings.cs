@@ -116,7 +116,7 @@ public const string RootProjectTxtWithoutEF = @"
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
     <OutputType>EXE</OutputType>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <OutputPath>bin\$(Configuration)</OutputPath>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
@@ -634,7 +634,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </When>
     <Otherwise>
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolAssets\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -811,7 +811,7 @@ namespace Test
     <RestoreSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
     <NoWarn>NU1605</NoWarn>
@@ -972,7 +972,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </When>
     <Otherwise>
       <PropertyGroup >
-        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+        <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -1021,7 +1021,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
   <PropertyGroup>
-    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net5.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
   </PropertyGroup>
 
   <UsingTask TaskName=""ProjectContextWriter""

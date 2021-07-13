@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Extensions.Internal;
 
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             InitUserSecrets(projectPath, consoleLogger);
             string section = isB2C ? "AzureADB2C" : "AzureAD";
             string key = $"{section}:ClientSecret";
-            SetUserSecerets(projectPath, key, value, consoleLogger);
+            SetUserSecrets(projectPath, key, value, consoleLogger);
         }
 
         public static void InitUserSecrets(string projectPath, IConsoleLogger consoleLogger)
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             arguments.Add("init");
-            consoleLogger.LogMessage("\nInitializing User Secrets . . . ", LogMessageType.Error);
+            consoleLogger.LogMessage(Resources.InitializeUserSecrets, LogMessageType.Error);
 
             var result = Command.CreateDotNet(
                 "user-secrets",
@@ -86,16 +87,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             
             if (result.ExitCode != 0)
             {
-                consoleLogger.LogMessage("FAILED\n", LogMessageType.Error, removeNewLine: true);
-                throw new Exception("Error while running dotnet-user-secrets init");
+                consoleLogger.LogMessage(Resources.Failed, LogMessageType.Error, removeNewLine: true);
+                throw new Exception(Resources.DotnetUserSecretsError);
             }
             else
             {
-                consoleLogger.LogMessage("SUCCESS\n", removeNewLine: true);
+                consoleLogger.LogMessage(Resources.Success, removeNewLine: true);
             }
         }
 
-        public static void AddPackage(string packageName, string packageVersion, string tfm, IConsoleLogger consoleLogger)
+        public static void AddPackage(string packageName, string tfm, IConsoleLogger consoleLogger, string? packageVersion = null)
         {
             if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
             {
@@ -121,7 +122,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     arguments.Add(tfm);
                 }
 
-                consoleLogger.LogMessage($"\nAdding package {packageName} . . . ");
+                consoleLogger.LogMessage(string.Format(Resources.AddingPackage, packageName));
 
                 var result = Command.CreateDotNet(
                     "add",
@@ -132,12 +133,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 if (result.ExitCode != 0)
                 {
-                    consoleLogger.LogMessage("FAILED\n", removeNewLine: true);
-                    consoleLogger.LogMessage($"Failed to add package {packageName}");
+                    consoleLogger.LogMessage(Resources.Success, removeNewLine: true);
+                    consoleLogger.LogMessage(string.Format(Resources.FailedAddPackage, packageName));
                 }
                 else
                 {
-                    consoleLogger.LogMessage("SUCCESS\n");
+                    consoleLogger.LogMessage(Resources.Success);
                 }
             }
         }
@@ -147,7 +148,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return tfm.Equals("net6.0", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void SetUserSecerets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
+        private static void SetUserSecrets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -177,7 +178,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             else 
             {
-                consoleLogger.LogMessage($"\nAdded {key} to user secrets.\n");
+                string consoleOutput = string.Format(Resources.AddingKeyToUserSecrets, key);    
+                consoleLogger.LogMessage($"\n{consoleOutput}\n");
             }
         }
 

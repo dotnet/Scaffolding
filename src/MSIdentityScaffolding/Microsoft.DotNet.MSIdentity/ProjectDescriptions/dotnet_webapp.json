@@ -26,5 +26,12 @@
         }
       ]
     }
+  ],
+  "Packages": [
+    "Microsoft.AspNetCore.Authentication",
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+    "Microsoft.AspNetCore.Authorization",
+    "Microsoft.Identity.Web",
+    "Microsoft.Identity.Web.UI"
   ]
 }

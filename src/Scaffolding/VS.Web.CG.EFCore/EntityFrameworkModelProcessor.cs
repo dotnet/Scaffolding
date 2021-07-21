@@ -84,6 +84,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var programType = _modelTypesLocator.GetType("Program").FirstOrDefault();
 
             ModelType dbContextSymbolInWebProject = null;
+            //if there is no Startup.cs (minimal hosting app), this scaffolding scanerio is not supported.
+            if (startupType == null)
+            {
+               throw new InvalidOperationException("\n" + MessageStrings.StartupScaffoldingNotSupported);
+            }
+
             if (!dbContextSymbols.Any())
             {
                 await GenerateNewDbContextAndRegister(startupType, programType);

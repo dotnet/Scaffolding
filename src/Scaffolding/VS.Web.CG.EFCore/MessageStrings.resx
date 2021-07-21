@@ -177,6 +177,9 @@
   <data name="ScaffoldingNeedsToRerun" xml:space="preserve">
     <value>Scaffolding should be run again since it needs to reload the application with the added package reference - just run the previous command one more time.</value>
   </data>
+  <data name="StartupScaffoldingNotSupported" xml:space="preserve">
+    <value>Startup.cs file was not found. Scaffolding is not supported for minimal hosting scenarios.</value>
+  </data>
   <data name="TemplateProcessingError" xml:space="preserve">
     <value>There was an error running the template {0}: {1}</value>
   </data>

@@ -11,16 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\General\**\*.cs">
-      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
-    </Compile>
-    <EmbeddedResource Include="..\Shared\General\**\*.resx">
+    <EmbeddedResource Include="..\..\Shared\Microsoft.DotNet.Scaffolding.Shared\General\**\*.resx">
       <Link>Shared\%(RecursiveDir)%(FileName).resx</Link>
     </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

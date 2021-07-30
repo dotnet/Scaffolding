@@ -3,8 +3,9 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller

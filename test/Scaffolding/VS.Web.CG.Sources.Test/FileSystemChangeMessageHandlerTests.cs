@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using Xunit;
 

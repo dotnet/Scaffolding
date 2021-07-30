@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
@@ -76,6 +76,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         [Build.Framework.Required]
         public string ProjectAssetsFile { get; set; }
+
+        [Build.Framework.Required]
+        public string GeneratedImplicitNamespaceImportFile { get; set; }
         #endregion
 
         public override bool Execute()
@@ -100,7 +103,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 RuntimeConfig = this.ProjectRuntimeConfigFileName,
                 TargetDirectory = this.TargetDirectory,
                 TargetFramework = this.TargetFramework,
-                TargetFrameworkMoniker = this.TargetFrameworkMoniker
+                TargetFrameworkMoniker = this.TargetFrameworkMoniker, 
+                GeneratedImplicitNamespaceImportFile = this.GeneratedImplicitNamespaceImportFile
             };
 
             var projectReferences = msBuildContext.ProjectReferences;

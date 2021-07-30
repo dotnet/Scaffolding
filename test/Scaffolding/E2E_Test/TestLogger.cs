@@ -3,6 +3,7 @@
 
 using System;
 using System.Text;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Xunit.Abstractions;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration

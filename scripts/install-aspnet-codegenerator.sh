@@ -13,7 +13,7 @@ rm -rf artifacts
 dotnet tool uninstall -g dotnet-aspnet-codegenerator 
 cd $DEFAULT_NUPKG_PATH
 rm -rf microsoft.visualstudio.web.codegeneration
-rm -rf microsoft.visualstudio.web.codegeneration.contracts
+rm -rf Microsoft.DotNet.Scaffolding.Shared
 rm -rf microsoft.visualstudio.web.codegeneration.core
 rm -rf microsoft.visualstudio.web.codegeneration.design
 rm -rf microsoft.visualstudio.web.codegeneration.entityframeworkcore

@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
@@ -50,12 +51,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     foreach (var file in codeModifierConfig.Files)
                     {
                         var fileName = file.FileName;
-                        string className = GetClassName(fileName);
+                        string className = ProjectModifierHelper.GetClassName(fileName);
 
                         //if the file we are modifying is Startup.cs, use Program.cs to find the correct file to edit.
                         if (!string.IsNullOrEmpty(file.FileName) && file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase))
                         {
-                            fileName = await GetStarupClass(project);
+                            fileName = await ProjectModifierHelper.GetStartupClass(_toolOptions.ProjectPath, project);
                         }
 
                         if (!string.IsNullOrEmpty(fileName))
@@ -149,73 +150,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             string jsonText = Encoding.UTF8.GetString(fileContent);
             return JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
-        }
-
-        internal string GetClassName(string? className)
-        {
-            string formattedClassName = string.Empty;
-            if (!string.IsNullOrEmpty(className))
-            {
-                string[] blocks = className.Split(".cs");
-                if (blocks.Length > 1)
-                {
-                    return blocks[0];
-                }
-            }
-            return formattedClassName;
-        }
-
-        //Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
-        //will bail out.
-        internal async Task<string?> GetStarupClass(CodeAnalysis.Project project)
-        {
-            var programFilePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, "Program.cs").FirstOrDefault();
-            if (!string.IsNullOrEmpty(programFilePath))
-            {
-                var programDoc = project.Documents.Where(d => d.Name.Equals(programFilePath)).FirstOrDefault();
-                var startupClassName = await GetStartupClassName(programDoc);
-                string className = startupClassName;
-                var startupFilePath = string.Empty;
-                if (!string.IsNullOrEmpty(startupClassName))
-                {
-                    return string.Concat(startupClassName, ".cs");
-                }
-            }
-            return string.Empty;
-        }
-
-        internal async Task<string> GetStartupClassName(Document? programDoc)
-        {
-            if (programDoc != null && await programDoc.GetSyntaxRootAsync() is CompilationUnitSyntax root)
-            {
-                var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                var programClassNode = namespaceNode?.DescendantNodes()
-                    .Where(node =>
-                        node is ClassDeclarationSyntax cds &&
-                        cds.Identifier
-                           .ValueText.Contains("Program"))
-                    .First();
-
-                var nodes = programClassNode?.DescendantNodes();
-                var useStartupNode = programClassNode?.DescendantNodes()
-                    .Where(node =>
-                        node is MemberAccessExpressionSyntax maes &&
-                        maes.ToString()
-                            .Contains("webBuilder.UseStartup"))
-                    .First();
-
-                var useStartupTxt = useStartupNode?.ToString();
-                if (!string.IsNullOrEmpty(useStartupTxt))
-                {
-                    int startIndex = useStartupTxt.IndexOf("<");
-                    int endIndex = useStartupTxt.IndexOf(">");
-                    if (startIndex > -1 && endIndex > startIndex)
-                    {
-                        return useStartupTxt.Substring(startIndex + 1, endIndex - startIndex - 1);
-                    }
-                }
-            }
-            return string.Empty;
         }
     }
 }

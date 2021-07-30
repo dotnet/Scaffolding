@@ -10,6 +10,7 @@
     <DebugType>pdbonly</DebugType>
     <DebugSymbol>true</DebugSymbol>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
   </PropertyGroup>
 
   <PropertyGroup>

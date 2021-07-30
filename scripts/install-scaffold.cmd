@@ -10,7 +10,7 @@ call dotnet tool uninstall -g Microsoft.dotnet-scaffold
 
 call cd %DEFAULT_NUPKG_PATH%
 call rd /Q /S microsoft.visualstudio.web.codegeneration
-call rd /Q /S microsoft.visualstudio.web.codegeneration.contracts
+call rd /Q /S Microsoft.DotNet.Scaffolding.Shared
 call rd /Q /S microsoft.visualstudio.web.codegeneration.core
 call rd /Q /S microsoft.visualstudio.web.codegeneration.design
 call rd /Q /S microsoft.visualstudio.web.codegeneration.entityframeworkcore

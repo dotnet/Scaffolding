@@ -13,12 +13,7 @@
     <Compile Include="..\Shared\**\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Scaffolding\Ext.ProjectModel.MsBuild.Sources\**\*.cs;">
-      <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
-    </Compile>
-    <Compile Include="$(RepoRoot)\src\Scaffolding\Shared\Cli.Utils\*.cs">
-      <Link>Shared\Cli.Utils\%(FileName)</Link>
-    </Compile>
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />

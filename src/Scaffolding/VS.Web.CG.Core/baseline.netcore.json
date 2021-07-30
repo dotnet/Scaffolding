@@ -310,7 +310,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "loadContext",
@@ -612,7 +612,7 @@
           "Kind": "Method",
           "Name": "get_Changes",
           "Parameters": [],
-          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>",
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.SharedInformation>",
           "Sealed": true,
           "Virtual": true,
           "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.IFileSystemChangeTracker",
@@ -625,7 +625,7 @@
           "Parameters": [
             {
               "Name": "fileSystemChangeInfo",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation"
             }
           ],
           "ReturnType": "System.Void",
@@ -641,7 +641,7 @@
           "Parameters": [
             {
               "Name": "fileSystemChangeInfo",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation"
             }
           ],
           "ReturnType": "System.Void",
@@ -657,7 +657,7 @@
           "Parameters": [
             {
               "Name": "fileSystemChanges",
-              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>"
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation>"
             }
           ],
           "ReturnType": "System.Void",
@@ -980,7 +980,7 @@
           "Kind": "Method",
           "Name": "get_Changes",
           "Parameters": [],
-          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>",
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation>",
           "GenericParameter": []
         },
         {
@@ -989,7 +989,7 @@
           "Parameters": [
             {
               "Name": "info",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation"
             }
           ],
           "ReturnType": "System.Void",
@@ -1001,7 +1001,7 @@
           "Parameters": [
             {
               "Name": "info",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation"
             }
           ],
           "ReturnType": "System.Void",
@@ -1020,7 +1020,7 @@
           "Parameters": [
             {
               "Name": "subDirectoryChanges",
-              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>"
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation>"
             }
           ],
           "ReturnType": "System.Void",
@@ -1381,7 +1381,7 @@
           "Kind": "Method",
           "Name": "get_FileSystemChanges",
           "Parameters": [],
-          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange.FileSystemChangeInformation>",
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.FileSystemChangeInformation>",
           "Visibility": "Public",
           "GenericParameter": []
         },

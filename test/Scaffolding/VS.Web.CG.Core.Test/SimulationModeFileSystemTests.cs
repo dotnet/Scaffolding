@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test

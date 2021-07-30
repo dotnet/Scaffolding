@@ -22,8 +22,8 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
 
-   <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
-
+  <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
+  
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(AzureIdentityVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftExtensionsConfigurationVersion)" />
@@ -50,11 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)src\Scaffolding\Shared\Cli.Utils\*.cs">
-      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
     <Folder Include="Resources\" />
   </ItemGroup>
 

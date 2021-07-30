@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
@@ -10,7 +11,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using PInfo = Microsoft.CodeAnalysis.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
@@ -92,6 +93,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                     : Path.Combine(Path.GetDirectoryName(fullPath), file);
                 AddSourceFile(projectInfo, filePath);
             }
+
+            if (!string.IsNullOrEmpty(context.GeneratedImplicitNamespaceImportFile) && !string.IsNullOrEmpty(fullPath))
+            {
+                var namespaceImportsFilePath = Path.Combine(Path.GetDirectoryName(fullPath), context.GeneratedImplicitNamespaceImportFile);
+                AddSourceFile(projectInfo, namespaceImportsFilePath);
+            }
+
 
             return projectInfo.Id;
         }

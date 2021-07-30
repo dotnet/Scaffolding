@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Newtonsoft.Json.Linq;
@@ -162,46 +162,84 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 var configServicesMethod = startUpClassNode.ChildNodes()
                     .FirstOrDefault(n => n is MethodDeclarationSyntax
                         && ((MethodDeclarationSyntax)n).Identifier.ToString() == "ConfigureServices") as MethodDeclarationSyntax;
-
                 var configRootProperty = TryGetIConfigurationRootProperty(startUp.TypeSymbol);
-
-                if (configServicesMethod != null && configRootProperty != null)
+                //if using Startup.cs, the ConfigureServices method should exist. 
+                if (configServicesMethod != null)
                 {
-                    var servicesParam = configServicesMethod.ParameterList.Parameters
-                        .FirstOrDefault(p => p.Type.ToString() == "IServiceCollection") as ParameterSyntax;
-                    string textToAddAtEnd;
-                    var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
-                    if (servicesParam != null)
+                    if (configServicesMethod != null && configRootProperty != null)
                     {
-                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
-                        if (useSqlite)
-                        {
-
-                            textToAddAtEnd =
-                                statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
-                                statementLeadingTrivia + "        options.UseSqlite({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
-                        }
-                        else 
-                        {
-                            textToAddAtEnd =
-                                statementLeadingTrivia + "{0}.AddDbContext<{1}>(options =>" + Environment.NewLine +
-                                statementLeadingTrivia + "        options.UseSqlServer({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
-                        }
+                        var servicesParam = configServicesMethod.ParameterList.Parameters
+                            .FirstOrDefault(p => p.Type.ToString() == "IServiceCollection") as ParameterSyntax;
                         
-                        if (configServicesMethod.Body.Statements.Any())
+                        var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
+                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, useSqlite, statementLeadingTrivia);
+                        if (servicesParam != null)
                         {
-                            textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
+                            _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
+                            if (configServicesMethod.Body.Statements.Any())
+                            {
+                                textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
+                            }
+
+                            var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
+                                servicesParam.Identifier,
+                                dbContextTypeName,
+                                configRootProperty.Name));
+
+                            MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
+
+                            var newRoot = rootNode.ReplaceNode(configServicesMethod, newConfigServicesMethod);
+
+                            var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
+                            foreach (var namespaceName in namespacesToAdd)
+                            {
+                                newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
+                            }
+
+                            return new EditSyntaxTreeResult()
+                            {
+                                Edited = true,
+                                OldTree = sourceTree,
+                                NewTree = sourceTree.WithRootAndOptions(newRoot, sourceTree.Options)
+                            };
+                        }
+                    }
+                }
+                //minimal hosting scenario
+                else
+                {
+                    CompilationUnitSyntax classSyntax = startUpClassNode as CompilationUnitSyntax;
+                    if (classSyntax != null)
+                    {
+                        //get leading trivia
+                        var statementLeadingTrivia = classSyntax.Members.First().GetLeadingTrivia().ToString();
+
+                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, useSqlite, statementLeadingTrivia);
+                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
+                        textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
+
+                        //get builder identifier string
+                        var builderExpression = classSyntax.Members.Where(st => st.ToString().Contains("WebApplication.CreateBuilder")).FirstOrDefault();
+                        var builderIdentifierString = GetBuilderIdentifier(builderExpression);
+
+                        //create syntax expression that adds DbContext
+                        var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
+                                string.Format("{0}.Services", builderIdentifierString),
+                                dbContextTypeName,
+                                string.Format("{0}.Configuration", builderIdentifierString)));
+                        var dbContextExpression = SyntaxFactory.GlobalStatement(expression);
+
+                        //get global statement to insert after (different for web app vs web api)
+                        var statementToInsertAfter = classSyntax.Members.Where(st => st.ToString().Contains("Services.AddRazorPages()")).FirstOrDefault();
+                        if (statementToInsertAfter == null)
+                        {
+                            statementToInsertAfter = classSyntax.Members.Where(st => st.ToString().Contains("CreateBuilder(args)")).FirstOrDefault(); 
                         }
 
-                        var expression = SyntaxFactory.ParseStatement(String.Format(textToAddAtEnd,
-                            servicesParam.Identifier,
-                            dbContextTypeName,
-                            configRootProperty.Name));
+                        var newClassSyntax = classSyntax.InsertNodesAfter(statementToInsertAfter, new List<GlobalStatementSyntax>() { dbContextExpression });
+                        var newRoot = rootNode.ReplaceNode(classSyntax, newClassSyntax);
 
-                        MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
-
-                        var newRoot = rootNode.ReplaceNode(configServicesMethod, newConfigServicesMethod);
-
+                        //add additional namespaces
                         var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
                         foreach (var namespaceName in namespacesToAdd)
                         {
@@ -222,6 +260,46 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 Edited = false
             };
+        }
+
+        private string GetBuilderIdentifier(MemberDeclarationSyntax builderMember)
+        {
+            if (builderMember != null)
+            {
+                var builderVariable = builderMember?.ChildNodes().Where(st => st is StatementSyntax).FirstOrDefault()?.ChildNodes().Where(decl => decl is VariableDeclarationSyntax).FirstOrDefault();
+                var builderIdentifierString = string.Empty;
+                if (builderVariable != null)
+                {
+                    var builderIdentifier = builderVariable as VariableDeclarationSyntax;
+                    builderIdentifierString = builderIdentifier.Variables.FirstOrDefault()?.Identifier.ToString();
+                }
+                if (!string.IsNullOrEmpty(builderIdentifierString))
+                {
+                    return builderIdentifierString;
+                }
+            }
+            return "builder";
+        }
+        
+        private string AddDbContextString(bool minimalHostingTemplate, bool useSqlite, string statementLeadingTrivia)
+        {
+            string textToAddAtEnd;
+            string additionalNewline = minimalHostingTemplate ? string.Empty : Environment.NewLine;
+            string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
+            string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
+            if (useSqlite)
+            {
+                textToAddAtEnd =
+                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
+            }
+            else
+            {
+                textToAddAtEnd =
+                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
+            }
+            return textToAddAtEnd;
         }
 
         private IPropertySymbol TryGetIConfigurationRootProperty(ITypeSymbol startup)

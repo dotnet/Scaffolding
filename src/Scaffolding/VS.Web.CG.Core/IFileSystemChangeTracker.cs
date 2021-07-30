@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
+using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {

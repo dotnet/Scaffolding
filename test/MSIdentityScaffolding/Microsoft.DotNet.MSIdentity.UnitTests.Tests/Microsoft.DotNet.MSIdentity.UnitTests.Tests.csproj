@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
 </Project>

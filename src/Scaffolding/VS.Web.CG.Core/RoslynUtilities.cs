@@ -15,7 +15,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
                 throw new ArgumentNullException(nameof(compilation));
             }
-
+            var ns = compilation.Assembly.GlobalNamespace;
+            var ass = compilation.Assembly;
             var types = new List<ITypeSymbol>();
             CollectTypes(compilation.Assembly.GlobalNamespace, types);
             return types;
@@ -28,6 +29,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             foreach (var nestedNs in ns.GetNamespaceMembers())
             {
                 CollectTypes(nestedNs, types);
+            }
+        }
+
+        private static void CollectTypes2(INamespaceSymbol ns, List<ITypeSymbol> types)
+        {
+            types.AddRange(ns.GetTypeMembers().Cast<ITypeSymbol>());
+
+            foreach (var nestedNs in ns.GetNamespaceMembers())
+            {
+                CollectTypes2(nestedNs, types);
             }
         }
     }

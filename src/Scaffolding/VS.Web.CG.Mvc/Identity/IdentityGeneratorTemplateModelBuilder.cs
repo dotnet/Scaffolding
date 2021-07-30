@@ -7,10 +7,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -112,6 +114,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task<IdentityGeneratorTemplateModel> ValidateAndBuild()
         {
+            Debugger.Launch();
             ValidateCommandLine(_commandlineModel);
             RootNamespace = string.IsNullOrEmpty(_commandlineModel.RootNamespace)
                 ? _projectContext.RootNamespace

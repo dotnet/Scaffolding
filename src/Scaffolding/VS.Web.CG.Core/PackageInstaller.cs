@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Newtonsoft.Json.Linq;

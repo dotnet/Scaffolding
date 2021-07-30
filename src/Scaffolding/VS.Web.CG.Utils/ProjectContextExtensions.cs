@@ -3,7 +3,7 @@
 
 using System;
 using System.Linq;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils

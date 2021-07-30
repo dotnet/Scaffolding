@@ -22,6 +22,9 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="$(OutputPath)$(AssemblyName).dll;
                       $(OutputPath)$(AssemblyName).xml;"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">

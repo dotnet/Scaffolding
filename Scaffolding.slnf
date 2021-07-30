@@ -5,7 +5,7 @@
         "tools\\dotnet-aspnet-codegenerator\\dotnet-aspnet-codegenerator.csproj",
         "tools\\dotnet-scaffold\\dotnet-scaffold.csproj",
         "src\\Scaffolding\\VS.Web.CG\\VS.Web.CG.csproj",
-        "src\\Scaffolding\\VS.Web.CG.Contracts\\VS.Web.CG.Contracts.csproj",
+        "src\\Scaffolding\\Microsoft.DotNet.Scaffolding.Shared\\Microsoft.DotNet.Scaffolding.Shared.csproj",
         "src\\Scaffolding\\VS.Web.CG.Core\\VS.Web.CG.Core.csproj",
         "src\\Scaffolding\\VS.Web.CG.Design\\VS.Web.CG.Design.csproj",
         "src\\Scaffolding\\VS.Web.CG.Design-anycpu\\VS.Web.CG.Design-anycpu.csproj",

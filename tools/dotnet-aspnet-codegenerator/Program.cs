@@ -9,8 +9,9 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {

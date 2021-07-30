@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.Web.CodeGeneration;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {

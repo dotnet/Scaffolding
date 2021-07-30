@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -47,10 +45,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
                 throw new ArgumentNullException(nameof(typeName));
             }
-
-            var temp2 = _projectWorkspace
-                .CurrentSolution.Projects
-                .Select(project => project.GetCompilationAsync().Result).First().Assembly;
 
             var exactTypesInAllProjects = _projectWorkspace
                 .CurrentSolution.Projects

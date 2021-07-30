@@ -125,6 +125,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         /// </summary>
         IEnumerable<ProjectReferenceInformation> ProjectReferenceInformation { get; }
 
+        /// <summary>
+        /// .cs file in obj folder generated at compile time with all default namespace imports in .NET 6+.
+        /// </summary>
         string GeneratedImplicitNamespaceImportFile { get; }
     }
 }

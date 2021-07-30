@@ -3,8 +3,8 @@
 
 using System;
 using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller

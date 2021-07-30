@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using Microsoft.Extensions.Internal;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Newtonsoft.Json;

@@ -72,6 +72,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
 
         public string TargetFrameworkMoniker { get; set; }
 
+        /// <inheritdoc/>
         public string GeneratedImplicitNamespaceImportFile { get; set; }
     }
 }

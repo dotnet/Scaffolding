@@ -4,9 +4,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Messaging
 {

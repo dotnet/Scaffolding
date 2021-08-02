@@ -114,7 +114,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task<IdentityGeneratorTemplateModel> ValidateAndBuild()
         {
-            Debugger.Launch();
             ValidateCommandLine(_commandlineModel);
             RootNamespace = string.IsNullOrEmpty(_commandlineModel.RootNamespace)
                 ? _projectContext.RootNamespace

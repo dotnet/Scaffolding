@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Microsoft.AspNetCore.Razor.Language -->
-    <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0-preview.7.21369.1</MicrosoftAspNetCoreRazorLanguagePackageVersion>
+    <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0-preview.7.21377.13</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.AspNetCore.Razor.Runtime -->
     <MicrosoftAspNetCoreRazorRuntimePackageVersion>2.2.0</MicrosoftAspNetCoreRazorRuntimePackageVersion>
     <!-- Microsoft.Build-->
@@ -35,17 +35,17 @@
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-3.21369.3</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
-    <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.7.21369.1</MicrosoftCodeAnalysisRazorPackageVersion>
+    <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-preview.7.21377.13</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0-3.21369.3</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.1.21076.2</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0-preview.7.21365.2</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0-preview.7.21377.5</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.6.21352.12</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0-preview.7.21377.12</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.6.21352.12</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0-preview.7.21377.12</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <SystemCollectionsImmutablePackageVersion>5.0.0</SystemCollectionsImmutablePackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

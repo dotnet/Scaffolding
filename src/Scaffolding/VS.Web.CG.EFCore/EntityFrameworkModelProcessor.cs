@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -80,19 +79,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
         }
 
-        private async Task TestCompilation()
-        {
-            var projectCompilation = await _workspace.CurrentSolution.Projects
-                .First(project => project.AssemblyName == _projectContext.AssemblyName)
-                .GetCompilationAsync();
-
-            var assembly = CommonUtilities.GetAssemblyFromCompilation(_loader, projectCompilation);
-            var errors = assembly.ErrorMessages;
-        }
         public async Task Process()
         {
-            Debugger.Launch();
-            await TestCompilation();
             var programType = _modelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? _modelTypesLocator.GetType("Program").FirstOrDefault();
             var programDocument = _modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
             var dbContextSymbols = _modelTypesLocator.GetType(_dbContextFullTypeName).ToList();

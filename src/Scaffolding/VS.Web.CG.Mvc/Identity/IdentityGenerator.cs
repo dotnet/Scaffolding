@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
@@ -211,7 +212,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task GenerateCode(IdentityGeneratorCommandLineModel commandlineModel)
         {
-            Debugger.Launch();
             if (commandlineModel == null)
             {
                 throw new ArgumentNullException(nameof(commandlineModel));
@@ -234,9 +234,33 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             var templateModel = await templateModelBuilder.ValidateAndBuild();
             EnsureFolderLayout(IdentityAreaName, templateModel);
-
+            //Identity is not supported in minimal apps.
+            var minimalApp = await IsMinimalApp(new ModelTypesLocator(_workspace));
+            if (minimalApp)
+            {
+               _logger.LogMessage($"\n{MessageStrings.IdentityNotSupported}\n", LogMessageLevel.Error);
+               return;
+            }
             await AddTemplateFiles(templateModel);
             await AddStaticFiles(templateModel);
+        }
+
+        /// <summary>
+        /// Check if Startup.cs or similar file exists.
+        /// </summary>
+        /// <returns>true if Startup.cs does not exist, false if it does exist.</returns>
+        private static async Task<bool> IsMinimalApp(IModelTypesLocator modelTypesLocator)
+        {
+            //find Startup if named Startup.
+            var startupType = modelTypesLocator.GetType("Startup").FirstOrDefault();
+            if (startupType == null)
+            {
+                //if changed the name in Program.cs, get the class name and check.
+                var programDocument = modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+                var startupClassName = await ProjectModifierHelper.GetStartupClassName(programDocument);
+                startupType = modelTypesLocator.GetType(startupClassName).FirstOrDefault();
+            }
+            return startupType == null;
         }
 
         private void ShowFileList(string commandBootstrapVersion)

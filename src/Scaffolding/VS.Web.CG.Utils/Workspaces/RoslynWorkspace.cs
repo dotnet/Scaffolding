@@ -93,13 +93,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                     : Path.Combine(Path.GetDirectoryName(fullPath), file);
                 AddSourceFile(projectInfo, filePath);
             }
-
             if (!string.IsNullOrEmpty(context.GeneratedImplicitNamespaceImportFile) && !string.IsNullOrEmpty(fullPath))
             {
                 var namespaceImportsFilePath = Path.Combine(Path.GetDirectoryName(fullPath), context.GeneratedImplicitNamespaceImportFile);
                 AddSourceFile(projectInfo, namespaceImportsFilePath);
             }
-
+            // manually add the ImplicitImports.cs file.
+            else 
+            {
+                var namespaceImportsFilePath = $"{context.TargetDirectory.Replace("\\bin\\", "\\obj\\")}\\{context.ProjectName}.ImplicitNamespaceImports.cs";
+                AddSourceFile(projectInfo, namespaceImportsFilePath);
+            }
 
             return projectInfo.Id;
         }

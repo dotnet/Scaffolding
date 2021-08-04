@@ -119,7 +119,7 @@
     <XunitRunnerVisualStudioPackageVersion>2.4.1</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <SystemCollectionsImmutableVersion>6.0.0-preview.6.21352.12</SystemCollectionsImmutableVersion>
+    <SystemCollectionsImmutableVersion>6.0.0-preview.7.21377.12</SystemCollectionsImmutableVersion>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>

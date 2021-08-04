@@ -7,6 +7,7 @@
 
   <ItemGroup>
       <FileSignInfo Include = "Newtonsoft.Json.dll" CertificateName="3PartySHA2"/>
+      <FileSignInfo Include = "MessagePack.dll" CertificateName="3PartySHA2"/>
   </ItemGroup>
 
   <ItemGroup Label="Code sign exclusions">

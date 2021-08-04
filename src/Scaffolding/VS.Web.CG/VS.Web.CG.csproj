@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VS.Web.CG.EFCore\VS.Web.CG.EFCore.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.EFCore\VS.Web.CG.EFCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

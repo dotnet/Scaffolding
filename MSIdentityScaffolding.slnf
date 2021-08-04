@@ -3,6 +3,7 @@
     "path": "All.sln",
     "projects": [
       "src\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity\\Microsoft.DotNet.MSIdentity.csproj",
+      "src\\Shared\\Microsoft.DotNet.Scaffolding.Shared\\Microsoft.DotNet.Scaffolding.Shared.csproj",
       "test\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity.Tests\\Microsoft.DotNet.MSIdentity.Tests.csproj",
       "test\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity.UnitTests.Tests\\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj",
       "tools\\dotnet-msidentity\\dotnet-msidentity.csproj"

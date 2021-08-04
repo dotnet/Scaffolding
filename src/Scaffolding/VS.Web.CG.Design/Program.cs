@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design

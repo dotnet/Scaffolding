@@ -43,7 +43,6 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            //Debugger.Launch();
             //get csproj file path
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {

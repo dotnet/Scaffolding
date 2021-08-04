@@ -12,11 +12,12 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -40,6 +41,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private string _dbContextError;
         private SyntaxTree _dbContextSyntaxTree;
         private EditSyntaxTreeResult _startupEditResult;
+        private EditSyntaxTreeResult _programEditResult;
         private IFileSystem _fileSystem;
 
         public EntityFrameworkModelProcessor (
@@ -79,75 +81,144 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public async Task Process()
         {
+            var programType = _modelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? _modelTypesLocator.GetType("Program").FirstOrDefault();
+            var programDocument = _modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
             var dbContextSymbols = _modelTypesLocator.GetType(_dbContextFullTypeName).ToList();
-            var startupType = _modelTypesLocator.GetType("Startup").FirstOrDefault();
-            var programType = _modelTypesLocator.GetType("Program").FirstOrDefault();
+            var startupClassName = await ProjectModifierHelper.GetStartupClassName(programDocument);
+            var startupType = _modelTypesLocator.GetType(startupClassName).FirstOrDefault() ?? _modelTypesLocator.GetType("Startup").FirstOrDefault();
 
             ModelType dbContextSymbolInWebProject = null;
             //if there is no Startup.cs (minimal hosting app), this scaffolding scanerio is not supported.
             if (startupType == null)
             {
-               throw new InvalidOperationException("\n" + MessageStrings.StartupScaffoldingNotSupported);
-            }
+                _logger.LogMessage("\nMinimal hosting scenario!");
+                if (programType == null)
+                {
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, "Program"));
+                }
 
-            if (!dbContextSymbols.Any())
-            {
-                await GenerateNewDbContextAndRegister(startupType, programType);
-            }
-            else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
-            {
-                await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject);
+                if (!dbContextSymbols.Any())
+                {
+                    await GenerateNewDbContextAndRegisterProgramFile(programType);
+                }
+                else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
+                {
+                    await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject);
+                }
+                else
+                {
+                    await EnsureDbContextInLibraryIsValid(dbContextSymbols.First());
+                }
+
+                var dbContextType = _reflectedTypesProvider.GetReflectedType(
+                  modelType: _dbContextFullTypeName,
+                  lookInDependencies: true);
+
+                if (dbContextType == null)
+                {
+                    throw new InvalidOperationException(_dbContextError);
+                }
+
+                var modelReflectionType = _reflectedTypesProvider.GetReflectedType(
+                    modelType: _modelTypeSymbol.FullName,
+                    lookInDependencies: true);
+                if (modelReflectionType == null)
+                {
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, _modelTypeSymbol.Name));
+                }
+
+                var reflectedProgramType = _reflectedTypesProvider.GetReflectedType(
+                    modelType: programType.FullName,
+                    lookInDependencies: true);
+
+                if (reflectedProgramType == null)
+                {
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, reflectedProgramType.Name));
+                }
+
+                _logger.LogMessage(string.Format(MessageStrings.GettingEFMetadata, _modelTypeSymbol.Name));
+
+                ModelMetadata = GetModelMetadata(dbContextType, modelReflectionType, reflectedProgramType);
+                if (_dbContextSyntaxTree != null)
+                {
+                    PersistSyntaxTree(_dbContextSyntaxTree);
+
+                    if (ContextProcessingStatus == ContextProcessingStatus.ContextAdded || ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
+                    {
+                        _logger.LogMessage(string.Format(MessageStrings.AddedDbContext, _dbContextSyntaxTree.FilePath.Substring(_applicationInfo.ApplicationBasePath.Length)));
+
+                        if (ContextProcessingStatus != ContextProcessingStatus.ContextAddedButRequiresConfig)
+                        {
+                            PersistSyntaxTree(_programEditResult.NewTree);
+                        }
+                        else
+                        {
+                            _logger.LogMessage(MessageStrings.AdditionalSteps);
+                        }
+                    }
+                }
             }
             else
             {
-                await EnsureDbContextInLibraryIsValid(dbContextSymbols.First());
-            }
-
-            var dbContextType = _reflectedTypesProvider.GetReflectedType(
-                modelType: _dbContextFullTypeName,
-                lookInDependencies: true);
-
-            if (dbContextType == null)
-            {
-                throw new InvalidOperationException(_dbContextError);
-            }
-
-            var modelReflectionType = _reflectedTypesProvider.GetReflectedType(
-                modelType: _modelTypeSymbol.FullName,
-                lookInDependencies: true);
-            if (modelReflectionType == null)
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, _modelTypeSymbol.Name));
-            }
-
-            var reflectedStartupType = _reflectedTypesProvider.GetReflectedType(
-                modelType: startupType.FullName,
-                lookInDependencies: true);
-
-            if (reflectedStartupType == null)
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, reflectedStartupType.Name));
-            }
-
-            _logger.LogMessage(string.Format(MessageStrings.GettingEFMetadata, _modelTypeSymbol.Name));
-
-            ModelMetadata = GetModelMetadata(dbContextType, modelReflectionType, reflectedStartupType);
-
-            if (_dbContextSyntaxTree != null)
-            {
-                PersistSyntaxTree(_dbContextSyntaxTree);
-
-                if (ContextProcessingStatus == ContextProcessingStatus.ContextAdded || ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
+                if (!dbContextSymbols.Any())
                 {
-                    _logger.LogMessage(string.Format(MessageStrings.AddedDbContext, _dbContextSyntaxTree.FilePath.Substring(_applicationInfo.ApplicationBasePath.Length)));
+                    await GenerateNewDbContextAndRegister(startupType, programType);
+                }
+                else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
+                {
+                    await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject);
+                }
+                else
+                {
+                    await EnsureDbContextInLibraryIsValid(dbContextSymbols.First());
+                }
 
-                    if (ContextProcessingStatus != ContextProcessingStatus.ContextAddedButRequiresConfig)
+                var dbContextType = _reflectedTypesProvider.GetReflectedType(
+                    modelType: _dbContextFullTypeName,
+                    lookInDependencies: true);
+
+                if (dbContextType == null)
+                {
+                    throw new InvalidOperationException(_dbContextError);
+                }
+
+                var modelReflectionType = _reflectedTypesProvider.GetReflectedType(
+                    modelType: _modelTypeSymbol.FullName,
+                    lookInDependencies: true);
+                if (modelReflectionType == null)
+                {
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, _modelTypeSymbol.Name));
+                }
+
+                var reflectedStartupType = _reflectedTypesProvider.GetReflectedType(
+                    modelType: startupType.FullName,
+                    lookInDependencies: true);
+
+                if (reflectedStartupType == null)
+                {
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, reflectedStartupType.Name));
+                }
+
+                _logger.LogMessage(string.Format(MessageStrings.GettingEFMetadata, _modelTypeSymbol.Name));
+
+                ModelMetadata = GetModelMetadata(dbContextType, modelReflectionType, reflectedStartupType);
+
+                if (_dbContextSyntaxTree != null)
+                {
+                    PersistSyntaxTree(_dbContextSyntaxTree);
+
+                    if (ContextProcessingStatus == ContextProcessingStatus.ContextAdded || ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
                     {
-                        PersistSyntaxTree(_startupEditResult.NewTree);
-                    }
-                    else
-                    {
-                        _logger.LogMessage(MessageStrings.AdditionalSteps);
+                        _logger.LogMessage(string.Format(MessageStrings.AddedDbContext, _dbContextSyntaxTree.FilePath.Substring(_applicationInfo.ApplicationBasePath.Length)));
+
+                        if (ContextProcessingStatus != ContextProcessingStatus.ContextAddedButRequiresConfig)
+                        {
+                            PersistSyntaxTree(_startupEditResult.NewTree);
+                        }
+                        else
+                        {
+                            _logger.LogMessage(MessageStrings.AdditionalSteps);
+                        }
                     }
                 }
             }
@@ -287,7 +358,71 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _loader,
                 _logger);
         }
+        private async Task GenerateNewDbContextAndRegisterProgramFile(ModelType programType)
+        {
+            AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
+            _programEditResult = new EditSyntaxTreeResult()
+            {
+                Edited = false
+            };
 
+            if (!_useSqlite)
+            {
+                ValidateEFSqlServerDependency();
+            }
+            // Create a new Context
+            _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
+            var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType);
+            _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
+            ContextProcessingStatus = ContextProcessingStatus.ContextAdded;
+
+            if (programType != null)
+            {
+                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(programType,
+                    dbContextTemplateModel.DbContextTypeName,
+                    dbContextTemplateModel.DbContextNamespace,
+                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
+                    _useSqlite);
+            }
+
+            if (!_programEditResult.Edited)
+            {
+                ContextProcessingStatus = ContextProcessingStatus.ContextAddedButRequiresConfig;
+
+                // The created context would anyway fail to fetch metadata with a crypic message
+                // It's better to throw with a meaningful message
+                throw new InvalidOperationException(string.Format("{0} {1}", MessageStrings.FailedToEditStartup, MessageStrings.EnsureStartupClassExists));
+            }
+            _logger.LogMessage(MessageStrings.CompilingWithAddedDbContext);
+
+            var projectCompilation = await _workspace.CurrentSolution.Projects
+                .First(project => project.AssemblyName == _projectContext.AssemblyName)
+                .GetCompilationAsync();
+
+            _reflectedTypesProvider = GetReflectedTypesProvider(
+                projectCompilation,
+                c =>
+                {
+                    c = c.AddSyntaxTrees(assemblyAttributeGenerator.GenerateAttributeSyntaxTree());
+                    c = c.AddSyntaxTrees(_dbContextSyntaxTree);
+                    if (_programEditResult.Edited)
+                    {
+                        c = c.ReplaceSyntaxTree(_programEditResult.OldTree, _programEditResult.NewTree);
+                    }
+                    return c;
+                });
+
+            var compilationErrors = _reflectedTypesProvider.GetCompilationErrors();
+            _dbContextError = string.Format(
+                MessageStrings.DbContextCreationError,
+                (compilationErrors == null
+                    ? string.Empty
+                    : string.Join(Environment.NewLine, compilationErrors)));
+
+            _dbContextSyntaxTree = _dbContextSyntaxTree.WithFilePath(GetPathForNewContext(dbContextTemplateModel.DbContextTypeName, _areaName));
+        }
+
+        //if not minimal hosting, edit Startup.cs
         private async Task GenerateNewDbContextAndRegister(ModelType startupType, ModelType programType)
         {
             AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
@@ -364,7 +499,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(modelType));
             }
 
-            DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, startupType);
+            DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, dbContextType);
 
             if (dbContextInstance == null)
             {
@@ -406,7 +541,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 // ASPNETCORE_ENVIRONMENT. This should already be set up by the CodeGeneration.Design process.
                 OperationReportHandler operationHandler = new OperationReportHandler();
 
-                return DbContextActivator.CreateInstance(dbContextType, startupType.GetTypeInfo().Assembly, operationHandler);
+                var assembly = startupType.GetTypeInfo().Assembly;
+                return DbContextActivator.CreateInstance(dbContextType, assembly, operationHandler);
             }
             catch (Exception ex)
             {

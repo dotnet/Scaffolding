@@ -10,7 +10,7 @@
     <Compile Include="..\Shared\*.cs">
       <Link>Shared\%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Ext.ProjectModel.MsBuild.Sources\**\*.cs;">
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\MsBuild\**\*.cs;">
       <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
     </Compile>
     <Compile Include="$(RepoRoot)\src\Shared\Cli.Utils\*.cs">
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

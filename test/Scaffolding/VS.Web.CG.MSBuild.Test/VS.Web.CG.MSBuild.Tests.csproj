@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
 
@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)\src\Scaffolding\Shared\Cli.Utils\*.cs" />
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Cli.Utils\*.cs" />
     <Compile Include="..\Shared\*.cs">
       <Link>Shared\%(FileName)</Link>
     </Compile>
@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" />
-    <Compile Include="$(RepoRoot)\src\Scaffolding\Ext.ProjectModel.MsBuild.Sources\**\*.cs;">
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\MsBuild\**\*.cs;">
       <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
     </Compile>
   </ItemGroup>
@@ -26,5 +26,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" PrivateAssets="All"/>
   </ItemGroup>
 </Project>

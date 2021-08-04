@@ -216,7 +216,7 @@
             },
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             }
           ],
           "ReturnType": "System.Collections.Generic.List<System.String>",
@@ -379,14 +379,14 @@
           "Parameters": [
             {
               "Name": "context",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "name",
               "Type": "System.String"
             }
           ],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.DependencyDescription",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.DependencyDescription",
           "Static": true,
           "Extension": true,
           "Visibility": "Public",
@@ -398,14 +398,14 @@
           "Parameters": [
             {
               "Name": "context",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "name",
               "Type": "System.String"
             }
           ],
-          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.DependencyDescription>",
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.ProjectModel.DependencyDescription>",
           "Static": true,
           "Extension": true,
           "Visibility": "Public",
@@ -427,7 +427,7 @@
           "Parameters": [
             {
               "Name": "projectInformation",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "configuration",
@@ -451,7 +451,7 @@
           "Kind": "Method",
           "Name": "get_RootProject",
           "Parameters": [],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext",
           "Visibility": "Public",
           "GenericParameter": []
         },
@@ -459,7 +459,7 @@
           "Kind": "Method",
           "Name": "get_DependencyProjects",
           "Parameters": [],
-          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext>",
+          "ReturnType": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext>",
           "Visibility": "Public",
           "GenericParameter": []
         },
@@ -469,11 +469,11 @@
           "Parameters": [
             {
               "Name": "root",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "projectReferences",
-              "Type": "System.Collections.Generic.IEnumerable<Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext>"
+              "Type": "System.Collections.Generic.IEnumerable<Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext>"
             }
           ],
           "Visibility": "Public",
@@ -531,10 +531,10 @@
       "GenericParameters": []
     },
     {
-      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.FileSystemChangeMessageHandler",
+      "Name": "Microsoft.DotNet.Scaffolding.Shared.Messaging.FileSystemChangeMessageHandler",
       "Visibility": "Public",
       "Kind": "Class",
-      "BaseType": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.MessageHandlerBase",
+      "BaseType": "Microsoft.DotNet.Scaffolding.Shared.Messaging.MessageHandlerBase",
       "ImplementedInterfaces": [],
       "Members": [
         {
@@ -553,11 +553,11 @@
           "Parameters": [
             {
               "Name": "sender",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageSender"
             },
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
@@ -582,7 +582,7 @@
       "GenericParameters": []
     },
     {
-      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageHandler",
+      "Name": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageHandler",
       "Visibility": "Public",
       "Kind": "Interface",
       "Abstract": true,
@@ -594,11 +594,11 @@
           "Parameters": [
             {
               "Name": "sender",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageSender"
             },
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
@@ -608,7 +608,7 @@
       "GenericParameters": []
     },
     {
-      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender",
+      "Name": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageSender",
       "Visibility": "Public",
       "Kind": "Interface",
       "Abstract": true,
@@ -620,7 +620,7 @@
           "Parameters": [
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
@@ -632,7 +632,7 @@
           "Parameters": [
             {
               "Name": "messageType",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.MessageType"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.MessageType"
             },
             {
               "Name": "o",
@@ -643,19 +643,19 @@
               "Type": "System.Int32"
             }
           ],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message",
           "GenericParameter": []
         }
       ],
       "GenericParameters": []
     },
     {
-      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.MessageHandlerBase",
+      "Name": "Microsoft.DotNet.Scaffolding.Shared.Messaging.MessageHandlerBase",
       "Visibility": "Public",
       "Kind": "Class",
       "Abstract": true,
       "ImplementedInterfaces": [
-        "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageHandler"
+        "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageHandler"
       ],
       "Members": [
         {
@@ -674,11 +674,11 @@
           "Parameters": [
             {
               "Name": "sender",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageSender"
             },
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
@@ -710,17 +710,17 @@
           "Parameters": [
             {
               "Name": "sender",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageSender"
             },
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
           "Sealed": true,
           "Virtual": true,
-          "ImplementedInterface": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageHandler",
+          "ImplementedInterface": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageHandler",
           "Visibility": "Public",
           "GenericParameter": []
         },
@@ -730,7 +730,7 @@
           "Parameters": [
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
@@ -754,17 +754,17 @@
       "GenericParameters": []
     },
     {
-      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.ProjectInformationMessageHandler",
+      "Name": "Microsoft.DotNet.Scaffolding.Shared.Messaging.ProjectInformationMessageHandler",
       "Visibility": "Public",
       "Kind": "Class",
-      "BaseType": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.MessageHandlerBase",
+      "BaseType": "Microsoft.DotNet.Scaffolding.Shared.Messaging.MessageHandlerBase",
       "ImplementedInterfaces": [],
       "Members": [
         {
           "Kind": "Method",
           "Name": "get_ProjectInformation",
           "Parameters": [],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext",
           "Visibility": "Public",
           "GenericParameter": []
         },
@@ -784,11 +784,11 @@
           "Parameters": [
             {
               "Name": "sender",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging.IMessageSender"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.IMessageSender"
             },
             {
               "Name": "message",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging.Message"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.Messaging.Message"
             }
           ],
           "ReturnType": "System.Boolean",
@@ -803,7 +803,7 @@
           "Parameters": [
             {
               "Name": "projectInformation",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "logger",
@@ -1074,7 +1074,7 @@
           "Parameters": [
             {
               "Name": "reference",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.ResolvedReference"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.ResolvedReference"
             },
             {
               "Name": "throwOnError",

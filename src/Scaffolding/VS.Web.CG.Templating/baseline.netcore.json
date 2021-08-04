@@ -501,7 +501,7 @@
             },
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             }
           ],
           "Visibility": "Public",

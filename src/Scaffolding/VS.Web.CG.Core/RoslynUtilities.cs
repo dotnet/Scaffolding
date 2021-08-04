@@ -15,7 +15,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
                 throw new ArgumentNullException(nameof(compilation));
             }
-
             var types = new List<ITypeSymbol>();
             CollectTypes(compilation.Assembly.GlobalNamespace, types);
             return types;

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
@@ -11,7 +12,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
-using IProjectContext = Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext;
+using IProjectContext = Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {

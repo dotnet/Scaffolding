@@ -3,7 +3,7 @@
 
 using System.Linq;
 using Xunit;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.FileSystemChange;
+using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
 {

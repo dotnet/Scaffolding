@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -16,22 +15,28 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         public ModelTypesLocator(
             Workspace projectWorkspace)
         {
-            if (projectWorkspace == null)
-            {
-                throw new ArgumentNullException(nameof(projectWorkspace));
-            }
-
-            _projectWorkspace = projectWorkspace;
+            _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
         }
-
+        
         public IEnumerable<ModelType> GetAllTypes()
         {
             return _projectWorkspace.CurrentSolution.Projects
                 .Select(project => project.GetCompilationAsync().Result)
                 .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
                 .Aggregate((col1, col2) => col1.Concat(col2).ToList())
-                .Distinct(new TypeSymbolEqualityComparer())
                 .Select(ts => ModelType.FromITypeSymbol(ts));
+        }
+
+        public IEnumerable<Document> GetAllDocuments()
+        {
+            var documents = new List<Document>();
+            var allDocuments =  _projectWorkspace.CurrentSolution.Projects
+                .Select(project => project.Documents);
+            foreach (var documentList in allDocuments)
+            {
+                documents.AddRange(documentList);
+            }
+            return documents;
         }
 
         public IEnumerable<ModelType> GetType(string typeName)
@@ -45,8 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 .CurrentSolution.Projects
                 .Select(project => project.GetCompilationAsync().Result)
                 .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
-                .Where(type => type != null)
-                .Distinct(new TypeSymbolEqualityComparer());
+                .Where(type => type != null);
 
             if (exactTypesInAllProjects.Any())
             {
@@ -54,6 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
             //For short type names, we don't give special preference to types in current app,
             //should we do that?
+            var allTypes = GetAllTypes();
             return GetAllTypes()
                 .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
         }

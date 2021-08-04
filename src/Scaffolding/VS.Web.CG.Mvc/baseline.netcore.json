@@ -622,7 +622,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -698,7 +698,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -766,7 +766,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -1234,7 +1234,7 @@
           "Parameters": [
             {
               "Name": "projectDependencyProvider",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -1260,7 +1260,7 @@
           "Kind": "Field",
           "Name": "_projectContext",
           "Parameters": [],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext",
           "ReadOnly": true,
           "Visibility": "Protected",
           "GenericParameter": []
@@ -1433,7 +1433,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -1509,7 +1509,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -2045,7 +2045,7 @@
           "Parameters": [
             {
               "Name": "projectDependencyProvider",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -2071,7 +2071,7 @@
           "Kind": "Field",
           "Name": "_projectContext",
           "Parameters": [],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext",
           "ReadOnly": true,
           "Visibility": "Protected",
           "GenericParameter": []
@@ -2290,7 +2290,7 @@
             },
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "connectionStringsWriter",
@@ -3285,7 +3285,7 @@
           "Kind": "Method",
           "Name": "get_ProjectContext",
           "Parameters": [],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext",
           "Visibility": "Protected",
           "GenericParameter": []
         },
@@ -3364,7 +3364,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -3442,7 +3442,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -3529,7 +3529,7 @@
             },
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -3714,7 +3714,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -3939,7 +3939,7 @@
           "Kind": "Method",
           "Name": "get_ProjectContext",
           "Parameters": [],
-          "ReturnType": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext",
+          "ReturnType": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext",
           "Visibility": "Protected",
           "GenericParameter": []
         },
@@ -4060,7 +4060,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -4144,7 +4144,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -4409,7 +4409,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -4472,7 +4472,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -4535,7 +4535,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",

@@ -1046,7 +1046,8 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           ProjectFullPath=""$(MSBuildProjectFullPath)""
                           ProjectDepsFileName=""$(ProjectDepsFileName)""
                           ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""
-                          ProjectAssetsFile=""$(ProjectAssetsFile)""/>
+                          ProjectAssetsFile=""$(ProjectAssetsFile)""
+                          GeneratedImplicitNamespaceImportFile = ""$(GeneratedImplicitNamespaceImportFile)""/>
   </Target>
 </Project>
 ";

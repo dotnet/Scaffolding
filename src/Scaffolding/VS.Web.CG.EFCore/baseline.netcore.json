@@ -182,7 +182,7 @@
           "Parameters": [
             {
               "Name": "context",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "workspace",
@@ -424,7 +424,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -566,7 +566,7 @@
           "Parameters": [
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "applicationInfo",
@@ -1989,7 +1989,7 @@
             },
             {
               "Name": "projectContext",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel.IProjectContext"
+              "Type": "Microsoft.DotNet.Scaffolding.Shared.ProjectModel.IProjectContext"
             },
             {
               "Name": "loader",

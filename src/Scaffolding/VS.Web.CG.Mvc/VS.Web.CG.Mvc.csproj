@@ -74,7 +74,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VS.Web.CG\VS.Web.CG.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG\VS.Web.CG.csproj" />
   </ItemGroup>
 
   <ItemGroup>

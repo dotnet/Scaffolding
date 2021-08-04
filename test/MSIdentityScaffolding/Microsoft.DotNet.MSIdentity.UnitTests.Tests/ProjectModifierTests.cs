@@ -2,16 +2,16 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Xunit;
+using ConsoleLogger = Microsoft.DotNet.MSIdentity.Tool.ConsoleLogger;
 
 namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 {
 
     public class ProjectModifierTests : DocumentBuilderTestBase
     {
-        readonly ProjectModifier projectModifier = new ProjectModifier(new ApplicationParameters(), new ProvisioningToolOptions(), new ConsoleLogger());
-
         [Theory]
         [InlineData(new object[] { new string[] { "Startup.cs", "File.cs", "Test", "", null},
                                    new string[] { "Startup", "File", "", "", "" } })]
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 string className = classNames[i];
                 string formattedClassName = formattedClassNames[i];
-                Assert.Equal(projectModifier.GetClassName(className), formattedClassName);
+                Assert.Equal(ProjectModifierHelper.GetClassName(className), formattedClassName);
             }
         }
 
@@ -32,10 +32,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             Document programDocumentNoStartup = CreateDocument(ProgramCsFileNoStartup);
             Document programDocumentDifferentStartup = CreateDocument(ProgramCsFileWithDifferentStartup);
 
-            string startupName = await projectModifier.GetStartupClassName(programDocument);
-            string emptyStartupName = await projectModifier.GetStartupClassName(programDocumentNoStartup);
-            string notStartupName = await projectModifier.GetStartupClassName(programDocumentDifferentStartup);
-            string nullStartup = await projectModifier.GetStartupClassName(null);
+            string startupName = await ProjectModifierHelper.GetStartupClassName(programDocument);
+            string emptyStartupName = await ProjectModifierHelper.GetStartupClassName(programDocumentNoStartup);
+            string notStartupName = await ProjectModifierHelper.GetStartupClassName(programDocumentDifferentStartup);
+            string nullStartup = await ProjectModifierHelper.GetStartupClassName(null);
 
             Assert.Equal("Startup", startupName);
             Assert.Equal("", emptyStartupName);

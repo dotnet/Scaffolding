@@ -18,17 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)\src\Scaffolding\Shared\**\*.cs">
-      <Link>Shared\%(RecursiveDir)%(FileName).cs</Link>
-    </Compile>
-    <Compile Include="$(RepoRoot)\src\Scaffolding\Ext.ProjectModel.MsBuild.Sources\**\*.cs">
-      <Link>MsBuildSources\%(RecursiveDir)%(FileName).cs</Link>
-    </Compile>
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Contracts\VS.Web.CG.Contracts.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

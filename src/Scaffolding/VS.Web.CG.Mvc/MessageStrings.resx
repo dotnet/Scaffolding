@@ -249,4 +249,7 @@
   <data name="InvalidBootstrapVersionForScaffolding" xml:space="preserve">
     <value>The specified bootstrap version '{0}' is not valid. The valid options are '{1}'.</value>
   </data>
+  <data name="IdentityNotSupported" xml:space="preserve">
+    <value>Scaffolding Identity is not supported for web applications with minimal APIs for hosting and routing.</value>
+  </data>
 </root>

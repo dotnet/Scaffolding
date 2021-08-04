@@ -8,6 +8,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public interface IModelTypesLocator
     {
+        /// <summary>
+        /// returns all Documents in all the projects in the solution.
+        /// </summary>
+        IEnumerable<Document> GetAllDocuments();
         IEnumerable<ModelType> GetAllTypes();
 
         /// <summary>

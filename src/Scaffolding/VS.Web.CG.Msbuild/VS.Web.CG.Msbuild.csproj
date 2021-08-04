@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\General\*.cs">
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\General\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
-    <Compile Include="..\VS.Web.CG.Contracts\ProjectModel\*.cs">
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\*.cs">
       <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
     </Compile>
   </ItemGroup>
@@ -20,9 +20,24 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" PrivateAssets="All" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(VisualStudio_NewtonsoftJsonPackageVersion)" PrivateAssets="All">
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" PrivateAssets="All">
       <!-- This version needs to line up with what is bundled in MSBuild and Visual Studio -->
       <NoWarn>KRB4002</NoWarn>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="MessageStrings.Designer.cs">
+      <DependentUpon>MessageStrings.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="MessageStrings.resx">
+      <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

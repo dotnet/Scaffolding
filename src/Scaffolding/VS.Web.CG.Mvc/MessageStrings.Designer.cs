@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class MessageStrings {
@@ -165,6 +165,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string ForceOptionDesc {
             get {
                 return ResourceManager.GetString("ForceOptionDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Scaffolding Identity is not supported for web applications with minimal APIs for hosting and routing.
+        /// </summary>
+        internal static string IdentityNotSupported {
+            get {
+                return ResourceManager.GetString("IdentityNotSupported", resourceCulture);
             }
         }
         

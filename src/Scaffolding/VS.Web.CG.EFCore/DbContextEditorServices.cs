@@ -178,9 +178,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         .FirstOrDefault(p => p.Type.ToString().Equals(IServiceCollection));
                         
                     var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
-                    string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, useSqlite, statementLeadingTrivia);
                     if (servicesParam != null)
                     {
+                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, useSqlite, statementLeadingTrivia);
                         _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
                         if (configServicesMethod.Body.Statements.Any())
                         {

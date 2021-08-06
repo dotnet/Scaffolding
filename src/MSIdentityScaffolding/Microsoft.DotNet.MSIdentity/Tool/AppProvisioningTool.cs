@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.MSIdentity
             // Get developer credentials
             TokenCredential tokenCredential = GetTokenCredential(
                 ProvisioningToolOptions,
-                projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
+                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
 
             //for now, update project command is handlded seperately.
             //TODO: switch case to handle all the different commands.

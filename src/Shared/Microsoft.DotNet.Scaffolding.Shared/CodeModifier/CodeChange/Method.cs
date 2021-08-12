@@ -1,4 +1,4 @@
-namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter.CodeChange
+namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
 {
     public class Method
     {

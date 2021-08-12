@@ -5,7 +5,7 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
+namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
     public class ProjectAuthenticationSettings
     {

@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -13,7 +13,7 @@ using System;
             "Microsoft.Extensions.Configuration",
             "Microsoft.Extensions.DependencyInjection",
         });
-    var thisNamespace = $"{Model.Namespace}.Areas.Identity";
+    var thisNamespace = @Model.Namespace + ".Areas.Identity";
 
     if (!string.IsNullOrEmpty(Model.UserClassNamespace) && thisNamespace != Model.UserClassNamespace)
     {

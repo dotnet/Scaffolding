@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter.CodeChange;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +14,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
+namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
     internal class DocumentBuilder
     {

@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -212,6 +214,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task GenerateCode(IdentityGeneratorCommandLineModel commandlineModel)
         {
+            Debugger.Launch();
             if (commandlineModel == null)
             {
                 throw new ArgumentNullException(nameof(commandlineModel));
@@ -239,12 +242,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (minimalApp)
             {
                _logger.LogMessage($"\n{MessageStrings.IdentityNotSupported}\n", LogMessageLevel.Error);
-               return;
+                //edit Program.cs in minimal hosting scenario
+                await EditProgramCsForIdentity(new ModelTypesLocator(_workspace));
+                //return;
             }
+
+            
             await AddTemplateFiles(templateModel);
             await AddStaticFiles(templateModel);
         }
 
+        private async Task EditProgramCsForIdentity(IModelTypesLocator modelTypesLocator)
+        {
+            var programType = modelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? modelTypesLocator.GetType("Program").FirstOrDefault();
+            var programDocument = modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+            DocumentBuilder documentEditor;
+            // add missing usings
+            // add missing connectionstring
+            // add builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+            // add AddDefaultIdentity
+            // add app.UseMigrationsEndPoint(); in else of IsDevelopment()
+            // add app.UseAuthentication();
+            // PersistSyntaxTree(_startupEditResult.NewTree);
+            return;
+        }
         /// <summary>
         /// Check if Startup.cs or similar file exists.
         /// </summary>
@@ -310,7 +331,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
             IEnumerable<IdentityGeneratorFile> templates = templateModel.FilesToGenerate.Where(t => t.IsTemplate);
             IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion(templateModel);
-
             foreach (IdentityGeneratorFile template in templates)
             {
                 string outputPath = Path.Combine(projectDir, template.OutputPath);
@@ -326,7 +346,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         templateModel);
                 }
             }
-
+            
             if (!templateModel.IsUsingExistingDbContext)
             {
                 _connectionStringsWriter.AddConnectionString(

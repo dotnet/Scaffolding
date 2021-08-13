@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? currentDirectory;
             }
-            
+
             //get appsettings.json file path
             var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
             if (appSettingsFile.Any())
@@ -500,7 +500,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 projectSettings = reader.ReadFromFiles(provisioningToolOptions.ProjectPath, projectDescription, projectDescriptions);
             }
-            
+
             // Override with the tools options
             projectSettings.ApplicationParameters.ApplicationDisplayName ??= !string.IsNullOrEmpty(provisioningToolOptions.AppDisplayName) ? provisioningToolOptions.AppDisplayName : Path.GetFileName(provisioningToolOptions.ProjectPath);
             projectSettings.ApplicationParameters.ClientId = !string.IsNullOrEmpty(provisioningToolOptions.ClientId) ? provisioningToolOptions.ClientId : projectSettings.ApplicationParameters.ClientId;
@@ -572,7 +572,8 @@ namespace Microsoft.DotNet.MSIdentity
                                             tokenCredential,
                                             applicationParameters,
                                             ProvisioningToolOptions,
-                                            CommandName);
+                                            CommandName,
+                                            requestFromVS: true);
 
                 ConsoleLogger.LogMessage(jsonResponse.Content as string);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
@@ -623,9 +624,9 @@ namespace Microsoft.DotNet.MSIdentity
                 }
                 catch (ServiceException se)
                 {
-                    output = string.Format(se.Error.ToString()); 
+                    output = string.Format(se.Error.ToString());
                     jsonResponse.State = State.Fail;
-                    jsonResponse.Content = se.Error.Code;
+                    jsonResponse.Content = se.Error?.Code;
                 }
 
                 ConsoleLogger.LogMessage(output);
@@ -678,7 +679,7 @@ namespace Microsoft.DotNet.MSIdentity
                         ConsoleLogger.LogMessage("=============================================");
                         ConsoleLogger.LogMessage(Resources.UpdatingProjectPackages);
                         ConsoleLogger.LogMessage("=============================================\n");
-                        
+
                         DependencyGraphService dependencyGraphService = new DependencyGraphService(ProvisioningToolOptions.ProjectFilePath);
                         var dependencyGraph = dependencyGraphService.GenerateDependencyGraph();
                         if (dependencyGraph != null)
@@ -713,11 +714,11 @@ namespace Microsoft.DotNet.MSIdentity
                     //if project is not setup for auth, add updates to Startup.cs, .csproj.
                     ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);
                     await startupModifier.AddAuthCodeAsync();
-                }  
+                }
             }
-        }           
-                //Layout.cshtml
-                //LoginPartial.cshtml
-                //launchsettings.json --> update
+        }
+        //Layout.cshtml
+        //LoginPartial.cshtml
+        //launchsettings.json --> update
     }
 }

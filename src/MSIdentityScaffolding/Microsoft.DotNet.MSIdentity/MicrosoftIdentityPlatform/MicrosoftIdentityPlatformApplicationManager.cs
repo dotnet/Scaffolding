@@ -188,8 +188,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             TokenCredential tokenCredential,
             ApplicationParameters? reconciledApplicationParameters,
             ProvisioningToolOptions toolOptions,
-            string commandName,
-            bool requestFromVS = false)
+            string commandName)
         {
             JsonResponse jsonResponse = new JsonResponse(commandName);
             if (reconciledApplicationParameters is null)
@@ -242,16 +241,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
                 }
 
-                if (requestFromVS)
-                {
-                    var idTokenEnabled = existingApplication.Web.ImplicitGrantSettings.EnableIdTokenIssuance ?? false;
-                    if (!idTokenEnabled)
-                    {
-                        needsUpdate = true;
-                        updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
-                    }
-                }
-                else if (toolOptions.EnableIdToken.HasValue &&
+                if (toolOptions.EnableIdToken.HasValue &&
                     (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
                 {
                     needsUpdate = true;

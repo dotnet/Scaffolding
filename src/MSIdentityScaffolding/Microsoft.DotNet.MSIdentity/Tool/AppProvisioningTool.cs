@@ -2,20 +2,22 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using Azure.Core;
-using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
+using File = System.IO.File;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
 namespace Microsoft.DotNet.MSIdentity
@@ -412,7 +414,7 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task WriteApplicationRegistration(Summary summary, ApplicationParameters reconcialedApplicationParameters, TokenCredential tokenCredential)
         {
             summary.changes.Add(new Change($"Writing the project AppId = {reconcialedApplicationParameters.ClientId}"));
-            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(tokenCredential, reconcialedApplicationParameters, ProvisioningToolOptions);
+            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(tokenCredential, reconcialedApplicationParameters, ProvisioningToolOptions, CommandName);
         }
 
         private void WriteProjectConfiguration(Summary summary, ProjectAuthenticationSettings projectSettings, ApplicationParameters reconcialedApplicationParameters)
@@ -565,76 +567,70 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
-            bool updateSuccess = false;
             if (applicationParameters != null)
             {
-                updateSuccess = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
+                var jsonResponse = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
                                             tokenCredential,
                                             applicationParameters,
-                                            ProvisioningToolOptions);
-            }
+                                            ProvisioningToolOptions,
+                                            CommandName);
 
-            JsonResponse jsonResponse = new JsonResponse(CommandName);
-
-            if (updateSuccess)
-            {
-                jsonResponse.Content = $"Success updating Azure AD app {applicationParameters?.ApplicationDisplayName} ({applicationParameters?.ClientId})";
-                jsonResponse.State = State.Success;
+                ConsoleLogger.LogMessage(jsonResponse.Content as string);
+                ConsoleLogger.LogJsonMessage(jsonResponse);
             }
-            else
-            {
-                jsonResponse.Content = $"Failed to update Azure AD app {applicationParameters?.ApplicationDisplayName} ({applicationParameters?.ClientId})";
-                jsonResponse.State = State.Fail;
-            }
-
-            ConsoleLogger.LogMessage(jsonResponse.Content as string);
-            ConsoleLogger.LogJsonMessage(jsonResponse);
         }
 
         private async Task AddClientSecret(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
             JsonResponse jsonResponse = new JsonResponse(CommandName);
+            string output;
 
-            if (applicationParameters != null && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
+            if (applicationParameters == null || string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
-                var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-
-                string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
-                        graphServiceClient,
-                        applicationParameters.GraphEntityId,
-                        applicationParameters,
-                        ConsoleLogger);
-
-                //if user wants to update user secrets
-                if (ProvisioningToolOptions.UpdateUserSecrets)
-                {
-                    CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
-                }
-
-                if (!string.IsNullOrEmpty(password))
-                {
-                    jsonResponse.State = State.Success;
-                    jsonResponse.Content = new KeyValuePair<string, string>("ClientSecret", password);
-                    string secretOutput = string.Format(Resources.ClientSecret, password);
-                    ConsoleLogger.LogMessage(secretOutput);
-                    ConsoleLogger.LogJsonMessage(jsonResponse);
-
-                }
-                else
-                {
-                    string failedOutput = string.Format(Resources.FailedClientSecretWithApp, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId);
-                    jsonResponse.State = State.Fail;
-                    jsonResponse.Content = failedOutput;
-                    ConsoleLogger.LogMessage(failedOutput);
-                    ConsoleLogger.LogJsonMessage(jsonResponse);
-                }
+                output = Resources.FailedClientSecret;
+                jsonResponse.State = State.Fail;
+                jsonResponse.Content = output;
             }
             else
             {
-                string failedOutput = Resources.FailedClientSecret;
-                jsonResponse.State = State.Fail;
-                jsonResponse.Content = failedOutput;
-                ConsoleLogger.LogMessage(failedOutput);
+                var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+
+                try
+                {
+                    string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
+                            graphServiceClient,
+                            applicationParameters.GraphEntityId,
+                            applicationParameters,
+                            ConsoleLogger);
+
+                    //if user wants to update user secrets
+                    if (ProvisioningToolOptions.UpdateUserSecrets)
+                    {
+                        CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
+                    }
+
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        output = string.Format(Resources.ClientSecret, password);
+                        jsonResponse.State = State.Success;
+                        jsonResponse.Content = new KeyValuePair<string, string>("ClientSecret", password);
+                    }
+                    else
+                    {
+                        output = string.Format(Resources.FailedClientSecretWithApp, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId);
+                        jsonResponse.State = State.Fail;
+                        jsonResponse.Content = "TODO Empty password";
+                    }
+                }
+                catch (ServiceException se)
+                {
+                    Debugger.Launch();
+                    output = string.Format(se.Error.ToString()); 
+                    jsonResponse.State = State.Fail;
+                    jsonResponse.Content = se.Error.Code; // TODO - is this the correct thing to pass?
+                }
+
+                ConsoleLogger.LogMessage(output);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
         }

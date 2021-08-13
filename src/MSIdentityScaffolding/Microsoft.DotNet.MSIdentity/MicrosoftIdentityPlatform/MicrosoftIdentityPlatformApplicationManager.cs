@@ -184,10 +184,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return tenant;
         }
 
-        internal async Task<bool> UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? reconciledApplicationParameters, ProvisioningToolOptions toolOptions)
+        internal async Task<JsonResponse> UpdateApplication(
+            TokenCredential tokenCredential,
+            ApplicationParameters? reconciledApplicationParameters,
+            ProvisioningToolOptions toolOptions,
+            string commandName)
         {
-            bool updateStatus = false;
-            if (reconciledApplicationParameters != null)
+            JsonResponse jsonResponse = new JsonResponse(commandName);
+            if (reconciledApplicationParameters is null)
+            {
+                jsonResponse.Content = $"Failed to update Azure AD app, reconciledApplicationParameters == null";
+                jsonResponse.State = State.Fail;
+            }
+            else
             {
                 var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -219,7 +228,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 {
                     needsUpdate = true;
                 }
-                
+
                 if (updatedApp.Web.ImplicitGrantSettings == null)
                 {
                     updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
@@ -232,12 +241,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
                 }
 
-                if (toolOptions.EnableIdToken.HasValue && (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
+                var idTokenEnabled = existingApplication.Web.ImplicitGrantSettings.EnableIdTokenIssuance ?? false;
+                if (!idTokenEnabled)
                 {
                     needsUpdate = true;
-                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
                 }
-                
 
                 if (needsUpdate)
                 {
@@ -248,16 +257,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         await graphServiceClient.Applications[existingApplication.Id]
                             .Request()
                             .UpdateAsync(updatedApp).ConfigureAwait(false);
-                        updateStatus = true;
                     }
-                    //TODO update exception
-                    catch (ServiceException)
+                    catch (ServiceException se)
                     {
-                        updateStatus = false;
+                        jsonResponse.Content = se.Error.Message;
+                        jsonResponse.State = State.Fail;
+                        return jsonResponse;
                     }
                 }
+
+                jsonResponse.Content = $"Success updating Azure AD app {updatedApp.DisplayName} ({updatedApp.AppId})"; // TODO localize?
+                jsonResponse.State = State.Success;
             }
-            return updateStatus;
+            return jsonResponse;
         }
 
         //checks for valid https uris.
@@ -358,6 +370,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 catch (ServiceException se)
                 {
                     consoleLogger.LogMessage($"Failed to create password : {se.Error.Message}", LogMessageType.Error);
+                    throw;
                 }
             }
             return password;
@@ -742,7 +755,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 : originalApplicationParameters.Instance;
 
             effectiveApplicationParameters.PasswordCredentials.AddRange(application.PasswordCredentials.Select(p => p.Hint + "******************"));
-           
+
             if (application.Spa != null && application.Spa.RedirectUris != null)
             {
                 effectiveApplicationParameters.WebRedirectUris.AddRange(application.Spa.RedirectUris);

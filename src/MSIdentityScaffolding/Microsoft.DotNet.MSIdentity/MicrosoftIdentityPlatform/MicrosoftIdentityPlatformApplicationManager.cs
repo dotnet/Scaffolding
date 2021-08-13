@@ -266,7 +266,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     }
                 }
 
-                jsonResponse.Content = $"Success updating Azure AD app {updatedApp.DisplayName} ({updatedApp.AppId})"; // TODO localize?
+                jsonResponse.Content = $"Success updating Azure AD app {updatedApp.DisplayName} ({updatedApp.AppId})";
                 jsonResponse.State = State.Success;
             }
             return jsonResponse;

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -624,10 +623,9 @@ namespace Microsoft.DotNet.MSIdentity
                 }
                 catch (ServiceException se)
                 {
-                    Debugger.Launch();
                     output = string.Format(se.Error.ToString()); 
                     jsonResponse.State = State.Fail;
-                    jsonResponse.Content = se.Error.Code; // TODO - is this the correct thing to pass?
+                    jsonResponse.Content = se.Error.Code;
                 }
 
                 ConsoleLogger.LogMessage(output);

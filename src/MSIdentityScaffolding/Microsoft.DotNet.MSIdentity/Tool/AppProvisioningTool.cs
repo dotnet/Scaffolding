@@ -572,7 +572,7 @@ namespace Microsoft.DotNet.MSIdentity
                                             tokenCredential,
                                             applicationParameters,
                                             ProvisioningToolOptions,
-                                            CommandName;
+                                            CommandName);
 
                 ConsoleLogger.LogMessage(jsonResponse.Content as string);
                 ConsoleLogger.LogJsonMessage(jsonResponse);

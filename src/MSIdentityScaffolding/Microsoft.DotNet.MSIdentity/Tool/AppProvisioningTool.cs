@@ -582,7 +582,7 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task AddClientSecret(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
             JsonResponse jsonResponse = new JsonResponse(CommandName);
-            string output;
+            string? output;
 
             if (applicationParameters == null || string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
@@ -623,7 +623,7 @@ namespace Microsoft.DotNet.MSIdentity
                 }
                 catch (ServiceException se)
                 {
-                    output = string.Format(se.Error.ToString());
+                    output = se.Error?.ToString();
                     jsonResponse.State = State.Fail;
                     jsonResponse.Content = se.Error?.Code;
                 }

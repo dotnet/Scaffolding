@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     }
                     catch (ServiceException se)
                     {
-                        jsonResponse.Content = se.Error.Message;
+                        jsonResponse.Content = se.Error?.Message;
                         jsonResponse.State = State.Fail;
                         return jsonResponse;
                     }
@@ -369,7 +369,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
                 catch (ServiceException se)
                 {
-                    consoleLogger.LogMessage($"Failed to create password : {se.Error.Message}", LogMessageType.Error);
+                    consoleLogger.LogMessage($"Failed to create password : {se.Error?.Message}", LogMessageType.Error);
                     throw;
                 }
             }

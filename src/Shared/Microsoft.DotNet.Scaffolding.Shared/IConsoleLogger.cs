@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.DotNet.Scaffolding.Shared
+namespace Microsoft.DotNet.MSIdentity.Shared
 {
     public interface IConsoleLogger
     {

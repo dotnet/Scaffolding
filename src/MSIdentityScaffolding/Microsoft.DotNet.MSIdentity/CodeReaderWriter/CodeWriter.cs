@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.Extensions.Internal;
 
 namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter

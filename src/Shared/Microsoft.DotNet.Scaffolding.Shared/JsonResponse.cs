@@ -1,15 +1,15 @@
 using System;
 using System.Text.Json;
 
-namespace Microsoft.DotNet.MSIdentity.Tool
+namespace Microsoft.DotNet.MSIdentity.Shared
 {
     public class JsonResponse
     {
         public string Command { get; }
-        public string? State { get; set; }
-        public object? Content { get; set; }
+        public string State { get; set; }
+        public object Content { get; set; }
 
-        public JsonResponse(string command, string? state = null, object? content = null)
+        public JsonResponse(string command, string state = null, object content = null)
         {
             State = state;
             Content = content;

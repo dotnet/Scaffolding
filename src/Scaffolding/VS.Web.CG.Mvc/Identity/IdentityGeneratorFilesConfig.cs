@@ -84,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         };
 
-        internal static IdentityGeneratorFile[] GetFilesToGenerate(IEnumerable<string> names, IdentityGeneratorTemplateModel templateModel)
+        internal static IdentityGeneratorFile[] GetFilesToGenerate(IEnumerable<string> names, IdentityGeneratorTemplateModel templateModel, bool minimalHosting = false)
         {
             if (templateModel == null)
             {
@@ -168,7 +168,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
 
-            filesToGenerate.Add(IdentityHostingStartup);
+            if (!minimalHosting)
+            {
+                filesToGenerate.Add(IdentityHostingStartup);
+            }
+            
             filesToGenerate.Add(ReadMe);
 
             return filesToGenerate.Distinct(new IdentityGeneratorFileComparer()).ToArray();

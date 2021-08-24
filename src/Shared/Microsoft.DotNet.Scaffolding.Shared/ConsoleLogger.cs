@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.DotNet.Scaffolding.Shared
+namespace Microsoft.DotNet.MSIdentity.Shared
 {
     internal class ConsoleLogger : IConsoleLogger
     {
@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             Console.OutputEncoding = Encoding.UTF8;
         }
 
-        public void LogMessage(string? message, LogMessageType level, bool removeNewLine = false)
+        public void LogMessage(string message, LogMessageType level, bool removeNewLine = false)
         {
             //if json output is enabled, don't write to console at all.
             if (!_jsonOutput)
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             }
         }
 
-        public void LogMessage(string? message, bool removeNewLine = false)
+        public void LogMessage(string message, bool removeNewLine = false)
         {
             LogMessage(message, LogMessageType.Information, removeNewLine);
         }

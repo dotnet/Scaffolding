@@ -11,12 +11,10 @@ using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Project;
-using Microsoft.DotNet.MSIdentity.Properties;
+using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
-using File = System.IO.File;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
 namespace Microsoft.DotNet.MSIdentity

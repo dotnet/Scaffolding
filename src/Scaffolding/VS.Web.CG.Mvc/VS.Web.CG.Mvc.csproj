@@ -15,6 +15,8 @@
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
+    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net6.0\" />
+    <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />

@@ -1,11 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
-using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using Microsoft.DotNet.MSIdentity.Tool;
 using Xunit;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Tool.ConsoleLogger;
 
 namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 {

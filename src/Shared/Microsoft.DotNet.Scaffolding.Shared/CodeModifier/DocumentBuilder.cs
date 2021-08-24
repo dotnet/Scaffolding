@@ -3,8 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.DotNet.MSIdentity.CodeReaderWriter.CodeChange;
-using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using System;
 using System.Collections.Generic;
@@ -35,28 +34,30 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _docRoot = (CompilationUnitSyntax)_documentEditor.OriginalRoot ?? throw new ArgumentNullException(nameof(_documentEditor.OriginalRoot));
         }
 
-        public void AddUsings()
+        public CompilationUnitSyntax AddUsings()
         {
             //adding usings
             var usingNodes = CreateUsings(_codeFile.Usings);
             if (usingNodes.Any() && _docRoot.Usings.Count == 0)
             {
-                _documentEditor.ReplaceNode(_docRoot, _docRoot.WithUsings(new SyntaxList<UsingDirectiveSyntax>(usingNodes)));
+                return _docRoot.WithUsings(new SyntaxList<UsingDirectiveSyntax>(usingNodes));
             }
             else
             {
+                var newRoot = _docRoot;
                 foreach (var usingNode in usingNodes)
                 {
                     //if usings exist (very likely), add it after the last one.
-                    if (_docRoot.Usings.Count > 0)
+                    if (newRoot.Usings.Count > 0)
                     {
                         var usingName = usingNode.Name.ToString();
-                        if (!_docRoot.Usings.Any(node => node.Name.ToString().Equals(usingName)))
+                        if (!newRoot.Usings.Any(node => node.Name.ToString().Equals(usingName)))
                         {
-                            _documentEditor.InsertAfter(_docRoot.Usings.Last(), usingNode);
+                           newRoot = newRoot.InsertNodesAfter(newRoot.Usings.Last(), new List<SyntaxNode> { usingNode } );
                         }
                     }
                 }
+                return newRoot;
             }
         }
 
@@ -125,7 +126,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         methodChanges.CodeChanges != null)
                     {
                         //get method node from ClassDeclarationSyntax
-                        IDictionary<string, string>? parameterValues = null;
+                        IDictionary<string, string> parameterValues = null;
                         var methodNode = modifiedClassDeclarationSyntax?
                             .DescendantNodes()
                             .Where(
@@ -172,6 +173,36 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedClassDeclarationSyntax;
         }
 
+        //For inserting global statements in a minimal hosting C# file (.NET 6 Preview 7+)
+        //add tests
+        internal static CompilationUnitSyntax AddGlobalStatements(CodeSnippet change, CompilationUnitSyntax root)
+        {
+            var newRoot = root;
+            //create syntax expression that adds DbContext
+            var expression = SyntaxFactory.ParseStatement(change.Block);
+            var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+            //insert global statement after particular statement
+            if (!string.IsNullOrEmpty(change.InsertAfter))
+            {
+                var insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
+                if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)
+                {
+                    newRoot = newRoot.InsertNodesAfter(insertAfterGlobalStatment, new List<SyntaxNode> { globalStatement });
+                }
+            }
+            //insert global statement at the top of the file
+            else if (change.Append)
+            {
+                newRoot = newRoot.WithMembers(newRoot.Members.Insert(0, globalStatement));
+            }
+            //insert global statement at the end of the file
+            else
+            {
+                newRoot = newRoot.WithMembers(newRoot.Members.Add(globalStatement));
+            }
+            return newRoot;
+        }
+
         //add code snippet to parent node
         internal BlockSyntax AddCodeSnippetOnParent(
             CodeSnippet change,
@@ -214,7 +245,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedBlockSyntaxNode;
         }
 
-        internal ExpressionStatementSyntax? AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string? codeSnippet)
+        internal ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet)
         {
             if (!string.IsNullOrEmpty(codeSnippet) && !expression.ToString().Trim(CodeSnippetTrimChars).Contains(codeSnippet.Trim(CodeSnippetTrimChars)))
             {
@@ -227,13 +258,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
         }
 
-        internal ExpressionStatementSyntax? AddExpressionInLambdaBlock(
+        internal ExpressionStatementSyntax AddExpressionInLambdaBlock(
             ExpressionStatementSyntax expression,
-            string? insertAfterBlock,
-            string? codeSnippet,
+            string insertAfterBlock,
+            string codeSnippet,
             IDictionary<string, string> parameterValues)
         {
-            BlockSyntax? blockToEdit;
+            BlockSyntax blockToEdit;
             if (!string.IsNullOrEmpty(codeSnippet))
             {
                 if (!string.IsNullOrEmpty(insertAfterBlock))
@@ -350,7 +381,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.WithStatements(modifiedBlockSyntaxNode.Statements.Add(expression));
                     }
                 }
-                else if (change.Append.GetValueOrDefault())
+                else if (change.Append)
                 {
                     modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.WithStatements(new SyntaxList<StatementSyntax>(modifiedBlockSyntaxNode.Statements.Insert(0, statement)));
                 }
@@ -363,7 +394,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         //create UsingDirectiveSyntax[] using a string[] to add to the root of the class (root.Usings).
-        internal UsingDirectiveSyntax[] CreateUsings(string[]? usings)
+        internal UsingDirectiveSyntax[] CreateUsings(string[] usings)
         {
             var usingDirectiveList = new List<UsingDirectiveSyntax>();
             if (usings != null && usings.Any())
@@ -388,7 +419,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         //create AttributeListSyntax using string[] to add on top of a ClassDeclrationSyntax
-        internal SyntaxList<AttributeListSyntax> CreateAttributeList(string[]? attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
+        internal SyntaxList<AttributeListSyntax> CreateAttributeList(string[] attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
         {
             var syntaxList = attributeLists;
             
@@ -426,14 +457,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         /// <param name="codeBlock">SimpleMemberAccessExpression string</param>
         /// <param name="parameterDict">IDictionary with parameter type keys and values</param>
         /// <returns></returns>
-        internal string FormatCodeBlock(string? codeBlock, IDictionary<string, string>? parameterDict)
+        internal string FormatCodeBlock(string codeBlock, IDictionary<string, string> parameterDict)
         {
             string formattedCodeBlock = string.Empty;
             if (!string.IsNullOrEmpty(codeBlock) && parameterDict != null)
             {
                 string value = Regex.Replace(codeBlock, "^([^.]*).", "");
                 string param = Regex.Replace(codeBlock, "[*^.].*", "");
-                if (parameterDict.TryGetValue(param, out string? parameter))
+                if (parameterDict.TryGetValue(param, out string parameter))
                 {
                     formattedCodeBlock = $"{parameter}.{value}";
                 }
@@ -443,6 +474,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 }
             }
             return formattedCodeBlock;
+        }
+
+        internal bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement)
+        {
+            if (root != null)
+            {
+                return root.Members.Where(st => st.ToString().Equals(statement.ToString())).Any();
+            }
+            return false;
         }
 
         internal bool StatementExists(BlockSyntax blockSyntaxNode, StatementSyntax statement)
@@ -455,7 +495,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         //check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.
-        internal IDictionary<string, string>? VerfiyParameters(string[]? parametersToCheck, List<ParameterSyntax> foundParameters)
+        internal IDictionary<string, string> VerfiyParameters(string[] parametersToCheck, List<ParameterSyntax> foundParameters)
         {
             IDictionary<string, string> parametersWithNames = new Dictionary<string, string>();
             if (foundParameters.Any() && parametersToCheck != null && parametersToCheck.Any())
@@ -488,6 +528,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal Document GetDocument()
         {
             return _documentEditor.GetChangedDocument();
+        }
+
+        internal CompilationUnitSyntax GetChangedRoot()
+        {
+            return _documentEditor.GetChangedRoot() as CompilationUnitSyntax;
         }
 
         //create MemberDeclarationSyntax[] to add at the top of ClassDeclarationSynax. Created from the property strings.

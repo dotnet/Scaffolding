@@ -6,8 +6,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
-using Microsoft.DotNet.MSIdentity.CodeReaderWriter.CodeChange;
+using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Xunit;
 
 namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
@@ -25,16 +27,14 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 Usings = usings
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
-            docBuilder.AddUsings();
-            Document changedDoc = docBuilder.GetDocument();
-            var root = (CompilationUnitSyntax)await changedDoc.GetSyntaxRootAsync();
+            var newRoot = docBuilder.AddUsings();
 
-            Assert.True(root.Usings.Count == 4);
+            Assert.True(newRoot.Usings.Count == 4);
             foreach (var usingString in usings)
             {
                 if (!string.IsNullOrEmpty(usingString))
                 {
-                    Assert.Contains(root.Usings, node => node.Name.ToString().Equals(usingString));
+                    Assert.Contains(newRoot.Usings, node => node.Name.ToString().Equals(usingString));
                 }
             }
 
@@ -51,16 +51,14 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 Usings = usings
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
-            docBuilder.AddUsings();
-            Document changedDoc = docBuilder.GetDocument();
-            var root = (CompilationUnitSyntax)await changedDoc.GetSyntaxRootAsync();
+            var newRoot = docBuilder.AddUsings();
 
-            Assert.True(root.Usings.Count == 3);
+            Assert.True(newRoot.Usings.Count == 3);
             foreach (var usingString in usings)
             {
                 if (!string.IsNullOrEmpty(usingString))
                 {
-                    Assert.Contains(root.Usings, node => node.Name.ToString().Equals(usingString));
+                    Assert.Contains(newRoot.Usings, node => node.Name.ToString().Equals(usingString));
                 }
             }
         }

@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
     internal static class ProjectExtensions
     {
-        public static Project AddDocuments(this Project project, IEnumerable<string> files)
+        public static CodeAnalysis.Project AddDocuments(this CodeAnalysis.Project project, IEnumerable<string> files)
         {
             foreach (string file in files)
             {
@@ -15,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return project;
         }
 
-        public static Project WithAllSourceFiles(this Project project)
+        public static CodeAnalysis.Project WithAllSourceFiles(this CodeAnalysis.Project project)
         {
             if (!string.IsNullOrEmpty(project.FilePath))
             {

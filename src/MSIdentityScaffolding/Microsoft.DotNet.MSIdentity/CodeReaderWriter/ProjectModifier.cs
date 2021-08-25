@@ -101,7 +101,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                     //replace class node with all the updates.
                                     documentEditor.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
                                 }
-                                documentEditor.ReplaceNode(docRoot, newRoot);
+
+                                if (docRoot != null && newRoot != null)
+                                {
+                                    documentEditor.ReplaceNode(docRoot, newRoot);
+                                }
                                 await documentBuilder.WriteToClassFileAsync(fileName, filePath);
                             }
                         }

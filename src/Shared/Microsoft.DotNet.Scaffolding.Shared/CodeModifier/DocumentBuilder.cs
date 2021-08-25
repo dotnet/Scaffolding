@@ -181,25 +181,29 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             //create syntax expression that adds DbContext
             var expression = SyntaxFactory.ParseStatement(change.Block);
             var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-            //insert global statement after particular statement
-            if (!string.IsNullOrEmpty(change.InsertAfter))
+            if (!GlobalStatementExists(newRoot, globalStatement))
             {
-                var insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
-                if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)
+                //insert global statement after particular statement
+                if (!string.IsNullOrEmpty(change.InsertAfter))
                 {
-                    newRoot = newRoot.InsertNodesAfter(insertAfterGlobalStatment, new List<SyntaxNode> { globalStatement });
+                    var insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
+                    if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)
+                    {
+                        newRoot = newRoot.InsertNodesAfter(insertAfterGlobalStatment, new List<SyntaxNode> { globalStatement });
+                    }
+                }
+                //insert global statement at the top of the file
+                else if (change.Append)
+                {
+                    newRoot = newRoot.WithMembers(newRoot.Members.Insert(0, globalStatement));
+                }
+                //insert global statement at the end of the file
+                else
+                {
+                    newRoot = newRoot.WithMembers(newRoot.Members.Add(globalStatement));
                 }
             }
-            //insert global statement at the top of the file
-            else if (change.Append)
-            {
-                newRoot = newRoot.WithMembers(newRoot.Members.Insert(0, globalStatement));
-            }
-            //insert global statement at the end of the file
-            else
-            {
-                newRoot = newRoot.WithMembers(newRoot.Members.Add(globalStatement));
-            }
+           
             return newRoot;
         }
 
@@ -476,11 +480,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return formattedCodeBlock;
         }
 
-        internal bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement)
+        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement)
         {
             if (root != null)
             {
-                return root.Members.Where(st => st.ToString().Equals(statement.ToString())).Any();
+                return root.Members.Where(st => st.ToString().Trim(CodeSnippetTrimChars).Equals(statement.ToString().Trim(CodeSnippetTrimChars))).Any();
             }
             return false;
         }

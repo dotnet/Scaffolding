@@ -5,9 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
-using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.Shared;
-using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Xunit;
@@ -37,7 +35,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                     Assert.Contains(newRoot.Usings, node => node.Name.ToString().Equals(usingString));
                 }
             }
-
         }
 
         [Theory]
@@ -326,7 +323,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             }
         }
 
-
         [Theory]
         [InlineData(new object[] { new string[] { "Authorize", "Empty" },
                                    new string[] { "Theory", "Controller" },
@@ -352,6 +348,53 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             foreach (var attribute in invalidAttributes)
             {
                 Assert.False(docBuilder.AttributeExists(attribute, attributeLists));
+            }
+        }
+
+        [Theory]
+        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false" },
+                                   new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()", "app.UseStaticFiles()", "app.UseRouting()", "bool IsProperty { get; set; } = false" } }
+        )]
+        public async Task AddGlobalStatementsTests(string[] statementsToAdd, string[] duplicateStatements)
+        {
+            Document minimalProgramCsDoc = CreateDocument(MinimalProgramCsFile);
+            var root = await minimalProgramCsDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
+            foreach (var statementToAdd in statementsToAdd)
+            {
+                var expression = SyntaxFactory.ParseStatement(statementToAdd);
+                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                root = DocumentBuilder.AddGlobalStatements(new CodeSnippet { Block = statementToAdd }, root);
+                Assert.True(DocumentBuilder.GlobalStatementExists(root, globalStatement));
+            }
+            var statementCount = root.Members.Count;
+            foreach (var duplicateStatement in duplicateStatements)
+            {
+                root = DocumentBuilder.AddGlobalStatements(new CodeSnippet { Block = duplicateStatement }, root);
+                Assert.Equal(statementCount, root.Members.Count);
+            }
+        }
+
+        [Theory]
+        [InlineData(new object[] { new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()" , "app.UseStaticFiles()", "app.UseRouting()" },
+                                   new string[] { "var app2 = builder.Build()", "app2.UseHttpsRedirection()" , "app2.UseStaticFiles()", "app2.UseRouting()" }}
+        )]
+        public async Task GlobalStatementExistsTests( string[] existingStatements, string[] nonExistingStatements)
+        {
+            Document minimalProgramCsDoc = CreateDocument(MinimalProgramCsFile);
+            var root = await minimalProgramCsDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
+            //test existing global statments in MinimalProgramCsFile
+            foreach (var existingStatement in existingStatements)
+            {
+                var expression = SyntaxFactory.ParseStatement(existingStatement);
+                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                Assert.True(DocumentBuilder.GlobalStatementExists(root, globalStatement));
+            }
+
+            foreach (var nonExistingStatement in nonExistingStatements)
+            {
+                var expression = SyntaxFactory.ParseStatement(nonExistingStatement);
+                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                Assert.False(DocumentBuilder.GlobalStatementExists(root, globalStatement));
             }
         }
     }

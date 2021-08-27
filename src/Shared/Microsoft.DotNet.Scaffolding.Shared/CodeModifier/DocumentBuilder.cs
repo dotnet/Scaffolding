@@ -183,10 +183,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
             if (!GlobalStatementExists(newRoot, globalStatement))
             {
-                Debugger.Launch();
                 //insert after, before, or at the end of file.
                 //insert global statement after particular statement
-                if (!string.IsNullOrEmpty(change.InsertAfter) || change.InsertBefore.Any())
+                if (!string.IsNullOrEmpty(change.InsertAfter) || change.InsertBefore != null)
                 {
                     var insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
                     if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)

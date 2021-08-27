@@ -183,15 +183,31 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
             if (!GlobalStatementExists(newRoot, globalStatement))
             {
+                Debugger.Launch();
+                //insert after, before, or at the end of file.
                 //insert global statement after particular statement
-                if (!string.IsNullOrEmpty(change.InsertAfter))
+                if (!string.IsNullOrEmpty(change.InsertAfter) || change.InsertBefore.Any())
                 {
                     var insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
                     if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)
                     {
                         newRoot = newRoot.InsertNodesAfter(insertAfterGlobalStatment, new List<SyntaxNode> { globalStatement });
                     }
-                }
+                    else
+                    {
+                        //find a statement to insert before.
+                        foreach (var insertBeforeText in change.InsertBefore)
+                        {
+                            var insertBeforeStatement = newRoot.Members.Where(st => st.ToString().Contains(insertBeforeText)).FirstOrDefault();
+                            if (insertBeforeStatement != null && insertBeforeStatement is GlobalStatementSyntax insertBeforeGlobalStatment)
+                            {
+                                newRoot = newRoot.InsertNodesBefore(insertBeforeGlobalStatment, new List<SyntaxNode> { globalStatement });
+                                //exit if we found a statement to insert before
+                                break;
+                            }
+                        }
+                    }
+            }
                 //insert global statement at the top of the file
                 else if (change.Append)
                 {

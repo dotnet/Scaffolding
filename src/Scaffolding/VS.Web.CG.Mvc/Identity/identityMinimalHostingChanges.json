@@ -7,7 +7,7 @@
           "CodeChanges": [
             {
               "InsertAfter": "WebApplication.CreateBuilder",
-              "Block": "var connectionString = builder.Configuration.GetConnectionString(\"{0}\");"
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\");"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
@@ -19,7 +19,8 @@
             },
             {
               "InsertAfter": "app.UseRouting();",
-              "Block": "app.UseAuthentication();"
+              "Block": "app.UseAuthentication();",
+              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ] 
             }
           ]
         }

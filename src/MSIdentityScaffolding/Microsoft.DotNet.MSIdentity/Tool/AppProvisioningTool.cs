@@ -11,8 +11,10 @@ using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Project;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
@@ -239,7 +241,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 bool changesMade = false;
                 //waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
-                JObject appSettings = JObject.Parse(File.ReadAllText(filePath));
+                JObject appSettings = JObject.Parse(System.IO.File.ReadAllText(filePath));
                 if (appSettings != null)
                 {
                     var azureAdToken = appSettings["AzureAd"];
@@ -349,7 +351,7 @@ namespace Microsoft.DotNet.MSIdentity
                 //save comments somehow, only write to appsettings.json if changes are made
                 if (appSettings != null && changesMade)
                 {
-                    File.WriteAllText(filePath, appSettings.ToString());
+                    System.IO.File.WriteAllText(filePath, appSettings.ToString());
                 }
             }
         }
@@ -368,7 +370,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             foreach (string filePath in filesWithReplacementsForB2C)
             {
-                string fileContent = File.ReadAllText(filePath);
+                string fileContent = System.IO.File.ReadAllText(filePath);
                 string updatedContent = fileContent.Replace("AzureAd", "AzureAdB2C");
 
                 // Add the policies to the appsettings.json
@@ -383,7 +385,7 @@ namespace Microsoft.DotNet.MSIdentity
                             + updatedContent.Substring(indexCallbackPath);
                     }
                 }
-                File.WriteAllText(filePath, updatedContent);
+                System.IO.File.WriteAllText(filePath, updatedContent);
             }
 
             if (projectSettings.ApplicationParameters.CallsMicrosoftGraph)

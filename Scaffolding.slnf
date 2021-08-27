@@ -24,7 +24,8 @@
         "test\\Scaffolding\\VS.Web.CG.Sources.Test\\VS.Web.CG.Sources.Tests.csproj",
         "test\\Scaffolding\\VS.Web.CG.Templating.Test\\VS.Web.CG.Templating.Tests.csproj",
         "test\\Scaffolding\\VS.Web.CG.Tools.Test\\VS.Web.CG.Tools.Tests.csproj",
-        "test\\Scaffolding\\E2E_Test\\E2E_Test.Tests.csproj"
+        "test\\Scaffolding\\E2E_Test\\E2E_Test.Tests.csproj",
+        "test\\Shared\\Microsoft.DotNet.Scaffolding.Shared.Tests\\Microsoft.DotNet.Scaffolding.Shared.Tests.csproj"
     ]
   }
 }

@@ -6,7 +6,8 @@
       "src\\Shared\\Microsoft.DotNet.Scaffolding.Shared\\Microsoft.DotNet.Scaffolding.Shared.csproj",
       "test\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity.Tests\\Microsoft.DotNet.MSIdentity.Tests.csproj",
       "test\\MSIdentityScaffolding\\Microsoft.DotNet.MSIdentity.UnitTests.Tests\\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj",
-      "tools\\dotnet-msidentity\\dotnet-msidentity.csproj"
+      "test\\Shared\\Microsoft.DotNet.Scaffolding.Shared.Tests\\Microsoft.DotNet.Scaffolding.Shared.Tests.csproj",
+      "tools\\dotnet-msidentity\\dotnet-msidentity.csproj",
     ]
   }
 }

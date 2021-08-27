@@ -284,7 +284,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             return jsonText;
         }
 
-        private async Task EditProgramCsForIdentity(IModelTypesLocator modelTypesLocator, string dbContextClassName, string identityUserClassName, string dbContextNamespace, bool useSqlite)
+        /// <summary>
+        /// Edit the Program.cs file for Individual Auth. Adds GlobalStatements found in 'identityMinimalHostingChanges.json' file.
+        /// </summary>
+        /// <param name="modelTypesLocator">To find Program.cs model type and document for editing</param>
+        /// <param name="dbContextClassName">For injecting the DbContext class in statements.</param>
+        /// <param name="identityUserClassName">For injecting the IdentityUser class in statements.</param>
+        /// <param name="dbContextNamespace">For injecting the namespace for DbContext class in statements.</param>
+        /// <param name="useSqlite">To opt between injecting UseSqlite or UseSqlServer</param>
+        /// <returns></returns>
+        internal async Task EditProgramCsForIdentity(
+            IModelTypesLocator modelTypesLocator,
+            string dbContextClassName,
+            string identityUserClassName,
+            string dbContextNamespace,
+            bool useSqlite = false)
         {
             var jsonText = GetIdentityCodeModifierConfig();
             CodeModifierConfig identityProgramFileConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
@@ -432,7 +446,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         templateModel);
                 }
             }
-            
+
             if (!templateModel.IsUsingExistingDbContext)
             {
                 _connectionStringsWriter.AddConnectionString(

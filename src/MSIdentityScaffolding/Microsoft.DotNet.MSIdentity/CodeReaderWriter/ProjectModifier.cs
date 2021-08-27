@@ -72,6 +72,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
                                 DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
                                 var docRoot = documentEditor.OriginalRoot as CompilationUnitSyntax;
+                                //adding usings
                                 var newRoot = documentBuilder.AddUsings();
                                 var namespaceNode = newRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
 
@@ -86,7 +87,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
                                 {
                                     var modifiedClassDeclarationSyntax = classDeclarationSyntax;
-                                    //adding usings
                                    
                                     //add class properties
                                     modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax);

@@ -25,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 };
         }
 
-        private static IdentityGeneratorFile IdentityHostingStartup = new IdentityGeneratorFile()
+        internal static IdentityGeneratorFile IdentityHostingStartup = new IdentityGeneratorFile()
         {
             Name = "IdentityHostingStartup",
             SourcePath = "IdentityHostingStartup.cshtml",
@@ -84,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         };
 
-        internal static IdentityGeneratorFile[] GetFilesToGenerate(IEnumerable<string> names, IdentityGeneratorTemplateModel templateModel, bool minimalHosting = false)
+        internal static IdentityGeneratorFile[] GetFilesToGenerate(IEnumerable<string> names, IdentityGeneratorTemplateModel templateModel)
         {
             if (templateModel == null)
             {
@@ -167,11 +167,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
-
-            if (!minimalHosting)
-            {
-                filesToGenerate.Add(IdentityHostingStartup);
-            }
+            filesToGenerate.Add(IdentityHostingStartup);
+            
             
             filesToGenerate.Add(ReadMe);
 

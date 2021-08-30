@@ -253,6 +253,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var minimalApp = await IsMinimalApp(new ModelTypesLocator(_workspace));
             if (minimalApp)
             {
+                //remove IdentityGeneratorFilesConfig.IdentityHostingStartup. This is not super performant but doesn't need to be.
+                int hostingStartupIndex = Array.IndexOf(templateModel.FilesToGenerate, IdentityGeneratorFilesConfig.IdentityHostingStartup);
+                if (hostingStartupIndex != -1)
+                {
+                    templateModel.FilesToGenerate = templateModel.FilesToGenerate.Where((source, index) => index != hostingStartupIndex).ToArray();
+                }
+                
                 //edit Program.cs in minimal hosting scenario
                 await EditProgramCsForIdentity(
                     new ModelTypesLocator(_workspace),

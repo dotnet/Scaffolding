@@ -218,15 +218,29 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters? resultAppParameters = null;
             if (applicationParameters != null)
             {
-                resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
-                if (resultAppParameters != null && !string.IsNullOrEmpty(resultAppParameters.ClientId))
+                try
                 {
-                    ConsoleLogger.LogMessage(string.Format(Resources.CreatedAppRegistration, resultAppParameters.ApplicationDisplayName, resultAppParameters.ClientId));
+                    resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
+                    if (resultAppParameters != null && !string.IsNullOrEmpty(resultAppParameters.ClientId))
+                    {
+                        ConsoleLogger.LogMessage(string.Format(Resources.CreatedAppRegistration, resultAppParameters.ApplicationDisplayName, resultAppParameters.ClientId));
+                    }
+                    else
+                    {
+                        string failMessage = Resources.FailedToCreateApp;
+                        ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    string failMessage = Resources.FailedToCreateApp;
-                    ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
+                    JsonResponse jsonResponse = new JsonResponse(CommandName)
+                    {
+                        State = State.Fail,
+                        Content = ex.Message
+                    };
+
+                    ConsoleLogger.LogJsonMessage(jsonResponse);
+                    ConsoleLogger.LogMessage(ex.Message, LogMessageType.Error);
                 }
             }
             return resultAppParameters;

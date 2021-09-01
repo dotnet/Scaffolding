@@ -231,12 +231,13 @@ namespace Microsoft.DotNet.MSIdentity
                         ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
                     }
                 }
-                catch (Exception ex)
+                catch (ServiceException ex)
                 {
+                    string jsonErrorContent = $"{ex.Error?.Code ?? string.Empty} {Environment.NewLine} {ex.Error?.Message ?? string.Empty}";
                     JsonResponse jsonResponse = new JsonResponse(CommandName)
                     {
                         State = State.Fail,
-                        Content = ex.Message
+                        Content = jsonErrorContent
                     };
 
                     ConsoleLogger.LogJsonMessage(jsonResponse);

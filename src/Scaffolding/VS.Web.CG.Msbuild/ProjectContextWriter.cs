@@ -77,7 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         [Build.Framework.Required]
         public string ProjectAssetsFile { get; set; }
 
-        [Build.Framework.Required]
+        //not required as it might not get a value (fails if required and value not present).
         public string GeneratedImplicitNamespaceImportFile { get; set; }
         #endregion
 

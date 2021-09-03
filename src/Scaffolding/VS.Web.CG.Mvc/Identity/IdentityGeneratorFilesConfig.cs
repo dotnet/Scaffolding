@@ -25,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 };
         }
 
-        private static IdentityGeneratorFile IdentityHostingStartup = new IdentityGeneratorFile()
+        internal static IdentityGeneratorFile IdentityHostingStartup = new IdentityGeneratorFile()
         {
             Name = "IdentityHostingStartup",
             SourcePath = "IdentityHostingStartup.cshtml",
@@ -167,8 +167,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
-
             filesToGenerate.Add(IdentityHostingStartup);
+            
+            
             filesToGenerate.Add(ReadMe);
 
             return filesToGenerate.Distinct(new IdentityGeneratorFileComparer()).ToArray();

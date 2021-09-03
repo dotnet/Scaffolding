@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.MSBuild;
 
-namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
+namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
     //static class helper for CodeAnalysis 
     public static class CodeAnalysisHelper

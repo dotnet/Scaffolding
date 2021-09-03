@@ -5,9 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -36,6 +41,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         internal static readonly string DefaultContentRelativeBaseDir = "Identity";
         internal static readonly string VersionedContentRelativeBaseDir = "Identity_Versioned";
+
+        //const strings for Program.cs edits.
+        internal const string AddDbContext = nameof(AddDbContext);
+        internal const string AddDefaultIdentity = nameof(AddDefaultIdentity);
+        internal const string AddEntityFrameworkStores = nameof(AddEntityFrameworkStores);
+        internal const string OptionsUseConnectionString = "options.{0}(connectionString)";
+        internal const string GetConnectionString = nameof(GetConnectionString);
+        internal const string UseSqlite = nameof(UseSqlite);
+        internal const string UseSqlServer = nameof(UseSqlServer);
+        internal const string ProgramCsFileName = "Program.cs";
 
         private ILogger _logger;
         private IApplicationInfo _applicationInfo;
@@ -238,18 +253,131 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var minimalApp = await IsMinimalApp(new ModelTypesLocator(_workspace));
             if (minimalApp)
             {
-               _logger.LogMessage($"\n{MessageStrings.IdentityNotSupported}\n", LogMessageLevel.Error);
-               return;
+                //remove IdentityGeneratorFilesConfig.IdentityHostingStartup. This is not super performant but doesn't need to be.
+                int hostingStartupIndex = Array.IndexOf(templateModel.FilesToGenerate, IdentityGeneratorFilesConfig.IdentityHostingStartup);
+                if (hostingStartupIndex != -1)
+                {
+                    templateModel.FilesToGenerate = templateModel.FilesToGenerate.Where((source, index) => index != hostingStartupIndex).ToArray();
+                }
+                
+                //edit Program.cs in minimal hosting scenario
+                await EditProgramCsForIdentity(
+                    new ModelTypesLocator(_workspace),
+                    templateModel.DbContextClass,
+                    templateModel.UserClass,
+                    templateModel.DbContextNamespace,
+                    templateModel.UseSQLite);
+                //return;
             }
+
             await AddTemplateFiles(templateModel);
             await AddStaticFiles(templateModel);
+        }
+
+        private string GetIdentityCodeModifierConfig()
+        {
+            string jsonText = string.Empty;
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceNames = assembly.GetManifestResourceNames();
+            var resourceName = resourceNames.Where(x => x.EndsWith("identityMinimalHostingChanges.json")).FirstOrDefault();
+            if (!string.IsNullOrEmpty(resourceName))
+            {
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    jsonText = reader.ReadToEnd();
+                }
+            }
+            return jsonText;
+        }
+
+        /// <summary>
+        /// Edit the Program.cs file for Individual Auth. Adds GlobalStatements found in 'identityMinimalHostingChanges.json' file.
+        /// </summary>
+        /// <param name="modelTypesLocator">To find Program.cs model type and document for editing</param>
+        /// <param name="dbContextClassName">For injecting the DbContext class in statements.</param>
+        /// <param name="identityUserClassName">For injecting the IdentityUser class in statements.</param>
+        /// <param name="dbContextNamespace">For injecting the namespace for DbContext class in statements.</param>
+        /// <param name="useSqlite">To opt between injecting UseSqlite or UseSqlServer</param>
+        /// <returns></returns>
+        internal async Task EditProgramCsForIdentity(
+            IModelTypesLocator modelTypesLocator,
+            string dbContextClassName,
+            string identityUserClassName,
+            string dbContextNamespace,
+            bool useSqlite = false)
+        {
+            var jsonText = GetIdentityCodeModifierConfig();
+            CodeModifierConfig identityProgramFileConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+            if (identityProgramFileConfig != null)
+            {
+                var programCsFile = identityProgramFileConfig.Files.FirstOrDefault();
+                //Add the newly generated DbContext's namespace.
+                programCsFile.Usings = programCsFile.Usings.Append(dbContextNamespace).ToArray();
+                var programType = modelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? modelTypesLocator.GetType("Program").FirstOrDefault();
+                var programDocument = modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith(ProgramCsFileName)).FirstOrDefault();
+                var docEditor = await DocumentEditor.CreateAsync(programDocument);
+
+                var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
+                var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
+                //adding usings
+                var newRoot = docBuilder.AddUsings();
+                //add code snippets/changes.
+                if (programCsFile.Methods != null && programCsFile.Methods.Any())
+                {
+                    var globalChanges = programCsFile.Methods.Where(x => x.Key == "Global").First().Value;
+                    foreach (var change in globalChanges.CodeChanges)
+                    {
+                        change.Block = EditIdentityStrings(change.Block, dbContextClassName, identityUserClassName, useSqlite);
+                        newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                    }
+                }
+                //replace root node with all the updates.
+                docEditor.ReplaceNode(docRoot, newRoot);
+                //write to Program.cs file
+                await docBuilder.WriteToClassFileAsync(programDocument.Name, programDocument.FilePath);
+                // add app.UseMigrationsEndPoint(); in else of IsDevelopment()
+            }
+        }
+
+        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, bool isSqlite)
+        {
+            if (string.IsNullOrEmpty(stringToModify))
+            {
+                return string.Empty;
+            }
+
+            string modifiedString = stringToModify;
+            if (stringToModify.Contains(AddDbContext))
+            {
+                modifiedString = modifiedString.Replace("AddDbContext<{0}>", $"{AddDbContext}<{dbContextClassName}>");
+            }
+            if (stringToModify.Contains(AddDefaultIdentity))
+            {
+                modifiedString = modifiedString.Replace("AddDefaultIdentity<{0}>", $"{AddDefaultIdentity}<{identityUserClassName}>");
+            }
+            if (stringToModify.Contains(AddEntityFrameworkStores))
+            {
+                modifiedString = modifiedString.Replace("AddEntityFrameworkStores<{0}>", $"{AddEntityFrameworkStores}<{dbContextClassName}>");
+            }
+            if (stringToModify.Contains(OptionsUseConnectionString))
+            {
+                modifiedString = modifiedString.Replace("options.{0}",
+                    isSqlite ?  $"options.{UseSqlite}" :
+                                $"options.{UseSqlServer}");
+            }
+            if (stringToModify.Contains(GetConnectionString))
+            {
+                modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
+            }
+            return modifiedString;
         }
 
         /// <summary>
         /// Check if Startup.cs or similar file exists.
         /// </summary>
         /// <returns>true if Startup.cs does not exist, false if it does exist.</returns>
-        private static async Task<bool> IsMinimalApp(IModelTypesLocator modelTypesLocator)
+        internal static async Task<bool> IsMinimalApp(IModelTypesLocator modelTypesLocator)
         {
             //find Startup if named Startup.
             var startupType = modelTypesLocator.GetType("Startup").FirstOrDefault();
@@ -310,7 +438,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             string projectDir = Path.GetDirectoryName(_projectContext.ProjectFullPath);
             IEnumerable<IdentityGeneratorFile> templates = templateModel.FilesToGenerate.Where(t => t.IsTemplate);
             IEnumerable<string> templateFolders = GetTemplateFoldersForContentVersion(templateModel);
-
             foreach (IdentityGeneratorFile template in templates)
             {
                 string outputPath = Path.Combine(projectDir, template.OutputPath);

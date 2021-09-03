@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
+namespace @thisNamespace
 {
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -84,16 +84,16 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
         public virtual Task<IActionResult> OnPostAsync() => throw new NotImplementedException();
     }
 
-    internal class EnableAuthenticatorModel<TUser> : EnableAuthenticatorModel where TUser : class
+    internal class EnableAuthenticatorModel<@(Model.UserClass)> : EnableAuthenticatorModel where TUser : class
     {
-        private readonly UserManager<TUser> _userManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
         private readonly ILogger<EnableAuthenticatorModel> _logger;
         private readonly UrlEncoder _urlEncoder;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
         public EnableAuthenticatorModel(
-            UserManager<TUser> userManager,
+            UserManager<@(Model.UserClass)> userManager,
             ILogger<EnableAuthenticatorModel> logger,
             UrlEncoder urlEncoder)
         {

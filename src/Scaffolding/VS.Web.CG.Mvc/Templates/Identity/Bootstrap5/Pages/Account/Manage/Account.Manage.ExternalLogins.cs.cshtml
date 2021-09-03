@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
+namespace @thisNamespace
 {
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -69,16 +69,16 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
         public virtual Task<IActionResult> OnGetLinkLoginCallbackAsync() => throw new NotImplementedException();
     }
 
-    internal class ExternalLoginsModel<TUser> : ExternalLoginsModel where TUser : class
+    internal class ExternalLoginsModel<@(Model.UserClass)> : ExternalLoginsModel where TUser : class
     {
-        private readonly UserManager<TUser> _userManager;
-        private readonly SignInManager<TUser> _signInManager;
-        private readonly IUserStore<TUser> _userStore;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
+        private readonly IUserStore<@(Model.UserClass)> _userStore;
 
         public ExternalLoginsModel(
-            UserManager<TUser> userManager,
-            SignInManager<TUser> signInManager,
-            IUserStore<TUser> userStore)
+            UserManager<@(Model.UserClass)> userManager,
+            SignInManager<@(Model.UserClass)> signInManager,
+            IUserStore<@(Model.UserClass)> userStore)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -99,7 +99,7 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
                 .ToList();
 
             string passwordHash = null;
-            if (_userStore is IUserPasswordStore<TUser> userPasswordStore)
+            if (_userStore is IUserPasswordStore<@(Model.UserClass)> userPasswordStore)
             {
                 passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
             }

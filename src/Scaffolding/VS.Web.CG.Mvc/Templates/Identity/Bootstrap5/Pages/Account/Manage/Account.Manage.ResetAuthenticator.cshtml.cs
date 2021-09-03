@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
+namespace @thisNamespace
 {
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -36,15 +36,15 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
         public virtual Task<IActionResult> OnPostAsync() => throw new NotImplementedException();
     }
 
-    internal class ResetAuthenticatorModel<TUser> : ResetAuthenticatorModel where TUser : class
+    internal class ResetAuthenticatorModel<@(Model.UserClass)> : ResetAuthenticatorModel where TUser : class
     {
-        private readonly UserManager<TUser> _userManager;
-        private readonly SignInManager<TUser> _signInManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
         private readonly ILogger<ResetAuthenticatorModel> _logger;
 
         public ResetAuthenticatorModel(
-            UserManager<TUser> userManager,
-            SignInManager<TUser> signInManager,
+            UserManager<@(Model.UserClass)> userManager,
+            SignInManager<@(Model.UserClass)> signInManager,
             ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;

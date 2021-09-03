@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
+namespace @thisNamespace
 {
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -23,13 +23,13 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Manage.Internal
         public virtual Task<IActionResult> OnGet() => throw new NotImplementedException();
     }
 
-    internal class PersonalDataModel<TUser> : PersonalDataModel where TUser : class
+    internal class PersonalDataModel<@(Model.UserClass)> : PersonalDataModel where TUser : class
     {
-        private readonly UserManager<TUser> _userManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
         private readonly ILogger<PersonalDataModel> _logger;
 
         public PersonalDataModel(
-            UserManager<TUser> userManager,
+            UserManager<@(Model.UserClass)> userManager,
             ILogger<PersonalDataModel> logger)
         {
             _userManager = userManager;

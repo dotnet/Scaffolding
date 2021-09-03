@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -9,14 +9,31 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+@{
+    var namespaceSet = new HashSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Identity.UI.Services",
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.WebUtilities",
+            "Microsoft.Extensions.Logging",
+        });
 
-namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
+    var thisNamespace =@Model.Namespace + ".Areas.Identity.Pages.Account";
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace) && thisNamespace != Model.UserClassNamespace)
+    {
+        namespaceSet.Add(Model.UserClassNamespace);
+    }
+    foreach (var name in namespaceSet.OrderBy(n => n))
+    {
+@:using @name;
+    }
+}
+
+namespace @thisNamespace
 {
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -92,19 +109,19 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
         public virtual Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null) => throw new NotImplementedException();
     }
 
-    internal class ExternalLoginModel<TUser> : ExternalLoginModel where TUser : class
+    internal class ExternalLoginModel<@(Model.UserClass)> : ExternalLoginModel where TUser : class
     {
-        private readonly SignInManager<TUser> _signInManager;
-        private readonly UserManager<TUser> _userManager;
-        private readonly IUserStore<TUser> _userStore;
-        private readonly IUserEmailStore<TUser> _emailStore;
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly IUserStore<@(Model.UserClass)> _userStore;
+        private readonly IUserEmailStore<@(Model.UserClass)> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         public ExternalLoginModel(
-            SignInManager<TUser> signInManager,
-            UserManager<TUser> userManager,
-            IUserStore<TUser> userStore,
+            SignInManager<@(Model.UserClass)> signInManager,
+            UserManager<@(Model.UserClass)> userManager,
+            IUserStore<@(Model.UserClass)> userStore,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender)
         {
@@ -231,7 +248,7 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
         {
             try
             {
-                return Activator.CreateInstance<TUser>();
+                return Activator.CreateInstance<@(Model.UserClass)>();
             }
             catch
             {
@@ -241,13 +258,13 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
             }
         }
 
-        private IUserEmailStore<TUser> GetEmailStore()
+        private IUserEmailStore<@(Model.UserClass)> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<TUser>)_userStore;
+            return (IUserEmailStore<@(Model.UserClass)>)_userStore;
         }
     }
 }

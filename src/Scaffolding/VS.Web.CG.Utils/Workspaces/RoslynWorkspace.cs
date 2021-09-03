@@ -101,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             // manually add the ImplicitImports.cs file.
             else 
             {
-                var namespaceImportsFilePath = $"{context?.TargetDirectory?.Replace("\\bin\\", "\\obj\\")}\\{context?.ProjectName}.ImplicitNamespaceImports.cs";
+                var namespaceImportsFilePath = $"{context?.TargetDirectory?.Replace("\\bin\\", "\\obj\\")}\\{context?.ProjectName}.GlobalUsings.g.cs";
                 if (!string.IsNullOrEmpty(namespaceImportsFilePath))
                 {
                     AddSourceFile(projectInfo, namespaceImportsFilePath);

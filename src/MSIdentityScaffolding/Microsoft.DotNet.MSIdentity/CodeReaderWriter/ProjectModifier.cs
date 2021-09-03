@@ -11,7 +11,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
+using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
@@ -70,7 +72,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
                                 DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
                                 var docRoot = documentEditor.OriginalRoot as CompilationUnitSyntax;
-                                var namespaceNode = docRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+                                //adding usings
+                                var newRoot = documentBuilder.AddUsings();
+                                var namespaceNode = newRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
 
                                 //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
                                 var classNode = namespaceNode?
@@ -83,8 +87,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
                                 {
                                     var modifiedClassDeclarationSyntax = classDeclarationSyntax;
-                                    //adding usings
-                                    documentBuilder.AddUsings();
+                                   
                                     //add class properties
                                     modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax);
                                     //add class attributes
@@ -97,6 +100,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                     }
                                     //replace class node with all the updates.
                                     documentEditor.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
+                                }
+
+                                if (docRoot != null && newRoot != null)
+                                {
+                                    documentEditor.ReplaceNode(docRoot, newRoot);
                                 }
                                 await documentBuilder.WriteToClassFileAsync(fileName, filePath);
                             }

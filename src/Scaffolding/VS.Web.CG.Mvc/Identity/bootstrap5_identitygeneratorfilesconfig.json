@@ -1,0 +1,827 @@
+{
+    "NamedFileConfig": {
+      "Account._StatusMessage": [
+        {
+          "Name": "Account._StatusMessage",
+          "SourcePath": "Pages/Account/Account._StatusMessage.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/_StatusMessage.cshtml",
+          "IsTemplate": false
+        }
+      ],
+      "Account.AccessDenied": [
+        {
+          "Name": "Account.AccessDenied",
+          "SourcePath": "Pages/Account/Account.AccessDenied.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/AccessDenied.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.AccessDenied.cs",
+          "SourcePath": "Account.AccessDenied.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/AccessDenied.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ConfirmEmail": [
+        {
+          "Name": "Account.ConfirmEmail",
+          "SourcePath": "Pages/Account/Account.ConfirmEmail.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmail.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ConfirmEmail.cs",
+          "SourcePath": "Account.ConfirmEmail.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmail.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ConfirmEmailChange": [
+        {
+          "Name": "Account.ConfirmEmailChange",
+          "SourcePath": "Pages/Account/Account.ConfirmEmailChange.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmailChange.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ConfirmEmailChange.cs",
+          "SourcePath": "Account.ConfirmEmailChange.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ConfirmEmailChange.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ExternalLogin": [
+        {
+          "Name": "Account.ExternalLogin",
+          "SourcePath": "Pages/Account/Account.ExternalLogin.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ExternalLogin.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ExternalLogin.cs",
+          "SourcePath": "Account.ExternalLogin.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ExternalLogin.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ForgotPassword": [
+        {
+          "Name": "Account.ForgotPassword",
+          "SourcePath": "Pages/Account/Account.ForgotPassword.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ForgotPassword.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ForgotPassword.cs",
+          "SourcePath": "Account.ForgotPassword.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ForgotPassword.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ForgotPasswordConfirmation": [
+        {
+          "Name": "Account.ForgotPasswordConfirmation",
+          "SourcePath": "Pages/Account/Account.ForgotPasswordConfirmation.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ForgotPasswordConfirmation.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ForgotPasswordConfirmation.cs",
+          "SourcePath": "Account.ForgotPasswordConfirmation.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ForgotPasswordConfirmation.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Lockout": [
+        {
+          "Name": "Account.Lockout",
+          "SourcePath": "Pages/Account/Account.Lockout.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Lockout.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Lockout.cs",
+          "SourcePath": "Account.Lockout.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Lockout.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Login": [
+        {
+          "Name": "Account.Login",
+          "SourcePath": "Pages/Account/Account.Login.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Login.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Login.cs",
+          "SourcePath": "Account.Login.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Login.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.LoginWith2fa": [
+        {
+          "Name": "Account.LoginWith2fa",
+          "SourcePath": "Pages/Account/Account.LoginWith2fa.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/LoginWith2fa.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.LoginWith2fa.cs",
+          "SourcePath": "Account.LoginWith2fa.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/LoginWith2fa.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.LoginWithRecoveryCode": [
+        {
+          "Name": "Account.LoginWithRecoveryCode",
+          "SourcePath": "Pages/Account/Account.LoginWithRecoveryCode.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/LoginWithRecoveryCode.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.LoginWithRecoveryCode.cs",
+          "SourcePath": "Account.LoginWithRecoveryCode.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/LoginWithRecoveryCode.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Logout": [
+        {
+          "Name": "Account.Logout",
+          "SourcePath": "Pages/Account/Account.Logout.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Logout.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Logout.cs",
+          "SourcePath": "Account.Logout.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Logout.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage._Layout": [
+        {
+          "Name": "Account.Manage._Layout",
+          "SourcePath": "Pages/Account/Manage/Account.Manage._Layout.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_Layout.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage._ManageNav": [
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage._StatusMessage": [
+        {
+          "Name": "Account.Manage._StatusMessage",
+          "SourcePath": "Pages/Account/Manage/Account.Manage._StatusMessage.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_StatusMessage.cshtml",
+          "IsTemplate": false
+        }
+      ],
+      "Account.Manage.ChangePassword": [
+        {
+          "Name": "Account.Manage.ChangePassword",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.ChangePassword.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ChangePassword.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.ChangePassword.cs",
+          "SourcePath": "Account.Manage.ChangePassword.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ChangePassword.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.DeletePersonalData": [
+        {
+          "Name": "Account.Manage.DeletePersonalData",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.DeletePersonalData.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/DeletePersonalData.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.DeletePersonalData.cs",
+          "SourcePath": "Account.Manage.DeletePersonalData.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/DeletePersonalData.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.Disable2fa": [
+        {
+          "Name": "Account.Manage.Disable2fa",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.Disable2fa.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/Disable2fa.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.Disable2fa.cs",
+          "SourcePath": "Account.Manage.Disable2fa.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/Disable2fa.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.DownloadPersonalData": [
+        {
+          "Name": "Account.Manage.DownloadPersonalData",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.DownloadPersonalData.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/DownloadPersonalData.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.DownloadPersonalData.cs",
+          "SourcePath": "Account.Manage.DownloadPersonalData.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/DownloadPersonalData.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.Email": [
+        {
+          "Name": "Account.Manage.Email",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.Email.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/Email.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.Email.cs",
+          "SourcePath": "Account.Manage.Email.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/Email.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.EnableAuthenticator": [
+        {
+          "Name": "Account.Manage.EnableAuthenticator",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.EnableAuthenticator.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/EnableAuthenticator.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.EnableAuthenticator.cs",
+          "SourcePath": "Account.Manage.EnableAuthenticator.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/EnableAuthenticator.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.ExternalLogins": [
+        {
+          "Name": "Account.Manage.ExternalLogins",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.ExternalLogins.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ExternalLogins.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.ExternalLogins.cs",
+          "SourcePath": "Account.Manage.ExternalLogins.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ExternalLogins.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.GenerateRecoveryCodes": [
+        {
+          "Name": "Account.Manage.GenerateRecoveryCodes",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.GenerateRecoveryCodes.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/GenerateRecoveryCodes.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.GenerateRecoveryCodes.cs",
+          "SourcePath": "Account.Manage.GenerateRecoveryCodes.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/GenerateRecoveryCodes.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.Index": [
+        {
+          "Name": "Account.Manage.Index",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.Index.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/Index.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.Index.cs",
+          "SourcePath": "Account.Manage.Index.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/Index.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.PersonalData": [
+        {
+          "Name": "Account.Manage.PersonalData",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.PersonalData.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/PersonalData.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.PersonalData.cs",
+          "SourcePath": "Account.Manage.PersonalData.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/PersonalData.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.ResetAuthenticator": [
+        {
+          "Name": "Account.Manage.ResetAuthenticator",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.ResetAuthenticator.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ResetAuthenticator.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.ResetAuthenticator.cs",
+          "SourcePath": "Account.Manage.ResetAuthenticator.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ResetAuthenticator.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.SetPassword": [
+        {
+          "Name": "Account.Manage.SetPassword",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.SetPassword.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/SetPassword.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.SetPassword.cs",
+          "SourcePath": "Account.Manage.SetPassword.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/SetPassword.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.ShowRecoveryCodes": [
+        {
+          "Name": "Account.Manage.ShowRecoveryCodes",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.ShowRecoveryCodes.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ShowRecoveryCodes.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.ShowRecoveryCodes.cs",
+          "SourcePath": "Account.Manage.ShowRecoveryCodes.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ShowRecoveryCodes.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Manage.TwoFactorAuthentication": [
+        {
+          "Name": "Account.Manage.TwoFactorAuthentication",
+          "SourcePath": "Pages/Account/Manage/Account.Manage.TwoFactorAuthentication.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/TwoFactorAuthentication.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Manage.TwoFactorAuthentication.cs",
+          "SourcePath": "Account.Manage.TwoFactorAuthentication.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/TwoFactorAuthentication.cshtml.cs",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage._ManageNav",
+          "SourcePath": "Account.Manage._ManageNav.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml",
+          "IsTemplate": true
+        },
+        {
+          "Name": "Account.Manage.ManageNavPages",
+          "SourcePath": "Account.Manage.ManageNavPages.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Manage/ManageNavPages.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.Register": [
+        {
+          "Name": "Account.Register",
+          "SourcePath": "Pages/Account/Account.Register.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Register.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.Register.cs",
+          "SourcePath": "Account.Register.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/Register.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.RegisterConfirmation": [
+        {
+          "Name": "Account.RegisterConfirmation",
+          "SourcePath": "Pages/Account/Account.RegisterConfirmation.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/RegisterConfirmation.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.RegisterConfirmation.cs",
+          "SourcePath": "Account.RegisterConfirmation.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/RegisterConfirmation.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ResendEmailConfirmation": [
+        {
+          "Name": "Account.ResendEmailConfirmation",
+          "SourcePath": "Pages/Account/Account.ResendEmailConfirmation.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ResendEmailConfirmation.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ResendEmailConfirmation.cs",
+          "SourcePath": "Account.ResendEmailConfirmation.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ResendEmailConfirmation.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ResetPassword": [
+        {
+          "Name": "Account.ResetPassword",
+          "SourcePath": "Pages/Account/Account.ResetPassword.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ResetPassword.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ResetPassword.cs",
+          "SourcePath": "Account.ResetPassword.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ResetPassword.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Account.ResetPasswordConfirmation": [
+        {
+          "Name": "Account.ResetPasswordConfirmation",
+          "SourcePath": "Pages/Account/Account.ResetPasswordConfirmation.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ResetPasswordConfirmation.cshtml",
+          "IsTemplate": false
+        },
+        {
+          "Name": "Account.ResetPasswordConfirmation.cs",
+          "SourcePath": "Account.ResetPasswordConfirmation.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Account/ResetPasswordConfirmation.cshtml.cs",
+          "IsTemplate": true
+        }
+      ],
+      "Error": [
+        {
+          "Name": "Error",
+          "SourcePath": "Pages/Error.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Error.cshtml",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Error.cs",
+          "SourcePath": "Error.cs.cshtml",
+          "OutputPath": "Areas/Identity/Pages/Error.cshtml.cs",
+          "IsTemplate": true,
+          "ShowInListFiles": false
+        }
+      ],
+      "WwwRoot": [
+        {
+          "Name": "Site.css",
+          "SourcePath": "wwwroot/css/site.css",
+          "OutputPath": "wwwroot/css/site.css",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Site.js",
+          "SourcePath": "wwwroot/js/site.js",
+          "OutputPath": "wwwroot/js/site.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Bootstrap.css",
+          "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+          "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Bootstrap.css.map",
+          "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css.map",
+          "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.css.map",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Bootstrap.min.css",
+          "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css",
+          "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Bootstrap.min.css.map",
+          "SourcePath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map",
+          "OutputPath": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Bootstrap.js",
+          "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
+          "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Bootstrap.min.js",
+          "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
+          "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Lib.Bootstrap.License",
+          "SourcePath": "wwwroot/lib/bootstrap/LICENSE",
+          "OutputPath": "wwwroot/lib/bootstrap/LICENSE",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.js",
+          "SourcePath": "wwwroot/lib/jquery/dist/jquery.js",
+          "OutputPath": "wwwroot/lib/jquery/dist/jquery.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.min.js",
+          "SourcePath": "wwwroot/lib/jquery/dist/jquery.min.js",
+          "OutputPath": "wwwroot/lib/jquery/dist/jquery.min.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.min.map",
+          "SourcePath": "wwwroot/lib/jquery/dist/jquery.min.map",
+          "OutputPath": "wwwroot/lib/jquery/dist/jquery.min.map",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.License.txt",
+          "SourcePath": "wwwroot/lib/jquery/LICENSE.txt",
+          "OutputPath": "wwwroot/lib/jquery/LICENSE.txt",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Additional-methods.js",
+          "SourcePath": "wwwroot/lib/jquery-validation/dist/additional-methods.js",
+          "OutputPath": "wwwroot/lib/jquery-validation/dist/additional-methods.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Additional-methods.min.js",
+          "SourcePath": "wwwroot/lib/jquery-validation/dist/additional-methods.min.js",
+          "OutputPath": "wwwroot/lib/jquery-validation/dist/additional-methods.min.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery-validate.js",
+          "SourcePath": "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
+          "OutputPath": "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.validate.min.js",
+          "SourcePath": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
+          "OutputPath": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery-validation.License.md",
+          "SourcePath": "wwwroot/lib/jquery-validation/LICENSE.md",
+          "OutputPath": "wwwroot/lib/jquery-validation/LICENSE.md",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.validate.unobtrusive.js",
+          "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+          "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.validate.unobtrusive.min.js",
+          "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
+          "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "Jquery.License.txt",
+          "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
+          "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        },
+        {
+          "Name": "favicon.ico",
+          "SourcePath": "wwwroot/favicon.ico",
+          "OutputPath": "wwwroot/favicon.ico",
+          "IsTemplate": false,
+          "ShowInListFiles": false
+        }
+      ]
+    }
+  }
+  

@@ -1,12 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 @{
-    var namespaceSet = new HashSet<string>(
+    var namespaceSet = new System.Collections.Generic.SortedSet<string>(
         new string[]
         {
             "Microsoft.AspNetCore.Identity",
@@ -20,21 +20,29 @@ using Microsoft.AspNetCore.Authorization;
     {
         namespaceSet.Add(Model.UserClassNamespace);
     }
-    foreach (var name in namespaceSet.OrderBy(n => n))
+    foreach (var name in namespaceSet)
     {
 @:using @name;
     }
 }
-namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
+namespace @thisNamespace
 {
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
-    [AllowAnonymous]
-    [IdentityDefaultUI(typeof(LoginWithRecoveryCodeModel<>))]
-    public abstract class LoginWithRecoveryCodeModel : PageModel
+    public class LoginWithRecoveryCodeModel : PageModel
     {
+        private readonly SignInManager<@(Model.UserClass)> _signInManager;
+        private readonly UserManager<@(Model.UserClass)> _userManager;
+        private readonly ILogger<LoginWithRecoveryCodeModel> _logger;
+
+        public LoginWithRecoveryCodeModel(
+            SignInManager<@(Model.UserClass)> signInManager,
+            UserManager<@(Model.UserClass)> userManager,
+            ILogger<LoginWithRecoveryCodeModel> logger)
+        {
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _logger = logger;
+        }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -65,36 +73,7 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
             public string RecoveryCode { get; set; }
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual Task<IActionResult> OnGetAsync(string returnUrl = null) => throw new NotImplementedException();
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual Task<IActionResult> OnPostAsync(string returnUrl = null) => throw new NotImplementedException();
-    }
-
-    internal class LoginWithRecoveryCodeModel<@(Model.UserClass)> : LoginWithRecoveryCodeModel where TUser : class
-    {
-        private readonly SignInManager<@(Model.UserClass)> _signInManager;
-        private readonly UserManager<@(Model.UserClass)> _userManager;
-        private readonly ILogger<LoginWithRecoveryCodeModel> _logger;
-
-        public LoginWithRecoveryCodeModel(
-            SignInManager<@(Model.UserClass)> signInManager,
-            UserManager<@(Model.UserClass)> userManager,
-            ILogger<LoginWithRecoveryCodeModel> logger)
-        {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _logger = logger;
-        }
-
-        public override async Task<IActionResult> OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -108,7 +87,7 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
             return Page();
         }
 
-        public override async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -129,7 +108,7 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
 
             if (result.Succeeded)
             {
-                _logger.LogInformation(LoggerEventIds.UserLoginWithRecoveryCode, "User logged in with a recovery code.");
+                _logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", user.Id);
                 return LocalRedirect(returnUrl ?? Url.Content("~/"));
             }
             if (result.IsLockedOut)
@@ -139,7 +118,7 @@ namespace Microsoft.AspNetCore.Identity.UI.V5.Pages.Account.Internal
             }
             else
             {
-                _logger.LogWarning(LoggerEventIds.InvalidRecoveryCode, "Invalid recovery code entered.");
+                _logger.LogWarning("Invalid recovery code entered for user with ID '{UserId}' ", user.Id);
                 ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
                 return Page();
             }

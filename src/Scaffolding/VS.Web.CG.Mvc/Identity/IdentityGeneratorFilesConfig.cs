@@ -352,7 +352,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private static readonly IReadOnlyDictionary<string, string> _contentVersionToConfigPrefixMap = new Dictionary<string, string>()
         {
             { IdentityGenerator.ContentVersionBootstrap3, "bootstrap3" },
-            { IdentityGenerator.ContentVersionDefault, "bootstrap4" },
+            { IdentityGenerator.ContentVersionBootstrap4, "bootstrap4" },
+            { IdentityGenerator.ContentVersionDefault, "bootstrap5" },
         };
 
         // Lazy-Caches the deserialized versions of {prefix}_identitygeneratorfilesconfig.json

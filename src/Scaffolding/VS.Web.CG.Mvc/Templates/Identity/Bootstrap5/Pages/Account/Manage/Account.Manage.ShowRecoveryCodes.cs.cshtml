@@ -1,8 +1,26 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
+    var namespaceSet = new System.Collections.Generic.SortedSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.Extensions.Logging",
+        });
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+    var thisNamespace = @Model.Namespace + ".Areas.Identity.Pages.Account.Manage";
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace) && thisNamespace != Model.UserClassNamespace)
+    {
+        namespaceSet.Add(Model.UserClassNamespace);
+    }
+    foreach (var name in namespaceSet)
+    {
+@:using @name;
+    }
+}
 
 namespace @thisNamespace
 {

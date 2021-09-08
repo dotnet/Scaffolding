@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
 
-        internal static readonly string DefaultBootstrapVersion = "4";
+        internal static readonly string DefaultBootstrapVersion = "5";
         // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
@@ -30,6 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
         internal static readonly string ContentVersionDefault = "Default";
         internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
+        internal static readonly string ContentVersionBootstrap4 = "Bootstrap4";
 
         internal static readonly string DefaultContentRelativeBaseDir = "ViewGenerator";
         internal static readonly string VersionedContentRelativeBaseDir = "ViewGenerator_Versioned";

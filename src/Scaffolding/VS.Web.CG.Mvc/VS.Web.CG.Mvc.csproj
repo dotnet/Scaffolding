@@ -11,6 +11,8 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
+    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
+    <Content Remove="Identity\bootstrap5_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
@@ -26,10 +28,12 @@
     <None Pack="true" Include="Templates\StaticFiles\*" PackagePath="Templates\StaticFiles\" />
 
     <None Pack="true" Include="Templates\ViewGenerator\Bootstrap3\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap3\" />
-    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap4\*" PackagePath="Templates\ViewGenerator\" />
+    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap4\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap4\" />
+    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap5\*" PackagePath="Templates\ViewGenerator\" />
 
     <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap3\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap3\" />
-    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap4\*" PackagePath="Templates\RazorPageGenerator\" />
+    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap4\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap4\" />
+    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap5\*" PackagePath="Templates\RazorPageGenerator\" />
 
     <!-- Identity Bootstrap3 -->
     <None Pack="true" Include="Templates\Identity\Bootstrap3\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\" />
@@ -51,24 +55,43 @@
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation\dist\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation-unobtrusive\" />
     
-    <!-- Identity Bootstrap4 - The current default, so it gets moved to Templates\Identity\ -->
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\*" PackagePath="Templates\Identity\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\Data\*" PackagePath="Templates\Identity\Data\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\*" PackagePath="Templates\Identity\Pages\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\Account\*" PackagePath="Templates\Identity\Pages\Account\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\Account\Manage\*" PackagePath="Templates\Identity\Pages\Account\Manage\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\*" PackagePath="Templates\Identity\wwwroot\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\css\*" PackagePath="Templates\Identity\wwwroot\css\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\js\*" PackagePath="Templates\Identity\wwwroot\js\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\dist\css\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\css\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\dist\fonts\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\fonts\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\dist\js\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\js\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery\*" PackagePath="Templates\Identity\wwwroot\lib\jquery\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery\dist\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\dist\" />
-    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\" />
+    <!-- Identity Bootstrap4 -->
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\Data\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\Data\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\Pages\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\Account\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\Pages\Account\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\Pages\Account\Manage\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\Pages\Account\Manage\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\css\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\css\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\js\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\js\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\bootstrap\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\dist\css\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\bootstrap\dist\css\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\dist\fonts\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\bootstrap\dist\fonts\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\bootstrap\dist\js\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\bootstrap\dist\js\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery\dist\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation\dist\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\" />
+
+        <!-- Identity Bootstrap5 - The current default, so it gets moved to Templates\Identity\ -->
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\*" PackagePath="Templates\Identity\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\Data\*" PackagePath="Templates\Identity\Data\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\Pages\*" PackagePath="Templates\Identity\Pages\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\Pages\Account\*" PackagePath="Templates\Identity\Pages\Account\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\Pages\Account\Manage\*" PackagePath="Templates\Identity\Pages\Account\Manage\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\*" PackagePath="Templates\Identity\wwwroot\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\css\*" PackagePath="Templates\Identity\wwwroot\css\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\js\*" PackagePath="Templates\Identity\wwwroot\js\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\bootstrap\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\bootstrap\dist\css\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\css\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\bootstrap\dist\fonts\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\fonts\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\bootstrap\dist\js\*" PackagePath="Templates\Identity\wwwroot\lib\bootstrap\dist\js\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery\*" PackagePath="Templates\Identity\wwwroot\lib\jquery\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery\dist\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\dist\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\" />
   </ItemGroup>
 
   <ItemGroup>

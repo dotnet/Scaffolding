@@ -1,39 +1,36 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
+@{
+    var namespaceSet = new System.Collections.Generic.SortedSet<string>(
+        new string[]
+        {
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.AspNetCore.Mvc.RazorPages",
+            "Microsoft.AspNetCore.Identity",
+            "Microsoft.Extensions.Logging",
+        });
+
+    var thisNamespace = @Model.Namespace + ".Areas.Identity.Pages.Account.Manage";
+    if (!string.IsNullOrEmpty(Model.UserClassNamespace) && thisNamespace != Model.UserClassNamespace)
+    {
+        namespaceSet.Add(Model.UserClassNamespace);
+    }
+    foreach (var name in namespaceSet)
+    {
+@:using @name;
+    }
+}
 
 namespace @thisNamespace
 {
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
-    [IdentityDefaultUI(typeof(DownloadPersonalDataModel<>))]
-    public abstract class DownloadPersonalDataModel : PageModel
-    {
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual IActionResult OnGet() => throw new NotImplementedException();
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual Task<IActionResult> OnPostAsync() => throw new NotImplementedException();
-    }
-
-    internal class DownloadPersonalDataModel<@(Model.UserClass)> : DownloadPersonalDataModel where TUser : class
+    public class DownloadPersonalDataModel : PageModel
     {
         private readonly UserManager<@(Model.UserClass)> _userManager;
         private readonly ILogger<DownloadPersonalDataModel> _logger;
@@ -46,12 +43,12 @@ namespace @thisNamespace
             _logger = logger;
         }
 
-        public override IActionResult OnGet()
+        public IActionResult OnGet()
         {
             return NotFound();
         }
 
-        public override async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -59,11 +56,11 @@ namespace @thisNamespace
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            _logger.LogInformation(LoggerEventIds.PersonalDataRequested, "User asked for their personal data.");
+            _logger.LogInformation("User with ID '{UserId}' asked for their personal data.", _userManager.GetUserId(User));
 
             // Only include personal data for download
             var personalData = new Dictionary<string, string>();
-            var personalDataProps = typeof(TUser).GetProperties().Where(
+            var personalDataProps = typeof(@(Model.UserClass)).GetProperties().Where(
                             prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
             foreach (var p in personalDataProps)
             {

@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name="generateLayout", ShortName="gl", Description="Use this option to generate a new _Layout.cshtml")]
         public bool GenerateLayout { get; set; }
 
-        [Option(Name ="bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        [Option(Name ="bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4', '5'. Default is 5.")]
         public string BootstrapVersion { get; set; }
 
         [Option(Name ="excludeFiles", ShortName="exf", Description = "Use this option to overwrite all but list of semicolon separated files.  Use the --listFiles option to see the available options.")]

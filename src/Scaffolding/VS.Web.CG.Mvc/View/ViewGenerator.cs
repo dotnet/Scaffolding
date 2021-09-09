@@ -25,7 +25,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
         {
             "3",
-            "4"
+            "4",
+            "5"
         };
 
         internal static readonly string ContentVersionDefault = "Default";

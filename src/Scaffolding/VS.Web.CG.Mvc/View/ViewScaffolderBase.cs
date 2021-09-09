@@ -83,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 return ViewGenerator.ContentVersionBootstrap3;
             }
-            else if (string.Equals(model.BootstrapVersion, "3", StringComparison.Ordinal))
+            else if (string.Equals(model.BootstrapVersion, "4", StringComparison.Ordinal))
             {
                 return ViewGenerator.ContentVersionBootstrap4;
             }

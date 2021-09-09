@@ -27,17 +27,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     {
         private const string IdentityAreaName = "Identity";
 
-        internal static readonly string DefaultBootstrapVersion = "4";
+        internal static readonly string DefaultBootstrapVersion = "5";
         // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
         {
             "3",
-            "4"
+            "4",
+            "5"
         };
 
         internal static readonly string ContentVersionDefault = "Default";
         internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
+        internal static readonly string ContentVersionBootstrap4 = "Bootstrap4";
 
         internal static readonly string DefaultContentRelativeBaseDir = "Identity";
         internal static readonly string VersionedContentRelativeBaseDir = "Identity_Versioned";
@@ -102,7 +104,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             // For non-default bootstrap versions, the content is packaged under "Identity_Versioned\[Version_Identifier]\*"
             // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
-            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal) || 
+                string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap4, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     Constants.ThisAssemblyName,

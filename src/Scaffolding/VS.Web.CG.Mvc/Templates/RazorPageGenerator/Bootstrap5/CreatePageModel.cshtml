@@ -1,0 +1,69 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic
+@using System.Linq
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+@{
+    var entitySetName = Model.ModelMetadata.EntitySetName;
+    var entitySetVar = Model.EntitySetVariable ??
+        (String.IsNullOrEmpty(entitySetName)
+            ? entitySetName
+            : (entitySetName.Substring(0, length: 1).ToLowerInvariant() + entitySetName.Substring(1)));
+
+    var relatedProperties = new Dictionary<string, dynamic>();
+    foreach (var nav in Model.ModelMetadata.Navigations)
+    {
+        relatedProperties.Add(nav.AssociationPropertyName, nav);
+    }
+
+    foreach (var namespaceName in Model.RequiredNamespaces)
+    {
+@:using @namespaceName;
+    }
+}
+
+namespace @Model.NamespaceName
+{
+    public class @Model.PageModelClassName : PageModel
+    {
+        private readonly @Model.ContextTypeName _context;
+
+        public @(Model.PageModelClassName)(@Model.ContextTypeName context)
+        {
+            _context = context;
+        }
+
+        public IActionResult OnGet()
+        {
+@{
+    foreach (var property in relatedProperties.Values)
+    {
+        @:ViewData["@(property.ForeignKeyPropertyNames[0])"] = new SelectList(_context.@property.EntitySetName, "@property.PrimaryKeyNames[0]", "@property.DisplayPropertyName");
+    }
+}
+            return Page();
+        }
+
+        [BindProperty]
+        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+
+        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            _context.@(entitySetName).Add(@Model.ViewDataTypeShortName);
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage("./Index");
+        }
+    }
+}

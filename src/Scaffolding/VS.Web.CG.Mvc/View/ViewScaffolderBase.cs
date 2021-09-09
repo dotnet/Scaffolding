@@ -83,6 +83,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 return ViewGenerator.ContentVersionBootstrap3;
             }
+            else if (string.Equals(model.BootstrapVersion, "4", StringComparison.Ordinal))
+            {
+                return ViewGenerator.ContentVersionBootstrap4;
+            }
             else
             {
                 // this should be caught by ViewGenerator.ValidateViewGeneratorModel(), but best to be safe.
@@ -111,6 +115,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
                     baseFolders: new[] { Path.Combine(ViewGenerator.VersionedContentRelativeBaseDir, ViewGenerator.ContentVersionBootstrap3) },
+                    projectContext: _projectContext);
+            }
+            else if (string.Equals(contentVersion, ViewGenerator.ContentVersionBootstrap4, StringComparison.Ordinal))
+            {
+                return TemplateFoldersUtilities.GetTemplateFolders(
+                    containingProject: Constants.ThisAssemblyName,
+                    applicationBasePath: ApplicationInfo.ApplicationBasePath,
+                    baseFolders: new[] { Path.Combine(ViewGenerator.VersionedContentRelativeBaseDir, ViewGenerator.ContentVersionBootstrap4) },
                     projectContext: _projectContext);
             }
 

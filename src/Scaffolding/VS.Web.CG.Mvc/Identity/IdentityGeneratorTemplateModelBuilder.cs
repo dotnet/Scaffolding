@@ -298,6 +298,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     return IdentityGenerator.ContentVersionBootstrap3;
                 }
+                else if (string.Equals(templateModel2.BootstrapVersion, "4", StringComparison.Ordinal))
+                {
+                    return IdentityGenerator.ContentVersionBootstrap4;
+                }
                 else
                 {
                     // This should get caught by ValidateCommandLine() and emit the same error.

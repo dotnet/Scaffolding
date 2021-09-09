@@ -20,17 +20,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
-        internal static readonly string DefaultBootstrapVersion = "4";
+        internal static readonly string DefaultBootstrapVersion = "5";
         // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
         {
             "3",
-            "4"
+            "4",
+            "5"
         };
 
         internal static readonly string ContentVersionDefault = "Default";
         internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
+        internal static readonly string ContentVersionBootstrap4 = "Bootstrap4";
 
         internal static readonly string DefaultContentRelativeBaseDir = "RazorPageGenerator";
         internal static readonly string VersionedContentRelativeBaseDir = "RazorPageGenerator_Versioned";
@@ -135,6 +137,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             // For non-default content versions, the content is packaged under "RazorPageGenerator_Versioned\[Version_Identifier]\*"
             if (string.Equals(contentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+            {
+                return TemplateFoldersUtilities.GetTemplateFolders(
+                    containingProject: Constants.ThisAssemblyName,
+                    applicationBasePath: ApplicationInfo.ApplicationBasePath,
+                    baseFolders: new[] {
+                        Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{bootstrapVersion}")
+                    },
+                    projectContext: _projectContext);
+            }
+            else if (string.Equals(contentVersion, ContentVersionBootstrap4, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,

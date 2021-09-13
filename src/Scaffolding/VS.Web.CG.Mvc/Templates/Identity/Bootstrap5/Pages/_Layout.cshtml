@@ -1,13 +1,19 @@
-﻿@using Microsoft.AspNetCore.Hosting
-@using Microsoft.AspNetCore.Mvc.ViewEngines
-@inject IWebHostEnvironment Environment
-@inject ICompositeViewEngine Engine
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
+    var currentYear = System.DateTime.Now.Year;
+}
+@{
+@:@@using Microsoft.AspNetCore.Hosting
+@:@@using Microsoft.AspNetCore.Mvc.ViewEngines
+@:@@inject IWebHostEnvironment Environment
+@:@@inject ICompositeViewEngine Engine
+}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - @Environment.ApplicationName</title>
+    <title>@@ViewData["Title"] - @Model.ApplicationName</title>
 
     <environment include="Development">
         <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.css" />
@@ -25,16 +31,16 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" href="~/">@Environment.ApplicationName</a>
+                <a class="navbar-brand" href="~/">@Model.ApplicationName</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    @{
+                    @@{
                         var result = Engine.FindView(ViewContext, "_LoginPartial", isMainPage: false);
                     }
-                    @if (result.Success)
+                    @@if (result.Success)
                     {
                         await Html.RenderPartialAsync("_LoginPartial");
                     }
@@ -52,18 +58,17 @@
     <div class="container">
         <partial name="_CookieConsentPartial" optional />
         <main role="main" class="pb-1">
-            @RenderBody()
+            @@RenderBody()
         </main>
     </div>
     <footer class="footer border-top pl-3 text-muted">
         <div class="container">
-        &copy; @DateTime.Now.Year - @Environment.ApplicationName
-            @{
+        &copy; @DateTime.Now.Year - @Model.ApplicationName
+            @@{
                 var foundPrivacy = Url.Page("/Privacy", new { area = "" });
             }
-            @if (foundPrivacy != null)
+            @@if (foundPrivacy != null)
             {
-                @:-
                 <a asp-area="" asp-page="/Privacy">Privacy</a>
             }
         </div>
@@ -90,6 +95,6 @@
         <script src="~/Identity/js/site.js" asp-append-version="true"></script>
     </environment>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

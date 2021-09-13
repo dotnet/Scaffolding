@@ -180,8 +180,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var newRoot = root;
             //create syntax expression that adds DbContext
             var expression = SyntaxFactory.ParseStatement(change.Block);
+            var checkBlock = change.CheckBlock;
             var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-            if (!GlobalStatementExists(newRoot, globalStatement))
+            if (!GlobalStatementExists(newRoot, globalStatement, checkBlock))
             {
                 //insert after, before, or at the end of file.
                 //insert global statement after particular statement
@@ -495,11 +496,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return formattedCodeBlock;
         }
 
-        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement)
+        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
         {
-            if (root != null)
+            if (root != null && statement != null)
             {
-                return root.Members.Where(st => st.ToString().Trim(CodeSnippetTrimChars).Equals(statement.ToString().Trim(CodeSnippetTrimChars))).Any();
+                bool foundStatement = root.Members.Where(st => st.ToString().Trim(CodeSnippetTrimChars).Equals(statement.ToString().Trim(CodeSnippetTrimChars))).Any();
+                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
+                if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
+                {
+                    foundStatement = root.Members.Where(st => st.ToString().Trim(CodeSnippetTrimChars).Contains(checkBlock.ToString().Trim(CodeSnippetTrimChars))).Any();
+                }
+                return foundStatement;
             }
             return false;
         }

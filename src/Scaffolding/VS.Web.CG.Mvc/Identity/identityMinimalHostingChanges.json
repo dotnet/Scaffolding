@@ -7,14 +7,17 @@
           "CodeChanges": [
             {
               "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
               "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\");"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
+              "CheckBlock": "builder.Services.AddDbContext",
               "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n    options.{0}(connectionString));\""
             },
             {
               "InsertAfter": "builder.Services.AddDbContext",
+              "CheckBlock": "builder.Services.AddDefaultIdentity",
               "Block": "builder.Services.AddDefaultIdentity<{0}>(options => options.SignIn.RequireConfirmedAccount = true)\r\n    .AddEntityFrameworkStores<{0}>();\""
             },
             {

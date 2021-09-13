@@ -293,7 +293,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private string AddDbContextString(bool minimalHostingTemplate, bool useSqlite, string statementLeadingTrivia)
         {
             string textToAddAtEnd;
-            string additionalNewline = minimalHostingTemplate ? string.Empty : Environment.NewLine;
+            string additionalNewline = Environment.NewLine;
             string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
             if (useSqlite)

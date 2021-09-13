@@ -4,6 +4,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
     {
         public string InsertAfter { get; set; }
         public string Block { get; set; }
+        public string CheckBlock { get; set; }
         public string Parent { get; set; }
         public string Type { get; set; }
         public bool Append { get; set; } = false;

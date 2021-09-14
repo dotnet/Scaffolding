@@ -12,7 +12,6 @@
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
-              "CheckBlock": "builder.Services.AddDbContext",
               "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n    options.{0}(connectionString));\""
             },
             {

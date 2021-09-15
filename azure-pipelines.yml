@@ -133,7 +133,6 @@ stages:
           name: Hosted Ubuntu 1604
         container: LinuxContainer
         strategy:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
           matrix:
             release_configuration:
               _BuildConfig: Release

@@ -77,41 +77,26 @@ stages:
               /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
 
         strategy:
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            matrix:
-              Build_Release:
-                _BuildConfig: Release
-                # PRs or external builds are not signed.
-                ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-                  _PublishType: none
-                  _SignType: test
-                  _DotNetPublishToBlobFeed : false
-                ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-                  _PublishType: blob
-                  _SignType: real
-                  _DotNetPublishToBlobFeed : true
-                  # _Script: eng\validate-sdk.cmd
-                  # _ValidateSdkArgs: -gitHubPat $(BotAccount-dotnet-maestro-bot-PAT) -barToken $(MaestroAccessToken)
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            matrix:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              # PRs or external builds are not signed.
+              ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+                _PublishType: none
+                _SignType: test
+                _DotNetPublishToBlobFeed : false
+              ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+                _PublishType: blob
+                _SignType: real
+                _DotNetPublishToBlobFeed : true
+                # _Script: eng\validate-sdk.cmd
+                # _ValidateSdkArgs: -gitHubPat $(BotAccount-dotnet-maestro-bot-PAT) -barToken $(MaestroAccessToken)
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
               Build_Debug:
                 _BuildConfig: Debug
                 _PublishType: none
                 _SignType: test
                 _DotNetPublishToBlobFeed : false
-              Build_Release:
-                _BuildConfig: Release
-                # PRs or external builds are not signed.
-                ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-                  _PublishType: none
-                  _SignType: test
-                  _DotNetPublishToBlobFeed : false
-                ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-                  _PublishType: blob
-                  _SignType: real
-                  _DotNetPublishToBlobFeed : true
-                  # _Script: eng\validate-sdk.cmd
-                  # _ValidateSdkArgs: -gitHubPat $(BotAccount-dotnet-maestro-bot-PAT) -barToken $(MaestroAccessToken)
         steps:
         - checkout: self
           clean: true
@@ -127,16 +112,12 @@ stages:
         pool:
           name: Hosted macOS
         strategy:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            matrix:
+          matrix:
+            release_configuration:
+              _BuildConfig: Release
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
               debug_configuration:
                 _BuildConfig: Debug
-              release_configuration:
-                _BuildConfig: Release
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            matrix:
-              release_configuration:
-                _BuildConfig: Release
         steps:
         - checkout: self
           clean: true
@@ -153,15 +134,12 @@ stages:
         container: LinuxContainer
         strategy:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            matrix:
+          matrix:
+            release_configuration:
+              _BuildConfig: Release
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
               debug_configuration:
                 _BuildConfig: Debug
-              release_configuration:
-                _BuildConfig: Release
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            matrix:
-              release_configuration:
-                _BuildConfig: Release
         steps:
         - checkout: self
           clean: true

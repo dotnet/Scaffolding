@@ -78,11 +78,6 @@ stages:
 
         strategy:
           matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed : false
             Build_Release:
               _BuildConfig: Release
               # PRs or external builds are not signed.
@@ -96,6 +91,12 @@ stages:
                 _DotNetPublishToBlobFeed : true
                 # _Script: eng\validate-sdk.cmd
                 # _ValidateSdkArgs: -gitHubPat $(BotAccount-dotnet-maestro-bot-PAT) -barToken $(MaestroAccessToken)
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              Build_Debug:
+                _BuildConfig: Debug
+                _PublishType: none
+                _SignType: test
+                _DotNetPublishToBlobFeed : false
         steps:
         - checkout: self
           clean: true
@@ -112,10 +113,11 @@ stages:
           name: Hosted macOS
         strategy:
           matrix:
-            debug_configuration:
-              _BuildConfig: Debug
             release_configuration:
               _BuildConfig: Release
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              debug_configuration:
+                _BuildConfig: Debug
         steps:
         - checkout: self
           clean: true
@@ -132,10 +134,11 @@ stages:
         container: LinuxContainer
         strategy:
           matrix:
-            debug_configuration:
-              _BuildConfig: Debug
             release_configuration:
               _BuildConfig: Release
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              debug_configuration:
+                _BuildConfig: Debug
         steps:
         - checkout: self
           clean: true

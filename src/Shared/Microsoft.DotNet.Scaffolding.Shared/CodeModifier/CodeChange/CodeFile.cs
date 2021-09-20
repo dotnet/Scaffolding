@@ -9,5 +9,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public string FileName { get; set; }
         public string[] ClassProperties { get; set; }
         public string[] ClassAttributes { get; set; }
+        public string[] GlobalVariables { get; set; }
     }
 }

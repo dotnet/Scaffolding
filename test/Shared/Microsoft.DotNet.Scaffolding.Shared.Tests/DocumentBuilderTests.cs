@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Xunit;
 
 namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
@@ -180,15 +181,13 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [Theory]
         [InlineData(new object[] { new string[] { "string.ToString()", "bool.ToString()", "IServices.AddRazorPages()", "IWebSomething.DoWebStuff()", "", "Wrong.Missing()" },
                                    new string[] { "password.ToString()", "IsTrue.ToString()", "services.AddRazorPages()", "app.DoWebStuff()", "", "Wrong.Missing()" } })]
-        public async Task FormatCodeBlockTests(string[] parameterKeys, string[] formattedValues)
+        public void FormatCodeBlockTests(string[] parameterKeys, string[] formattedValues)
         {
-            DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
             for (int i = 0; i < parameterKeys.Length; i++)
             {
                 string paramKey = parameterKeys[i];
                 string correctCodeBlock = formattedValues[i];
-                string formattedCodeBlock = docBuilder.FormatCodeBlock(paramKey, ParameterValues);
+                string formattedCodeBlock = ProjectModifierHelper.FormatCodeBlock(paramKey, ParameterValues);
                 Assert.Equal(formattedCodeBlock, correctCodeBlock);
             }
         }

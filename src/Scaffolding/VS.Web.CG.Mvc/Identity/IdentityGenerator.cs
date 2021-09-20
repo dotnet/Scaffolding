@@ -253,7 +253,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var templateModel = await templateModelBuilder.ValidateAndBuild();
             EnsureFolderLayout(IdentityAreaName, templateModel);
             //Identity is not supported in minimal apps.
-            var minimalApp = await IsMinimalApp(new ModelTypesLocator(_workspace));
+            var minimalApp = await ProjectModifierHelper.IsMinimalApp(_workspace);
             if (minimalApp)
             {
                 //remove IdentityGeneratorFilesConfig.IdentityHostingStartup. This is not super performant but doesn't need to be.
@@ -374,24 +374,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
             }
             return modifiedString;
-        }
-
-        /// <summary>
-        /// Check if Startup.cs or similar file exists.
-        /// </summary>
-        /// <returns>true if Startup.cs does not exist, false if it does exist.</returns>
-        internal static async Task<bool> IsMinimalApp(IModelTypesLocator modelTypesLocator)
-        {
-            //find Startup if named Startup.
-            var startupType = modelTypesLocator.GetType("Startup").FirstOrDefault();
-            if (startupType == null)
-            {
-                //if changed the name in Program.cs, get the class name and check.
-                var programDocument = modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
-                var startupClassName = await ProjectModifierHelper.GetStartupClassName(programDocument);
-                startupType = modelTypesLocator.GetType(startupClassName).FirstOrDefault();
-            }
-            return startupType == null;
         }
 
         private void ShowFileList(string commandBootstrapVersion)

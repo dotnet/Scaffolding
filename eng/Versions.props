@@ -31,11 +31,11 @@
     <!-- Microsoft.Build.Utilities-->
     <MicrosoftBuildUtilitiesCorePackageVersion>16.9.0 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-3.final</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-4.final</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
     <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0-rc.1.21452.15</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0-3.final</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0-4.final</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
@@ -118,16 +118,16 @@
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
-    <AzureIdentityVersion>1.3.0</AzureIdentityVersion>
-    <CodeAnalysisVersion>4.0.0-3.final</CodeAnalysisVersion>
+    <AzureIdentityVersion>1.4.1</AzureIdentityVersion>
+    <CodeAnalysisVersion>4.0.0-4.final</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>3.1.9</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.9</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.9</MicrosoftExtensionsConfigurationCommandLineVersion>
-    <MicrosoftGraphVersion>3.25.0</MicrosoftGraphVersion>
-    <MicrosoftIdentityClientExtensionsMsalVersion>2.18.0</MicrosoftIdentityClientExtensionsMsalVersion>
-    <NuGetProjectModelVersion>5.9.1</NuGetProjectModelVersion>
-    <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
-    <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
+    <MicrosoftGraphVersion>4.5.0</MicrosoftGraphVersion>
+    <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
+    <NuGetProjectModelVersion>5.11.0</NuGetProjectModelVersion>
+    <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.21462.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>
 </Project>

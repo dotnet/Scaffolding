@@ -1,8 +1,10 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity;
 using Moq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
@@ -41,16 +43,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Fact]
-        public async Task IsMinimalAppTests()
+        public void IsMinimalAppTests()
         {
             var modelTypes = new List<ModelType>();
             var modelTypesLocator = new Mock<IModelTypesLocator>();
             //IModelTypesLocator has a Startup.cs file
-            modelTypesLocator.Setup(m => m.GetType("Startup")).Returns(() => { return new List<ModelType> { startupModel }; });
-            Assert.False(await IdentityGenerator.IsMinimalApp(modelTypesLocator.Object));
+/*            modelTypesLocator.Setup(m => m.GetType("Startup")).Returns(() => { return new List<ModelType> { startupModel }; });
+            var workspace = new Mock<Workspace>();
+            Assert.False(await ProjectModifierHelper.IsMinimalApp(modelTypesLocator: modelTypesLocator.Object));
+            ProjectModifierHelper.IsMinimalApp()
             //IModelTypesLocator does not have a Startup.cs file
             modelTypesLocator.Setup(m => m.GetType("Startup")).Returns(() => { return new List<ModelType> { }; });
-            Assert.True(await IdentityGenerator.IsMinimalApp(modelTypesLocator.Object));
+            Assert.True(await ProjectModifierHelper.IsMinimalApp(modelTypesLocator.Object));*/
         }
         private static readonly List<string> unModifiedStrings = new List<string> {
                 "builder.Services.AddDbContext<{0}>.options.{0}(connectionString)",

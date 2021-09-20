@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             else
             {
-                consoleLogger.LogMessage(Resources.Success, removeNewLine: true);
+                consoleLogger.LogMessage($"{Resources.Success}\n\n", removeNewLine: true);
             }
         }
 
@@ -133,12 +133,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 if (result.ExitCode != 0)
                 {
-                    consoleLogger.LogMessage(Resources.Success, removeNewLine: true);
+                    consoleLogger.LogMessage($"{Resources.Success}\n\n", removeNewLine: true);
                     consoleLogger.LogMessage(string.Format(Resources.FailedAddPackage, packageName));
                 }
                 else
                 {
-                    consoleLogger.LogMessage(Resources.Success);
+                    consoleLogger.LogMessage($"{Resources.Success}\n\n");
                 }
             }
         }

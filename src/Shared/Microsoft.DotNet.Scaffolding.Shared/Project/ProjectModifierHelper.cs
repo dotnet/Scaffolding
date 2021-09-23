@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -10,15 +11,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
     internal static class ProjectModifierHelper
     {
+        internal static string[] CodeSnippetTrimStrings = new string[] { " ", "\r", "\n", ";" };
         internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
-
         /// <summary>
         /// Check if Startup.cs or similar file exists.
         /// </summary>
         /// <returns>true if Startup.cs does not exist, false if it does exist.</returns>
-        internal static async Task<bool> IsMinimalApp(Workspace workspace)
+        internal static async Task<bool> IsMinimalApp(IModelTypesLocator modelTypesLocator)
         {
-            var modelTypesLocator = new ModelTypesLocator(workspace);
             //find Startup if named Startup.
             var startupType = modelTypesLocator.GetType("Startup").FirstOrDefault();
             if (startupType == null)
@@ -159,18 +159,21 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         }
 
         /// <summary>
-        /// Trim ' ', '\r', '\n' and repalce any whitespace with no spaces.
+        /// Trim ' ', '\r', '\n' and replace any whitespace with no spaces.
         /// </summary>
         /// <param name="statement"></param>
         /// <returns></returns>
         internal static string TrimStatement(string statement)
         {
-            string trimmedStatement = statement;
+            StringBuilder sb = new StringBuilder(statement);
             if (!string.IsNullOrEmpty(statement))
             {
-                trimmedStatement = statement.Trim(CodeSnippetTrimChars).Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty); ;
+                foreach (string replaceString in CodeSnippetTrimStrings)
+                {
+                    sb.Replace(replaceString, string.Empty);
+                }
             }
-            return trimmedStatement;
+            return sb.ToString();
         }
     }
 }

@@ -5,13 +5,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
-using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Xunit;
-
-namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
+using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
+namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 {
     public class DocumentBuilderTests : DocumentBuilderTestBase
     {
@@ -25,7 +24,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 Usings = usings
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             var newRoot = docBuilder.AddUsings();
 
             Assert.True(newRoot.Usings.Count == 4);
@@ -48,7 +47,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 Usings = usings
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             var newRoot = docBuilder.AddUsings();
 
             Assert.True(newRoot.Usings.Count == 3);
@@ -71,7 +70,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 Usings = usings
             };
 
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             docBuilder.AddUsings();
 
             //Get modified SyntaxNode root
@@ -99,7 +98,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 ClassProperties = properties
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             classSyntax = docBuilder.AddProperties(classSyntax);
             //Members count should be up by 2.
             Assert.True(classSyntax.Members.Count > memberCount);
@@ -126,7 +125,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 ClassAttributes = attributes
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             classSyntax = docBuilder.AddClassAttributes(classSyntax);
             //Members count should be up by 2.
             Assert.True(classSyntax.AttributeLists.Count == 4);
@@ -147,7 +146,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             //Add usings
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             var usingDirectiveSyntax = docBuilder.CreateUsings(usingsStrings);
             Assert.True(usingDirectiveSyntax.Length == 3);
 
@@ -165,7 +164,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         public async Task CreateAttributeListTests(string[] attributeStrings)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             var attributes = docBuilder.CreateAttributeList(attributeStrings, new SyntaxList<AttributeListSyntax>(), new SyntaxTriviaList());
             Assert.True(attributes.Count == 4);
 
@@ -179,26 +178,12 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { new string[] { "string.ToString()", "bool.ToString()", "IServices.AddRazorPages()", "IWebSomething.DoWebStuff()", "", "Wrong.Missing()" },
-                                   new string[] { "password.ToString()", "IsTrue.ToString()", "services.AddRazorPages()", "app.DoWebStuff()", "", "Wrong.Missing()" } })]
-        public void FormatCodeBlockTests(string[] parameterKeys, string[] formattedValues)
-        {
-            for (int i = 0; i < parameterKeys.Length; i++)
-            {
-                string paramKey = parameterKeys[i];
-                string correctCodeBlock = formattedValues[i];
-                string formattedCodeBlock = ProjectModifierHelper.FormatCodeBlock(paramKey, ParameterValues);
-                Assert.Equal(formattedCodeBlock, correctCodeBlock);
-            }
-        }
-
-        [Theory]
         [InlineData(new object[] { new string[] { "IServiceCollection", "IApplcationBuilder", "IWebHostEnvironment", "string", "bool" },
                                    new string[] { "services", "app", "env", "testString", "testBool"} })]
         public async Task VerfiyParametersTests(string[] types, string[] vals)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             var paramList = CreateParameterList(types, vals);
             var paramDict = docBuilder.VerfiyParameters(types, paramList);
             Assert.True(paramDict != null);
@@ -213,7 +198,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         public async Task StatementExistsTests()
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             //create a block with app.UseRouting();
             StatementSyntax block = SyntaxFactory.ParseStatement(
                 @"
@@ -275,8 +260,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             {
                 ClassProperties = properties
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
-            DocumentBuilder emptyDocBuilder = new DocumentBuilder(emptyDocEditor, codeFile, new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder emptyDocBuilder = new DocumentBuilder(emptyDocEditor, codeFile, new MSIdentity.Shared.ConsoleLogger());
 
             var members = docBuilder.CreateClassProperties(classSyntax.Members, MemberLeadingTrivia, MemberTrailingTrivia);
             var membersInEmptyDoc = emptyDocBuilder.CreateClassProperties(emptyClassSyntax.Members, MemberLeadingTrivia, MemberTrailingTrivia);
@@ -308,7 +293,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var classSyntax = await CreateClassSyntax(editor);
             var members = classSyntax.Members;
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
 
             foreach (var property in existingProperties)
             {
@@ -332,7 +317,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var classSyntax = await CreateClassSyntax(editor);
             var attributeLists = classSyntax.AttributeLists;
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
 
             foreach (var attribute in existingAttributes)
             {

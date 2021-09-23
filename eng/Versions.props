@@ -127,7 +127,7 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>5.11.0</NuGetProjectModelVersion>
     <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
-    <SystemCommandLineVersion>2.0.0-beta1.21462.1</SystemCommandLineVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>
 </Project>

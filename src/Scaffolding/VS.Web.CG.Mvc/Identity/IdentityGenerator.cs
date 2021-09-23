@@ -253,7 +253,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var templateModel = await templateModelBuilder.ValidateAndBuild();
             EnsureFolderLayout(IdentityAreaName, templateModel);
             //Identity is not supported in minimal apps.
-            var minimalApp = await ProjectModifierHelper.IsMinimalApp(_workspace);
+            var minimalApp = await ProjectModifierHelper.IsMinimalApp(new ModelTypesLocator(_workspace));
             if (minimalApp)
             {
                 //remove IdentityGeneratorFilesConfig.IdentityHostingStartup. This is not super performant but doesn't need to be.

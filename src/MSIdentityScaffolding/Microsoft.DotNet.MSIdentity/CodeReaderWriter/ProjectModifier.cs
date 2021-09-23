@@ -47,7 +47,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (codeModifierConfig != null &&
                     codeModifierConfig.Files != null)
                 {
-                    System.Diagnostics.Debugger.Launch();
                     //Initialize CodeAnalysis.Project wrapper
                     CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
 

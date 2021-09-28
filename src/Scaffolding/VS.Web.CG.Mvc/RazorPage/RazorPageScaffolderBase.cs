@@ -310,6 +310,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 return ContentVersionBootstrap3;
             }
+            else if (string.Equals(razorGeneratorModel.BootstrapVersion, "4", StringComparison.Ordinal))
+            {
+                return ContentVersionBootstrap4;
+            }
             else
             {
                 throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, razorGeneratorModel.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));

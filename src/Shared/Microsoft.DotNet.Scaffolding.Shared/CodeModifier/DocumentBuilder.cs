@@ -5,12 +5,11 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
@@ -21,7 +20,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         private CodeFile _codeFile;
         private CompilationUnitSyntax _docRoot;
         private IConsoleLogger _consoleLogger;
-        internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
+
 
         public DocumentBuilder(
             DocumentEditor  documentEditor,
@@ -188,7 +187,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 //insert global statement after particular statement
                 if (!string.IsNullOrEmpty(change.InsertAfter) || change.InsertBefore != null)
                 {
-                    var insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
+                    MemberDeclarationSyntax insertAfterStatement = null;
+                    if (!string.IsNullOrEmpty(change.InsertAfter))
+                    {
+                        insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
+                    }
                     if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)
                     {
                         newRoot = newRoot.InsertNodesAfter(insertAfterGlobalStatment, new List<SyntaxNode> { globalStatement });
@@ -207,11 +210,31 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                             }
                         }
                     }
-            }
+                }
                 //insert global statement at the top of the file
                 else if (change.Append)
                 {
                     newRoot = newRoot.WithMembers(newRoot.Members.Insert(0, globalStatement));
+                }
+                else if (!string.IsNullOrEmpty(change.Parent))
+                {
+                    var parentNode = newRoot.DescendantNodes().Where(n => n is ExpressionStatementSyntax && n.ToString().Contains(change.Parent)).FirstOrDefault();
+                    if (CodeChangeType.MemberAccess.Equals(change.Type))
+                    {
+                        if (parentNode is ExpressionStatementSyntax exprNode)
+                        {
+                            var trailingTrivia = exprNode.GetTrailingTrivia();
+                            if (trailingTrivia.Where(x => x.ToString().Trim(' ').Equals(";")).Any())
+                            {
+                                trailingTrivia = trailingTrivia.Insert(0, SemiColonTrivia);
+                            }
+                            var modifiedExprNode = AddSimpleMemberAccessExpression(exprNode, change.Block)?.WithTrailingTrivia(trailingTrivia);
+                            if (modifiedExprNode != null)
+                            {
+                                newRoot = newRoot.ReplaceNode(exprNode, modifiedExprNode);
+                            }
+                        }
+                    }
                 }
                 //insert global statement at the end of the file
                 else
@@ -219,7 +242,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     newRoot = newRoot.WithMembers(newRoot.Members.Add(globalStatement));
                 }
             }
-           
             return newRoot;
         }
 
@@ -229,7 +251,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             BlockSyntax modifiedBlockSyntaxNode,
             IDictionary<string, string> parameterValues)
         {
-            string parentBlock = FormatCodeBlock(change.Parent, parameterValues).Trim(CodeSnippetTrimChars);
+            string parentBlock = ProjectModifierHelper.FormatCodeBlock(change.Parent, parameterValues).Trim(ProjectModifierHelper.CodeSnippetTrimChars);
             if (!string.IsNullOrEmpty(parentBlock))
             {
                 //get the parent node to add CodeSnippet onto.
@@ -265,11 +287,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedBlockSyntaxNode;
         }
 
-        internal ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet)
+        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet)
         {
-            if (!string.IsNullOrEmpty(codeSnippet) && !expression.ToString().Trim(CodeSnippetTrimChars).Contains(codeSnippet.Trim(CodeSnippetTrimChars)))
+            if (!string.IsNullOrEmpty(codeSnippet) &&
+                !expression
+                    .ToString()
+                    .Trim(ProjectModifierHelper.CodeSnippetTrimChars)
+                    .Contains(
+                        codeSnippet.Trim(ProjectModifierHelper.CodeSnippetTrimChars)))
             {
-                return expression.WithExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expression.Expression, SyntaxFactory.IdentifierName(codeSnippet)))
+                return expression
+                    .WithExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expression.Expression, SyntaxFactory.IdentifierName(codeSnippet)))
                     .WithTrailingTrivia(new SyntaxTriviaList(SemiColonTrivia));
             }
             else
@@ -289,10 +317,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             {
                 if (!string.IsNullOrEmpty(insertAfterBlock))
                 {
-                    string insertAfterFormattedBlock = FormatCodeBlock(insertAfterBlock, parameterValues);
+                    string insertAfterFormattedBlock = ProjectModifierHelper.FormatCodeBlock(insertAfterBlock, parameterValues);
                     blockToEdit = expression.DescendantNodes().FirstOrDefault(node =>
                                     node is BlockSyntax &&
-                                    node.ToString().Trim(CodeSnippetTrimChars).Contains(insertAfterBlock)) as BlockSyntax;
+                                    node.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Contains(insertAfterBlock)) as BlockSyntax;
                 }
                 else
                 {
@@ -332,7 +360,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             BlockSyntax modifiedBlockSyntaxNode,
             IDictionary<string, string> parameterValues)
         {
-            string insertAfterBlock = FormatCodeBlock(change.InsertAfter, parameterValues);
+            string insertAfterBlock = ProjectModifierHelper.FormatCodeBlock(change.InsertAfter, parameterValues);
             
             if (!string.IsNullOrEmpty(insertAfterBlock) && !string.IsNullOrEmpty(change.Block))
             {
@@ -341,7 +369,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 {
                     var leadingTrivia = insertAfterNode.GetLeadingTrivia();
                     var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-                    string formattedCodeBlock = FormatCodeBlock(change.Block, parameterValues);
+                    string formattedCodeBlock = ProjectModifierHelper.FormatCodeBlock(change.Block, parameterValues);
 
                     StatementSyntax statement = SyntaxFactory.ParseStatement(formattedCodeBlock)
                         .WithAdditionalAnnotations(Formatter.Annotation)
@@ -362,7 +390,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             BlockSyntax modifiedBlockSyntaxNode,
             IDictionary<string, string> parameterValues)
         {
-            string formattedCodeBlock = FormatCodeBlock(change.Block, parameterValues);
+            string formattedCodeBlock = ProjectModifierHelper.FormatCodeBlock(change.Block, parameterValues);
 
             //using defaults for leading and trailing trivia
             var trailingTrivia = new SyntaxTriviaList(SyntaxFactory.CarriageReturnLineFeed);
@@ -470,41 +498,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return false;
         }
 
-        /// <summary>
-        /// Format a string of a SimpleMemberAccessExpression(eg., Type.Value)
-        /// Replace Type with its value from the parameterDict.
-        /// </summary>
-        /// <param name="codeBlock">SimpleMemberAccessExpression string</param>
-        /// <param name="parameterDict">IDictionary with parameter type keys and values</param>
-        /// <returns></returns>
-        internal string FormatCodeBlock(string codeBlock, IDictionary<string, string> parameterDict)
-        {
-            string formattedCodeBlock = string.Empty;
-            if (!string.IsNullOrEmpty(codeBlock) && parameterDict != null)
-            {
-                string value = Regex.Replace(codeBlock, "^([^.]*).", "");
-                string param = Regex.Replace(codeBlock, "[*^.].*", "");
-                if (parameterDict.TryGetValue(param, out string parameter))
-                {
-                    formattedCodeBlock = $"{parameter}.{value}";
-                }
-                else
-                {
-                    formattedCodeBlock = codeBlock;
-                }
-            }
-            return formattedCodeBlock;
-        }
-
         internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
         {
             if (root != null && statement != null)
             {
-                bool foundStatement = root.Members.Where(st => st.ToString().Trim(CodeSnippetTrimChars).Equals(statement.ToString().Trim(CodeSnippetTrimChars))).Any();
+                var formattedStatementString = ProjectModifierHelper.TrimStatement(statement.ToString());
+                bool foundStatement = root.Members.Where(st => ProjectModifierHelper.TrimStatement(st.ToString()).Equals(formattedStatementString)).Any();
                 //if statement is not found due to our own mofications, check for a CheckBlock snippet 
                 if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
                 {
-                    foundStatement = root.Members.Where(st => st.ToString().Trim(CodeSnippetTrimChars).Contains(checkBlock.ToString().Trim(CodeSnippetTrimChars))).Any();
+                    foundStatement = root.Members.Where(st => st.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Contains(checkBlock.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars))).Any();
                 }
                 return foundStatement;
             }
@@ -594,7 +597,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             if (!string.IsNullOrEmpty(property))
             {
-                if (members.Where(m => m.ToString().Trim(CodeSnippetTrimChars).Equals(property.Trim(CodeSnippetTrimChars))).Any())
+                if (members.Where(m => m.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Equals(property.Trim(ProjectModifierHelper.CodeSnippetTrimChars))).Any())
                 {
                     return true;
                 }

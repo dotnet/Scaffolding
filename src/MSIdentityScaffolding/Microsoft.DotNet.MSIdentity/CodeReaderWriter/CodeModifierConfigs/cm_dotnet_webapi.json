@@ -35,6 +35,29 @@
       ]
     },
     {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [ "builder.Services.AddControllers()", "builder.Build()" ]
+            },
+            {
+              "InsertAfter": "app.UseRouting();",
+              "Block": "app.UseAuthentication();",
+              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.Identity.Web",
+        "Microsoft.AspNetCore.Authentication.JwtBearer"
+      ]
+    },
+    {
       "FileName": "WeatherForecastController.cs",
       "ClassAttributes": [ "Authorize" ],
       "ClassProperties": [

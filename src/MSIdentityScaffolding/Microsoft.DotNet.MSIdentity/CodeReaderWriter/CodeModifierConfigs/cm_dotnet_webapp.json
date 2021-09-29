@@ -61,6 +61,47 @@
         "Microsoft.AspNetCore.Authorization",
         "Microsoft.AspNetCore.Mvc.Authorization"
       ]
+    },
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "Block":"\nWebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [ "builder.Services.AddAuthorization", "builder.Services.AddRazorPages()", "builder.Build()" ]
+            },
+            {
+              "Block":"\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
+              "InsertAfter":"builder.Services.AddAuthentication",
+              "InsertBefore": ["builder.Services.AddRazorPages()", "builder.Build()"]
+            },
+            {
+              "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
+              "Type": "MemberAccess",
+              "Block": "AddMicrosoftIdentityUI()"
+            },
+            {
+              "InsertAfter": "app.UseRouting();",
+              "Block": "app.UseAuthentication();",
+              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ] 
+            },
+            {
+              "InsertAfter": "app.MapRazorPages();",
+              "Block": "app.MapControllers();",
+              "InsertBefore": [ "app.Run();" ] 
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.UI",
+        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "Microsoft.AspNetCore.Authorization",
+        "Microsoft.AspNetCore.Mvc.Authorization"
+      ]
     }
   ]
 }

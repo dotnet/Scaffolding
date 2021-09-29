@@ -3,7 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-
+using Microsoft.DotNet.Scaffolding.Shared.Project;
+    
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class NewDbContextTemplateModel

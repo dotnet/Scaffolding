@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
+namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 {
     public abstract class DocumentBuilderTestBase
     {

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration
+namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
     public class ModelTypesLocator : IModelTypesLocator
     {

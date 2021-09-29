@@ -4,6 +4,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest

@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         internal IConsoleLogger ConsoleLogger { get; }
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
-        public IGraphServiceClient GraphServiceClient { get; set; }
+        public GraphServiceClient GraphServiceClient { get; set; }
         public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set;}
         private MsalTokenCredential TokenCredential { get; set; }
 

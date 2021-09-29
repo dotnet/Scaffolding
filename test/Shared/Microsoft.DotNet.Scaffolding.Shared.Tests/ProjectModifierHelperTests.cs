@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Moq;
 using Xunit;
@@ -68,20 +70,28 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             minimalModelTypesLocator.Setup(m => m.GetType("Startup")).Returns(() => { return new List<ModelType> { }; });
             Assert.True(await ProjectModifierHelper.IsMinimalApp(minimalModelTypesLocator.Object));
             Assert.False(await ProjectModifierHelper.IsMinimalApp(nonMinimalTypesLocator.Object));
+
+            //test other IsMinimalApp method
         }
 
         [Theory]
-        [InlineData(new object[] {
-                        new string[] { "\nWebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
-                                       "\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
-                                       "absdf \n \r asdfsadfasdf sdfasdf \n {} ",
-                                       "",
-                                       null },
-                        new string[] { "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))",
-                                       "WebApplication.CreateBuilder.Services.AddAuthorization(options=>{options.FallbackPolicy=options.DefaultPolicy})",
-                                       "absdfasdfsadfasdfsdfasdf{}",
-                                       "",
-                                       ""} }
+        [InlineData(
+            new object[] {
+                new string[] {
+                    "\nWebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+                    "\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
+                    "absdf \n \r asdfsadfasdf sdfasdf \n {} ",
+                    "",
+                    null
+                },
+                new string[] {
+                    "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))",
+                    "WebApplication.CreateBuilder.Services.AddAuthorization(options=>{options.FallbackPolicy=options.DefaultPolicy})",
+                    "absdfasdfsadfasdfsdfasdf{}",
+                    "",
+                    ""
+                }
+            }
         )]
         public void TrimStatementTests(string[] statements, string[] trimmedStatements)
         {
@@ -90,6 +100,45 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 string statement = statements[i];
                 string trimmedStatement = trimmedStatements[i];
                 Assert.Equal(trimmedStatement, ProjectModifierHelper.TrimStatement(statement));
+            }
+        }
+
+        [Theory]
+        [InlineData(
+            new object[] {
+                new string[] {
+                    "var builder = WebApplication.CreateBuilder(args);",
+                    "var      builderThing = WebApplication.CreateBuilder(args);",
+                    "var builderVar=WebApplication.CreateBuilder(args);",
+                    "var realBuilder =             WebApplication.CreateBuilder(args);",
+                    "WebApplicationBuilder fakeBuilder = WebApplication.CreateBuilder(args);",
+                    "WebApplicationBuilder           builderr =      WebApplication.CreateBuilder(args);",
+                    "WebApplicationBuilder Builder=WebApplication.CreateBuilder(args);"
+                },
+                new string[] {
+                    "builder",
+                    "builderThing",
+                    "builderVar",
+                    "realBuilder",
+                    "fakeBuilder",
+                    "builderr",
+                    "Builder",
+                }
+            }
+        )]
+        public void GetVariablesTests(string[] statements, string[] builderVariableIdentifierValues)
+        {
+            for (int i = 0; i < statements.Length; i++)
+            {
+                var members = new SyntaxList<MemberDeclarationSyntax>() { SyntaxFactory.ParseMemberDeclaration(statements[i]) } ;
+                string builderVariableIdentifierValue = builderVariableIdentifierValues[i];
+                var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(members);
+                variableDict.TryGetValue("WebApplication.CreateBuilder", out string builderVariableString);
+                if (!string.IsNullOrEmpty(builderVariableString))
+                {
+                    Assert.Equal(builderVariableIdentifierValue, builderVariableString);
+                }    
+                
             }
         }
 

@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
     {
         internal static string[] CodeSnippetTrimStrings = new string[] { " ", "\r", "\n", ";" };
         internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
+        internal const string VarIdentifier = "var";
+        internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
         /// <summary>
         /// Check if Startup.cs or similar file exists.
         /// </summary>
@@ -175,5 +177,36 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
             return sb.ToString();
         }
+
+        internal static IDictionary<string, string> GetBuilderVariableIdentifier(SyntaxList<MemberDeclarationSyntax> members)
+        {
+            IDictionary<string, string> variables = new Dictionary<string, string>();
+            if (members.Any())
+            {
+                foreach (var member in members)
+                {
+                    var memberString = TrimStatement(member.ToString());
+                    if (memberString.Contains("=WebApplication.CreateBuilder"))
+                    {
+                        var start = 0;
+                        if (memberString.Contains(VarIdentifier))
+                        {
+                            start = memberString.IndexOf(VarIdentifier) + VarIdentifier.Length;
+                        }
+                        else if (memberString.Contains(WebApplicationBuilderIdentifier))
+                        {
+                            start = memberString.IndexOf(WebApplicationBuilderIdentifier) + WebApplicationBuilderIdentifier.Length;
+                        }
+                        if (start > 0)
+                        {
+                            var end = memberString.IndexOf("=");
+                            variables.Add("WebApplication.CreateBuilder", memberString.Substring(start, end - start));
+                        }
+                    }
+                }
+            }
+            return variables;
+        }
+
     }
 }

@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (docRoot != null && programDocument != null)
                 {
                     //get builder variable
-                    var variableDict = GetVariables(docRoot.Members);
+                    var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(docRoot.Members);
                     //add usings
                     var newRoot = documentBuilder.AddUsings();
 
@@ -129,25 +129,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     await documentBuilder.WriteToClassFileAsync(programDocument.Name, programCsFilePath);
                 }
             }
-        }
-
-        internal IDictionary<string, string> GetVariables(SyntaxList<MemberDeclarationSyntax> members)
-        {
-            IDictionary<string, string> variables = new Dictionary<string, string>();
-            if (members.Any())
-            {
-                foreach (var member in members)
-                {
-                    var memberString = member.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Replace(" ", "");
-                    if (memberString.Contains("=WebApplication.CreateBuilder"))
-                    {
-                        var start = memberString.IndexOf("var") + 3;
-                        var end = memberString.IndexOf("=");
-                        variables.Add("WebApplication.CreateBuilder", memberString.Substring(start, end-start));
-                    }
-                }
-            }
-            return variables;
         }
 
         internal async Task ModifyCsFile(string fileName, CodeFile file, CodeAnalysis.Project project)
@@ -199,6 +180,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 await documentBuilder.WriteToClassFileAsync(fileName, filePath);
             }
         }
+
         private CodeModifierConfig? GetCodeModifierConfig()
         {
             List<CodeModifierConfig> codeModifierConfigs = new List<CodeModifierConfig>();

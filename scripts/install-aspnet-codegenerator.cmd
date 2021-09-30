@@ -4,8 +4,7 @@ set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 call taskkill /f /im dotnet.exe
 call rd /Q /S artifacts
-call dotnet build Scaffolding.slnf
-call dotnet pack Scaffolding.slnf
+call build
 call dotnet tool uninstall -g dotnet-aspnet-codegenerator 
 
 call cd %DEFAULT_NUPKG_PATH%

@@ -47,7 +47,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
         public int Execute(Action<IEnumerable<FileSystemChangeInformation>> simModeAction = null)
         {
-            System.Diagnostics.Debugger.Launch();
             var serviceProvider = new ServiceProvider();
             AddFrameworkServices(serviceProvider, _projectInformation);
             AddCodeGenerationServices(serviceProvider);

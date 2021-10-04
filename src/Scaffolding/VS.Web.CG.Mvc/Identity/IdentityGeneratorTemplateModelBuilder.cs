@@ -731,7 +731,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
 
             var missingPackages = dependencies.Where(d => !_projectContext.PackageDependencies.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
-            System.Diagnostics.Debugger.Launch();
             if (CalledFromCommandline && missingPackages.Any())
             {
                 throw new InvalidOperationException(

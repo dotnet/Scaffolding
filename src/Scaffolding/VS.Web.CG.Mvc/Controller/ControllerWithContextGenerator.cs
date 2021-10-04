@@ -36,7 +36,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
-            ILogger logger)
+            ILogger logger,
+            IFileSystem fileSystem)
             : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
 
@@ -49,7 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 throw new ArgumentNullException(nameof(entityFrameworkService));
             }
-
+            FileSystem = fileSystem;
             ModelTypesLocator = modelTypesLocator;
             EntityFrameworkService = entityFrameworkService;
         }
@@ -58,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
-            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite);
+            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite, CalledFromCommandline);
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
@@ -138,15 +139,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             return generatorModel.IsRestController ? Constants.ApiControllerWithContextTemplate : Constants.MvcControllerWithContextTemplate;
         }
 
-        protected IModelTypesLocator ModelTypesLocator
-        {
-            get;
-            private set;
-        }
-        protected IEntityFrameworkService EntityFrameworkService
-        {
-            get;
-            private set;
-        }
+        //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.
+        private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+
+        protected IFileSystem FileSystem { get; private set; }
+        protected IModelTypesLocator ModelTypesLocator { get; private set; }
+        protected IEntityFrameworkService EntityFrameworkService { get; private set; }
     }
 }

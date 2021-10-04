@@ -13,12 +13,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
         const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
 
-        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, bool useSqlite)
+        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, bool useSqlite, bool calledFromCommandline)
         {
             var isEFDesignPackagePresent = dependencies
                 .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
-            if (!isEFDesignPackagePresent)
+            if (!isEFDesignPackagePresent && calledFromCommandline)
             {
                  throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}"));

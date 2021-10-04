@@ -63,7 +63,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
 
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.UseSqlite);
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.UseSqlite, !string.IsNullOrEmpty(_projectContext.TargetFrameworkMoniker));
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 viewGeneratorModel,

@@ -714,7 +714,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private void ValidateRequiredDependencies(bool useSqlite)
         {
-
             var dependencies = new HashSet<string>()
             {
                 "Microsoft.AspNetCore.Identity.UI",
@@ -732,12 +731,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
 
             var missingPackages = dependencies.Where(d => !_projectContext.PackageDependencies.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
-
-            if (missingPackages.Any())
+            System.Diagnostics.Debugger.Launch();
+            if (CalledFromCommandline && missingPackages.Any())
             {
                 throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallPackagesForScaffoldingIdentity, string.Join(",", missingPackages)));
             }
         }
+
+        //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.
+        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
     }
 }

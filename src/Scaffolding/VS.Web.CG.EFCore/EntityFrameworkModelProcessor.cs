@@ -552,7 +552,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private void ValidateEFSqlServerDependency()
         {
-            if (_projectContext.GetPackage(EFSqlServerPackageName) == null)
+            if (_projectContext.GetPackage(EFSqlServerPackageName) == null && CalledFromCommandline)
             {
                 throw new InvalidOperationException(MessageStrings.EFSqlServerPackageNotAvailable);
             }
@@ -589,5 +589,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             return outputPath;
         }
+
+        //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.
+        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
     }
 }

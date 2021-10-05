@@ -17,6 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
     public class EFModelBasedRazorPageScaffolder : RazorPageScaffolderBase
     {
         private IEntityFrameworkService _entityFrameworkService;
+        private IFileSystem _fileSystem;
         private IModelTypesLocator _modelTypesLocator;
         private static readonly IReadOnlyList<string> Views = new List<string>()
         {
@@ -34,7 +35,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
-            ILogger logger)
+            ILogger logger,
+            IFileSystem fileSystem)
             : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
             if (modelTypesLocator == null)
@@ -47,6 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentNullException(nameof(entityFrameworkService));
             }
 
+            _fileSystem = fileSystem;
             _modelTypesLocator = modelTypesLocator;
             _entityFrameworkService = entityFrameworkService;
         }
@@ -76,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.UseSqlite);
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.UseSqlite, CalledFromCommandline);
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,
@@ -131,7 +134,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             string outputPath = ValidateAndGetOutputPath(razorPageGeneratorModel, string.Empty);
 
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.UseSqlite);
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.UseSqlite, CalledFromCommandline);
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorPageGeneratorModel,
@@ -191,5 +194,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             await AddRequiredFiles(razorPageGeneratorModel);
         }
+
+        //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.
+        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
     }
 }

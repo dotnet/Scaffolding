@@ -21,7 +21,7 @@
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
-              "Type": "MemberAccess",
+              "Options": [ "MemberAccess" ],
               "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"));",
               "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
             }
@@ -44,6 +44,21 @@
               "InsertBefore": [ "builder.Services.AddControllers()", "builder.Build()" ]
             },
             {
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddDownstreamWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
+            },
+            {
               "InsertAfter": "app.UseRouting();",
               "Block": "app.UseAuthentication();",
               "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
@@ -59,9 +74,17 @@
     },
     {
       "FileName": "WeatherForecastController.cs",
-      "ClassAttributes": [ "Authorize" ],
+      "ClassAttributes": [
+        {
+          "Block":"Authorize",
+          "Options": []
+        }
+      ],
       "ClassProperties": [
-        "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }"
+        { 
+          "CodeBlock":"static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
+          "Options":[]
+        }
       ],
       "Methods": {
         "Configure": {

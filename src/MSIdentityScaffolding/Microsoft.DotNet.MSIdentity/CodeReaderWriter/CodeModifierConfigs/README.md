@@ -11,7 +11,7 @@ class File
     public Dictionary<string, Method>? Methods { get; set; } --> all the methods in the file that need editing
     public string[]? Usings { get; set; } --> any `usings` that need to be added to a C# file. 
     public string? FileName { get; set; } --> .cs file to edit
-    public string[]? ClassProperties { get; set; } --> any properties that need to be added to the class' members.
+    public CodeBlock[]? ClassProperties { get; set; } --> any properties that need to be added to the class' members.
     public string[]? ClassAttributes { get; set; } --> [Attribute] that need to added to the class.
 }
 

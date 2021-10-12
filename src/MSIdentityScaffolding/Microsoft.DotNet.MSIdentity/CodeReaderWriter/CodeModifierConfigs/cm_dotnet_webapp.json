@@ -13,7 +13,7 @@
             },
             {
               "Parent": "IApplicationBuilder.UseEndpoints",
-              "Type": "InLambdaBlock",
+              "Options": [ "InLambdaBlock" ],
               "InsertAfter": "endpoints.MapRazorPages()",
               "Block": "endpoints.MapControllers()"
             }
@@ -27,27 +27,27 @@
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
-              "Type": "MemberAccess",
+              "Options": [ "MemberAccess" ],
               "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"));"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
-              "Type": "MemberAccess",
+              "Options": [ "MemberAccess" ],
               "Block": "AddMvcOptions(options => {})"
             },
             {
               "Block": "IServiceCollection.AddAuthorization",
-              "Type": "LambdaExpression",
+              "Options": [ "LambdaExpression" ],
               "Parameter": "options"
             },
             {
               "Parent": "services.AddAuthorization",
-              "Type": "InLambdaBlock",
+              "Options": [ "InLambdaBlock" ],
               "Block": "options.FallbackPolicy = options.DefaultPolicy"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
-              "Type": "MemberAccess",
+              "Options": [ "MemberAccess" ],
               "Block": "AddMicrosoftIdentityUI()"
             }
           ]
@@ -68,17 +68,52 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block":"\nWebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
-              "InsertBefore": [ "builder.Services.AddAuthorization", "builder.Services.AddRazorPages()", "builder.Build()" ]
+              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ');\n",
+              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddAuthentication", "WebApplication.CreateBuilder.Services.AddAuthorization", "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ]
+            },
+            {
+              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddAuthorization", "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Parent":"AddMicrosoftIdentityWebApp",
+              "Options" : [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
+              "Block":"EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddDownstreamWebApi(builder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
             },
             {
               "Block":"\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
-              "InsertAfter":"builder.Services.AddAuthentication",
-              "InsertBefore": ["builder.Services.AddRazorPages()", "builder.Build()"]
+              "InsertAfter":"WebApplication.CreateBuilder.Services.AddAuthentication",
+              "InsertBefore": ["WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()"]
             },
             {
               "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
-              "Type": "MemberAccess",
+              "Options": [ "MemberAccess" ],
               "Block": "AddMicrosoftIdentityUI()"
             },
             {
@@ -101,6 +136,89 @@
         "Microsoft.AspNetCore.Authentication.OpenIdConnect",
         "Microsoft.AspNetCore.Authorization",
         "Microsoft.AspNetCore.Mvc.Authorization"
+      ]
+    },
+    {
+      "FileName": "Index.cshtml.cs",
+      "Options" :  [ "MicrosoftGraph", "DownstreamApi" ],
+      "ClassProperties": [
+        {
+          "Block" : "private readonly GraphServiceClient _graphServiceClient;",
+          "Options": [ "MicrosoftGraph" ]
+        },
+        {
+          "Block": "private readonly IDownstreamWebApi _downstreamWebApi;",
+          "Options": [ "DownstreamApi" ]
+        }
+      ],
+      "ClassAttributes": [
+        {
+          "Block": "AuthorizeForScopes(ScopeKeySection = \"DownstreamApi:Scopes\")",
+          "Options": [ "DownstreamApi", "MicrosoftGraph" ]
+        }
+      ],
+      "Methods": {
+        "OnGet":{
+          "Parameters": [ "void" ],
+          "EditParameters" :  {
+            "void" :  "async Task"
+          },
+          "CodeChanges": [
+            {
+              "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              },
+              "Options" : [ "MicrosoftGraph"]
+            },
+            {
+              "Block": "ViewData[\"ApiResult\"] = user.DisplayName;",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              },
+              "Options" : [ "MicrosoftGraph"]
+            },
+            {
+              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              },
+              "Options" : [ "DownstreamApi"]
+            },
+            {
+              "Block" : "",
+              "Options": [ "DownstreamApi"]
+            }
+          ]
+        },
+        "IndexModel" : {
+          "Parameters" : [ "ILogger<IndexModel>" ],
+          "AddParameters" : [ 
+            {
+              "Block":"GraphServiceClient graphServiceClient",
+              "Options": [ "MicrosoftGraph"]
+            },
+            {
+              "Block":"IDownstreamWebApi downstreamWebApi",
+              "Options": [ "DownstreamApi"]
+            }
+          ],
+          "CodeChanges": [
+            {
+              "Block" : "_graphServiceClient = graphServiceClient;",
+              "Options" : [ "MicrosoftGraph" ]
+            },
+            {
+              "Block" : "_downstreamWebApi = downstreamWebApi;",
+              "Options" : [ "DownstreamApi" ]
+            }
+          ]
+        }
+      },
+      "Usings" : [
+        "Microsoft.Graph",
+        "Microsoft.Identity.Web",
+        "System.Net"
       ]
     }
   ]

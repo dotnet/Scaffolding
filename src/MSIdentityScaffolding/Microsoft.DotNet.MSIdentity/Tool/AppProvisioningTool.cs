@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.MSIdentity
     /// </summary>
     public class AppProvisioningTool : IMsAADTool
     {
+        private const string AppSettingsJson = "appsettings.json";
+
         internal IConsoleLogger ConsoleLogger { get; }
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
 
@@ -69,7 +71,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             //get appsettings.json file path
-            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
+            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, AppSettingsJson, SearchOption.AllDirectories);
             if (appSettingsFile.Any())
             {
                 var filePath = appSettingsFile.First();
@@ -245,59 +247,13 @@ namespace Microsoft.DotNet.MSIdentity
                 if (appSettings != null)
                 {
                     var azureAdToken = appSettings["AzureAd"];
-                    if (azureAdToken != null)
+                    if (applicationParameters.IsBlazorWasm ?? false)
                     {
-                        var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
-                        if (azureAdProperty != null)
-                        {
-                            // if property exists, and if suggested value is not already there.
-                            if (!string.IsNullOrEmpty(azureAdProperty.Domain) &&
-                                !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.TenantId) &&
-                                !azureAdProperty.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
-                                !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.Instance) &&
-                                !azureAdProperty.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.CallbackPath) &&
-                                !azureAdProperty.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
-                            }
-                        }
+                        changesMade = ModifyBlazorAppSettings(azureAdToken, applicationParameters, appSettings);
                     }
                     else
                     {
-                        changesMade = true;
-                        appSettings.Add("AzureAd", JObject.FromObject(new
-                        {
-                            Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
-                            Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
-                            TenantId = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId,
-                            ClientId = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId,
-                            CallbackPath = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath
-                        }));
+                       changesMade = ModifyAppSettings(azureAdToken, applicationParameters, appSettings);
                     }
 
                     if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
@@ -347,7 +303,6 @@ namespace Microsoft.DotNet.MSIdentity
                     }
                 }
 
-
                 //save comments somehow, only write to appsettings.json if changes are made
                 if (appSettings != null && changesMade)
                 {
@@ -355,6 +310,141 @@ namespace Microsoft.DotNet.MSIdentity
                 }
             }
         }
+
+        /// <summary>
+        /// Modifies AppSettings file for non-blazor projects
+        /// </summary>
+        /// <param name="azureAdToken"></param>
+        /// <param name="applicationParameters"></param>
+        /// <param name="appSettings"></param>
+        /// <returns></returns>
+        private bool ModifyAppSettings(JToken? azureAdToken, ApplicationParameters applicationParameters, JObject appSettings)
+        {
+            bool changesMade = false;
+
+            if (azureAdToken != null)
+            {
+                var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
+                if (azureAdProperty != null)
+                {
+                    // if property exists, and if suggested value is not already there.
+                    if (!string.IsNullOrEmpty(azureAdProperty.Domain) &&
+                        !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
+                    }
+
+                    if (!string.IsNullOrEmpty(azureAdProperty.TenantId) &&
+                        !azureAdProperty.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
+                    }
+
+                    if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
+                        !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
+                    }
+
+                    if (!string.IsNullOrEmpty(azureAdProperty.Instance) &&
+                        !azureAdProperty.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
+                    }
+
+                    if (!string.IsNullOrEmpty(azureAdProperty.CallbackPath) &&
+                        !azureAdProperty.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
+                    }
+                }
+            }
+            else
+            {
+                changesMade = true;
+                appSettings.Add("AzureAd", JObject.FromObject(new
+                {
+                    Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
+                    Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
+                    TenantId = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId,
+                    ClientId = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId,
+                    CallbackPath = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath
+                }));
+            }
+            return changesMade;
+        }
+
+        /// <summary>
+        /// Modifies AppSettings file for blazor projects
+        /// </summary>
+        /// <param name="azureAdToken"></param>
+        /// <param name="applicationParameters"></param>
+        /// <param name="appSettings"></param>
+        /// <returns></returns>
+        private bool ModifyBlazorAppSettings(JToken? azureAdToken, ApplicationParameters applicationParameters, JObject appSettings)
+        {
+            bool changesMade = false;
+
+            var authority = BlazorAzureAdDefaultProperties.Authority;
+            if (!string.IsNullOrEmpty(applicationParameters.Authority))
+            {
+                authority = applicationParameters.Authority;
+            }
+            else if (!string.IsNullOrEmpty(applicationParameters.Instance) && !string.IsNullOrEmpty(applicationParameters.TenantId))
+            {
+                authority = applicationParameters.Instance + applicationParameters.TenantId;
+            }
+            else if (!string.IsNullOrEmpty(applicationParameters.TenantId))
+            {
+                authority = AzureAdDefaultProperties.Instance + applicationParameters.TenantId;
+            }
+
+            if (azureAdToken != null)
+            {
+                var azureAdProperty = azureAdToken.ToObject<BlazorAzureAdProperties>();
+                if (azureAdProperty != null)
+                {
+                    // if property exists, and if suggested value is not already there.
+                    if (!string.IsNullOrEmpty(azureAdProperty.Authority) &&
+                        !azureAdProperty.Authority.Equals(applicationParameters.Authority, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken[nameof(applicationParameters.Authority)] = authority;
+                    }
+
+                    if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
+                        !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["ClientId"] = applicationParameters.ClientId ?? BlazorAzureAdDefaultProperties.ClientId;
+                    }
+
+                    if (!string.IsNullOrEmpty(azureAdProperty.ValidateAuthority) &&
+                        !azureAdProperty.ValidateAuthority.Equals(BlazorAzureAdDefaultProperties.ValidateAuthority, StringComparison.OrdinalIgnoreCase))
+                    {
+                        changesMade = true;
+                        azureAdToken["ValidateAuthority"] = BlazorAzureAdDefaultProperties.ValidateAuthority;
+                    }
+                }
+            }
+            else
+            {
+                changesMade = true;
+                appSettings.Add("AzureAd", JObject.FromObject(new
+                {
+                    Authority = authority,
+                    ClientId = applicationParameters.ClientId ?? BlazorAzureAdDefaultProperties.ClientId,
+                    ValidateAuthority = "true"
+                }));
+            }
+            return changesMade;
+        }
+
         /// <summary>
         /// Converts an AAD application to a B2C application
         /// </summary>

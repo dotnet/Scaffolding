@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     Web = existingApplication.Web
                 };
 
-                //update redirect uris
+                // update redirect uris // TODO: SPA redirect URIs for blazor?
                 List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
                 List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
                 int originalUrisCount = existingRedirectUris.Count;
@@ -235,7 +235,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 }
 
-                //update implicit grant settings if need be.
+                //update implicit grant settings if need be. // TODO: EnableAccessToken False for Blazor?
                 if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
                 {
                     needsUpdate = true;

@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
     {
         public string[] Parameters { get; set; }
         public CodeBlock [] AddParameters { get; set; }
-        public Tuple<string, string> EditParameters { get; set; }
+        public CodeBlock EditType { get; set; }
         public CodeSnippet[] CodeChanges { get; set; }
     }
 }

@@ -185,13 +185,81 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _consoleLogger.LogMessage($"Modified {fileName}.\n");
         }
 
-        //Add all the different code snippet.
-        internal ClassDeclarationSyntax AddCodeSnippets(CodeFile file, ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
+        internal ClassDeclarationSyntax AddMethodParameters( ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
         {
+            foreach (var method in _codeFile.Methods)
+            { //AddParameters
+                var methodName = method.Key;
+                var methodChanges = method.Value;
+                if (!string.IsNullOrEmpty(methodName) &&
+                    methodChanges != null &&
+                    methodChanges.AddParameters != null &&
+                    methodChanges.AddParameters.Any())
+                {
+                    //get method node from ClassDeclarationSyntax
+                    IDictionary<string, string> parameterValues = null;
+
+                    var originalMethodNode = modifiedClassDeclarationSyntax?
+                        .DescendantNodes()
+                        .Where(
+                            node => node is MethodDeclarationSyntax mds &&
+                            mds.Identifier.ValueText.Equals(methodName) &&
+                            (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
+                        .FirstOrDefault();
+
+                    var methodNode = modifiedClassDeclarationSyntax?
+                        .DescendantNodes()
+                        .Where(
+                            node => node is MethodDeclarationSyntax mds &&
+                            mds.Identifier.ValueText.Equals(methodName) &&
+                            (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
+                        .FirstOrDefault();
+
+                    if (methodNode == null)
+                    {
+                        originalMethodNode = modifiedClassDeclarationSyntax?
+                        .DescendantNodes()
+                        .Where(
+                            node => node is ConstructorDeclarationSyntax mds &&
+                            mds.Identifier.ValueText.Equals(methodName))
+                        .FirstOrDefault();
+
+                        methodNode = modifiedClassDeclarationSyntax?
+                        .DescendantNodes()
+                        .Where(
+                            node => node is ConstructorDeclarationSyntax mds &&
+                            mds.Identifier.ValueText.Equals(methodName))
+                        .FirstOrDefault();
+                    }
+
+                    //methodNode is either MethodDeclarationSynax, or ConstructorDeclarationSyntax
+                    if (methodNode != null)
+                    {
+                        //Filter for CodeChangeOptions
+                        methodChanges.AddParameters = FilterCodeBlocks(methodChanges.AddParameters, options);
+                    }
+                    
+                    if (methodNode is MethodDeclarationSyntax methodDeclratation)
+                    {
+                        methodNode = AddParameters(methodDeclratation, methodChanges.AddParameters, options);
+                    }
+                    else if (methodNode is ConstructorDeclarationSyntax constructorDeclaration)
+                    {
+                        methodNode = AddParameters(constructorDeclaration, methodChanges.AddParameters, options);
+                    }
+                    modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(originalMethodNode, methodNode);
+                }
+            }
+            return modifiedClassDeclarationSyntax;
+        }
+
+        //Add all the different code snippet.
+        internal ClassDeclarationSyntax AddCodeSnippets(ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
+        {                        
             //code changes are chunked together by methods. Easier for Document modifications.
-            if (file.Methods != null)
+            if (_codeFile.Methods != null)
             {
-                foreach (var method in file.Methods)
+                foreach (var method in _codeFile.Methods)
                 {
                     var methodName = method.Key;
                     var methodChanges = method.Value;
@@ -216,25 +284,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                             methodNode = modifiedClassDeclarationSyntax?
                             .DescendantNodes()
                             .Where(node2 => node2 is ConstructorDeclarationSyntax cds &&
-                               cds.Identifier.ValueText.Equals(methodName))
+                               cds.Identifier.ValueText.Equals(methodName) && 
+                               (parameterValues = VerfiyParameters(methodChanges.Parameters, cds.ParameterList.Parameters.ToList())) != null)
                             .FirstOrDefault();
                         }
-                        //check if constructor 
                         var newMethod = methodNode;
-
-                        //EditParameters
-                        //AddParameters
-                        if (methodChanges.AddParameters != null && methodChanges.AddParameters.Any())
-                        {
-                            if (newMethod is MethodDeclarationSyntax methodDeclratation)
-                            {
-                                newMethod = AddParameters(methodDeclratation, methodChanges.AddParameters, options);
-                            }
-                            else if(newMethod is ConstructorDeclarationSyntax constructorDeclaration)
-                            {
-                                newMethod = AddParameters(constructorDeclaration, methodChanges.AddParameters, options);
-                            }
-                        }
                         
                         //get method's BlockSyntax
                         var blockSyntaxNode = newMethod?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();
@@ -268,8 +322,61 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                                 }
                             }
                             //replace the BlockSyntax of a MethodDeclarationSyntax of a ClassDeclarationSyntax
-                            //modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(blockSyntaxNode, modifiedBlockSyntaxNode);
-                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(methodNode, newMethod);
+                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(blockSyntaxNode, modifiedBlockSyntaxNode);
+                            //newMethod = newMethod.ReplaceNode(blockSyntaxNode, blockSyntaxNode);
+                            //modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(methodNode, newMethod);
+                        }
+                    }
+                }
+            }
+            return modifiedClassDeclarationSyntax;
+        }
+
+        internal ClassDeclarationSyntax EditMethodTypes(ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
+        {
+            foreach (var method in _codeFile.Methods)
+            { //AddParameters
+                var methodName = method.Key;
+                var methodChanges = method.Value;
+                if (!string.IsNullOrEmpty(methodName) &&
+                    methodChanges != null &&
+                    methodChanges.EditType != null)
+                {
+                    methodChanges.EditType = FilterCodeBlocks(new CodeBlock[] { methodChanges.EditType }, options).First();
+                    //get method node from ClassDeclarationSyntax
+                    IDictionary<string, string> parameterValues = null;
+
+                    var originalMethodNode = modifiedClassDeclarationSyntax?
+                        .DescendantNodes()
+                        .Where(
+                            node => node is MethodDeclarationSyntax mds &&
+                            mds.Identifier.ValueText.Equals(methodName) &&
+                            (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
+                        .FirstOrDefault();
+
+                    
+
+                    var methodNode = modifiedClassDeclarationSyntax?
+                        .DescendantNodes()
+                        .Where(
+                            node => node is MethodDeclarationSyntax mds &&
+                            mds.Identifier.ValueText.Equals(methodName) &&
+                            (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
+                        .FirstOrDefault();
+
+                    if (originalMethodNode != null && methodNode != null && methodNode is MethodDeclarationSyntax methodDeclarationSyntax && methodChanges.EditType != null)
+                    {
+                        System.Diagnostics.Debugger.Launch();
+                        var returnTypeString = methodDeclarationSyntax.ReturnType.ToFullString();
+                        if (methodDeclarationSyntax.Modifiers.Any(m => m.ToFullString().Contains("async")))
+                        {
+                            returnTypeString = $"async {returnTypeString}";
+                        }
+                        if (!ProjectModifierHelper.TrimStatement(returnTypeString).Equals(ProjectModifierHelper.TrimStatement(methodChanges.EditType.Block)))
+                        {
+                            var typeIdentifier = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(methodChanges.EditType.Block));
+                            methodDeclarationSyntax = methodDeclarationSyntax.WithReturnType(typeIdentifier.WithTrailingTrivia(SyntaxFactory.Whitespace(" ")));
+                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(originalMethodNode, methodDeclarationSyntax);
                         }
                     }
                 }
@@ -281,54 +388,59 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             var newMethod = methodNode;
             List<ParameterSyntax> newParameters = new List<ParameterSyntax>();
-
+           
             foreach(var parameter in addParameters)
             {
-                if (toolOptions.MicrosoftGraph)
+                var identifier = SyntaxFactory.Identifier(parameter.Block).WithLeadingTrivia(SyntaxFactory.Whitespace(" "));
+                var parameterSyntax = SyntaxFactory.Parameter(identifier);
+                if (!newMethod.ParameterList.Parameters.Any(p => p.ToFullString().Equals(parameter.Block)))
                 {
-                    if (parameter.Options != null)
+                    if (toolOptions.MicrosoftGraph)
                     {
-                        //add code change if MicrosoftGraph condition is present or if DownstreamApi is not present.
-                        if (parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
+                        if (parameter.Options != null)
+                        {
+                            //add code change if MicrosoftGraph condition is present or if DownstreamApi is not present.
+                            if (parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
+                                !parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
+                            {
+                                newParameters.Add(parameterSyntax);
+                            }
+                        }
+                        else
+                        {
+                            newParameters.Add(parameterSyntax);
+                        }
+                    }
+
+                    //if the application calls a Downstream API
+                    if (toolOptions.DownstreamApi)
+                    {
+                        if (parameter.Options != null)
+                        {
+                            //add code change if DownstreamApi condition is present or if MicrosoftGraph is not present.
+                            if (parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
+                                !parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
+                            {
+                                newParameters.Add(parameterSyntax);
+                            }
+                        }
+                        //if no Options are present, add the code changes.
+                        else
+                        {
+                            newParameters.Add(parameterSyntax);
+                        }
+                    }
+
+                    //if the application calls neither Microsoft Graph or a Downstream API
+                    if (!toolOptions.MicrosoftGraph && !toolOptions.DownstreamApi)
+                    {
+                        //if no Options are present, or if they are present, don't contain MicrosoftGraph or DownstreamAPI, add the code changes.
+                        if (parameter.Options == null ||
+                            !parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
                             !parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
                         {
-                            newParameters.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameter.Block)));
+                            newParameters.Add(parameterSyntax);
                         }
-                    }
-                    else
-                    {
-                        newParameters.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameter.Block)));
-                    }
-                }
-
-                //if the application calls a Downstream API
-                if (toolOptions.DownstreamApi)
-                {
-                    if (parameter.Options != null)
-                    {
-                        //add code change if DownstreamApi condition is present or if MicrosoftGraph is not present.
-                        if (parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                            !parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                        {
-                            newParameters.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameter.Block)));
-                        }
-                    }
-                    //if no Options are present, add the code changes.
-                    else
-                    {
-                        newParameters.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameter.Block)));
-                    }
-                }
-
-                //if the application calls neither Microsoft Graph or a Downstream API
-                if (!toolOptions.MicrosoftGraph && !toolOptions.DownstreamApi)
-                {
-                    //if no Options are present, or if they are present, don't contain MicrosoftGraph or DownstreamAPI, add the code changes.
-                    if (parameter.Options == null ||
-                        !parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                        !parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                    {
-                        newParameters.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameter.Block)));
                     }
                 }
             }

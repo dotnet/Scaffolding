@@ -27,11 +27,22 @@
       ]
     }
   ],
-  "Packages": [
+  "BasePackages": [
     "Microsoft.AspNetCore.Authentication",
     "Microsoft.AspNetCore.Authentication.OpenIdConnect",
-    "Microsoft.AspNetCore.Authorization",
+    "Microsoft.AspNetCore.Authorization"
+  ],
+  "CommonPackages": [
     "Microsoft.Identity.Web",
     "Microsoft.Identity.Web.UI"
+  ],
+  "MicrosoftGraphPackages": [
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+    "Microsoft.AspNetCore.Authentication.JwtBearer",
+    "Microsoft.Identity.Web.MicrosoftGraph"
+  ],
+  "DownstreamApiPackages": [
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+    "Microsoft.AspNetCore.Authentication.JwtBearer"
   ]
 }

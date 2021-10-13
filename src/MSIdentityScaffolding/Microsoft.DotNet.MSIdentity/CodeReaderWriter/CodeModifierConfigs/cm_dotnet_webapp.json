@@ -80,9 +80,9 @@
               }
             },
             {
-              "Parent":"AddMicrosoftIdentityWebApp",
-              "Options" : [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
-              "Block":"EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Parent": "AddMicrosoftIdentityWebApp",
+              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
               "CodeFormatting": {
                 "NumberOfSpaces": 8,
                 "Newline": true
@@ -91,7 +91,7 @@
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()",
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\"))",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
@@ -100,16 +100,34 @@
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
               "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddDownstreamWebApi(builder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()",
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "Block":"\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
-              "InsertAfter":"WebApplication.CreateBuilder.Services.AddAuthentication",
-              "InsertBefore": ["WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()"]
+              "Parent": "AddDownstreamWebApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddMicrosoftGraph",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
+              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ]
             },
             {
               "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
@@ -119,12 +137,12 @@
             {
               "InsertAfter": "app.UseRouting();",
               "Block": "app.UseAuthentication();",
-              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ] 
+              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
             },
             {
               "InsertAfter": "app.MapRazorPages();",
               "Block": "app.MapControllers();",
-              "InsertBefore": [ "app.Run();" ] 
+              "InsertBefore": [ "app.Run();" ]
             }
           ]
         }
@@ -143,11 +161,11 @@
       "Options" :  [ "MicrosoftGraph", "DownstreamApi" ],
       "ClassProperties": [
         {
-          "Block" : "private readonly GraphServiceClient _graphServiceClient;",
+          "Block" : "private readonly GraphServiceClient _graphServiceClient",
           "Options": [ "MicrosoftGraph" ]
         },
         {
-          "Block": "private readonly IDownstreamWebApi _downstreamWebApi;",
+          "Block": "private readonly IDownstreamWebApi _downstreamWebApi",
           "Options": [ "DownstreamApi" ]
         }
       ],
@@ -160,8 +178,9 @@
       "Methods": {
         "OnGet":{
           "Parameters": [ "void" ],
-          "EditParameters" :  {
-            "void" :  "async Task"
+          "EditType" : {
+           "Block": "async Task",
+           "Options": ["MicrosoftGraph", "DownstreamApi"]
           },
           "CodeChanges": [
             {
@@ -186,8 +205,8 @@
               "Options" : [ "DownstreamApi"]
             },
             {
-              "Block" : "",
-              "Options": [ "DownstreamApi"]
+              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n        {\n            var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n            ViewData[\"ApiResult\"] = apiResult;\n        }\n        else\n        {\n            var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n            throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n        }",
+              "Options": [ "DownstreamApi" ]
             }
           ]
         },
@@ -205,12 +224,18 @@
           ],
           "CodeChanges": [
             {
-              "Block" : "_graphServiceClient = graphServiceClient;",
-              "Options" : [ "MicrosoftGraph" ]
+              "Block": "_graphServiceClient = graphServiceClient;",
+              "Options": [ "MicrosoftGraph" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              }
             },
             {
-              "Block" : "_downstreamWebApi = downstreamWebApi;",
-              "Options" : [ "DownstreamApi" ]
+              "Block": "_downstreamWebApi = downstreamWebApi;",
+              "Options": [ "DownstreamApi" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              }
             }
           ]
         }

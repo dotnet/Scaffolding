@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     foreach (var file in codeModifierConfig.Files)
                     {
                         var fileName = file.FileName;
-                        System.Diagnostics.Debugger.Launch();
+                        //System.Diagnostics.Debugger.Launch();
                         //if the file we are modifying is Startup.cs, use Program.cs to find the correct file to edit.
                         if (!string.IsNullOrEmpty(fileName) && fileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase))
                         {
@@ -169,7 +169,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 }
                             }
                         }
-                        
                     }
                     //replace root node with all the updates.
                     documentEditor.ReplaceNode(docRoot, newRoot);
@@ -250,7 +249,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     //add code snippets/changes.
                     if (file.Methods != null && file.Methods.Any())
                     {
-                        modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(file, modifiedClassDeclarationSyntax, options);
+                        modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(modifiedClassDeclarationSyntax, options);
+                        modifiedClassDeclarationSyntax = documentBuilder.EditMethodTypes(modifiedClassDeclarationSyntax, options);
+                        modifiedClassDeclarationSyntax = documentBuilder.AddMethodParameters(modifiedClassDeclarationSyntax, options);   
                     }
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.

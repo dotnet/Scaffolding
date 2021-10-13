@@ -673,7 +673,20 @@ namespace Microsoft.DotNet.MSIdentity
 
                 if (ProvisioningToolOptions.PackagesUpdate)
                 {
-                    if (projectDescription.Packages != null)
+                    List<string> packages = projectDescription.CommonPackages?.ToList() ?? new List<string>();
+                    if (ProvisioningToolOptions.CallsDownstreamApi && projectDescription.DownstreamApiPackages != null)
+                    {
+                        packages.AddRange(projectDescription.DownstreamApiPackages);
+                    }
+                    if (ProvisioningToolOptions.CallsGraph && projectDescription.MicrosoftGraphPackages != null)
+                    {
+                        packages.AddRange(projectDescription.MicrosoftGraphPackages);
+                    }
+                    if (!ProvisioningToolOptions.CallsDownstreamApi && !ProvisioningToolOptions.CallsGraph && projectDescription.BasePackages != null)
+                    {
+                        packages.AddRange(projectDescription.BasePackages);
+                    }
+                    if (packages != null)
                     {
                         ConsoleLogger.LogMessage("=============================================");
                         ConsoleLogger.LogMessage(Resources.UpdatingProjectPackages);
@@ -691,7 +704,7 @@ namespace Microsoft.DotNet.MSIdentity
                                 var shortTfm = tfm.FrameworkName?.GetShortFolderName();
                                 if (!string.IsNullOrEmpty(shortTfm))
                                 {
-                                    foreach (var packageToInstall in projectDescription.Packages)
+                                    foreach (var packageToInstall in packages)
                                     {
                                         //if package doesn't exist, add it.
                                         if (!tfm.Dependencies.Where(x => x.Name.Equals(packageToInstall)).Any())

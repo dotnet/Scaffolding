@@ -23,7 +23,10 @@
           "Parameters": [ "IServiceCollection" ],
           "CodeChanges": [
             {
-              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)"
+              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              }
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
@@ -38,7 +41,10 @@
             {
               "Block": "IServiceCollection.AddAuthorization",
               "Options": [ "LambdaExpression" ],
-              "Parameter": "options"
+              "Parameter": "options",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              }
             },
             {
               "Parent": "services.AddAuthorization",
@@ -125,9 +131,12 @@
               }
             },
             {
-              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
-              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ]
+              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
               "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",

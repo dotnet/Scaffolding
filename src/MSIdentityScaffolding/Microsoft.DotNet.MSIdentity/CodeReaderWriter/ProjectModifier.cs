@@ -57,12 +57,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         MicrosoftGraph = _toolOptions.CallsGraph,
                         DownstreamApi = _toolOptions.CallsDownstreamApi
                     };
-
+                    var filteredFiles = codeModifierConfig.Files.Where(f => DocumentBuilder.FilterOptions(f.Options, options));
                     //Go through all the files, make changes using DocumentBuilder.
-                    foreach (var file in codeModifierConfig.Files)
+                    foreach (var file in filteredFiles)
                     {
                         var fileName = file.FileName;
-                        //System.Diagnostics.Debugger.Launch();
+                        
                         //if the file we are modifying is Startup.cs, use Program.cs to find the correct file to edit.
                         if (!string.IsNullOrEmpty(fileName) && fileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase))
                         {

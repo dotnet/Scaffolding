@@ -90,6 +90,48 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedClassDeclarationSyntax;
         }
 
+        /// <summary>
+        /// Filter Options string array to matching CodeChangeOptions.
+        /// Primary use to filter out CodeBlocks and Files that apply in Microsoft Graph and Downstream API scenarios
+        /// </summary>
+        /// <param name="options">string [] in cm_*.json files for code modifications</param>
+        /// <param name="codeChangeOptions">based on cli parameters</param>
+        /// <returns>true if the CodeChangeOptions apply, false otherwise. </returns>
+        internal static bool FilterOptions(string[] options, CodeChangeOptions codeChangeOptions)
+        {
+            if (options == null)
+            {
+                return true;
+            }
+            if (codeChangeOptions.DownstreamApi)
+            {
+                if (options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
+                    !options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
+                {
+                    return true;
+                }
+            }
+            if (codeChangeOptions.MicrosoftGraph)
+            {
+                if (options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
+                    !options.Contains(CodeChangeOptionStrings.DownstreamApi))
+                {
+                    return true;
+                }
+            }
+            if (!codeChangeOptions.DownstreamApi && !codeChangeOptions.MicrosoftGraph)
+            {
+                if (options == null ||
+                    (!options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
+                    !options.Contains(CodeChangeOptionStrings.DownstreamApi)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Filter out CodeBlocks that are invalid using FilterOptions
         internal static CodeBlock[] FilterCodeBlocks(CodeBlock[] codeBlocks, CodeChangeOptions options)
         {
             var filteredCodeBlocks = new HashSet<CodeBlock>();
@@ -97,36 +139,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             {
                 foreach (var codeBlock in codeBlocks)
                 {
-                    if (options.DownstreamApi)
+                    if (FilterOptions(codeBlock.Options, options))
                     {
-                        if (codeBlock.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                            !codeBlock.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                        {
-                            filteredCodeBlocks.Add(codeBlock);
-                        }
-                    }
-                    if (options.MicrosoftGraph)
-                    {
-                        if (codeBlock.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                            !codeBlock.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                        {
-                            filteredCodeBlocks.Add(codeBlock);
-                        }
-                    }
-                    if (!options.DownstreamApi && !options.MicrosoftGraph)
-                    {
-                        if (codeBlock.Options == null ||
-                            (!codeBlock.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
-                            !codeBlock.Options.Contains(CodeChangeOptionStrings.DownstreamApi)))
-                        {
-                            filteredCodeBlocks.Add(codeBlock);
-                        }
+                        filteredCodeBlocks.Add(codeBlock);
                     }
                 }
             }
             return filteredCodeBlocks.ToArray();
         }
 
+        //Filter out CodeSnippets that are invalid using FilterOptions
         internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options)
         {
             var filteredCodeSnippets = new HashSet<CodeSnippet>();
@@ -134,30 +156,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             {
                 foreach (var codeSnippet in codeSnippets)
                 {
-                    if (options.DownstreamApi)
+                    if (FilterOptions(codeSnippet.Options, options))
                     {
-                        if (codeSnippet.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                            !codeSnippet.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                        {
-                            filteredCodeSnippets.Add(codeSnippet);
-                        }
-                    }
-                    if (options.MicrosoftGraph)
-                    {
-                        if (codeSnippet.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                            !codeSnippet.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                        {
-                            filteredCodeSnippets.Add(codeSnippet);
-                        }
-                    }
-                    if (!options.DownstreamApi && !options.MicrosoftGraph)
-                    {
-                        if (codeSnippet.Options == null ||
-                            (!codeSnippet.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
-                            !codeSnippet.Options.Contains(CodeChangeOptionStrings.DownstreamApi)))
-                        {
-                            filteredCodeSnippets.Add(codeSnippet);
-                        }
+                        filteredCodeSnippets.Add(codeSnippet);
                     }
                 }
             }
@@ -342,41 +343,43 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     methodChanges != null &&
                     methodChanges.EditType != null)
                 {
-                    methodChanges.EditType = FilterCodeBlocks(new CodeBlock[] { methodChanges.EditType }, options).First();
-                    //get method node from ClassDeclarationSyntax
-                    IDictionary<string, string> parameterValues = null;
-
-                    var originalMethodNode = modifiedClassDeclarationSyntax?
-                        .DescendantNodes()
-                        .Where(
-                            node => node is MethodDeclarationSyntax mds &&
-                            mds.Identifier.ValueText.Equals(methodName) &&
-                            (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
-                        .FirstOrDefault();
-
-                    
-
-                    var methodNode = modifiedClassDeclarationSyntax?
-                        .DescendantNodes()
-                        .Where(
-                            node => node is MethodDeclarationSyntax mds &&
-                            mds.Identifier.ValueText.Equals(methodName) &&
-                            (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
-                        .FirstOrDefault();
-
-                    if (originalMethodNode != null && methodNode != null && methodNode is MethodDeclarationSyntax methodDeclarationSyntax && methodChanges.EditType != null)
+                    methodChanges.EditType = FilterCodeBlocks(new CodeBlock[] { methodChanges.EditType }, options).FirstOrDefault();
+                    //if after filtering, the method type might not need editing
+                    if (methodChanges.EditType != null)
                     {
                         System.Diagnostics.Debugger.Launch();
-                        var returnTypeString = methodDeclarationSyntax.ReturnType.ToFullString();
-                        if (methodDeclarationSyntax.Modifiers.Any(m => m.ToFullString().Contains("async")))
+                        //get method node from ClassDeclarationSyntax
+                        IDictionary<string, string> parameterValues = null;
+
+                        var originalMethodNode = modifiedClassDeclarationSyntax?
+                            .DescendantNodes()
+                            .Where(
+                                node => node is MethodDeclarationSyntax mds &&
+                                mds.Identifier.ValueText.Equals(methodName) &&
+                                (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
+                            .FirstOrDefault();
+                        
+                        var methodNode = modifiedClassDeclarationSyntax?
+                            .DescendantNodes()
+                            .Where(
+                                node => node is MethodDeclarationSyntax mds &&
+                                mds.Identifier.ValueText.Equals(methodName) &&
+                                (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
+                            .FirstOrDefault();
+                        
+                        if (originalMethodNode != null && methodNode != null && methodNode is MethodDeclarationSyntax methodDeclarationSyntax && methodChanges.EditType != null)
                         {
-                            returnTypeString = $"async {returnTypeString}";
-                        }
-                        if (!ProjectModifierHelper.TrimStatement(returnTypeString).Equals(ProjectModifierHelper.TrimStatement(methodChanges.EditType.Block)))
-                        {
-                            var typeIdentifier = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(methodChanges.EditType.Block));
-                            methodDeclarationSyntax = methodDeclarationSyntax.WithReturnType(typeIdentifier.WithTrailingTrivia(SyntaxFactory.Whitespace(" ")));
-                            modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(originalMethodNode, methodDeclarationSyntax);
+                            var returnTypeString = methodDeclarationSyntax.ReturnType.ToFullString();
+                            if (methodDeclarationSyntax.Modifiers.Any(m => m.ToFullString().Contains("async")))
+                            {
+                                returnTypeString = $"async {returnTypeString}";
+                            }
+                            if (!ProjectModifierHelper.TrimStatement(returnTypeString).Equals(ProjectModifierHelper.TrimStatement(methodChanges.EditType.Block)))
+                            {
+                                var typeIdentifier = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(methodChanges.EditType.Block));
+                                methodDeclarationSyntax = methodDeclarationSyntax.WithReturnType(typeIdentifier.WithTrailingTrivia(SyntaxFactory.Whitespace(" ")));
+                                modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(originalMethodNode, methodDeclarationSyntax);
+                            }
                         }
                     }
                 }

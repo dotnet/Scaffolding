@@ -59,6 +59,42 @@
               "Block": "AddDownstreamWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
             },
             {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddDownstreamWebApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddMicrosoftGraph",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
               "InsertAfter": "app.UseRouting();",
               "Block": "app.UseAuthentication();",
               "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
@@ -81,9 +117,17 @@
         }
       ],
       "ClassProperties": [
-        { 
-          "CodeBlock":"static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
-          "Options":[]
+        {
+          "Block": "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
+          "Options": []
+        },
+        {
+          "Block": "private readonly GraphServiceClient _graphServiceClient",
+          "Options": [ "MicrosoftGraph" ]
+        },
+        {
+          "Block": "private readonly IDownstreamWebApi _downstreamWebApi",
+          "Options": [ "DownstreamApi" ]
         }
       ],
       "Methods": {
@@ -98,7 +142,19 @@
         },
         "Get": {
           "Parameters": [ "IEnumerable<WeatherForecast>" ],
+          "EditType": {
+            "Block": "async Task<IEnumerable<WeatherForecast>>",
+            "Options": [ "MicrosoftGraph", "DownstreamApi" ]
+          },
           "CodeChanges": [
+            {
+              "Append": true,
+              "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              },
+              "Options": [ "MicrosoftGraph" ]
+            },
             {
               "Append": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);"

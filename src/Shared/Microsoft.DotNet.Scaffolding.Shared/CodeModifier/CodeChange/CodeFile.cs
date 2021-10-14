@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public CodeBlock[] ClassProperties { get; set; }
         public CodeBlock[] ClassAttributes { get; set; }
         public string[] GlobalVariables { get; set; }
+        public string[] Options { get; set; }
     }
 
     public class CodeBlock 

@@ -88,6 +88,40 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
+        public void FilterOptionsTests()
+        {
+            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
+            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
+            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
+            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
+
+            var graphOptions = new string[] { "MicrosoftGraph" } ;
+            var apiOptions = new string[] { "DownstreamApi" } ;
+            var bothOptions = new string[] { "DownstreamApi", "MicrosoftGraph" } ;
+            var neitherOptions = new string[] { } ;
+
+            Assert.True(DocumentBuilder.FilterOptions(graphOptions, optionsWithGraph));
+            Assert.False(DocumentBuilder.FilterOptions(graphOptions, optionsWithApi));
+            Assert.True(DocumentBuilder.FilterOptions(graphOptions, optionsWithBoth));
+            Assert.False(DocumentBuilder.FilterOptions(graphOptions, optionsWithNeither));
+
+            Assert.False(DocumentBuilder.FilterOptions(apiOptions, optionsWithGraph));
+            Assert.True(DocumentBuilder.FilterOptions(apiOptions, optionsWithApi));
+            Assert.True(DocumentBuilder.FilterOptions(apiOptions, optionsWithBoth));
+            Assert.False(DocumentBuilder.FilterOptions(apiOptions, optionsWithNeither));
+
+            Assert.True(DocumentBuilder.FilterOptions(bothOptions, optionsWithGraph));
+            Assert.True(DocumentBuilder.FilterOptions(bothOptions, optionsWithApi));
+            Assert.True(DocumentBuilder.FilterOptions(bothOptions, optionsWithBoth));
+            Assert.False(DocumentBuilder.FilterOptions(bothOptions, optionsWithNeither));
+
+            Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithGraph));
+            Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithApi));
+            Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithBoth));
+            Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithNeither));
+        }
+
+        [Fact]
         public void FilterCodeBlocksTests()
         {
             var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };

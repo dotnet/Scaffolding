@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 Description = applicationParameters.Description
             };
 
-            if (applicationParameters.IsWebApi.GetValueOrDefault())
+            if (applicationParameters.IsWebApi == true)
             {
                 application.Api = new ApiApplication()
                 {
@@ -50,15 +51,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 };
             }
 
-            if (applicationParameters.IsWebApp.GetValueOrDefault())
+            if (applicationParameters.IsWebApp == true)
             {
                 AddWebAppPlatform(applicationParameters, application);
             }
-            else if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
+            else if (applicationParameters.IsBlazorWasm == true)
             {
+                Debugger.Launch();
                 // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
                 // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
-                if (applicationParameters.TargetFramework == "net5.0")
+                if (applicationParameters.TargetFramework == "net5.0") // TODO: make version logic more robust for 6.0
                 {
                     AddSpaPlatform(applicationParameters, application);
                 }
@@ -108,7 +110,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 await ExposeScopes(graphServiceClient, createdApplication);
 
                 // Blazorwasm hosted: add permission to server web API from client SPA
-                if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
+                if (applicationParameters.IsBlazorWasm.GetValueOrDefault()) // TODO try this
                 {
                     await AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
                         graphServiceClient,
@@ -191,6 +193,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             ProvisioningToolOptions toolOptions,
             string commandName)
         {
+            Debugger.Launch();
             JsonResponse jsonResponse = new JsonResponse(commandName);
             if (reconciledApplicationParameters is null)
             {
@@ -208,45 +211,69 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 bool needsUpdate = false;
 
-                // Updates the redirect URIs
-                if (existingApplication.Web == null)
+                // Update the redirect URIs
+                var updatedApp = new Application();
+                List<string> existingRedirectUris;
+
+
+                updatedApp.Web = existingApplication.Web ?? new WebApplication();
+                if (reconciledApplicationParameters.IsBlazorWasm == true)
+                { 
+                    updatedApp.Spa = existingApplication.Spa ?? new SpaApplication();
+                    existingRedirectUris = updatedApp.Spa.RedirectUris.ToList();
+                }
+                else
                 {
-                    existingApplication.Web = new WebApplication();
+                    existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
                 }
 
-                var updatedApp = new Application
-                {
-                    Web = existingApplication.Web
-                };
+                var useTheseInstead = reconciledApplicationParameters.WebRedirectUris; //TODO get these please :)
 
-                // update redirect uris // TODO: SPA redirect URIs for blazor?
-                List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
                 List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
+
                 int originalUrisCount = existingRedirectUris.Count;
                 existingRedirectUris.AddRange(urisToEnsure);
-                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
-                if (updatedApp.Web.RedirectUris.Count() > originalUrisCount)
+
+                if (existingRedirectUris.Distinct().Count() > originalUrisCount)
                 {
                     needsUpdate = true;
                 }
 
-                if (updatedApp.Web.ImplicitGrantSettings == null)
+                if (updatedApp.Web.ImplicitGrantSettings == null)  // TODO: Blazor, SPA?
                 {
                     updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 }
 
                 //update implicit grant settings if need be. // TODO: EnableAccessToken False for Blazor?
-                if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
+                if (reconciledApplicationParameters.IsBlazorWasm == true)
                 {
-                    needsUpdate = true;
-                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
-                }
+                    // disable access token and disable id token
+                    if (updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance != false)
+                    {
+                        updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
+                        needsUpdate = true;
+                    }
 
-                if (toolOptions.EnableIdToken.HasValue &&
-                    (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
+                    if (updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance != false)
+                    {
+                        updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
+                        needsUpdate = true;
+                    }
+                }
+                else
                 {
-                    needsUpdate = true;
-                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+                    if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
+                    {
+                        needsUpdate = true;
+                        updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+                    }
+
+                    if (toolOptions.EnableIdToken.HasValue &&
+                        (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
+                    {
+                        needsUpdate = true;
+                        updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+                    }
                 }
 
                 if (needsUpdate)
@@ -509,7 +536,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // IdToken
             if ((!applicationParameters.CallsDownstreamApi && !applicationParameters.CallsMicrosoftGraph)
-                || withImplicitFlow)
+                || withImplicitFlow) // TODO: how do downstreamAPI and graph affect blazor 5, 6, 3.1?
             {
                 application.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 application.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;

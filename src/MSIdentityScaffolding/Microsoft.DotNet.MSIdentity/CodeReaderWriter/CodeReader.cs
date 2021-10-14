@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -51,6 +53,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             ProjectAuthenticationSettings projectAuthenticationSettings,
             IEnumerable<ProjectDescription> projectDescriptions)
         {
+            //Debugger.Launch();
             string projectPath = Path.Combine(folderToConfigure, projectDescription.ProjectRelativeFolder!);
 
             // TO-DO get all the project descriptions
@@ -69,82 +72,72 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 }
             }
 
-            PostProcessWebUris(projectAuthenticationSettings);
+            PostProcessWebUris(projectAuthenticationSettings.ApplicationParameters, projectAuthenticationSettings.Replacements); // Why bother doing this from VS?
         }
 
-        private static void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
+        private static void PostProcessWebUris(ApplicationParameters applicationParameters, List<Replacement> replacements)
         {
-            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue &&
-                                projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.Value &&
-                                projectAuthenticationSettings.ApplicationParameters.IsWebApp.HasValue &&
-                                !projectAuthenticationSettings.ApplicationParameters.IsWebApp.Value;
-            string callbackPath = projectAuthenticationSettings.ApplicationParameters.CallbackPath ?? "/signin-oidc";
-            if (isBlazorWasm)
+            bool isBlazorWasm = applicationParameters.IsBlazorWasm == true && applicationParameters.IsWebApp != true;
+
+            string callbackPath = isBlazorWasm ? "/authentication/login-callback" : applicationParameters.CallbackPath ?? "/signin-oidc";
+
+            if (!callbackPath.StartsWith('/')) // TODO what scenario is this?
             {
-                callbackPath = "/authentication/login-callback";
-            }
-            if (callbackPath != null && !callbackPath.StartsWith('/'))
-            {
-                projectAuthenticationSettings.ApplicationParameters.WebRedirectUris.Add(callbackPath);
+                applicationParameters.WebRedirectUris.Add(callbackPath);
             }
             else
             {
                 List<string> launchUrls = new List<string>();
 
                 // Create a list of string (roots)
-                string? iisExpressApplicationUrl = projectAuthenticationSettings.Replacements.FirstOrDefault(r => r.ReplaceBy == "iisApplicationUrl")?.ReplaceFrom;
-                string? iisExpressSslPort = projectAuthenticationSettings.Replacements.FirstOrDefault(r => r.ReplaceBy == "iisSslPort")?.ReplaceFrom;
+                string? iisExpressApplicationUrl = replacements.FirstOrDefault(r => r.ReplaceBy == "iisApplicationUrl")?.ReplaceFrom;
+                string? iisExpressSslPort = replacements.FirstOrDefault(r => r.ReplaceBy == "iisSslPort")?.ReplaceFrom;
                 if (!string.IsNullOrEmpty(iisExpressApplicationUrl) && !string.IsNullOrEmpty(iisExpressSslPort))
                 {
                     // Change the port
                     Uri url = new Uri(iisExpressApplicationUrl);
                     string sslLauchUrl;
 
-                    if (url.Scheme == "https" || url.Port == 0)
+                    if (url.Scheme == Uri.UriSchemeHttps || url.Port == 0)
                     {
                         sslLauchUrl = iisExpressApplicationUrl;
                     }
-                    else
+                    else if (int.TryParse(iisExpressSslPort, out var port))
                     {
-                        sslLauchUrl = "https://" + url.Host + ":" + iisExpressSslPort + url.PathAndQuery;
+                        sslLauchUrl = new UriBuilder
+                        {
+                            Scheme = Uri.UriSchemeHttps,
+                            Host = url.Host,
+                            Port = port,
+                            Path = url.AbsolutePath,
+                            Query = url.Query
+                        }.Uri.AbsoluteUri;
+
                         if (!iisExpressApplicationUrl.EndsWith('/'))
                         {
                             sslLauchUrl = sslLauchUrl.TrimEnd('/');
                         }
+                        launchUrls.Add(sslLauchUrl);
                     }
-                    launchUrls.Add(sslLauchUrl);
                 }
 
-                // Add the profile lauchsettings 
-                IEnumerable<string> httpsProfileLaunchUrls = projectAuthenticationSettings.Replacements
+                // Add the profile launchsettings 
+                IEnumerable<string> httpsProfileLaunchUrls = replacements
                     .Where(r => r.ReplaceBy == "profilesApplicationUrls")
                     .SelectMany(r => r.ReplaceFrom.Split(';'))
-                    .Where(u => u.StartsWith("https://"));
+                    .Where(u => u.StartsWith(Uri.UriSchemeHttps));
                 launchUrls.AddRange(httpsProfileLaunchUrls);
 
                 // Set the web redirect URIs
-                List<string> redirectUris = projectAuthenticationSettings.ApplicationParameters.WebRedirectUris;
+                List<string> redirectUris = applicationParameters.WebRedirectUris;
                 redirectUris.AddRange(launchUrls.Select(l => l + callbackPath));
 
                 // Get the signout path (/oidc-signout)
-                string signoutPath = "/oidc-signout";
-                if (isBlazorWasm)
+                string signoutPath = isBlazorWasm ? "/authentication/logout-callback" : "/oidc-signout";
+
+                if (launchUrls.Any())
                 {
-                    signoutPath = "/authentication/logout-callback";
-                }
-                if (!string.IsNullOrEmpty(signoutPath))
-                {
-                    if (signoutPath.StartsWith("/"))
-                    {
-                        if (launchUrls.Any())
-                        {
-                            projectAuthenticationSettings.ApplicationParameters.LogoutUrl = launchUrls.First() + signoutPath;
-                        }
-                    }
-                    else
-                    {
-                        projectAuthenticationSettings.ApplicationParameters.LogoutUrl = signoutPath;
-                    }
+                    applicationParameters.LogoutUrl = launchUrls.First() + signoutPath;
                 }
             }
         }

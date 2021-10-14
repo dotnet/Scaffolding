@@ -1,10 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
@@ -16,6 +11,12 @@ using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -108,13 +109,14 @@ namespace Microsoft.DotNet.MSIdentity
 
             //for now, update project command is handlded seperately.
             //TODO: switch case to handle all the different commands.
+            // TODO this would help me out a lot too I think
+
             ApplicationParameters? applicationParameters = null;
 
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
-            if (projectSettings.ApplicationParameters.IsBlazorWasm.HasValue && projectSettings.ApplicationParameters.IsBlazorWasm.Value
-                && projectSettings.ApplicationParameters.IsWebApi.HasValue && projectSettings.ApplicationParameters.IsWebApi.Value)
+            if (projectSettings.ApplicationParameters.IsBlazorWasm == true && projectSettings.ApplicationParameters.IsWebApi == true)
             {
                 // Processes the hosted web API
                 ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
@@ -314,17 +316,17 @@ namespace Microsoft.DotNet.MSIdentity
         /// <summary>
         /// Modifies AppSettings file for non-blazor projects
         /// </summary>
-        /// <param name="azureAdToken"></param>
+        /// <param name="existingAppSettings"></param>
         /// <param name="applicationParameters"></param>
         /// <param name="appSettings"></param>
         /// <returns></returns>
-        private bool ModifyAppSettings(JToken? azureAdToken, ApplicationParameters applicationParameters, JObject appSettings)
+        private bool ModifyAppSettings(JToken? existingAppSettings, ApplicationParameters applicationParameters, JObject appSettings)
         {
             bool changesMade = false;
 
-            if (azureAdToken != null)
+            if (existingAppSettings != null)
             {
-                var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
+                var azureAdProperty = existingAppSettings.ToObject<AzureAdProperties>();
                 if (azureAdProperty != null)
                 {
                     // if property exists, and if suggested value is not already there.
@@ -332,35 +334,35 @@ namespace Microsoft.DotNet.MSIdentity
                         !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
                     {
                         changesMade = true;
-                        azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
+                        existingAppSettings["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
                     }
 
                     if (!string.IsNullOrEmpty(azureAdProperty.TenantId) &&
                         !azureAdProperty.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
                     {
                         changesMade = true;
-                        azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
+                        existingAppSettings["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
                     }
 
                     if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
                         !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
                     {
                         changesMade = true;
-                        azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
+                        existingAppSettings["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
                     }
 
                     if (!string.IsNullOrEmpty(azureAdProperty.Instance) &&
                         !azureAdProperty.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
                     {
                         changesMade = true;
-                        azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
+                        existingAppSettings["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
                     }
 
                     if (!string.IsNullOrEmpty(azureAdProperty.CallbackPath) &&
                         !azureAdProperty.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
                     {
                         changesMade = true;
-                        azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
+                        existingAppSettings["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
                     }
                 }
             }
@@ -382,15 +384,16 @@ namespace Microsoft.DotNet.MSIdentity
         /// <summary>
         /// Modifies AppSettings file for blazor projects
         /// </summary>
-        /// <param name="azureAdToken"></param>
+        /// <param name="exisitingAppSettings"></param>
         /// <param name="applicationParameters"></param>
         /// <param name="appSettings"></param>
         /// <returns></returns>
-        private bool ModifyBlazorAppSettings(JToken? azureAdToken, ApplicationParameters applicationParameters, JObject appSettings)
+        private bool ModifyBlazorAppSettings(JToken? exisitingAppSettings, ApplicationParameters applicationParameters, JObject appSettings)
         {
+            Debugger.Launch();
             bool changesMade = false;
 
-            var authority = BlazorAzureAdDefaultProperties.Authority;
+            var authority = BlazorDefaultProperties.Authority;
             if (!string.IsNullOrEmpty(applicationParameters.Authority))
             {
                 authority = applicationParameters.Authority;
@@ -404,32 +407,14 @@ namespace Microsoft.DotNet.MSIdentity
                 authority = AzureAdDefaultProperties.Instance + applicationParameters.TenantId;
             }
 
-            if (azureAdToken != null)
+            if (exisitingAppSettings != null)
             {
-                var azureAdProperty = azureAdToken.ToObject<BlazorAzureAdProperties>();
-                if (azureAdProperty != null)
+                var existingProperties = exisitingAppSettings.ToObject<BlazorAzureAdProperties>();
+                if (existingProperties != null)
                 {
-                    // if property exists, and if suggested value is not already there.
-                    if (!string.IsNullOrEmpty(azureAdProperty.Authority) &&
-                        !azureAdProperty.Authority.Equals(applicationParameters.Authority, StringComparison.OrdinalIgnoreCase))
-                    {
-                        changesMade = true;
-                        azureAdToken[nameof(applicationParameters.Authority)] = authority;
-                    }
-
-                    if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
-                        !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        changesMade = true;
-                        azureAdToken["ClientId"] = applicationParameters.ClientId ?? BlazorAzureAdDefaultProperties.ClientId;
-                    }
-
-                    if (!string.IsNullOrEmpty(azureAdProperty.ValidateAuthority) &&
-                        !azureAdProperty.ValidateAuthority.Equals(BlazorAzureAdDefaultProperties.ValidateAuthority, StringComparison.OrdinalIgnoreCase))
-                    {
-                        changesMade = true;
-                        azureAdToken["ValidateAuthority"] = BlazorAzureAdDefaultProperties.ValidateAuthority;
-                    }
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.Authority), existingProperties.Authority, authority);
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ClientId), existingProperties.ClientId, applicationParameters.ClientId, BlazorDefaultProperties.ClientId);
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ValidateAuthority), existingProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority); // todo: test
                 }
             }
             else
@@ -438,11 +423,21 @@ namespace Microsoft.DotNet.MSIdentity
                 appSettings.Add("AzureAd", JObject.FromObject(new
                 {
                     Authority = authority,
-                    ClientId = applicationParameters.ClientId ?? BlazorAzureAdDefaultProperties.ClientId,
+                    ClientId = applicationParameters.ClientId ?? BlazorDefaultProperties.ClientId,
                     ValidateAuthority = "true"
                 }));
             }
             return changesMade;
+        }
+
+        private bool UpdateAppSettingsProperty(JToken existingAppSettings, string propertyName, string? existingProperty, string? replacementProperty, string? defaultProperty = null)
+        {
+            if (!string.IsNullOrEmpty(existingProperty) && !existingProperty.Equals(replacementProperty, StringComparison.OrdinalIgnoreCase)) // TODO refactor me
+            {
+                existingAppSettings[propertyName] = replacementProperty ?? defaultProperty;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -725,6 +720,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task UpdateProject(TokenCredential tokenCredential, ApplicationParameters? applicationParameters, ProjectDescription? projectDescription)
         {
+            //Debugger.Launch();
             if (applicationParameters != null && !string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath) && projectDescription != null)
             {
                 if (ProvisioningToolOptions.ConfigUpdate)

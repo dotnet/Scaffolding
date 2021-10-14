@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string CallbackPath = "/signin-oidc";
     }
 
-    public static class BlazorAzureAdDefaultProperties
+    public static class BlazorDefaultProperties
     {
         public const string Authority = AzureAdDefaultProperties.Instance + AzureAdDefaultProperties.TenantId;
         public const string ClientId = AzureAdDefaultProperties.ClientId;

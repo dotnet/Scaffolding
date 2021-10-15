@@ -47,6 +47,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
+            Debugger.Launch();
             //get csproj file path
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
@@ -109,7 +110,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             //for now, update project command is handlded seperately.
             //TODO: switch case to handle all the different commands.
-            // TODO this would help me out a lot too I think
+            // TODO Z this would help me out a lot too I think
 
             ApplicationParameters? applicationParameters = null;
 
@@ -117,7 +118,7 @@ namespace Microsoft.DotNet.MSIdentity
             // - the hosted web API
             // - the SPA.
             if (projectSettings.ApplicationParameters.IsBlazorWasm == true && projectSettings.ApplicationParameters.IsWebApi == true)
-            {
+            { // TODO z check this out
                 // Processes the hosted web API
                 ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
                 provisioningToolOptionsBlazorServer.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Server");
@@ -390,7 +391,6 @@ namespace Microsoft.DotNet.MSIdentity
         /// <returns></returns>
         private bool ModifyBlazorAppSettings(JToken? exisitingAppSettings, ApplicationParameters applicationParameters, JObject appSettings)
         {
-            Debugger.Launch();
             bool changesMade = false;
 
             var authority = BlazorDefaultProperties.Authority;
@@ -414,7 +414,7 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.Authority), existingProperties.Authority, authority);
                     changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ClientId), existingProperties.ClientId, applicationParameters.ClientId, BlazorDefaultProperties.ClientId);
-                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ValidateAuthority), existingProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority); // todo: test
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ValidateAuthority), existingProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority);
                 }
             }
             else
@@ -432,11 +432,12 @@ namespace Microsoft.DotNet.MSIdentity
 
         private bool UpdateAppSettingsProperty(JToken existingAppSettings, string propertyName, string? existingProperty, string? replacementProperty, string? defaultProperty = null)
         {
-            if (!string.IsNullOrEmpty(existingProperty) && !existingProperty.Equals(replacementProperty, StringComparison.OrdinalIgnoreCase)) // TODO refactor me
+            if (!string.IsNullOrEmpty(existingProperty) && !existingProperty.Equals(replacementProperty, StringComparison.OrdinalIgnoreCase)) // TODO z refactor me, what if existingProperty is null?
             {
                 existingAppSettings[propertyName] = replacementProperty ?? defaultProperty;
                 return true;
             }
+
             return false;
         }
 

@@ -53,7 +53,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             ProjectAuthenticationSettings projectAuthenticationSettings,
             IEnumerable<ProjectDescription> projectDescriptions)
         {
-            //Debugger.Launch();
             string projectPath = Path.Combine(folderToConfigure, projectDescription.ProjectRelativeFolder!);
 
             // TO-DO get all the project descriptions
@@ -77,11 +76,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private static void PostProcessWebUris(ApplicationParameters applicationParameters, List<Replacement> replacements)
         {
+            //Debugger.Launch(); // TODO z we can do the redirect URIs here perhaps
             bool isBlazorWasm = applicationParameters.IsBlazorWasm == true && applicationParameters.IsWebApp != true;
 
             string callbackPath = isBlazorWasm ? "/authentication/login-callback" : applicationParameters.CallbackPath ?? "/signin-oidc";
 
-            if (!callbackPath.StartsWith('/')) // TODO what scenario is this?
+            if (!callbackPath.StartsWith('/'))
             {
                 applicationParameters.WebRedirectUris.Add(callbackPath);
             }
@@ -346,7 +346,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     projectAuthenticationSettings.ApplicationParameters.EffectiveDomain = (value != defaultValue) ? value : null;
                     break;
                 case "secretsId":
-                    projectAuthenticationSettings.ApplicationParameters.SecretsId = value;
+                    Debugger.Break();
+                    Debug.WriteLine(value);
+                    //projectAuthenticationSettings.ApplicationParameters.SecretsId = value; // TODO do we need this?
                     break;
                 case "targetFramework":
                     projectAuthenticationSettings.ApplicationParameters.TargetFramework = value;

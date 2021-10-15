@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [MemberData(nameof(UriList))]
         public void ValidateUrisTests(List<string> urisToValidate, List<string> validUris)
         {
-            var validatedUris = MicrosoftIdentityPlatformApplicationManager.ValidateUris(urisToValidate);
+            var validatedUris = MicrosoftIdentityPlatformApplicationManager.ValidateUris(urisToValidate, null);
             var areEquivalent = (validUris.Count == validatedUris.Count) && !validatedUris.Except(validUris).Any();
             Assert.True(areEquivalent);
         }

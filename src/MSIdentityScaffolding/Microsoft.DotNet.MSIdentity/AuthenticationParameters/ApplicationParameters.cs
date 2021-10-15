@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// <summary>
         /// Web app redirect URIs.
         /// </summary>
-        public List<string> WebRedirectUris { get; } = new List<string>();
+        public List<string> WebRedirectUris { get; set; } = new List<string>();
 
         /// <summary>
         /// Callback path (path of the redirect URIs).

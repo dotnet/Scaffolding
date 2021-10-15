@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -150,6 +151,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private static void SetUserSecrets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
         {
+            Debugger.Break();
             var errors = new List<string>();
             var output = new List<string>();
 
@@ -220,7 +222,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     replacement = null;
                     break;
                 case "secretsId":
-                    replacement = reconciledApplicationParameters.SecretsId;
+                    Debugger.Break();
+                    // replacement = reconciledApplicationParameters.SecretsId; // TODO I don't think we use this any more
                     break;
                 case "targetFramework":
                     replacement = reconciledApplicationParameters.TargetFramework;

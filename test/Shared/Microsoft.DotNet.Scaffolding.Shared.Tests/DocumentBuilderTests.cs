@@ -245,16 +245,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         }
 
-/*        [Theory]
+        [Theory]
         [InlineData(new object[] { new string[] { "Authorize", "Theory", "Empty", "Controller", "", null } })]
         public async Task AddAttributesTests(string[] attributes)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             var classSyntax = await CreateClassSyntax(editor);
             var memberCount = classSyntax.Members.Count;
+            var classAttributes = attributes.Select(at => new CodeBlock() { Block = at });
             CodeFile codeFile = new CodeFile
             {
-                ClassAttributes = attributes
+                ClassAttributes = classAttributes.ToArray()
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             classSyntax = docBuilder.AddClassAttributes(classSyntax, new CodeChangeOptions());
@@ -269,7 +270,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                     Assert.Contains(classSyntax.AttributeLists, al => al.Attributes.Where(attr => attr.ToString().Equals(attribute, StringComparison.OrdinalIgnoreCase)).Any());
                 }
             }
-        }*/
+        }
 
         [Theory]
         [InlineData(new object[] { new string[] { "System", "System.Test", "System.Data", "", null } })]

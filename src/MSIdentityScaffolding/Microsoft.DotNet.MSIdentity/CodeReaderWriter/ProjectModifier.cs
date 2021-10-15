@@ -117,42 +117,42 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             foreach (var change in globalMethod.CodeChanges)
                             {
                                 //Modify CodeSnippet to have correct variable identifiers present.
-                                FormatCodeSnippet(change, variableDict);
+                                var formattedChange = ProjectModifierHelper.FormatCodeSnippet(change, variableDict);
 
                                 //if the application calls Microsoft Graph
                                 if (toolOptions.CallsGraph)
                                 {
-                                    if (change.Options != null)
+                                    if (formattedChange.Options != null)
                                     {
                                         //add code change if MicrosoftGraph condition is present or if DownstreamApi is not present.
-                                        if (change.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                                            !change.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
+                                        if (formattedChange.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
+                                            !formattedChange.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
                                         {
-                                            newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                                            newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
                                         }
                                     }
                                     else
                                     {
-                                        newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
                                     }
                                 }
 
                                 //if the application calls a Downstream API
                                 if (toolOptions.CallsDownstreamApi)
                                 {
-                                    if (change.Options != null)
+                                    if (formattedChange.Options != null)
                                     {
                                         //add code change if DownstreamApi condition is present or if MicrosoftGraph is not present.
-                                        if (change.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                                            !change.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
+                                        if (formattedChange.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
+                                            !formattedChange.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
                                         {
-                                            newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                                            newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
                                         }
                                     }
                                     //if no Options are present, add the code changes.
                                     else
                                     {
-                                        newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
                                     }
                                 }
 
@@ -160,11 +160,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 if (!toolOptions.CallsGraph && !toolOptions.CallsDownstreamApi)
                                 {
                                     //if no Options are present, or if they are present, don't contain MicrosoftGraph or DownstreamAPI, add the code changes.
-                                    if (change.Options == null ||
-                                        !change.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                                        !change.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
+                                    if (formattedChange.Options == null ||
+                                        !formattedChange.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
+                                        !formattedChange.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
                                     {
-                                        newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
                                     }
                                 }
                             }
@@ -176,35 +176,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     await documentBuilder.WriteToClassFileAsync(programDocument.Name, programCsFilePath);
                 }
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="change"></param>
-        /// <param name="variableDict"></param>
-        /// <returns></returns>
-        internal CodeSnippet FormatCodeSnippet(CodeSnippet change, IDictionary<string, string> variableDict)
-        {
-            //format CodeChange.Block and CodeChange.Parent for any variables or parameters.
-            change.Block = ProjectModifierHelper.FormatGlobalStatement(change.Block, variableDict);
-
-            if (!string.IsNullOrEmpty(change.Parent))
-            {
-                change.Parent = ProjectModifierHelper.FormatGlobalStatement(change.Parent, variableDict);
-            }
-            if (!string.IsNullOrEmpty(change.InsertAfter))
-            {
-                change.InsertAfter = ProjectModifierHelper.FormatGlobalStatement(change.InsertAfter, variableDict);
-            }
-            if (change.InsertBefore != null && change.InsertBefore.Any())
-            {
-                for(int i = 0; i < change.InsertBefore.Count(); i++)
-                {
-                    change.InsertBefore[i] = ProjectModifierHelper.FormatGlobalStatement(change.InsertBefore[i], variableDict);
-                }
-            }
-            return change;
         }
 
         internal async Task ModifyCsFile(string fileName, CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Moq;
 using Xunit;
@@ -139,6 +140,79 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                     Assert.Equal(builderVariableIdentifierValue, builderVariableString);
                 }    
                 
+            }
+        }
+
+        [Fact]
+        public void FormatCodeSnippetTests()
+        {
+            CodeSnippet snippet = new CodeSnippet
+            {
+                Block = "string.ToString()",
+                CheckBlock = "((string)Boolean).ToString()",
+                Parent = "Builder.Build()",
+                InsertAfter = "nonExistentVariable.DoingStuff(string);",
+                InsertBefore = new string[] { "nonExistentVariable.DoingOtherStuff()", "Builder.Boolean.ToString()" }
+            };
+
+            CodeSnippet correctlyFormattedSnippet = new CodeSnippet
+            {
+                Block = "myCustomString.ToString()",
+                CheckBlock = "((myCustomString)myCustomBoolean).ToString()",
+                Parent = "builderVar.Build()",
+                InsertAfter = "nonExistentVariable.DoingStuff(myCustomString);",
+                InsertBefore = new string[] { "nonExistentVariable.DoingOtherStuff()", "builderVar.myCustomBoolean.ToString()" }
+            };
+
+            var variableDict = new Dictionary<string, string>()
+            {
+                { "string", "myCustomString" },
+                { "Boolean", "myCustomBoolean" },
+                { "Builder", "builderVar" }
+            };
+
+            var formattedSnippet = ProjectModifierHelper.FormatCodeSnippet(snippet, variableDict);
+
+            Assert.Equal(correctlyFormattedSnippet.Block, formattedSnippet.Block);
+            Assert.Equal(correctlyFormattedSnippet.CheckBlock, formattedSnippet.CheckBlock);
+            Assert.Equal(correctlyFormattedSnippet.InsertBefore, formattedSnippet.InsertBefore);
+            Assert.Equal(correctlyFormattedSnippet.InsertAfter, formattedSnippet.InsertAfter);
+            Assert.Equal(correctlyFormattedSnippet.Parent, formattedSnippet.Parent);
+        }
+
+        [Fact]
+        public void FormatGlobalStatementTests()
+        {
+            string[] globalStatements = new string[]
+            {
+                "string.ToString()",
+                "((string)Boolean).ToString()",
+                "Builder.Build()",
+                "nonExistentVariable.DoingStuff(string);",
+                "nonExistentVariable.DoingOtherStuff()",
+                "Builder.Boolean.ToString()" 
+            };
+
+            string[] correctlyFormattedStatements = new string[]
+            {
+                "myCustomString.ToString()",
+                "((myCustomString)myCustomBoolean).ToString()",
+                "builderVar.Build()",
+                "nonExistentVariable.DoingStuff(myCustomString);",
+                "nonExistentVariable.DoingOtherStuff()",
+                "builderVar.myCustomBoolean.ToString()"
+            };
+
+            var variablesDict = new Dictionary<string, string>()
+            {
+                { "string", "myCustomString" },
+                { "Boolean", "myCustomBoolean" },
+                { "Builder", "builderVar" }
+            };
+
+            for (int i = 0; i < globalStatements.Length; i++)
+            {
+                Assert.Equal(correctlyFormattedStatements[i], ProjectModifierHelper.FormatGlobalStatement(globalStatements[i], variablesDict));
             }
         }
 

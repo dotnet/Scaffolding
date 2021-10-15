@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
@@ -145,19 +146,54 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         internal static string FormatGlobalStatement(string codeBlock, IDictionary<string, string> replacements)
         {
-            string formattedStatement = string.Empty;
-            if (!string.IsNullOrEmpty(codeBlock) && replacements != null && replacements.Any())
+            string formattedStatement = codeBlock;
+            if (!string.IsNullOrEmpty(formattedStatement) && replacements != null && replacements.Any())
             {
                 foreach (var key in replacements.Keys)
                 {
                     replacements.TryGetValue(key, out string value);
                     if (!string.IsNullOrEmpty(value))
                     {
-                        formattedStatement = codeBlock.Replace(key, value);
+                        formattedStatement = formattedStatement.Replace(key, value);
                     }
                 }
             }
             return formattedStatement;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="change"></param>
+        /// <param name="variableDict"></param>
+        /// <returns></returns>
+        internal static CodeSnippet FormatCodeSnippet(CodeSnippet change, IDictionary<string, string> variableDict)
+        {
+            //format CodeSnippet fields for any variables or parameters.
+            if (!string.IsNullOrEmpty(change.Block))
+            {
+                change.Block = FormatGlobalStatement(change.Block, variableDict);
+            }
+            if (!string.IsNullOrEmpty(change.Parent))
+            {
+                change.Parent = FormatGlobalStatement(change.Parent, variableDict);
+            }
+            if (!string.IsNullOrEmpty(change.CheckBlock))
+            {
+                change.CheckBlock = FormatGlobalStatement(change.CheckBlock, variableDict);
+            }
+            if (!string.IsNullOrEmpty(change.InsertAfter))
+            {
+                change.InsertAfter = FormatGlobalStatement(change.InsertAfter, variableDict);
+            }
+            if (change.InsertBefore != null && change.InsertBefore.Any())
+            {
+                for (int i = 0; i < change.InsertBefore.Count(); i++)
+                {
+                    change.InsertBefore[i] = FormatGlobalStatement(change.InsertBefore[i], variableDict);
+                }
+            }
+            return change;
         }
 
         /// <summary>
@@ -207,6 +243,5 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
             return variables;
         }
-
     }
 }

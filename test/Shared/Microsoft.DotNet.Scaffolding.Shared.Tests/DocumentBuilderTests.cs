@@ -245,7 +245,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         }
 
-/*        [Theory]
+        [Theory]
         [InlineData(new object[] { new string[] { "Authorize", "Theory", "Empty", "Controller", "", null } })]
         public async Task AddAttributesTests(string[] attributes)
         {
@@ -270,7 +270,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                     Assert.Contains(classSyntax.AttributeLists, al => al.Attributes.Where(attr => attr.ToString().Equals(attribute, StringComparison.OrdinalIgnoreCase)).Any());
                 }
             }
-        }*/
+        }
 
         [Theory]
         [InlineData(new object[] { new string[] { "System", "System.Test", "System.Data", "", null } })]

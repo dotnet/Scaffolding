@@ -1,5 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
@@ -11,12 +17,6 @@ using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.MSIdentity
         private const string AppSettingsJson = "appsettings.json";
 
         internal IConsoleLogger ConsoleLogger { get; }
+
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
 
         private string CommandName { get; }
@@ -250,7 +251,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (appSettings != null)
                 {
                     var azureAdToken = appSettings["AzureAd"];
-                    if (applicationParameters.IsBlazorWasm ?? false)
+                    if (ProvisioningToolOptions.ProjectType?.Equals("blazorwasm") == true) // TODO test for all projects
                     {
                         changesMade = ModifyBlazorAppSettings(azureAdToken, applicationParameters, appSettings);
                     }

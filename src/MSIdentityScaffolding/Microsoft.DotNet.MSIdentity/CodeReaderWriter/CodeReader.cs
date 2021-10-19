@@ -76,7 +76,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private static void PostProcessWebUris(ApplicationParameters applicationParameters, List<Replacement> replacements)
         {
-            //Debugger.Launch(); // TODO z we can do the redirect URIs here perhaps
+            Debugger.Break(); // TODO z we can do the redirect URIs here perhaps
+            // TODO: ProvisioningToolOptions.ProjectType == "blazorwasm"; 
             bool isBlazorWasm = applicationParameters.IsBlazorWasm == true && applicationParameters.IsWebApp != true;
 
             string callbackPath = isBlazorWasm ? "/authentication/login-callback" : applicationParameters.CallbackPath ?? "/signin-oidc";

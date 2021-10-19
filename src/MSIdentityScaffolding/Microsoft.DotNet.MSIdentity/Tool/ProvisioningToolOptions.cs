@@ -1,5 +1,6 @@
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
@@ -159,6 +160,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// Make PackageReferences in .csproj (add using `dotnet add package`
         /// </summary>
         public bool PackagesUpdate { get; set; } = false;
+
+        /// <summary>
+        /// If Blazor project
+        /// </summary>
+        public bool? IsBlazorWasm => ProjectType?.Equals("blazorwasm", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Clones the options

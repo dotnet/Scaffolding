@@ -14,8 +14,9 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [MemberData(nameof(UriList))]
         public void ValidateUrisTests(List<string> urisToValidate, List<string> validUris)
         {
-            var validatedUris = MicrosoftIdentityPlatformApplicationManager.ValidateUris(urisToValidate, null);
-            var areEquivalent = (validUris.Count == validatedUris.Count) && !validatedUris.Except(validUris).Any();
+            var validatedUris = MicrosoftIdentityPlatformApplicationManager.ValidateUris(urisToValidate);
+            var uriStrings = validatedUris.Select(uri => uri.ToString()).ToList();
+            var areEquivalent = (validUris.Count == validatedUris.Count) && !uriStrings.Except(validUris).Any();
             Assert.True(areEquivalent);
         }
 
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                                         "https://www.microsoft.com/",
                                         "https://www.testapi.com/get/{id}",
                                         "http://127.0.0.1/get",
-                                        "http://loopback/post",
+                                        "http://localhost/post",
                                      }
                 }
             };

@@ -251,7 +251,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (appSettings != null)
                 {
                     var azureAdToken = appSettings["AzureAd"];
-                    if (ProvisioningToolOptions.ProjectType?.Equals("blazorwasm") == true) // TODO test for all projects
+                    if (ProvisioningToolOptions.IsBlazorWasm == true) // TODO test for all projects
                     {
                         changesMade = ModifyBlazorAppSettings(azureAdToken, applicationParameters, appSettings);
                     }
@@ -605,7 +605,7 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     projectSettings.ApplicationParameters.IsWebApi = projectSettings.ApplicationParameters.IsWebApi ?? true;
                 }
-                if (provisioningToolOptions.ProjectType.Equals("blazorwasm", StringComparison.OrdinalIgnoreCase))
+                if (provisioningToolOptions.IsBlazorWasm == true)
                 {
                     projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm ?? true;
                 }

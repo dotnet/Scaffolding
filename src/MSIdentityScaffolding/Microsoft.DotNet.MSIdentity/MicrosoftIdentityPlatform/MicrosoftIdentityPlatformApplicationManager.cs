@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
 
                 updatedApp.Web = existingApplication.Web ?? new WebApplication();
-                if (reconciledApplicationParameters.IsBlazorWasm == true)
+                if (toolOptions.IsBlazorWasm == true)
                 { 
                     updatedApp.Spa = existingApplication.Spa ?? new SpaApplication();
                     existingRedirectUris = updatedApp.Spa.RedirectUris.ToList();
@@ -220,12 +220,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 var useTheseInstead = reconciledApplicationParameters.WebRedirectUris; // TODO z get these please :)
 
-                Debugger.Break();
-
-                List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris, reconciledApplicationParameters.IsBlazorWasm).ToList();
+                List<Uri> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
 
                 int originalUrisCount = existingRedirectUris.Count;
-                existingRedirectUris.AddRange(urisToEnsure);
+
+                List<string> processedUris = urisToEnsure.Select(uri => PostProcess(uri, toolOptions.IsBlazorWasm)).ToList();
+                existingRedirectUris.AddRange(processedUris);
 
                 if (existingRedirectUris.Distinct().Count() > originalUrisCount)
                 {
@@ -238,7 +238,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
 
                 // update implicit grant settings if need be.
-                if (reconciledApplicationParameters.IsBlazorWasm == true)
+                if (toolOptions.IsBlazorWasm == true)
                 {
                     // disable access token and disable id token
                     if (updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance != false)
@@ -295,9 +295,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         }
 
         //checks for valid https uris.
-        internal static IList<string> ValidateUris(IList<string> redirectUris, bool? isBlazorWasm)
+        internal static IList<Uri> ValidateUris(IList<string> redirectUris)
         {
-            IList<string> validUris = new List<string>();
+            IList<Uri> validUris = new List<Uri>();
             if (redirectUris.Any())
             {
                 foreach (var uri in redirectUris)
@@ -306,8 +306,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
                        (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
                     {
-                        var processedUri = PostProcess(uriResult, isBlazorWasm);
-                        validUris.Add(processedUri);
+                        validUris.Add(uriResult);
                     }
                 }
             }
@@ -319,7 +318,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return new UriBuilder(uriResult)
             {
                 Path = isBlazorWasm == true ? "authentication/login-callback" : "signin-oidc"
-            }.Uri.AbsoluteUri;
+            }.Uri.ToString();
         }
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
@@ -557,8 +556,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // Explicit usage of MicrosoftGraph openid and offline_access, in the case
             // of Azure AD B2C.
-            if (applicationParameters.IsB2C && (applicationParameters.IsWebApp.HasValue && applicationParameters.IsWebApp.Value)
-                || (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value))
+            if (applicationParameters.IsB2C && applicationParameters.IsWebApp == true || applicationParameters.IsBlazorWasm == true) // TODO confirm
             {
                 if (applicationParameters.CalledApiScopes == null)
                 {
@@ -770,7 +768,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 WebRedirectUris = originalApplicationParameters.WebRedirectUris
             };
 
-            Debugger.Break();
             if (application.Api != null && application.IdentifierUris.Any())
             {
                 effectiveApplicationParameters.AppIdUri = application.IdentifierUris.FirstOrDefault();

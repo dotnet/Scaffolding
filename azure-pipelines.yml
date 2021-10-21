@@ -130,7 +130,8 @@ stages:
           
       - job: Linux
         pool:
-          name: Hosted Ubuntu 1604
+          vmImage: ubuntu-latest
+          name: ubuntu-latest
         container: LinuxContainer
         strategy:
           matrix:

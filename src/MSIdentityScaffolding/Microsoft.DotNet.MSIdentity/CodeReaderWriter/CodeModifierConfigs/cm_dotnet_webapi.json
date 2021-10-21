@@ -21,7 +21,7 @@
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
-              "Type": "MemberAccess",
+              "Options": [ "MemberAccess" ],
               "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"));",
               "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
             }
@@ -44,6 +44,57 @@
               "InsertBefore": [ "builder.Services.AddControllers()", "builder.Build()" ]
             },
             {
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddDownstreamWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddDownstreamWebApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddMicrosoftGraph",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
               "InsertAfter": "app.UseRouting();",
               "Block": "app.UseAuthentication();",
               "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
@@ -59,9 +110,25 @@
     },
     {
       "FileName": "WeatherForecastController.cs",
-      "ClassAttributes": [ "Authorize" ],
+      "ClassAttributes": [
+        {
+          "Block":"Authorize",
+          "Options": []
+        }
+      ],
       "ClassProperties": [
-        "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }"
+        {
+          "Block": "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
+          "Options": ["Skip"]
+        },
+        {
+          "Block": "private readonly GraphServiceClient _graphServiceClient",
+          "Options": [ "MicrosoftGraph" ]
+        },
+        {
+          "Block": "private readonly IDownstreamWebApi _downstreamWebApi",
+          "Options": [ "DownstreamApi" ]
+        }
       ],
       "Methods": {
         "Configure": {
@@ -75,10 +142,23 @@
         },
         "Get": {
           "Parameters": [ "IEnumerable<WeatherForecast>" ],
+          "EditType": {
+            "Block": "async Task<IEnumerable<WeatherForecast>>",
+            "Options": [ "MicrosoftGraph", "DownstreamApi" ]
+          },
           "CodeChanges": [
             {
               "Append": true,
-              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);"
+              "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8
+              },
+              "Options": [ "MicrosoftGraph" ]
+            },
+            {
+              "Append": true,
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
+              "Options": [ "Skip" ]
             }
           ]
         }

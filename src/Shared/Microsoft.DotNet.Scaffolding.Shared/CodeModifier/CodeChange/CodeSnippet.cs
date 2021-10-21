@@ -6,11 +6,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public string Block { get; set; }
         public string CheckBlock { get; set; }
         public string Parent { get; set; }
-        public string Type { get; set; }
         public bool Append { get; set; } = false;
         public string Parameter { get; set; }
-        public bool IfStatement { get; set; }
-        public bool ElseStatement { get; set; }
         public string[] InsertBefore { get; set; }
+        public string[] Options { get; set; }
+        public Formatting CodeFormatting { get; set; }
     }
 }

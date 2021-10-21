@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
@@ -31,7 +32,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         private static IEnumerable<string> GetAllSourceFiles(string directoryPath)
         {
-            var filePaths = Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
+            var filePaths =
+                Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories).Union(
+                Directory.EnumerateFiles(directoryPath, "*.cshtml", SearchOption.AllDirectories));
             return filePaths;
         }
 

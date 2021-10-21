@@ -24,7 +24,10 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         public string? BasedOnProjectDescription { get; set; }
 
-        public string[]? Packages { get; set; }
+        public string[]? BasePackages { get; set; }
+        public string[]? CommonPackages { get; set; }
+        public string[]? DownstreamApiPackages { get; set; }
+        public string[]? MicrosoftGraphPackages { get; set; }
         public override string? ToString()
         {
             return Identifier;

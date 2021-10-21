@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Moq;
 using Xunit;
@@ -139,6 +141,310 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                     Assert.Equal(builderVariableIdentifierValue, builderVariableString);
                 }    
                 
+            }
+        }
+
+        [Fact]
+        public void FormatCodeSnippetTests()
+        {
+            CodeSnippet snippet = new CodeSnippet
+            {
+                Block = "string.ToString()",
+                CheckBlock = "((string)Boolean).ToString()",
+                Parent = "Builder.Build()",
+                InsertAfter = "nonExistentVariable.DoingStuff(string);",
+                InsertBefore = new string[] { "nonExistentVariable.DoingOtherStuff()", "Builder.Boolean.ToString()" }
+            };
+
+            CodeSnippet correctlyFormattedSnippet = new CodeSnippet
+            {
+                Block = "myCustomString.ToString()",
+                CheckBlock = "((myCustomString)myCustomBoolean).ToString()",
+                Parent = "builderVar.Build()",
+                InsertAfter = "nonExistentVariable.DoingStuff(myCustomString);",
+                InsertBefore = new string[] { "nonExistentVariable.DoingOtherStuff()", "builderVar.myCustomBoolean.ToString()" }
+            };
+
+            var variableDict = new Dictionary<string, string>()
+            {
+                { "string", "myCustomString" },
+                { "Boolean", "myCustomBoolean" },
+                { "Builder", "builderVar" }
+            };
+
+            var formattedSnippet = ProjectModifierHelper.FormatCodeSnippet(snippet, variableDict);
+
+            Assert.Equal(correctlyFormattedSnippet.Block, formattedSnippet.Block);
+            Assert.Equal(correctlyFormattedSnippet.CheckBlock, formattedSnippet.CheckBlock);
+            Assert.Equal(correctlyFormattedSnippet.InsertBefore, formattedSnippet.InsertBefore);
+            Assert.Equal(correctlyFormattedSnippet.InsertAfter, formattedSnippet.InsertAfter);
+            Assert.Equal(correctlyFormattedSnippet.Parent, formattedSnippet.Parent);
+        }
+
+        [Fact]
+        public void FormatGlobalStatementTests()
+        {
+            string[] globalStatements = new string[]
+            {
+                "string.ToString()",
+                "((string)Boolean).ToString()",
+                "Builder.Build()",
+                "nonExistentVariable.DoingStuff(string);",
+                "nonExistentVariable.DoingOtherStuff()",
+                "Builder.Boolean.ToString()" 
+            };
+
+            string[] correctlyFormattedStatements = new string[]
+            {
+                "myCustomString.ToString()",
+                "((myCustomString)myCustomBoolean).ToString()",
+                "builderVar.Build()",
+                "nonExistentVariable.DoingStuff(myCustomString);",
+                "nonExistentVariable.DoingOtherStuff()",
+                "builderVar.myCustomBoolean.ToString()"
+            };
+
+            var variablesDict = new Dictionary<string, string>()
+            {
+                { "string", "myCustomString" },
+                { "Boolean", "myCustomBoolean" },
+                { "Builder", "builderVar" }
+            };
+
+            for (int i = 0; i < globalStatements.Length; i++)
+            {
+                Assert.Equal(correctlyFormattedStatements[i], ProjectModifierHelper.FormatGlobalStatement(globalStatements[i], variablesDict));
+            }
+        }
+
+        [Fact]
+        public void FilterOptionsTests()
+        {
+            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
+            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
+            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
+            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
+
+            var graphOptions = new string[] { "MicrosoftGraph" };
+            var apiOptions = new string[] { "DownstreamApi" };
+            var bothOptions = new string[] { "DownstreamApi", "MicrosoftGraph" };
+            var neitherOptions = new string[] { };
+
+            Assert.True(ProjectModifierHelper.FilterOptions(graphOptions, optionsWithGraph));
+            Assert.False(ProjectModifierHelper.FilterOptions(graphOptions, optionsWithApi));
+            Assert.True(ProjectModifierHelper.FilterOptions(graphOptions, optionsWithBoth));
+            Assert.False(ProjectModifierHelper.FilterOptions(graphOptions, optionsWithNeither));
+
+            Assert.False(ProjectModifierHelper.FilterOptions(apiOptions, optionsWithGraph));
+            Assert.True(ProjectModifierHelper.FilterOptions(apiOptions, optionsWithApi));
+            Assert.True(ProjectModifierHelper.FilterOptions(apiOptions, optionsWithBoth));
+            Assert.False(ProjectModifierHelper.FilterOptions(apiOptions, optionsWithNeither));
+
+            Assert.True(ProjectModifierHelper.FilterOptions(bothOptions, optionsWithGraph));
+            Assert.True(ProjectModifierHelper.FilterOptions(bothOptions, optionsWithApi));
+            Assert.True(ProjectModifierHelper.FilterOptions(bothOptions, optionsWithBoth));
+            Assert.False(ProjectModifierHelper.FilterOptions(bothOptions, optionsWithNeither));
+
+            Assert.True(ProjectModifierHelper.FilterOptions(neitherOptions, optionsWithGraph));
+            Assert.True(ProjectModifierHelper.FilterOptions(neitherOptions, optionsWithApi));
+            Assert.True(ProjectModifierHelper.FilterOptions(neitherOptions, optionsWithBoth));
+            Assert.True(ProjectModifierHelper.FilterOptions(neitherOptions, optionsWithNeither));
+        }
+
+        [Fact]
+        public void FilterCodeBlocksTests()
+        {
+            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
+            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
+            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
+            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
+
+            var graphBlock = new CodeBlock { Block = "GraphProperty", Options = new string[] { "MicrosoftGraph" } };
+            var apiBlock = new CodeBlock { Block = "DownstreamProperty", Options = new string[] { "DownstreamApi" } };
+            var bothBlock = new CodeBlock { Block = "BothProperty", Options = new string[] { "DownstreamApi", "MicrosoftGraph" } };
+            var neitherBlock = new CodeBlock { Block = "NeitherProperty", Options = new string[] { } };
+
+            var codeBlocks = new CodeBlock[] { graphBlock, apiBlock, bothBlock, neitherBlock };
+            var filteredWithGraph = ProjectModifierHelper.FilterCodeBlocks(codeBlocks, optionsWithGraph);
+            var filteredWithApi = ProjectModifierHelper.FilterCodeBlocks(codeBlocks, optionsWithApi);
+            var filteredWithBoth = ProjectModifierHelper.FilterCodeBlocks(codeBlocks, optionsWithBoth);
+            var filteredWithNeither = ProjectModifierHelper.FilterCodeBlocks(codeBlocks, optionsWithNeither);
+
+            Assert.True(
+                filteredWithGraph.Length == 3 &&
+                filteredWithGraph.Contains(graphBlock) &&
+                !filteredWithGraph.Contains(apiBlock) &&
+                filteredWithGraph.Contains(bothBlock) &&
+                filteredWithGraph.Contains(neitherBlock));
+
+            Assert.True(
+                filteredWithApi.Length == 3 &&
+                !filteredWithApi.Contains(graphBlock) &&
+                filteredWithApi.Contains(apiBlock) &&
+                filteredWithApi.Contains(neitherBlock) &&
+                filteredWithApi.Contains(bothBlock));
+
+            Assert.True(
+                filteredWithBoth.Length == 4 &&
+                filteredWithBoth.Contains(graphBlock) &&
+                filteredWithBoth.Contains(apiBlock) &&
+                filteredWithBoth.Contains(bothBlock) &&
+                filteredWithBoth.Contains(neitherBlock));
+
+            Assert.True(
+                filteredWithNeither.Length == 1 &&
+                !filteredWithNeither.Contains(graphBlock) &&
+                !filteredWithNeither.Contains(apiBlock) &&
+                filteredWithNeither.Contains(neitherBlock) &&
+                !filteredWithNeither.Contains(bothBlock));
+        }
+
+
+        [Fact]
+        public void FilterCodeSnippetsTests()
+        {
+            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
+            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
+            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
+            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
+
+            var graphSnippet = new CodeSnippet { Block = "GraphProperty", Options = new string[] { "MicrosoftGraph" } };
+            var apiSnippet = new CodeSnippet { Block = "DownstreamProperty", Options = new string[] { "DownstreamApi" } };
+            var bothSnippet = new CodeSnippet { Block = "BothProperty", Options = new string[] { "DownstreamApi", "MicrosoftGraph" } };
+            var neitherSnippet = new CodeSnippet { Block = "NeitherProperty", Options = new string[] { } };
+
+            var codeSnippets = new CodeSnippet[] { graphSnippet, apiSnippet, bothSnippet, neitherSnippet };
+            var filteredWithGraph = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, optionsWithGraph);
+            var filteredWithApi = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, optionsWithApi);
+            var filteredWithBoth = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, optionsWithBoth);
+            var filteredWithNeither = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, optionsWithNeither);
+
+            Assert.True(
+                filteredWithGraph.Length == 3 &&
+                filteredWithGraph.Contains(graphSnippet) &&
+                !filteredWithGraph.Contains(apiSnippet) &&
+                filteredWithGraph.Contains(bothSnippet) &&
+                filteredWithGraph.Contains(neitherSnippet));
+
+            Assert.True(
+                filteredWithApi.Length == 3 &&
+                !filteredWithApi.Contains(graphSnippet) &&
+                filteredWithApi.Contains(apiSnippet) &&
+                filteredWithApi.Contains(neitherSnippet) &&
+                filteredWithApi.Contains(bothSnippet));
+
+            Assert.True(
+                filteredWithBoth.Length == 4 &&
+                filteredWithBoth.Contains(graphSnippet) &&
+                filteredWithBoth.Contains(apiSnippet) &&
+                filteredWithBoth.Contains(bothSnippet) &&
+                filteredWithBoth.Contains(neitherSnippet));
+
+            Assert.True(
+                filteredWithNeither.Length == 1 &&
+                !filteredWithNeither.Contains(graphSnippet) &&
+                !filteredWithNeither.Contains(apiSnippet) &&
+                filteredWithNeither.Contains(neitherSnippet) &&
+                !filteredWithNeither.Contains(bothSnippet));
+        }
+
+        [Fact]
+        public void StatementExistsTests()
+        {
+            //create a block with app.UseRouting();
+            StatementSyntax block = SyntaxFactory.ParseStatement(
+                @"
+                {
+                    app.UseRouting();
+                }");
+            StatementSyntax denseBlock = SyntaxFactory.ParseStatement(
+                @"
+                {
+                    app.UseRoutingNot();
+                    services.AddRazorPages().AddMvcOptions(options => {}).AddMicrosoftIdentityUI();
+                    if (env.IsDevelopment())
+                    {
+                        app.UseDeveloperExceptionPage();
+                    }
+                app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapRazorPages();
+                    endpoints.MapControllers();
+                });    
+                }");
+
+            StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
+                @"
+                {                   
+                }");
+
+            BlockSyntax blockSyntax = SyntaxFactory.Block(block);
+            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
+            BlockSyntax denseBlockSyntax = SyntaxFactory.Block(denseBlock);
+            StatementSyntax statement = SyntaxFactory.ParseStatement("app.UseRouting();");
+            StatementSyntax statement2 = SyntaxFactory.ParseStatement("app.UseDeveloperExceptionPage();");
+            StatementSyntax statement3 = SyntaxFactory.ParseStatement("endpoints.MapRazorPages();");
+            StatementSyntax statement4 = SyntaxFactory.ParseStatement("env.IsDevelopment()");
+            StatementSyntax statement5 = SyntaxFactory.ParseStatement("services.AddRazorPages()");
+            StatementSyntax statement6 = SyntaxFactory.ParseStatement("services.AddRazorPages().AddMvcOptions(options => {})");
+
+            Assert.True(ProjectModifierHelper.StatementExists(blockSyntax, statement));
+            Assert.False(ProjectModifierHelper.StatementExists(emptyBlockSyntax, statement));
+            Assert.False(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement));
+            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement2));
+            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement3));
+            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement4));
+            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement5));
+            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement6));
+        }
+
+        [Theory]
+        [InlineData(new object[] { new string[] { "Authorize", "Empty" },
+                                   new string[] { "Theory", "Controller" },
+                                   new string[] { "", null }})]
+        public async Task AttributeExistsTests(string[] existingAttributes, string[] nonExistingAttributes, string[] invalidAttributes)
+        {
+            DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var attributeLists = classSyntax.AttributeLists;
+
+            foreach (var attribute in existingAttributes)
+            {
+                Assert.True(ProjectModifierHelper.AttributeExists(attribute, attributeLists));
+            }
+
+            foreach (var attribute in nonExistingAttributes)
+            {
+                Assert.False(ProjectModifierHelper.AttributeExists(attribute, attributeLists));
+            }
+
+            foreach (var attribute in invalidAttributes)
+            {
+                Assert.False(ProjectModifierHelper.AttributeExists(attribute, attributeLists));
+            }
+        }
+
+        [Theory]
+        [InlineData(new object[] { new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()" , "app.UseStaticFiles()", "app.UseRouting()" },
+                                   new string[] { "var app2 = builder.Build()", "app2.UseHttpsRedirection()" , "app2.UseStaticFiles()", "app2.UseRouting()" }}
+        )]
+        public async Task GlobalStatementExistsTests(string[] existingStatements, string[] nonExistingStatements)
+        {
+            Document minimalProgramCsDoc = CreateDocument(MinimalProgramCsFile);
+            var root = await minimalProgramCsDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
+            //test existing global statments in MinimalProgramCsFile
+            foreach (var existingStatement in existingStatements)
+            {
+                var expression = SyntaxFactory.ParseStatement(existingStatement);
+                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                Assert.True(ProjectModifierHelper.GlobalStatementExists(root, globalStatement));
+            }
+
+            foreach (var nonExistingStatement in nonExistingStatements)
+            {
+                var expression = SyntaxFactory.ParseStatement(nonExistingStatement);
+                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                Assert.False(ProjectModifierHelper.GlobalStatementExists(root, globalStatement));
             }
         }
 

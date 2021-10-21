@@ -9,7 +9,7 @@ using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Xunit;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
+
 namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 {
     public class DocumentBuilderTests : DocumentBuilderTestBase
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 Usings = usings
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
-            var newRoot = docBuilder.AddUsings();
+            var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
 
             Assert.True(newRoot.Usings.Count == 4);
             foreach (var usingString in usings)
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 Usings = usings
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
-            var newRoot = docBuilder.AddUsings();
+            var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
 
             Assert.True(newRoot.Usings.Count == 3);
             foreach (var usingString in usings)
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             };
 
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
-            docBuilder.AddUsings();
+            docBuilder.AddUsings(new CodeChangeOptions());
 
             //Get modified SyntaxNode root
             Document changedDoc = docBuilder.GetDocument();
@@ -94,12 +94,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             var classSyntax = await CreateClassSyntax(editor);
             var memberCount = classSyntax.Members.Count;
+            var classProperties = properties.Select(p => new CodeBlock { Block = p }).ToArray();
             CodeFile codeFile = new CodeFile
             {
-                ClassProperties = properties
+                ClassProperties = classProperties
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
-            classSyntax = docBuilder.AddProperties(classSyntax);
+            classSyntax = docBuilder.AddProperties(classSyntax, new CodeChangeOptions());
             //Members count should be up by 2.
             Assert.True(classSyntax.Members.Count > memberCount);
             Assert.True(classSyntax.Members.Count == (memberCount + 2));
@@ -121,12 +122,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             var classSyntax = await CreateClassSyntax(editor);
             var memberCount = classSyntax.Members.Count;
+            var classAttributes = attributes.Select(at => new CodeBlock() { Block = at });
             CodeFile codeFile = new CodeFile
             {
-                ClassAttributes = attributes
+                ClassAttributes = classAttributes.ToArray()
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
-            classSyntax = docBuilder.AddClassAttributes(classSyntax);
+            classSyntax = docBuilder.AddClassAttributes(classSyntax, new CodeChangeOptions());
             //Members count should be up by 2.
             Assert.True(classSyntax.AttributeLists.Count == 4);
 
@@ -165,7 +167,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
-            var attributes = docBuilder.CreateAttributeList(attributeStrings, new SyntaxList<AttributeListSyntax>(), new SyntaxTriviaList());
+            var classAttributes = attributeStrings.Select(at => new CodeBlock() { Block = at }).ToArray();
+            var attributes = docBuilder.CreateAttributeList(classAttributes, new SyntaxList<AttributeListSyntax>(), new SyntaxTriviaList());
             Assert.True(attributes.Count == 4);
 
             foreach (var attributeString in attributeStrings)
@@ -194,58 +197,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         }
 
-        [Fact]
-        public async Task StatementExistsTests()
-        {
-            DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
-            //create a block with app.UseRouting();
-            StatementSyntax block = SyntaxFactory.ParseStatement(
-                @"
-                {
-                    app.UseRouting();
-                }");
-            StatementSyntax denseBlock = SyntaxFactory.ParseStatement(
-                @"
-                {
-                    app.UseRoutingNot();
-                    services.AddRazorPages().AddMvcOptions(options => {}).AddMicrosoftIdentityUI();
-                    if (env.IsDevelopment())
-                    {
-                        app.UseDeveloperExceptionPage();
-                    }
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapRazorPages();
-                    endpoints.MapControllers();
-                });    
-                }");
-
-            StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
-                @"
-                {                   
-                }");
-
-            BlockSyntax blockSyntax = SyntaxFactory.Block(block);
-            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
-            BlockSyntax denseBlockSyntax = SyntaxFactory.Block(denseBlock);
-            StatementSyntax statement = SyntaxFactory.ParseStatement("app.UseRouting();");
-            StatementSyntax statement2 = SyntaxFactory.ParseStatement("app.UseDeveloperExceptionPage();");
-            StatementSyntax statement3 = SyntaxFactory.ParseStatement("endpoints.MapRazorPages();");
-            StatementSyntax statement4 = SyntaxFactory.ParseStatement("env.IsDevelopment()");
-            StatementSyntax statement5 = SyntaxFactory.ParseStatement("services.AddRazorPages()");
-            StatementSyntax statement6 = SyntaxFactory.ParseStatement("services.AddRazorPages().AddMvcOptions(options => {})");
-
-            Assert.True(docBuilder.StatementExists(blockSyntax, statement));
-            Assert.False(docBuilder.StatementExists(emptyBlockSyntax, statement));
-            Assert.False(docBuilder.StatementExists(denseBlockSyntax, statement));
-            Assert.True(docBuilder.StatementExists(denseBlockSyntax, statement2));
-            Assert.True(docBuilder.StatementExists(denseBlockSyntax, statement3));
-            Assert.True(docBuilder.StatementExists(denseBlockSyntax, statement4));
-            Assert.True(docBuilder.StatementExists(denseBlockSyntax, statement5));
-            Assert.True(docBuilder.StatementExists(denseBlockSyntax, statement6));
-        }
-
         [Theory]
         [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false", "", null },
                                    new string[] { "public string Name { get; set; }", "bool IsProperty { get; set; } = false" } })]
@@ -253,12 +204,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             DocumentEditor emptyDocEditor = await DocumentEditor.CreateAsync(CreateDocument(EmptyDocument));
-
+            var classProperties = properties.Select(p => new CodeBlock { Block = p }).ToArray();
             var classSyntax = await CreateClassSyntax(editor);
             var emptyClassSyntax = await CreateClassSyntax(emptyDocEditor);
             CodeFile codeFile = new CodeFile
             {
-                ClassProperties = properties
+                ClassProperties = classProperties
             };
             DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
             DocumentBuilder emptyDocBuilder = new DocumentBuilder(emptyDocEditor, codeFile, new MSIdentity.Shared.ConsoleLogger());
@@ -308,34 +259,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { new string[] { "Authorize", "Empty" },
-                                   new string[] { "Theory", "Controller" },
-                                   new string[] { "", null }})]
-        public async Task AttributeExistsTests(string[] existingAttributes, string[] nonExistingAttributes, string[] invalidAttributes)
-        {
-            DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-
-            var classSyntax = await CreateClassSyntax(editor);
-            var attributeLists = classSyntax.AttributeLists;
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
-
-            foreach (var attribute in existingAttributes)
-            {
-                Assert.True(docBuilder.AttributeExists(attribute, attributeLists));
-            }
-
-            foreach (var attribute in nonExistingAttributes)
-            {
-                Assert.False(docBuilder.AttributeExists(attribute, attributeLists));
-            }
-
-            foreach (var attribute in invalidAttributes)
-            {
-                Assert.False(docBuilder.AttributeExists(attribute, attributeLists));
-            }
-        }
-
-        [Theory]
         [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false" },
                                    new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()", "app.UseStaticFiles()", "app.UseRouting()", "bool IsProperty { get; set; } = false" } }
         )]
@@ -348,37 +271,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 var expression = SyntaxFactory.ParseStatement(statementToAdd);
                 var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
                 root = DocumentBuilder.AddGlobalStatements(new CodeSnippet { Block = statementToAdd }, root);
-                Assert.True(DocumentBuilder.GlobalStatementExists(root, globalStatement));
+                Assert.True(ProjectModifierHelper.GlobalStatementExists(root, globalStatement));
             }
             var statementCount = root.Members.Count;
             foreach (var duplicateStatement in duplicateStatements)
             {
                 root = DocumentBuilder.AddGlobalStatements(new CodeSnippet { Block = duplicateStatement }, root);
                 Assert.Equal(statementCount, root.Members.Count);
-            }
-        }
-
-        [Theory]
-        [InlineData(new object[] { new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()" , "app.UseStaticFiles()", "app.UseRouting()" },
-                                   new string[] { "var app2 = builder.Build()", "app2.UseHttpsRedirection()" , "app2.UseStaticFiles()", "app2.UseRouting()" }}
-        )]
-        public async Task GlobalStatementExistsTests( string[] existingStatements, string[] nonExistingStatements)
-        {
-            Document minimalProgramCsDoc = CreateDocument(MinimalProgramCsFile);
-            var root = await minimalProgramCsDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
-            //test existing global statments in MinimalProgramCsFile
-            foreach (var existingStatement in existingStatements)
-            {
-                var expression = SyntaxFactory.ParseStatement(existingStatement);
-                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-                Assert.True(DocumentBuilder.GlobalStatementExists(root, globalStatement));
-            }
-
-            foreach (var nonExistingStatement in nonExistingStatements)
-            {
-                var expression = SyntaxFactory.ParseStatement(nonExistingStatement);
-                var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-                Assert.False(DocumentBuilder.GlobalStatementExists(root, globalStatement));
             }
         }
     }

@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,11 +11,6 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         private CodeFile _codeFile;
         private CompilationUnitSyntax _docRoot;
         private IConsoleLogger _consoleLogger;
-
 
         public DocumentBuilder(
             DocumentEditor  documentEditor,
@@ -33,9 +32,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _docRoot = (CompilationUnitSyntax)_documentEditor.OriginalRoot ?? throw new ArgumentNullException(nameof(_documentEditor.OriginalRoot));
         }
 
-        public CompilationUnitSyntax AddUsings()
+        public CompilationUnitSyntax AddUsings(CodeChangeOptions options)
         {
             //adding usings
+            if (_codeFile.UsingsWithOptions != null && _codeFile.UsingsWithOptions.Any())
+            {
+                var usingsWithOptions = FilterUsingsWithOptions(_codeFile, options);
+                var usingList = _codeFile.Usings.ToList();
+                usingList.AddRange(usingsWithOptions);
+                _codeFile.Usings = usingList.ToArray();
+            }
             var usingNodes = CreateUsings(_codeFile.Usings);
             if (usingNodes.Any() && _docRoot.Usings.Count == 0)
             {
@@ -60,13 +66,28 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
         }
 
+        internal static IList<string> FilterUsingsWithOptions(CodeFile codeFile, CodeChangeOptions options)
+        {
+            List<string> usingsWithOptions = new List<string>();
+            if (codeFile != null)
+            {
+                var filteredCodeBlocks = codeFile.UsingsWithOptions.Where(us => ProjectModifierHelper.FilterOptions(us.Options, options)).ToList();
+                if (filteredCodeBlocks.Any())
+                {
+                    usingsWithOptions = filteredCodeBlocks.Select(us => us.Block)?.ToList();
+                }
+            }
+
+            return usingsWithOptions;
+        }
+
         //Add class members to the top of the class.
         public ClassDeclarationSyntax AddProperties(ClassDeclarationSyntax classDeclarationSyntax, CodeChangeOptions options)
         { 
             var modifiedClassDeclarationSyntax = classDeclarationSyntax;
             if (_codeFile.ClassProperties != null && _codeFile.ClassProperties.Any() && classDeclarationSyntax != null)
             {
-                _codeFile.ClassProperties = FilterCodeBlocks(_codeFile.ClassProperties, options);
+                _codeFile.ClassProperties = ProjectModifierHelper.FilterCodeBlocks(_codeFile.ClassProperties, options);
                 //get a sample member for leading trivia. Trailing trivia will still be semi colon and new line.
                 var sampleMember = modifiedClassDeclarationSyntax.Members.FirstOrDefault();
                 var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
@@ -90,80 +111,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedClassDeclarationSyntax;
         }
 
-        /// <summary>
-        /// Filter Options string array to matching CodeChangeOptions.
-        /// Primary use to filter out CodeBlocks and Files that apply in Microsoft Graph and Downstream API scenarios
-        /// </summary>
-        /// <param name="options">string [] in cm_*.json files for code modifications</param>
-        /// <param name="codeChangeOptions">based on cli parameters</param>
-        /// <returns>true if the CodeChangeOptions apply, false otherwise. </returns>
-        internal static bool FilterOptions(string[] options, CodeChangeOptions codeChangeOptions)
-        {
-            if (options == null)
-            {
-                return true;
-            }
-            if (codeChangeOptions.DownstreamApi)
-            {
-                if (options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                    !options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                {
-                    return true;
-                }
-            }
-            if (codeChangeOptions.MicrosoftGraph)
-            {
-                if (options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                    !options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                {
-                    return true;
-                }
-            }
-            if (!codeChangeOptions.DownstreamApi && !codeChangeOptions.MicrosoftGraph)
-            {
-                if (options == null ||
-                    (!options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
-                    !options.Contains(CodeChangeOptionStrings.DownstreamApi)))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
 
-        // Filter out CodeBlocks that are invalid using FilterOptions
-        internal static CodeBlock[] FilterCodeBlocks(CodeBlock[] codeBlocks, CodeChangeOptions options)
-        {
-            var filteredCodeBlocks = new HashSet<CodeBlock>();
-            if (codeBlocks != null && codeBlocks.Any() && options != null)
-            {
-                foreach (var codeBlock in codeBlocks)
-                {
-                    if (FilterOptions(codeBlock.Options, options))
-                    {
-                        filteredCodeBlocks.Add(codeBlock);
-                    }
-                }
-            }
-            return filteredCodeBlocks.ToArray();
-        }
-
-        //Filter out CodeSnippets that are invalid using FilterOptions
-        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options)
-        {
-            var filteredCodeSnippets = new HashSet<CodeSnippet>();
-            if (codeSnippets != null && codeSnippets.Any() && options != null)
-            {
-                foreach (var codeSnippet in codeSnippets)
-                {
-                    if (FilterOptions(codeSnippet.Options, options))
-                    {
-                        filteredCodeSnippets.Add(codeSnippet);
-                    }
-                }
-            }
-            return filteredCodeSnippets.ToArray();
-        }
 
         //Add class attributes '[Attribute]' to a class.
         public ClassDeclarationSyntax AddClassAttributes(ClassDeclarationSyntax classDeclarationSyntax, CodeChangeOptions options)
@@ -171,19 +119,19 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var modifiedClassDeclarationSyntax = classDeclarationSyntax;
             if (_codeFile.ClassAttributes != null && _codeFile.ClassAttributes.Any() && classDeclarationSyntax != null)
             {
-                _codeFile.ClassAttributes = FilterCodeBlocks(_codeFile.ClassAttributes, options);
+                _codeFile.ClassAttributes = ProjectModifierHelper.FilterCodeBlocks(_codeFile.ClassAttributes, options);
                 var classAttributes = CreateAttributeList(_codeFile.ClassAttributes, modifiedClassDeclarationSyntax.AttributeLists, classDeclarationSyntax.GetLeadingTrivia());
                 modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.WithAttributeLists(classAttributes);
             }
             return modifiedClassDeclarationSyntax;
         }
 
-        public async Task WriteToClassFileAsync(string fileName, string filePath)
+        public async Task WriteToClassFileAsync(string filePath)
         {
             var changedDocument = GetDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
             File.WriteAllText(filePath, classFileTxt.ToString());
-            _consoleLogger.LogMessage($"Modified {fileName}.\n");
+            _consoleLogger.LogMessage($"Modified {filePath}.\n");
         }
 
         internal ClassDeclarationSyntax AddMethodParameters( ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
@@ -237,7 +185,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     if (methodNode != null)
                     {
                         //Filter for CodeChangeOptions
-                        methodChanges.AddParameters = FilterCodeBlocks(methodChanges.AddParameters, options);
+                        methodChanges.AddParameters = ProjectModifierHelper.FilterCodeBlocks(methodChanges.AddParameters, options);
                     }
                     
                     if (methodNode is MethodDeclarationSyntax methodDeclratation)
@@ -296,7 +244,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         var modifiedBlockSyntaxNode = newMethod?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();
                         if (modifiedBlockSyntaxNode != null && parameterValues != null && blockSyntaxNode != null && modifiedClassDeclarationSyntax != null)
                         {
-                            methodChanges.CodeChanges = FilterCodeSnippets(methodChanges.CodeChanges, options);
+                            methodChanges.CodeChanges = ProjectModifierHelper.FilterCodeSnippets(methodChanges.CodeChanges, options);
                             //do all the CodeChanges for the method.
                             foreach (var change in methodChanges.CodeChanges)
                             {
@@ -343,11 +291,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     methodChanges != null &&
                     methodChanges.EditType != null)
                 {
-                    methodChanges.EditType = FilterCodeBlocks(new CodeBlock[] { methodChanges.EditType }, options).FirstOrDefault();
+                    methodChanges.EditType = ProjectModifierHelper.FilterCodeBlocks(new CodeBlock[] { methodChanges.EditType }, options).FirstOrDefault();
                     //if after filtering, the method type might not need editing
                     if (methodChanges.EditType != null)
                     {
-                        System.Diagnostics.Debugger.Launch();
                         //get method node from ClassDeclarationSyntax
                         IDictionary<string, string> parameterValues = null;
 
@@ -391,60 +338,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             var newMethod = methodNode;
             List<ParameterSyntax> newParameters = new List<ParameterSyntax>();
-           
-            foreach(var parameter in addParameters)
+            foreach (var parameter in addParameters)
             {
                 var identifier = SyntaxFactory.Identifier(parameter.Block).WithLeadingTrivia(SyntaxFactory.Whitespace(" "));
                 var parameterSyntax = SyntaxFactory.Parameter(identifier);
                 if (!newMethod.ParameterList.Parameters.Any(p => p.ToFullString().Equals(parameter.Block)))
                 {
-                    if (toolOptions.MicrosoftGraph)
-                    {
-                        if (parameter.Options != null)
-                        {
-                            //add code change if MicrosoftGraph condition is present or if DownstreamApi is not present.
-                            if (parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                                !parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                            {
-                                newParameters.Add(parameterSyntax);
-                            }
-                        }
-                        else
-                        {
-                            newParameters.Add(parameterSyntax);
-                        }
-                    }
-
-                    //if the application calls a Downstream API
-                    if (toolOptions.DownstreamApi)
-                    {
-                        if (parameter.Options != null)
-                        {
-                            //add code change if DownstreamApi condition is present or if MicrosoftGraph is not present.
-                            if (parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                                !parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                            {
-                                newParameters.Add(parameterSyntax);
-                            }
-                        }
-                        //if no Options are present, add the code changes.
-                        else
-                        {
-                            newParameters.Add(parameterSyntax);
-                        }
-                    }
-
-                    //if the application calls neither Microsoft Graph or a Downstream API
-                    if (!toolOptions.MicrosoftGraph && !toolOptions.DownstreamApi)
-                    {
-                        //if no Options are present, or if they are present, don't contain MicrosoftGraph or DownstreamAPI, add the code changes.
-                        if (parameter.Options == null ||
-                            !parameter.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                            !parameter.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                        {
-                            newParameters.Add(parameterSyntax);
-                        }
-                    }
+                    newParameters.Add(parameterSyntax);
                 }
             }
             if (newParameters.Any())
@@ -475,7 +375,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             var globalStatement = SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(change.Block)).WithLeadingTrivia(statementLeadingTrivia).WithTrailingTrivia(statementTrailingTrivia);
-            if (!GlobalStatementExists(newRoot, globalStatement, change.CheckBlock))
+            if (!ProjectModifierHelper.GlobalStatementExists(newRoot, globalStatement, change.CheckBlock))
             {
                 //insert after, before, or at the end of file.
                 //insert global statement after particular statement
@@ -517,8 +417,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     {
                         if (parentNode is ExpressionStatementSyntax exprNode)
                         {
-                            var modifiedExprNode = AddSimpleMemberAccessExpression(exprNode, change.Block, leadingTrivia: statementLeadingTrivia, trailingTrivia: statementTrailingTrivia);
-                            modifiedExprNode = modifiedExprNode.WithTrailingTrivia(modifiedExprNode.GetTrailingTrivia().Add(SyntaxFactory.ElasticCarriageReturnLineFeed));
+                            var modifiedExprNode = ProjectModifierHelper.AddSimpleMemberAccessExpression(exprNode, change.Block, leadingTrivia: statementLeadingTrivia, trailingTrivia: statementTrailingTrivia);
+                            //modifiedExprNode = modifiedExprNode.WithTrailingTrivia(modifiedExprNode.GetTrailingTrivia().Add(SyntaxFactory));
                             if (modifiedExprNode != null)
                             {
                                 newRoot = newRoot.ReplaceNode(exprNode, modifiedExprNode);
@@ -556,7 +456,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         {
                             trailingTrivia = trailingTrivia.Insert(0, SemiColonTrivia);
                         }
-                        var modifiedExprNode = AddSimpleMemberAccessExpression(exprNode, change.Block, new SyntaxTriviaList(), new SyntaxTriviaList())?.WithTrailingTrivia(trailingTrivia);
+                        var modifiedExprNode = ProjectModifierHelper.AddSimpleMemberAccessExpression(exprNode, change.Block, new SyntaxTriviaList(), new SyntaxTriviaList())?.WithTrailingTrivia(trailingTrivia);
                         if (modifiedExprNode != null)
                         {
                             modifiedExprNode = modifiedExprNode.WithTrailingTrivia(trailingTrivia);
@@ -575,29 +475,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 }
             }
             return modifiedBlockSyntaxNode;
-        }
-
-        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
-        {
-            if (!string.IsNullOrEmpty(codeSnippet) &&
-                !expression
-                    .ToString()
-                    .Trim(ProjectModifierHelper.CodeSnippetTrimChars)
-                    .Contains(
-                        codeSnippet.Trim(ProjectModifierHelper.CodeSnippetTrimChars)))
-            {
-                var identifier = SyntaxFactory.IdentifierName(codeSnippet)
-                            .WithTrailingTrivia(trailingTrivia);
-                return expression
-                    .WithExpression(SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        expression.Expression.WithTrailingTrivia(leadingTrivia),
-                        identifier));
-            }
-            else
-            {
-                return null;
-            }
         }
 
         internal ExpressionStatementSyntax AddExpressionInLambdaBlock(
@@ -639,7 +516,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         .WithLeadingTrivia(innerLeadingTrivia)
                         .WithTrailingTrivia(innerTrailingTrivia);
 
-                    if (!StatementExists(blockToEdit, innerStatement))
+                    if (!ProjectModifierHelper.StatementExists(blockToEdit, innerStatement))
                     {
                         var newBlock = blockToEdit.WithStatements(blockToEdit.Statements.Add(innerStatement));
                         return expression.ReplaceNode(blockToEdit, newBlock);
@@ -670,7 +547,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         .WithTrailingTrivia(trailingTrivia)
                         .WithLeadingTrivia(leadingTrivia);
                     //check if statement already exists.
-                    if (!StatementExists(modifiedBlockSyntaxNode, statement))
+                    if (!ProjectModifierHelper.StatementExists(modifiedBlockSyntaxNode, statement))
                     {
                         modifiedBlockSyntaxNode = modifiedBlockSyntaxNode.InsertNodesAfter(insertAfterNode, new List<StatementSyntax>() { statement });
                     }
@@ -711,7 +588,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                                             .WithTrailingTrivia(trailingTrivia)
                                             .WithLeadingTrivia(leadingTrivia);
             //check if statement already exists.
-            if (!StatementExists(modifiedBlockSyntaxNode, statement))
+            if (!ProjectModifierHelper.StatementExists(modifiedBlockSyntaxNode, statement))
             {
                 if (change.Options != null && change.Options.Any() &&
                    change.Options.Contains(CodeChangeType.LambdaExpression) &&
@@ -782,7 +659,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 {
                     var attributeList = new List<AttributeSyntax>();
                     //filter by apps
-                    if (!string.IsNullOrEmpty(attribute.Block) && !AttributeExists(attribute.Block, attributeLists))
+                    if (!string.IsNullOrEmpty(attribute.Block) && !ProjectModifierHelper.AttributeExists(attribute.Block, attributeLists))
                     {
                         attributeList.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName(attribute.Block)));
                     }
@@ -793,40 +670,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 }
             }
             return syntaxList;   
-        }
-
-        internal bool AttributeExists(string attribute, SyntaxList<AttributeListSyntax> attributeList)
-        {
-            if (attributeList.Any() && !string.IsNullOrEmpty(attribute))
-            {
-                return attributeList.Where(al => al.Attributes.Where(attr => attr.ToString().Equals(attribute, StringComparison.OrdinalIgnoreCase)).Any()).Any();
-            }
-            return false;
-        }
-
-        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
-        {
-            if (root != null && statement != null)
-            {
-                var formattedStatementString = ProjectModifierHelper.TrimStatement(statement.ToString());
-                bool foundStatement = root.Members.Where(st => ProjectModifierHelper.TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
-                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
-                if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
-                {
-                    foundStatement = root.Members.Where(st => st.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Contains(checkBlock.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars))).Any();
-                }
-                return foundStatement;
-            }
-            return false;
-        }
-
-        internal bool StatementExists(BlockSyntax blockSyntaxNode, StatementSyntax statement)
-        {
-            if (blockSyntaxNode.Statements.Any(st => st.ToString().Contains(statement.ToString(), StringComparison.Ordinal)))
-            {
-                return true;
-            }
-            return false;
         }
 
         //check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.

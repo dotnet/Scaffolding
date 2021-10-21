@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -5,7 +6,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
@@ -242,6 +246,176 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 }
             }
             return variables;
+        }
+
+        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
+        {
+            if (root != null && statement != null)
+            {
+                var formattedStatementString = ProjectModifierHelper.TrimStatement(statement.ToString());
+                bool foundStatement = root.Members.Where(st => ProjectModifierHelper.TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
+                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
+                if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
+                {
+                    foundStatement = root.Members.Where(st => st.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Contains(checkBlock.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars))).Any();
+                }
+                return foundStatement;
+            }
+            return false;
+        }
+
+        internal static bool AttributeExists(string attribute, SyntaxList<AttributeListSyntax> attributeList)
+        {
+            if (attributeList.Any() && !string.IsNullOrEmpty(attribute))
+            {
+                return attributeList.Where(al => al.Attributes.Where(attr => attr.ToString().Equals(attribute, StringComparison.OrdinalIgnoreCase)).Any()).Any();
+            }
+            return false;
+        }
+
+        internal static bool StatementExists(BlockSyntax blockSyntaxNode, StatementSyntax statement)
+        {
+            if (blockSyntaxNode.Statements.Any(st => st.ToString().Contains(statement.ToString(), StringComparison.Ordinal)))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        {
+            if (!string.IsNullOrEmpty(codeSnippet) &&
+                !expression
+                    .ToString()
+                    .Trim(ProjectModifierHelper.CodeSnippetTrimChars)
+                    .Contains(
+                        codeSnippet.Trim(ProjectModifierHelper.CodeSnippetTrimChars)))
+            {
+                var identifier = SyntaxFactory.IdentifierName(codeSnippet)
+                            .WithTrailingTrivia(trailingTrivia);
+                return expression
+                    .WithExpression(SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        expression.Expression.WithTrailingTrivia(leadingTrivia),
+                        identifier));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //Filter out CodeSnippets that are invalid using FilterOptions
+        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options)
+        {
+            var filteredCodeSnippets = new HashSet<CodeSnippet>();
+            if (codeSnippets != null && codeSnippets.Any() && options != null)
+            {
+                foreach (var codeSnippet in codeSnippets)
+                {
+                    if (FilterOptions(codeSnippet.Options, options))
+                    {
+                        filteredCodeSnippets.Add(codeSnippet);
+                    }
+                }
+            }
+            return filteredCodeSnippets.ToArray();
+        }
+
+        /// <summary>
+        /// Filter Options string array to matching CodeChangeOptions.
+        /// Primary use to filter out CodeBlocks and Files that apply in Microsoft Graph and Downstream API scenarios
+        /// </summary>
+        /// <param name="options">string [] in cm_*.json files for code modifications</param>
+        /// <param name="codeChangeOptions">based on cli parameters</param>
+        /// <returns>true if the CodeChangeOptions apply, false otherwise. </returns>
+        internal static bool FilterOptions(string[] options, CodeChangeOptions codeChangeOptions)
+        {
+            //if no options are passed, CodeBlock is valid
+            if (options == null)
+            {
+                return true;
+            }
+
+            //if options have a "Skio", every CodeBlock is invalid
+            if (options.Contains(CodeChangeOptionStrings.Skip))
+            {
+                return false;
+            }
+            //an app will either support DownstreamApi, MicrosoftGraph, both, or neither.
+            if (codeChangeOptions.DownstreamApi)
+            {
+                if (options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
+                    !options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
+                {
+                    return true;
+                }
+            }
+            if (codeChangeOptions.MicrosoftGraph)
+            {
+                if (options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
+                    !options.Contains(CodeChangeOptionStrings.DownstreamApi))
+                {
+                    return true;
+                }
+            }
+            if (!codeChangeOptions.DownstreamApi && !codeChangeOptions.MicrosoftGraph)
+            {
+                if (options == null ||
+                    (!options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
+                    !options.Contains(CodeChangeOptionStrings.DownstreamApi)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        internal static async Task<Document> AddTextToDocument(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
+        {
+            Document editedDoc = null;
+            if (fileDoc != null && codeChanges != null && codeChanges.Any())
+            {
+                var sourceText = await fileDoc.GetTextAsync();
+                var textToAdd = sourceText?.ToString();
+                foreach (var change in codeChanges)
+                {
+                    if (!ProjectModifierHelper.TrimStatement(textToAdd).Contains(ProjectModifierHelper.TrimStatement(change.Block)))
+                    {
+                        textToAdd += change.Block;
+                    }
+                }
+                if (!string.IsNullOrEmpty(textToAdd))
+                {
+                    var sourceTextToAdd = SourceText.From(textToAdd);
+                    editedDoc = fileDoc.WithText(sourceTextToAdd);
+                }
+            }
+            return editedDoc;
+        }
+
+        internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)
+        {
+            var classFileTxt = await editedDocument.GetTextAsync();
+            File.WriteAllText(fileDoc.Name, classFileTxt.ToString());
+            consoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
+        }
+
+        // Filter out CodeBlocks that are invalid using FilterOptions
+        internal static CodeBlock[] FilterCodeBlocks(CodeBlock[] codeBlocks, CodeChangeOptions options)
+        {
+            var filteredCodeBlocks = new HashSet<CodeBlock>();
+            if (codeBlocks != null && codeBlocks.Any() && options != null)
+            {
+                foreach (var codeBlock in codeBlocks)
+                {
+                    if (FilterOptions(codeBlock.Options, options))
+                    {
+                        filteredCodeBlocks.Add(codeBlock);
+                    }
+                }
+            }
+            return filteredCodeBlocks.ToArray();
         }
     }
 }

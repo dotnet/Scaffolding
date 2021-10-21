@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -324,7 +325,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
                 //adding usings
-                var newRoot = docBuilder.AddUsings();
+                var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
@@ -338,8 +339,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 //replace root node with all the updates.
                 docEditor.ReplaceNode(docRoot, newRoot);
                 //write to Program.cs file
-                await docBuilder.WriteToClassFileAsync(programDocument.Name, programDocument.FilePath);
-                // add app.UseMigrationsEndPoint(); in else of IsDevelopment()
+                await docBuilder.WriteToClassFileAsync(programDocument.FilePath);
             }
         }
 

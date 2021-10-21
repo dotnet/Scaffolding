@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public const string ElseStatement = nameof(ElseStatement);
         public const string MicrosoftGraph = nameof(MicrosoftGraph);
         public const string DownstreamApi = nameof(DownstreamApi);
+        public const string Skip = nameof(Skip);
     }
 
     public class CodeChangeOptions

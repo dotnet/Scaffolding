@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         MicrosoftGraph = _toolOptions.CallsGraph,
                         DownstreamApi = _toolOptions.CallsDownstreamApi
                     };
-                    var filteredFiles = codeModifierConfig.Files.Where(f => DocumentBuilder.FilterOptions(f.Options, options));
+                    var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
                     //Go through all the files, make changes using DocumentBuilder.
                     foreach (var file in filteredFiles)
                     {
@@ -71,7 +71,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                         if (!string.IsNullOrEmpty(fileName) && !fileName.Equals("Program.cs"))
                         {
-                            await ModifyCsFile(fileName, file, project, options);
+                            if (fileName.EndsWith(".cs"))
+                            {
+                                await ModifyCsFile(fileName, file, project, options);
+                            }
+                            else if(fileName.EndsWith(".cshtml"))
+                            {
+                                await ModifyCshtmlFile(fileName, file, project, options);
+                            }
                         }
                         // if file is Program.cs
                         else if (!string.IsNullOrEmpty(fileName) && fileName.Equals("Program.cs"))
@@ -79,8 +86,33 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             //only modify Program.cs file if its a minimal hosting app (as we made changes to the Startup.cs file).
                             if (isMinimalApp)
                             {
-                                await ModifyProgramCs(file, project, _toolOptions);
+                                await ModifyProgramCs(file, project, options);
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        internal async Task ModifyCshtmlFile(string fileName, CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
+        {
+            string? filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var fileDoc = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
+                if (fileDoc != null)
+                {
+                    //add code snippets/changes.
+                    if (file.Methods != null && file.Methods.Any())
+                    {
+                        var globalChanges = file.Methods.TryGetValue("Global", out var globalMethod);
+                        if (globalMethod != null)
+                        {
+                            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+                            var editedDocument = await ProjectModifierHelper.AddTextToDocument(fileDoc, filteredCodeChanges);
+                            //replace the document
+                            await ProjectModifierHelper.UpdateDocument(fileDoc, editedDocument, _consoleLogger);
                         }
                     }
                 }
@@ -93,7 +125,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="programCsFile"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        internal async Task ModifyProgramCs(CodeFile programCsFile, CodeAnalysis.Project project, ProvisioningToolOptions toolOptions)
+        internal async Task ModifyProgramCs(CodeFile programCsFile, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
             string? programCsFilePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, "Program.cs", SearchOption.AllDirectories).FirstOrDefault();
             if (!string.IsNullOrEmpty(programCsFilePath))
@@ -107,73 +139,26 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     //get builder variable
                     var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(docRoot.Members);
                     //add usings
-                    var newRoot = documentBuilder.AddUsings();
+                    var newRoot = documentBuilder.AddUsings(toolOptions);
                     //add code snippets/changes.
                     if (programCsFile.Methods != null && programCsFile.Methods.Any())
                     {
                         var globalChanges = programCsFile.Methods.TryGetValue("Global", out var globalMethod);
                         if (globalMethod != null)
                         {
-                            foreach (var change in globalMethod.CodeChanges)
+                            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+                            foreach (var change in filteredCodeChanges)
                             {
                                 //Modify CodeSnippet to have correct variable identifiers present.
                                 var formattedChange = ProjectModifierHelper.FormatCodeSnippet(change, variableDict);
-
-                                //if the application calls Microsoft Graph
-                                if (toolOptions.CallsGraph)
-                                {
-                                    if (formattedChange.Options != null)
-                                    {
-                                        //add code change if MicrosoftGraph condition is present or if DownstreamApi is not present.
-                                        if (formattedChange.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                                            !formattedChange.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                                        {
-                                            newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                                    }
-                                }
-
-                                //if the application calls a Downstream API
-                                if (toolOptions.CallsDownstreamApi)
-                                {
-                                    if (formattedChange.Options != null)
-                                    {
-                                        //add code change if DownstreamApi condition is present or if MicrosoftGraph is not present.
-                                        if (formattedChange.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                                            !formattedChange.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                                        {
-                                            newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                                        }
-                                    }
-                                    //if no Options are present, add the code changes.
-                                    else
-                                    {
-                                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                                    }
-                                }
-
-                                //if the application calls neither Microsoft Graph or a Downstream API
-                                if (!toolOptions.CallsGraph && !toolOptions.CallsDownstreamApi)
-                                {
-                                    //if no Options are present, or if they are present, don't contain MicrosoftGraph or DownstreamAPI, add the code changes.
-                                    if (formattedChange.Options == null ||
-                                        !formattedChange.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                                        !formattedChange.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                                    {
-                                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                                    }
-                                }
+                                newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
                             }
                         }
                     }
                     //replace root node with all the updates.
                     documentEditor.ReplaceNode(docRoot, newRoot);
                     //write to Program.cs file
-                    await documentBuilder.WriteToClassFileAsync(programDocument.Name, programCsFilePath);
+                    await documentBuilder.WriteToClassFileAsync(programCsFilePath);
                 }
             }
         }
@@ -187,10 +172,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!string.IsNullOrEmpty(filePath))
             {
                 var fileDoc = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
+                var toolOptions = new CodeChangeOptions
+                {
+                    MicrosoftGraph = _toolOptions.CallsGraph,
+                    DownstreamApi = _toolOptions.CallsDownstreamApi
+                };
                 DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
                 DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
                 var docRoot = documentEditor.OriginalRoot as CompilationUnitSyntax;
-                var newRoot = documentBuilder.AddUsings();
+                var newRoot = documentBuilder.AddUsings(toolOptions);
                 //adding usings
                 var namespaceNode = newRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
                 FileScopedNamespaceDeclarationSyntax? fileScopedNamespace = null;
@@ -234,7 +224,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 {
                     documentEditor.ReplaceNode(docRoot, newRoot);
                 }
-                await documentBuilder.WriteToClassFileAsync(fileName, filePath);
+                await documentBuilder.WriteToClassFileAsync(filePath);
             }
         }
 

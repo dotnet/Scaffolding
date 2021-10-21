@@ -130,7 +130,6 @@ stages:
           
       - job: Linux
         pool:
-          vmImage: ubuntu-latest
           name: ubuntu-latest
         container: LinuxContainer
         strategy:

@@ -130,7 +130,7 @@ stages:
           
       - job: Linux
         pool:
-          name: ubuntu-latest
+          name: Hosted Ubuntu 1804
         container: LinuxContainer
         strategy:
           matrix:

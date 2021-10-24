@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
             // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
-            if (applicationParameters.IsBlazorWasm == true && applicationParameters.TargetFramework != "netcoreapp3.1") // TODO z don't use applicationParameters
+            if (applicationParameters.IsBlazorWasm == true && applicationParameters.TargetFramework != "netcoreapp3.1")
             {
                 AddSpaPlatform(applicationParameters, application);
             }
@@ -733,39 +733,39 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         private ApplicationParameters GetEffectiveApplicationParameters(
             Organization tenant,
-            Application application,
-            ApplicationParameters originalApplicationParameters)
+            Application appRegistration,
+            ApplicationParameters originalParameters)
         {
             bool isB2C = (tenant.TenantType.Equals("AAD B2C"));
             var effectiveApplicationParameters = new ApplicationParameters
             {
-                ApplicationDisplayName = application.DisplayName,
-                ClientId = application.AppId,
-                EffectiveClientId = application.AppId,
+                ApplicationDisplayName = appRegistration.DisplayName,
+                ClientId = appRegistration.AppId,
+                EffectiveClientId = appRegistration.AppId,
                 IsAAD = !isB2C,
                 IsB2C = isB2C,
                 HasAuthentication = true,
-                IsWebApi = application.Api?.Oauth2PermissionScopes?.Any() == true || application.AppRoles?.Any()  == true,
-                IsWebApp = application.Web != null,
-                IsBlazorWasm = application.Spa != null, // TODO this doesn't necessarily mean that the app is definitely a Blazor app
+                IsWebApi = appRegistration.Api?.Oauth2PermissionScopes?.Any() == true || appRegistration.AppRoles?.Any()  == true,
+                IsWebApp = appRegistration.Web != null,
                 TenantId = tenant.Id,
                 Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault == true)?.Name,
-                CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
-                CallsDownstreamApi = application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
-                LogoutUrl = application.Web?.LogoutUrl,
-                GraphEntityId = application.Id,
+                CallsMicrosoftGraph = appRegistration.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
+                CallsDownstreamApi = appRegistration.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
+                LogoutUrl = appRegistration.Web?.LogoutUrl,
+                GraphEntityId = appRegistration.Id,
                 // Parameters that cannot be infered from the registered app
-                SusiPolicy = originalApplicationParameters.SusiPolicy,
-                SecretsId = originalApplicationParameters.SecretsId,
-                TargetFramework = originalApplicationParameters.TargetFramework,
-                MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
-                CalledApiScopes = originalApplicationParameters.CalledApiScopes,
-                AppIdUri = originalApplicationParameters.AppIdUri
+                IsBlazorWasm = originalParameters.IsBlazorWasm,
+                SusiPolicy = originalParameters.SusiPolicy,
+                SecretsId = originalParameters.SecretsId,
+                TargetFramework = originalParameters.TargetFramework,
+                MsalAuthenticationOptions = originalParameters.MsalAuthenticationOptions,
+                CalledApiScopes = originalParameters.CalledApiScopes,
+                AppIdUri = originalParameters.AppIdUri
             };
 
-            if (application.Api != null && application.IdentifierUris.Any())
+            if (appRegistration.Api != null && appRegistration.IdentifierUris.Any())
             {
-                effectiveApplicationParameters.AppIdUri = application.IdentifierUris.FirstOrDefault();
+                effectiveApplicationParameters.AppIdUri = appRegistration.IdentifierUris.FirstOrDefault();
             }
 
             // Todo: might be a bit more complex in some cases for the B2C case.
@@ -776,17 +776,17 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                  : $"https://login.microsoftonline.com/{effectiveApplicationParameters.TenantId ?? effectiveApplicationParameters.Domain}/";
             effectiveApplicationParameters.Instance = isB2C
                 ? $"https://{effectiveApplicationParameters.Domain1}.b2clogin.com/"
-                : originalApplicationParameters.Instance;
+                : originalParameters.Instance;
 
-            effectiveApplicationParameters.PasswordCredentials.AddRange(application.PasswordCredentials.Select(p => p.Hint + "******************"));
+            effectiveApplicationParameters.PasswordCredentials.AddRange(appRegistration.PasswordCredentials.Select(p => p.Hint + "******************"));
 
-            if (application.Spa != null && application.Spa.RedirectUris != null)
+            if (appRegistration.Spa != null && appRegistration.Spa.RedirectUris != null)
             {
-                effectiveApplicationParameters.WebRedirectUris.AddRange(application.Spa.RedirectUris);
+                effectiveApplicationParameters.WebRedirectUris.AddRange(appRegistration.Spa.RedirectUris);
             }
-            else if (application.Web != null && application.Web.RedirectUris != null)
+            else if (appRegistration.Web != null && appRegistration.Web.RedirectUris != null)
             {
-                effectiveApplicationParameters.WebRedirectUris.AddRange(application.Web.RedirectUris);
+                effectiveApplicationParameters.WebRedirectUris.AddRange(appRegistration.Web.RedirectUris);
             }
 
             effectiveApplicationParameters.SignInAudience = MicrosoftIdentityPlatformAppAudienceToAppParameterAudience(effectiveApplicationParameters.SignInAudience!);

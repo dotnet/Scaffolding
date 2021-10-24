@@ -163,35 +163,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="change"></param>
-        /// <param name="variableDict"></param>
-        /// <returns></returns>
-        internal CodeSnippet FormatCodeSnippet(CodeSnippet change, IDictionary<string, string> variableDict)
-        {
-            //format CodeChange.Block and CodeChange.Parent for any variables or parameters.
-            change.Block = ProjectModifierHelper.FormatGlobalStatement(change.Block, variableDict);
-
-            if (!string.IsNullOrEmpty(change.Parent))
-            {
-                change.Parent = ProjectModifierHelper.FormatGlobalStatement(change.Parent, variableDict);
-            }
-            if (!string.IsNullOrEmpty(change.InsertAfter))
-            {
-                change.InsertAfter = ProjectModifierHelper.FormatGlobalStatement(change.InsertAfter, variableDict);
-            }
-            if (change.InsertBefore != null && change.InsertBefore.Any())
-            {
-                for(int i = 0; i < change.InsertBefore.Count(); i++)
-                {
-                    change.InsertBefore[i] = ProjectModifierHelper.FormatGlobalStatement(change.InsertBefore[i], variableDict);
-                }
-            }
-            return change;
-        }
-
         internal async Task ModifyCsFile(string fileName, CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
         {
             string className = ProjectModifierHelper.GetClassName(fileName);

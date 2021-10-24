@@ -87,136 +87,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         }
 
-        [Fact]
-        public void FilterOptionsTests()
-        {
-            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
-            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
-            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
-            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
-
-            var graphOptions = new string[] { "MicrosoftGraph" } ;
-            var apiOptions = new string[] { "DownstreamApi" } ;
-            var bothOptions = new string[] { "DownstreamApi", "MicrosoftGraph" } ;
-            var neitherOptions = new string[] { } ;
-
-            //Assert.True(DocumentBuilder.FilterOptions(graphOptions, optionsWithGraph));
-            //Assert.False(DocumentBuilder.FilterOptions(graphOptions, optionsWithApi));
-            //Assert.True(DocumentBuilder.FilterOptions(graphOptions, optionsWithBoth));
-            //Assert.False(DocumentBuilder.FilterOptions(graphOptions, optionsWithNeither));
-
-            //Assert.False(DocumentBuilder.FilterOptions(apiOptions, optionsWithGraph));
-            //Assert.True(DocumentBuilder.FilterOptions(apiOptions, optionsWithApi));
-            //Assert.True(DocumentBuilder.FilterOptions(apiOptions, optionsWithBoth));
-            //Assert.False(DocumentBuilder.FilterOptions(apiOptions, optionsWithNeither));
-
-            //Assert.True(DocumentBuilder.FilterOptions(bothOptions, optionsWithGraph));
-            //Assert.True(DocumentBuilder.FilterOptions(bothOptions, optionsWithApi));
-            //Assert.True(DocumentBuilder.FilterOptions(bothOptions, optionsWithBoth));
-            //Assert.False(DocumentBuilder.FilterOptions(bothOptions, optionsWithNeither));
-
-            //Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithGraph));
-            //Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithApi));
-            //Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithBoth));
-            //Assert.True(DocumentBuilder.FilterOptions(neitherOptions, optionsWithNeither));
-        }
-
-        [Fact]
-        public void FilterCodeBlocksTests()
-        {
-            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
-            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
-            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
-            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
-
-            var graphBlock = new CodeBlock { Block = "GraphProperty", Options = new string[] { "MicrosoftGraph" } };
-            var apiBlock = new CodeBlock { Block = "DownstreamProperty", Options = new string[] { "DownstreamApi" } };
-            var bothBlock = new CodeBlock { Block = "BothProperty", Options = new string[] { "DownstreamApi", "MicrosoftGraph" } };
-            var neitherBlock = new CodeBlock { Block = "NeitherProperty", Options = new string[] {  } };
-            
-            var codeBlocks = new CodeBlock[] { graphBlock, apiBlock, bothBlock, neitherBlock };
-            var filteredWithGraph = DocumentBuilder.FilterCodeBlocks(codeBlocks, optionsWithGraph);
-            var filteredWithApi = DocumentBuilder.FilterCodeBlocks(codeBlocks, optionsWithApi);
-            var filteredWithBoth = DocumentBuilder.FilterCodeBlocks(codeBlocks, optionsWithBoth);
-            var filteredWithNeither = DocumentBuilder.FilterCodeBlocks(codeBlocks, optionsWithNeither);
-
-            Assert.True(
-                filteredWithGraph.Length == 3 &&
-                filteredWithGraph.Contains(graphBlock) &&
-                !filteredWithGraph.Contains(apiBlock) &&
-                filteredWithGraph.Contains(bothBlock) &&
-                filteredWithGraph.Contains(neitherBlock));
-
-            Assert.True(
-                filteredWithApi.Length == 3 &&
-                !filteredWithApi.Contains(graphBlock) &&
-                filteredWithApi.Contains(apiBlock) &&
-                filteredWithApi.Contains(neitherBlock) &&
-                filteredWithApi.Contains(bothBlock));
-
-            Assert.True(
-                filteredWithBoth.Length == 4 &&
-                filteredWithBoth.Contains(graphBlock) &&
-                filteredWithBoth.Contains(apiBlock) &&
-                filteredWithBoth.Contains(bothBlock) &&
-                filteredWithBoth.Contains(neitherBlock));
-
-            Assert.True(
-                filteredWithNeither.Length == 1 &&
-                !filteredWithNeither.Contains(graphBlock) &&
-                !filteredWithNeither.Contains(apiBlock) &&
-                filteredWithNeither.Contains(neitherBlock) &&
-                !filteredWithNeither.Contains(bothBlock));
-        }
-
-        [Fact]
-        public void FilterCodeSnippetsTests()
-        {
-            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
-            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
-            var optionsWithBoth = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = true };
-            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
-
-            var graphSnippet = new CodeSnippet { Block = "GraphProperty", Options = new string[] { "MicrosoftGraph" } };
-            var apiSnippet = new CodeSnippet { Block = "DownstreamProperty", Options = new string[] { "DownstreamApi" } };
-            var bothSnippet = new CodeSnippet { Block = "BothProperty", Options = new string[] { "DownstreamApi", "MicrosoftGraph" } };
-            var neitherSnippet = new CodeSnippet { Block = "NeitherProperty", Options = new string[] { } };
-
-            var codeSnippets = new CodeSnippet[] { graphSnippet, apiSnippet, bothSnippet, neitherSnippet };
-            var filteredWithGraph = DocumentBuilder.FilterCodeSnippets(codeSnippets, optionsWithGraph);
-            var filteredWithApi = DocumentBuilder.FilterCodeSnippets(codeSnippets, optionsWithApi);
-            var filteredWithBoth = DocumentBuilder.FilterCodeSnippets(codeSnippets, optionsWithBoth);
-            var filteredWithNeither = DocumentBuilder.FilterCodeSnippets(codeSnippets, optionsWithNeither);
-
-            Assert.True(
-                filteredWithGraph.Length == 3 &&
-                filteredWithGraph.Contains(graphSnippet) &&
-                !filteredWithGraph.Contains(apiSnippet) &&
-                filteredWithGraph.Contains(bothSnippet) &&
-                filteredWithGraph.Contains(neitherSnippet));
-
-            Assert.True(
-                filteredWithApi.Length == 3 &&
-                !filteredWithApi.Contains(graphSnippet) &&
-                filteredWithApi.Contains(apiSnippet) &&
-                filteredWithApi.Contains(neitherSnippet) &&
-                filteredWithApi.Contains(bothSnippet));
-
-            Assert.True(
-                filteredWithBoth.Length == 4 &&
-                filteredWithBoth.Contains(graphSnippet) &&
-                filteredWithBoth.Contains(apiSnippet) &&
-                filteredWithBoth.Contains(bothSnippet) &&
-                filteredWithBoth.Contains(neitherSnippet));
-
-            Assert.True(
-                filteredWithNeither.Length == 1 &&
-                !filteredWithNeither.Contains(graphSnippet) &&
-                !filteredWithNeither.Contains(apiSnippet) &&
-                filteredWithNeither.Contains(neitherSnippet) &&
-                !filteredWithNeither.Contains(bothSnippet));
-        }
-
         [Theory]
         [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false","" , null } })]
         public async Task AddPropertiesTests(string[] properties)
@@ -291,7 +161,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         }
 
-/*        [Theory]
+        [Theory]
         [InlineData(new object[] { new string[] { "Authorize", "Theory", "Empty", "Controller", "", null } })]
         public async Task CreateAttributeListTests(string[] attributeStrings)
         {
@@ -308,7 +178,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                     Assert.Contains(attributes, al => al.Attributes.Where(attr => attr.ToString().Equals(attributeString, StringComparison.OrdinalIgnoreCase)).Any());
                 }
             }
-        }*/
+        }
 
         [Theory]
         [InlineData(new object[] { new string[] { "IServiceCollection", "IApplcationBuilder", "IWebHostEnvironment", "string", "bool" },

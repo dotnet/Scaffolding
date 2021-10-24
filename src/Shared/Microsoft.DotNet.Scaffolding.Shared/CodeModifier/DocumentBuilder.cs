@@ -111,80 +111,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedClassDeclarationSyntax;
         }
 
-        internal static CodeBlock[] FilterCodeBlocks(CodeBlock[] codeBlocks, CodeChangeOptions options)
-        {
-            var filteredCodeBlocks = new HashSet<CodeBlock>();
-            if (codeBlocks != null && codeBlocks.Any() && options != null)
-            {
-                foreach (var codeBlock in codeBlocks)
-                {
-                    if (options.DownstreamApi)
-                    {
-                        if (codeBlock.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                            !codeBlock.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                        {
-                            filteredCodeBlocks.Add(codeBlock);
-                        }
-                    }
-                    if (options.MicrosoftGraph)
-                    {
-                        if (codeBlock.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                            !codeBlock.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                        {
-                            filteredCodeBlocks.Add(codeBlock);
-                        }
-                    }
-                    if (!options.DownstreamApi && !options.MicrosoftGraph)
-                    {
-                        if (codeBlock.Options == null ||
-                            (!codeBlock.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
-                            !codeBlock.Options.Contains(CodeChangeOptionStrings.DownstreamApi)))
-                        {
-                            filteredCodeBlocks.Add(codeBlock);
-                        }
-                    }
-                }
-            }
-            return filteredCodeBlocks.ToArray();
-        }
-
-        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options)
-        {
-            var filteredCodeSnippets = new HashSet<CodeSnippet>();
-            if (codeSnippets != null && codeSnippets.Any() && options != null)
-            {
-                foreach (var codeSnippet in codeSnippets)
-                {
-                    if (options.DownstreamApi)
-                    {
-                        if (codeSnippet.Options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                            !codeSnippet.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
-                        {
-                            filteredCodeSnippets.Add(codeSnippet);
-                        }
-                    }
-                    if (options.MicrosoftGraph)
-                    {
-                        if (codeSnippet.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                            !codeSnippet.Options.Contains(CodeChangeOptionStrings.DownstreamApi))
-                        {
-                            filteredCodeSnippets.Add(codeSnippet);
-                        }
-                    }
-                    if (!options.DownstreamApi && !options.MicrosoftGraph)
-                    {
-                        if (codeSnippet.Options == null ||
-                            (!codeSnippet.Options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
-                            !codeSnippet.Options.Contains(CodeChangeOptionStrings.DownstreamApi)))
-                        {
-                            filteredCodeSnippets.Add(codeSnippet);
-                        }
-                    }
-                }
-            }
-            return filteredCodeSnippets.ToArray();
-        }
-
 
 
         //Add class attributes '[Attribute]' to a class.
@@ -312,20 +238,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                             .FirstOrDefault();
                         }
                         var newMethod = methodNode;
-                        
-                        //EditParameters
-                        //AddParameters
-                        if (methodChanges.AddParameters != null && methodChanges.AddParameters.Any())
-                        {
-                            if (newMethod is MethodDeclarationSyntax methodDeclratation)
-                            {
-                                newMethod = AddParameters(methodDeclratation, methodChanges.AddParameters, options);
-                            }
-                            else if(newMethod is ConstructorDeclarationSyntax constructorDeclaration)
-                            {
-                                newMethod = AddParameters(constructorDeclaration, methodChanges.AddParameters, options);
-                            }
-                        }
                         
                         //get method's BlockSyntax
                         var blockSyntaxNode = newMethod?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();

@@ -204,35 +204,31 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 // Update the redirect URIs
                 var updatedApp = new Application();
-                List<string> existingRedirectUris;
-
 
                 updatedApp.Web = existingApplication.Web ?? new WebApplication();
+                IEnumerable<string> remoteRedirectUris = updatedApp.Web.RedirectUris;
+
                 if (toolOptions.IsBlazorWasm == true)
                 { 
                     updatedApp.Spa = existingApplication.Spa ?? new SpaApplication();
-                    existingRedirectUris = updatedApp.Spa.RedirectUris.ToList();
-                }
-                else
-                {
-                    existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
+                    remoteRedirectUris = updatedApp.Spa.RedirectUris;
                 }
 
-                var useTheseInstead = reconciledApplicationParameters.WebRedirectUris; // TODO z get these please :)
+                //var useTheseInstead = reconciledApplicationParameters.WebRedirectUris; // TODO z get these please :)
 
                 List<Uri> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
 
-                int originalUrisCount = existingRedirectUris.Count;
+                int originalUrisCount = remoteRedirectUris.Count();
 
-                List<string> processedUris = urisToEnsure.Select(uri => PostProcess(uri, toolOptions.IsBlazorWasm)).ToList();
-                existingRedirectUris.AddRange(processedUris);
+                var processedUris = urisToEnsure.Select(uri => PostProcess(uri, toolOptions.IsBlazorWasm));
+                remoteRedirectUris = remoteRedirectUris.Union(processedUris);
 
-                if (existingRedirectUris.Distinct().Count() > originalUrisCount)
+                if (remoteRedirectUris.Count() > originalUrisCount)
                 {
-                    needsUpdate = true;
+                    needsUpdate = true; // TODO z test that the list is updated
                 }
 
-                if (updatedApp.Web.ImplicitGrantSettings == null)  // TODO: Blazor, SPA?
+                if (updatedApp.Web.ImplicitGrantSettings == null)  // TODO: check for Blazor, SPA?
                 {
                     updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 }
@@ -243,19 +239,20 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     // disable access token and disable id token
                     if (updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance != false)
                     {
-                        updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
                         needsUpdate = true;
+                        updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
                     }
 
                     if (updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance != false)
                     {
-                        updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
                         needsUpdate = true;
+                        updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
                     }
                 }
                 else
                 {
-                    if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
+                    if (toolOptions.EnableAccessToken.HasValue &&
+                        (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
                     {
                         needsUpdate = true;
                         updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;

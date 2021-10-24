@@ -25,16 +25,4 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public bool Newline { get ; set; }
         public int NumberOfSpaces { get; set; }
     }
-
-    public class CodeBlock 
-    {
-        public string Block { get ; set; }
-        public string[] Options { get; set; }
-    }
-
-    public class Formatting
-    {
-        public bool Newline { get ; set; }
-        public int NumberOfSpaces { get; set; }
-    }
 }

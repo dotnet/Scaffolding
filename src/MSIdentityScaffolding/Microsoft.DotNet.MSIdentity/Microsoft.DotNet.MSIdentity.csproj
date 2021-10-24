@@ -15,6 +15,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <DebugType>pdbonly</DebugType>
     <DebugSymbol>true</DebugSymbol>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

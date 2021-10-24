@@ -71,13 +71,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 }
             }
 
-            PostProcessWebUris(projectAuthenticationSettings.ApplicationParameters, projectAuthenticationSettings.Replacements); // Why bother doing this from VS?
+            PostProcessWebUris(projectAuthenticationSettings);
         }
 
-        private static void PostProcessWebUris(ApplicationParameters applicationParameters, List<Replacement> replacements)
+        private static void PostProcessWebUris(ProjectAuthenticationSettings settings) //ApplicationParameters applicationParameters, List<Replacement> replacements)
         {
             Debugger.Break(); // TODO z we can do the redirect URIs here perhaps
-            // TODO: ProvisioningToolOptions.IsBlazorWasm; 
+            // TODO: ProvisioningToolOptions.IsBlazorWasm;
+
+            var applicationParameters = settings.ApplicationParameters;
+            var replacements = settings.Replacements;
             bool isBlazorWasm = applicationParameters.IsBlazorWasm == true && applicationParameters.IsWebApp != true;
 
             string callbackPath = isBlazorWasm ? "/authentication/login-callback" : applicationParameters.CallbackPath ?? "/signin-oidc";

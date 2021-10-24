@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// <summary>
         /// If Blazor project
         /// </summary>
-        public bool? IsBlazorWasm => ProjectType?.Equals("blazorwasm", StringComparison.OrdinalIgnoreCase);
+        public bool? IsBlazorWasm => ProjectType?.Contains("blazorwasm");
 
         /// <summary>
         /// Clones the options

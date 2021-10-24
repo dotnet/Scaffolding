@@ -111,14 +111,12 @@ namespace Microsoft.DotNet.MSIdentity
 
             //for now, update project command is handlded seperately.
             //TODO: switch case to handle all the different commands.
-            // TODO Z this would help me out a lot too I think
-
             ApplicationParameters? applicationParameters = null;
 
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
-            if (projectSettings.ApplicationParameters.IsBlazorWasm == true && projectSettings.ApplicationParameters.IsWebApi == true)
+            if (ProvisioningToolOptions.IsBlazorWasm == true && projectSettings.ApplicationParameters.IsWebApi == true)
             { // TODO z check this out
                 // Processes the hosted web API
                 ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
@@ -605,15 +603,10 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     projectSettings.ApplicationParameters.IsWebApi = projectSettings.ApplicationParameters.IsWebApi ?? true;
                 }
-                if (provisioningToolOptions.IsBlazorWasm == true)
-                {
-                    projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm ?? true;
-                }
-                if (provisioningToolOptions.ProjectType.Equals("blazorwasm-hosted", StringComparison.OrdinalIgnoreCase))
-                {
-                    projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm ?? true;
-                }
+
+                projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm; // TODO z test for all project types
             }
+
             if (!string.IsNullOrEmpty(provisioningToolOptions.AppIdUri))
             {
                 projectSettings.ApplicationParameters.AppIdUri = provisioningToolOptions.AppIdUri;

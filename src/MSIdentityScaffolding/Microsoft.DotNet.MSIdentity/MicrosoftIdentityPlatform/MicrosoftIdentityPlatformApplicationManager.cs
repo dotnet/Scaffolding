@@ -51,14 +51,15 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 };
             }
 
-            if (applicationParameters.IsBlazorWasm == true && applicationParameters.TargetFramework != "netcoreapp3.1")
+
+            // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
+            // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
+            if (applicationParameters.IsBlazorWasm == true && applicationParameters.TargetFramework != "netcoreapp3.1") // TODO z don't use applicationParameters
             {
                 AddSpaPlatform(applicationParameters, application);
             }
             else
             {
-                // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
-                // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
                 AddWebAppPlatform(applicationParameters, application);
             }
 
@@ -215,15 +216,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     existingRedirectUris = updatedApp.Spa.RedirectUris;
                 }
 
-                var urisToEnsure = ValidateUris(toolOptions.RedirectUris);
-
-                var processedUris = urisToEnsure.Select(uri => AppendUriPath(uri, toolOptions.IsBlazorWasm));
+                var processedUris = ValidateUris(toolOptions.RedirectUris).Select(uri => UpdateUriPath(uri, toolOptions.IsBlazorWasm));
                 var updatedRedirectUris = existingRedirectUris.Union(processedUris);
-
                 if (updatedRedirectUris.Count() > existingRedirectUris.Count())
                 {
-                    needsUpdate = true; // TODO z test that the list is updated
-
+                    needsUpdate = true; 
                     if (toolOptions.IsBlazorWasm == true) {
                         updatedApp.Spa.RedirectUris = updatedRedirectUris;
                     }
@@ -233,7 +230,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     }
                 }
 
-                if (updatedApp.Web.ImplicitGrantSettings == null)  // TODO: check for Blazor, SPA?
+                if (updatedApp.Web.ImplicitGrantSettings == null)
                 {
                     updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 }
@@ -300,24 +297,23 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal static IList<Uri> ValidateUris(IList<string> redirectUris)
         {
             IList<Uri> validUris = new List<Uri>();
-            if (redirectUris.Any())
+            foreach (var uri in redirectUris)
             {
-                foreach (var uri in redirectUris)
+                //either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+                if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
+                    (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
                 {
-                    //either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
-                    if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
-                       (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
-                    {
-                        validUris.Add(uriResult);
-                    }
+                    validUris.Add(uriResult);
                 }
             }
+
             return validUris;
         }
 
-        private static string AppendUriPath(Uri uriResult, bool? isBlazorWasm)
+        // Path for Redirect URIs depends on whether the app registration is for a Blazor project
+        private static string UpdateUriPath(Uri uri, bool? isBlazorWasm)
         {
-            return new UriBuilder(uriResult)
+            return new UriBuilder(uri)
             {
                 Path = isBlazorWasm == true ? "authentication/login-callback" : "signin-oidc"
             }.Uri.ToString();
@@ -540,7 +536,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // IdToken
             if ((!applicationParameters.CallsDownstreamApi && !applicationParameters.CallsMicrosoftGraph)
-                || withImplicitFlow) // TODO z: how do downstreamAPI and graph affect blazor 5, 6, 3.1?
+                || withImplicitFlow)
             {
                 application.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
                 application.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
@@ -556,9 +552,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // Logout URI
             application.Web.LogoutUrl = applicationParameters.LogoutUrl;
 
-            // Explicit usage of MicrosoftGraph openid and offline_access, in the case
-            // of Azure AD B2C.
-            if (applicationParameters.IsB2C && applicationParameters.IsWebApp == true || applicationParameters.IsBlazorWasm == true) // TODO confirm
+            // Explicit usage of MicrosoftGraph openid and offline_access, in the case of Azure AD B2C.
+            if (applicationParameters.IsB2C && applicationParameters.IsWebApp == true || applicationParameters.IsBlazorWasm == true)
             {
                 if (applicationParameters.CalledApiScopes == null)
                 {
@@ -572,6 +567,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 {
                     applicationParameters.CalledApiScopes += " offline_access";
                 }
+
                 applicationParameters.CalledApiScopes = applicationParameters.CalledApiScopes.Trim();
             }
         }
@@ -740,7 +736,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             Application application,
             ApplicationParameters originalApplicationParameters)
         {
-            bool isB2C = (tenant.TenantType == "AAD B2C");
+            bool isB2C = (tenant.TenantType.Equals("AAD B2C"));
             var effectiveApplicationParameters = new ApplicationParameters
             {
                 ApplicationDisplayName = application.DisplayName,
@@ -749,13 +745,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 IsAAD = !isB2C,
                 IsB2C = isB2C,
                 HasAuthentication = true,
-                IsWebApi = application.Api != null
-                        && (application.Api.Oauth2PermissionScopes != null && application.Api.Oauth2PermissionScopes.Any())
-                        || (application.AppRoles != null && application.AppRoles.Any()),
+                IsWebApi = application.Api?.Oauth2PermissionScopes?.Any() == true || application.AppRoles?.Any()  == true,
                 IsWebApp = application.Web != null,
-                IsBlazorWasm = application.Spa != null, // TODO z this doesn't work for WAP projects at least
+                IsBlazorWasm = application.Spa != null, // TODO this doesn't necessarily mean that the app is definitely a Blazor app
                 TenantId = tenant.Id,
-                Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.HasValue && v.IsDefault.Value)?.Name,
+                Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault == true)?.Name,
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
                 CallsDownstreamApi = application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
                 LogoutUrl = application.Web?.LogoutUrl,

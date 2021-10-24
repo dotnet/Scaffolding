@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.MSIdentity
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
-            if (ProvisioningToolOptions.IsBlazorWasm == true && projectSettings.ApplicationParameters.IsWebApi == true)
+            if (projectSettings.ApplicationParameters.IsBlazorWasm == true && projectSettings.ApplicationParameters.IsWebApi == true)
             { // TODO z check this out
                 // Processes the hosted web API
                 ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (appSettings != null)
                 {
                     var azureAdToken = appSettings["AzureAd"];
-                    if (ProvisioningToolOptions.IsBlazorWasm == true) // TODO test for all projects
+                    if (applicationParameters.IsBlazorWasm == true) // TODO test for all projects
                     {
                         changesMade = ModifyBlazorAppSettings(azureAdToken, applicationParameters, appSettings);
                     }
@@ -604,7 +604,7 @@ namespace Microsoft.DotNet.MSIdentity
                     projectSettings.ApplicationParameters.IsWebApi = projectSettings.ApplicationParameters.IsWebApi ?? true;
                 }
 
-                projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm; // TODO z test for all project types
+                projectSettings.ApplicationParameters.IsBlazorWasm = provisioningToolOptions.ProjectType.Contains("blazorwasm"); // TODO z test for all project types
             }
 
             if (!string.IsNullOrEmpty(provisioningToolOptions.AppIdUri))

@@ -162,11 +162,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool PackagesUpdate { get; set; } = false;
 
         /// <summary>
-        /// If Blazor project
-        /// </summary>
-        public bool? IsBlazorWasm => ProjectType?.Contains("blazorwasm");
-
-        /// <summary>
         /// Clones the options
         /// </summary>
         /// <returns></returns>

@@ -182,12 +182,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         internal async Task<JsonResponse> UpdateApplication(
             TokenCredential tokenCredential,
-            ApplicationParameters? reconciledApplicationParameters,
+            ApplicationParameters? applicationParameters,
             ProvisioningToolOptions toolOptions,
             string commandName)
         {
             JsonResponse jsonResponse = new JsonResponse(commandName);
-            if (reconciledApplicationParameters is null)
+            if (applicationParameters is null)
             {
                 jsonResponse.Content = $"Failed to update Azure AD app, reconciledApplicationParameters == null";
                 jsonResponse.State = State.Fail;
@@ -198,7 +198,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 var existingApplication = (await graphServiceClient.Applications
                    .Request()
-                   .Filter($"appId eq '{reconciledApplicationParameters.ClientId}'")
+                   .Filter($"appId eq '{applicationParameters.ClientId}'")
                    .GetAsync()).First();
 
                 bool needsUpdate = false;
@@ -210,18 +210,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 };
 
                 var existingRedirectUris = updatedApp.Web.RedirectUris;
-                if (toolOptions.IsBlazorWasm == true)
+                if (applicationParameters.IsBlazorWasm == true)
                 { 
                     updatedApp.Spa = existingApplication.Spa ?? new SpaApplication();
                     existingRedirectUris = updatedApp.Spa.RedirectUris;
                 }
 
-                var processedUris = ValidateUris(toolOptions.RedirectUris).Select(uri => UpdateUriPath(uri, toolOptions.IsBlazorWasm));
+                var processedUris = ValidateUris(toolOptions.RedirectUris).Select(uri => UpdateUriPath(uri, applicationParameters.IsBlazorWasm));
                 var updatedRedirectUris = existingRedirectUris.Union(processedUris);
                 if (updatedRedirectUris.Count() > existingRedirectUris.Count())
                 {
                     needsUpdate = true; 
-                    if (toolOptions.IsBlazorWasm == true) {
+                    if (applicationParameters.IsBlazorWasm == true) {
                         updatedApp.Spa.RedirectUris = updatedRedirectUris;
                     }
                     else
@@ -236,7 +236,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
 
                 // update implicit grant settings if need be.
-                if (toolOptions.IsBlazorWasm == true)
+                if (applicationParameters.IsBlazorWasm == true)
                 {
                     // disable access token and disable id token
                     if (updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance != false)

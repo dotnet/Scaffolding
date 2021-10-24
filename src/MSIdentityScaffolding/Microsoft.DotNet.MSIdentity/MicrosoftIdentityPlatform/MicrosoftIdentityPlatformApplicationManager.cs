@@ -203,29 +203,34 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 bool needsUpdate = false;
 
                 // Update the redirect URIs
-                var updatedApp = new Application();
+                var updatedApp = new Application
+                {
+                    Web = existingApplication.Web ?? new WebApplication()
+                };
 
-                updatedApp.Web = existingApplication.Web ?? new WebApplication();
-                IEnumerable<string> remoteRedirectUris = updatedApp.Web.RedirectUris;
-
+                var existingRedirectUris = updatedApp.Web.RedirectUris;
                 if (toolOptions.IsBlazorWasm == true)
                 { 
                     updatedApp.Spa = existingApplication.Spa ?? new SpaApplication();
-                    remoteRedirectUris = updatedApp.Spa.RedirectUris;
+                    existingRedirectUris = updatedApp.Spa.RedirectUris;
                 }
 
-                //var useTheseInstead = reconciledApplicationParameters.WebRedirectUris; // TODO z get these please :)
+                var urisToEnsure = ValidateUris(toolOptions.RedirectUris);
 
-                List<Uri> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
+                var processedUris = urisToEnsure.Select(uri => AppendUriPath(uri, toolOptions.IsBlazorWasm));
+                var updatedRedirectUris = existingRedirectUris.Union(processedUris);
 
-                int originalUrisCount = remoteRedirectUris.Count();
-
-                var processedUris = urisToEnsure.Select(uri => PostProcess(uri, toolOptions.IsBlazorWasm));
-                remoteRedirectUris = remoteRedirectUris.Union(processedUris);
-
-                if (remoteRedirectUris.Count() > originalUrisCount)
+                if (updatedRedirectUris.Count() > existingRedirectUris.Count())
                 {
                     needsUpdate = true; // TODO z test that the list is updated
+
+                    if (toolOptions.IsBlazorWasm == true) {
+                        updatedApp.Spa.RedirectUris = updatedRedirectUris;
+                    }
+                    else
+                    {
+                        updatedApp.Web.RedirectUris = updatedRedirectUris;
+                    }
                 }
 
                 if (updatedApp.Web.ImplicitGrantSettings == null)  // TODO: check for Blazor, SPA?
@@ -310,7 +315,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return validUris;
         }
 
-        private static string PostProcess(Uri uriResult, bool? isBlazorWasm)
+        private static string AppendUriPath(Uri uriResult, bool? isBlazorWasm)
         {
             return new UriBuilder(uriResult)
             {
@@ -761,8 +766,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 TargetFramework = originalApplicationParameters.TargetFramework,
                 MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
                 CalledApiScopes = originalApplicationParameters.CalledApiScopes,
-                AppIdUri = originalApplicationParameters.AppIdUri,
-                WebRedirectUris = originalApplicationParameters.WebRedirectUris
+                AppIdUri = originalApplicationParameters.AppIdUri
             };
 
             if (application.Api != null && application.IdentifierUris.Any())

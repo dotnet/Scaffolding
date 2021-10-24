@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public string? Instance { get; set; }
     }
 
-    public class BlazorAzureAdProperties
+    public class BlazorProperties
     {
         public string? Authority { get; set; }
         public string? ClientId { get; set; }

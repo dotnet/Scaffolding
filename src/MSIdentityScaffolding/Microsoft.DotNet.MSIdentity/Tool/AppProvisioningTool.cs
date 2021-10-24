@@ -410,12 +410,12 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (exisitingAppSettings != null)
             {
-                var existingProperties = exisitingAppSettings.ToObject<BlazorAzureAdProperties>();
+                var existingProperties = exisitingAppSettings.ToObject<BlazorProperties>();
                 if (existingProperties != null)
                 {
-                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.Authority), existingProperties.Authority, authority);
-                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ClientId), existingProperties.ClientId, applicationParameters.ClientId, BlazorDefaultProperties.ClientId);
-                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorAzureAdProperties.ValidateAuthority), existingProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority);
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorProperties.Authority), existingProperties.Authority, authority);
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorProperties.ClientId), existingProperties.ClientId, applicationParameters.ClientId, BlazorDefaultProperties.ClientId);
+                    changesMade |= UpdateAppSettingsProperty(exisitingAppSettings, nameof(BlazorProperties.ValidateAuthority), existingProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority, BlazorDefaultProperties.ValidateAuthority);
                 }
             }
             else
@@ -722,7 +722,6 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task UpdateProject(TokenCredential tokenCredential, ApplicationParameters? applicationParameters, ProjectDescription? projectDescription)
         {
-            //Debugger.Launch();
             if (applicationParameters != null && !string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath) && projectDescription != null)
             {
                 if (ProvisioningToolOptions.ConfigUpdate)

@@ -270,11 +270,11 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "\n<div>Api result</div>\n<div>@ViewData [ \"ApiResult\" ]</div>\n",
+              "Block": "\n<div>Api result</div>\n<div>@ViewData[\"ApiResult\"]</div>\n",
               "Options": [ "DownstreamApi" ]
             },
             {
-              "Block": "\n<div>Api result</div>\n<div>@ViewData [ \"GraphApiResult\" ]</div>\n",
+              "Block": "\n<div>Api result</div>\n<div>@ViewData[\"GraphApiResult\"]</div>\n",
               "Options": [ "MicrosoftGraph" ]
             }
           ]

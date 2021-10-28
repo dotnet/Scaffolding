@@ -324,20 +324,21 @@ namespace Microsoft.DotNet.MSIdentity
                             {
                                 changesMade = true;
                                 string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
+                                string scopes = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiScopes) ? ProvisioningToolOptions.CalledApiScopes : "SCOPES_HERE";
                                 appSettings.Add("DownstreamApi", JObject.FromObject(new
                                 {
                                     BaseUrl = apiURL,
-                                    Scopes = "user.read"
+                                    Scopes = scopes
                                 }));
                             }
                         }
 
                         if (ProvisioningToolOptions.CallsGraph)
                         {
-                            if (appSettings["DownstreamApi"] == null)
+                            if (appSettings["MicrosoftGraph"] == null)
                             {
                                 changesMade = true;
-                                appSettings.Add("DownstreamApi", JObject.FromObject(new
+                                appSettings.Add("MicrosoftGraph", JObject.FromObject(new
                                 {
                                     BaseUrl = "https://graph.microsoft.com/v1.0",
                                     Scopes = "user.read"

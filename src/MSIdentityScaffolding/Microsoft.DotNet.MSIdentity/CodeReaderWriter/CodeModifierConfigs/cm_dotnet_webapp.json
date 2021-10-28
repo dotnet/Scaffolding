@@ -75,7 +75,15 @@
           "CodeChanges": [
             {
               "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ');\n",
-              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "Options": [ "DownstreamApi" ],
+              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddAuthentication", "WebApplication.CreateBuilder.Services.AddAuthorization", "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ');\n",
+              "Options": [ "MicrosoftGraph" ],
               "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddAuthentication", "WebApplication.CreateBuilder.Services.AddAuthorization", "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],
               "CodeFormatting": {
                 "Newline": true
@@ -100,7 +108,7 @@
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
@@ -185,6 +193,10 @@
         {
           "Block": "AuthorizeForScopes(ScopeKeySection = \"DownstreamApi:Scopes\")",
           "Options": [ "DownstreamApi", "MicrosoftGraph" ]
+        },
+        {
+          "Block": "AuthorizeForScopes(ScopeKeySection = \"MicrosoftGraph:Scopes\")",
+          "Options": [ "MicrosoftGraph" ]
         }
       ],
       "Methods": {

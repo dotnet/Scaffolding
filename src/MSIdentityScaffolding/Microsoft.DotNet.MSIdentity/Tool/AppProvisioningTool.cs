@@ -324,11 +324,10 @@ namespace Microsoft.DotNet.MSIdentity
                             {
                                 changesMade = true;
                                 string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
-                                string scopes = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiScopes) ? ProvisioningToolOptions.CalledApiScopes : "SCOPES_HERE";
                                 appSettings.Add("DownstreamApi", JObject.FromObject(new
                                 {
                                     BaseUrl = apiURL,
-                                    Scopes = scopes
+                                    Scopes = "user.read"
                                 }));
                             }
                         }

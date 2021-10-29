@@ -334,10 +334,10 @@ namespace Microsoft.DotNet.MSIdentity
 
                         if (ProvisioningToolOptions.CallsGraph)
                         {
-                            if (appSettings["DownstreamApi"] == null)
+                            if (appSettings["MicrosoftGraph"] == null)
                             {
                                 changesMade = true;
-                                appSettings.Add("DownstreamApi", JObject.FromObject(new
+                                appSettings.Add("MicrosoftGraph", JObject.FromObject(new
                                 {
                                     BaseUrl = "https://graph.microsoft.com/v1.0",
                                     Scopes = "user.read"

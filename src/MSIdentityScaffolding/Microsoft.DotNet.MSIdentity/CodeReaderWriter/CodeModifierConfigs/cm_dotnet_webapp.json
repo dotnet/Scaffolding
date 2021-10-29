@@ -74,8 +74,8 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ');\n",
-              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ') ?? WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ');\n",
+              "Options": [ "DownstreamApi", "MicrosoftGraph" ],
               "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddAuthentication", "WebApplication.CreateBuilder.Services.AddAuthorization", "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],
               "CodeFormatting": {
                 "Newline": true
@@ -100,7 +100,7 @@
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
@@ -184,7 +184,11 @@
       "ClassAttributes": [
         {
           "Block": "AuthorizeForScopes(ScopeKeySection = \"DownstreamApi:Scopes\")",
-          "Options": [ "DownstreamApi", "MicrosoftGraph" ]
+          "Options": [ "DownstreamApi" ]
+        },
+        {
+          "Block": "AuthorizeForScopes(ScopeKeySection = \"MicrosoftGraph:Scopes\")",
+          "Options": [ "MicrosoftGraph" ]
         }
       ],
       "Methods": {
@@ -270,11 +274,11 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "\n<div>Api result</div>\n<div>@ViewData[\"ApiResult\"]</div>\n",
+              "Block": "\n<div>API result</div>\n<div>@ViewData[\"ApiResult\"]</div>\n",
               "Options": [ "DownstreamApi" ]
             },
             {
-              "Block": "\n<div>Api result</div>\n<div>@ViewData[\"GraphApiResult\"]</div>\n",
+              "Block": "\n<div>Graph API result</div>\n<div>@ViewData[\"GraphApiResult\"]</div>\n",
               "Options": [ "MicrosoftGraph" ]
             }
           ]

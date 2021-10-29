@@ -51,7 +51,7 @@
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
+              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"MicrosoftGraph\")).AddInMemoryTokenCaches()"
             },
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
@@ -61,7 +61,7 @@
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true

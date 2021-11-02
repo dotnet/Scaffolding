@@ -190,16 +190,16 @@
             },
             {
               "Append": true,
-              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
-              "Options": [ "DownstreamApi" ]
-            },
-            {
-              "Append": true,
               "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
               "CodeFormatting": {
                 "NumberOfSpaces": 12
               },
               "Options" : [ "DownstreamApi"]
+            },
+            {
+              "InsertAfter": "using var response = await _downstreamWebApi.CallWebApiForUserAsync",
+              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
+              "Options": [ "DownstreamApi" ]
             },
             {
               "Append": true,

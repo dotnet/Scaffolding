@@ -123,7 +123,7 @@
       "ClassProperties": [
         {
           "Block": "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
-          "Options": ["Skip"]
+          "Options": ["NonMinimalApp"]
         },
         {
           "Block": "private readonly GraphServiceClient _graphServiceClient",
@@ -207,7 +207,7 @@
             {
               "Append": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
-              "Options": [ "Skip" ]
+              "Options": [ "NonMinimalApp" ]
             }
           ]
         }

@@ -55,7 +55,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     CodeChangeOptions options = new CodeChangeOptions
                     {
                         MicrosoftGraph = _toolOptions.CallsGraph,
-                        DownstreamApi = _toolOptions.CallsDownstreamApi
+                        DownstreamApi = _toolOptions.CallsDownstreamApi,
+                        IsMinimalApp = isMinimalApp
                     };
                     var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
                     //Go through all the files, make changes using DocumentBuilder.
@@ -84,7 +85,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         else if (!string.IsNullOrEmpty(fileName) && fileName.Equals("Program.cs"))
                         {
                             //only modify Program.cs file if its a minimal hosting app (as we made changes to the Startup.cs file).
-                            if (isMinimalApp)
+                            if (options.IsMinimalApp)
                             {
                                 await ModifyProgramCs(file, project, options);
                             }
@@ -172,15 +173,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!string.IsNullOrEmpty(filePath))
             {
                 var fileDoc = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
-                var toolOptions = new CodeChangeOptions
-                {
-                    MicrosoftGraph = _toolOptions.CallsGraph,
-                    DownstreamApi = _toolOptions.CallsDownstreamApi
-                };
                 DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
                 DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
                 var docRoot = documentEditor.OriginalRoot as CompilationUnitSyntax;
-                var newRoot = documentBuilder.AddUsings(toolOptions);
+                var newRoot = documentBuilder.AddUsings(options);
                 //adding usings
                 var namespaceNode = newRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
                 FileScopedNamespaceDeclarationSyntax? fileScopedNamespace = null;

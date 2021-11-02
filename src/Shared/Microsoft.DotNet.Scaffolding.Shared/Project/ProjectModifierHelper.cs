@@ -252,12 +252,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         {
             if (root != null && statement != null)
             {
-                var formattedStatementString = ProjectModifierHelper.TrimStatement(statement.ToString());
-                bool foundStatement = root.Members.Where(st => ProjectModifierHelper.TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
+                var formattedStatementString = TrimStatement(statement.ToString());
+                bool foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
                 //if statement is not found due to our own mofications, check for a CheckBlock snippet 
                 if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
                 {
-                    foundStatement = root.Members.Where(st => st.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Contains(checkBlock.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars))).Any();
+                    foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(TrimStatement(checkBlock.ToString()))).Any();
                 }
                 return foundStatement;
             }
@@ -337,11 +337,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return true;
             }
 
-            //if options have a "Skio", every CodeBlock is invalid
+            //if options have a "Skip", every CodeBlock is invalid
             if (options.Contains(CodeChangeOptionStrings.Skip))
             {
                 return false;
             }
+            //if its a minimal app and options have a "NonMinimalApp", don't add the CodeBlock
+            if (options.Contains(CodeChangeOptionStrings.NonMinimalApp) && codeChangeOptions.IsMinimalApp)
+            {
+                return false;
+            }
+
             //an app will either support DownstreamApi, MicrosoftGraph, both, or neither.
             if (codeChangeOptions.DownstreamApi)
             {

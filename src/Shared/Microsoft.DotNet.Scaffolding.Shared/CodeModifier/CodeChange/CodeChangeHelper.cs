@@ -14,11 +14,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public const string MicrosoftGraph = nameof(MicrosoftGraph);
         public const string DownstreamApi = nameof(DownstreamApi);
         public const string Skip = nameof(Skip);
+        public const string NonMinimalApp = nameof(NonMinimalApp);
     }
 
     public class CodeChangeOptions
     {
         public bool MicrosoftGraph { get; set; } = false;
         public bool DownstreamApi { get; set; } = false;
+        public bool IsMinimalApp { get; set; } = false;
     }
 }

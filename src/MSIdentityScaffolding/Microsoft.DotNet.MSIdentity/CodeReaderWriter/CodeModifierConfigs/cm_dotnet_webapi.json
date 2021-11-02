@@ -114,6 +114,10 @@
         {
           "Block":"Authorize",
           "Options": []
+        },
+        {
+          "Block": "RequiredScope(RequiredScopesConfigurationKey = \"AzureAd:Scopes\")",
+          "Options": []
         }
       ],
       "ClassProperties": [
@@ -140,6 +144,35 @@
             }
           ]
         },
+        "WeatherForecastController": {
+          "Parameters": [ "ILogger<WeatherForecastController>" ],
+          "AddParameters" : [ 
+            {
+              "Block":"GraphServiceClient graphServiceClient",
+              "Options": [ "MicrosoftGraph"]
+            },
+            {
+              "Block":"IDownstreamWebApi downstreamWebApi",
+              "Options": [ "DownstreamApi"]
+            }
+          ],
+          "CodeChanges": [
+            {
+              "Block": "_graphServiceClient = graphServiceClient;",
+              "Options": [ "MicrosoftGraph" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              }
+            },
+            {
+              "Block": "_downstreamWebApi = downstreamWebApi;",
+              "Options": [ "DownstreamApi" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              }
+            }
+          ]
+        },
         "Get": {
           "Parameters": [ "IEnumerable<WeatherForecast>" ],
           "EditType": {
@@ -157,6 +190,19 @@
             },
             {
               "Append": true,
+              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
+              "Options": [ "DownstreamApi" ]
+            },
+            {
+              "Append": true,
+              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              },
+              "Options" : [ "DownstreamApi"]
+            },
+            {
+              "Append": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
               "Options": [ "Skip" ]
             }
@@ -166,6 +212,16 @@
       "Usings": [
         "Microsoft.AspNetCore.Authorization",
         "Microsoft.Identity.Web.Resource"
+      ],
+      "UsingsWithOptions": [
+        {
+          "Block": "Microsoft.Graph",
+          "Options": [ "MicrosoftGraph" ]
+        },
+        {
+          "Block": "Microsoft.Identity.Web",
+          "Options": [ "DownstreamApi" ]
+        }
       ]
     }
   ] 

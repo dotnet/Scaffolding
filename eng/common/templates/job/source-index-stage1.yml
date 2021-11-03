@@ -5,6 +5,8 @@ parameters:
   sourceIndexBuildCommand: powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "eng/common/build.ps1 -restore -build -binarylog -ci"
   preSteps: []
   binlogPath: artifacts/log/Debug/Build.binlog
+  pool:
+    vmImage: 'windows-2019'
   condition: ''
   dependsOn: ''
 

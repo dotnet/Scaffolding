@@ -134,6 +134,7 @@
               }
             },
             {
+              "CheckBlock": "WebApplication.CreateBuilder.Services.AddAuthorization",
               "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
               "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],

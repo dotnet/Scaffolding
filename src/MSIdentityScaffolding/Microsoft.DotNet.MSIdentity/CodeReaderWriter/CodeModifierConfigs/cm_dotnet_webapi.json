@@ -49,16 +49,6 @@
               "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"MicrosoftGraph\")).AddInMemoryTokenCaches()"
-            },
-            {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddDownstreamWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
-            },
-            {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
               "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
@@ -123,7 +113,7 @@
       "ClassProperties": [
         {
           "Block": "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
-          "Options": ["Skip"]
+          "Options": ["NonMinimalApp"]
         },
         {
           "Block": "private readonly GraphServiceClient _graphServiceClient",
@@ -184,7 +174,7 @@
               "Append": true,
               "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
               "CodeFormatting": {
-                "NumberOfSpaces": 8
+                "NumberOfSpaces": 12
               },
               "Options": [ "MicrosoftGraph" ]
             },
@@ -207,7 +197,7 @@
             {
               "Append": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
-              "Options": [ "Skip" ]
+              "Options": [ "NonMinimalApp" ]
             }
           ]
         }

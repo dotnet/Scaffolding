@@ -47,6 +47,7 @@
         "Global": {
           "CodeChanges": [
             {
+<<<<<<< HEAD
               "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
               "InsertBefore": ["WebApplication.CreateBuilder.Services.AddControllers"],
               "CodeFormatting": {
@@ -67,6 +68,20 @@
               "Parent": "AddMicrosoftIdentityWebApi",
               "CodeChangeType": "MemberAccess",
               "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+=======
+              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [ "builder.Services.AddControllers()", "builder.Build()" ]
+            },
+            {
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
               "CodeFormatting": {
                 "Newline": true,
                 "NumberOfSpaces": 8
@@ -184,7 +199,11 @@
               "Options": [ "MicrosoftGraph" ]
             },
             {
+<<<<<<< HEAD
               "Prepend": true,
+=======
+              "Append": true,
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
               "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
               "CodeFormatting": {
                 "NumberOfSpaces": 12
@@ -193,16 +212,27 @@
             },
             {
               "InsertAfter": "await _downstreamWebApi.CallWebApiForUserAsync",
+<<<<<<< HEAD
               "Block": "\r\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\r\n            {\r\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\r\n                // Do something\r\n            }\r\n            else\r\n            {\r\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\r\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\r\n            }",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
+=======
+              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
               },
               "Options": [ "DownstreamApi" ]
             },
             {
+<<<<<<< HEAD
               "Prepend": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)",
+=======
+              "Append": true,
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
               "Options": [ "NonMinimalApp" ]
             }
           ]

@@ -556,8 +556,19 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var children = GetDescendantNodes(parent);
             if (ProjectModifierHelper.StatementExists(children, change.Block))
             {
+<<<<<<< HEAD
                 return originalMethod;
             }
+=======
+                var insertAfterNode =
+                    modifiedBlockSyntaxNode.DescendantNodes().Where(node => node != null && node.ToString().Contains(insertAfterBlock)).FirstOrDefault() ??
+                    modifiedBlockSyntaxNode.DescendantNodes().Where(node => node != null && node.ToString().Contains(ProjectModifierHelper.TrimStatement(insertAfterBlock))).FirstOrDefault();
+                if (insertAfterNode != null)
+                {
+                    var leadingTrivia = insertAfterNode.GetLeadingTrivia();
+                    var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+                    string formattedCodeBlock = ProjectModifierHelper.FormatCodeBlock(change.Block, parameterValues);
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
 
             // Find parent's expression statement
             if (!(children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) is ExpressionStatementSyntax exprNode))
@@ -634,7 +645,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             if (attributes == null)
             {
+<<<<<<< HEAD
                 return attributeLists;
+=======
+                foreach (var attribute in attributes)
+                {
+                    var attributeList = new List<AttributeSyntax>();
+                    //filter by apps
+                    if (!string.IsNullOrEmpty(attribute.Block) && !ProjectModifierHelper.AttributeExists(attribute.Block, attributeLists))
+                    {
+                        attributeList.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName(attribute.Block)));
+                    }
+                    if (attributeList.Any())
+                    {
+                        syntaxList = syntaxList.Insert(0, SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia));
+                    }
+                }
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
             }
 
             foreach (var attribute in attributes)

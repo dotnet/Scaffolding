@@ -174,7 +174,7 @@
               "Append": true,
               "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
               "CodeFormatting": {
-                "NumberOfSpaces": 8
+                "NumberOfSpaces": 12
               },
               "Options": [ "MicrosoftGraph" ]
             },

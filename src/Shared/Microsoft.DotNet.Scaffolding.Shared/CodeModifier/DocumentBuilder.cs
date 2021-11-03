@@ -535,7 +535,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             
             if (!string.IsNullOrEmpty(insertAfterBlock) && !string.IsNullOrEmpty(change.Block))
             {
-                var insertAfterNode = modifiedBlockSyntaxNode.DescendantNodes().Where(node => node is ExpressionStatementSyntax && node.ToString().Contains(insertAfterBlock)).FirstOrDefault();
+                var insertAfterNode =
+                    modifiedBlockSyntaxNode.DescendantNodes().Where(node => node != null && node.ToString().Contains(insertAfterBlock)).FirstOrDefault() ??
+                    modifiedBlockSyntaxNode.DescendantNodes().Where(node => node != null && node.ToString().Contains(ProjectModifierHelper.TrimStatement(insertAfterBlock))).FirstOrDefault();
                 if (insertAfterNode != null)
                 {
                     var leadingTrivia = insertAfterNode.GetLeadingTrivia();
@@ -665,7 +667,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     }
                     if (attributeList.Any())
                     {
-                        syntaxList = syntaxList.Insert(0, SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+                        syntaxList = syntaxList.Insert(0, SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia));
                     }
                 }
             }

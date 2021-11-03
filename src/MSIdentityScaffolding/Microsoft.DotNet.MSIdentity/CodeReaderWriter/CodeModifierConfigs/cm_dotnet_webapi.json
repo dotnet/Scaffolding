@@ -49,16 +49,6 @@
               "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"MicrosoftGraph\")).AddInMemoryTokenCaches()"
-            },
-            {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi()",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddDownstreamWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\")).AddInMemoryTokenCaches()"
-            },
-            {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
               "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
@@ -114,12 +104,16 @@
         {
           "Block":"Authorize",
           "Options": []
+        },
+        {
+          "Block": "RequiredScope(RequiredScopesConfigurationKey = \"AzureAd:Scopes\")",
+          "Options": []
         }
       ],
       "ClassProperties": [
         {
           "Block": "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
-          "Options": ["Skip"]
+          "Options": ["NonMinimalApp"]
         },
         {
           "Block": "private readonly GraphServiceClient _graphServiceClient",
@@ -140,6 +134,35 @@
             }
           ]
         },
+        "WeatherForecastController": {
+          "Parameters": [ "ILogger<WeatherForecastController>" ],
+          "AddParameters" : [ 
+            {
+              "Block":"GraphServiceClient graphServiceClient",
+              "Options": [ "MicrosoftGraph"]
+            },
+            {
+              "Block":"IDownstreamWebApi downstreamWebApi",
+              "Options": [ "DownstreamApi"]
+            }
+          ],
+          "CodeChanges": [
+            {
+              "Block": "_graphServiceClient = graphServiceClient;",
+              "Options": [ "MicrosoftGraph" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              }
+            },
+            {
+              "Block": "_downstreamWebApi = downstreamWebApi;",
+              "Options": [ "DownstreamApi" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              }
+            }
+          ]
+        },
         "Get": {
           "Parameters": [ "IEnumerable<WeatherForecast>" ],
           "EditType": {
@@ -151,14 +174,30 @@
               "Append": true,
               "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
               "CodeFormatting": {
-                "NumberOfSpaces": 8
+                "NumberOfSpaces": 12
               },
               "Options": [ "MicrosoftGraph" ]
             },
             {
               "Append": true,
+              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              },
+              "Options" : [ "DownstreamApi"]
+            },
+            {
+              "InsertAfter": "await _downstreamWebApi.CallWebApiForUserAsync",
+              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12
+              },
+              "Options": [ "DownstreamApi" ]
+            },
+            {
+              "Append": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
-              "Options": [ "Skip" ]
+              "Options": [ "NonMinimalApp" ]
             }
           ]
         }
@@ -166,6 +205,16 @@
       "Usings": [
         "Microsoft.AspNetCore.Authorization",
         "Microsoft.Identity.Web.Resource"
+      ],
+      "UsingsWithOptions": [
+        {
+          "Block": "Microsoft.Graph",
+          "Options": [ "MicrosoftGraph" ]
+        },
+        {
+          "Block": "Microsoft.Identity.Web",
+          "Options": [ "DownstreamApi" ]
+        }
       ]
     }
   ] 

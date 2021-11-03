@@ -83,6 +83,7 @@ jobs:
         - ${{ if eq(parameters.enableSourceBuild, true) }}:
           - Source_Build_Complete
         pool:
+<<<<<<< HEAD
           # We don't use the collection uri here because it might vary (.visualstudio.com vs. dev.azure.com)
           ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
             name: VSEngSS-MicroBuild2022-1ES
@@ -95,3 +96,19 @@ jobs:
         runAsPublic: ${{ parameters.runAsPublic }}
         publishUsingPipelines: ${{ parameters.enablePublishUsingPipelines }}
         enablePublishBuildArtifacts: ${{ parameters.enablePublishBuildArtifacts }}
+=======
+          vmImage: 'windows-2019'
+        runAsPublic: ${{ parameters.runAsPublic }}
+        publishUsingPipelines: ${{ parameters.enablePublishUsingPipelines }}
+        enablePublishBuildArtifacts: ${{ parameters.enablePublishBuildArtifacts }}
+
+  - ${{ if eq(parameters.graphFileGeneration.enabled, true) }}:
+    - template: ../job/generate-graph-files.yml
+      parameters:
+        continueOnError: ${{ parameters.continueOnError }}
+        includeToolset: ${{ parameters.graphFileGeneration.includeToolset }}
+        dependsOn:
+          - Asset_Registry_Publish
+        pool:
+          vmImage: 'windows-2019'
+>>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))

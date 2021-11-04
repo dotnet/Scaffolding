@@ -18,7 +18,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         private readonly IFilesLocator _filesLocator;
         private readonly IFileSystem _fileSystem;
         private readonly ITemplating _templatingService;
-
+        private const string DisableNullable = "\n#nullable disable\n";
         public CodeGeneratorActionsService(
             ITemplating templatingService,
             IFilesLocator filesLocator,
@@ -50,7 +50,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         public async Task AddFileFromTemplateAsync(string outputPath, string templateName,
             IEnumerable<string> templateFolders,
-            object templateModel)
+            object templateModel,
+            bool addDisableNullable = false)
         {
             if (templateFolders == null)
             {
@@ -82,7 +83,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                     templateResult.ProcessingException.Message));
             }
 
-            using (var sourceStream = new MemoryStream(Encoding.UTF8.GetBytes(templateResult.GeneratedText)))
+            string editedText = templateResult.GeneratedText;
+            if (addDisableNullable)
+            {
+                editedText = editedText.Insert(0, DisableNullable);
+            }
+
+            using (var sourceStream = new MemoryStream(Encoding.UTF8.GetBytes(editedText)))
             {
                 await AddFileHelper(outputPath, sourceStream);
             }

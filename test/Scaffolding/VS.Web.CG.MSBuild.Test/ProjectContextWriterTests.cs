@@ -54,8 +54,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
-                ProjectContextWriter writer = new ProjectContextWriter();
-                Assert.Equal(expectedPath, writer.GetPath(nugetPath, nameAndVersion));
+                Assert.Equal(expectedPath, ProjectContextWriter.GetPath(nugetPath, nameAndVersion));
             }
         }
 
@@ -72,8 +71,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
-                ProjectContextWriter writer = new ProjectContextWriter();
-                Assert.Equal(expectedPath, writer.GetPath(nugetPath, nameAndVersion));
+                Assert.Equal(expectedPath, ProjectContextWriter.GetPath(nugetPath, nameAndVersion));
             }
         }
     }

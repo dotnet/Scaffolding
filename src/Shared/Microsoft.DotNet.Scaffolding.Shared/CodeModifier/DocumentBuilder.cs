@@ -668,8 +668,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     if (attributeList.Any())
                     {
                         var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
-                        var trailingTrivia = attributeListSyntax.GetTrailingTrivia().ToString();
-                        var leadingTrivia = attributeListSyntax.GetLeadingTrivia().ToString();
                         if (!leadingTrivia.ToString().Contains("\n"))
                         {
                             attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);                        

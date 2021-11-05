@@ -665,8 +665,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     }
                     if (attributeList.Any())
                     {
-                        syntaxList = syntaxList.Insert(0, SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
-                    }
+                        var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
+                        if (!leadingTrivia.ToString().Contains("\n"))
+                        {
+                            attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);                        
+                        }
+                        syntaxList = syntaxList.Insert(0, attributeListSyntax);
+                    }  
                 }
             }
             return syntaxList;   

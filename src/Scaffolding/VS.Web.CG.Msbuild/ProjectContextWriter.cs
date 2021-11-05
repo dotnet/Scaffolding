@@ -15,6 +15,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 {
     public class ProjectContextWriter : Build.Utilities.Task
     {
+        private const string EntityFrameworkCore = "Microsoft.EntityFrameworkCore";
+        private const string AspNetCoreIdentity = "Microsoft.AspNetCore.Identity";
+
         private const string TargetsProperty = "targets";
         private const string PackageFoldersProperty = "packageFolders";
         private const string DependencyProperty = "dependencies";
@@ -89,7 +92,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 AssemblyName = string.IsNullOrEmpty(this.AssemblyName) ? Path.GetFileName(this.AssemblyFullPath) : this.AssemblyName,
                 CompilationAssemblies = GetCompilationAssemblies(this.ResolvedReferences),
                 CompilationItems = this.CompilationItems.Select(i => i.ItemSpec),
-                PackageDependencies = GetPackageDependencies(this.ProjectAssetsFile),
+                PackageDependencies = GetPackageDependencies(this.ProjectAssetsFile, this.TargetFramework, this.TargetFrameworkMoniker),
                 Config = this.AssemblyFullPath + ".config",
                 Configuration = this.Configuration,
                 DepsFile = this.ProjectDepsFileName,
@@ -119,14 +122,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return true;
         }
 
-        private IEnumerable<DependencyDescription> GetPackageDependencies(string projectAssetsFile)
+        internal static IEnumerable<DependencyDescription> GetPackageDependencies(string projectAssetsFile, string tfm, string tfmMoniker)
         {
             IList<DependencyDescription> packageDependencies = new List<DependencyDescription>();
-            if (!string.IsNullOrEmpty(projectAssetsFile) && File.Exists(projectAssetsFile) && !string.IsNullOrEmpty(TargetFramework))
+            if (!string.IsNullOrEmpty(projectAssetsFile) && File.Exists(projectAssetsFile) && !string.IsNullOrEmpty(tfm))
             {
                 //target framework moniker for the current project. We use this to get all targets for said moniker.
-                var targetFramework = TargetFramework;
-                var targetFrameworkMoniker = TargetFrameworkMoniker;
+                var targetFramework = tfm;
+                var targetFrameworkMoniker = tfmMoniker;
+                if (string.IsNullOrEmpty(targetFrameworkMoniker))
+                {
+                    //if targetFrameworkMoniker is null, targetFramework is the TargetFrameworkMoniker (issue w/ IProjectContext sent from VS)
+                    targetFrameworkMoniker = tfm;
+                    targetFramework = ProjectModelHelper.GetShortTfm(tfm);
+                }
                 string json = File.ReadAllText(projectAssetsFile);
                 if (!string.IsNullOrEmpty(json) && !string.IsNullOrEmpty(targetFrameworkMoniker))
                 {
@@ -159,7 +168,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return packageDependencies;
         }
 
-        private IList<DependencyDescription> DeserializePackages(JsonElement packages, JsonElement packageFolderPath, string targetFrameworkMoniker)
+        internal static IEnumerable<ResolvedReference> GetScaffoldingAssemblies(IEnumerable<DependencyDescription> dependencies)
+        {
+            var compilationAssemblies = new List<ResolvedReference>();
+            foreach (var item in dependencies)
+            {
+                //only add Microsoft.EntityFrameworkCore.* or Microsoft.AspNetCore.Identity.* assemblies. Any others might be duplicates which cause in-memory compilation errors and those are the assemblies we care about.
+                if (item.Name.Contains(EntityFrameworkCore, StringComparison.OrdinalIgnoreCase) || item.Name.Contains(AspNetCoreIdentity, StringComparison.OrdinalIgnoreCase))
+                {
+                    var name = $"{item.Name}.dll";
+                    //costly search but we're only doing it a handful of times.
+                    var file = Directory.GetFiles(item.Path, name, SearchOption.AllDirectories).FirstOrDefault();
+                    if (file != null)
+                    {
+                        var resolvedPath = file.ToString();
+                        var reference = new ResolvedReference(name, resolvedPath);
+                        compilationAssemblies.Add(reference);
+                    }
+                }
+            }
+            return compilationAssemblies;
+        }
+
+        private static IList<DependencyDescription> DeserializePackages(JsonElement packages, JsonElement packageFolderPath, string targetFrameworkMoniker)
         {
             IList<DependencyDescription> packageDependencies = new List<DependencyDescription>();
             var packagesEnumerator = packages.EnumerateObject();
@@ -172,7 +203,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 if (!string.IsNullOrEmpty(fullName) && !string.IsNullOrEmpty(path) && package.Value.TryGetProperty(TypeProperty, out var type))
                 {
                     //fullName is in the format {Package Name}/{Version} for example "System.Text.MoreText/2.1.1" Split into tuple. 
-                    Tuple<string, string> nameAndVersion = GetName(fullName);
+                    Tuple<string, string> nameAndVersion = ProjectContextWriter.GetName(fullName);
                     if (nameAndVersion != null)
                     {
                         var dependencyTypeValue = type.ToString();
@@ -182,7 +213,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                             DependencyTypeEnum = (DependencyType)dependencyType;
                         }
 
-                        string packagePath = GetPath(path, nameAndVersion);
+                        string packagePath = ProjectContextWriter.GetPath(path, nameAndVersion);
                         DependencyDescription dependency = new DependencyDescription(nameAndVersion.Item1,
                                                                                         nameAndVersion.Item2,
                                                                                         Directory.Exists(packagePath) ? packagePath : string.Empty,
@@ -210,7 +241,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return packageDependencies;
         }
 
-        internal string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
+        internal static string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
         {
             string path = string.Empty;
             if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
@@ -222,7 +253,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             return path;
         }
 
-        private Tuple<string, string> GetName(string fullName)
+        private static Tuple<string, string> GetName(string fullName)
         {
             Tuple<string, string> nameAndVersion = null;
             if (!string.IsNullOrEmpty(fullName))

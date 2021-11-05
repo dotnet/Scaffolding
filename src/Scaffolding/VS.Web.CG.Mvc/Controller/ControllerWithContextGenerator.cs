@@ -59,7 +59,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
-            EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite, CalledFromCommandline);
+
+            if (!CalledFromCommandline)
+            {
+                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite);
+            }
+            
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 

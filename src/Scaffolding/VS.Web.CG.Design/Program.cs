@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
@@ -71,7 +72,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                     {
                         var messageOrchestrator = new MessageOrchestrator(client, logger);
                         var projectInformation = messageOrchestrator.GetProjectInformation();
-
+                        string projectAssetsFile = ProjectModelHelper.GetProjectAssetsFile(projectInformation);
+                        //fix package dependencies sent from VS
+                        projectInformation = projectInformation.AddPackageDependencies(projectAssetsFile);
                         var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
                         var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
                         CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,

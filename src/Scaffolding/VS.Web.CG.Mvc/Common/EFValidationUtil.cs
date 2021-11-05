@@ -12,21 +12,27 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
     {
         const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
         const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
+        const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
 
-        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, bool useSqlite, bool calledFromCommandline)
+        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, bool useSqlite)
         {
             var isEFDesignPackagePresent = dependencies
                 .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
-            if (!isEFDesignPackagePresent && calledFromCommandline)
+            if (!isEFDesignPackagePresent)
             {
-                 throw new InvalidOperationException(
+                throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}"));
             }
-            if (!useSqlite)
+            if (useSqlite)
+            {
+                ValidateSqliteDependency(dependencies);
+            }
+            else
             {
                 ValidateSqlServerDependency(dependencies);
-            } 
+            }
+            
         }
 
         internal static void ValidateSqlServerDependency(IEnumerable<DependencyDescription> dependencies)
@@ -38,6 +44,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallSqlPackage, $"{SqlServerPackageName}."));
+            }
+        }
+
+        internal static void ValidateSqliteDependency(IEnumerable<DependencyDescription> dependencies)
+        {
+            var isSqlServerPackagePresent = dependencies
+                .Any(package => package.Name.Equals(SqlitePackageName, StringComparison.OrdinalIgnoreCase));
+
+            if (!isSqlServerPackagePresent)
+            {
+                throw new InvalidOperationException(
+                    string.Format(MessageStrings.InstallSqlPackage, $"{SqlitePackageName}."));
             }
         }
     }

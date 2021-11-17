@@ -66,6 +66,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             commandLineBuilder.UseDefaults();
 
             var parser = commandLineBuilder.Build();
+            System.Diagnostics.Debugger.Launch();
             return await parser.InvokeAsync(args);
         }
 
@@ -73,6 +74,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         {
             if (provisioningToolOptions != null)
             {
+                Helper.AddPackage();
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.LIST_AAD_APPS_COMMAND, provisioningToolOptions);
                 await msAADTool.Run();
                 return 0;
@@ -85,6 +87,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.LIST_TENANTS_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -96,6 +99,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.LIST_SERVICE_PRINCIPALS_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -107,6 +111,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.REGISTER_APPLICATIION_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -118,6 +123,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_APP_REGISTRATION_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -129,6 +135,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UNREGISTER_APPLICATION_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -140,6 +147,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.CREATE_APP_REGISTRATION_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -151,6 +159,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.UPDATE_PROJECT_COMMAND, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }
@@ -162,6 +171,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (provisioningToolOptions != null)
             {
                 IMsAADTool msAADTool = MsAADToolFactory.CreateTool(Commands.ADD_CLIENT_SECRET, provisioningToolOptions);
+                Helper.AddPackage();
                 await msAADTool.Run();
                 return 0;
             }

@@ -1,4 +1,4 @@
-set VERSION=1.0.0-dev
+set VERSION=1.0.1-dev
 set NUPKG=artifacts\packages\Debug\Shipping\
 
 pushd %~dp0
@@ -6,7 +6,6 @@ call cd ..
 set SRC_DIR=%cd%
 
 call taskkill /f /im dotnet.exe
-call rd /Q /S artifacts
 
 call build
 call dotnet tool uninstall -g Microsoft.dotnet-msidentity

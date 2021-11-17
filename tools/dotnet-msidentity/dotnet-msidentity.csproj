@@ -54,10 +54,30 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj" />
+    <Reference Include="Microsoft.DotNet.MSIdentity">
+      <HintPath>$(ArtifactsBinDir)\Microsoft.DotNet.MSIdentity\Debug\net6.0\Microsoft.DotNet.MSIdentity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DotNet.MSIdentity">
+      <HintPath>$(ArtifactsBinDir)\Microsoft.DotNet.MSIdentity\Debug\net5.0\Microsoft.DotNet.MSIdentity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DotNet.MSIdentity">
+      <HintPath>$(ArtifactsBinDir)\Microsoft.DotNet.MSIdentity\Debug\netcoreapp3.1\Microsoft.DotNet.MSIdentity.dll</HintPath>
+    </Reference>
+
+    <Reference Include="Microsoft.DotNet.Scaffolding.Shared">
+      <HintPath>$(ArtifactsBinDir)\Microsoft.DotNet.Scaffolding.Shared\Debug\net6.0\Microsoft.DotNet.Scaffolding.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DotNet.MSIdentity">
+      <HintPath>$(ArtifactsBinDir)\Microsoft.DotNet.Scaffolding.Shared\Debug\net5.0\Microsoft.DotNet.Scaffolding.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DotNet.MSIdentity">
+      <HintPath>$(ArtifactsBinDir)\Microsoft.DotNet.Scaffolding.Shared\Debug\netcoreapp3.1\Microsoft.DotNet.Scaffolding.Shared.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

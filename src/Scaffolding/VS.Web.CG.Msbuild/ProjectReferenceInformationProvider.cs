@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -41,6 +41,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 addedProjects.Add(currentProjectPath);
                 // If the project is already loaded, it just returns the loaded project.
                 // If it is not already loaded, it will load using global properties, toolsets etc. and return.
+                //System.Diagnostics.Debugger.Launch();
                 var currentProject = ProjectCollection.GlobalProjectCollection.LoadProject(currentProjectPath);
                 if (currentProject == null)
                 {

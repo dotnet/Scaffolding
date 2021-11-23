@@ -14,15 +14,40 @@
     <EmbeddedResource Include="..\..\Shared\Microsoft.DotNet.Scaffolding.Shared\General\**\*.resx">
       <Link>Shared\%(RecursiveDir)%(FileName).resx</Link>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
+    <!-- <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\ProjectReferenceInformation.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\IProjectContext.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\DependencyDescription.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\ResolvedReference.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\Dependency.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\DependencyType.cs">
+      <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    <Compile Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Msbuild\ProjectReferenceInformationProvider.cs">
+      <Link>Scaffolding\%(RecursiveDir)%(FileName)</Link>
+    </Compile>
+    
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\General\Requires.cs">
+      <Link>Shared\%(RecursiveDir)%(FileName)</Link>
+    </Compile> 
+    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />-->
     <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
+    <PackageReference Include="Microsoft.Build" ExcludeAssets="Runtime" Version="$(MicrosoftBuildNet6PackageVersion)" />
   </ItemGroup>
 
 </Project>

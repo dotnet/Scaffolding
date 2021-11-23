@@ -1,0 +1,133 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Determining projects to restore...
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj (in 517 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\TestApps\StablePackage\StablePackage.csproj (in 645 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\TestApps\PreviousPackage\PreviousPackage.csproj (in 655 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Core\VS.Web.CG.Core.csproj (in 691 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Design-anycpu\VS.Web.CG.Design-anycpu.csproj (in 674 ms).
+  Restored C:\Users\decho\Scaffolding\test\Shared\Microsoft.DotNet.Scaffolding.Shared.Tests\Microsoft.DotNet.Scaffolding.Shared.Tests.csproj (in 494 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.Core.FunctionalTest\VS.Web.CG.Core.FunctionalTests.Tests.csproj (in 1.2 sec).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.Tools.Test\VS.Web.CG.Tools.Tests.csproj (in 459 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.Templating.Test\VS.Web.CG.Templating.Tests.csproj (in 663 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.Mvc.Test\VS.Web.CG.Mvc.Tests.csproj (in 308 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.Sources.Test\VS.Web.CG.Sources.Tests.csproj (in 691 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.MSBuild.Test\VS.Web.CG.MSBuild.Tests.csproj (in 191 ms).
+  Restored C:\Users\decho\Scaffolding\tools\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj (in 1.81 sec).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.EFCore.Test\VS.Web.CG.EFCore.Tests.csproj (in 452 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Utils\VS.Web.CG.Utils.csproj (in 183 ms).
+  Restored C:\Users\decho\Scaffolding\src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj (in 1.92 sec).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\VS.Web.CG.Core.Test\VS.Web.CG.Core.Tests.csproj (in 393 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG\VS.Web.CG.csproj (in 293 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Design-arm64\VS.Web.CG.Design-arm64.csproj (in 1.28 sec).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Templating\VS.Web.CG.Templating.csproj (in 344 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj (in 250 ms).
+  Restored C:\Users\decho\Scaffolding\tools\dotnet-scaffold\dotnet-scaffold.csproj (in 440 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Design\VS.Web.CG.Design.csproj (in 219 ms).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.EFCore\VS.Web.CG.EFCore.csproj (in 272 ms).
+  Restored C:\Users\decho\Scaffolding\test\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity.UnitTests.Tests\Microsoft.DotNet.MSIdentity.UnitTests.Tests.csproj (in 516 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\E2E_Test\E2E_Test.Tests.csproj (in 520 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\TestApps\ClassLibrary2\ClassLibrary2.csproj (in 56 ms).
+  Restored C:\Users\decho\Scaffolding\test\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity.Tests\Microsoft.DotNet.MSIdentity.Tests.csproj (in 578 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\TestApps\ClassLibrary1\ClassLibrary1.csproj (in 26 ms).
+  Restored C:\Users\decho\Scaffolding\tools\dotnet-msidentity\dotnet-msidentity.csproj (in 829 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj (in 297 ms).
+  Restored C:\Users\decho\Scaffolding\test\Scaffolding\TestApps\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.csproj (in 289 ms).
+  Restored C:\Users\decho\Scaffolding\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj (in 1.02 sec).
+  Restored C:\Users\decho\Scaffolding\src\Scaffolding\VS.Web.CG.Design-arm\VS.Web.CG.Design-arm.csproj (in 666 ms).
+  ClassLibrary1 -> C:\Users\decho\Scaffolding\artifacts\bin\ClassLibrary1\Debug\net6.0\ClassLibrary1.dll
+  VS.Web.CG.Msbuild -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Msbuild\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll
+  Microsoft.DotNet.Scaffolding.Shared -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.Scaffolding.Shared\Debug\net6.0\Microsoft.DotNet.Scaffolding.Shared.dll
+  VS.Web.CG.Utils -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Utils\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Utils.dll
+  ClassLibrary2 -> C:\Users\decho\Scaffolding\artifacts\bin\ClassLibrary2\Debug\net6.0\ClassLibrary2.dll
+  Microsoft.DotNet.Scaffolding.Shared -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.Scaffolding.Shared\Debug\netcoreapp3.1\Microsoft.DotNet.Scaffolding.Shared.dll
+  Microsoft.DotNet.Scaffolding.Shared -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.Scaffolding.Shared\Debug\net5.0\Microsoft.DotNet.Scaffolding.Shared.dll
+  StablePackage -> C:\Users\decho\Scaffolding\artifacts\bin\StablePackage\Debug\net6.0\StablePackage.dll
+  PreviousPackage -> C:\Users\decho\Scaffolding\artifacts\bin\PreviousPackage\Debug\net6.0\PreviousPackage.dll
+  Microsoft.DotNet.Scaffolding.Shared.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.Scaffolding.Shared.Tests\Debug\net6.0\Microsoft.DotNet.Scaffolding.Shared.Tests.dll
+  VS.Web.CG.Templating -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Templating\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Templating.dll
+  Microsoft.DotNet.MSIdentity -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity\Debug\netcoreapp3.1\Microsoft.DotNet.MSIdentity.dll
+  VS.Web.CG.MSBuild.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.MSBuild.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test.dll
+  Microsoft.DotNet.MSIdentity -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity\Debug\net5.0\Microsoft.DotNet.MSIdentity.dll
+  dotnet-msidentity -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-msidentity\Debug\net5.0\dotnet-msidentity.dll
+  VS.Web.CG.Core -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.dll
+  VS.Web.CG.Templating.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Templating.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.dll
+  VS.Web.CG.Core.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.dll
+  VS.Web.CG.Sources.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Sources.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.dll
+  Microsoft.DotNet.MSIdentity -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity\Debug\net6.0\Microsoft.DotNet.MSIdentity.dll
+  dotnet-aspnet-codegenerator -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-aspnet-codegenerator\Debug\net6.0\dotnet-aspnet-codegenerator.dll
+  dotnet-msidentity -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-msidentity\Debug\net6.0\dotnet-msidentity.dll
+  VS.Web.CG.EFCore -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.EFCore\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.dll
+  dotnet-msidentity -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-msidentity\Debug\netcoreapp3.1\dotnet-msidentity.dll
+  VS.Web.CG.Tools.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Tools.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test.dll
+  E2E_Test.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\E2E_Test.Tests\Debug\net6.0\E2E_Test.Tests.dll
+  dotnet-scaffold -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-scaffold\Debug\net6.0\dotnet-scaffold.dll
+  VS.Web.CG -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.dll
+  VS.Web.CG.EFCore.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.EFCore.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.dll
+  Microsoft.DotNet.MSIdentity.UnitTests.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity.UnitTests.Tests\Debug\net6.0\Microsoft.DotNet.MSIdentity.UnitTests.Tests.dll
+  Microsoft.DotNet.MSIdentity.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity.Tests\Debug\net6.0\Microsoft.DotNet.MSIdentity.Tests.dll
+  VS.Web.CG.Mvc -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Mvc\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.dll
+  ModelTypesLocatorTestClassLibrary -> C:\Users\decho\Scaffolding\artifacts\bin\ModelTypesLocatorTestClassLibrary\Debug\net6.0\ModelTypesLocatorTestClassLibrary.dll
+  VS.Web.CG.Design-anycpu -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Design-anycpu\Debug\net6.0\dotnet-aspnet-codegenerator-design.dll
+  VS.Web.CG.Mvc.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Mvc.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.dll
+  VS.Web.CG.Design -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Design\Debug\net6.0\dotnet-aspnet-codegenerator-design.dll
+  VS.Web.CG.Design-arm -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Design-arm\Debug\net6.0\win-arm\dotnet-aspnet-codegenerator-design.dll
+  VS.Web.CG.Design-arm64 -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Design-arm64\Debug\net6.0\win-arm64\dotnet-aspnet-codegenerator-design.dll
+  ModelTypesLocatorTestWebApp -> C:\Users\decho\Scaffolding\artifacts\bin\ModelTypesLocatorTestWebApp\Debug\net6.0\ModelTypesLocatorTestWebApp.dll
+  VS.Web.CG.Core.FunctionalTests.Tests -> C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core.FunctionalTests.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest.dll
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\E2E_Test.Tests\Debug\net6.0\E2E_Test.Tests.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Tools.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Templating.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Sources.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.EFCore.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Tools.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.MSBuild.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Templating.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\E2E_Test.Tests\Debug\net6.0\E2E_Test.Tests.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core.FunctionalTests.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity.Tests\Debug\net6.0\Microsoft.DotNet.MSIdentity.Tests.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Mvc.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity.Tests\Debug\net6.0\Microsoft.DotNet.MSIdentity.Tests.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity.UnitTests.Tests\Debug\net6.0\Microsoft.DotNet.MSIdentity.UnitTests.Tests.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Sources.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.dll [net6.0|x64]
+  Running tests: C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.Scaffolding.Shared.Tests\Debug\net6.0\Microsoft.DotNet.Scaffolding.Shared.Tests.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.MSIdentity.UnitTests.Tests\Debug\net6.0\Microsoft.DotNet.MSIdentity.UnitTests.Tests.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.EFCore.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\Microsoft.DotNet.Scaffolding.Shared.Tests\Debug\net6.0\Microsoft.DotNet.Scaffolding.Shared.Tests.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Core.FunctionalTests.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.Mvc.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.dll [net6.0|x64]
+  Tests succeeded: C:\Users\decho\Scaffolding\artifacts\bin\VS.Web.CG.MSBuild.Tests\Debug\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test.dll [net6.0|x64]
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Utils.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Utils.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Templating.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Core.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Templating.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Core.6.0.1-dev.symbols.nupkg'.
+  dotnet-aspnet-codegenerator -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-aspnet-codegenerator\Debug\net6.0\dotnet-aspnet-codegenerator.dll
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.DotNet.Scaffolding.Shared.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.DotNet.Scaffolding.Shared.6.0.1-dev.symbols.nupkg'.
+  dotnet-scaffold -> C:\Users\decho\Scaffolding\artifacts\bin\dotnet-scaffold\Debug\net6.0\dotnet-scaffold.dll
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Design.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGeneration.Design.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\dotnet-aspnet-codegenerator.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.dotnet-scaffold.6.0.1-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\dotnet-aspnet-codegenerator.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.DotNet.MSIdentity.1.0.0-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.DotNet.MSIdentity.1.0.0-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.dotnet-scaffold.6.0.1-dev.symbols.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.dotnet-msidentity.1.0.0-dev.nupkg'.
+  Successfully created package 'C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping\Microsoft.dotnet-msidentity.1.0.0-dev.symbols.nupkg'.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:03:42.44

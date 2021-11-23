@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!--
    NOTE: Do not add package/ project references to this file.
    Edit the Shared.proj file to add additional package/ project references.
@@ -23,6 +23,7 @@
   
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(OutputPath)$(AssemblyName).dll;

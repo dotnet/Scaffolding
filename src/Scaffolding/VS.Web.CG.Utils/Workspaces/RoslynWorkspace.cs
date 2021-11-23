@@ -3,15 +3,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
+using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Workspaces;
 using PInfo = Microsoft.CodeAnalysis.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
@@ -31,14 +32,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             : base(MefHostServices.DefaultHost, "Custom")
         {
             Requires.NotNull(projectInformation, nameof(projectInformation));
-
+            System.Diagnostics.Debugger.Launch();
             var id = AddProject(projectInformation, configuration);
-
+            var compilationItems = projectInformation.CompilationItems.Where(c => c.Contains("projwithmodel"));
             // Since we have resolved all references, we can directly use them as MetadataReferences.
             // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
-            if (projectInformation.ProjectReferenceInformation != null)
+            if (!MSBuildLocator.IsRegistered)
             {
-                foreach (var projectReference in projectInformation.ProjectReferenceInformation)
+                MSBuildLocator.RegisterDefaults();
+            }
+            var projReferenceInformation = RoslynWorkspaceHelper.GetProjectReferenceInformation(projectInformation.ProjectReferences);
+
+            if (projReferenceInformation != null && projReferenceInformation.Any())
+            {
+                foreach (var projectReference in projReferenceInformation)
                 {
                     AddProject(projectReference, configuration);
                 }

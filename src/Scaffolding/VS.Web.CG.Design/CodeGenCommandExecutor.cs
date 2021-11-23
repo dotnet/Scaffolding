@@ -72,6 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
         private void AddFrameworkServices(ServiceProvider serviceProvider, IProjectContext projectInformation)
         {
+            //System.Diagnostics.Debugger.Launch();
             var applicationInfo = new ApplicationInfo(
                 projectInformation.ProjectName,
                 Path.GetDirectoryName(projectInformation.ProjectFullPath));

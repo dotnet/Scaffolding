@@ -13,22 +13,30 @@
     <!-- Ref packages -->
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>6.0.0</VersionPrefix>
+    <VersionPrefix>6.0.1</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
     -->
-    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
+    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
-    <MicrosoftBuildPackageVersion>16.9.0 </MicrosoftBuildPackageVersion>
+    <MicrosoftBuildNet6PackageVersion>17.0.0 </MicrosoftBuildNet6PackageVersion>
     <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCorePackageVersion>16.9.0 </MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCoreNet6PackageVersion>17.0.0 </MicrosoftBuildUtilitiesCoreNet6PackageVersion>
+    <!-- Microsoft.Build-->
+    <MicrosoftBuildNet5PackageVersion>16.11.0 </MicrosoftBuildNet5PackageVersion>
+    <!-- Microsoft.Build.Utilities-->
+    <MicrosoftBuildUtilitiesCoreNet5PackageVersion>16.11.0 </MicrosoftBuildUtilitiesCoreNet5PackageVersion>
+    <!-- Microsoft.Build-->
+    <MicrosoftBuildNet31PackageVersion>16.9.0 </MicrosoftBuildNet31PackageVersion>
+    <!-- Microsoft.Build.Utilities-->
+    <MicrosoftBuildUtilitiesCoreNet31PackageVersion>16.9.0 </MicrosoftBuildUtilitiesCoreNet31PackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
@@ -63,7 +71,9 @@
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
     <MicrosoftAspNetCorePackageVersion>6.0.0</MicrosoftAspNetCorePackageVersion>
-    <MicrosoftBuildRuntimePackageVersion>16.9.0</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildRuntimeNet6PackageVersion>17.0.0</MicrosoftBuildRuntimeNet6PackageVersion>
+    <MicrosoftBuildRuntimeNet5PackageVersion>16.11.0</MicrosoftBuildRuntimeNet5PackageVersion>
+    <MicrosoftBuildRuntimeNet31PackageVersion>16.9.0</MicrosoftBuildRuntimeNet31PackageVersion>
     <!-- Microsoft.AspNetCore.Mvc -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreMvcPackageVersion>6.0.0</MicrosoftAspNetCoreMvcPackageVersion>

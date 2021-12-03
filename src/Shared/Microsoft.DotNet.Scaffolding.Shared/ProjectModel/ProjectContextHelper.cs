@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Microsoft.Build.Framework;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
@@ -91,7 +90,33 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             return compilationAssemblies;
         }
 
-        private static IList<DependencyDescription> DeserializePackages(JsonElement packages, JsonElement packageFolderPath, string targetFrameworkMoniker)
+        internal static string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
+        {
+            string path = string.Empty;
+            if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
+            {
+                path = Path.Combine(nugetPath, nameAndVersion.Item1, nameAndVersion.Item2);
+                path = Directory.Exists(path) ? path : Path.Combine(nugetPath, nameAndVersion.Item1.ToLower(), nameAndVersion.Item2);
+            }
+
+            return path;
+        }
+
+        internal static Tuple<string, string> GetName(string fullName)
+        {
+            Tuple<string, string> nameAndVersion = null;
+            if (!string.IsNullOrEmpty(fullName))
+            {
+                string[] splitName = fullName.Split("/");
+                if (splitName.Length > 1)
+                {
+                    nameAndVersion = new Tuple<string, string>(splitName[0], splitName[1]);
+                }
+            }
+            return nameAndVersion;
+        }
+
+        internal static IList<DependencyDescription> DeserializePackages(JsonElement packages, JsonElement packageFolderPath, string targetFrameworkMoniker)
         {
             IList<DependencyDescription> packageDependencies = new List<DependencyDescription>();
             var packagesEnumerator = packages.EnumerateObject();
@@ -140,32 +165,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             }
 
             return packageDependencies;
-        }
-
-        internal static string GetPath(string nugetPath, Tuple<string, string> nameAndVersion)
-        {
-            string path = string.Empty;
-            if (!string.IsNullOrEmpty(nugetPath) && !string.IsNullOrEmpty(nameAndVersion.Item1) && !string.IsNullOrEmpty(nameAndVersion.Item2))
-            {
-                path = Path.Combine(nugetPath, nameAndVersion.Item1, nameAndVersion.Item2);
-                path = Directory.Exists(path) ? path : Path.Combine(nugetPath, nameAndVersion.Item1.ToLower(), nameAndVersion.Item2);
-            }
-
-            return path;
-        }
-
-        private static Tuple<string, string> GetName(string fullName)
-        {
-            Tuple<string, string> nameAndVersion = null;
-            if (!string.IsNullOrEmpty(fullName))
-            {
-                string[] splitName = fullName.Split("/");
-                if (splitName.Length > 1)
-                {
-                    nameAndVersion = new Tuple<string, string>(splitName[0], splitName[1]);
-                }
-            }
-            return nameAndVersion;
         }
     }
 }

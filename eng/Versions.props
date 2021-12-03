@@ -19,7 +19,7 @@
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
     -->
-    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
+    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
   </PropertyGroup>
   <PropertyGroup>
@@ -63,9 +63,7 @@
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
     <MicrosoftAspNetCorePackageVersion>6.0.0</MicrosoftAspNetCorePackageVersion>
-    <MicrosoftBuildRuntimeNet6PackageVersion>17.0.0</MicrosoftBuildRuntimeNet6PackageVersion>
-    <MicrosoftBuildRuntimeNet5PackageVersion>16.11.0</MicrosoftBuildRuntimeNet5PackageVersion>
-    <MicrosoftBuildRuntimeNet31PackageVersion>16.9.0</MicrosoftBuildRuntimeNet31PackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>17.0.0</MicrosoftBuildRuntimePackageVersion>
     <!-- Microsoft.AspNetCore.Mvc -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreMvcPackageVersion>6.0.0</MicrosoftAspNetCoreMvcPackageVersion>

@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" PrivateAssets="All" ExcludeAssets="Runtime" Condition="'$(TargetFramework)' == 'net6.0'" Version="$(MicrosoftBuildNet6PackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" ExcludeAssets="Runtime" Condition="'$(TargetFramework)' == 'net6.0'" Version="$(MicrosoftBuildUtilitiesCoreNet6PackageVersion)" />
+    <PackageReference Include="Microsoft.Build" PrivateAssets="All" ExcludeAssets="Runtime" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" ExcludeAssets="Runtime" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" PrivateAssets="All">
       <!-- This version needs to line up with what is bundled in MSBuild and Visual Studio -->
       <NoWarn>KRB4002</NoWarn>

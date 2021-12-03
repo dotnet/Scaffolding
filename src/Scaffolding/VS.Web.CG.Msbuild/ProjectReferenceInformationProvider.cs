@@ -41,7 +41,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 addedProjects.Add(currentProjectPath);
                 // If the project is already loaded, it just returns the loaded project.
                 // If it is not already loaded, it will load using global properties, toolsets etc. and return.
-                //System.Diagnostics.Debugger.Launch();
                 var currentProject = ProjectCollection.GlobalProjectCollection.LoadProject(currentProjectPath);
                 if (currentProject == null)
                 {

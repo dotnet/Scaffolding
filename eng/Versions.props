@@ -26,17 +26,9 @@
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.0</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
-    <MicrosoftBuildNet6PackageVersion>17.0.0 </MicrosoftBuildNet6PackageVersion>
+    <MicrosoftBuildPackageVersion>17.0.0 </MicrosoftBuildPackageVersion>
     <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCoreNet6PackageVersion>17.0.0 </MicrosoftBuildUtilitiesCoreNet6PackageVersion>
-    <!-- Microsoft.Build-->
-    <MicrosoftBuildNet5PackageVersion>16.11.0 </MicrosoftBuildNet5PackageVersion>
-    <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCoreNet5PackageVersion>16.11.0 </MicrosoftBuildUtilitiesCoreNet5PackageVersion>
-    <!-- Microsoft.Build-->
-    <MicrosoftBuildNet31PackageVersion>16.9.0 </MicrosoftBuildNet31PackageVersion>
-    <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCoreNet31PackageVersion>16.9.0 </MicrosoftBuildUtilitiesCoreNet31PackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>17.0.0 </MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->

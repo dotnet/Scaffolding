@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
-    <Reference Include="$(ArtifactsBinDir)\Microsoft.DotNet.Scaffolding.Shared\$(Configuration)\net6.0\Microsoft.DotNet.Scaffolding.Shared.dll" />
   </ItemGroup>
 
 </Project>

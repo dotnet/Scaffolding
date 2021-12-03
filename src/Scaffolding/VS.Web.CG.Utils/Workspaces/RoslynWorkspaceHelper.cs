@@ -15,11 +15,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils.Workspaces
             List<ProjectReferenceInformation> projectReferenceInformation = new List<ProjectReferenceInformation>();
             if (projectReferenceStrings != null && projectReferenceStrings.Any())
             {   
-                //projectReferenceInformation = ProjectReferenceInformationProvider.GetProjectReferenceInformation("C:\\Users\\decho\\Test Scripts\\test4\\test4.csproj", projectReferenceStrings).ToList();
                 foreach (string projectReferenceString in projectReferenceStrings)
                 {
                     var currentProject = GetMsBuildProject(Path.GetFullPath(projectReferenceString));
-                    projectReferenceInformation.Add(GetProjectInformation(currentProject));
+                    if (currentProject != null)
+                    {
+                        projectReferenceInformation.Add(GetProjectInformation(currentProject));
+                    }
                 }
             }
             return projectReferenceInformation;

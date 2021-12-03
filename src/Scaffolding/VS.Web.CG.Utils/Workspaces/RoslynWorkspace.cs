@@ -32,9 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             : base(MefHostServices.DefaultHost, "Custom")
         {
             Requires.NotNull(projectInformation, nameof(projectInformation));
-            System.Diagnostics.Debugger.Launch();
             var id = AddProject(projectInformation, configuration);
-            var compilationItems = projectInformation.CompilationItems.Where(c => c.Contains("projwithmodel"));
             // Since we have resolved all references, we can directly use them as MetadataReferences.
             // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
             if (!MSBuildLocator.IsRegistered)

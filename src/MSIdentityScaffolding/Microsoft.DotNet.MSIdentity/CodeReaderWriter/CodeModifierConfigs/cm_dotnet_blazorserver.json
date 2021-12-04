@@ -2,52 +2,131 @@
   "Identifier": "dotnet-blazorserver",
   "Files": [
     {
-      "FileName": "Startup.cs",
+      "FileName": "Program.cs",
       "Methods": {
-        "Configure": {
-          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
+        "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
-              "Block": "IApplicationBuilder.UseAuthentication()"
+              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ') ?? WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ');\n",
+              "Options": [
+                "DownstreamApi",
+                "MicrosoftGraph"
+              ],
+              "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddAuthentication",
+                "WebApplication.CreateBuilder.Services.AddAuthorization",
+                "WebApplication.CreateBuilder.Services.AddRazorPages()",
+                "WebApplication.CreateBuilder.Build()"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
-              "InsertAfter": "IApplicationBuilder.UseAuthentication()",
-              "Block": "IApplicationBuilder.UseAuthorization()"
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddAuthorization",
+                "WebApplication.CreateBuilder.Services.AddRazorPages()",
+                "WebApplication.CreateBuilder.Build()"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
-              "Parent": "IApplicationBuilder.UseEndpoints",
-              "Type": "InLambdaBlock",
-              "Block": "endpoints.MapControllers()"
-            }
-          ]
-        },
-        "ConfigureServices": {
-          "Parameters": [ "IServiceCollection" ],
-          "CodeChanges": [
-            {
-              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)"
+              "Parent": "AddMicrosoftIdentityWebApp",
+              "Options": [
+                "MemberAccess",
+                "MicrosoftGraph",
+                "DownstreamApi"
+              ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "CodeFormatting": {
+                "NumberOfSpaces": 8,
+                "Newline": true
+              }
             },
             {
-              "Block": "IServiceCollection.AddControllersWithViews().AddMicrosoftIdentityUI()",
-              "InsertAfter":"IApplicationBuilder.AddAuthentication()"
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Options": [
+                "MemberAccess",
+                "MicrosoftGraph"
+              ],
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
             },
             {
-              "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
-              "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"))"
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Options": [
+                "MemberAccess",
+                "DownstreamApi"
+              ],
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
             },
             {
-              "Block": "IServiceCollection.AddAuthorization(options => { options.FallbackPolicy = options.DefaultPolicy; })"
+              "Parent": "AddDownstreamWebApi",
+              "Options": [
+                "MemberAccess",
+                "DownstreamApi"
+              ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
             },
             {
-              "Block": "IServiceCollection.AddServerSideBlazor()",
-              "InsertAfter":"IServiceCollection.AddRazorPages()"
+              "Parent": "AddMicrosoftGraph",
+              "Options": [
+                "MemberAccess",
+                "MicrosoftGraph"
+              ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
             },
             {
-              "Parent": "IServiceCollection.AddServerSideBlazor()",
-              "Type": "MemberAccess",
-              "Block": "AddMicrosoftIdentityConsentHandler()"
+              "CheckBlock": "WebApplication.CreateBuilder.Services.AddAuthorization",
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
+              "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddRazorPages()",
+                "WebApplication.CreateBuilder.Build()"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
+              "Options": [
+                "MemberAccess"
+              ],
+              "Block": "AddMicrosoftIdentityUI()"
+            },
+            {
+              "InsertAfter": "app.UseRouting();",
+              "Block": "app.UseAuthentication();",
+              "InsertBefore": [
+                "app.UseAuthorization();",
+                "app.Run();"
+              ]
+            },
+            {
+              "InsertAfter": "app.MapRazorPages();",
+              "Block": "app.MapControllers();",
+              "InsertBefore": [
+                "app.Run();"
+              ]
             }
           ]
         }
@@ -59,6 +138,25 @@
         "Microsoft.AspNetCore.Authentication.OpenIdConnect",
         "Microsoft.AspNetCore.Authorization",
         "Microsoft.AspNetCore.Mvc.Authorization"
+      ]
+    },
+    {
+      "FileName": "NavMenu.razor",
+      "Options": [
+        "MicrosoftGraph",
+        "DownstreamApi"
+      ],
+      "RazorChanges": [
+        {
+          "ReplaceToken": "data\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>\r\n\r\n@code ",
+          "Block": "data\r\n            </NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\\\">\r\n            <NavLink class=\"nav-link\" href=\"showprofile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>\r\n\r\n@code ",
+          "Options": [
+            "MicrosoftGraph"
+          ],
+          "CodeFormatting": {
+            "NumberOfSpaces": 4
+          }
+        }
       ]
     }
   ]

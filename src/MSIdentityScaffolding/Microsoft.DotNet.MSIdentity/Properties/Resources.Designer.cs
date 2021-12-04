@@ -167,6 +167,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] dotnet_blazor_server {
+            get {
+                object obj = ResourceManager.GetObject("dotnet_blazor_server", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] dotnet_blazorwasm {
             get {
                 object obj = ResourceManager.GetObject("dotnet_blazorwasm", resourceCulture);

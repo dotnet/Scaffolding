@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,7 +51,6 @@ namespace Microsoft.DotNet.MSIdentity.Project
             ReadProjectDescriptions();
 
             // TODO: could be both a Web app and WEB API.
-
             foreach (ProjectDescription projectDescription in projectDescriptions.Where(p => p.GetMergedMatchesForProjectType(projectDescriptions) != null))
             {
                 var matchesForProjectTypes = projectDescription.GetMergedMatchesForProjectType(projectDescriptions);

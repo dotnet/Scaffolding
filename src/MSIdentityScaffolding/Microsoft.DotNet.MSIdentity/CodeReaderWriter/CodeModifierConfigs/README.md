@@ -1,4 +1,4 @@
-ach project type/scenario should have a json config file for itself.
+Each project type/scenario should have a json config file for itself.
 
 class CodeModifierConfig
 {
@@ -27,6 +27,7 @@ class CodeChange
     public string? Parent { get; set; } --> Add C# statement syntax node upon this parent statement syntax node based on Type 
     public string? Type { get; set; } --> CodeChangeType (below) string.
     public bool? Append { get; set; } = false; --> Insert Block at the top of the method.
+    public string ReplaceToken { get; set; } --> Replace token with Block
 }
 
 class CodeChangeType

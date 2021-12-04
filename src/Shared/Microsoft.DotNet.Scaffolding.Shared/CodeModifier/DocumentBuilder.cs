@@ -364,13 +364,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             var newRoot = root;
-            var statementLeadingTrivia = new SyntaxTriviaList();
-            if (change.CodeFormatting.NumberOfSpaces > 0)
-            {
-                statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', change.CodeFormatting.NumberOfSpaces)));
-            }
-
-            var replacement = SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(change.Block)).WithLeadingTrivia(statementLeadingTrivia);
+            var replacement = SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(change.Block));
             if (!ProjectModifierHelper.GlobalStatementExists(newRoot, replacement))
             {
                 var tokenToReplace = newRoot.Members.Where(st => st.ToString().Equals(change.ReplaceToken)).FirstOrDefault();

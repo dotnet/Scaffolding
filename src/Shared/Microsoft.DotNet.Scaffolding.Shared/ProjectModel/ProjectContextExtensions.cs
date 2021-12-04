@@ -4,7 +4,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.Web.CodeGeneration.Msbuild;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
@@ -33,8 +32,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         public static IProjectContext AddPackageDependencies(this IProjectContext projectInformation, string projectAssetsFile)
         {
             //get project assets file
-            var packageDependencies = ProjectContextWriter.GetPackageDependencies(projectAssetsFile, projectInformation.TargetFramework, projectInformation.TargetFrameworkMoniker);
-            var additionalCompilation = ProjectContextWriter.GetScaffoldingAssemblies(packageDependencies).ToList();
+            var packageDependencies = ProjectContextHelper.GetPackageDependencies(projectAssetsFile, projectInformation.TargetFramework, projectInformation.TargetFrameworkMoniker);
+            var additionalCompilation = ProjectContextHelper.GetScaffoldingAssemblies(packageDependencies).ToList();
             var compilationList = projectInformation.CompilationAssemblies.ToList();
             compilationList.AddRange(additionalCompilation);
             var newProjectContext = new CommonProjectContext()

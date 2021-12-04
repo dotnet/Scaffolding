@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.Msbuild;
 using Xunit;
 using Xunit.Abstractions;
@@ -54,7 +55,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
-                Assert.Equal(expectedPath, ProjectContextWriter.GetPath(nugetPath, nameAndVersion));
+                Assert.Equal(expectedPath, ProjectContextHelper.GetPath(nugetPath, nameAndVersion));
             }
         }
 
@@ -71,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
-                Assert.Equal(expectedPath, ProjectContextWriter.GetPath(nugetPath, nameAndVersion));
+                Assert.Equal(expectedPath, ProjectContextHelper.GetPath(nugetPath, nameAndVersion));
             }
         }
     }

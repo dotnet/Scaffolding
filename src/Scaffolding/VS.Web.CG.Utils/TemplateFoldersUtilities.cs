@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
@@ -43,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             rootFolders.Add(applicationBasePath);
 
-            var dependency = projectContext.GetPackage(containingProject);
+            var dependency = GetPackage(projectContext, containingProject);
 
             if (dependency != null)
             {
@@ -81,6 +82,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 }
             }
             return templateFolders;
+        }
+
+        public static DependencyDescription GetPackage(IProjectContext context, string name)
+        {
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNull(context, nameof(context));
+
+            return context.PackageDependencies.FirstOrDefault(package => package.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

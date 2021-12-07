@@ -61,6 +61,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_ShowProfile_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_ShowProfile_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added {0} to user secrets..
         /// </summary>
         internal static string AddingKeyToUserSecrets {

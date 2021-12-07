@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -40,61 +41,103 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuthCodeAsync()
         {
-            if (!string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
+            if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
-                CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
-                //Get CodeModifierConfig from CodeModifierConfigs folder.
-                if (codeModifierConfig != null &&
-                    codeModifierConfig.Files != null)
+                return;
+            }
+
+            CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
+            if (codeModifierConfig == null || codeModifierConfig.Files.Any() is false)
+            {
+                return;
+            }
+
+            //Initialize CodeAnalysis.Project wrapper
+            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
+
+            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project);
+            CodeChangeOptions options = new CodeChangeOptions
+            {
+                MicrosoftGraph = _toolOptions.CallsGraph,
+                DownstreamApi = _toolOptions.CallsDownstreamApi,
+                IsMinimalApp = isMinimalApp
+            };
+
+            var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
+            //Go through all the files, make changes using DocumentBuilder.
+            foreach (var file in filteredFiles)
+            {
+                await HandleCodeFileAsync(file, project, options);
+            }
+        }
+
+        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
+        {
+            if (string.IsNullOrEmpty(file.FileName))
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(file.AddFilePath))
+            {
+                AddFile(file);
+                return;
+            }
+
+            var fileName = file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase)
+                    ? await ProjectModifierHelper.GetStartupClass(_toolOptions.ProjectPath, project)
+                    : file.FileName;
+
+            if (fileName.Equals("Program.cs"))
+            {
+                // only modify Program.cs file if it's a minimal hosting app (as we made changes to the Startup.cs file).
+                if (options.IsMinimalApp)
                 {
-                    //Initialize CodeAnalysis.Project wrapper
-                    CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
-
-                    //is minimal project
-                    var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project);
-                    CodeChangeOptions options = new CodeChangeOptions
-                    {
-                        MicrosoftGraph = _toolOptions.CallsGraph,
-                        DownstreamApi = _toolOptions.CallsDownstreamApi,
-                        IsMinimalApp = isMinimalApp
-                    };
-
-                    var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
-                    //Go through all the files, make changes using DocumentBuilder.
-                    foreach (var file in filteredFiles)
-                    {
-                        if (string.IsNullOrEmpty(file.FileName))
-                        {
-                            return;
-                        }
-
-                        //if the file we are modifying is Startup.cs, use Program.cs to find the correct file to edit.
-                        var fileName = file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase)
-                            ? await ProjectModifierHelper.GetStartupClass(_toolOptions.ProjectPath, project)
-                            : file.FileName;
-
-                        if (fileName.Equals("Program.cs"))
-                        {
-                            // only modify Program.cs file if it's a minimal hosting app (as we made changes to the Startup.cs file).
-                            if (options.IsMinimalApp)
-                            {
-                                await ModifyProgramCs(file, project, options);
-                            }
-                        }
-                        else if (fileName.EndsWith(".cs"))
-                        {
-                            await ModifyCsFile(fileName, file, project, options);
-                        }
-                        else if (fileName.EndsWith(".cshtml"))
-                        {
-                            await ModifyCshtmlFile(fileName, file, project, options);
-                        }
-                        else if (fileName.EndsWith(".razor"))
-                        {
-                            await ModifyRazorFile(fileName, file, project, options);
-                        }
-                    }
+                    await ModifyProgramCs(file, project, options);
                 }
+            }
+            else if (fileName.EndsWith(".cs"))
+            {
+                await ModifyCsFile(fileName, file, project, options);
+            }
+            else if (fileName.EndsWith(".cshtml"))
+            {
+                await ModifyCshtmlFile(fileName, file, project, options);
+            }
+            else if (fileName.EndsWith(".razor"))
+            {
+                await ModifyRazorFile(fileName, file, project, options);
+            }
+        }
+
+        private void AddFile(CodeFile file)
+        {
+            Debugger.Launch();
+            var resourceName = file.FileName.Replace('.', '_');
+            var propertyInfo = AppProvisioningTool.Properties.Where(
+                p => p.Name.StartsWith("add") && p.Name.EndsWith(resourceName)).FirstOrDefault();
+
+            if (propertyInfo is null)
+            {
+                return;
+            }
+
+            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+
+            string codeFileString = Encoding.UTF8.GetString(content);
+
+            if (string.IsNullOrEmpty(codeFileString))
+            {
+                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+            }
+            
+            var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
+            var fileDir = Path.GetDirectoryName(filePath);
+
+            if (!string.IsNullOrEmpty(fileDir))
+            {
+                Directory.CreateDirectory(fileDir);
+                File.WriteAllText(filePath, codeFileString);
             }
         }
 
@@ -270,8 +313,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!string.IsNullOrEmpty(_toolOptions.ProjectType))
             {
                 var properties = typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
-               .Where(p => p.PropertyType == typeof(byte[]))
-               .ToArray();
+                    .Where(p => p.PropertyType == typeof(byte[]))
+                    .ToArray();
 
                 foreach (PropertyInfo propertyInfo in properties)
                 {

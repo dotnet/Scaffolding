@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -33,6 +35,9 @@ namespace Microsoft.DotNet.MSIdentity
 
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
 
+        internal static readonly PropertyInfo[] Properties = typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
+            .Where(p => p.PropertyType == typeof(byte[])).ToArray();
+
         private ProjectDescriptionReader ProjectDescriptionReader { get; } = new ProjectDescriptionReader();
 
         public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
@@ -44,6 +49,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
+            Debugger.Launch();
             //get csproj file path
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
@@ -215,6 +221,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task<ApplicationParameters?> CreateAppRegistration(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
+            Debugger.Launch();
             ApplicationParameters? resultAppParameters = null;
             if (applicationParameters != null)
             {

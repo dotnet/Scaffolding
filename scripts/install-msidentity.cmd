@@ -1,4 +1,4 @@
-set VERSION=1.0.0-dev
+set VERSION=1.0.0
 set NUPKG=artifacts\packages\Debug\Shipping\
 
 pushd %~dp0

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -49,7 +48,6 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            Debugger.Launch();
             //get csproj file path
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
@@ -221,7 +219,6 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task<ApplicationParameters?> CreateAppRegistration(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
-            Debugger.Launch();
             ApplicationParameters? resultAppParameters = null;
             if (applicationParameters != null)
             {

@@ -5,10 +5,7 @@
   "MatchesForProjectType": [
     {
       "FileRelativePath": "Program.cs",
-      "MatchAny": [ ".AddServerSideBlazor" ]
-    },
-    {
-      "FileRelativePath": "Pages\\*.cshtml",
+      "MatchAny": [ ".AddServerSideBlazor" ],
       "Sets": "IsWebApp"
     }
   ],
@@ -45,10 +42,6 @@
           "Represents": "MsalAuthenticationOptions"
         }
       ]
-    },
-    {
-      "FileRelativePath": "Pages\\*.cshtml",
-      "Sets": "IsWebApp"
     },
     {
       "FileRelativePath": "appsettings.json",
@@ -160,32 +153,6 @@
         {
           "Property": "Project:PropertyGroup:TargetFramework",
           "Represents": "targetFramework"
-        }
-      ]
-    },
-    {
-      "FileRelativePath": "Properties\\launchSettings.json",
-      "Properties": [
-        {
-          "Property": "iisSettings:iisExpress:applicationUrl",
-          "Represents": "iisApplicationUrl"
-        },
-        {
-          "Property": "iisSettings:iisExpress:sslPort",
-          "Represents": "iisSslPort"
-        },
-        {
-          "Property": "profiles:*:applicationUrl",
-          "Represents": "profilesApplicationUrls"
-        }
-      ]
-    },
-    {
-      "FileRelativePath": "*.csproj",
-      "Properties": [
-        {
-          "Property": "Project:PropertyGroup:UserSecretsId",
-          "Represents": "secretsId"
         }
       ]
     }

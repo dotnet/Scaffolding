@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -112,7 +111,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private void AddFile(CodeFile file)
         {
-            Debugger.Launch();
             var resourceName = file.FileName.Replace('.', '_');
             var propertyInfo = AppProvisioningTool.Properties.Where(
                 p => p.Name.StartsWith("add") && p.Name.EndsWith(resourceName)).FirstOrDefault();
@@ -132,6 +130,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             
             var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
+            if (File.Exists(filePath))
+            {
+                return;
+            }
+
             var fileDir = Path.GetDirectoryName(filePath);
 
             if (!string.IsNullOrEmpty(fileDir))

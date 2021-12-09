@@ -52,10 +52,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     {
                         startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
                     }
-
                 }
+
                 return startupDocument == null;
             }
+
             return false;
         }
 

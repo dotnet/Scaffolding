@@ -580,11 +580,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 }
             }
             //set leading and trailing trivia if block has any existing statements.
-            /*  if (modifiedBlockSyntaxNode.Statements.Any())
-                {
-                    trailingTrivia = modifiedBlockSyntaxNode.Statements[0].GetTrailingTrivia();
-                    leadingTrivia = modifiedBlockSyntaxNode.Statements[0].GetLeadingTrivia();
-                } */
             StatementSyntax statement = SyntaxFactory.ParseStatement(formattedCodeBlock)
                                             .WithAdditionalAnnotations(Formatter.Annotation)
                                             .WithTrailingTrivia(trailingTrivia)

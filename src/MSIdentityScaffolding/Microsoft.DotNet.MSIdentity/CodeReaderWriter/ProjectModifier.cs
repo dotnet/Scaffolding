@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
-            if (codeModifierConfig == null || codeModifierConfig.Files.Any() is false)
+            if (codeModifierConfig is null || !codeModifierConfig.Files.Any())
             {
                 return;
             }
@@ -109,8 +109,23 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
+        /// <summary>
+        /// Determines if specified file exists, and if not then creates the 
+        /// file based on template stored in AppProvisioningTool.Properties
+        /// and adds file to the project
+        /// </summary>
+        /// <param name="file"></param>
+        /// <exception cref="FormatException"></exception>
         private void AddFile(CodeFile file)
         {
+            var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
+            if (File.Exists(filePath))
+            {
+                return; // File exists, don't need to create
+            }
+
+            // Resource names for addFiles prefixed with "add" and contain '_' in place of '.'
+            // fileName: "ShowProfile.razor" -> resourceName: "add_ShowProfile_razor"
             var resourceName = file.FileName.Replace('.', '_');
             var propertyInfo = AppProvisioningTool.Properties.Where(
                 p => p.Name.StartsWith("add") && p.Name.EndsWith(resourceName)).FirstOrDefault();
@@ -121,22 +136,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-
             string codeFileString = Encoding.UTF8.GetString(content);
-
             if (string.IsNullOrEmpty(codeFileString))
             {
                 throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
             }
 
-            var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
-            if (File.Exists(filePath))
-            {
-                return;
-            }
-
             var fileDir = Path.GetDirectoryName(filePath);
-
             if (!string.IsNullOrEmpty(fileDir))
             {
                 Directory.CreateDirectory(fileDir);
@@ -146,21 +152,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         internal async Task ModifyRazorFile(string fileName, CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
-            string? filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
-            if (string.IsNullOrEmpty(filePath))
+            var document = project.Documents.Where(d => d.Name.EndsWith(fileName)).FirstOrDefault();
+            if (document is null)
             {
                 return;
             }
 
-            var razorFile = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
-            if (razorFile is null)
-            {
-                return;
-            }
-
-            var razorChanges = file?.RazorChanges?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-            var editedDocument = await ProjectModifierHelper.AddTextToDocument(razorFile, razorChanges);
-            await ProjectModifierHelper.UpdateDocument(razorFile, editedDocument, _consoleLogger);
+            var razorChanges = file?.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
+            await ProjectModifierHelper.UpdateDocument(document, editedDocument, _consoleLogger);
         }
 
         internal async Task ModifyCshtmlFile(string fileName, CodeFile cshtmlFile, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -178,8 +178,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         var globalChanges = cshtmlFile.Methods.TryGetValue("Global", out var globalMethod);
                         if (globalMethod != null)
                         {
-                            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
-                            var editedDocument = await ProjectModifierHelper.AddTextToDocument(fileDoc, filteredCodeChanges);
+                            var filteredCodeFiles = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+                            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeFiles);
                             //replace the document
                             await ProjectModifierHelper.UpdateDocument(fileDoc, editedDocument, _consoleLogger);
                         }
@@ -214,8 +214,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         var globalChanges = programCsFile.Methods.TryGetValue("Global", out var globalMethod);
                         if (globalMethod != null)
                         {
-                            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-                            foreach (var change in filteredCodeChanges)
+                            var filteredCodeFiles = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+                            foreach (var change in filteredCodeFiles)
                             {
                                 //Modify CodeSnippet to have correct variable identifiers present.
                                 var formattedChange = ProjectModifierHelper.FormatCodeSnippet(change, variableDict);

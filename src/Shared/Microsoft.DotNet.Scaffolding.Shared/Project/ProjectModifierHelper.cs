@@ -378,9 +378,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        internal static async Task<Document> AddTextToDocument(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
+        /// <summary>
+        /// Replaces text within document or appends text to the end of the document
+        /// depending on whether change.ReplaceSnippet is set
+        /// </summary>
+        /// <param name="fileDoc"></param>
+        /// <param name="codeChanges"></param>
+        /// <returns></returns>
+        internal static async Task<Document> ModifyDocumentText(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
         {
-            if (fileDoc is null || codeChanges?.Any() != true)
+            if (fileDoc is null || codeChanges is null || !codeChanges.Any())
             {
                 return null;
             }
@@ -392,19 +399,19 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return null;
             }
 
-            var trimmedStatement = ProjectModifierHelper.TrimStatement(sourceFileString);
-            foreach (var change in codeChanges)
+            var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
+            var applicableCodeChanges = codeChanges.Where(
+                c => !string.IsNullOrEmpty(c.Block) && !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            foreach (var change in applicableCodeChanges)
             {
-                if (!string.IsNullOrEmpty(change.Block) && !trimmedStatement.Contains(ProjectModifierHelper.TrimStatement(change.Block)))
+                // If doing a code replacement, replace ReplaceSnippet in source with Block
+                if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
                 {
-                    if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
-                    {
-                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
-                    }
-                    else
-                    {
-                        sourceFileString += change.Block;
-                    }
+                    sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                }
+                else
+                {
+                    sourceFileString += change.Block; // Otherwise appending block to end of file
                 }
             }
 

@@ -11,6 +11,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public string[] InsertBefore { get; set; }
         public string[] Options { get; set; }
         public Formatting CodeFormatting { get; set; }
-        public string ReplaceToken { get; set; }
+        public string ReplaceSnippet { get; set; }
     }
 }

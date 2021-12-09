@@ -148,8 +148,8 @@
       ],
       "RazorChanges": [
         {
-          "ReplaceToken": "data\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>\r\n\r\n@code ",
-          "Block": "data\r\n            </NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"showprofile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>\r\n\r\n@code ",
+          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"showprofile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
           "Options": [
             "MicrosoftGraph"
           ]

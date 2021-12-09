@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
             }
-            
+
             var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
             if (File.Exists(filePath))
             {
@@ -147,39 +147,20 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         internal async Task ModifyRazorFile(string fileName, CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
             string? filePath = Directory.EnumerateFiles(_toolOptions.ProjectPath, fileName, SearchOption.AllDirectories).FirstOrDefault();
-
             if (string.IsNullOrEmpty(filePath))
             {
                 return;
             }
 
-            var programDocument = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
-            if (programDocument == null)
+            var razorFile = project.Documents.Where(d => d.Name.Equals(filePath)).FirstOrDefault();
+            if (razorFile is null)
             {
                 return;
             }
 
-            DocumentEditor documentEditor = await DocumentEditor.CreateAsync(programDocument);
-            DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
-
-            if (documentEditor.OriginalRoot is CompilationUnitSyntax originalRoot)
-            {
-                var newRoot = originalRoot;
-
-                if (file.RazorChanges?.Any() is true)
-                {
-                    var filteredCodeChanges = file.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-                    foreach (var change in filteredCodeChanges)
-                    {
-                        newRoot = DocumentBuilder.ModifyRazorFile(change, newRoot);
-                    }
-                }
-
-                //replace root node with all the updates.
-                documentEditor.ReplaceNode(originalRoot, newRoot);
-                //write to Program.cs file
-                await documentBuilder.WriteToClassFileAsync(filePath);
-            }
+            var razorChanges = file?.RazorChanges?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+            var editedDocument = await ProjectModifierHelper.AddTextToDocument(razorFile, razorChanges);
+            await ProjectModifierHelper.UpdateDocument(razorFile, editedDocument, _consoleLogger);
         }
 
         internal async Task ModifyCshtmlFile(string fileName, CodeFile cshtmlFile, CodeAnalysis.Project project, CodeChangeOptions options)

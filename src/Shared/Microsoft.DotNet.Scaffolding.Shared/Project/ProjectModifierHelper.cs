@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     {
                         startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
                     }
-                   
+
                 }
                 return startupDocument == null;
             }
@@ -379,25 +379,41 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         internal static async Task<Document> AddTextToDocument(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
         {
-            Document editedDoc = null;
-            if (fileDoc != null && codeChanges != null && codeChanges.Any())
+            if (fileDoc is null || codeChanges?.Any() != true)
             {
-                var sourceText = await fileDoc.GetTextAsync();
-                var textToAdd = sourceText?.ToString();
-                foreach (var change in codeChanges)
+                return null;
+            }
+
+            var sourceText = await fileDoc.GetTextAsync();
+            var sourceFileString = sourceText?.ToString() ?? null;
+            if (sourceFileString is null)
+            {
+                return null;
+            }
+
+            var trimmedStatement = ProjectModifierHelper.TrimStatement(sourceFileString);
+            foreach (var change in codeChanges)
+            {
+                if (!string.IsNullOrEmpty(change.Block) && !trimmedStatement.Contains(ProjectModifierHelper.TrimStatement(change.Block)))
                 {
-                    if (!ProjectModifierHelper.TrimStatement(textToAdd).Contains(ProjectModifierHelper.TrimStatement(change.Block)))
+                    if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
                     {
-                        textToAdd += change.Block;
+                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    }
+                    else
+                    {
+                        sourceFileString += change.Block;
                     }
                 }
-                if (!string.IsNullOrEmpty(textToAdd))
-                {
-                    var sourceTextToAdd = SourceText.From(textToAdd);
-                    editedDoc = fileDoc.WithText(sourceTextToAdd);
-                }
             }
-            return editedDoc;
+
+            if (string.IsNullOrEmpty(sourceFileString))
+            {
+                return null; // TODO generate README
+            }
+
+            var sourceTextToAdd = SourceText.From(sourceFileString);
+            return fileDoc.WithText(sourceTextToAdd);
         }
 
         internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)

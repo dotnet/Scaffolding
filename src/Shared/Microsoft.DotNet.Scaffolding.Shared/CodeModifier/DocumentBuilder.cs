@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -354,24 +353,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             return newMethod;
-        }
-
-        internal static CompilationUnitSyntax ModifyRazorFile(CodeSnippet change, CompilationUnitSyntax root)
-        {
-            if (string.IsNullOrEmpty(change.ReplaceToken))
-            {
-                return root;
-            }
-
-            var newRoot = root;
-            var replacement = SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(change.Block));
-            if (!ProjectModifierHelper.GlobalStatementExists(newRoot, replacement))
-            {
-                var tokenToReplace = newRoot.Members.Where(st => st.ToString().Equals(change.ReplaceToken)).FirstOrDefault();
-                newRoot = newRoot.ReplaceNode(tokenToReplace, replacement);
-            }
-            
-            return newRoot;
         }
 
         //For inserting global statements in a minimal hosting C# file (.NET 6 Preview 7+)

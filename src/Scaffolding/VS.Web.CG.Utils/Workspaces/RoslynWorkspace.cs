@@ -12,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Workspaces;
 using PInfo = Microsoft.CodeAnalysis.ProjectInfo;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
@@ -39,7 +38,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             {
                 MSBuildLocator.RegisterDefaults();
             }
-            var projReferenceInformation = RoslynWorkspaceHelper.GetProjectReferenceInformation(projectInformation.ProjectReferences);
+            RoslynWorkspaceHelper roslynHelper = new RoslynWorkspaceHelper(projectInformation.ProjectFullPath);
+            var projReferenceInformation = roslynHelper.GetProjectReferenceInformation(projectInformation.ProjectReferences);
 
             if (projReferenceInformation != null && projReferenceInformation.Any())
             {

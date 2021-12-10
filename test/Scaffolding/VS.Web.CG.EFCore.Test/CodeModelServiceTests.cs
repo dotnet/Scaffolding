@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         private CodeModelService GetCodeModelService(string path, string applicationName)
         {
-            _appInfo = new ApplicationInfo(applicationName, Path.GetDirectoryName(path), "Debug");
+            _appInfo = new ApplicationInfo(applicationName, Path.GetDirectoryName(path), null);
             _logger = new ConsoleLogger();
             _projectContext = GetProjectInformation(path);
             _workspace = new RoslynWorkspace(_projectContext);

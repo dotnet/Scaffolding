@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             _codeGenActionService = new Mock<ICodeGeneratorActionsService>();
             _serviceProvider = new Mock<IServiceProvider>();
             _logger = new ConsoleLogger();
-            _applicationInfo = new ApplicationInfo("TestApp", "..", "Debug");
+            _applicationInfo = new ApplicationInfo("TestApp", "..", null);
         }
 
         [Fact]

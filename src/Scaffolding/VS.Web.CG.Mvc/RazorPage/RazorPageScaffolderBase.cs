@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Build.Locator;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -272,6 +273,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 razorGeneratorModel.BootstrapVersion = RazorPageScaffolderBase.DefaultBootstrapVersion;
             }
 
+            if (!MSBuildLocator.IsRegistered)
+            {
+                MSBuildLocator.RegisterDefaults();
+            }
+
             RazorPageWithContextTemplateModel2 templateModel = new RazorPageWithContextTemplateModel2(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {
                 NamespaceName = namespaceName,
@@ -289,7 +295,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 JQueryVersion = "1.10.2", //Todo
                 BootstrapVersion = razorGeneratorModel.BootstrapVersion,
                 ContentVersion = DetermineContentVersion(razorGeneratorModel),
-                UseSqlite = razorGeneratorModel.UseSqlite
+                UseSqlite = razorGeneratorModel.UseSqlite,
+                NullableEnabled = "enable".Equals(ApplicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase)
             };
 
             return templateModel;

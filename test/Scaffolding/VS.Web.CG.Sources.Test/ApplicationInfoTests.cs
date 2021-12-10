@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
@@ -14,7 +14,7 @@ namespace ConsoleApplication
         [Fact]
         public void ApplicationEnvironment_Test()
         {
-            _applicationInfo = new ApplicationInfo("TestApplication", Directory.GetCurrentDirectory());
+            _applicationInfo = new ApplicationInfo("TestApplication", Directory.GetCurrentDirectory(), null);
             Assert.Equal(Directory.GetCurrentDirectory(), _applicationInfo.ApplicationBasePath);
             Assert.Equal("TestApplication", _applicationInfo.ApplicationName);
         }

@@ -38,6 +38,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         public string AreaName { get; set; }
 
         public bool UseAsync { get; set; }
+        public bool NullableEnabled { get; set; }
 
         public string ControllerNamespace { get; set; }
 

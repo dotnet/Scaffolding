@@ -1,19 +1,20 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
 {
     public class ApplicationInfo : IApplicationInfo
     {
-        public ApplicationInfo(string appName, string appBasePath)
-            : this(appName, appBasePath, "Debug")
+        public ApplicationInfo(string appName, string appBasePath, RoslynWorkspaceHelper workspaceHelper)
+            : this(appName, appBasePath, "Debug", workspaceHelper)
         {
 
         }
 
-        public ApplicationInfo(string appName, string appBasePath, string appConfiguration)
+        public ApplicationInfo(string appName, string appBasePath, string appConfiguration, RoslynWorkspaceHelper workspaceHelper)
         {
             if (appName == null)
             {
@@ -30,7 +31,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
             ApplicationName = appName;
             ApplicationBasePath = appBasePath;
             ApplicationConfiguration = appConfiguration;
+            WorkspaceHelper = workspaceHelper;
         }
+
         public string ApplicationBasePath
         {
             get; private set;
@@ -42,6 +45,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
         }
 
         public string ApplicationConfiguration
+        {
+            get; private set;
+        }
+
+        public RoslynWorkspaceHelper WorkspaceHelper
         {
             get; private set;
         }

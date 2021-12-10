@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -16,7 +17,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
@@ -88,6 +88,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var startupType = _modelTypesLocator.GetType(startupClassName).FirstOrDefault() ?? _modelTypesLocator.GetType("Startup").FirstOrDefault();
 
             ModelType dbContextSymbolInWebProject = null;
+            if (!MSBuildLocator.IsRegistered)
+            {
+                MSBuildLocator.RegisterDefaults();
+            }
             //if there is no Startup.cs (minimal hosting app), this scaffolding scanerio is not supported.
             if (startupType == null)
             {
@@ -99,7 +103,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                 if (!dbContextSymbols.Any())
                 {
-                    await GenerateNewDbContextAndRegisterProgramFile(programType);
+                    //add nullable properties
+                    await GenerateNewDbContextAndRegisterProgramFile(programType, _applicationInfo);
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
                 {
@@ -162,7 +167,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 if (!dbContextSymbols.Any())
                 {
-                    await GenerateNewDbContextAndRegister(startupType, programType);
+                    await GenerateNewDbContextAndRegister(startupType, programType, _applicationInfo);
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
                 {
@@ -358,7 +363,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _loader,
                 _logger);
         }
-        private async Task GenerateNewDbContextAndRegisterProgramFile(ModelType programType)
+        private async Task GenerateNewDbContextAndRegisterProgramFile(ModelType programType, IApplicationInfo applicationInfo)
         {
             AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
             _programEditResult = new EditSyntaxTreeResult()
@@ -372,7 +377,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
-            var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType);
+            bool nullabledEnabled = "enable".Equals(applicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType, nullabledEnabled);
             _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
             ContextProcessingStatus = ContextProcessingStatus.ContextAdded;
 
@@ -423,7 +429,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         }
 
         //if not minimal hosting, edit Startup.cs
-        private async Task GenerateNewDbContextAndRegister(ModelType startupType, ModelType programType)
+        private async Task GenerateNewDbContextAndRegister(ModelType startupType, ModelType programType, IApplicationInfo applicationInfo)
         {
             AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
             _startupEditResult = new EditSyntaxTreeResult()
@@ -437,7 +443,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
-            var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType);
+            bool nullabledEnabled = "enable".Equals(applicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType, nullabledEnabled);
+
             _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
             ContextProcessingStatus = ContextProcessingStatus.ContextAdded;
 

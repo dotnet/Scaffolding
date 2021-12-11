@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -406,7 +405,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 c => !string.IsNullOrEmpty(c.Block) && !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
 
             List<string> failedStringReplacements = new List<string>();
-            Debugger.Launch();
             foreach (var change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
@@ -418,8 +416,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     }
                     else
                     {
-                       //Store all the failed code replacements for the ReadMe
-                       failedStringReplacements.Add(change.Block);
+                        //Store all the failed code replacements for the ReadMe
+                        failedStringReplacements.Add(change.Block);
                     }
                 }
                 else

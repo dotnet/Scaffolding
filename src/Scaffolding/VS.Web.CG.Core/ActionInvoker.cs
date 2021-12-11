@@ -87,7 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                         ex = ex.GetBaseException();
                     }
 
-                    throw new InvalidOperationException(ex.Message);
+                    throw new InvalidOperationException(ex.Message, ex);
                 }
 
                 return 0;

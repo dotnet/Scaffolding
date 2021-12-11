@@ -130,7 +130,7 @@ stages:
           
       - job: Linux
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: macOS-11
         container: LinuxContainer
         strategy:
           matrix:

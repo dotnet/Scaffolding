@@ -50,6 +50,43 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             Assert.True(invokedModel.BoolProperty);
         }
 
+                [Fact]
+        public void ActionInvoker_Throws_With_Inner_Exception()
+        {
+            //Arrange
+            bool methodCalled = false;
+            CodeGeneratorModel invokedModel = null;
+
+            var codeGenInstance = new CodeGeneratorSample((model) =>
+            {
+                throw new NotImplementedException ("This action is intentionally not implemented.");
+            });
+            
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            var generatorMock = new Mock<CodeGeneratorDescriptor>(typeof(CodeGeneratorSample).GetTypeInfo(),
+                serviceProviderMock.Object);
+
+            generatorMock
+                .SetupGet(cd => cd.CodeGeneratorInstance)
+                .Returns(codeGenInstance);
+            generatorMock
+                .SetupGet(cd => cd.Name)
+                .Returns(typeof(CodeGeneratorSample).Name);
+
+            var actionDescriptor = new ActionDescriptor(generatorMock.Object,
+                typeof(CodeGeneratorSample).GetMethod("GenerateCode")); //This is not a perfect unit test as the arrange is using actual instance rather than a mock
+
+            var actionInvoker = new ActionInvoker(actionDescriptor);
+
+            //Act
+            InvalidOperationException ex =
+                Assert.Throws<InvalidOperationException>(
+                () => actionInvoker.Execute("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' ')));
+
+            //Assert
+            Assert.IsType<NotImplementedException>(ex.InnerException);
+         }
+
         private class CodeGeneratorSample
         {
             private Action<CodeGeneratorModel> _generateCodeImpl;

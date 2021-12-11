@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -384,8 +385,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         /// </summary>
         /// <param name="fileDoc"></param>
         /// <param name="codeChanges"></param>
+        /// <param name="consoleLogger"></param>
         /// <returns></returns>
-        internal static async Task<Document> ModifyDocumentText(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
+        internal static async Task<Document> ModifyDocumentText(Document fileDoc, IEnumerable<CodeSnippet> codeChanges, IConsoleLogger consoleLogger)
         {
             if (fileDoc is null || codeChanges is null || !codeChanges.Any())
             {
@@ -402,12 +404,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
             var applicableCodeChanges = codeChanges.Where(
                 c => !string.IsNullOrEmpty(c.Block) && !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+
+            List<string> failedStringReplacements = new List<string>();
+            Debugger.Launch();
             foreach (var change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
-                if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
+                if (!string.IsNullOrEmpty(change.ReplaceSnippet))
                 {
-                    sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    if (sourceFileString.Contains(change.ReplaceSnippet))
+                    {
+                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    }
+                    else
+                    {
+                       //Store all the failed code replacements for the ReadMe
+                       failedStringReplacements.Add(change.Block);
+                    }
                 }
                 else
                 {
@@ -415,13 +428,49 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 }
             }
 
+            if (failedStringReplacements.Any())
+            {
+                GenerateReadMe(fileDoc.Name, failedStringReplacements, consoleLogger);
+            }
+
             if (string.IsNullOrEmpty(sourceFileString))
             {
-                return null; // TODO generate README
+                return null;
             }
 
             var sourceTextToAdd = SourceText.From(sourceFileString);
             return fileDoc.WithText(sourceTextToAdd);
+        }
+
+        /// <summary>
+        /// Creates a ReadMe file listing failed code modifications. TODO: Open readme file, add link to learn more
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="failedStringReplacements"></param>
+        /// <param name="consoleLogger"></param>
+        private static void GenerateReadMe(string fileName, List<string> failedStringReplacements, IConsoleLogger consoleLogger)
+        {
+            string ReadMeMessage =
+                $"Failed to update the following file: {fileName}\n" +
+                $"You may need to add the following code blocks: \n\n";
+
+            foreach (var failedToAdd in failedStringReplacements)
+            {
+                ReadMeMessage += $"{failedToAdd}\n\n";
+            }
+
+            var fileDirectory = Path.GetDirectoryName(fileName);
+            if (string.IsNullOrEmpty(fileDirectory))
+            {
+                return;
+            }
+
+            var readMePath = Path.Combine(fileName, $"README_{DateTime.Now.Millisecond}.txt"); // Unique file name
+            if (!string.IsNullOrEmpty(readMePath) && !File.Exists(readMePath))
+            {
+                File.WriteAllText(readMePath, ReadMeMessage);
+                consoleLogger.LogMessage($"Generated ReadMe file {readMePath}.\n");
+            }
         }
 
         internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)

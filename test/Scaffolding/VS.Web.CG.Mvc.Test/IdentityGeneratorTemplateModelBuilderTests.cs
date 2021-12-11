@@ -50,7 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     UseSqlite = false
                 };
 
-                var applicationInfo = new ApplicationInfo("TestApp", "Sample");
+                var applicationInfo = new ApplicationInfo("TestApp", "Sample", null);
 
                 var builder = new IdentityGeneratorTemplateModelBuilder(
                     commandLineModel,
@@ -139,7 +139,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             IdentityGeneratorCommandLineModel commandLineModel = new IdentityGeneratorCommandLineModel();
             commandLineModel.Layout = existingLayoutFile;
 
-            IApplicationInfo applicationInfo = new ApplicationInfo("test", LayoutFileLocationTestProjectBasePath);
+            IApplicationInfo applicationInfo = new ApplicationInfo("test", LayoutFileLocationTestProjectBasePath, null);
             CommonProjectContext context = new CommonProjectContext();
             context.ProjectFullPath = LayoutFileLocationTestProjectBasePath;
             context.ProjectName = "TestProject";

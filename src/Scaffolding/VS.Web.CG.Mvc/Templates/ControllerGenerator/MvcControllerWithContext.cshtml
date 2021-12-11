@@ -1,4 +1,11 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
+if (@Model.NullableEnabled)
+{
+@:#nullable disable
+
+}
+}
 @using System.Collections.Generic;
 @using System.Linq;
 using System;

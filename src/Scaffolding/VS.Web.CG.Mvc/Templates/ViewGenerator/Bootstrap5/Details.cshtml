@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 @using System.Collections.Generic
 @using System.Linq
@@ -76,7 +76,7 @@
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
     {
-    @:<a asp-action="Edit" asp-route-id="@@Model.@pkName">Edit</a> |
+    @:<a asp-action="Edit" asp-route-id="@@Model?.@pkName">Edit</a> |
     @:<a asp-action="Index">Back to List</a>
     }
     else

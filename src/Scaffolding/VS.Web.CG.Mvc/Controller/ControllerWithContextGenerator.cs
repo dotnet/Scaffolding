@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Build.Locator;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -79,6 +80,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 //Todo: Pluralize model name
                 controllerGeneratorModel.ControllerName = modelTypeAndContextModel.ModelType.Name + Constants.ControllerSuffix;
             }
+
+            if (!MSBuildLocator.IsRegistered)
+            {
+                MSBuildLocator.RegisterDefaults();
+            }
             var namespaceName = string.IsNullOrEmpty(controllerGeneratorModel.ControllerNamespace)
                 ? GetDefaultControllerNamespace(controllerGeneratorModel.RelativeFolderPath)
                 : controllerGeneratorModel.ControllerNamespace;
@@ -88,7 +94,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 AreaName = _areaName,
                 UseAsync = controllerGeneratorModel.UseAsync, // This is no longer used for controllers with context.
                 ControllerNamespace = namespaceName,
-                ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata
+                ModelMetadata = modelTypeAndContextModel.ContextProcessingResult.ModelMetadata,
+                NullableEnabled = "enable".Equals(ApplicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase)
             };
 
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath, GetTemplateName(controllerGeneratorModel), TemplateFolders, templateModel);

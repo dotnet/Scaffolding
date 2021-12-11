@@ -9,7 +9,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class NewDbContextTemplateModel
     {
-        public NewDbContextTemplateModel(string dbContextName, ModelType modelType, ModelType programType)
+        public NewDbContextTemplateModel(string dbContextName, ModelType modelType, ModelType programType, bool nullableEnabled)
         {
             if (dbContextName == null)
             {
@@ -33,7 +33,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             ProgramTypeName = programType.Name;
             ProgramNamespace = programType.Namespace;
             RequiredNamespaces = new HashSet<string>();
-
+            NullableEnabled = nullableEnabled;
             var classNameModel = new ClassNameModel(dbContextName);
 
             DbContextTypeName = classNameModel.ClassName;
@@ -58,5 +58,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public string ProgramNamespace { get; private set; }
 
         public HashSet<string> RequiredNamespaces { get; private set; }
+        public bool NullableEnabled { get; set; }
     }
 }

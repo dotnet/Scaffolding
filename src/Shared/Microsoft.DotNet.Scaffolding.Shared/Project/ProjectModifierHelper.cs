@@ -463,7 +463,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return;
             }
 
-            var readMePath = Path.Combine(fileName, $"README_{DateTime.Now.Millisecond}.txt"); // Unique file name
+            var readMePath = Path.Combine(fileDirectory, $"README_{DateTime.Now.Millisecond}.txt"); // Unique file name
             if (!string.IsNullOrEmpty(readMePath) && !File.Exists(readMePath))
             {
                 File.WriteAllText(readMePath, ReadMeMessage);

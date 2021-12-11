@@ -77,12 +77,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             var actionInvoker = new ActionInvoker(actionDescriptor);
 
             //Act
-            InvalidOperationException ex =
+            var ex =
                 Assert.Throws<InvalidOperationException>(
                 () => actionInvoker.Execute("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' ')));
 
             //Assert
-            Assert.Equals(NOT_IMPLEMENTED_MESSAGE, ex.InnerException.Message);
+            Assert.Equal(NOT_IMPLEMENTED_MESSAGE, ex.InnerException.Message);
          }
 
         private class CodeGeneratorSample

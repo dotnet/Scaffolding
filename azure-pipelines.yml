@@ -110,7 +110,7 @@ stages:
 
       - job: OSX
         pool:
-          name: Hosted macOS
+          vmImage: macOS-11
         strategy:
           matrix:
             release_configuration:

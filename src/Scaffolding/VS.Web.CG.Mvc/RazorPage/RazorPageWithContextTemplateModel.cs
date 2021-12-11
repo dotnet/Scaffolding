@@ -37,6 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         public string DbContextNamespace { get; private set; }
 
         public ModelType ModelType { get; private set; }
+        public bool NullableEnabled { get; set; }
 
         public string ModelTypeName
         {

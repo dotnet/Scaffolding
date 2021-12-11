@@ -54,12 +54,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
         public void ActionInvoker_Throws_With_Inner_Exception()
         {
             //Arrange
-            bool methodCalled = false;
-            CodeGeneratorModel invokedModel = null;
-
+            const string NOT_IMPLEMENTED_MESSAGE = "This action is intentionally not implemented.";
             var codeGenInstance = new CodeGeneratorSample((model) =>
             {
-                throw new NotImplementedException ("This action is intentionally not implemented.");
+                throw new NotImplementedException(NOT_IMPLEMENTED_MESSAGE);
             });
             
             var serviceProviderMock = new Mock<IServiceProvider>();
@@ -84,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                 () => actionInvoker.Execute("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' ')));
 
             //Assert
-            Assert.IsType<NotImplementedException>(ex.InnerException);
+            Assert.Equals(NOT_IMPLEMENTED_MESSAGE, ex.InnerException.Message);
          }
 
         private class CodeGeneratorSample

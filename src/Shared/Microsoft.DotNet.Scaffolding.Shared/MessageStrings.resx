@@ -150,4 +150,10 @@
   <data name="StartFileSystemChangeToken" xml:space="preserve">
     <value>:::Start FileSystemChange:::</value>
   </data>
+  <data name="ProjectPathNotGiven" xml:space="preserve">
+    <value>Project path has not been specified</value>
+  </data>
+  <data name="TargetLocationNotGiven" xml:space="preserve">
+    <value>Target location (the build directory) has not been specified</value>
+  </data>
 </root>

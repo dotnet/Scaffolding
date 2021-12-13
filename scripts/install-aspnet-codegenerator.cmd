@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 set VERSION=7.0.0-dev
+=======
+set VERSION=6.0.1
+>>>>>>> 293eace1 (6.0.1 cherry picks (#1730))
 set DEFAULT_NUPKG_PATH=%userprofile%\.nuget\packages
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/

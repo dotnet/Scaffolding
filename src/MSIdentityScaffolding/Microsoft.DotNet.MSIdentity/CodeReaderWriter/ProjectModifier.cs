@@ -121,6 +121,59 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 return _codeModifierConfigPropertyInfo;
             }
+            else if (fileName.EndsWith(".cs"))
+            {
+                await ModifyCsFile(fileName, file, project, options);
+            }
+            else if (fileName.EndsWith(".cshtml"))
+            {
+                await ModifyCshtmlFile(fileName, file, project, options);
+            }
+            else if (fileName.EndsWith(".razor"))
+            {
+                await ModifyRazorFile(fileName, file, project, options);
+            }
+        }
+
+        /// <summary>
+        /// Determines if specified file exists, and if not then creates the 
+        /// file based on template stored in AppProvisioningTool.Properties
+        /// and adds file to the project
+        /// </summary>
+        /// <param name="file"></param>
+        /// <exception cref="FormatException"></exception>
+        private void AddFile(CodeFile file)
+        {
+            var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
+            if (File.Exists(filePath))
+            {
+                return; // File exists, don't need to create
+            }
+
+            // Resource names for addFiles prefixed with "add" and contain '_' in place of '.'
+            // fileName: "ShowProfile.razor" -> resourceName: "add_ShowProfile_razor"
+            var resourceName = file.FileName.Replace('.', '_');
+            var propertyInfo = AppProvisioningTool.Properties.Where(
+                p => p.Name.StartsWith("add") && p.Name.EndsWith(resourceName)).FirstOrDefault();
+
+            if (propertyInfo is null)
+            {
+                return;
+            }
+
+            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+            string codeFileString = Encoding.UTF8.GetString(content);
+            if (string.IsNullOrEmpty(codeFileString))
+            {
+                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+            }
+
+            var fileDir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(fileDir))
+            {
+                Directory.CreateDirectory(fileDir);
+                File.WriteAllText(filePath, codeFileString);
+            }
         }
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
@@ -286,7 +339,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
 
                     //add code snippets/changes.
-
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
                     root = root.ReplaceNode(classNode, modifiedClassDeclarationSyntax);

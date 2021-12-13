@@ -556,19 +556,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var children = GetDescendantNodes(parent);
             if (ProjectModifierHelper.StatementExists(children, change.Block))
             {
-<<<<<<< HEAD
                 return originalMethod;
             }
-=======
-                var insertAfterNode =
-                    modifiedBlockSyntaxNode.DescendantNodes().Where(node => node != null && node.ToString().Contains(insertAfterBlock)).FirstOrDefault() ??
-                    modifiedBlockSyntaxNode.DescendantNodes().Where(node => node != null && node.ToString().Contains(ProjectModifierHelper.TrimStatement(insertAfterBlock))).FirstOrDefault();
-                if (insertAfterNode != null)
-                {
-                    var leadingTrivia = insertAfterNode.GetLeadingTrivia();
-                    var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-                    string formattedCodeBlock = ProjectModifierHelper.FormatCodeBlock(change.Block, parameterValues);
->>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
 
             // Find parent's expression statement
             if (!(children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) is ExpressionStatementSyntax exprNode))
@@ -658,11 +647,25 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     }
                     if (attributeList.Any())
                     {
+<<<<<<< HEAD
                         syntaxList = syntaxList.Insert(0, SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia));
+=======
+                        var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
+                        if (!leadingTrivia.ToString().Contains("\n"))
+                        {
+                            attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                        }
+                        syntaxList = syntaxList.Insert(0, attributeListSyntax);
+>>>>>>> 293eace1 (6.0.1 cherry picks (#1730))
                     }
                 }
 >>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
             }
+<<<<<<< HEAD
+=======
+            return syntaxList;
+        }
+>>>>>>> 293eace1 (6.0.1 cherry picks (#1730))
 
             foreach (var attribute in attributes)
             {

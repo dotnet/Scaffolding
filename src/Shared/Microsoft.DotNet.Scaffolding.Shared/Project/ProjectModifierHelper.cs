@@ -306,17 +306,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 var formattedStatementString = TrimStatement(statement.ToString());
                 bool foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
-<<<<<<< HEAD
 
                 if (foundStatement)
                 {
                     return true;
-=======
-                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
-                if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
-                {
-                    foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(TrimStatement(checkBlock.ToString()))).Any();
->>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
                 }
             }
 
@@ -363,14 +356,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 return false;
             }
-<<<<<<< HEAD
             // for example, program.cs is only modified when codeChangeOptions.IsMinimalApp is true
             if (options.Contains(CodeChangeOptionStrings.MinimalApp) && !codeChangeOptions.IsMinimalApp)
             {
                 return false;
             }
-=======
->>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
             //if its a minimal app and options have a "NonMinimalApp", don't add the CodeBlock
             if (options.Contains(CodeChangeOptionStrings.NonMinimalApp) && codeChangeOptions.IsMinimalApp)
             {

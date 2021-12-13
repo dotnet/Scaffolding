@@ -123,13 +123,16 @@
   <data name="AddingPackage" xml:space="preserve">
     <value>Adding package {0} . . .</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="add_ShowProfile_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\Server\ShowProfile.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="AuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>
   </data>
   <data name="ClientSecret" xml:space="preserve">
     <value>Client secret - {0}.</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="cm_dotnet_blazorserver" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorserver.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -159,6 +162,9 @@
   </data>
   <data name="dotnet_blazorwasm_hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_blazorwasm_hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="dotnet_blazor_server" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ProjectDescriptions\dotnet_blazor_server.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="dotnet_web" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_web.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

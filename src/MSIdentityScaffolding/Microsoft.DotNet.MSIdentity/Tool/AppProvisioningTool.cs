@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -32,6 +33,9 @@ namespace Microsoft.DotNet.MSIdentity
         private string CommandName { get; }
 
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
+
+        internal static readonly PropertyInfo[] Properties = typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
+            .Where(p => p.PropertyType == typeof(byte[])).ToArray();
 
         private ProjectDescriptionReader ProjectDescriptionReader { get; } = new ProjectDescriptionReader();
 

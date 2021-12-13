@@ -18,14 +18,20 @@ namespace Microsoft.Extensions.ProjectModel.Tests
         [Fact]
         public async Task ProjectArgumentExceptionTest()
         {
+            // Act
             var ex = Assert.Throws<ArgumentException>(() => new MsBuildProjectContextBuilder(String.Empty, "build"));
+
+            // Assert
             Assert.Equal(MessageStrings.ProjectPathNotGiven, ex.Message);
         }
 
         [Fact]
         public async Task ProjectArgumentExceptionTest()
         {
+            // Act
             var ex = Assert.Throws<ArgumentException>(() => new MsBuildProjectContextBuilder("project", String.Empty));
+
+            // Assert
             Assert.Equal(MessageStrings.TargetLocationNotGiven, ex.Message);
         }
    }

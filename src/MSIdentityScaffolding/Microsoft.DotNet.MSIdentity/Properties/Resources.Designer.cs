@@ -197,7 +197,8 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         ///    &lt;NotAuthorized&gt;
         ///        &lt;a href=&quot;authentication/login&quot;&gt;Log in&lt;/a&gt;
         ///    &lt;/NotAuthorized&gt;
-        ///&lt;/AuthorizeView&gt;        /// [rest of string was truncated]&quot;;.
+        ///&lt;/AuthorizeView&gt;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string add_dotnet_blazorwasm_LoginDisplay_razor {
             get {

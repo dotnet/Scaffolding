@@ -257,5 +257,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools {
                 return ResourceManager.GetString("TargetFrameworkOptionDesc", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find target directory {0}.
+        /// </summary>
+        internal static string TargetDirectoryNotFound {
+            get {
+                return ResourceManager.GetString("TargetDirectoryNotFound", resourceCulture);
+            }
+        }
     }
 }

@@ -158,23 +158,5 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
                 return ResourceManager.GetString("StartFileSystemChangeToken", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Project path has not been specified.
-        /// </summary>
-        internal static string ProjectPathNotGiven {
-            get {
-                return ResourceManager.GetString("ProjectPathNotGiven", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Target location (the build directory) has not been specified.
-        /// </summary>
-        internal static string TargetLocationNotGiven {
-            get {
-                return ResourceManager.GetString("TargetLocationNotGiven", resourceCulture);
-            }
-        }
       }
 }

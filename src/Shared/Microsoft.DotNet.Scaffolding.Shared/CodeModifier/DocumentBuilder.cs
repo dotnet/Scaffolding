@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         private IConsoleLogger _consoleLogger;
 
         public DocumentBuilder(
-            DocumentEditor  documentEditor,
+            DocumentEditor documentEditor,
             CodeFile codeFile,
             IConsoleLogger consoleLogger)
         {
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         var usingName = usingNode.Name.ToString();
                         if (!newRoot.Usings.Any(node => node.Name.ToString().Equals(usingName)))
                         {
-                           newRoot = newRoot.InsertNodesAfter(newRoot.Usings.Last(), new List<SyntaxNode> { usingNode } );
+                            newRoot = newRoot.InsertNodesAfter(newRoot.Usings.Last(), new List<SyntaxNode> { usingNode });
                         }
                     }
                 }
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         //Add class members to the top of the class.
         public ClassDeclarationSyntax AddProperties(ClassDeclarationSyntax classDeclarationSyntax, CodeChangeOptions options)
-        { 
+        {
             var modifiedClassDeclarationSyntax = classDeclarationSyntax;
             if (_codeFile.ClassProperties != null && _codeFile.ClassProperties.Any() && classDeclarationSyntax != null)
             {
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 var sampleMember = modifiedClassDeclarationSyntax.Members.FirstOrDefault();
                 var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
                 var memberTrailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-                
+
                 //create MemberDeclarationSyntax[] with all the Property strings. 
                 var classProperties = CreateClassProperties(modifiedClassDeclarationSyntax.Members, memberLeadingTrivia, memberTrailingTrivia);
 
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _consoleLogger.LogMessage($"Modified {filePath}.\n");
         }
 
-        internal ClassDeclarationSyntax AddMethodParameters( ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
+        internal ClassDeclarationSyntax AddMethodParameters(ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
         {
             foreach (var method in _codeFile.Methods)
             { //AddParameters
@@ -187,7 +187,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         //Filter for CodeChangeOptions
                         methodChanges.AddParameters = ProjectModifierHelper.FilterCodeBlocks(methodChanges.AddParameters, options);
                     }
-                    
+
                     if (methodNode is MethodDeclarationSyntax methodDeclratation)
                     {
                         methodNode = AddParameters(methodDeclratation, methodChanges.AddParameters, options);
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         //Add all the different code snippet.
         internal ClassDeclarationSyntax AddCodeSnippets(ClassDeclarationSyntax modifiedClassDeclarationSyntax, CodeChangeOptions options)
-        {                        
+        {
             //code changes are chunked together by methods. Easier for Document modifications.
             if (_codeFile.Methods != null)
             {
@@ -233,12 +233,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                             methodNode = modifiedClassDeclarationSyntax?
                             .DescendantNodes()
                             .Where(node2 => node2 is ConstructorDeclarationSyntax cds &&
-                               cds.Identifier.ValueText.Equals(methodName) && 
+                               cds.Identifier.ValueText.Equals(methodName) &&
                                (parameterValues = VerfiyParameters(methodChanges.Parameters, cds.ParameterList.Parameters.ToList())) != null)
                             .FirstOrDefault();
                         }
                         var newMethod = methodNode;
-                        
+
                         //get method's BlockSyntax
                         var blockSyntaxNode = newMethod?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();
                         var modifiedBlockSyntaxNode = newMethod?.DescendantNodes().OfType<BlockSyntax>().FirstOrDefault();
@@ -305,7 +305,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                                 mds.Identifier.ValueText.Equals(methodName) &&
                                 (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
                             .FirstOrDefault();
-                        
+
                         var methodNode = modifiedClassDeclarationSyntax?
                             .DescendantNodes()
                             .Where(
@@ -313,7 +313,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                                 mds.Identifier.ValueText.Equals(methodName) &&
                                 (parameterValues = VerfiyParameters(methodChanges.Parameters, mds.ParameterList.Parameters.ToList())) != null)
                             .FirstOrDefault();
-                        
+
                         if (originalMethodNode != null && methodNode != null && methodNode is MethodDeclarationSyntax methodDeclarationSyntax && methodChanges.EditType != null)
                         {
                             var returnTypeString = methodDeclarationSyntax.ReturnType.ToFullString();
@@ -351,7 +351,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             {
                 newMethod = newMethod.AddParameterListParameters(newParameters.ToArray());
             }
-           
+
             return newMethod;
         }
 
@@ -532,7 +532,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             IDictionary<string, string> parameterValues)
         {
             string insertAfterBlock = ProjectModifierHelper.FormatCodeBlock(change.InsertAfter, parameterValues);
-            
+
             if (!string.IsNullOrEmpty(insertAfterBlock) && !string.IsNullOrEmpty(change.Block))
             {
                 var insertAfterNode =
@@ -580,11 +580,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 }
             }
             //set leading and trailing trivia if block has any existing statements.
-/*            if (modifiedBlockSyntaxNode.Statements.Any())
-            {
-                trailingTrivia = modifiedBlockSyntaxNode.Statements[0].GetTrailingTrivia();
-                leadingTrivia = modifiedBlockSyntaxNode.Statements[0].GetLeadingTrivia();
-            }*/
             StatementSyntax statement = SyntaxFactory.ParseStatement(formattedCodeBlock)
                                             .WithAdditionalAnnotations(Formatter.Annotation)
                                             .WithTrailingTrivia(trailingTrivia)
@@ -654,7 +649,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal SyntaxList<AttributeListSyntax> CreateAttributeList(CodeBlock[] attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
         {
             var syntaxList = attributeLists;
-            
+
             if (attributes != null && attributes.Any())
             {
                 foreach (var attribute in attributes)
@@ -670,13 +665,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
                         if (!leadingTrivia.ToString().Contains("\n"))
                         {
-                            attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);                        
+                            attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
                         }
                         syntaxList = syntaxList.Insert(0, attributeListSyntax);
-                    }  
+                    }
                 }
             }
-            return syntaxList;   
+            return syntaxList;
         }
 
         //check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.

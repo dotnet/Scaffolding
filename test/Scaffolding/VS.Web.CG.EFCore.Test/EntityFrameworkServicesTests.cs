@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 
         private EntityFrameworkServices GetEfServices(string path, string applicationName, bool useSqlite)
         {
-            _appInfo = new ApplicationInfo(applicationName, Path.GetDirectoryName(path), "Debug");
+            _appInfo = new ApplicationInfo(applicationName, Path.GetDirectoryName(path), null);
             _logger = new ConsoleLogger();
             _packageInstaller = new Mock<IPackageInstaller>();
             _serviceProvider = new Mock<IServiceProvider>();

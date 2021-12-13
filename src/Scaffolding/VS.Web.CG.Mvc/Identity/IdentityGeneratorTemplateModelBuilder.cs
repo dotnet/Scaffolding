@@ -207,7 +207,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 SupportFileLocation = supportFileLocation,
                 HasExistingNonEmptyWwwRoot = HasExistingNonEmptyWwwRootDirectory,
                 BootstrapVersion = boostrapVersion,
-                IsRazorPagesProject = IsRazorPagesLayout()
+                IsRazorPagesProject = IsRazorPagesLayout(),
+                IsBlazorProject = IsBlazorProjectLayout()
             };
 
             templateModel.ContentVersion = DetermineContentVersion(templateModel);
@@ -259,11 +260,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 ValidateFilesOption(templateModel);
             }
-
             return templateModel;
         }
 
-        private IdentityGeneratorFile[] DetermineFilesToGenerate(IdentityGeneratorTemplateModel templateModel)
+        private IdentityGeneratorFile[] DetermineFilesToGenerate(IdentityGeneratorTemplateModel2 templateModel)
         {
             var filesToGenerate = new List<IdentityGeneratorFile>(IdentityGeneratorFilesConfig.GetFilesToGenerate(NamedFiles, templateModel));
 
@@ -279,6 +279,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
 
             var filesToGenerateArray = filesToGenerate.ToArray();
+
+            //Blazor projects with Individual Auth enabled ship with a custom Account\Logout.cshtml file. If found, don't add the Account\Logout template shipped with dotnet/Scaffolding (based on aspnetcore\Identity's template).
+            if (templateModel.IsBlazorProject)
+            {
+                string logoutFilePath = $"{_applicationInfo.ApplicationBasePath}\\Areas\\Identity\\Pages\\Account\\LogOut.cshtml";
+                if (File.Exists(logoutFilePath))
+                {
+                    //remove Account\Logout.cshtml and Account\Logout.cshtml.cs files. This is not super performant but doesn't need to be.
+                    filesToGenerateArray = filesToGenerateArray.Where(x => !x.Name.Contains("Account.Logout")).ToArray();
+                }
+            }
+
             ValidateFilesToGenerate(filesToGenerateArray);
 
             return filesToGenerateArray;
@@ -418,6 +430,36 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             string pagesFilesCheckPath = Path.Combine(_applicationInfo.ApplicationBasePath, "Pages");
             return Directory.Exists(pagesFilesCheckPath);
+        }
+
+
+        internal bool IsBlazorProjectLayout()
+        {
+            bool isBlazorProject = false;
+            string programCsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "Program.cs");
+            if (!File.Exists(programCsFile))
+            {
+                programCsFile = Directory.EnumerateFiles(_applicationInfo.ApplicationBasePath, "Program.cs").FirstOrDefault();
+            }
+
+            //check for Blazor server
+            if (!string.IsNullOrEmpty(programCsFile))
+            {
+                string programCsText = File.ReadAllText(programCsFile);
+                if (!string.IsNullOrEmpty(programCsText) && programCsText.Contains("AddServerSideBlazor()"))
+                {
+                    isBlazorProject = true;
+                }
+            }
+
+            //check for blazor wasm
+            if (!isBlazorProject &&
+                _projectContext.PackageDependencies.Any(p => p.Name.Equals("Microsoft.AspNetCore.Components.WebAssembly", StringComparison.Ordinal)))
+            {
+                isBlazorProject = true;
+            }
+
+            return isBlazorProject;
         }
 
         private void ValidateFilesToGenerate(IdentityGeneratorFile[] filesToGenerate)

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Internal;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.DotNet.Scaffolding.Shared;
 using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.ProjectModel

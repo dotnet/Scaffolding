@@ -183,4 +183,7 @@
   <data name="NoCodeGeneratorsFound" xml:space="preserve">
     <value>No code generators are available in this project.</value>
   </data>
+  <data name="TargetDirectoryNotFound" xml:space="preserve">
+    <value>Could not find target directory {0}.</value>
+  </data>
 </root>

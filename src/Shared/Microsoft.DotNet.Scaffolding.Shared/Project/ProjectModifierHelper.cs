@@ -52,10 +52,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     {
                         startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
                     }
-                   
                 }
+
                 return startupDocument == null;
             }
+
             return false;
         }
 
@@ -377,27 +378,50 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        internal static async Task<Document> AddTextToDocument(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
+        /// <summary>
+        /// Replaces text within document or appends text to the end of the document
+        /// depending on whether change.ReplaceSnippet is set
+        /// </summary>
+        /// <param name="fileDoc"></param>
+        /// <param name="codeChanges"></param>
+        /// <returns></returns>
+        internal static async Task<Document> ModifyDocumentText(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
         {
-            Document editedDoc = null;
-            if (fileDoc != null && codeChanges != null && codeChanges.Any())
+            if (fileDoc is null || codeChanges is null || !codeChanges.Any())
             {
-                var sourceText = await fileDoc.GetTextAsync();
-                var textToAdd = sourceText?.ToString();
-                foreach (var change in codeChanges)
+                return null;
+            }
+
+            var sourceText = await fileDoc.GetTextAsync();
+            var sourceFileString = sourceText?.ToString() ?? null;
+            if (sourceFileString is null)
+            {
+                return null;
+            }
+
+            var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
+            var applicableCodeChanges = codeChanges.Where(
+                c => !string.IsNullOrEmpty(c.Block) && !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            foreach (var change in applicableCodeChanges)
+            {
+                // If doing a code replacement, replace ReplaceSnippet in source with Block
+                if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
                 {
-                    if (!ProjectModifierHelper.TrimStatement(textToAdd).Contains(ProjectModifierHelper.TrimStatement(change.Block)))
-                    {
-                        textToAdd += change.Block;
-                    }
+                    sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
                 }
-                if (!string.IsNullOrEmpty(textToAdd))
+                else
                 {
-                    var sourceTextToAdd = SourceText.From(textToAdd);
-                    editedDoc = fileDoc.WithText(sourceTextToAdd);
+                    sourceFileString += change.Block; // Otherwise appending block to end of file
                 }
             }
-            return editedDoc;
+
+            if (string.IsNullOrEmpty(sourceFileString))
+            {
+                return null; // TODO generate README
+            }
+
+            var sourceTextToAdd = SourceText.From(sourceFileString);
+            return fileDoc.WithText(sourceTextToAdd);
         }
 
         internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)

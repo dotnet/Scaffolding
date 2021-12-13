@@ -32,9 +32,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         private static IEnumerable<string> GetAllSourceFiles(string directoryPath)
         {
-            var filePaths =
-                Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories).Union(
-                Directory.EnumerateFiles(directoryPath, "*.cshtml", SearchOption.AllDirectories));
+            var filePaths = Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(directoryPath, "*.cshtml", SearchOption.AllDirectories))
+                .Concat(Directory.EnumerateFiles(directoryPath, "*.razor", SearchOption.AllDirectories));
+               
             return filePaths;
         }
 

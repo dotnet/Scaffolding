@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using Microsoft.DotNet.MSIdentity.Properties;
 
 namespace Microsoft.DotNet.MSIdentity.Project
 {
@@ -50,7 +49,6 @@ namespace Microsoft.DotNet.MSIdentity.Project
             ReadProjectDescriptions();
 
             // TODO: could be both a Web app and WEB API.
-
             foreach (ProjectDescription projectDescription in projectDescriptions.Where(p => p.GetMergedMatchesForProjectType(projectDescriptions) != null))
             {
                 var matchesForProjectTypes = projectDescription.GetMergedMatchesForProjectType(projectDescriptions);
@@ -120,12 +118,9 @@ namespace Microsoft.DotNet.MSIdentity.Project
                 return;
             }
 
-            var properties = typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
-                .Where(p => p.PropertyType == typeof(byte[]))
-                .ToArray();
-            foreach (PropertyInfo propertyInfo in properties)
+            foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
             {
-                if (!propertyInfo.Name.StartsWith("cm"))
+                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add"))) 
                 {
                     byte[] content = (propertyInfo.GetValue(null) as byte[])!;
                     ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);

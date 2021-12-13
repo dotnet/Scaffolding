@@ -61,6 +61,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_ShowProfile_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_ShowProfile_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added {0} to user secrets..
         /// </summary>
         internal static string AddingKeyToUserSecrets {
@@ -161,6 +171,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string DetectedProjectType {
             get {
                 return ResourceManager.GetString("DetectedProjectType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] dotnet_blazor_server {
+            get {
+                object obj = ResourceManager.GetObject("dotnet_blazor_server", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         

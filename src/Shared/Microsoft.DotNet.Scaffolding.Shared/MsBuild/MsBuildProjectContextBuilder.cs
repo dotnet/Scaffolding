@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Internal;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.ProjectModel
@@ -20,12 +21,12 @@ namespace Microsoft.Extensions.ProjectModel
         {
             if (string.IsNullOrEmpty(projectPath))
             {
-                throw new ArgumentNullException(nameof(projectPath));
+                throw new ArgumentException(MessageStrings .ProjectPathNotGiven);
             }
 
             if (string.IsNullOrEmpty(targetsLocation))
             {
-                throw new ArgumentNullException(nameof(targetsLocation));
+                throw new ArgumentException(MessageStrings .TargetLocationNotGiven);
             }
 
             _configuration = configuration;

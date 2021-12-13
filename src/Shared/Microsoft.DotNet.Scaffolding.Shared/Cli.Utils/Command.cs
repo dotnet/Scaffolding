@@ -63,9 +63,18 @@ namespace Microsoft.Extensions.Internal
             return this;
         }
 
+        public override string ToString()
+        {
+            var psi = _process .StartInfo;
+            return $"{ psi .FileName } { psi .Arguments }";
+        }
+
         public CommandResult Execute()
         {
             ThrowIfRunning();
+            Command._logger.LogMessage(
+                $"Executing external command:\n{ this }", LogMessageLevel .Trace
+            );
             _running = true;
             _process.EnableRaisingEvents = true;
 

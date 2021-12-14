@@ -52,6 +52,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
+<<<<<<< HEAD
             // Initialize Microsoft.Build assemblies
             if (!MSBuildLocator.IsRegistered)
             {
@@ -64,6 +65,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 return;
             }
+=======
+            //Initialize Microsoft.Build assemblies
+            if (!MSBuildLocator.IsRegistered)
+            {
+                MSBuildLocator.RegisterDefaults();
+            }            
+
+            //Initialize CodeAnalysis.Project wrapper
+            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
+>>>>>>> c0744a5e (added MSBuildLocator.RegisterDefaults call to load Microsoft.Build assemblies (#1741))
 
             var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project);
             CodeChangeOptions options = new CodeChangeOptions

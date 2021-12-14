@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!MSBuildLocator.IsRegistered)
             {
                 MSBuildLocator.RegisterDefaults();
-            }            
+            }
 
             //Initialize CodeAnalysis.Project wrapper
             CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);

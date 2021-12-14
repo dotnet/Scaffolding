@@ -36,7 +36,6 @@ namespace Microsoft.Extensions.ProjectModel
         public IProjectContext Build()
         {
             var errors = new List<string>();
-            var output = new List<string>();
             var tmpFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var result = Command.CreateDotNet(
                 "msbuild",
@@ -47,7 +46,6 @@ namespace Microsoft.Extensions.ProjectModel
                     $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation};Configuration={_configuration}"
                 })
                 .OnErrorLine(e => errors.Add(e))
-                .OnOutputLine(o => output.Add(o))
                 .Execute();
 
             if (result.ExitCode != 0)

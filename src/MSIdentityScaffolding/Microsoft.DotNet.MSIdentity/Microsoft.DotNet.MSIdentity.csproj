@@ -38,6 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
     <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="6.0.0"/>
     <Folder Include="Resources\" />
   </ItemGroup>
 

@@ -101,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                         }
                         ex = ex .InnerException;
                     }
-                    while (!(ex is null))
+                    while (!(ex is null));
                 }
                 return exitCode;
                 

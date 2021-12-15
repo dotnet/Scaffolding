@@ -90,14 +90,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 }
                 catch(Exception ex)
                 {
-                    logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
-                    logger.LogMessage(ex.Message, LogMessageLevel.Error);
-                    logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
-                    if (!logger.IsTracing)
+                    do
                     {
-                        logger.LogMessage(Resources.EnableTracingMessage);
+                        logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
+                        logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                        logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
+                        if (!logger.IsTracing)
+                        {
+                            logger.LogMessage(Resources.EnableTracingMessage);
+                        }
+                        ex = ex .InnerException;
                     }
-
+                    while (!(ex is null))
                 }
                 return exitCode;
                 

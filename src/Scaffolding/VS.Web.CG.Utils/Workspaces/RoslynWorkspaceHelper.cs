@@ -64,6 +64,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             if (projectReferenceStrings != null && projectReferenceStrings.Any())
             {
                 foreach (string projectReferenceString in projectReferenceStrings)
+                try
                 {
                     var currentProject = new Project(Path.GetFullPath(projectReferenceString));
                     if (currentProject != null)
@@ -71,7 +72,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                         projectReferenceInformation.Add(GetProjectInformation(currentProject));
                     }
                 }
-            }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Could not load information for project { projectReferenceString }", ex);
+                }
+            } 
             return projectReferenceInformation;
         }
 

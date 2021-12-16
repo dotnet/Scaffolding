@@ -31,6 +31,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         public IModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }
+        
+        public bool NullableEnabled { get; set; }
 
     }
 }

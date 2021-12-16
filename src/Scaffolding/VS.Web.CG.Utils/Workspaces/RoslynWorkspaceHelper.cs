@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {

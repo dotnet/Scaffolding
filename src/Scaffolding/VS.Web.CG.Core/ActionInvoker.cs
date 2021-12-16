@@ -56,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException(string.Format(MessageStrings.ModelCreationFailed, ex.Message));
+                    throw new InvalidOperationException(string.Format(MessageStrings.ModelCreationFailed, ex.Message), ex);
                 }
 
                 foreach (var param in ActionDescriptor.Parameters)
@@ -87,7 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                         ex = ex.GetBaseException();
                     }
 
-                    throw new InvalidOperationException(ex.Message);
+                    throw new InvalidOperationException(ex.Message, ex);
                 }
 
                 return 0;

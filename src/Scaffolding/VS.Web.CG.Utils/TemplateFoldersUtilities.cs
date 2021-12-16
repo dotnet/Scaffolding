@@ -8,11 +8,14 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+// ConsoleLogger
+using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public static class TemplateFoldersUtilities
     {
+        static ConsoleLogger _logger = new ConsoleLogger();
         public static List<string> GetTemplateFolders(
             string containingProject,
             string applicationBasePath,
@@ -75,6 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     string templatesFolderName = "Templates";
                     var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, baseFolderName);
+                    _logger.LogMessage($"Considering candidate template folder { candidateTemplateFolders }", LogMessageLevel .Trace);
                     if (Directory.Exists(candidateTemplateFolders))
                     {
                         templateFolders.Add(candidateTemplateFolders);

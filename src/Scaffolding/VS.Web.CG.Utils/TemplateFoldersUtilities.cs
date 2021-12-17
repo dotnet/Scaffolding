@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public static class TemplateFoldersUtilities
     {
-        static ConsoleLogger _logger = new ConsoleLogger();
+        static readonly ConsoleLogger _logger = new ConsoleLogger();
         public static List<string> GetTemplateFolders(
             string containingProject,
             string applicationBasePath,

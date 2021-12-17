@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.Internal
         private bool _running = false;
         private Action<string> _stdErrorHandler;
         private Action<string> _stdOutHandler;
-        private static ConsoleLogger _logger = new ConsoleLogger ();
+        private static readonly ConsoleLogger _logger = new ConsoleLogger ();
 
         internal static Command CreateDotNet(string commandName, IEnumerable<string> args)
         {

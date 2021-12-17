@@ -10,6 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
+// ConsoleLogger
+using Microsoft.DotNet.Scaffolding.Shared;
+
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -18,6 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         private readonly IFilesLocator _filesLocator;
         private readonly IFileSystem _fileSystem;
         private readonly ITemplating _templatingService;
+        private readonly static ConsoleLogger _logger = new ConsoleLogger();
 
         public CodeGeneratorActionsService(
             ITemplating templatingService,
@@ -70,6 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             Debug.Assert(_fileSystem.FileExists(templatePath));
+            _logger.LogMessage($"Rendering template { templatePath }", LogMessageLevel.Trace);
             var templateContent = _fileSystem.ReadAllText(templatePath);
             
             var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);

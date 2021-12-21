@@ -180,7 +180,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 if (disposing)
                 {
                     _server.Stop();
-                    foreach (var d in new [] { _writer, _reader, _socket }) if (d is IDisposable) d.Dispose();
+                    foreach (var d in new IDisposable[] { _writer, _reader, _socket }) if (d is IDisposable) d.Dispose();
                 }
 
                 disposedValue = true;

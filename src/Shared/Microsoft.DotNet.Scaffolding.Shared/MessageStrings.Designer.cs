@@ -158,5 +158,5 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
                 return ResourceManager.GetString("StartFileSystemChangeToken", resourceCulture);
             }
         }
-    }
+      }
 }

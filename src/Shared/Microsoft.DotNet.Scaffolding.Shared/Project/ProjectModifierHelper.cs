@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return startupType == null;
         }
 
+        // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
             if (project != null)
@@ -60,23 +61,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        //Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
-        //will bail out.
-        internal static async Task<string> GetStartupClass(string projectPath, CodeAnalysis.Project project)
+        // Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
+        // will return null.
+        internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
         {
-            var programFilePath = Directory.EnumerateFiles(projectPath, "Program.cs").FirstOrDefault();
-            if (!string.IsNullOrEmpty(programFilePath))
-            {
-                var programDoc = project.Documents.Where(d => d.Name.Equals(programFilePath)).FirstOrDefault();
-                var startupClassName = await GetStartupClassName(programDoc);
-                string className = startupClassName;
-                var startupFilePath = string.Empty;
-                if (!string.IsNullOrEmpty(startupClassName))
-                {
-                    return string.Concat(startupClassName, ".cs");
-                }
-            }
-            return string.Empty;
+            var programCsDocument = project.Documents.Where(d => d.Name.Equals("Program.cs")).FirstOrDefault();
+            var startupClassName = await GetStartupClassName(programCsDocument);
+
+            return string.IsNullOrEmpty(startupClassName) ? null : string.Concat(startupClassName, ".cs");
         }
 
         internal static async Task<string> GetStartupClassName(Document programDoc)
@@ -110,6 +102,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     }
                 }
             }
+
             return string.Empty;
         }
 
@@ -343,6 +336,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 return false;
             }
+            // for example, program.cs is only modified when codeChangeOptions.IsMinimalApp is true
+            if (options.Contains(CodeChangeOptionStrings.MinimalApp) && !codeChangeOptions.IsMinimalApp)
+            {
+                return false;
+            }
             //if its a minimal app and options have a "NonMinimalApp", don't add the CodeBlock
             if (options.Contains(CodeChangeOptionStrings.NonMinimalApp) && codeChangeOptions.IsMinimalApp)
             {
@@ -375,6 +373,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -420,14 +419,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return null; // TODO generate README
             }
 
-            var sourceTextToAdd = SourceText.From(sourceFileString);
-            return fileDoc.WithText(sourceTextToAdd);
+            var updatedSourceText = SourceText.From(sourceFileString);
+            return fileDoc.WithText(updatedSourceText);
         }
 
         internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)
         {
             var classFileTxt = await editedDocument.GetTextAsync();
-            File.WriteAllText(fileDoc.Name, classFileTxt.ToString());
+            File.WriteAllText(fileDoc.FilePath, classFileTxt.ToString());
             consoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
         }
 

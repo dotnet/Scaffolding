@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
@@ -64,6 +65,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             if (projectReferenceStrings != null && projectReferenceStrings.Any())
             {
                 foreach (string projectReferenceString in projectReferenceStrings)
+                try
                 {
                     var currentProject = new Project(Path.GetFullPath(projectReferenceString));
                     if (currentProject != null)
@@ -71,7 +73,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                         projectReferenceInformation.Add(GetProjectInformation(currentProject));
                     }
                 }
-            }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Could not load information for project { projectReferenceString }", ex);
+                }
+            } 
             return projectReferenceInformation;
         }
 

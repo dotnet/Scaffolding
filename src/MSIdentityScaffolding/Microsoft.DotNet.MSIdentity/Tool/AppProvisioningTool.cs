@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -51,6 +52,7 @@ namespace Microsoft.DotNet.MSIdentity
         public async Task<ApplicationParameters?> Run()
         {
             //get csproj file path
+            Debugger.Launch();
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
                 var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
@@ -67,15 +69,15 @@ namespace Microsoft.DotNet.MSIdentity
                 }
             }
 
-            string currentDirectory = Directory.GetCurrentDirectory();
-            //if its current directory, update it using the ProjectPath
-            if (ProvisioningToolOptions.ProjectPath.Equals(currentDirectory, StringComparison.OrdinalIgnoreCase))
-            {
-                ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? currentDirectory;
-            }
+            //string currentDirectory = Directory.GetCurrentDirectory();
+            ////if its current directory, update it using the ProjectPath
+            //if (ProvisioningToolOptions.ProjectPath.Equals(currentDirectory, StringComparison.OrdinalIgnoreCase))
+            //{
+            //    ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? currentDirectory;
+            //}
 
             //get appsettings.json file path
-            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
+            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json", SearchOption.AllDirectories);
             if (appSettingsFile.Any())
             {
                 var filePath = appSettingsFile.First();

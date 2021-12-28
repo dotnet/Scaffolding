@@ -49,21 +49,27 @@ namespace Microsoft.DotNet.MSIdentity.Project
         }
 
         public ConfigurationProperties[]? ConfigurationProperties { get; set; }
-        
-        public MatchesForProjectType[]? MatchesForProjectType { get;set; }
+
+        public MatchesForProjectType[]? MatchesForProjectType { get; set; }
 
         public ProjectDescription? GetBasedOnProject(IEnumerable<ProjectDescription> projects)
         {
+            if (string.IsNullOrEmpty(BasedOnProjectDescription))
+            {
+                return null;
+            }
+
             if (projects is null)
             {
                 throw new ArgumentNullException(nameof(projects));
             }
 
             ProjectDescription? baseProject = projects.FirstOrDefault(p => p.Identifier == BasedOnProjectDescription);
-            if (!string.IsNullOrEmpty(BasedOnProjectDescription) && baseProject == null)
+            if (baseProject == null)
             {
-                throw new FormatException($"In Project {ProjectRelativeFolder} BasedOn = {BasedOnProjectDescription} could not be found. ");
+                throw new FormatException($"BasedOnProjectDescription = {BasedOnProjectDescription} could not be found in project {ProjectRelativeFolder} . ");
             }
+
             return baseProject;
         }
 
@@ -94,7 +100,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
         /// </summary>
         /// <param name="projects"></param>
         /// <returns></returns>
-        public IEnumerable<MatchesForProjectType> GetMergedMatchesForProjectType(IEnumerable<ProjectDescription> projects)
+        public IEnumerable<MatchesForProjectType> GetMergedMatchesForProjectType(IEnumerable<ProjectDescription> projects) // TODO refactor, efficiency?
         {
             IEnumerable<MatchesForProjectType> configurationProperties = GetBasedOnProject(projects)?.GetMergedMatchesForProjectType(projects) ?? new MatchesForProjectType[0];
             IEnumerable<MatchesForProjectType> allConfigurationProperties = MatchesForProjectType != null ? configurationProperties.Union(MatchesForProjectType) : configurationProperties;

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -46,68 +47,72 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         private string? InferProjectType(string projectPath)
         {
+            Debugger.Launch();
+            if (!Directory.Exists(projectPath))
+            {
+                return null;
+            }
+
             ReadProjectDescriptions();
 
             // TODO: could be both a Web app and WEB API.
-            foreach (ProjectDescription projectDescription in projectDescriptions.Where(p => p.GetMergedMatchesForProjectType(projectDescriptions) != null))
+            foreach (ProjectDescription projectDescription in projectDescriptions)
             {
                 var matchesForProjectTypes = projectDescription.GetMergedMatchesForProjectType(projectDescriptions);
-                if (projectDescription.MatchesForProjectType != null)
+                if (!matchesForProjectTypes.Any())
                 {
-                    foreach (MatchesForProjectType matchesForProjectType in matchesForProjectTypes)
-                    {
-                        if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
-                        {
-                            IEnumerable<string> files;
+                    return null;
+                }
 
-                            try
+                foreach (MatchesForProjectType matchesForProjectType in matchesForProjectTypes)
+                {
+                    if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
+                    {
+                        try
+                        {
+                            IEnumerable<string> files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath);
+                            if (files.Any())
                             {
-                                files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath);
-                            }
-                            catch (DirectoryNotFoundException)
-                            {
-                                files = new string[0];
-                            }
-                            foreach (string filePath in files)
-                            {
-                                // If there are matches, one at least needs to match
-                                if (matchesForProjectType.MatchAny != null)
+                                if (matchesForProjectType.MatchAny == null) // If MatchAny is null, then the presence of a file is enough
                                 {
-                                    string fileContent = File.ReadAllText(filePath);
-                                    foreach (string match in matchesForProjectType.MatchAny!) // Valid project => 
-                                    {
-                                        if (fileContent.Contains(match))
-                                        {
-                                            return projectDescription.Identifier!;
-                                        }
-                                    }
+                                    return projectDescription.Identifier;
                                 }
 
-                                // If MatchAny is null, then the presence of a file is enough
-                                else
+                                foreach (string filePath in files)
                                 {
-                                    return projectDescription.Identifier!;
+                                    // If there are matches, one at least needs to match
+                                    string fileContent = File.ReadAllText(filePath);
+                                    var hasMatch = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match)).Any();
+                                    if (hasMatch)
+                                    {
+                                        return projectDescription.Identifier!;
+                                    }
                                 }
                             }
                         }
-
-                        if (matchesForProjectType.FolderRelativePath != null)
+                        catch
                         {
-                            try
+                            // files not found
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
+                    {
+                        try
+                        {
+                            if (Directory.EnumerateDirectories(projectPath, matchesForProjectType.FolderRelativePath).Any())
                             {
-                                if (Directory.EnumerateDirectories(projectPath, matchesForProjectType.FolderRelativePath).Any())
-                                {
-                                    return projectDescription.Identifier!;
-                                }
+                                return projectDescription.Identifier!;
                             }
-                            catch
-                            {
-                                // No folder
-                            }
+                        }
+                        catch
+                        {
+                            continue; // No folder
                         }
                     }
                 }
             }
+
             return null;
         }
 
@@ -120,7 +125,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
             foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
             {
-                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add"))) 
+                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
                 {
                     byte[] content = (propertyInfo.GetValue(null) as byte[])!;
                     ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);

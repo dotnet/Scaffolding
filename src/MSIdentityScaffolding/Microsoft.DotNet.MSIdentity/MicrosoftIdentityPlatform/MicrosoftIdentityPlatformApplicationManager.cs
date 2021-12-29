@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -57,14 +58,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             else if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
             {
                 // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
-                // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
-                if (applicationParameters.TargetFramework == "net5.0")
+                // whereas in .NET 5.0 and .NET 6.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
+                switch (applicationParameters.TargetFramework)
                 {
-                    AddSpaPlatform(applicationParameters, application);
-                }
-                else
-                {
-                    AddWebAppPlatform(applicationParameters, application, true);
+                    case "net5.0":
+                    case "net6.0":
+                        AddSpaPlatform(applicationParameters, application);
+                        break;
+                    default:
+                        AddWebAppPlatform(applicationParameters, application, withImplicitFlow: true);
+                        break;
                 }
             }
 
@@ -179,6 +182,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         Console.WriteLine(ex.Message);
                     }
                 }
+
                 Environment.Exit(1);
             }
 
@@ -187,110 +191,169 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         internal async Task<JsonResponse> UpdateApplication(
             TokenCredential tokenCredential,
-            ApplicationParameters? reconciledApplicationParameters,
+            ApplicationParameters? applicationParameters,
             ProvisioningToolOptions toolOptions,
             string commandName)
         {
-            JsonResponse jsonResponse = new JsonResponse(commandName);
-            if (reconciledApplicationParameters is null)
+            if (applicationParameters is null)
             {
-                jsonResponse.Content = $"Failed to update Azure AD app, reconciledApplicationParameters == null";
-                jsonResponse.State = State.Fail;
+                var failureMessage = $"Failed to update Azure AD app, null applicationParameters"; // TODO constant
+                return new JsonResponse(commandName, State.Fail, failureMessage);
             }
-            else
+
+            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+
+            var remoteApp = (await graphServiceClient.Applications.Request()
+                .Filter($"appId eq '{applicationParameters.ClientId}'").GetAsync()).First();
+
+            if (remoteApp is null)
             {
-                var graphServiceClient = GetGraphServiceClient(tokenCredential);
+                var notFound = $"Could not find Azure AD app registration {applicationParameters.ApplicationDisplayName} ({applicationParameters.ClientId})"; // TODO constant
+                return new JsonResponse(commandName, State.Fail, notFound);
+            }
 
-                var existingApplication = (await graphServiceClient.Applications
-                   .Request()
-                   .Filter($"appId eq '{reconciledApplicationParameters.ClientId}'")
-                   .GetAsync()).First();
-
-                bool needsUpdate = false;
-
-                // Updates the redirect URIs
-                if (existingApplication.Web == null)
+            var appUpdates = applicationParameters.IsBlazorWasm == true ? UpdateBlazorApp(remoteApp, toolOptions) : UpdateApplication(remoteApp, toolOptions);
+            if (appUpdates != null)
+            {
+                try
                 {
-                    existingApplication.Web = new WebApplication();
+                    // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
+                    var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
+                    if (updatedApp is null)
+                    {
+                        var updateFail = $"Failed to update Azure AD app registration {remoteApp.DisplayName} ({remoteApp.AppId})"; // TODO constant
+                        return new JsonResponse(commandName, State.Fail, updateFail);
+                    }
+
+                    var successMessage = $"Success updating Azure AD app {updatedApp.DisplayName} ({updatedApp.AppId})";
+                    return new JsonResponse(commandName, State.Success, successMessage);
                 }
-
-                var updatedApp = new Application
+                catch (ServiceException se)
                 {
-                    Web = existingApplication.Web
+                    return new JsonResponse(commandName, State.Fail, se.Error?.Message);
+                }
+            }
+
+            var unnecessaryMsg = $"Azure AD app {remoteApp.DisplayName} ({remoteApp.AppId}) did not require any remote updates"; // TODO constant
+            return new JsonResponse(commandName, State.Success, unnecessaryMsg);
+        }
+
+        /// <summary>
+        /// Updates application in Azure AD, returns updated app or null if no updates were made
+        /// </summary>
+        /// <param name="existingApplication"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns></returns>
+        private Application? UpdateApplication(Application existingApplication, ProvisioningToolOptions toolOptions)
+        {
+            bool needsUpdate = false;
+            var updatedApp = new Application
+            {
+                Web = existingApplication.Web ?? new WebApplication()
+            };
+
+            // Update redirect uris
+            var existingRedirectUris = updatedApp.Web.RedirectUris.Distinct();
+            var updatedRedirectUris = UpdateRedirectUris(toolOptions, existingRedirectUris, "signin-oidc"); // TODO constant
+            if (updatedRedirectUris.Count() > existingRedirectUris.Count())
+            {
+                updatedApp.Web.RedirectUris = updatedRedirectUris;
+                needsUpdate = true;
+            }
+
+            updatedApp.Web.ImplicitGrantSettings ??= new ImplicitGrantSettings();
+
+            if (toolOptions.EnableAccessToken.HasValue &&
+                updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
+            {
+                needsUpdate = true;
+                updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+            }
+
+            if (toolOptions.EnableIdToken.HasValue &&
+                updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
+            {
+                needsUpdate = true;
+                updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+            }
+
+            return needsUpdate ? updatedApp : null;
+        }
+
+        /// <summary>
+        /// Updates blazor application in Azure AD, returns updated app or null if no updates were made
+        /// </summary>
+        /// <param name="existingApplication"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns></returns>
+        private Application? UpdateBlazorApp(Application existingApplication, ProvisioningToolOptions toolOptions)
+        {
+            Debugger.Launch();
+            bool needsUpdate = false;
+            var updatedApp = new Application
+            {
+                Web = existingApplication.Web ?? new WebApplication(),
+                Spa = existingApplication.Spa ?? new SpaApplication()
+            };
+
+            // Update redirect uris
+            var existingRedirectUris = updatedApp.Spa.RedirectUris.Distinct();
+            var updatedRedirectUris = UpdateRedirectUris(toolOptions, existingRedirectUris, "authentication/login-callback"); // TODO constant
+            if (updatedRedirectUris.Count() > existingRedirectUris.Count())
+            {
+                updatedApp.Spa.RedirectUris = updatedRedirectUris;
+                needsUpdate = true;
+            }
+
+            if (updatedApp.Web.ImplicitGrantSettings is null)
+            {
+                updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings
+                {
+                    EnableAccessTokenIssuance = true,
+                    EnableIdTokenIssuance = true
                 };
 
-                //update redirect uris
-                List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
-                List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
-                int originalUrisCount = existingRedirectUris.Count;
-                existingRedirectUris.AddRange(urisToEnsure);
-                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
-                if (updatedApp.Web.RedirectUris.Count() > originalUrisCount)
-                {
-                    needsUpdate = true;
-                }
-
-                if (updatedApp.Web.ImplicitGrantSettings == null)
-                {
-                    updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
-                }
-
-                //update implicit grant settings if need be.
-                if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
-                {
-                    needsUpdate = true;
-                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
-                }
-
-                if (toolOptions.EnableIdToken.HasValue &&
-                    (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
-                {
-                    needsUpdate = true;
-                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
-                }
-
-                if (needsUpdate)
-                {
-                    try
-                    {
-                        // TODO: update other fields. 
-                        // See https://github.com/jmprieur/app-provisonning-tool/issues/10
-                        await graphServiceClient.Applications[existingApplication.Id]
-                            .Request()
-                            .UpdateAsync(updatedApp).ConfigureAwait(false);
-                    }
-                    catch (ServiceException se)
-                    {
-                        jsonResponse.Content = se.Error?.Message;
-                        jsonResponse.State = State.Fail;
-                        return jsonResponse;
-                    }
-                }
-
-                jsonResponse.Content = $"Success updating Azure AD app {updatedApp.DisplayName} ({updatedApp.AppId})";
-                jsonResponse.State = State.Success;
+                return updatedApp;
             }
-            return jsonResponse;
-        }
 
-        //checks for valid https uris.
-        internal static IList<string> ValidateUris(IList<string> redirectUris)
-        {
-            IList<string> validUris = new List<string>();
-            if (redirectUris.Any())
+            // update implicit grant settings if need be. Default for Blazor is to set both Access tokens and ID tokens
+            if (updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance != true)
             {
-                foreach (var uri in redirectUris)
+                if (!(toolOptions.EnableIdToken.HasValue && toolOptions.EnableIdToken.Value == false))
                 {
-                    //either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
-                    if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
-                       (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
-                    {
-                        validUris.Add(uri);
-                    }
+                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
+                    needsUpdate = true;
                 }
             }
-            return validUris;
+
+            if (updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance != true)
+            {
+                if (!(toolOptions.EnableAccessToken.HasValue && toolOptions.EnableAccessToken.Value == false))
+                {
+                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
+                    needsUpdate = true;
+                }
+            }
+
+            return needsUpdate ? updatedApp : null;
         }
+
+        private IEnumerable<string> UpdateRedirectUris(ProvisioningToolOptions toolOptions, IEnumerable<string> existingRedirectUris, string path)
+        {
+            var urisToEnsure = toolOptions.RedirectUris.Where(uri => IsValidUri(uri));
+            var processedUris = urisToEnsure.Select(uri => UpdateUriPath(uri, path));
+
+            return existingRedirectUris.Union(processedUris).Distinct();
+        }
+
+       
+        // either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+        internal static bool IsValidUri(string uri) => Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback));
+
+        // isBlazorWasm == true ? "authentication/login-callback" : "signin-oidc"
+        private static string UpdateUriPath(string uri, string path) => new UriBuilder(uri) { Path = path }.Uri.ToString();
+
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
             GraphServiceClient graphServiceClient,
@@ -493,8 +556,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="application"></param>
         private static void AddSpaPlatform(ApplicationParameters applicationParameters, Application application)
         {
-            application.Spa = new SpaApplication();
-            application.Spa.RedirectUris = applicationParameters.WebRedirectUris;
+            application.Spa = new SpaApplication
+            {
+                RedirectUris = applicationParameters.WebRedirectUris
+            };
         }
 
         /// <summary>
@@ -508,15 +573,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             application.Web = new WebApplication();
 
             // IdToken
-            if ((!applicationParameters.CallsDownstreamApi && !applicationParameters.CallsMicrosoftGraph)
-                || withImplicitFlow)
+            if (withImplicitFlow || (!applicationParameters.CallsDownstreamApi && !applicationParameters.CallsMicrosoftGraph))
             {
-                application.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
-                application.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
-                if (applicationParameters.IsB2C || withImplicitFlow)
+                application.Web.ImplicitGrantSettings = new ImplicitGrantSettings
                 {
-                    application.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
-                }
+                    EnableIdTokenIssuance = true,
+                    EnableAccessTokenIssuance = withImplicitFlow || applicationParameters.IsB2C
+                };
             }
 
             // Redirect URIs
@@ -525,23 +588,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // Logout URI
             application.Web.LogoutUrl = applicationParameters.LogoutUrl;
 
-            // Explicit usage of MicrosoftGraph openid and offline_access, in the case
-            // of Azure AD B2C.
-            if (applicationParameters.IsB2C && (applicationParameters.IsWebApp.HasValue && applicationParameters.IsWebApp.Value)
-                || (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value))
+            // Explicit usage of MicrosoftGraph openid and offline_access
+            // in the case of Azure AD B2C.
+            if (applicationParameters.IsB2C &&
+                (applicationParameters.IsWebApp.GetValueOrDefault() || applicationParameters.IsBlazorWasm.GetValueOrDefault()))
             {
-                if (applicationParameters.CalledApiScopes == null)
-                {
-                    applicationParameters.CalledApiScopes = string.Empty;
-                }
+                applicationParameters.CalledApiScopes ??= string.Empty;
                 if (!applicationParameters.CalledApiScopes.Contains("openid"))
                 {
-                    applicationParameters.CalledApiScopes += " openid";
+                    applicationParameters.CalledApiScopes += " openid";                 // TODO this doesn't make sense
                 }
                 if (!applicationParameters.CalledApiScopes.Contains("offline_access"))
                 {
                     applicationParameters.CalledApiScopes += " offline_access";
                 }
+
                 applicationParameters.CalledApiScopes = applicationParameters.CalledApiScopes.Trim();
             }
         }
@@ -736,8 +797,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 TargetFramework = originalApplicationParameters.TargetFramework,
                 MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
                 CalledApiScopes = originalApplicationParameters.CalledApiScopes,
-                AppIdUri = originalApplicationParameters.AppIdUri,
-
+                AppIdUri = originalApplicationParameters.AppIdUri
             };
 
             if (application.Api != null && application.IdentifierUris.Any())

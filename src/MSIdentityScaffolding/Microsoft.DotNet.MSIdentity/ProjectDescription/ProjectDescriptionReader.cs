@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -47,7 +46,6 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         private string? InferProjectType(string projectPath)
         {
-            Debugger.Launch();
             if (!Directory.Exists(projectPath))
             {
                 return null;
@@ -73,19 +71,17 @@ namespace Microsoft.DotNet.MSIdentity.Project
                             IEnumerable<string> files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath);
                             if (files.Any())
                             {
-                                if (matchesForProjectType.MatchAny == null) // If MatchAny is null, then the presence of a file is enough
+                                if (matchesForProjectType.MatchAny is null)
                                 {
-                                    return projectDescription.Identifier;
+                                    return projectDescription.Identifier; // If MatchAny is null, then the presence of a file is enough
                                 }
-
                                 foreach (string filePath in files)
                                 {
-                                    // If there are matches, one at least needs to match
-                                    string fileContent = File.ReadAllText(filePath);
+                                    string fileContent = File.ReadAllText(filePath) ?? string.Empty;
                                     var hasMatch = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match)).Any();
                                     if (hasMatch)
                                     {
-                                        return projectDescription.Identifier!;
+                                        return projectDescription.Identifier!;  // If there are matches, at least one needs to match
                                     }
                                 }
                             }
@@ -107,7 +103,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
                         }
                         catch
                         {
-                            continue; // No folder
+                            continue; // Folder not found
                         }
                     }
                 }

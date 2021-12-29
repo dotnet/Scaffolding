@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [MemberData(nameof(UriList))]
         public void ValidateUrisTests(List<string> urisToValidate, List<string> validUris)
         {
-            var validatedUris = MicrosoftIdentityPlatformApplicationManager.ValidateUris(urisToValidate);
-            var areEquivalent = (validUris.Count == validatedUris.Count) && !validatedUris.Except(validUris).Any();
+            var validatedUris = urisToValidate.Where(uri => MicrosoftIdentityPlatformApplicationManager.IsValidUri(uri));
+            var areEquivalent = (validUris.Count == validatedUris.Count()) && !validatedUris.Except(validUris).Any();
             Assert.True(areEquivalent);
         }
 
@@ -23,31 +23,33 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             new List<object[]>
             {
                 new object[] {
-                    new List<string> {
-                                        "https://localhost:5001/",
-                                        "https://localhost:5002/get",
-                                        "http://localhost:5001/",
-                                        "https://www.microsoft.com/",
-                                        "http://www.azure.com",
-                                        "https://www.testapi.com/get/{id}",
-                                        "http://www.skype.com",
-                                        "http://127.0.0.1/get",
-                                        "http://loopback/post",
-                                        "badstring",
-                                        null,
-                                        string.Empty,
-                                        ""
-                                     },
+                    new List<string>
+                    {
+                        "https://localhost:5001/",
+                        "https://localhost:5002/get",
+                        "http://localhost:5001/",
+                        "https://www.microsoft.com/",
+                        "http://www.azure.com",
+                        "https://www.testapi.com/get/{id}",
+                        "http://www.skype.com",
+                        "http://127.0.0.1/get",
+                        "http://loopback/post",
+                        "badstring",
+                        null,
+                        string.Empty,
+                        ""
+                    },
 
-                    new List<string> {
-                                        "https://localhost:5001/",
-                                        "https://localhost:5002/get",
-                                        "http://localhost:5001/",
-                                        "https://www.microsoft.com/",
-                                        "https://www.testapi.com/get/{id}",
-                                        "http://127.0.0.1/get",
-                                        "http://loopback/post",
-                                     }
+                    new List<string>
+                    {
+                        "https://localhost:5001/",
+                        "https://localhost:5002/get",
+                        "http://localhost:5001/",
+                        "https://www.microsoft.com/",
+                        "https://www.testapi.com/get/{id}",
+                        "http://127.0.0.1/get",
+                        "http://loopback/post",
+                    }
                 }
             };
     }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,6 +28,10 @@ namespace Microsoft.DotNet.MSIdentity
     /// </summary>
     public class AppProvisioningTool : IMsAADTool
     {
+        private const string AppSettingsJson = "appsettings.json";
+
+        private static PropertyInfo[]? _properties;
+
         internal IConsoleLogger ConsoleLogger { get; }
 
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
@@ -50,7 +55,8 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            //get csproj file path
+            // get csproj file path
+            Debugger.Launch();
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
                 var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
@@ -62,8 +68,8 @@ namespace Microsoft.DotNet.MSIdentity
                         ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
                         return null;
                     }
-                    var filePath = csProjfiles.First();
-                    ProvisioningToolOptions.ProjectFilePath = filePath;
+
+                    ProvisioningToolOptions.ProjectFilePath = csProjfiles.First();
                 }
             }
 
@@ -76,7 +82,7 @@ namespace Microsoft.DotNet.MSIdentity
             //}
 
             // get appsettings.json file path
-            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json", SearchOption.AllDirectories);
+            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, AppSettingsJson, SearchOption.AllDirectories);
             if (appSettingsFile.Any())
             {
                 var filePath = appSettingsFile.First();
@@ -355,8 +361,7 @@ namespace Microsoft.DotNet.MSIdentity
                     }
                 }
 
-
-                //save comments somehow, only write to appsettings.json if changes are made
+                // save comments somehow, only write to appsettings.json if changes are made
                 if (appSettings != null && changesMade)
                 {
                     System.IO.File.WriteAllText(filePath, appSettings.ToString());
@@ -382,7 +387,7 @@ namespace Microsoft.DotNet.MSIdentity
                 string updatedContent = fileContent.Replace("AzureAd", "AzureAdB2C");
 
                 // Add the policies to the appsettings.json
-                if (filePath.EndsWith("appsettings.json"))
+                if (filePath.EndsWith(AppSettingsJson))
                 {
                     // Insert the policies
                     int indexCallbackPath = updatedContent.IndexOf("\"CallbackPath\"");

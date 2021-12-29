@@ -121,7 +121,7 @@
     <value>Adding dependency '{0}' version '{1}'.</value>
   </data>
   <data name="CodeGeneratorInstanceCreationError" xml:space="preserve">
-    <value>There was an error creating the code generator instance: {0}\r\n{1}</value>
+    <value>There was an error creating the code generator instance: {0}</value>
   </data>
   <data name="CodeGeneratorNotFound" xml:space="preserve">
     <value>No code generators found with the name '{0}'</value>

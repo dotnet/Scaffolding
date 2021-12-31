@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
+using System.IO.Pipes;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -21,8 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
     {
         private static readonly string HostId = typeof(ScaffoldingClient).GetTypeInfo().Assembly.GetName().Name;
 
-        private int _port;
-        private TcpClient _client;
+        private string _port;
         private BinaryWriter _writer;
         private BinaryReader _reader;
 
@@ -34,39 +32,35 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
         public int CurrentProtocolVersion => 1;
 
-        public static async Task<ScaffoldingClient> Connect(int port, ILogger logger)
+        public static ScaffoldingClient Connect(string port, ILogger logger)
         {
-            TcpClient client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, port);
-
-            return new ScaffoldingClient(client, logger, port);
+            return new ScaffoldingClient(logger, port);
         }
 
-        public ScaffoldingClient(TcpClient client, ILogger logger, int port)
+        public ScaffoldingClient(ILogger logger, string port)
         {
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
             }
-            _client = client;
-            _logger = logger;
-            _port = port;
+            this._logger = logger;
+            this._port = port;
             Init();
         }
 
         public void Init()
         {
-            if (_client.Connected)
-            {
-                var stream = _client.GetStream();
-                _writer = new BinaryWriter(stream);
-                _reader = new BinaryReader(stream);
-                return;
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(Resources.ConnectToServerError, _port));
-            }
+            var ports = this._port.Split(':');
+            if (0X2 != ports.Length) throw new ArgumentException("port", "Expected input:output");
+            var stream = new AnonymousPipeClientStream(PipeDirection.Out, ports[0X0]);
+            try {
+                this._writer = new BinaryWriter(stream);
+                stream = null;
+            } finally { using (stream); }
+            try {
+                _reader = new BinaryReader(stream = new AnonymousPipeClientStream(PipeDirection.In, ports[0X1]));
+                stream = null;
+            } finally { using (stream); }
         }
         
         [SuppressMessage("supressing re-throw exception", "CA2200")]

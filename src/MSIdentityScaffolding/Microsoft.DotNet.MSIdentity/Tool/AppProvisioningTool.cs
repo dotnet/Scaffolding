@@ -236,127 +236,125 @@ namespace Microsoft.DotNet.MSIdentity
 
         // add 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fill them default values if empty.
         // Default values can be found https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content
-        private void ModifyAppSettings(ApplicationParameters applicationParameters) // TODO add logging
+        private void ModifyAppSettings(ApplicationParameters applicationParameters)
         {
-            // TODO refactor me
-            if (string.IsNullOrEmpty(ProvisioningToolOptions.AppSettingsFilePath))
+            string? filePath = ProvisioningToolOptions.AppSettingsFilePath;
+            if (!string.IsNullOrEmpty(filePath))
             {
-                return;
-            }
-
-            bool changesMade = false;
-            var fileContents = System.IO.File.ReadAllText(ProvisioningToolOptions.AppSettingsFilePath);
-            if (fileContents is null)
-            {
-                return;
-            }
-
-            JObject appSettings = JObject.Parse(System.IO.File.ReadAllText(fileContents));
-            if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
-            {
-                // add azureAdBlock
-                changesMade = true;
-                appSettings.Add("AzureAd", JObject.FromObject(new AzureAdProperties
+                bool changesMade = false;
+                //waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
+                JObject appSettings = JObject.Parse(System.IO.File.ReadAllText(filePath));
+                if (appSettings != null)
                 {
-                    Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
-                    Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
-                    TenantId = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId,
-                    ClientId = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId,
-                    CallbackPath = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath
-                }));
-
-                azureAdToken = appSettings.GetValue("AzureAd");
-            }
-            else
-            {
-                // if property exists, and if suggested value is not already there.
-                // TODO what if property does not exist ?
-                if (azureAdToken["Domain"] &&
-                    !azureAdBlock.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
-                {
-                    changesMade = true;
-                    azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
-                }
-
-                if (!string.IsNullOrEmpty(azureAdBlock.TenantId) &&
-                    !azureAdBlock.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
-                {
-                    changesMade = true;
-                    azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
-                }
-
-                if (!string.IsNullOrEmpty(azureAdBlock.ClientId) &&
-                    !azureAdBlock.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
-                {
-                    changesMade = true;
-                    azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
-                }
-
-                if (!string.IsNullOrEmpty(azureAdBlock.Instance) &&
-                    !azureAdBlock.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
-                {
-                    changesMade = true;
-                    azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
-                }
-
-                if (!string.IsNullOrEmpty(azureAdBlock.CallbackPath) &&
-                    !azureAdBlock.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    changesMade = true;
-                    azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
-                }
-            }
-            
-
-            if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
-            {
-                if (azureAdToken != null)
-                {
-                    if (azureAdToken["ClientSecret"] == null)
+                    var azureAdToken = appSettings["AzureAd"];
+                    if (azureAdToken != null)
                     {
-                        changesMade = true;
-                        azureAdToken["ClientSecret"] = "Client secret from app-registration. Check user secrets/azure portal.";
-                    }
-
-                    if (azureAdToken["ClientCertificates"] == null)
-                    {
-                        changesMade = true;
-                        azureAdToken["ClientCertificates"] = new JArray();
-                    }
-                }
-
-                if (ProvisioningToolOptions.CallsDownstreamApi)
-                {
-                    if (appSettings["DownstreamApi"] == null)
-                    {
-                        changesMade = true;
-                        string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
-                        appSettings.Add("DownstreamApi", JObject.FromObject(new
+                        var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
+                        if (azureAdProperty != null)
                         {
-                            BaseUrl = apiURL,
-                            Scopes = "user.read"
+                            // if property exists, and if suggested value is not already there.
+                            if (!string.IsNullOrEmpty(azureAdProperty.Domain) &&
+                                !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.TenantId) &&
+                                !azureAdProperty.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
+                                !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.Instance) &&
+                                !azureAdProperty.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
+                            }
+
+                            if (!string.IsNullOrEmpty(azureAdProperty.CallbackPath) &&
+                                !azureAdProperty.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                changesMade = true;
+                                azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        changesMade = true;
+                        appSettings.Add("AzureAd", JObject.FromObject(new
+                        {
+                            Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
+                            Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
+                            TenantId = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId,
+                            ClientId = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId,
+                            CallbackPath = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath
                         }));
                     }
-                }
 
-                if (ProvisioningToolOptions.CallsGraph)
-                {
-                    if (appSettings["MicrosoftGraph"] == null)
+                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
                     {
-                        changesMade = true;
-                        appSettings.Add("MicrosoftGraph", JObject.FromObject(new
+
+                        if (azureAdToken != null)
                         {
-                            BaseUrl = "https://graph.microsoft.com/v1.0",
-                            Scopes = "user.read"
-                        }));
+                            if (azureAdToken["ClientSecret"] == null)
+                            {
+                                changesMade = true;
+                                azureAdToken["ClientSecret"] = "Client secret from app-registration. Check user secrets/azure portal.";
+                            }
+
+                            if (azureAdToken["ClientCertificates"] == null)
+                            {
+                                changesMade = true;
+                                azureAdToken["ClientCertificates"] = new JArray();
+                            }
+                        }
+
+                        if (ProvisioningToolOptions.CallsDownstreamApi)
+                        {
+                            if (appSettings["DownstreamApi"] == null)
+                            {
+                                changesMade = true;
+                                string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
+                                appSettings.Add("DownstreamApi", JObject.FromObject(new
+                                {
+                                    BaseUrl = apiURL,
+                                    Scopes = "user.read"
+                                }));
+                            }
+                        }
+
+                        if (ProvisioningToolOptions.CallsGraph)
+                        {
+                            if (appSettings["MicrosoftGraph"] == null)
+                            {
+                                changesMade = true;
+                                appSettings.Add("MicrosoftGraph", JObject.FromObject(new
+                                {
+                                    BaseUrl = "https://graph.microsoft.com/v1.0",
+                                    Scopes = "user.read"
+                                }));
+                            }
+                        }
                     }
                 }
-            }
 
-            // save comments somehow, only write to appsettings.json if changes are made
-            if (appSettings != null && changesMade)
-            {
-                System.IO.File.WriteAllText(ProvisioningToolOptions.AppSettingsFilePath, appSettings.ToString());
+
+                //save comments somehow, only write to appsettings.json if changes are made
+                if (appSettings != null && changesMade)
+                {
+                    System.IO.File.WriteAllText(filePath, appSettings.ToString());
+                }
             }
         }
 

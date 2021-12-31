@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             }
 #endif
 
-            app.OnExecute(async () =>
+            await app.OnExecute(async () =>
             {
                 var exitCode = 1;
                 try

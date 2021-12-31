@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                     var configuration = appConfiguration.Value();
 
                     var portNumber = port.Value();
-                    using (var client = await ScaffoldingClient.Connect(portNumber, logger))
+                    using (var client = ScaffoldingClient.Connect(portNumber, logger))
                     {
                         var messageOrchestrator = new MessageOrchestrator(client, logger);
                         var projectInformation = messageOrchestrator.GetProjectInformation();

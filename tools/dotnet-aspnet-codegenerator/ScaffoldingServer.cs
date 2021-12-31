@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
-using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;

@@ -78,8 +78,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             var actionInvoker = new ActionInvoker(actionDescriptor);
 
             //Act
-            var ex =
-                Assert.Throws<InvalidOperationException>(
+            var ex = await
+                Assert.ThrowsAsync<InvalidOperationException>(
                 async () => await actionInvoker.ExecuteAsync("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' ')));
 
             //Assert

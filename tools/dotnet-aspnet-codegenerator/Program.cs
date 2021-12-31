@@ -201,7 +201,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     .Start();
 
                 using (var serverTask = server.Accept()) {
-                    if (default == serverTask.Status) serverTask.Run();
+                    if (default == serverTask.Status) serverTask.Start();
                     try {
                         return command.WaitForExit().ExitCode;
                     }

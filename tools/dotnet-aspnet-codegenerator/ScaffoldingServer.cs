@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 this.Port[0X1] = stream.GetClientHandleAsString();
                 stream = null;
             }
-            finally { if (this._writer is null) using (stream); }
+            finally { if (this._writer is null) using (stream) {} }
 
             stream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
             try {
@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 this.Port[0X0] = stream.GetClientHandleAsString();
                 stream = null;
             }
-            finally { if (this._reader is null) using (stream); }    
+            finally { if (this._reader is null) using (stream) {} }    
             this._logger = logger;
         }
 

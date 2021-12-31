@@ -116,7 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 try
                 {
-                    var rawMessage = await this._reader.ReadStringAsync();
+                    var rawMessage = await Task.Run(() => this._reader.ReadString());
                     var message = JsonConvert.DeserializeObject<Message>(rawMessage);
                     if (ShouldStopListening(message))
                     {

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -288,7 +287,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns></returns>
         private Application? UpdateBlazorApp(Application existingApplication, ProvisioningToolOptions toolOptions)
         {
-            Debugger.Launch();
             bool needsUpdate = false;
             var updatedApp = new Application
             {
@@ -738,7 +736,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var application = await GetApplication(tokenCredential, applicationParameters);
             if (application != null)
             {
-
                 ApplicationParameters effectiveApplicationParameters = GetEffectiveApplicationParameters(
                     tenant!,
                     application,
@@ -746,6 +743,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 return effectiveApplicationParameters;
             }
+
             return null;
         }
 

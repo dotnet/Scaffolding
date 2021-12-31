@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescriptionReader
     {
-        public List<ProjectDescription> projectDescriptions { get; private set; } = new List<ProjectDescription>();
+        public List<ProjectDescription> ProjectDescriptions { get; private set; } = new List<ProjectDescription>();
 
         public ProjectDescription? GetProjectDescription(string projectTypeIdentifier, string projectPath)
         {
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
         {
             ReadProjectDescriptions();
 
-            return projectDescriptions.FirstOrDefault(projectDescription => projectDescription.Identifier == projectTypeIdentifier);
+            return ProjectDescriptions.FirstOrDefault(projectDescription => projectDescription.Identifier == projectTypeIdentifier);
         }
 
         static JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
@@ -54,22 +54,16 @@ namespace Microsoft.DotNet.MSIdentity.Project
             ReadProjectDescriptions();
 
             // TODO: could be both a Web app and WEB API.
-            foreach (ProjectDescription projectDescription in projectDescriptions)
-            {
-                var matchesForProjectTypes = projectDescription.GetMergedMatchesForProjectType(projectDescriptions);
-                if (!matchesForProjectTypes.Any())
-                {
-                    return null;
-                }
-
-                foreach (MatchesForProjectType matchesForProjectType in matchesForProjectTypes)
+            foreach (ProjectDescription projectDescription in ProjectDescriptions)
+            { // TODO double for-loop, refactor?
+                foreach (MatchesForProjectType matchesForProjectType in projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions))
                 {
                     if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
                     {
                         try
                         {
-                            IEnumerable<string> files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath);
-                            if (files.Any())
+                            IEnumerable<string>? files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath) ?? null;
+                            if (files != null && files.Any())
                             {
                                 if (matchesForProjectType.MatchAny is null)
                                 {
@@ -86,10 +80,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
                                 }
                             }
                         }
-                        catch
-                        {
-                            // files not found
-                        }
+                        catch {}  // No files found
                     }
 
                     if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
@@ -101,10 +92,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
                                 return projectDescription.Identifier!;
                             }
                         }
-                        catch
-                        {
-                            continue; // Folder not found
-                        }
+                        catch {} // Folder not found
                     }
                 }
             }
@@ -114,7 +102,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         private void ReadProjectDescriptions()
         {
-            if (projectDescriptions.Any())
+            if (ProjectDescriptions.Any())
             {
                 return;
             }
@@ -134,7 +122,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
                     {
                         throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
                     }
-                    projectDescriptions.Add(projectDescription);
+                    ProjectDescriptions.Add(projectDescription);
                 }
             }
 

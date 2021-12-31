@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -12,7 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
     public class ActionInvokerTests
     {
         [Fact]
-        public void ActionInvoker_Invokes_GenerateCode_Method_With_Right_ActionModel()
+        public async Task ActionInvoker_Invokes_GenerateCode_Method_With_Right_ActionModel()
         {
             //Arrange
             bool methodCalled = false;
@@ -41,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             var actionInvoker = new ActionInvoker(actionDescriptor);
 
             //Act
-            actionInvoker.Execute("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' '));
+            await actionInvoker.ExecuteAsync("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' '));
 
             //Assert
             Assert.True(methodCalled);
@@ -51,7 +52,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
         }
 
                 [Fact]
-        public void ActionInvoker_Throws_With_Inner_Exception()
+        public async Task ActionInvoker_Throws_With_Inner_Exception()
         {
             //Arrange
             const string NOT_IMPLEMENTED_MESSAGE = "This action is intentionally not implemented.";
@@ -79,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             //Act
             var ex =
                 Assert.Throws<InvalidOperationException>(
-                () => actionInvoker.Execute("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' ')));
+                async () => await actionInvoker.ExecuteAsync("CodeGeneratorSample StringValuePassed --BoolProperty".Split(' ')));
 
             //Assert
             Assert.Equal(NOT_IMPLEMENTED_MESSAGE, ex.InnerException.Message);

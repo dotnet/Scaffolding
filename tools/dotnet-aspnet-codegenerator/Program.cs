@@ -343,7 +343,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             server = ScaffoldingServer.Listen(logger);
             server.AddHandler(new ProjectInformationMessageHandler(projectInformation, logger));
             server.AddHandler(new FileSystemChangeMessageHandler(logger));
-            server.Accept();
             return server;
         }
     }

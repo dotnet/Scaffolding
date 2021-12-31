@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             _isSimulationMode = isSimulationMode;
         }
 
-        public int Execute(Action<IEnumerable<FileSystemChangeInformation>> simModeAction = null)
+        public async Task<int> ExecuteAsync(Action<IEnumerable<FileSystemChangeInformation>> simModeAction = null)
         {
             var serviceProvider = new ServiceProvider();
             AddFrameworkServices(serviceProvider, _projectInformation);
@@ -54,7 +54,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             try
             {
-                codeGenCommand.Execute(_codeGenArguments);
+                await codeGenCommand.ExecuteAsync(_codeGenArguments);
 
                 if (_isSimulationMode && simModeAction != null)
                 {

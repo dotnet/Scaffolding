@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration

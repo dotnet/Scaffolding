@@ -135,7 +135,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         // No handler could handle the message.
                     }
                 }
-                catch (EndOfStreamException _)
+                catch (EndOfStreamException)
                 {
                     return;
                 }

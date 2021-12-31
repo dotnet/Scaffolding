@@ -184,9 +184,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             // Start server
-            var server = StartServer(logger, context);
-            try
+            using (var server = StartServer(logger, context))
             {
+                // The command must be started before the server starts accepting
                 var command = CreateDipatchCommand(
                     context,
                     args,
@@ -194,19 +194,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     configuration,
                     tfmMoniker,
                     shortFramework,
-                    server);
-
-                var exitCode = command
+                    server)
                     .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
                     .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
-                    .Execute()
-                    .ExitCode;
+                    .Start();
 
-                return exitCode;
-            }
-            finally
-            {
-                server.WaitForExit(TimeSpan.FromSeconds(ServerWaitTimeForExit));
+                using (var serverTask = server.Accept()) {
+                    if (default == serverTask.Status) serverTask.Run();
+                    try {
+                        return command.WaitForExit().ExitCode;
+                    }
+                    finally {
+                        serverTask.Wait(TimeSpan.FromSeconds(ServerWaitTimeForExit));
+                    }
+                }
             }
         }
 

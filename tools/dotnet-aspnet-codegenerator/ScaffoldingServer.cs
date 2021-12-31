@@ -56,7 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
         public async Task Accept()
         {
-            ((AnonymousPipeStream) this._reader.BaseStream).DisposeLocalCopyOfClientHandle();
+            ((AnonymousPipeServerStream) this._reader.BaseStream).DisposeLocalCopyOfClientHandle();
             // Read incoming messages on the background thread
             await this.ReadMessages();
         }

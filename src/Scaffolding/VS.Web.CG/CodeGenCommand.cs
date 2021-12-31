@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
 
                 _logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
-                return await actionInvoker.ExecuteAsync(args);
+                await actionInvoker.ExecuteAsync(args);
             }
             catch (Exception ex)
             {

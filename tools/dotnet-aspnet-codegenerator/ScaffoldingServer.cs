@@ -30,32 +30,34 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
         internal ScaffoldingServer(ILogger logger)
         {
+            AnonymousPipeStream stream;
+            try {
+                stream = new AnonymousPipeStream(PipeDirection.Out, HandleInheritability.Inherit);
+                this._writer = new BinaryWriter(stream);
+                this.Port[0X1] = stream.GetClientHandleAsString();
+                stream = null;
+            }
+            finally { using (stream); }    
+            try {
+                stream = new AnonymousPipeStream(PipeDirection.In, HandleInheritability.Inherit);
+                this._reader = new BinaryReader(stream);
+                this.Port[0X0] = stream.GetClientHandleAsString();
+                stream = null;
+            }
+            finally { using (stream); }    
             this._logger = logger;
         }
 
-        public int[] Port { get; }
+        public string[] Port { get; } = new string[0X2];
         public bool TerminateSessionRequested { get; private set; }
 
         public ISet<IMessageHandler> MessageHandlers { get; private set; }
 
         public async Task Accept()
         {
-                AnonymousPipeStream stream;
-                try {
-                    stream = new AnonymousPipeStream(PipeDirection.Out, HandleInheritability.Inherit);
-                    this._writer = new BinaryWriter(stream);
-                    stream = null;
-                }
-                finally { using (stream); }    
-                try {
-                    stream = new AnonymousPipeStream(PipeDirection.In, HandleInheritability.Inherit);
-                    this._reader = new BinaryReader(stream);
-                    stream = null;
-                }
-                finally { using (stream); }    
- 
-                // Read incoming messages on the background thread
-                await ReadMessages();
+            ((AnonymousPipeStream) this._reader.BaseStream).DisposeLocalCopyOfClientHandle();
+            // Read incoming messages on the background thread
+            await this.ReadMessages();
         }
 
         public bool Send(Message message)

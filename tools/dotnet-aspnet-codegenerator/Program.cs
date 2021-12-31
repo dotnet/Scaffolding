@@ -256,7 +256,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,
                      shortFramework,
-                     server.Port.ToString());
+                     string.Join(':', server.Port));
 
             return DotnetToolDispatcher.CreateDispatchCommand(
                     runtimeConfigPath: runtimeConfigPath,

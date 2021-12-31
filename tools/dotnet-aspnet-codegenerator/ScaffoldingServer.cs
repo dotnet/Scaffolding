@@ -31,7 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         internal ScaffoldingServer(ILogger logger)
         {
 
-            var stream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inherit);
+            var stream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
             try {
                 this._writer = new BinaryWriter(stream);
                 this.Port[0X1] = stream.GetClientHandleAsString();
@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
             finally { if (this._writer is null) using (stream); }
 
-            stream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inherit);
+            stream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
             try {
                 this._reader = new BinaryReader(stream);
                 this.Port[0X0] = stream.GetClientHandleAsString();

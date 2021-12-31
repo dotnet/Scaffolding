@@ -56,11 +56,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             try {
                 this._writer = new BinaryWriter(stream);
                 stream = null;
-            } finally { using (stream); }
+            } finally { using (stream) {} }
             try {
                 this._reader = new BinaryReader(stream = new AnonymousPipeClientStream(PipeDirection.In, ports[0X1]));
                 stream = null;
-            } finally { using (stream); }
+            } finally { using (stream) {} }
         }
         
         [SuppressMessage("supressing re-throw exception", "CA2200")]

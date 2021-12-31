@@ -23,10 +23,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
 
             //DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
-            Execute(args, _logger);
+            Execute(args, _logger).Start().Wait();
         }
 
-        private static void Execute(string[] args, ConsoleLogger logger)
+        private static async Task Execute(string[] args, ConsoleLogger logger)
         {
             var app = new CommandLineApplication(false)
             {

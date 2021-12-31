@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             private set;
         }
 
-        public void Execute(string[] args)
+        public async Task ExecuteAsync(string[] args)
         {
             var app = new CommandLineApplication();
 
@@ -37,7 +37,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 BuildCommandLine(c);
             });
 
-            app.Execute(args);
+            // until #1760
+            await Task.Run(() => app.Execute(args));
         }
 
         internal void BuildCommandLine(CommandLineApplication command)

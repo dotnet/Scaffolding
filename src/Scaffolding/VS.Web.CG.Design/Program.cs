@@ -23,10 +23,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
 
             //DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
-            Execute(args, _logger).Start().Wait();
+            Execute(args, _logger);
         }
 
-        private static async Task Execute(string[] args, ConsoleLogger logger)
+        private static void Execute(string[] args, ConsoleLogger logger)
         {
             var app = new CommandLineApplication(false)
             {
@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             }
 #endif
 
-            await app.OnExecute(async () =>
+            app.OnExecute(async () =>
             {
                 var exitCode = 1;
                 try

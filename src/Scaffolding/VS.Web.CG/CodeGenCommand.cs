@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             _logger = logger;
         }
 
-        public int Execute(string [] args)
+        public async Task<int> ExecuteAsync(string [] args)
         {
             if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
             {
@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
 
                 _logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
-                actionInvoker.Execute(args);
+                return await actionInvoker.ExecuteAsync(args);
             }
             catch (Exception ex)
             {

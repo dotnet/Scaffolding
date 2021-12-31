@@ -252,4 +252,8 @@
   <data name="IdentityNotSupported" xml:space="preserve">
     <value>Scaffolding Identity is not supported for web applications with minimal APIs for hosting and routing.</value>
   </data>
+  <data name="ModelMetadataRequired" xml:space="preserve">
+    <value>This template requires a database context.</value>
+  </data>
+255
 </root>

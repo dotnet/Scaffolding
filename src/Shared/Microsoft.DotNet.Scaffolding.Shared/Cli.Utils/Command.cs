@@ -63,30 +63,42 @@ namespace Microsoft.Extensions.Internal
             return this;
         }
 
-        public CommandResult Execute()
+        public Command Start()
         {
-            ThrowIfRunning();
-            _running = true;
-            _process.EnableRaisingEvents = true;
+            var process = this._process;
+            var psi = process.StartInfo;
 
-            _process.OutputDataReceived += OnOutputReceived;
-            _process.ErrorDataReceived += OnErrorReceived;
+            this.ThrowIfRunning();
+            this._running = true;
+            process.EnableRaisingEvents = true;
 
-            _process.Start();
-            _process.BeginOutputReadLine();
-            _process.BeginErrorReadLine();
+            process.OutputDataReceived += OnOutputReceived;
+            process.ErrorDataReceived += OnErrorReceived;
 
-            _process.WaitForExit();
+            process.Start();
+            if (psi.RedirectStandardOutput) process.BeginOutputReadLine();
+            if (psi.RedirectStandardError) process.BeginErrorReadLine();
 
-            var exitCode = _process.ExitCode;
+            return this;
+        }
 
-            _process.OutputDataReceived -= OnOutputReceived;
-            _process.ErrorDataReceived -= OnErrorReceived;
+        public CommandResult WaitForExit()
+        {
+            var process = this._process;
+
+            process.WaitForExit();
+
+            var exitCode = process.ExitCode;
+
+            process.OutputDataReceived -= OnOutputReceived;
+            process.ErrorDataReceived -= OnErrorReceived;
 
             return new CommandResult(
-                _process.StartInfo,
+                process.StartInfo,
                 exitCode);
         }
+
+        public CommandResult Execute() => this.Start().WaitForExit();
 
         private void OnErrorReceived(object sender, DataReceivedEventArgs e)
         {

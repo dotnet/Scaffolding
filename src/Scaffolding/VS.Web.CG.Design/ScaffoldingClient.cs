@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 stream = null;
             } finally { using (stream); }
             try {
-                _reader = new BinaryReader(stream = new AnonymousPipeClientStream(PipeDirection.In, ports[0X1]));
+                this._reader = new BinaryReader(stream = new AnonymousPipeClientStream(PipeDirection.In, ports[0X1]));
                 stream = null;
             } finally { using (stream); }
         }

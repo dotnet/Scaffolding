@@ -41,11 +41,12 @@
 @:<p>
     @:<a asp-page="Create">Create New</a>
 @:</p>
+    if ((IModelMetadata)Model.ModelMetadata) is IModelMetadata metadata) {
+    var propertyLookup = metadata.Properties.ToDictionary(x => x.PropertyName, x => x);
+    var navigationLookup = metadata..Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
 @:<table class="table">
     @:<thead>
         @:<tr>
-        Dictionary<string, IPropertyMetadata> propertyLookup = ((IModelMetadata)Model.ModelMetadata).Properties.ToDictionary(x => x.PropertyName, x => x);
-        Dictionary<string, INavigationMetadata> navigationLookup = ((IModelMetadata)Model.ModelMetadata).Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
 
         foreach (var item in Model.ModelMetadata.ModelType.GetProperties())
         {
@@ -107,6 +108,8 @@
     @:</tbody>
 
 @:</table>
+    }
+    else throw new ArgumentNullException (nameof (Model.ModelMetadata), MessageStrings.ModelMetadataRequired);
     if(!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {
         //ClearIndent();

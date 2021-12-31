@@ -4,8 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
+using System.IO.Pipes;
 using System.Reflection;
 using System.Threading;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -20,49 +19,43 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
     {
         private static readonly string HostId = typeof(ScaffoldingServer).GetTypeInfo().Assembly.GetName().Name;
 
-        private TcpListener _server;
-        private Socket _socket;
         private BinaryWriter _writer;
         private BinaryReader _reader;
         private ILogger _logger;
-        private Thread _readerThread;
 
         public static ScaffoldingServer Listen(ILogger logger)
         {
-            TcpListener server = new TcpListener(new IPEndPoint(IPAddress.Loopback, 0));
-            server.Start();
-
-            return new ScaffoldingServer(server, logger);
+            return new ScaffoldingServer(logger);
         }
 
-        internal ScaffoldingServer(TcpListener server, ILogger logger)
+        internal ScaffoldingServer(ILogger logger)
         {
-            _server = server;
-            Port = ((IPEndPoint)_server.LocalEndpoint).Port;
-            _logger = logger;
+            this._logger = logger;
         }
 
-        public int Port { get; }
+        public int[] Port { get; }
         public bool TerminateSessionRequested { get; private set; }
 
         public ISet<IMessageHandler> MessageHandlers { get; private set; }
 
-        public void Accept()
+        public async Task Accept()
         {
-            _readerThread = new Thread(async () =>
-            {
-                _socket = await _server.AcceptSocketAsync();
-
-                var stream = new NetworkStream(_socket);
-                _writer = new BinaryWriter(stream);
-                _reader = new BinaryReader(stream);
-
+                AnonymousPipeStream stream;
+                try {
+                    stream = new AnonymousPipeStream(PipeDirection.Out, HandleInheritability.Inherit);
+                    this._writer = new BinaryWriter(stream);
+                    stream = null;
+                }
+                finally { using (stream); }    
+                try {
+                    stream = new AnonymousPipeStream(PipeDirection.In, HandleInheritability.Inherit);
+                    this._reader = new BinaryReader(stream);
+                    stream = null;
+                }
+                finally { using (stream); }    
+ 
                 // Read incoming messages on the background thread
-                ReadMessages();
-            })
-            { IsBackground = true };
-            
-            _readerThread.Start();
+                await ReadMessages();
         }
 
         public bool Send(Message message)
@@ -114,31 +107,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
         }
 
-        public void WaitForExit(TimeSpan timeout)
+        private async Task ReadMessages()
         {
-            if (_readerThread == null)
-            {
-                return;
-            }
-            _readerThread.Join(timeout.Milliseconds);
-        }
-
-        private void ReadMessages()
-        {
-            while (true)
+            for (;;)
             {
                 try
                 {
-                    var rawMessage = _reader.ReadString();
+                    var rawMessage = this._reader.ReadString();
                     var message = JsonConvert.DeserializeObject<Message>(rawMessage);
                     if (ShouldStopListening(message))
                     {
-                        break;
+                        return;
                     }
 
-                    if (MessageHandlers != null)
+                    if (this.MessageHandlers is IEnumerable<IMessageHandler>)
                     {
-                        foreach (var handler in MessageHandlers)
+                        foreach (var handler in this.MessageHandlers)
                         {
                             if (handler.HandleMessage(this, message))
                             {
@@ -148,14 +132,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         // No handler could handle the message.
                     }
                 }
-                catch (Exception ex)
+                catch (EndOfStreamException _)
                 {
-                    _logger.LogMessage(ex.Message, LogMessageLevel.Warning);
-                    if (!TerminateSessionRequested)
-                    {
-                        continue;
-                    }
-                    break;
+                    return;
                 }
             }
         }
@@ -179,10 +158,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 if (disposing)
                 {
-                    _server.Stop();
                     _writer?.Dispose();
                     _reader?.Dispose();
-                    _socket?.Dispose();
                 }
 
                 disposedValue = true;

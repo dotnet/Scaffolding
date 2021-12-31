@@ -30,21 +30,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
         internal ScaffoldingServer(ILogger logger)
         {
-            AnonymousPipeStream stream;
+
+            var stream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inherit);
             try {
-                stream = new AnonymousPipeStream(PipeDirection.Out, HandleInheritability.Inherit);
                 this._writer = new BinaryWriter(stream);
                 this.Port[0X1] = stream.GetClientHandleAsString();
                 stream = null;
             }
-            finally { using (stream); }    
+            finally { if (this._writer is null) using (stream); }
+
+            stream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inherit);
             try {
-                stream = new AnonymousPipeStream(PipeDirection.In, HandleInheritability.Inherit);
                 this._reader = new BinaryReader(stream);
                 this.Port[0X0] = stream.GetClientHandleAsString();
                 stream = null;
             }
-            finally { using (stream); }    
+            finally { if (this._reader is null) using (stream); }    
             this._logger = logger;
         }
 

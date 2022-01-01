@@ -41,9 +41,9 @@
 @:<p>
     @:<a asp-page="Create">Create New</a>
 @:</p>
-    if ((IModelMetadata)Model.ModelMetadata) is IModelMetadata metadata) {
+    if (((IModelMetadata)Model.ModelMetadata) is IModelMetadata metadata) {
     var propertyLookup = metadata.Properties.ToDictionary(x => x.PropertyName, x => x);
-    var navigationLookup = metadata..Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
+    var navigationLookup = metadata.Navigations.ToDictionary(x => x.AssociationPropertyName, x => x);
 @:<table class="table">
     @:<thead>
         @:<tr>
@@ -109,7 +109,7 @@
 
 @:</table>
     }
-    else throw new ArgumentNullException (nameof (Model.ModelMetadata), MessageStrings.ModelMetadataRequired);
+    else throw new ArgumentNullException (nameof (Model.ModelMetadata), "This template requires a database context.");
     if(!Model.IsPartialView && !Model.IsLayoutPageSelected)
     {
         //ClearIndent();

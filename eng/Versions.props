@@ -113,8 +113,12 @@
     <XunitExtensibilityExecutionPackageVersion>2.4.2-pre.9</XunitExtensibilityExecutionPackageVersion>
     <XunitRunnerVisualStudioPackageVersion>2.4.2-pre.9</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
+  <!--System dependencies-->
   <PropertyGroup>
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+    <SystemNetHttpVersion>6.0.0</SystemNetHttpVersion>
+    <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
@@ -126,8 +130,6 @@
     <MicrosoftGraphVersion>4.5.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>5.11.0</NuGetProjectModelVersion>
-    <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
-    <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>
 </Project>

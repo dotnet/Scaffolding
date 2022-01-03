@@ -22,4 +22,9 @@
     <Product>Microsoft ASP.NET Core</Product>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4 " />
+    <PackageReference Include="System.Private.Uri" Version="4.3.1 " />
+  </ItemGroup>
+
 </Project>

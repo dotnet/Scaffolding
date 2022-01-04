@@ -104,10 +104,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Encodings.Web" Version="4.5.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="MessageStrings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

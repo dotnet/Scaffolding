@@ -104,7 +104,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReferebce Include="System.Text.Encodings.Web" Version="4.5.1" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="4.5.1" />
   </ItemGroup>
 
   <ItemGroup>

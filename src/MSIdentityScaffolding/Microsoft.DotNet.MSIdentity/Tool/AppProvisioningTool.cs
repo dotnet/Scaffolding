@@ -30,15 +30,10 @@ namespace Microsoft.DotNet.MSIdentity
     public class AppProvisioningTool : IMsAADTool
     {
         private const string AppSettingsJson = "appsettings.json";
-
-        private static PropertyInfo[]? _properties;
-
         internal IConsoleLogger ConsoleLogger { get; }
 
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
-
         private string CommandName { get; }
-
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
 
         internal static PropertyInfo[]? _properties;

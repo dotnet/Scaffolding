@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return startupType == null;
         }
 
+        // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
             if (project != null)
@@ -110,6 +111,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     }
                 }
             }
+
             return string.Empty;
         }
 
@@ -343,6 +345,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 return false;
             }
+            // for example, program.cs is only modified when codeChangeOptions.IsMinimalApp is true
+            if (options.Contains(CodeChangeOptionStrings.MinimalApp) && !codeChangeOptions.IsMinimalApp)
+            {
+                return false;
+            }
             //if its a minimal app and options have a "NonMinimalApp", don't add the CodeBlock
             if (options.Contains(CodeChangeOptionStrings.NonMinimalApp) && codeChangeOptions.IsMinimalApp)
             {
@@ -375,6 +382,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -420,15 +428,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return null; // TODO generate README
             }
 
-            var sourceTextToAdd = SourceText.From(sourceFileString);
-            return fileDoc.WithText(sourceTextToAdd);
+            var updatedSourceText = SourceText.From(sourceFileString);
+            return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)
+        internal static async Task UpdateDocument(Document document, IConsoleLogger consoleLogger)
         {
-            var classFileTxt = await editedDocument.GetTextAsync();
-            File.WriteAllText(fileDoc.Name, classFileTxt.ToString());
-            consoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
+            var classFileTxt = await document.GetTextAsync();
+
+            // Note: Here, document.Name is the full filepath
+            File.WriteAllText(document.Name, classFileTxt.ToString());
+            consoleLogger.LogMessage($"Modified {document.Name}.\n");
         }
 
         // Filter out CodeBlocks that are invalid using FilterOptions

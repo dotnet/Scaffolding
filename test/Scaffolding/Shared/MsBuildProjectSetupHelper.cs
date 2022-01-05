@@ -64,7 +64,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
             fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
 
-            var rootProjectTxt = MsBuildProjectStrings.SimpleNet50ProjectText;
+            var rootProjectTxt = MsBuildProjectStrings.SimpleNet60ProjectText;
             fileProvider.Add(MsBuildProjectStrings.RootProjectName, rootProjectTxt);
             fileProvider.Add("Startup.cs", MsBuildProjectStrings.EmptyTestStartupText);
             fileProvider.Add(MsBuildProjectStrings.DbContextInheritanceProgramName, MsBuildProjectStrings.DbContextInheritanceProjectProgramText);

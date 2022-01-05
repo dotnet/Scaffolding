@@ -107,6 +107,11 @@ stages:
             $(_InternalBuildArgs)
             $(_ValidateSdkArgs)
           displayName: Windows Build / Publish
+          
+        - task: ComponentGovernanceComponentDetection@0
+          inputs:
+            failOnAlert : true
+          displayName: Component Governance scan
 
       - job: OSX
         pool:

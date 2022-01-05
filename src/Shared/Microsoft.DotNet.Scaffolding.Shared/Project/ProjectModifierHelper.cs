@@ -432,11 +432,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)
+        internal static async Task UpdateDocument(Document editedDocument, string fileName, IConsoleLogger consoleLogger)
         {
             var classFileTxt = await editedDocument.GetTextAsync();
-            File.WriteAllText(fileDoc.FilePath, classFileTxt.ToString());
-            consoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
+            File.WriteAllText(editedDocument.Name, classFileTxt.ToString());
+            consoleLogger.LogMessage($"Modified {fileName}.\n");
         }
 
         // Filter out CodeBlocks that are invalid using FilterOptions

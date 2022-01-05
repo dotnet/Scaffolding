@@ -1,8 +1,5 @@
 [Oo]bj/
 [Bb]in/
-.gitignore
-Samples/
-Scripts/
 TestResults/
 .packages/
 .nuget/

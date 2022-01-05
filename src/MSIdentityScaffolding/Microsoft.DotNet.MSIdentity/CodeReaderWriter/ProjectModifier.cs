@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             var fileName = file.FileName.Equals("Startup.cs", StringComparison.OrdinalIgnoreCase)
-                    ? await ProjectModifierHelper.GetStartupClass(_toolOptions.ProjectPath, project)
+                    ? await ProjectModifierHelper.GetStartupClass(project)
                     : file.FileName;
 
             if (fileName.Equals("Program.cs"))

@@ -432,7 +432,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task UpdateDocument(Document editedDocument, string fileName, IConsoleLogger consoleLogger)
+        internal static async Task UpdateDocument(string fileName, Document editedDocument, IConsoleLogger consoleLogger)
         {
             var classFileTxt = await editedDocument.GetTextAsync();
             File.WriteAllText(editedDocument.Name, classFileTxt.ToString());

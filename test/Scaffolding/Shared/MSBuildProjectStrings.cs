@@ -804,7 +804,7 @@ namespace Test
 </Project>
 ";
 
-        public const string SimpleNet50ProjectText = @"
+        public const string SimpleNet60ProjectText = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
@@ -818,7 +818,7 @@ namespace Test
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""5.0.0-preview.6.20323.1"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""6.0.1"" />
   </ItemGroup>
 </Project>
 ";

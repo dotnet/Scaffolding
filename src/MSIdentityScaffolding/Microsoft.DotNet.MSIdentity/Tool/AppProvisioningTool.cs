@@ -639,100 +639,103 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task UpdateProject(TokenCredential tokenCredential, ApplicationParameters? applicationParameters, ProjectDescription? projectDescription)
         {
-            if (applicationParameters != null && !string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath) && projectDescription != null)
+            if (applicationParameters is null || string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath) || projectDescription is null)
             {
-                if (ProvisioningToolOptions.ConfigUpdate)
+                return;
+            }
+
+            if (ProvisioningToolOptions.ConfigUpdate)
+            {
+                ConsoleLogger.LogMessage("=============================================");
+                ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
+                ConsoleLogger.LogMessage("=============================================\n");
+                //dotnet user secrets init
+                CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
+
+                //modify appsettings.json. 
+                ModifyAppSettings(applicationParameters);
+
+                //Add ClientSecret if the app wants to call graph/a downstream api.
+                if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
                 {
-                    ConsoleLogger.LogMessage("=============================================");
-                    ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
-                    ConsoleLogger.LogMessage("=============================================\n");
-                    //dotnet user secrets init
-                    CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
-
-                    //modify appsettings.json. 
-                    ModifyAppSettings(applicationParameters);
-
-                    //Add ClientSecret if the app wants to call graph/a downstream api.
-                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                    //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
+                    if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
                     {
-                        var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                        //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
-                        if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
-                        {
-                            await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
-                                graphServiceClient,
-                                applicationParameters.GraphEntityId,
-                                applicationParameters,
-                                ConsoleLogger);
+                        await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
+                            graphServiceClient,
+                            applicationParameters.GraphEntityId,
+                            applicationParameters,
+                            ConsoleLogger);
 
-                            string? password = applicationParameters.PasswordCredentials.LastOrDefault();
-                            //if user wants to update user secrets
-                            if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
-                            {
-                                CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
-                            }
+                        string? password = applicationParameters.PasswordCredentials.LastOrDefault();
+                        //if user wants to update user secrets
+                        if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
+                        {
+                            CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
                         }
                     }
                 }
+            }
 
-                if (ProvisioningToolOptions.PackagesUpdate)
+            if (ProvisioningToolOptions.PackagesUpdate)
+            {
+                List<string> packages = projectDescription.CommonPackages?.ToList() ?? new List<string>();
+                if (ProvisioningToolOptions.CallsDownstreamApi && projectDescription.DownstreamApiPackages != null)
                 {
-                    List<string> packages = projectDescription.CommonPackages?.ToList() ?? new List<string>();
-                    if (ProvisioningToolOptions.CallsDownstreamApi && projectDescription.DownstreamApiPackages != null)
-                    {
-                        packages.AddRange(projectDescription.DownstreamApiPackages);
-                    }
-                    if (ProvisioningToolOptions.CallsGraph && projectDescription.MicrosoftGraphPackages != null)
-                    {
-                        packages.AddRange(projectDescription.MicrosoftGraphPackages);
-                    }
-                    if (!ProvisioningToolOptions.CallsDownstreamApi && !ProvisioningToolOptions.CallsGraph && projectDescription.BasePackages != null)
-                    {
-                        packages.AddRange(projectDescription.BasePackages);
-                    }
-                    if (packages != null)
-                    {
-                        ConsoleLogger.LogMessage("=============================================");
-                        ConsoleLogger.LogMessage(Resources.UpdatingProjectPackages);
-                        ConsoleLogger.LogMessage("=============================================\n");
+                    packages.AddRange(projectDescription.DownstreamApiPackages);
+                }
+                if (ProvisioningToolOptions.CallsGraph && projectDescription.MicrosoftGraphPackages != null)
+                {
+                    packages.AddRange(projectDescription.MicrosoftGraphPackages);
+                }
+                if (!ProvisioningToolOptions.CallsDownstreamApi && !ProvisioningToolOptions.CallsGraph && projectDescription.BasePackages != null)
+                {
+                    packages.AddRange(projectDescription.BasePackages);
+                }
+                if (packages != null)
+                {
+                    ConsoleLogger.LogMessage("=============================================");
+                    ConsoleLogger.LogMessage(Resources.UpdatingProjectPackages);
+                    ConsoleLogger.LogMessage("=============================================\n");
 
-                        DependencyGraphService dependencyGraphService = new DependencyGraphService(ProvisioningToolOptions.ProjectFilePath);
-                        var dependencyGraph = dependencyGraphService.GenerateDependencyGraph();
-                        if (dependencyGraph != null)
+                    DependencyGraphService dependencyGraphService = new DependencyGraphService(ProvisioningToolOptions.ProjectFilePath);
+                    var dependencyGraph = dependencyGraphService.GenerateDependencyGraph();
+                    if (dependencyGraph != null)
+                    {
+                        var project = dependencyGraph.Projects.FirstOrDefault();
+                        var tfm = project?.TargetFrameworks.FirstOrDefault();
+
+                        if (tfm != null)
                         {
-                            var project = dependencyGraph.Projects.FirstOrDefault();
-                            var tfm = project?.TargetFrameworks.FirstOrDefault();
-
-                            if (tfm != null)
+                            var shortTfm = tfm.FrameworkName?.GetShortFolderName();
+                            if (!string.IsNullOrEmpty(shortTfm))
                             {
-                                var shortTfm = tfm.FrameworkName?.GetShortFolderName();
-                                if (!string.IsNullOrEmpty(shortTfm))
+                                foreach (var packageToInstall in packages)
                                 {
-                                    foreach (var packageToInstall in packages)
+                                    //if package doesn't exist, add it.
+                                    if (!tfm.Dependencies.Where(x => x.Name.Equals(packageToInstall)).Any())
                                     {
-                                        //if package doesn't exist, add it.
-                                        if (!tfm.Dependencies.Where(x => x.Name.Equals(packageToInstall)).Any())
-                                        {
-                                            CodeWriter.AddPackage(packageToInstall, shortTfm, ConsoleLogger);
-                                        }
+                                        CodeWriter.AddPackage(packageToInstall, shortTfm, ConsoleLogger);
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                if (ProvisioningToolOptions.CodeUpdate)
-                {
-                    ConsoleLogger.LogMessage("=============================================");
-                    ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
-                    ConsoleLogger.LogMessage("=============================================\n");
-                    //if project is not setup for auth, add updates to Startup.cs, .csproj.
-                    ProjectModifier startupModifier = new ProjectModifier(applicationParameters, ProvisioningToolOptions, ConsoleLogger);
-                    await startupModifier.AddAuthCodeAsync();
-                }
+            if (ProvisioningToolOptions.CodeUpdate)
+            {
+                ConsoleLogger.LogMessage("=============================================");
+                ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
+                ConsoleLogger.LogMessage("=============================================\n");
+                //if project is not setup for auth, add updates to Startup.cs, .csproj.
+                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, ConsoleLogger);
+                await startupModifier.AddAuthCodeAsync();
             }
         }
+
         //Layout.cshtml
         //LoginPartial.cshtml
         //launchsettings.json --> update

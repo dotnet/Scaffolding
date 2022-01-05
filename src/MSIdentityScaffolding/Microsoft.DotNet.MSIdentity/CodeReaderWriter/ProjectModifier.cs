@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             var razorChanges = file?.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
-            await ProjectModifierHelper.UpdateDocument(document, editedDocument, _consoleLogger);
+            await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
         }
 
         internal async Task ModifyCshtmlFile(string fileName, CodeFile cshtmlFile, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             var filteredCodeFiles = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
                             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeFiles);
                             //replace the document
-                            await ProjectModifierHelper.UpdateDocument(fileDoc, editedDocument, _consoleLogger);
+                            await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
                         }
                     }
                 }

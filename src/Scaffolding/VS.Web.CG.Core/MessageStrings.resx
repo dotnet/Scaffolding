@@ -121,7 +121,7 @@
     <value>Adding dependency '{0}' version '{1}'.</value>
   </data>
   <data name="CodeGeneratorInstanceCreationError" xml:space="preserve">
-    <value>There was an error creating the code generator instance: {0}\r\n{1}</value>
+    <value>There was an error creating the code generator instance: [{0}]\r\n{1}</value>
   </data>
   <data name="CodeGeneratorNotFound" xml:space="preserve">
     <value>No code generators found with the name '{0}'</value>
@@ -139,22 +139,22 @@
     <value>The provided file '{0}' does not exist. This method expects a fully qualified path of an existing file.</value>
   </data>
   <data name="FileNotFoundInFolders" xml:space="preserve">
-    <value>A file matching the name {0} was not found within any of the folders: {1}</value>
+    <value>A file matching the name '{0}' was not found within any of the folders: [{1}]</value>
   </data>
   <data name="MethodNotFound" xml:space="preserve">
-    <value>{0} method with a model parameter is not found in class: {1}</value>
+    <value>[{0}] method with a model parameter is not found in class: [{1}]</value>
   </data>
   <data name="ModelCreationFailed" xml:space="preserve">
-    <value>There was an error attempting to create an instace of model for GenerateCode method: {0}</value>
+    <value>There was an error attempting to create an instace of model for GenerateCode method: [{0}]</value>
   </data>
   <data name="MultipleCodeGeneratorsFound" xml:space="preserve">
     <value>Multiple code generators found matching the name '{0}'</value>
   </data>
   <data name="MultipleFilesFound" xml:space="preserve">
-    <value>Multiple files with name {0} found within {1}</value>
+    <value>Multiple files with name '{0}' found within [{1}]</value>
   </data>
   <data name="MultipleMethodsFound" xml:space="preserve">
-    <value>Multiple {0} methods with a model parameter are found in class: {1}</value>
+    <value>Multiple [{0}] methods with a model parameter are found in class: [{1}]</value>
   </data>
   <data name="NullParamError" xml:space="preserve">
     <value>Parameter '{0}' cannot be null or empty.</value>
@@ -163,10 +163,10 @@
     <value>Could not find a part of the path '{0}'</value>
   </data>
   <data name="TemplateFileNotFound" xml:space="preserve">
-    <value>Template file {0} not found within search paths {1}</value>
+    <value>Template file '{0}' not found within search paths [{1}]</value>
   </data>
   <data name="TemplateProcessingError" xml:space="preserve">
-    <value>There was an error running the template {0}: {1}</value>
+    <value>There was an error running the template [{0}]: [{1}]</value>
   </data>
   <data name="UnableToRunRestore" xml:space="preserve">
     <value>Unable to run restore.</value>

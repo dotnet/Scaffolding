@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuthCodeAsync()
         {
+            Debugger.Launch();
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
                 return;
@@ -177,7 +178,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
             }
-            return;
         }
 
         internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -209,7 +209,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
             }
 
-            await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
+            if (!string.IsNullOrEmpty(fileDoc.FilePath))
+            {
+                await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
+            }
         }
 
         private static CompilationUnitSyntax? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
@@ -249,25 +252,25 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         node is ClassDeclarationSyntax cds &&
                         cds.Identifier.ValueText.Contains(className)).FirstOrDefault();
 
-            if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
-            {
-                var modifiedClassDeclarationSyntax = classDeclarationSyntax;
-
-                //add class properties
-                modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax, options);
-                //add class attributes
-                modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
-
-                //add code snippets/changes.
-                if (file.Methods != null && file.Methods.Any())
+                if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
                 {
-                    modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(modifiedClassDeclarationSyntax, options);
-                    modifiedClassDeclarationSyntax = documentBuilder.EditMethodTypes(modifiedClassDeclarationSyntax, options);
-                    modifiedClassDeclarationSyntax = documentBuilder.AddMethodParameters(modifiedClassDeclarationSyntax, options);
-                }
-                //replace class node with all the updates.
+                    var modifiedClassDeclarationSyntax = classDeclarationSyntax;
+
+                    //add class properties
+                    modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax, options);
+                    //add class attributes
+                    modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
+
+                    //add code snippets/changes.
+                    if (file.Methods != null && file.Methods.Any())
+                    {
+                        modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(modifiedClassDeclarationSyntax, options);
+                        modifiedClassDeclarationSyntax = documentBuilder.EditMethodTypes(modifiedClassDeclarationSyntax, options);
+                        modifiedClassDeclarationSyntax = documentBuilder.AddMethodParameters(modifiedClassDeclarationSyntax, options);
+                    }
+                    //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
-                newRoot = newRoot.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
+                    newRoot = newRoot.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
 #pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
                 }
             }

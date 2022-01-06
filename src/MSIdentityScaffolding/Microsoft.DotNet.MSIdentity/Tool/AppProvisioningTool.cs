@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +17,6 @@ using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
 using Newtonsoft.Json.Linq;
-using NuGet.ProjectModel;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -51,7 +49,6 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            Debugger.Launch();
             // get csproj file path
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {

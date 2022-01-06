@@ -35,7 +35,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuthCodeAsync()
         {
-            Debugger.Launch();
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
                 return;

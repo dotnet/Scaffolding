@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -63,7 +62,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // will return null.
         internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
         {
-            Debugger.Launch();
             var programCsDocument = project.Documents.Where(d => d.Name.Equals("Program.cs")).FirstOrDefault();
             var startupClassName = await GetStartupClassName(programCsDocument);
 

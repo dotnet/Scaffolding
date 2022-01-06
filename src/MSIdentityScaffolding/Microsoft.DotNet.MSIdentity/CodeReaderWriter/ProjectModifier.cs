@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -36,7 +35,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuthCodeAsync()
         {
-            Debugger.Launch();
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
                 return;
@@ -74,7 +72,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private CodeModifierConfig? GetCodeModifierConfig()
         {
-            Debugger.Launch();
             if (string.IsNullOrEmpty(_toolOptions.ProjectType))
             {
                 return null;

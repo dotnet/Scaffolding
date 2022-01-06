@@ -28,13 +28,15 @@ namespace Microsoft.DotNet.MSIdentity
     public class AppProvisioningTool : IMsAADTool
     {
         internal IConsoleLogger ConsoleLogger { get; }
+
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
 
         private string CommandName { get; }
 
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
 
-        internal static readonly PropertyInfo[] Properties = typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
+        private static PropertyInfo[]? _properties;
+        internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
             .Where(p => p.PropertyType == typeof(byte[])).ToArray();
 
         private ProjectDescriptionReader ProjectDescriptionReader { get; } = new ProjectDescriptionReader();

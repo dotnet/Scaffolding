@@ -42,24 +42,21 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
-            if (project != null)
+            var startupDocument = project?.Documents.Where(d => d.Name.EndsWith("Startup.cs")).FirstOrDefault() ?? null;
+            if (startupDocument != null)
             {
-                var startupDocument = project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).FirstOrDefault();
-                if (startupDocument == null)
-                {
-                    //if changed the name in Program.cs, get the class name and check.
-                    var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
-                    var startupClassName = await GetStartupClassName(programDocument);
-                    if (!string.IsNullOrEmpty(startupClassName))
-                    {
-                        startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
-                    }
-                }
-
-                return startupDocument == null;
+                return true;
             }
 
-            return false;
+            // if changed the name in Program.cs, get the class name and check.
+            var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+            var startupClassName = await GetStartupClassName(programDocument);
+            if (!string.IsNullOrEmpty(startupClassName))
+            {
+                startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
+            }
+
+            return startupDocument == null;
         }
 
         // Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method

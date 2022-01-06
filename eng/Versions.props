@@ -115,6 +115,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+    <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
+    <SystemPrivateUriVersion>4.3.2</SystemPrivateUriVersion>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>

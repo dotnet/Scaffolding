@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,21 +42,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
-            var startupDocument = project?.Documents.Where(d => d.Name.EndsWith("Startup.cs")).FirstOrDefault() ?? null;
-            if (startupDocument != null)
+            Debugger.Launch();
+            if (project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
             {
-                return true;
+                return false;
             }
 
             // if changed the name in Program.cs, get the class name and check.
             var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
             var startupClassName = await GetStartupClassName(programDocument);
-            if (!string.IsNullOrEmpty(startupClassName))
-            {
-                startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
-            }
 
-            return startupDocument == null;
+            return string.IsNullOrEmpty(startupClassName); // If project has UseStartup in Program.cs, it is not a minimal app
         }
 
         // Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method

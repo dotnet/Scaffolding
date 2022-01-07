@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
 
-        private static PropertyInfo[]? _properties;
+        internal static PropertyInfo[]? _properties;
         internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
             .Where(p => p.PropertyType == typeof(byte[])).ToArray();
 

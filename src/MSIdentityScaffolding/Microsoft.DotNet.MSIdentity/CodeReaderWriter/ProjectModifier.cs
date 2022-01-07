@@ -54,6 +54,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             //Initialize CodeAnalysis.Project wrapper
             CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
+            if (project is null)
+            {
+                return;
+            }
 
             var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project);
             CodeChangeOptions options = new CodeChangeOptions
@@ -64,7 +68,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             };
 
             //Go through all the files, make changes using DocumentBuilder.
-            foreach (var file in codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options)))
+            var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
+            foreach (var file in filteredFiles)
             {
                 await HandleCodeFileAsync(file, project, options);
             }
@@ -101,8 +106,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
         {
-            string jsonText = Encoding.UTF8.GetString(fileContent);
-            return JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+            try
+            {
+                string jsonText = Encoding.UTF8.GetString(fileContent);
+                return JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+            }
+            catch (Exception e)
+            {
+                _consoleLogger.LogMessage($"Error parsing Code Modifier Config for project type { _toolOptions.ProjectType }, exception: { e.Message }");
+                return null;
+            }
         }
 
         private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -175,7 +188,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             var fileDoc = project.Documents.Where(d => d.Name.Equals(file.FileName)).FirstOrDefault();
-            if (fileDoc is null)
+            if (fileDoc is null || string.IsNullOrEmpty(fileDoc.FilePath))
             {
                 return;
             }
@@ -195,10 +208,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
             }
 
-            if (!string.IsNullOrEmpty(fileDoc.FilePath))
-            {
-                await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
-            }
+            await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
         }
 
         private static CompilationUnitSyntax? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
@@ -209,7 +219,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(newRoot.Members);
                 if (file.Methods.TryGetValue("Global", out var globalMethod))
                 {
-                    foreach (var change in globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)))
+                    var filteredChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+                    foreach (var change in filteredChanges)
                     {
                         //Modify CodeSnippet to have correct variable identifiers present.
                         var formattedChange = ProjectModifierHelper.FormatCodeSnippet(change, variableDict);

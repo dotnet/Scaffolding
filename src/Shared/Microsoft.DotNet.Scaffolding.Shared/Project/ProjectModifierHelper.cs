@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -42,7 +41,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
-            Debugger.Launch();
             if (project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
             {
                 return false;

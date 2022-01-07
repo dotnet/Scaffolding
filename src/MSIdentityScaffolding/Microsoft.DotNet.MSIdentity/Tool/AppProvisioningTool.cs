@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -561,6 +562,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         private async Task UpdateApplication(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
         {
+            Debugger.Launch();
             if (applicationParameters != null)
             {
                 var jsonResponse = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(

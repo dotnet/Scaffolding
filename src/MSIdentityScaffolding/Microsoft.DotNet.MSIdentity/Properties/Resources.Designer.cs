@@ -63,9 +63,39 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] add_Authentication_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_Authentication_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] add_CallWebApi_razor {
             get {
                 object obj = ResourceManager.GetObject("add_CallWebApi_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_LoginDisplay_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_LoginDisplay_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_RedirectToLogin_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_RedirectToLogin_razor", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             FilesLocator locator = new FilesLocator(fs);
 
             var ex = Assert.Throws<InvalidOperationException>(() => locator.GetFilePath("template.cshtml", new[] { @"C:\One" }));
-            Assert.Equal(@"Multiple files with name 'template.cshtml' found within C:\One", ex.Message);
+            Assert.Equal(@"Multiple files with name 'template.cshtml' found within [C:\One]", ex.Message);
         }
 
         [Fact]

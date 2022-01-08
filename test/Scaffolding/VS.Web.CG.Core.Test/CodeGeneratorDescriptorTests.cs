@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             //Act
             var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorAction);
             Assert.Equal("[GenerateCode] method with a model parameter is not found in class: " +
-                "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithGenerateCodeNoParameters",
+                "[Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithGenerateCodeNoParameters]",
                 ex.Message);
         }
 

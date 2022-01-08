@@ -166,7 +166,7 @@
     <value>Template file '{0}' not found within search paths [{1}]</value>
   </data>
   <data name="TemplateProcessingError" xml:space="preserve">
-    <value>There was an error running the template [{0}]: [{1}]</value>
+    <value>There was an error running the template at '{0}': [{1}]</value>
   </data>
   <data name="UnableToRunRestore" xml:space="preserve">
     <value>Unable to run restore.</value>

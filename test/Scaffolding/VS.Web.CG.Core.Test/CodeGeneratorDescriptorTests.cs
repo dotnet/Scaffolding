@@ -120,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             //Act & Assert
             var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorInstance);
             Assert.StartsWith("There was an error creating the code generator instance: " +
-                "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithDependencies", ex.Message);
+                "[Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithDependencies]", ex.Message);
         }
 
         [Alias("MyAlias")]

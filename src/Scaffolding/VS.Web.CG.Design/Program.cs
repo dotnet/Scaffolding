@@ -67,8 +67,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                     project = Path.GetFullPath(project);
                     var configuration = appConfiguration.Value();
 
-                    var portNumber = int.Parse(port.Value());
-                    using (var client = await ScaffoldingClient.Connect(portNumber, logger))
+                    var portNumber = port.Value();
+                    using (var client = ScaffoldingClient.Connect(portNumber, logger))
                     {
                         var messageOrchestrator = new MessageOrchestrator(client, logger);
                         var projectInformation = messageOrchestrator.GetProjectInformation();
@@ -83,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                             logger,
                             isSimulationMode);
 
-                        exitCode = executor.Execute((changes) => messageOrchestrator.SendFileSystemChangeInformation(changes));
+                        exitCode = await executor.ExecuteAsync((changes) => messageOrchestrator.SendFileSystemChangeInformation(changes));
 
                         messageOrchestrator.SendScaffoldingCompletedMessage();
                     }

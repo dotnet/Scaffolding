@@ -4,10 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
+using System.IO.Pipes;
 using System.Reflection;
-using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
@@ -20,49 +19,46 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
     {
         private static readonly string HostId = typeof(ScaffoldingServer).GetTypeInfo().Assembly.GetName().Name;
 
-        private TcpListener _server;
-        private Socket _socket;
         private BinaryWriter _writer;
         private BinaryReader _reader;
         private ILogger _logger;
-        private Thread _readerThread;
 
         public static ScaffoldingServer Listen(ILogger logger)
         {
-            TcpListener server = new TcpListener(new IPEndPoint(IPAddress.Loopback, 0));
-            server.Start();
-
-            return new ScaffoldingServer(server, logger);
+            return new ScaffoldingServer(logger);
         }
 
-        internal ScaffoldingServer(TcpListener server, ILogger logger)
+        internal ScaffoldingServer(ILogger logger)
         {
-            _server = server;
-            Port = ((IPEndPoint)_server.LocalEndpoint).Port;
-            _logger = logger;
+
+            var stream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+            try {
+                this._writer = new BinaryWriter(stream);
+                this.Port[0X1] = stream.GetClientHandleAsString();
+                stream = null;
+            }
+            finally { if (this._writer is null) using (stream) {} }
+
+            stream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+            try {
+                this._reader = new BinaryReader(stream);
+                this.Port[0X0] = stream.GetClientHandleAsString();
+                stream = null;
+            }
+            finally { if (this._reader is null) using (stream) {} }    
+            this._logger = logger;
         }
 
-        public int Port { get; }
+        public string[] Port { get; } = new string[0X2];
         public bool TerminateSessionRequested { get; private set; }
 
         public ISet<IMessageHandler> MessageHandlers { get; private set; }
 
-        public void Accept()
+        public async Task Accept()
         {
-            _readerThread = new Thread(async () =>
-            {
-                _socket = await _server.AcceptSocketAsync();
-
-                var stream = new NetworkStream(_socket);
-                _writer = new BinaryWriter(stream);
-                _reader = new BinaryReader(stream);
-
-                // Read incoming messages on the background thread
-                ReadMessages();
-            })
-            { IsBackground = true };
-            
-            _readerThread.Start();
+            ((AnonymousPipeServerStream) this._reader.BaseStream).DisposeLocalCopyOfClientHandle();
+            // Read incoming messages on the background thread
+            await this.ReadMessages();
         }
 
         public bool Send(Message message)
@@ -114,31 +110,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
         }
 
-        public void WaitForExit(TimeSpan timeout)
+        private async Task ReadMessages()
         {
-            if (_readerThread == null)
-            {
-                return;
-            }
-            _readerThread.Join(timeout.Milliseconds);
-        }
-
-        private void ReadMessages()
-        {
-            while (true)
+            for (;;)
             {
                 try
                 {
-                    var rawMessage = _reader.ReadString();
+                    var rawMessage = await Task.Run(() => this._reader.ReadString());
                     var message = JsonConvert.DeserializeObject<Message>(rawMessage);
                     if (ShouldStopListening(message))
                     {
-                        break;
+                        return;
                     }
 
-                    if (MessageHandlers != null)
+                    if (this.MessageHandlers is IEnumerable<IMessageHandler>)
                     {
-                        foreach (var handler in MessageHandlers)
+                        foreach (var handler in this.MessageHandlers)
                         {
                             if (handler.HandleMessage(this, message))
                             {
@@ -148,14 +135,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         // No handler could handle the message.
                     }
                 }
-                catch (Exception ex)
+                catch (EndOfStreamException)
                 {
-                    _logger.LogMessage(ex.Message, LogMessageLevel.Warning);
-                    if (!TerminateSessionRequested)
-                    {
-                        continue;
-                    }
-                    break;
+                    return;
                 }
             }
         }
@@ -179,10 +161,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 if (disposing)
                 {
-                    _server.Stop();
                     _writer?.Dispose();
                     _reader?.Dispose();
-                    _socket?.Dispose();
                 }
 
                 disposedValue = true;

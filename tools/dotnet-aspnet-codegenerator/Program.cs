@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Internal;
@@ -184,9 +185,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             }
 
             // Start server
-            var server = StartServer(logger, context);
-            try
+            using (var server = StartServer(logger, context))
             {
+                // The command must be started before the server starts accepting
                 var command = CreateDipatchCommand(
                     context,
                     args,
@@ -194,19 +195,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     configuration,
                     tfmMoniker,
                     shortFramework,
-                    server);
-
-                var exitCode = command
+                    server)
                     .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
                     .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
-                    .Execute()
-                    .ExitCode;
+                    .Start();
 
-                return exitCode;
-            }
-            finally
-            {
-                server.WaitForExit(TimeSpan.FromSeconds(ServerWaitTimeForExit));
+                using (var serverTask = server.Accept()) {
+                    if (default == serverTask.Status) serverTask.Start();
+                    try {
+                        return command.WaitForExit().ExitCode;
+                    }
+                    finally {
+                        serverTask.Wait(TimeSpan.FromSeconds(ServerWaitTimeForExit));
+                    }
+                }
             }
         }
 
@@ -256,7 +258,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             var dependencyArgs = ToolCommandLineHelper.GetProjectDependencyCommandArgs(
                      args,
                      shortFramework,
-                     server.Port.ToString());
+                     string.Join(':', server.Port));
 
             return DotnetToolDispatcher.CreateDispatchCommand(
                     runtimeConfigPath: runtimeConfigPath,
@@ -341,7 +343,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             server = ScaffoldingServer.Listen(logger);
             server.AddHandler(new ProjectInformationMessageHandler(projectInformation, logger));
             server.AddHandler(new FileSystemChangeMessageHandler(logger));
-            server.Accept();
             return server;
         }
     }

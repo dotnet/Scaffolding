@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -45,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             _isSimulationMode = isSimulationMode;
         }
 
-        public int Execute(Action<IEnumerable<FileSystemChangeInformation>> simModeAction = null)
+        public async Task<int> ExecuteAsync(Action<IEnumerable<FileSystemChangeInformation>> simModeAction = null)
         {
             var serviceProvider = new ServiceProvider();
             AddFrameworkServices(serviceProvider, _projectInformation);
@@ -54,7 +55,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             try
             {
-                codeGenCommand.Execute(_codeGenArguments);
+                await codeGenCommand.ExecuteAsync(_codeGenArguments);
 
                 if (_isSimulationMode && simModeAction != null)
                 {

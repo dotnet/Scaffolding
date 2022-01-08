@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             //Act
             var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorAction);
             Assert.Equal("Multiple [GenerateCode] methods with a model parameter are found in class: " +
-                "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+ClassWithMultipleGenerateCodeMethods",
+                "[Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+ClassWithMultipleGenerateCodeMethods]",
                 ex.Message);
         }
 

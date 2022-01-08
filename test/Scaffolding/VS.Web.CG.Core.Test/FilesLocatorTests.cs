@@ -61,7 +61,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             FilesLocator locator = new FilesLocator(new MockFileSystem());
 
             var ex = Assert.Throws<InvalidOperationException>(() => locator.GetFilePath("template.cshtml", new[] { @"C:\One", @"C:\Two" }));
-            Assert.Equal(@"A file matching the name template.cshtml was not found within any of the folders: C:\One;C:\Two", ex.Message);
+            Assert.Equal(@"A file matching the name 'template.cshtml' was not found within any of the folders: [C:\One;C:\Two]", ex.Message);
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Debug.Assert(_fileSystem.FileExists(templatePath));
             var templateContent = _fileSystem.ReadAllText(templatePath);
             
-            var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
+            var templateResult = await _templatingService.RunTemplateAsync(templatePath, templateContent, templateModel);
 
             if (templateResult.ProcessingException != null)
             {

@@ -7,6 +7,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
 {
     public interface ITemplating
     {
-        Task<TemplateResult> RunTemplateAsync(string content, dynamic templateModel);
+        Task<TemplateResult> RunTemplateAsync(string path, string content, dynamic templateModel);
     }
 }

@@ -9,7 +9,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
     //This is more of an integration test.
     public class RazorTemplatingTests
     {
-        const mockTemplatePath = "/Template";
+        const string mockTemplatePath = "/Template";
         
         [Fact (Skip = "Disabling test on CI")]
         public async void RunTemplateAsync_Generates_Text_For_Template_With_A_Model()

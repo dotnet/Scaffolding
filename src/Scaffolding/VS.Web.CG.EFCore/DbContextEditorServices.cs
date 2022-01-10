@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             Contract.Assert(File.Exists(templatePath));
 
             var templateContent = File.ReadAllText(templatePath);
-            var templateResult = await _templatingService.RunTemplateAsync(templateContent, dbContextTemplateModel);
+            var templateResult = await _templatingService.RunTemplateAsync(templatePath, templateContent, dbContextTemplateModel);
 
             if (templateResult.ProcessingException != null)
             {

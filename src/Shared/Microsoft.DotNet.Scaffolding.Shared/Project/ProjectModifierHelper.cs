@@ -41,43 +41,26 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
-            if (project != null)
+            if (project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
             {
-                var startupDocument = project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).FirstOrDefault();
-                if (startupDocument == null)
-                {
-                    //if changed the name in Program.cs, get the class name and check.
-                    var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
-                    var startupClassName = await GetStartupClassName(programDocument);
-                    if (!string.IsNullOrEmpty(startupClassName))
-                    {
-                        startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
-                    }
-                }
-
-                return startupDocument == null;
+                return false;
             }
 
-            return false;
+            // if changed the name in Program.cs, get the class name and check.
+            var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+            var startupClassName = await GetStartupClassName(programDocument);
+
+            return string.IsNullOrEmpty(startupClassName); // If project has UseStartup in Program.cs, it is not a minimal app
         }
 
-        //Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
-        //will bail out.
-        internal static async Task<string> GetStartupClass(string projectPath, CodeAnalysis.Project project)
+        // Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
+        // will return null.
+        internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
         {
-            var programFilePath = Directory.EnumerateFiles(projectPath, "Program.cs").FirstOrDefault();
-            if (!string.IsNullOrEmpty(programFilePath))
-            {
-                var programDoc = project.Documents.Where(d => d.Name.Equals(programFilePath)).FirstOrDefault();
-                var startupClassName = await GetStartupClassName(programDoc);
-                string className = startupClassName;
-                var startupFilePath = string.Empty;
-                if (!string.IsNullOrEmpty(startupClassName))
-                {
-                    return string.Concat(startupClassName, ".cs");
-                }
-            }
-            return string.Empty;
+            var programCsDocument = project.Documents.Where(d => d.Name.Equals("Program.cs")).FirstOrDefault();
+            var startupClassName = await GetStartupClassName(programCsDocument);
+
+            return string.IsNullOrEmpty(startupClassName) ? null : string.Concat(startupClassName, ".cs");
         }
 
         internal static async Task<string> GetStartupClassName(Document programDoc)

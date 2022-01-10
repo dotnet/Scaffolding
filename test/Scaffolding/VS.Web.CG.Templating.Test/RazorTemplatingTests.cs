@@ -9,6 +9,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
     //This is more of an integration test.
     public class RazorTemplatingTests
     {
+        const mockTemplatePath = "/Template";
+        
         [Fact (Skip = "Disabling test on CI")]
         public async void RunTemplateAsync_Generates_Text_For_Template_With_A_Model()
         {
@@ -19,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
             var templatingService = new RazorTemplating(compilationService);
 
             //Act
-            var result = await templatingService.RunTemplateAsync(templateContent, model);
+            var result = await templatingService.RunTemplateAsync(mockTemplatePath, templateContent, model);
 
             //Assert
             Assert.Null(result.ProcessingException);
@@ -35,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
             var templatingService = new RazorTemplating(compilationService);
 
             //Act
-            var result = await templatingService.RunTemplateAsync(templateContent, templateModel: "DoesNotMatter");
+            var result = await templatingService.RunTemplateAsync(mockTemplatePath, templateContent, templateModel: "DoesNotMatter");
 
             //Assert
             Assert.Equal("", result.GeneratedText);

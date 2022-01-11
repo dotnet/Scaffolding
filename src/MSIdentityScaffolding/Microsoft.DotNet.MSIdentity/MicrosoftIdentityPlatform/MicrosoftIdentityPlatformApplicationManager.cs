@@ -321,7 +321,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             var validatedLocalUris = localRedirectUris.Where(uri => IsValidUri(uri));
             var processedLocalUris = validatedLocalUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm));
-            var allRedirectUris = remoteRedirectUris.Union(processedLocalUris).Distinct();
+            var processedRemoteUris = remoteRedirectUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm));
+            var allRedirectUris = processedRemoteUris.Union(processedLocalUris).Distinct();
 
             return allRedirectUris.Except(remoteRedirectUris).Any() ? allRedirectUris : null;
         }

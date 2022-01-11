@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +30,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             IConsoleLogger consoleLogger,
             string commandName)
         {
-            Debugger.Launch();
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             // Get the tenant
@@ -200,7 +198,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             ProvisioningToolOptions toolOptions,
             string commandName)
         {
-            Debugger.Launch();
             if (applicationParameters is null)
             {
                 return new JsonResponse(commandName, State.Fail, $"{Resources.FailedToUpdateAppNull} {nameof(applicationParameters)}");
@@ -247,7 +244,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns></returns>
         private Application? UpdateApplication(Application existingApplication, ProvisioningToolOptions toolOptions, bool isBlazorWasm = false)
         {
-            Debugger.Launch();
             bool needsUpdate = false;
             var updatedApp = new Application
             {

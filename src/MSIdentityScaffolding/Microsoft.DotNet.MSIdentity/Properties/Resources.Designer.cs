@@ -308,6 +308,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to update Azure AD app registration {0} ({1}).
+        /// </summary>
+        internal static string FailedToUpdateApp {
+            get {
+                return ResourceManager.GetString("FailedToUpdateApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update Azure AD app, null {0}.
+        /// </summary>
+        internal static string FailedToUpdateAppNull {
+            get {
+                return ResourceManager.GetString("FailedToUpdateAppNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Initializing User Secrets . . ..
         /// </summary>
         internal static string InitializeUserSecrets {
@@ -331,6 +349,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string NoProjectFound {
             get {
                 return ResourceManager.GetString("NoProjectFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find Azure AD app registration {0} ({1}).
+        /// </summary>
+        internal static string NotFound {
+            get {
+                return ResourceManager.GetString("NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure AD app {0} ({1}) did not require any remote updates.
+        /// </summary>
+        internal static string NoUpdateNecessary {
+            get {
+                return ResourceManager.GetString("NoUpdateNecessary", resourceCulture);
             }
         }
         
@@ -362,6 +398,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully updated app registration {0} ({1}).
+        /// </summary>
+        internal static string SuccessfullyUpdatedApp {
+            get {
+                return ResourceManager.GetString("SuccessfullyUpdatedApp", resourceCulture);
             }
         }
         

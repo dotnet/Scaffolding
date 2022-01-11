@@ -250,6 +250,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns>Updated Application if changes were made, otherwise null</returns>
         private Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
         {
+            Debugger.Launch();
             bool needsUpdate = false;
 
             // All applications require Web, Blazor WASM applications also require SPA (Single Page Application)
@@ -372,18 +373,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return needsUpdate;
         }
 
-        private IEnumerable<string> ValidateRedirectUris(IEnumerable<string> redirectUris) => redirectUris.Where(uri => IsValidUri(uri));
-
         // either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
-        internal static bool IsValidUri(string uri) => Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult)
-            && (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback));
-
-        private static IEnumerable<string> UpdateCallbackPaths(IEnumerable<string> redirectUris, bool isBlazorWasm = false) => redirectUris.Select(uri => UpdateUriPath(uri, isBlazorWasm));
-
-        private static string UpdateUriPath(string uri, bool isBlazorWasm) => new UriBuilder(uri)
+        internal static bool IsValidUri(string uriString)
         {
-            Path = isBlazorWasm ? "authentication/login-callback" : "signin-oidc" // TODO constant
-        }.Uri.ToString();
+            return Uri.TryCreate(uriString, UriKind.Absolute, out Uri? uri) && (uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback));
+        }
+
+        private static string UpdateCallbackPath(string uri, bool isBlazorWasm)
+        {
+            return new UriBuilder(uri)
+            {
+                Path = isBlazorWasm ? BlazorWasmCallbackPath : DefaultCallbackPath
+            }.Uri.ToString();
+        }
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
             GraphServiceClient graphServiceClient,

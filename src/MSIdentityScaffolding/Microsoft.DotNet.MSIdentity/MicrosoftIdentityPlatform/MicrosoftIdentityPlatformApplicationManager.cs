@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +30,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             IConsoleLogger consoleLogger,
             string commandName)
         {
-            Debugger.Launch();
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             // Get the tenant
@@ -250,7 +248,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns>Updated Application if changes were made, otherwise null</returns>
         private Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
         {
-            Debugger.Launch();
             bool needsUpdate = false;
 
             // All applications require Web, Blazor WASM applications also require SPA (Single Page Application)

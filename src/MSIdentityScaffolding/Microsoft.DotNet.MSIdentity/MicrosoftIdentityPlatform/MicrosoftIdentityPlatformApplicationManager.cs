@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             IConsoleLogger consoleLogger,
             string commandName)
         {
+            Debugger.Launch();
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             // Get the tenant
@@ -369,6 +371,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             return needsUpdate;
         }
+
+        private IEnumerable<string> ValidateRedirectUris(IEnumerable<string> redirectUris) => redirectUris.Where(uri => IsValidUri(uri));
+
+        // either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+        internal static bool IsValidUri(string uri) => Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback));
+
+        private static IEnumerable<string> UpdateCallbackPaths(IEnumerable<string> redirectUris, bool isBlazorWasm = false) => redirectUris.Select(uri => UpdateUriPath(uri, isBlazorWasm));
+
+        private static string UpdateUriPath(string uri, bool isBlazorWasm) => new UriBuilder(uri)
+        {
+            Path = isBlazorWasm ? "authentication/login-callback" : "signin-oidc" // TODO constant
+        }.Uri.ToString();
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
             GraphServiceClient graphServiceClient,

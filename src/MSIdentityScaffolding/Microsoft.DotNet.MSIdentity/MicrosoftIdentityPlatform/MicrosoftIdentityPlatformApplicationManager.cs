@@ -153,9 +153,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             else
             {
                 jsonResponse.State = State.Fail;
-                jsonResponse.Content = "Failed to create Azure AD/AD B2C app registration";
+                jsonResponse.Content = Resources.FailedToCreateApp;
                 consoleLogger.LogJsonMessage(jsonResponse);
             }
+
             consoleLogger.LogJsonMessage(jsonResponse);
             return effectiveApplicationParameters;
         }

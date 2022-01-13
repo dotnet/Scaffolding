@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
@@ -17,6 +18,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
     {
         const string MicrosoftGraphAppId = "00000003-0000-0000-c000-000000000000";
         const string ScopeType = "Scope";
+
+        private const string DefaultCallbackPath = "signin-oidc";
+        private const string BlazorWasmCallbackPath = "authentication/login-callback";
 
         GraphServiceClient? _graphServiceClient;
 
@@ -52,19 +56,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (applicationParameters.IsWebApp.GetValueOrDefault())
             {
-                AddWebAppPlatform(applicationParameters, application);
+                AddWebAppPlatform(application, applicationParameters);
             }
             else if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
             {
                 // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
-                // whereas in .NET 5.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
-                if (applicationParameters.TargetFramework == "net5.0")
+                // whereas in .NET 5.0 and .NET 6.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
+                switch (applicationParameters.TargetFramework)
                 {
-                    AddSpaPlatform(applicationParameters, application);
-                }
-                else
-                {
-                    AddWebAppPlatform(applicationParameters, application, true);
+                    case "net5.0":
+                    case "net6.0":
+                        AddSpaPlatform(application, applicationParameters.WebRedirectUris);
+                        break;
+                    default:
+                        AddWebAppPlatform(application, applicationParameters, withImplicitFlow: true);
+                        break;
                 }
             }
 
@@ -124,7 +130,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Filter($"appId eq '{createdApplication.AppId}'")
                 .GetAsync()).First();
 
-            //log json console message here since we need the Microsoft.Graph.Application
+            // log json console message here since we need the Microsoft.Graph.Application
             JsonResponse jsonResponse = new JsonResponse(commandName);
             if (createdApplication != null)
             {
@@ -141,14 +147,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         effectiveApplicationParameters,
                         consoleLogger);
                 }
-
             }
             else
             {
                 jsonResponse.State = State.Fail;
-                jsonResponse.Content = "Failed to create Azure AD/AD B2C app registration";
+                jsonResponse.Content = Resources.FailedToCreateApp;
                 consoleLogger.LogJsonMessage(jsonResponse);
             }
+
             consoleLogger.LogJsonMessage(jsonResponse);
             return effectiveApplicationParameters;
         }
@@ -179,117 +185,189 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         Console.WriteLine(ex.Message);
                     }
                 }
+
                 Environment.Exit(1);
             }
 
             return tenant;
         }
 
+        /// <summary>
+        /// Compares the parameters of the remote App Registration with the input parameters given to the tool,
+        /// if any updates need to be made, sends a request using the GraphServiceClient to update the app registration in Azure AD
+        /// </summary>
+        /// <param name="tokenCredential"></param>
+        /// <param name="parameters"></param>
+        /// <param name="toolOptions"></param>
+        /// <param name="commandName"></param>
+        /// <returns></returns>
         internal async Task<JsonResponse> UpdateApplication(
             TokenCredential tokenCredential,
-            ApplicationParameters? reconciledApplicationParameters,
+            ApplicationParameters? parameters,
             ProvisioningToolOptions toolOptions,
             string commandName)
         {
-            JsonResponse jsonResponse = new JsonResponse(commandName);
-            if (reconciledApplicationParameters is null)
+            if (parameters is null)
             {
-                jsonResponse.Content = $"Failed to update Azure AD app, reconciledApplicationParameters == null";
-                jsonResponse.State = State.Fail;
+                return new JsonResponse(commandName, State.Fail, string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
-            else
+
+            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+
+            var remoteApp = (await graphServiceClient.Applications.Request()
+                .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
+
+            if (remoteApp is null)
             {
-                var graphServiceClient = GetGraphServiceClient(tokenCredential);
+                return new JsonResponse(commandName, State.Fail, string.Format(Resources.NotFound, parameters.ClientId));
+            }
 
-                var existingApplication = (await graphServiceClient.Applications
-                   .Request()
-                   .Filter($"appId eq '{reconciledApplicationParameters.ClientId}'")
-                   .GetAsync()).First();
-
-                bool needsUpdate = false;
-
-                // Updates the redirect URIs
-                if (existingApplication.Web == null)
+            var appUpdates = GetApplicationUpdates(remoteApp, toolOptions);
+            if (appUpdates != null)
+            {
+                try
                 {
-                    existingApplication.Web = new WebApplication();
+                    // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
+                    await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates).ConfigureAwait(false);
+                    return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
                 }
-
-                var updatedApp = new Application
+                catch (ServiceException se)
                 {
-                    Web = existingApplication.Web
-                };
+                    return new JsonResponse(commandName, State.Fail, se.Error?.Message);
+                }
+            }
 
-                //update redirect uris
-                List<string> existingRedirectUris = updatedApp.Web.RedirectUris.ToList();
-                List<string> urisToEnsure = ValidateUris(toolOptions.RedirectUris).ToList();
-                int originalUrisCount = existingRedirectUris.Count;
-                existingRedirectUris.AddRange(urisToEnsure);
-                updatedApp.Web.RedirectUris = existingRedirectUris.Distinct();
-                if (updatedApp.Web.RedirectUris.Count() > originalUrisCount)
+            return new JsonResponse(commandName, State.Success, string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
+        }
+
+        /// <summary>
+        /// Determines whether redirect URIs or implicit grant settings need updating and makes the appropriate modifications based on project type
+        /// </summary>
+        /// <param name="existingApplication"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns>Updated Application if changes were made, otherwise null</returns>
+        private Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
+        {
+            bool needsUpdate = false;
+
+            // All applications require Web, Blazor WASM applications also require SPA (Single Page Application)
+            var updatedApp = new Application
+            {
+                Web = existingApplication.Web ?? new WebApplication(),
+                Spa = toolOptions.IsBlazorWasm ? existingApplication.Spa ?? new SpaApplication() : existingApplication.Spa 
+            };
+
+            // Make updates if necessary
+            needsUpdate |= UpdateRedirectUris(updatedApp, toolOptions);
+            needsUpdate |= UpdateImplicitGrantSettings(updatedApp, toolOptions);
+
+            return needsUpdate ? updatedApp : null;
+        }
+
+        /// <summary>
+        /// Updates redirect URIs if necessary.
+        /// </summary>
+        /// <param name="updatedApp"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns>true if redirect URIs are to be updated, else false</returns>
+        private static bool UpdateRedirectUris(Application updatedApp, ProvisioningToolOptions toolOptions)
+        {
+            // Scenarios when redirect URIs need to be updated:
+            // - New redirect URIs are added from the tool
+            // - The app registration is being switched to a different project type (e.g. switching from Web App to a Blazor WASM)
+
+            // Collect all remote redirect URIs (Web and SPA)
+            // If the project type changed, we still may want the Redirect URIs associated with the old project type
+            var allRemoteUris = updatedApp.Web.RedirectUris.Union(updatedApp.Spa.RedirectUris).Distinct();
+
+            // Validate local URIs
+            var validatedLocalUris = toolOptions.RedirectUris.Where(uri => IsValidUri(uri));
+
+            // Merge all redirect URIs
+            var allRedirectUris = allRemoteUris.Union(validatedLocalUris);
+
+            // Update callback paths based on the project type
+            var processedRedirectUris = allRedirectUris.Select(uri => UpdateCallbackPath(uri, toolOptions.IsBlazorWasm)).Distinct();
+
+            // If there are any differences between our processed list and the remote list, update the remote list (Web or SPA)
+            if (toolOptions.IsBlazorWasm && processedRedirectUris.Except(updatedApp.Spa.RedirectUris).Any())
+            {
+                updatedApp.Spa.RedirectUris = processedRedirectUris;
+                return true;
+            }
+            else if (processedRedirectUris.Except(updatedApp.Web.RedirectUris).Any())
+            {
+                updatedApp.Web.RedirectUris = processedRedirectUris;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// URI is valid when scheme is https, if scheme is http then must be referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+        /// </summary>
+        /// <param name="uriString"></param>
+        /// <returns>true for valid URI, else false</returns>
+        internal static bool IsValidUri(string uriString)
+        {
+            return Uri.TryCreate(uriString, UriKind.Absolute, out Uri? uri) && (uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback));
+        }
+
+        /// <summary>
+        /// Updates the callback path for input redirectUri based on the project type,
+        /// Blazor: "authentication/login-callback", other project types: "signin-oidc"
+        /// </summary>
+        /// <param name="redirectUri"></param>
+        /// <param name="isBlazorWasm"></param>
+        /// <returns>updated callback path</returns>
+        private static string UpdateCallbackPath(string redirectUri, bool isBlazorWasm = false)
+        {
+            return new UriBuilder(redirectUri)
+            {
+                Path = isBlazorWasm ? BlazorWasmCallbackPath : DefaultCallbackPath
+            }.Uri.ToString();
+        }
+
+        /// <summary>
+        /// Updates implicit grant settings if necessary
+        /// </summary>
+        /// <param name="updatedApp"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns>true if ImplicitGrantSettings require updates, else false</returns>
+        private bool UpdateImplicitGrantSettings(Application updatedApp, ProvisioningToolOptions toolOptions)
+        {
+            bool needsUpdate = false;
+            var currentSettings = updatedApp.Web.ImplicitGrantSettings;
+
+            if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
+            {
+                if (currentSettings.EnableAccessTokenIssuance != true || currentSettings.EnableIdTokenIssuance != true)
                 {
+                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
+                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
+
                     needsUpdate = true;
                 }
-
-                if (updatedApp.Web.ImplicitGrantSettings == null)
+            }
+            else // Otherwise we make changes only when the tool options differ from the existing settings.
+            {
+                if (toolOptions.EnableAccessToken.HasValue &&
+                    currentSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
                 {
-                    updatedApp.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
-                }
-
-                //update implicit grant settings if need be.
-                if (toolOptions.EnableAccessToken.HasValue && (toolOptions.EnableAccessToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance))
-                {
-                    needsUpdate = true;
                     updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+                    needsUpdate = true;
                 }
 
                 if (toolOptions.EnableIdToken.HasValue &&
-                    (toolOptions.EnableIdToken.Value != updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance))
+                    currentSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
                 {
-                    needsUpdate = true;
                     updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
-                }
-
-                if (needsUpdate)
-                {
-                    try
-                    {
-                        // TODO: update other fields. 
-                        // See https://github.com/jmprieur/app-provisonning-tool/issues/10
-                        await graphServiceClient.Applications[existingApplication.Id]
-                            .Request()
-                            .UpdateAsync(updatedApp).ConfigureAwait(false);
-                    }
-                    catch (ServiceException se)
-                    {
-                        jsonResponse.Content = se.Error?.Message;
-                        jsonResponse.State = State.Fail;
-                        return jsonResponse;
-                    }
-                }
-
-                jsonResponse.Content = $"Success updating Azure AD app {updatedApp.DisplayName} ({updatedApp.AppId})";
-                jsonResponse.State = State.Success;
-            }
-            return jsonResponse;
-        }
-
-        //checks for valid https uris.
-        internal static IList<string> ValidateUris(IList<string> redirectUris)
-        {
-            IList<string> validUris = new List<string>();
-            if (redirectUris.Any())
-            {
-                foreach (var uri in redirectUris)
-                {
-                    //either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
-                    if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult) &&
-                       (uriResult.Scheme == Uri.UriSchemeHttps || (uriResult.Scheme == Uri.UriSchemeHttp && uriResult.IsLoopback)))
-                    {
-                        validUris.Add(uri);
-                    }
+                    needsUpdate = true;
                 }
             }
-            return validUris;
+
+            return needsUpdate;
         }
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
@@ -487,53 +565,49 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         }
 
         /// <summary>
-        /// Adds a SPA redirect URI
+        /// Adds SPA redirect URIs, ensures that the callback paths are correct
         /// </summary>
-        /// <param name="applicationParameters"></param>
         /// <param name="application"></param>
-        private static void AddSpaPlatform(ApplicationParameters applicationParameters, Application application)
+        /// <param name="redirectUris"></param>
+        private static void AddSpaPlatform(Application application, List<string> redirectUris)
         {
-            application.Spa = new SpaApplication();
-            application.Spa.RedirectUris = applicationParameters.WebRedirectUris;
+            application.Spa = new SpaApplication
+            {
+                RedirectUris = redirectUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm: true))
+            };
         }
 
         /// <summary>
         /// Adds the Web redirect URIs (and required scopes in the case of B2C web apis)
         /// </summary>
-        /// <param name="applicationParameters"></param>
         /// <param name="application"></param>
+        /// <param name="applicationParameters"></param>
         /// <param name="withImplicitFlow">Should it add the implicit flow access token (for Blazor in netcore3.1)</param>
-        private static void AddWebAppPlatform(ApplicationParameters applicationParameters, Application application, bool withImplicitFlow = false)
+        private static void AddWebAppPlatform(Application application, ApplicationParameters applicationParameters, bool withImplicitFlow = false)
         {
             application.Web = new WebApplication();
 
             // IdToken
-            if ((!applicationParameters.CallsDownstreamApi && !applicationParameters.CallsMicrosoftGraph)
-                || withImplicitFlow)
+            if (withImplicitFlow || (!applicationParameters.CallsDownstreamApi && !applicationParameters.CallsMicrosoftGraph))
             {
-                application.Web.ImplicitGrantSettings = new ImplicitGrantSettings();
-                application.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
-                if (applicationParameters.IsB2C || withImplicitFlow)
+                application.Web.ImplicitGrantSettings = new ImplicitGrantSettings
                 {
-                    application.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
-                }
+                    EnableIdTokenIssuance = true,
+                    EnableAccessTokenIssuance = withImplicitFlow || applicationParameters.IsB2C
+                };
             }
 
             // Redirect URIs
-            application.Web.RedirectUris = applicationParameters.WebRedirectUris;
+            application.Web.RedirectUris = applicationParameters.WebRedirectUris.Select(uri => UpdateCallbackPath(uri));
 
             // Logout URI
             application.Web.LogoutUrl = applicationParameters.LogoutUrl;
 
-            // Explicit usage of MicrosoftGraph openid and offline_access, in the case
-            // of Azure AD B2C.
-            if (applicationParameters.IsB2C && (applicationParameters.IsWebApp.HasValue && applicationParameters.IsWebApp.Value)
-                || (applicationParameters.IsBlazorWasm.HasValue && applicationParameters.IsBlazorWasm.Value))
+            // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
+            if (applicationParameters.IsB2C &&
+                (applicationParameters.IsWebApp.GetValueOrDefault() || applicationParameters.IsBlazorWasm.GetValueOrDefault()))
             {
-                if (applicationParameters.CalledApiScopes == null)
-                {
-                    applicationParameters.CalledApiScopes = string.Empty;
-                }
+                applicationParameters.CalledApiScopes ??= string.Empty;
                 if (!applicationParameters.CalledApiScopes.Contains("openid"))
                 {
                     applicationParameters.CalledApiScopes += " openid";
@@ -542,10 +616,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 {
                     applicationParameters.CalledApiScopes += " offline_access";
                 }
+
                 applicationParameters.CalledApiScopes = applicationParameters.CalledApiScopes.Trim();
             }
         }
-
 
         /// <summary>
         /// Adds API permissions
@@ -677,7 +751,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var application = await GetApplication(tokenCredential, applicationParameters);
             if (application != null)
             {
-
                 ApplicationParameters effectiveApplicationParameters = GetEffectiveApplicationParameters(
                     tenant!,
                     application,
@@ -685,6 +758,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 return effectiveApplicationParameters;
             }
+
             return null;
         }
 
@@ -723,7 +797,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         && (application.Api.Oauth2PermissionScopes != null && application.Api.Oauth2PermissionScopes.Any())
                         || (application.AppRoles != null && application.AppRoles.Any()),
                 IsWebApp = application.Web != null,
-                IsBlazorWasm = application.Spa != null,
+                IsBlazorWasm = application.Spa != null, // TODO: note that just because an app registration has SPA does not imply that we are currently in a blazor wasm project
                 TenantId = tenant.Id,
                 Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.HasValue && v.IsDefault.Value)?.Name,
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
@@ -736,8 +810,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 TargetFramework = originalApplicationParameters.TargetFramework,
                 MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
                 CalledApiScopes = originalApplicationParameters.CalledApiScopes,
-                AppIdUri = originalApplicationParameters.AppIdUri,
-
+                AppIdUri = originalApplicationParameters.AppIdUri
             };
 
             if (application.Api != null && application.IdentifierUris.Any())

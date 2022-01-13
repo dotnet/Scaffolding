@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -83,7 +82,6 @@ namespace Microsoft.DotNet.MSIdentity
                 ProvisioningToolOptions.AppSettingsFilePath = filePath;
             }
 
-            Debugger.Launch();
             ProjectDescription? projectDescription = ProjectDescriptionReader.GetProjectDescription(
                 ProvisioningToolOptions.ProjectTypeIdentifier,
                 ProvisioningToolOptions.ProjectPath);

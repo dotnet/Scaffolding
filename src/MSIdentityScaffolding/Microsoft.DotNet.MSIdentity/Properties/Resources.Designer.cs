@@ -353,7 +353,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not find Azure AD app registration {0} ({1}).
+        ///   Looks up a localized string similar to Could not find app registration with matching ID in Azure AD (ID: {0}).
         /// </summary>
         internal static string NotFound {
             get {

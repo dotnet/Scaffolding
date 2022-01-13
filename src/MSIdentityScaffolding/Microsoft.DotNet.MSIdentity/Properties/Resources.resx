@@ -214,8 +214,8 @@
     <value>No project found in {0}.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
-    <value>Could not find Azure AD app registration {0} ({1})</value>
-    <comment>0 = Display Name, 1 = App Id</comment>
+    <value>Could not find app registration with matching ID in Azure AD (ID: {0})</value>
+    <comment>0 = App Id</comment>
   </data>
   <data name="NoUpdateNecessary" xml:space="preserve">
     <value>Azure AD app {0} ({1}) did not require any remote updates</value>

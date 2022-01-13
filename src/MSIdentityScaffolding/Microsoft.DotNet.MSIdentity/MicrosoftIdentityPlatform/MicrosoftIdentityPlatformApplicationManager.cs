@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -131,7 +130,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Filter($"appId eq '{createdApplication.AppId}'")
                 .GetAsync()).First();
 
-            //log json console message here since we need the Microsoft.Graph.Application
+            // log json console message here since we need the Microsoft.Graph.Application
             JsonResponse jsonResponse = new JsonResponse(commandName);
             if (createdApplication != null)
             {
@@ -216,26 +215,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
-                .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).First();
+                .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
             if (remoteApp is null)
             {
-                return new JsonResponse(commandName, State.Fail, string.Format(Resources.NotFound, parameters.ApplicationDisplayName, parameters.ClientId));
+                return new JsonResponse(commandName, State.Fail, string.Format(Resources.NotFound, parameters.ClientId));
             }
-            Debugger.Launch();
-            var appUpdates = GetApplicationUpdates(remoteApp, toolOptions, parameters.IsBlazorWasm.GetValueOrDefault());
+
+            var appUpdates = GetApplicationUpdates(remoteApp, toolOptions);
             if (appUpdates != null)
             {
                 try
                 {
                     // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
-                    var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
-                    if (updatedApp is null)
-                    {
-                        return new JsonResponse(commandName, State.Fail, string.Format(Resources.FailedToUpdateApp, remoteApp.DisplayName, remoteApp.AppId));
-                    }
-
-                    return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, updatedApp.DisplayName, updatedApp.AppId));
+                    await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates).ConfigureAwait(false);
+                    return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
                 }
                 catch (ServiceException se)
                 {
@@ -252,18 +246,20 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="existingApplication"></param>
         /// <param name="toolOptions"></param>
         /// <returns>Updated Application if changes were made, otherwise null</returns>
-        private Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions, bool isBlazorWasm = false)
+        private Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
         {
             bool needsUpdate = false;
+
+            // All applications require Web, Blazor WASM applications also require SPA (Single Page Application)
             var updatedApp = new Application
             {
                 Web = existingApplication.Web ?? new WebApplication(),
-                Spa = isBlazorWasm ? existingApplication.Spa ?? new SpaApplication() : existingApplication.Spa 
+                Spa = toolOptions.IsBlazorWasm ? existingApplication.Spa ?? new SpaApplication() : existingApplication.Spa 
             };
 
             // Make updates if necessary
-            needsUpdate |= UpdateRedirectUris(updatedApp, toolOptions, isBlazorWasm);
-            needsUpdate |= UpdateImplicitGrantSettings(updatedApp, toolOptions, isBlazorWasm);
+            needsUpdate |= UpdateRedirectUris(updatedApp, toolOptions);
+            needsUpdate |= UpdateImplicitGrantSettings(updatedApp, toolOptions);
 
             return needsUpdate ? updatedApp : null;
         }
@@ -273,9 +269,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// </summary>
         /// <param name="updatedApp"></param>
         /// <param name="toolOptions"></param>
-        /// <param name="isBlazorWasm"></param>
         /// <returns>true if redirect URIs are to be updated, else false</returns>
-        private static bool UpdateRedirectUris(Application updatedApp, ProvisioningToolOptions toolOptions, bool isBlazorWasm)
+        private static bool UpdateRedirectUris(Application updatedApp, ProvisioningToolOptions toolOptions)
         {
             // Scenarios when redirect URIs need to be updated:
             // - New redirect URIs are added from the tool
@@ -292,10 +287,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var allRedirectUris = allRemoteUris.Union(validatedLocalUris);
 
             // Update callback paths based on the project type
-            var processedRedirectUris = allRedirectUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm)).Distinct();
+            var processedRedirectUris = allRedirectUris.Select(uri => UpdateCallbackPath(uri, toolOptions.IsBlazorWasm)).Distinct();
 
             // If there are any differences between our processed list and the remote list, update the remote list (Web or SPA)
-            if (isBlazorWasm && processedRedirectUris.Except(updatedApp.Spa.RedirectUris).Any())
+            if (toolOptions.IsBlazorWasm && processedRedirectUris.Except(updatedApp.Spa.RedirectUris).Any())
             {
                 updatedApp.Spa.RedirectUris = processedRedirectUris;
                 return true;
@@ -339,14 +334,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// </summary>
         /// <param name="updatedApp"></param>
         /// <param name="toolOptions"></param>
-        /// <param name="isBlazorWasm"></param>
         /// <returns>true if ImplicitGrantSettings require updates, else false</returns>
-        private bool UpdateImplicitGrantSettings(Application updatedApp, ProvisioningToolOptions toolOptions, bool isBlazorWasm)
+        private bool UpdateImplicitGrantSettings(Application updatedApp, ProvisioningToolOptions toolOptions)
         {
             bool needsUpdate = false;
             var currentSettings = updatedApp.Web.ImplicitGrantSettings;
 
-            if (isBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
+            if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
             {
                 if (currentSettings.EnableAccessTokenIssuance != true || currentSettings.EnableIdTokenIssuance != true)
                 {
@@ -573,8 +567,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <summary>
         /// Adds SPA redirect URIs, ensures that the callback paths are correct
         /// </summary>
-        /// <param name="applicationParameters"></param>
         /// <param name="application"></param>
+        /// <param name="redirectUris"></param>
         private static void AddSpaPlatform(Application application, List<string> redirectUris)
         {
             application.Spa = new SpaApplication
@@ -803,7 +797,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         && (application.Api.Oauth2PermissionScopes != null && application.Api.Oauth2PermissionScopes.Any())
                         || (application.AppRoles != null && application.AppRoles.Any()),
                 IsWebApp = application.Web != null,
-                IsBlazorWasm = application.Spa != null,
+                IsBlazorWasm = application.Spa != null, // TODO: note that just because an app registration has SPA does not imply that we are currently in a blazor wasm project
                 TenantId = tenant.Id,
                 Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.HasValue && v.IsDefault.Value)?.Name,
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,

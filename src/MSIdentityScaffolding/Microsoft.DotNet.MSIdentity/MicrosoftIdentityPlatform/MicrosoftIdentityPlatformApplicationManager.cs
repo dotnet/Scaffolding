@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -209,7 +210,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             if (parameters is null)
             {
-                return new JsonResponse(commandName, State.Fail, $"{Resources.FailedToUpdateAppNull} {nameof(ApplicationParameters)}");
+                return new JsonResponse(commandName, State.Fail, string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
@@ -219,9 +220,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (remoteApp is null)
             {
-                return new JsonResponse(commandName, State.Fail, $"{Resources.NotFound} {parameters.ApplicationDisplayName} {parameters.ClientId}");
+                return new JsonResponse(commandName, State.Fail, string.Format(Resources.NotFound, parameters.ApplicationDisplayName, parameters.ClientId));
             }
-
+            Debugger.Launch();
             var appUpdates = GetApplicationUpdates(remoteApp, toolOptions, parameters.IsBlazorWasm.GetValueOrDefault());
             if (appUpdates != null)
             {
@@ -231,10 +232,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
                     if (updatedApp is null)
                     {
-                        return new JsonResponse(commandName, State.Fail, $"{Resources.FailedToUpdateApp} {remoteApp.DisplayName} {remoteApp.AppId}");
+                        return new JsonResponse(commandName, State.Fail, string.Format(Resources.FailedToUpdateApp, remoteApp.DisplayName, remoteApp.AppId));
                     }
 
-                    return new JsonResponse(commandName, State.Success, $"{Resources.SuccessfullyUpdatedApp} {updatedApp.DisplayName} ({updatedApp.AppId})");
+                    return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, updatedApp.DisplayName, updatedApp.AppId));
                 }
                 catch (ServiceException se)
                 {
@@ -242,7 +243,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 }
             }
 
-            return new JsonResponse(commandName, State.Success, $"{Resources.NoUpdateNecessary} {remoteApp.DisplayName} {remoteApp.AppId}");
+            return new JsonResponse(commandName, State.Success, string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
         }
 
         /// <summary>

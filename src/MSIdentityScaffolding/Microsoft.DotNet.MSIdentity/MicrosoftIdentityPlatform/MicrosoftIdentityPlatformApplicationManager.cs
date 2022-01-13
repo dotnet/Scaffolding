@@ -192,28 +192,37 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return tenant;
         }
 
+        /// <summary>
+        /// Compares the parameters of the remote App Registration with the input parameters given to the tool,
+        /// if any updates need to be made, sends a request using the GraphServiceClient to update the app registration in Azure AD
+        /// </summary>
+        /// <param name="tokenCredential"></param>
+        /// <param name="parameters"></param>
+        /// <param name="toolOptions"></param>
+        /// <param name="commandName"></param>
+        /// <returns></returns>
         internal async Task<JsonResponse> UpdateApplication(
             TokenCredential tokenCredential,
-            ApplicationParameters? applicationParameters,
+            ApplicationParameters? parameters,
             ProvisioningToolOptions toolOptions,
             string commandName)
         {
-            if (applicationParameters is null)
+            if (parameters is null)
             {
-                return new JsonResponse(commandName, State.Fail, $"{Resources.FailedToUpdateAppNull} {nameof(applicationParameters)}");
+                return new JsonResponse(commandName, State.Fail, $"{Resources.FailedToUpdateAppNull} {nameof(ApplicationParameters)}");
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
-                .Filter($"appId eq '{applicationParameters.ClientId}'").GetAsync()).First();
+                .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).First();
 
             if (remoteApp is null)
             {
-                return new JsonResponse(commandName, State.Fail, $"{Resources.NotFound} {applicationParameters.ApplicationDisplayName} {applicationParameters.ClientId}");
+                return new JsonResponse(commandName, State.Fail, $"{Resources.NotFound} {parameters.ApplicationDisplayName} {parameters.ClientId}");
             }
 
-            var appUpdates = UpdateApplication(remoteApp, toolOptions, applicationParameters.IsBlazorWasm.GetValueOrDefault());
+            var appUpdates = GetApplicationUpdates(remoteApp, toolOptions, parameters.IsBlazorWasm.GetValueOrDefault());
             if (appUpdates != null)
             {
                 try
@@ -237,108 +246,133 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         }
 
         /// <summary>
-        /// Updates application in Azure AD, returns updated app or null if no updates were made
+        /// Determines whether redirect URIs or implicit grant settings need updating and makes the appropriate modifications based on project type
         /// </summary>
         /// <param name="existingApplication"></param>
         /// <param name="toolOptions"></param>
-        /// <returns></returns>
-        private Application? UpdateApplication(Application existingApplication, ProvisioningToolOptions toolOptions, bool isBlazorWasm = false)
+        /// <returns>Updated Application if changes were made, otherwise null</returns>
+        private Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions, bool isBlazorWasm = false)
         {
             bool needsUpdate = false;
             var updatedApp = new Application
             {
                 Web = existingApplication.Web ?? new WebApplication(),
-                Spa = isBlazorWasm ? existingApplication.Spa ?? new SpaApplication() : existingApplication.Spa
+                Spa = isBlazorWasm ? existingApplication.Spa ?? new SpaApplication() : existingApplication.Spa 
             };
 
-            // Update redirect uris
-            var remoteUris = updatedApp.Web.RedirectUris.Union(updatedApp.Spa.RedirectUris).Distinct();
-            var updatedRedirectUris = UpdateRedirectUris(remoteUris, toolOptions.RedirectUris, isBlazorWasm);
-            if (updatedRedirectUris != null)
-            {
-                if (isBlazorWasm)
-                {
-                    updatedApp.Spa.RedirectUris = updatedRedirectUris;
-                }
-                else
-                {
-                    updatedApp.Web.RedirectUris = updatedRedirectUris;
-                }
-
-                needsUpdate = true;
-            }
-
-            var updatedImplicitGrantSettings = GetUpdatedImplicitGrantSettings(updatedApp.Web.ImplicitGrantSettings, toolOptions, isBlazorWasm);
-            if (updatedImplicitGrantSettings != null)
-            {
-                updatedApp.Web.ImplicitGrantSettings = updatedImplicitGrantSettings;
-                needsUpdate = true;
-            }
+            // Make updates if necessary
+            needsUpdate |= UpdateRedirectUris(updatedApp, toolOptions, isBlazorWasm);
+            needsUpdate |= UpdateImplicitGrantSettings(updatedApp, toolOptions, isBlazorWasm);
 
             return needsUpdate ? updatedApp : null;
         }
 
-        private ImplicitGrantSettings? GetUpdatedImplicitGrantSettings(ImplicitGrantSettings implicitGrantSettings, ProvisioningToolOptions toolOptions, bool isBlazorWasm)
+        /// <summary>
+        /// Updates redirect URIs if necessary.
+        /// </summary>
+        /// <param name="updatedApp"></param>
+        /// <param name="toolOptions"></param>
+        /// <param name="isBlazorWasm"></param>
+        /// <returns>true if redirect URIs are to be updated, else false</returns>
+        private static bool UpdateRedirectUris(Application updatedApp, ProvisioningToolOptions toolOptions, bool isBlazorWasm)
         {
-            bool needsUpdate = false;
-            if (isBlazorWasm)
+            // Scenarios when redirect URIs need to be updated:
+            // - New redirect URIs are added from the tool
+            // - The app registration is being switched to a different project type (e.g. switching from Web App to a Blazor WASM)
+
+            // Collect all remote redirect URIs (Web and SPA)
+            // If the project type changed, we still may want the Redirect URIs associated with the old project type
+            var allRemoteUris = updatedApp.Web.RedirectUris.Union(updatedApp.Spa.RedirectUris).Distinct();
+
+            // Validate local URIs
+            var validatedLocalUris = toolOptions.RedirectUris.Where(uri => IsValidUri(uri));
+
+            // Merge all redirect URIs
+            var allRedirectUris = allRemoteUris.Union(validatedLocalUris);
+
+            // Update callback paths based on the project type
+            var processedRedirectUris = allRedirectUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm)).Distinct();
+
+            // If there are any differences between our processed list and the remote list, update the remote list (Web or SPA)
+            if (isBlazorWasm && processedRedirectUris.Except(updatedApp.Spa.RedirectUris).Any())
             {
-                needsUpdate = implicitGrantSettings?.EnableAccessTokenIssuance != true || implicitGrantSettings?.EnableIdTokenIssuance != true;
-                return needsUpdate ? new ImplicitGrantSettings
-                {
-                    EnableAccessTokenIssuance = true,
-                    EnableIdTokenIssuance = true
-                } : null;
+                updatedApp.Spa.RedirectUris = processedRedirectUris;
+                return true;
+            }
+            else if (processedRedirectUris.Except(updatedApp.Web.RedirectUris).Any())
+            {
+                updatedApp.Web.RedirectUris = processedRedirectUris;
+                return true;
             }
 
-            implicitGrantSettings ??= new ImplicitGrantSettings();
-            if (toolOptions.EnableAccessToken.HasValue &&
-                implicitGrantSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
-            {
-                implicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
-                needsUpdate = true;
-            }
-
-            if (toolOptions.EnableIdToken.HasValue &&
-                implicitGrantSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
-            {
-                implicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
-                needsUpdate = true;
-            }
-
-            return needsUpdate ? implicitGrantSettings : null;
+            return false;
         }
 
         /// <summary>
-        /// Validates local URIs, updates the callback paths based on the project type and merges with remote redirect URIs
-        /// Returns updated redirect URIs if there are any changes, else null
+        /// URI is valid when scheme is https, if scheme is http then must be referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
         /// </summary>
-        /// <param name="remoteRedirectUris"></param>
-        /// <param name="localRedirectUris"></param>
-        /// <param name="isBlazorWasm"></param>
-        /// <returns></returns>
-        private static IEnumerable<string>? UpdateRedirectUris(IEnumerable<string> remoteRedirectUris, IEnumerable<string> localRedirectUris, bool isBlazorWasm = false)
-        {
-            var validatedLocalUris = localRedirectUris.Where(uri => IsValidUri(uri));
-            var processedLocalUris = validatedLocalUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm));
-            var processedRemoteUris = remoteRedirectUris.Select(uri => UpdateCallbackPath(uri, isBlazorWasm));
-            var allRedirectUris = processedRemoteUris.Union(processedLocalUris).Distinct();
-
-            return allRedirectUris.Except(remoteRedirectUris).Any() ? allRedirectUris : null;
-        }
-
-        // either https or http referencing localhost. IsLoopback checks for localhost, loopback and 127.0.0.1
+        /// <param name="uriString"></param>
+        /// <returns>true for valid URI, else false</returns>
         internal static bool IsValidUri(string uriString)
         {
             return Uri.TryCreate(uriString, UriKind.Absolute, out Uri? uri) && (uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback));
         }
 
-        private static string UpdateCallbackPath(string uri, bool isBlazorWasm)
+        /// <summary>
+        /// Updates the callback path for input redirectUri based on the project type,
+        /// Blazor: "authentication/login-callback", other project types: "signin-oidc"
+        /// </summary>
+        /// <param name="redirectUri"></param>
+        /// <param name="isBlazorWasm"></param>
+        /// <returns>updated callback path</returns>
+        private static string UpdateCallbackPath(string redirectUri, bool isBlazorWasm = false)
         {
-            return new UriBuilder(uri)
+            return new UriBuilder(redirectUri)
             {
                 Path = isBlazorWasm ? BlazorWasmCallbackPath : DefaultCallbackPath
             }.Uri.ToString();
+        }
+
+        /// <summary>
+        /// Updates implicit grant settings if necessary
+        /// </summary>
+        /// <param name="updatedApp"></param>
+        /// <param name="toolOptions"></param>
+        /// <param name="isBlazorWasm"></param>
+        /// <returns>true if ImplicitGrantSettings require updates, else false</returns>
+        private bool UpdateImplicitGrantSettings(Application updatedApp, ProvisioningToolOptions toolOptions, bool isBlazorWasm)
+        {
+            bool needsUpdate = false;
+            var currentSettings = updatedApp.Web.ImplicitGrantSettings;
+
+            if (isBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
+            {
+                if (currentSettings.EnableAccessTokenIssuance != true || currentSettings.EnableIdTokenIssuance != true)
+                {
+                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
+                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
+
+                    needsUpdate = true;
+                }
+            }
+            else // Otherwise we make changes only when the tool options differ from the existing settings.
+            {
+                if (toolOptions.EnableAccessToken.HasValue &&
+                    currentSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
+                {
+                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+                    needsUpdate = true;
+                }
+
+                if (toolOptions.EnableIdToken.HasValue &&
+                    currentSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
+                {
+                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+                    needsUpdate = true;
+                }
+            }
+
+            return needsUpdate;
         }
 
         private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
@@ -536,7 +570,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         }
 
         /// <summary>
-        /// Adds a SPA redirect URI
+        /// Adds SPA redirect URIs, ensures that the callback paths are correct
         /// </summary>
         /// <param name="applicationParameters"></param>
         /// <param name="application"></param>
@@ -569,13 +603,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             // Redirect URIs
-            application.Web.RedirectUris = applicationParameters.WebRedirectUris;
+            application.Web.RedirectUris = applicationParameters.WebRedirectUris.Select(uri => UpdateCallbackPath(uri));
 
             // Logout URI
             application.Web.LogoutUrl = applicationParameters.LogoutUrl;
 
-            // Explicit usage of MicrosoftGraph openid and offline_access
-            // in the case of Azure AD B2C.
+            // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
             if (applicationParameters.IsB2C &&
                 (applicationParameters.IsWebApp.GetValueOrDefault() || applicationParameters.IsBlazorWasm.GetValueOrDefault()))
             {

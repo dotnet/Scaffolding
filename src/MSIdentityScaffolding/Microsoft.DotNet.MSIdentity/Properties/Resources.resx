@@ -196,6 +196,14 @@
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
     <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>
   </data>
+  <data name="FailedToUpdateApp" xml:space="preserve">
+    <value>Failed to update Azure AD app registration {0} ({1})</value>
+    <comment>0 = Display Name, 1 = App Id</comment>
+  </data>
+  <data name="FailedToUpdateAppNull" xml:space="preserve">
+    <value>Failed to update Azure AD app, null {0}</value>
+    <comment>0 = null object</comment>
+  </data>
   <data name="InitializeUserSecrets" xml:space="preserve">
     <value>Initializing User Secrets . . .</value>
   </data>
@@ -205,6 +213,14 @@
   <data name="NoProjectFound" xml:space="preserve">
     <value>No project found in {0}.</value>
   </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Could not find app registration with matching ID in Azure AD (ID: {0})</value>
+    <comment>0 = App Id</comment>
+  </data>
+  <data name="NoUpdateNecessary" xml:space="preserve">
+    <value>Azure AD app {0} ({1}) did not require any remote updates</value>
+    <comment>0 = Display Name, 1 = App Id</comment>
+  </data>
   <data name="Policies" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Policies.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
@@ -213,6 +229,10 @@
   </data>
   <data name="Success" xml:space="preserve">
     <value>SUCCESS</value>
+  </data>
+  <data name="SuccessfullyUpdatedApp" xml:space="preserve">
+    <value>Successfully updated app registration {0} ({1})</value>
+    <comment>0 = Display Name, 1 = App Id</comment>
   </data>
   <data name="Summary" xml:space="preserve">
     <value>Summary</value>

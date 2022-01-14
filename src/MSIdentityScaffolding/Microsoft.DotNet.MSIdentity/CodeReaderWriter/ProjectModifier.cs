@@ -289,21 +289,21 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         internal async Task ModifyCshtmlFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
         {
             var fileDoc = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
-            if (fileDoc is null || file.Methods is null || !file.Methods.Any())
+            if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
             {
                 return;
             }
 
-            //add code snippets/changes.
-            if (file.Methods.TryGetValue("Global", out var globalMethod))
+            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+            if (!filteredCodeChanges.Any())
             {
-                var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
-                var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
-                if (editedDocument is null)
-                {
-                    return;
-                }
+                return;
+            }
 
+            // add code snippets/changes.
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
+            if (editedDocument != null)
+            {
                 //replace the document
                 await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
             }
@@ -318,13 +318,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             var razorChanges = file.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
-            if (editedDocument is null)
+            if (!razorChanges.Any())
             {
                 return;
             }
 
-            await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
+            if (editedDocument != null)
+            {
+                await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
+            }
         }
     }
 }

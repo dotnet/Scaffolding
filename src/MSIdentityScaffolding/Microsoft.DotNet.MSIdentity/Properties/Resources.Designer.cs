@@ -73,6 +73,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] add_LoginDisplay_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_LoginDisplay_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] add_ShowProfile_razor {
             get {
                 object obj = ResourceManager.GetObject("add_ShowProfile_razor", resourceCulture);

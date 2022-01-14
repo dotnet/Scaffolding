@@ -202,15 +202,22 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
             var modifiedRoot = ModifyRoot(documentBuilder, options, file);
-
-            if (modifiedRoot != null)
+            if (modifiedRoot is null)
             {
-                documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
+                return;
             }
 
+            documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
             await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
         }
 
+        /// <summary>
+        /// Modifies root if there any applicable changes
+        /// </summary>
+        /// <param name="documentBuilder"></param>
+        /// <param name="options"></param>
+        /// <param name="file"></param>
+        /// <returns>modified root if there are changes, else null</returns>
         private static CompilationUnitSyntax? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
             var newRoot = documentBuilder.AddUsings(options);
@@ -220,6 +227,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (file.Methods.TryGetValue("Global", out var globalMethod))
                 {
                     var filteredChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+                    if (!filteredChanges.Any())
+                    {
+                        return null;
+                    }
+
                     foreach (var change in filteredChanges)
                     {
                         //Modify CodeSnippet to have correct variable identifiers present.
@@ -287,6 +299,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
                 var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
+                if (editedDocument is null)
+                {
+                    return;
+                }
+
                 //replace the document
                 await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
             }
@@ -302,6 +319,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             var razorChanges = file.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
+            if (editedDocument is null)
+            {
+                return;
+            }
+
             await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
         }
     }

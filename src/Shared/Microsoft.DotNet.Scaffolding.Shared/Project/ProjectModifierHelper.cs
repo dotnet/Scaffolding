@@ -371,11 +371,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         /// <summary>
         /// Replaces text within document or appends text to the end of the document
-        /// depending on whether change.ReplaceSnippet is set
+        /// depending on whether change.ReplaceSnippet is set 
         /// </summary>
         /// <param name="fileDoc"></param>
         /// <param name="codeChanges"></param>
-        /// <returns></returns>
+        /// <returns>updated document, or null if no changes made</returns>
         internal static async Task<Document> ModifyDocumentText(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
         {
             if (fileDoc is null || codeChanges is null || !codeChanges.Any())
@@ -391,24 +391,30 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
 
             var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
-            var applicableCodeChanges = codeChanges.Where(
-                c => !string.IsNullOrEmpty(c.Block) && !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            if (!applicableCodeChanges.Any())
+            {
+                return null;
+            }
+
             foreach (var change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
-                if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
+                if (!string.IsNullOrEmpty(change.ReplaceSnippet))
                 {
-                    sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    if (sourceFileString.Contains(change.ReplaceSnippet))
+                    {
+                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    }
+                    else
+                    {
+                        // TODO: Generate readme file when replace snippets not found in file
+                    }
                 }
                 else
                 {
                     sourceFileString += change.Block; // Otherwise appending block to end of file
                 }
-            }
-
-            if (string.IsNullOrEmpty(sourceFileString))
-            {
-                return null; // TODO generate README
             }
 
             var updatedSourceText = SourceText.From(sourceFileString);

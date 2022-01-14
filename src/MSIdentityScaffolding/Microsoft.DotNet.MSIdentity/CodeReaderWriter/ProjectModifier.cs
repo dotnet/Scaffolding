@@ -46,13 +46,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            //Initialize Microsoft.Build assemblies
+            // Initialize Microsoft.Build assemblies
             if (!MSBuildLocator.IsRegistered)
             {
                 MSBuildLocator.RegisterDefaults();
             }
 
-            //Initialize CodeAnalysis.Project wrapper
+            // Initialize CodeAnalysis.Project wrapper
             CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
             if (project is null)
             {
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 IsMinimalApp = isMinimalApp
             };
 
-            //Go through all the files, make changes using DocumentBuilder.
+            // Go through all the files, make changes using DocumentBuilder.
             var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
             foreach (var file in filteredFiles)
             {
@@ -202,13 +202,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
             var modifiedRoot = ModifyRoot(documentBuilder, options, file);
-            if (modifiedRoot is null)
+            if (modifiedRoot != null)
             {
-                return;
+                documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
+                await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
             }
-
-            documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
-            await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
         }
 
         /// <summary>

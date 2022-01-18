@@ -74,10 +74,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private static void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
         {
-            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue &&
-                                projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.Value &&
-                                projectAuthenticationSettings.ApplicationParameters.IsWebApp.HasValue &&
-                                !projectAuthenticationSettings.ApplicationParameters.IsWebApp.Value;
+            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm;
             string callbackPath = projectAuthenticationSettings.ApplicationParameters.CallbackPath ?? "/signin-oidc";
             if (isBlazorWasm)
             {
@@ -187,8 +184,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 JsonElement element = pair.Key;
                                 int index = pair.Value;
                                 found = true;
-                                string replaceFrom = element.ValueKind == JsonValueKind.Number 
-                                    ? element.GetInt32().ToString(CultureInfo.InvariantCulture) 
+                                string replaceFrom = element.ValueKind == JsonValueKind.Number
+                                    ? element.GetInt32().ToString(CultureInfo.InvariantCulture)
                                     : element.ToString()!;
 
                                 UpdatePropertyRepresents(

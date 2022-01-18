@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// <summary>
         /// The project is a blazor web assembly.
         /// </summary>
-        public bool? IsBlazorWasm { get; set; }
+        public bool IsBlazorWasm { get; set; }
 
         /// <summary>
         /// The app calls Microsoft Graph.
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public List<string> PasswordCredentials { get; } = new List<string>();
 
         /// <summary>
-        /// Identitier URIs for web APIs.
+        /// Identifier URIs for web APIs.
         /// </summary>
         public string? AppIdUri { set;  get; }
 
@@ -202,5 +202,20 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             }
             property.SetValue(this, true);
         }
+
+        public Dictionary<string, string?> AppSettingsProperties =>
+            IsBlazorWasm ? new Dictionary<string, string?>
+            {
+                { PropertyNames.Authority,  $"{Instance}{TenantId}" },
+                { PropertyNames.ClientId, ClientId },
+                { PropertyNames.ValidateAuthority, DefaultProperties.ValidateAuthority },
+            } : new Dictionary<string, string?>
+            {
+                { PropertyNames.Domain,  Domain },
+                { PropertyNames.TenantId, TenantId },
+                { PropertyNames.ClientId, ClientId },
+                { PropertyNames.Instance, Instance },
+                { PropertyNames.CallbackPath, CallbackPath }
+            };
     }
 }

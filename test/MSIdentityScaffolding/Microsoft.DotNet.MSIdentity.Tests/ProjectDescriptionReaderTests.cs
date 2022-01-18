@@ -56,7 +56,7 @@ namespace Tests
             var authenticationSettings = _codeReader.ReadFromFiles(
                 createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                _projectDescriptionReader.ProjectDescriptions);
 
             bool callsGraph = folderPath.Contains(TestConstants.CallsGraph);
             bool callsWebApi = folderPath.Contains(TestConstants.CallsWebApi) || callsGraph;
@@ -100,7 +100,7 @@ namespace Tests
             var authenticationSettings = _codeReader.ReadFromFiles(
                 createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                _projectDescriptionReader.ProjectDescriptions);
 
             if (isB2C)
             {
@@ -135,7 +135,7 @@ namespace Tests
             var authenticationSettings = _codeReader.ReadFromFiles(
                 createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                _projectDescriptionReader.ProjectDescriptions);
 
             // Blazorwasm now delegates twice (once to the Client [Blazor], and once to the
             // Server [Web API]
@@ -160,7 +160,7 @@ namespace Tests
             var authenticationSettings = _codeReader.ReadFromFiles(
                 createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                _projectDescriptionReader.ProjectDescriptions);
 
             Assert.False(authenticationSettings.ApplicationParameters.HasAuthentication);
             Assert.Empty(authenticationSettings.ApplicationParameters.ApiPermissions);
@@ -181,7 +181,7 @@ namespace Tests
         {
             bool IsWebApi = authenticationSettings.ApplicationParameters.IsWebApi.HasValue && authenticationSettings.ApplicationParameters.IsWebApi.Value;
             bool IsWebApp = authenticationSettings.ApplicationParameters.IsWebApp.HasValue && authenticationSettings.ApplicationParameters.IsWebApp.Value;
-            bool IsBlazorWasm = authenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue && authenticationSettings.ApplicationParameters.IsBlazorWasm.Value;
+            bool IsBlazorWasm = authenticationSettings.ApplicationParameters.IsBlazorWasm;
             Assert.True(IsWebApi || IsWebApp || IsBlazorWasm);
             
             if (isB2C)

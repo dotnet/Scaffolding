@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// <summary>
         /// Path to appsettings.json file
         /// </summary>
-        public string? AppSettingsFilePath { get; set; }
+        public string? AppSettingsFilePath { get; set; } 
 
         ///<summary>
         /// Display name for Azure AD/AD B2C app registration

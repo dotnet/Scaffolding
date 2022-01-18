@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 AddWebAppPlatform(application, applicationParameters);
             }
-            else if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
+            else if (applicationParameters.IsBlazorWasm)
             {
                 // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
                 // whereas in .NET 5.0 and .NET 6.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
@@ -114,7 +115,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 await ExposeScopes(graphServiceClient, createdApplication);
 
                 // Blazorwasm hosted: add permission to server web API from client SPA
-                if (applicationParameters.IsBlazorWasm.GetValueOrDefault())
+                if (applicationParameters.IsBlazorWasm)
                 {
                     await AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
                         graphServiceClient,
@@ -605,7 +606,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
             if (applicationParameters.IsB2C &&
-                (applicationParameters.IsWebApp.GetValueOrDefault() || applicationParameters.IsBlazorWasm.GetValueOrDefault()))
+                (applicationParameters.IsWebApp.GetValueOrDefault() || applicationParameters.IsBlazorWasm))
             {
                 applicationParameters.CalledApiScopes ??= string.Empty;
                 if (!applicationParameters.CalledApiScopes.Contains("openid"))
@@ -793,18 +794,17 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 IsAAD = !isB2C,
                 IsB2C = isB2C,
                 HasAuthentication = true,
-                IsWebApi = application.Api != null
-                        && (application.Api.Oauth2PermissionScopes != null && application.Api.Oauth2PermissionScopes.Any())
-                        || (application.AppRoles != null && application.AppRoles.Any()),
-                IsWebApp = application.Web != null,
-                IsBlazorWasm = application.Spa != null, // TODO: note that just because an app registration has SPA does not imply that we are currently in a blazor wasm project
+                IsWebApi = application.Api?.Oauth2PermissionScopes?.Any() is true || application.AppRoles?.Any() is true,
                 TenantId = tenant.Id,
-                Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.HasValue && v.IsDefault.Value)?.Name,
+                Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.GetValueOrDefault())?.Name,
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
                 CallsDownstreamApi = application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
                 LogoutUrl = application.Web?.LogoutUrl,
                 GraphEntityId = application.Id,
+
                 // Parameters that cannot be infered from the registered app
+                IsWebApp = originalApplicationParameters.IsWebApp, // TODO
+                IsBlazorWasm = originalApplicationParameters.IsBlazorWasm,
                 SusiPolicy = originalApplicationParameters.SusiPolicy,
                 SecretsId = originalApplicationParameters.SecretsId,
                 TargetFramework = originalApplicationParameters.TargetFramework,

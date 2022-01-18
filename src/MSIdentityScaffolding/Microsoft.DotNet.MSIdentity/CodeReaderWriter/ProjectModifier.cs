@@ -132,9 +132,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 await ModifyCshtmlFile(file, project, options);
             }
-            else if (file.FileName.EndsWith(".razor"))
+            else if (file.FileName.EndsWith(".razor") || file.FileName.EndsWith(".html"))
             {
-                await ModifyRazorFile(file, project, options);
+                await ApplyTextReplacements(file, project, options);
             }
         }
 
@@ -307,7 +307,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        internal async Task ModifyRazorFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
+        /// <summary>
+        /// Updates .razor and .html files via string replacement
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="project"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns></returns>
+        internal async Task ApplyTextReplacements(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
             var document = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
             if (document is null)
@@ -315,13 +322,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            var razorChanges = file.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-            if (!razorChanges.Any())
+            var replacements = file.Replacements.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+            if (!replacements.Any())
             {
                 return;
             }
 
-            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
                 await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);

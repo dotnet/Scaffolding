@@ -14,9 +14,9 @@ namespace Microsoft.DotNet.MSIdentity.Project
     public class ProjectDescriptionReader
     {
         private IEnumerable<string>? _directories;
-        internal IEnumerable<string> Directories => _directories ??= Directory.EnumerateDirectories(ProjectPath);
+        private IEnumerable<string> Directories => _directories ??= Directory.EnumerateDirectories(ProjectPath);
 
-        public List<ProjectDescription> ProjectDescriptions { get; private set; } = new List<ProjectDescription>();
+        internal List<ProjectDescription>? _projectDescriptions;
 
         private string ProjectPath { get; }
 
@@ -36,14 +36,9 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return projectTypeId != null ? ReadProjectDescription(projectTypeId) : null;
         }
 
-        private ProjectDescription? ReadProjectDescription(string projectTypeIdentifier)
-        {
-            ReadProjectDescriptions();
+        private ProjectDescription? ReadProjectDescription(string identifier) => ProjectDescriptions.FirstOrDefault(p => p.Identifier == identifier);
 
-            return ProjectDescriptions.FirstOrDefault(projectDescription => projectDescription.Identifier == projectTypeIdentifier);
-        }
-
-        static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
+        static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions
         {
             ReadCommentHandling = JsonCommentHandling.Skip
         };
@@ -56,8 +51,6 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         private string? InferProjectType(IEnumerable<string> files)
         {
-            ReadProjectDescriptions();
-
             // TODO: could be both a Web app and WEB API.
             foreach (ProjectDescription projectDescription in ProjectDescriptions)
             {
@@ -68,7 +61,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
                     {
                         return projectDescription.Identifier;
                     }
-                   
+
                 }
             }
 
@@ -76,13 +69,17 @@ namespace Microsoft.DotNet.MSIdentity.Project
         }
 
         /// <summary>
-        /// TODO
+        /// Checks for a match given a list of matches and a list of files
         /// </summary>
         /// <param name="matchesForProjectType"></param>
-        /// <param name="projectPath"></param>
+        /// <param name="filePaths"></param>
         /// <returns></returns>
         private bool HasMatch(MatchesForProjectType matchesForProjectType, IEnumerable<string> filePaths)
         {
+            if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
+            {
+                return Directories.Where(dir => dir.Contains(matchesForProjectType.FolderRelativePath)).Any();
+            }
             if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
             {
                 IEnumerable<string>? matchingFiles = filePaths.Where(file => file.Contains(matchesForProjectType.FileRelativePath));
@@ -94,51 +91,49 @@ namespace Microsoft.DotNet.MSIdentity.Project
                     }
 
                     var fileContent = File.ReadAllText(filePath);
-                    var hasMatch = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match)).Any();
-                    if (hasMatch)
+                    var matches = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match));
+                    if (matches.Any())
                     {
                         return true;  // If MatchAny is not null, at least one needs to match
                     }
                 }
             }
 
-            if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
-            {
-                return Directories.Where(dir => dir.Contains(matchesForProjectType.FolderRelativePath)).Any();
-            }
-
             return false;
         }
 
-        private void ReadProjectDescriptions()
+        public List<ProjectDescription> ProjectDescriptions
         {
-            if (ProjectDescriptions.Any())
+            get
             {
-                return;
-            }
-
-            foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
-            {
-                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
+                if (_projectDescriptions is null)
                 {
-                    byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-                    ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
-
-                    if (projectDescription == null)
+                    _projectDescriptions = new List<ProjectDescription>();
+                    foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
                     {
-                        throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
-                    }
-                    if (!projectDescription.IsValid())
-                    {
-                        throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
-                    }
+                        if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
+                        {
+                            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+                            ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
 
-                    ProjectDescriptions.Add(projectDescription);
+                            if (projectDescription == null)
+                            {
+                                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                            }
+                            if (!projectDescription.IsValid())
+                            {
+                                throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
+                            }
+
+                            _projectDescriptions.Add(projectDescription);
+                        }
+                    }
                 }
-            }
 
-            // TODO: provide an extension mechanism to add such files outside the tool.
-            // In that case the validation would not be an exception? but would need to provide error messages
+                //  TODO: provide an extension mechanism to add such files outside the tool.
+                //     In that case the validation would not be an exception? but would need to provide error messages
+                return _projectDescriptions;
+            }
         }
     }
 }

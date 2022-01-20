@@ -279,7 +279,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             // If there is no existing property, update 
             if (string.IsNullOrEmpty(existingValue))
             {
-                return string.IsNullOrEmpty(newValue) ? DefaultProperties.AzureAd[propertyName] : newValue;
+                return string.IsNullOrEmpty(newValue) ? DefaultProperties.AllProperties[propertyName] : newValue;
             }
 
             // If newValue exists and it differs from the existing property, update value

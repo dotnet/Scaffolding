@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.MSIdentity
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
-        internal AppSettingsModifier AppSettingsModifier { get => new AppSettingsModifier(ProvisioningToolOptions); } 
+        internal AppSettingsModifier AppSettingsModifier { get => new AppSettingsModifier(ProvisioningToolOptions); }
 
         internal static PropertyInfo[]? _properties;
         internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
@@ -56,7 +56,8 @@ namespace Microsoft.DotNet.MSIdentity
         {
             // Get csproj file path if it is not input from the tool
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
-            { 
+            {
+                // Enumerate all files because we do not yet know the correct ProjectPath, later we cache all files and pass the list around
                 var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
                 if (csProjfiles is null || csProjfiles.Count() != 1)
                 {

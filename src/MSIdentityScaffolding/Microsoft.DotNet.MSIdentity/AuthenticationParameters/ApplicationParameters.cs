@@ -202,20 +202,5 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             }
             property.SetValue(this, true);
         }
-
-        public Dictionary<string, string?> AppSettingsProperties =>
-            IsBlazorWasm ? new Dictionary<string, string?>
-            {
-                { PropertyNames.Authority,  $"{DefaultProperties.Instance}{TenantId}" },
-                { PropertyNames.ClientId, ClientId },
-                { PropertyNames.ValidateAuthority, DefaultProperties.ValidateAuthority.ToString() },
-            } : new Dictionary<string, string?>
-            {
-                { PropertyNames.Domain,  Domain },
-                { PropertyNames.TenantId, TenantId },
-                { PropertyNames.ClientId, ClientId },
-                { PropertyNames.Instance, Instance },
-                { PropertyNames.CallbackPath, CallbackPath }
-            };
     }
 }

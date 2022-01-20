@@ -633,7 +633,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             List<RequiredResourceAccess> apiRequests,
             IGrouping<string, ResourceAndScope> g)
         {
-
             var spsWithScopes = await graphServiceClient.ServicePrincipals
                 .Request()
                 .Filter($"servicePrincipalNames/any(t: t eq '{g.Key}')")

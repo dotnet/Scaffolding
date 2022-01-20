@@ -165,8 +165,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// </summary>
         public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType);
 
-        public bool? IsWebApp => "webapp".Equals(ProjectType);
-
         /// <summary>
         /// Clones the options
         /// </summary>

@@ -141,10 +141,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
             {
                 // Create and return AzureAd block if none exists, differs for Blazor apps
-                return AzureAdBlock(applicationParameters);
+                return DefaultAzureAdBlock(applicationParameters);
             }
 
-            bool changesMade = ModifyAppSettingsToken(azureAdToken, applicationParameters.AppSettingsProperties);
+            bool changesMade = ModifyAppSettingsToken(azureAdToken, AzureAdBlock(applicationParameters));
 
             if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
             {
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="applicationParameters"></param>
         /// <param name="isBlazorWasm"></param>
         /// <returns></returns>
-        private static JToken AzureAdBlock(ApplicationParameters applicationParameters)
+        private static JToken DefaultAzureAdBlock(ApplicationParameters applicationParameters)
         {
             return applicationParameters.IsBlazorWasm ? JToken.FromObject(new
             {
@@ -176,6 +176,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 CallbackPath = applicationParameters.CallbackPath ?? DefaultProperties.CallbackPath
             });
         }
+
+        Dictionary<string, string?> AzureAdBlock(ApplicationParameters parameters) =>
+           parameters.IsBlazorWasm ? new Dictionary<string, string?>
+           {
+                { PropertyNames.Authority,  $"{DefaultProperties.Instance}{parameters.TenantId}" },
+                { PropertyNames.ClientId, parameters.ClientId },
+                { PropertyNames.ValidateAuthority, DefaultProperties.ValidateAuthority.ToString() },
+           } : new Dictionary<string, string?>
+           {
+                { PropertyNames.Domain,  parameters.Domain },
+                { PropertyNames.TenantId, parameters.TenantId },
+                { PropertyNames.ClientId, parameters.ClientId },
+                { PropertyNames.Instance, parameters.Instance },
+                { PropertyNames.CallbackPath, parameters.CallbackPath }
+           };
 
         private bool ModifyAppSettingsToken(JToken token, Dictionary<string, string?> inputProperties)
         {

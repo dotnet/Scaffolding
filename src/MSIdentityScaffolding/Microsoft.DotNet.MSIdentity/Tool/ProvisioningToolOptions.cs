@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         /// <summary>
         /// Path to appsettings.json file
-        /// </summary>
-        public string? AppSettingsFilePath { get; set; } 
+        /// </summary>   
+        public string? AppSettingsFilePath { get; set; }
 
         ///<summary>
         /// Display name for Azure AD/AD B2C app registration
@@ -164,6 +164,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// Determines if the project type is blazor wasm
         /// </summary>
         public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType);
+
+        public bool? IsWebApp => "webapp".Equals(ProjectType);
 
         /// <summary>
         /// Clones the options

@@ -124,14 +124,23 @@
     <value>Adding package {0} . . .</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="add_CallWebApi_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="add_dotnet_blazorserver_CallWebApi_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeFiles\Blazor\Server\CallWebApi.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="add_LoginDisplay_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="add_dotnet_blazorserver_LoginDisplay_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeFiles\Blazor\Server\LoginDisplay.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="add_ShowProfile_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="add_dotnet_blazorserver_ShowProfile_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeFiles\Blazor\Server\ShowProfile.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="add_dotnet_blazorwasm_Authentication_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\Authentication.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="add_dotnet_blazorwasm_LoginDisplay_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\LoginDisplay.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="add_dotnet_blazorwasm_RedirectToLogin_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\RedirectToLogin.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="AuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>

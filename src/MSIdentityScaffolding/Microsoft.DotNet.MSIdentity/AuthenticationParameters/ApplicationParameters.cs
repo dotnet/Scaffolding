@@ -206,9 +206,9 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public Dictionary<string, string?> AppSettingsProperties =>
             IsBlazorWasm ? new Dictionary<string, string?>
             {
-                { PropertyNames.Authority,  $"{Instance}{TenantId}" },
+                { PropertyNames.Authority,  $"{DefaultProperties.Instance}{TenantId}" },
                 { PropertyNames.ClientId, ClientId },
-                { PropertyNames.ValidateAuthority, DefaultProperties.ValidateAuthority },
+                { PropertyNames.ValidateAuthority, DefaultProperties.ValidateAuthority.ToString() },
             } : new Dictionary<string, string?>
             {
                 { PropertyNames.Domain,  Domain },

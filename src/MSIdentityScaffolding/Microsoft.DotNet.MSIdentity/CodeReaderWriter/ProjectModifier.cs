@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -71,7 +73,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
             foreach (var file in filteredFiles)
             {
-                await HandleCodeFileAsync(file, project, options);
+                await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
             }
         }
 
@@ -118,34 +120,39 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
+        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options, string identifier)
         {
             if (!string.IsNullOrEmpty(file.AddFilePath))
             {
-                AddFile(file);
+                AddFile(file, identifier);
             }
-            else if (file.FileName.EndsWith(".cs"))
+            else
             {
-                await ModifyCsFile(file, project, options);
-            }
-            else if (file.FileName.EndsWith(".cshtml"))
-            {
-                await ModifyCshtmlFile(file, project, options);
-            }
-            else if (file.FileName.EndsWith(".razor") || file.FileName.EndsWith(".html"))
-            {
-                await ApplyTextReplacements(file, project, options);
+                switch (file.Extension)
+                {
+                    case "cs":
+                        await ModifyCsFile(file, project, options);
+                        break;
+                    case "cshtml":
+                        await ModifyCshtmlFile(file, project, options);
+                        break;
+                    case "razor":
+                    case "html":
+                        await ApplyTextReplacements(file, project, options);
+                        break;
+                }
             }
         }
 
         /// <summary>
         /// Determines if specified file exists, and if not then creates the 
         /// file based on template stored in AppProvisioningTool.Properties
-        /// and adds file to the project
+        /// then adds file to the project
         /// </summary>
         /// <param name="file"></param>
+        /// <param name="identifier"></param>
         /// <exception cref="FormatException"></exception>
-        private void AddFile(CodeFile file)
+        private void AddFile(CodeFile file, string identifier)
         {
             var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
             if (File.Exists(filePath))
@@ -153,23 +160,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return; // File exists, don't need to create
             }
 
-            // Resource names for addFiles prefixed with "add" and contain '_' in place of '.'
-            // e.g. fileName: "ShowProfile.razor" -> resourceName: "add_ShowProfile_razor"
-            var resourceName = file.FileName.Replace('.', '_');
-            var propertyInfo = AppProvisioningTool.Properties.Where(
-                p => p.Name.StartsWith("add") && p.Name.EndsWith(resourceName)).FirstOrDefault();
-
-            if (propertyInfo is null)
-            {
-                return;
-            }
-
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-            string codeFileString = Encoding.UTF8.GetString(content);
-            if (string.IsNullOrEmpty(codeFileString))
-            {
-                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
-            }
+            var codeFileString = GetCodeFileString(file, identifier);
 
             var fileDir = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(fileDir))
@@ -177,6 +168,33 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
             }
+        }
+
+        private string GetCodeFileString(CodeFile file, string identifier)
+        {
+            var propertyInfo = GetPropertyInfo(file.FileName, identifier);
+            if (propertyInfo is null)
+            {
+                throw new FormatException($"Resource file for {file.FileName} could not be found. ");
+            }
+
+            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+            string codeFileString = Encoding.UTF8.GetString(content);
+            if (string.IsNullOrEmpty(codeFileString))
+            {
+                throw new FormatException($"Resource file for {file.FileName} could not be parsed. ");
+            }
+
+            return codeFileString;
+        }
+
+        private PropertyInfo? GetPropertyInfo(string fileName, string identifier)
+        {
+            return AppProvisioningTool.Properties.Where(
+                p => p.Name.StartsWith("add")
+                && p.Name.Contains(identifier.Replace('-', '_')) // Resource files cannot have '-' (dash character)
+                && p.Name.Contains(fileName.Replace('.', '_'))) // Resource files cannot have '.' (period character)
+                .FirstOrDefault();
         }
 
         internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)

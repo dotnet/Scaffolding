@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +28,6 @@ namespace Microsoft.DotNet.MSIdentity
     /// </summary>
     public class AppProvisioningTool : IMsAADTool
     {
-        private const string AppSettingsJson = "appsettings.json";
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
@@ -36,9 +36,14 @@ namespace Microsoft.DotNet.MSIdentity
         internal static PropertyInfo[]? _properties;
         internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
             .Where(p => p.PropertyType == typeof(byte[])).ToArray();
+
+        private IEnumerable<string>? _files;
+        internal IEnumerable<string> Files => _files ??= Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath);
+
         internal IConsoleLogger ConsoleLogger { get; }
 
-        private ProjectDescriptionReader ProjectDescriptionReader { get; } = new ProjectDescriptionReader();
+        private ProjectDescriptionReader? _projectDescriptionReader;
+        private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(ProvisioningToolOptions.ProjectPath);
 
         public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
@@ -49,9 +54,9 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            // get csproj file path
+            // Get csproj file path if it is not input from the tool
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
-            {
+            { 
                 var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
                 if (csProjfiles is null || csProjfiles.Count() != 1)
                 {
@@ -63,21 +68,15 @@ namespace Microsoft.DotNet.MSIdentity
                 ProvisioningToolOptions.ProjectFilePath = csProjfiles.First();
             }
 
-            if (string.Equals(Directory.GetCurrentDirectory(), ProvisioningToolOptions.ProjectPath, StringComparison.OrdinalIgnoreCase))
+            // Update the ProjectPath if necessary
+            if (ProvisioningToolOptions.ProjectPath.Equals(Directory.GetCurrentDirectory(), StringComparison.OrdinalIgnoreCase)
+                && Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) is string actualProjectPath)
             {
-                ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? ProvisioningToolOptions.ProjectPath;
+                ProvisioningToolOptions.ProjectPath = actualProjectPath;
             }
 
-            // get appsettings.json file path
-            if (!System.IO.File.Exists(ProvisioningToolOptions.AppSettingsFilePath))
-            {
-                ProvisioningToolOptions.AppSettingsFilePath = Directory.EnumerateFiles(
-                    ProvisioningToolOptions.ProjectPath, AppSettingsJson, SearchOption.AllDirectories).FirstOrDefault() ?? ProvisioningToolOptions.AppSettingsFilePath;
-            }
-
-            ProjectDescription? projectDescription = ProjectDescriptionReader.GetProjectDescription(
-                ProvisioningToolOptions.ProjectTypeIdentifier,
-                ProvisioningToolOptions.ProjectPath);
+            var projectDescription = ProjectDescriptionReader.GetProjectDescription(
+                ProvisioningToolOptions.ProjectTypeIdentifier, Files);
 
             if (projectDescription == null)
             {
@@ -248,7 +247,7 @@ namespace Microsoft.DotNet.MSIdentity
                 string updatedContent = fileContent.Replace("AzureAd", "AzureAdB2C");
 
                 // Add the policies to the appsettings.json
-                if (filePath.EndsWith(AppSettingsJson))
+                if (filePath.EndsWith(AppSettingsModifier.AppSettingsFileName))
                 {
                     // Insert the policies
                     int indexCallbackPath = updatedContent.IndexOf("\"CallbackPath\"");
@@ -372,12 +371,9 @@ namespace Microsoft.DotNet.MSIdentity
             IEnumerable<ProjectDescription> projectDescriptions,
             ProjectDescription? projectDescription = null)
         {
-            CodeReader reader = new CodeReader();
-            ProjectAuthenticationSettings projectSettings = new ProjectAuthenticationSettings();
-            if (projectDescription != null)
-            {
-                projectSettings = reader.ReadFromFiles(provisioningToolOptions.ProjectPath, projectDescription, projectDescriptions);
-            }
+            var projectSettings = projectDescription != null
+                ? new CodeReader().ReadFromFiles(projectDescription, projectDescriptions, Files)
+                : new ProjectAuthenticationSettings();
 
             // Override with the tools options
             projectSettings.ApplicationParameters.ApplicationDisplayName ??= !string.IsNullOrEmpty(provisioningToolOptions.AppDisplayName) ? provisioningToolOptions.AppDisplayName : Path.GetFileName(provisioningToolOptions.ProjectPath);
@@ -385,6 +381,7 @@ namespace Microsoft.DotNet.MSIdentity
             projectSettings.ApplicationParameters.TenantId = !string.IsNullOrEmpty(provisioningToolOptions.TenantId) ? provisioningToolOptions.TenantId : projectSettings.ApplicationParameters.TenantId;
             projectSettings.ApplicationParameters.CalledApiScopes = !string.IsNullOrEmpty(provisioningToolOptions.CalledApiScopes) ? provisioningToolOptions.CalledApiScopes : projectSettings.ApplicationParameters.CalledApiScopes;
             projectSettings.ApplicationParameters.IsBlazorWasm = provisioningToolOptions.IsBlazorWasm;
+            projectSettings.ApplicationParameters.IsWebApp = provisioningToolOptions.IsWebApp;
 
             // there can mutliple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
@@ -406,6 +403,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 projectSettings.ApplicationParameters.AppIdUri = provisioningToolOptions.AppIdUri;
             }
+
             return projectSettings;
         }
 
@@ -521,10 +519,10 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
                 ConsoleLogger.LogMessage("=============================================\n");
                 // dotnet user secrets init
-                CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
+                // CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger); TODO do we do this?
 
                 // modify appsettings.json.
-                AppSettingsModifier.ModifyAppSettings(applicationParameters);
+                AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
 
                 // Add ClientSecret if the app wants to call graph/a downstream api.
                 if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)

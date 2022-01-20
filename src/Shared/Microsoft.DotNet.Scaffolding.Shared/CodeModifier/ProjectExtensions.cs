@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             var filePaths = Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories)
                 .Concat(Directory.EnumerateFiles(directoryPath, "*.cshtml", SearchOption.AllDirectories))
+                .Concat(Directory.EnumerateFiles(directoryPath, "*.html", SearchOption.AllDirectories))
                 .Concat(Directory.EnumerateFiles(directoryPath, "*.razor", SearchOption.AllDirectories));
                
             return filePaths;

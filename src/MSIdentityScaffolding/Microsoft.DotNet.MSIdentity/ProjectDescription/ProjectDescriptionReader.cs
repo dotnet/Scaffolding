@@ -13,14 +13,24 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescriptionReader
     {
+        private IEnumerable<string>? _directories;
+        internal IEnumerable<string> Directories => _directories ??= Directory.EnumerateDirectories(ProjectPath);
+
         public List<ProjectDescription> ProjectDescriptions { get; private set; } = new List<ProjectDescription>();
 
-        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier, string projectPath)
+        private string ProjectPath { get; }
+
+        public ProjectDescriptionReader(string projectPath)
+        {
+            ProjectPath = projectPath;
+        }
+
+        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier, IEnumerable<string> files)
         {
             string? projectTypeId = projectTypeIdentifier;
             if (string.IsNullOrEmpty(projectTypeId) || projectTypeId == "dotnet-")
             {
-                projectTypeId = InferProjectType(projectPath);
+                projectTypeId = InferProjectType(files);
             }
 
             return projectTypeId != null ? ReadProjectDescription(projectTypeId) : null;
@@ -33,7 +43,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return ProjectDescriptions.FirstOrDefault(projectDescription => projectDescription.Identifier == projectTypeIdentifier);
         }
 
-        static JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
+        static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
         {
             ReadCommentHandling = JsonCommentHandling.Skip
         };
@@ -44,60 +54,60 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return JsonSerializer.Deserialize<ProjectDescription>(jsonText, serializerOptionsWithComments);
         }
 
-        private string? InferProjectType(string projectPath)
+        private string? InferProjectType(IEnumerable<string> files)
         {
-            if (!Directory.Exists(projectPath))
-            {
-                return null;
-            }
-
             ReadProjectDescriptions();
 
             // TODO: could be both a Web app and WEB API.
             foreach (ProjectDescription projectDescription in ProjectDescriptions)
-            { // TODO double for-loop, refactor?
-                foreach (MatchesForProjectType matchesForProjectType in projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions))
+            {
+                var mergedMatches = projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions);
+                foreach (MatchesForProjectType matches in mergedMatches)
                 {
-                    if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
+                    if (HasMatch(matches, files))
                     {
-                        try
-                        {
-                            IEnumerable<string>? files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath) ?? null;
-                            if (files != null && files.Any())
-                            {
-                                if (matchesForProjectType.MatchAny is null)
-                                {
-                                    return projectDescription.Identifier; // If MatchAny is null, then the presence of a file is enough
-                                }
-                                foreach (string filePath in files)
-                                {
-                                    string fileContent = File.ReadAllText(filePath) ?? string.Empty;
-                                    var hasMatch = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match)).Any();
-                                    if (hasMatch)
-                                    {
-                                        return projectDescription.Identifier!;  // If there are matches, at least one needs to match
-                                    }
-                                }
-                            }
-                        }
-                        catch {}  // No files found
+                        return projectDescription.Identifier;
                     }
-
-                    if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
-                    {
-                        try
-                        {
-                            if (Directory.EnumerateDirectories(projectPath, matchesForProjectType.FolderRelativePath).Any())
-                            {
-                                return projectDescription.Identifier!;
-                            }
-                        }
-                        catch {} // Folder not found
-                    }
+                   
                 }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="matchesForProjectType"></param>
+        /// <param name="projectPath"></param>
+        /// <returns></returns>
+        private bool HasMatch(MatchesForProjectType matchesForProjectType, IEnumerable<string> filePaths)
+        {
+            if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
+            {
+                IEnumerable<string>? matchingFiles = filePaths.Where(file => file.Contains(matchesForProjectType.FileRelativePath));
+                foreach (string filePath in matchingFiles)
+                {
+                    if (matchesForProjectType.MatchAny is null)
+                    {
+                        return true; // If MatchAny is null, then the presence of a file is enough
+                    }
+
+                    var fileContent = File.ReadAllText(filePath);
+                    var hasMatch = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match)).Any();
+                    if (hasMatch)
+                    {
+                        return true;  // If MatchAny is not null, at least one needs to match
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
+            {
+                return Directories.Where(dir => dir.Contains(matchesForProjectType.FolderRelativePath)).Any();
+            }
+
+            return false;
         }
 
         private void ReadProjectDescriptions()
@@ -122,6 +132,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
                     {
                         throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
                     }
+
                     ProjectDescriptions.Add(projectDescription);
                 }
             }

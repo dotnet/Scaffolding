@@ -33,7 +33,7 @@
       "FileName": "App.razor",
       "Replacements": [
         {
-          "Block": "<CascadingAuthenticationState>\r\n   <Router AppAssembly=\"@typeof(App).Assembly\">",
+          "Block": "<CascadingAuthenticationState>\r\n    <Router AppAssembly=\"@typeof(App).Assembly\">",
           "ReplaceSnippet": "<Router AppAssembly=\"@typeof(App).Assembly\">"
         },
         {

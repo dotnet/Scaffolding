@@ -32,32 +32,30 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="projectDescriptions"></param>
         /// <returns></returns>
         public ProjectAuthenticationSettings ReadFromFiles(
-            string folderToConfigure,
             ProjectDescription projectDescription,
-            IEnumerable<ProjectDescription> projectDescriptions)
+            IEnumerable<ProjectDescription> projectDescriptions,
+            IEnumerable<string> files)
         {
             ProjectAuthenticationSettings projectAuthenticationSettings = new ProjectAuthenticationSettings(projectDescription);
             ProcessProject(
-                folderToConfigure,
                 projectDescription,
                 projectAuthenticationSettings,
-                projectDescriptions);
+                projectDescriptions,
+                files);
             return projectAuthenticationSettings;
         }
 
         private static void ProcessProject(
-            string folderToConfigure,
             ProjectDescription projectDescription,
             ProjectAuthenticationSettings projectAuthenticationSettings,
-            IEnumerable<ProjectDescription> projectDescriptions)
+            IEnumerable<ProjectDescription> projectDescriptions,
+            IEnumerable<string> files)
         {
-            string projectPath = Path.Combine(folderToConfigure, projectDescription.ProjectRelativeFolder!);
-
             // TO-DO get all the project descriptions
-            var properties = projectDescription.GetMergedConfigurationProperties(projectDescriptions).ToArray();
+            var properties = projectDescription.GetMergedConfigurationProperties(projectDescriptions);
             foreach (ConfigurationProperties configurationProperties in properties)
             {
-                string? filePath = Directory.EnumerateFiles(projectPath, configurationProperties.FileRelativePath!).FirstOrDefault();
+                string? filePath = files.Where(f => f.Contains(configurationProperties.FileRelativePath!)).FirstOrDefault();
                 ProcessFile(projectAuthenticationSettings, filePath, configurationProperties);
             }
 
@@ -335,14 +333,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     if (!string.IsNullOrEmpty(value))
                     {
                         // TODO: something more generic
-                        Uri authority = new Uri(value);
-                        string? tenantOrDomain = authority.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[0];
-                        if (tenantOrDomain == "qualified.domain.name")
+                        if (Uri.TryCreate(value, UriKind.Absolute, out Uri? authority))
                         {
-                            tenantOrDomain = null;
+                            var tenantOrDomain = authority.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[0];
+                            if (tenantOrDomain != "qualified.domain.name")
+                            {
+                                projectAuthenticationSettings.ApplicationParameters.Domain = tenantOrDomain;
+                                projectAuthenticationSettings.ApplicationParameters.TenantId = tenantOrDomain;
+                            }
                         }
-                        projectAuthenticationSettings.ApplicationParameters.Domain = tenantOrDomain;
-                        projectAuthenticationSettings.ApplicationParameters.TenantId = tenantOrDomain;
                     }
                     break;
                 case "Directory.Domain":

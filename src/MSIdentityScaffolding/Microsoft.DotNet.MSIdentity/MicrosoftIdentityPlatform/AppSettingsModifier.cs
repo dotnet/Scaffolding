@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Newtonsoft.Json.Linq;
@@ -8,6 +9,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 {
     internal class AppSettingsModifier
     {
+        internal static string AppSettingsFileName = "appsettings.json";
+
         public AppSettingsModifier(ProvisioningToolOptions provisioningToolOptions)
         {
             ProvisioningToolOptions = provisioningToolOptions;
@@ -19,23 +22,28 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// Adds 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fills them with default values if empty. 
         /// </summary>
         /// <param name="applicationParameters"></param>
-        public void ModifyAppSettings(ApplicationParameters applicationParameters)
+        public void ModifyAppSettings(ApplicationParameters applicationParameters, IEnumerable<string> files)
         {
             // Default values can be found https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content
             // waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
 
-            var appSettingsFilePath = ProvisioningToolOptions.AppSettingsFilePath;
-            if (string.IsNullOrEmpty(appSettingsFilePath))
-            {
-                appSettingsFilePath = ProvisioningToolOptions.IsBlazorWasm ?
-                    Path.Combine(ProvisioningToolOptions.ProjectPath, "wwwroot", "appsettings.json")
-                    : Path.Combine(ProvisioningToolOptions.ProjectPath, "appsettings.json");
-            }
+            /** TODO: 
+             *       string jsonText = Encoding.UTF8.GetString(fileContent);
+             * 
+             *      return JsonSerializer.Deserialize<ProjectDescription>(jsonText, serializerOptionsWithComments);
+             *      static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
+             *      {
+             *       ReadCommentHandling = JsonCommentHandling.Skip
+             *      };
+             */
+
+
+            ProvisioningToolOptions.AppSettingsFilePath = GetAppSettingsFilePath(files);
 
             JObject appSettings;
             try
-            { 
-                appSettings = JObject.Parse(System.IO.File.ReadAllText(appSettingsFilePath)) ?? new JObject();
+            {
+                appSettings = JObject.Parse(System.IO.File.ReadAllText(ProvisioningToolOptions.AppSettingsFilePath)) ?? new JObject();
             }
             catch
             {
@@ -47,9 +55,37 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             // TODO: save comments somehow, only write to appsettings.json if changes are made
             if (modifiedAppSettings != null)
             {
-                System.IO.File.WriteAllText(appSettingsFilePath, modifiedAppSettings.ToString());
+                System.IO.File.WriteAllText(ProvisioningToolOptions.AppSettingsFilePath, modifiedAppSettings.ToString());
             }
         }
+
+        /// <summary>
+        /// First checks if default appsettings file exists, if not searches for the file.
+        /// If the file does not exist anywhere, it will be created later.
+        /// </summary>
+        private string GetAppSettingsFilePath(IEnumerable<string> files)
+        {
+            if (File.Exists(ProvisioningToolOptions.AppSettingsFilePath))
+            {
+                return ProvisioningToolOptions.AppSettingsFilePath!;
+            }
+
+            // In the majority of cases, this will give the correct appsettings file path
+            if (File.Exists(DefaultAppSettingsPath))
+            {
+                return DefaultAppSettingsPath;
+            }
+
+            // If default appsettings file does not exist, try to find it elsewhere
+            var filePath = files.Where(f => f.Contains(AppSettingsFileName)).FirstOrDefault();
+
+            // If not found, it will be created in the default location
+            return filePath ?? DefaultAppSettingsPath;
+        }
+
+        private string DefaultAppSettingsPath => ProvisioningToolOptions.IsBlazorWasm
+        ? Path.Combine(ProvisioningToolOptions.ProjectPath, "wwwroot", AppSettingsFileName)
+        : Path.Combine(ProvisioningToolOptions.ProjectPath, AppSettingsFileName);
 
         /// <summary>
         /// Modifies AppSettings.json if necessary, helper method for testing
@@ -146,7 +182,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             bool changesMade = false;
             foreach ((string propertyName, string? newValue) in inputProperties)
             {
-                changesMade |= UpdatePropertyIfNecessary(token, propertyName, newValue);
+                changesMade |= UpdateStringIfNecessary(token, propertyName, newValue);
             }
 
             return changesMade;
@@ -219,7 +255,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="inputProperty"></param>
         /// <param name="existingProperties"></param>
         /// <returns></returns>
-        private bool UpdatePropertyIfNecessary(JToken token, string propertyName, string? newValue)
+        private bool UpdateStringIfNecessary(JToken token, string propertyName, string? newValue)
         {
             var existingValue = token[propertyName]?.ToString();
             var update = UpdatePropertyIfNecessary(propertyName, existingValue, newValue);

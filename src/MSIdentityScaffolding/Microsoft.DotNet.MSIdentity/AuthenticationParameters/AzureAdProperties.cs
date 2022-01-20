@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
-    public class PropertyNames // TODO add blazor properties
+    public class PropertyNames
     {
         public const string Domain = nameof(Domain);
         public const string TenantId = nameof(TenantId);
@@ -46,7 +45,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             { PropertyNames.CallbackPath, CallbackPath },
         };
 
-        public static Dictionary<string, string> AzureAdBlazor = new Dictionary<string, string>
+        public static Dictionary<string, object> AzureAdBlazor = new Dictionary<string, object>
         {
             // Blazor Wasm
             { PropertyNames.Authority, Authority },

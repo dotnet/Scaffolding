@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
     public class PropertyNames
@@ -29,49 +27,11 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string Instance = "https://login.microsoftonline.com/";
         public const string CallbackPath = "/signin-oidc";
         public const string ClientSecret = "Client secret from app-registration. Check user secrets/azure portal.";
+
         public const string Authority = "https://login.microsoftonline.com/22222222-2222-2222-2222-222222222222";
         public const string ValidateAuthority = "true";
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
         public const string MicrosoftGraphScopes = "user.read";
-
-        public static Dictionary<string, string> AzureAd => new Dictionary<string, string>
-        {
-            { PropertyNames.Domain, Domain },
-            { PropertyNames.TenantId, TenantId },
-            { PropertyNames.ClientId, ClientId },
-            { PropertyNames.Instance, Instance },
-            { PropertyNames.CallbackPath, CallbackPath },
-        };
-
-        public static Dictionary<string, string> AzureAdBlazor => new Dictionary<string, string>
-        {
-            { PropertyNames.Authority, Authority },
-            { PropertyNames.ClientId, ClientId },
-            { PropertyNames.ValidateAuthority, ValidateAuthority }
-        };
-
-        public static Dictionary<string, string> AllProperties => new Dictionary<string, string> // TODO this can be better
-        {
-            { PropertyNames.Domain, Domain },
-            { PropertyNames.TenantId, TenantId },
-            { PropertyNames.ClientId, ClientId },
-            { PropertyNames.Instance, Instance },
-            { PropertyNames.CallbackPath, CallbackPath },
-            { PropertyNames.Authority, Authority },
-            { PropertyNames.ValidateAuthority, ValidateAuthority }
-        };
-
-        public static Dictionary<string, string> MicrosoftGraphDefaults => new Dictionary<string, string>
-        {
-            { PropertyNames.BaseUrl, MicrosoftGraphBaseUrl },
-            { PropertyNames.Scopes, MicrosoftGraphScopes }
-        };
-
-        public static Dictionary<string, string> DownstreamApiDefaults => new Dictionary<string, string>
-        {
-            { PropertyNames.BaseUrl, PropertyNames.BaseUrl }, // TODO
-            { PropertyNames.Scopes, PropertyNames.BaseUrl } // TODO
-        };
     }
 }

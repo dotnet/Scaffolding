@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Newtonsoft.Json.Linq;
@@ -27,7 +26,14 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var appSettings = new Newtonsoft.Json.Linq.JObject();
             var parameters = new AuthenticationParameters.ApplicationParameters();
 
-            var expected = JObject.FromObject(DefaultProperties.AzureAd).ToString();
+            var expected = JToken.FromObject(new
+            {
+                DefaultProperties.Domain,
+                DefaultProperties.TenantId,
+                DefaultProperties.ClientId,
+                DefaultProperties.Instance,
+                DefaultProperties.CallbackPath
+            }).ToString();
 
             var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
 
@@ -41,38 +47,42 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var appSettings = new Newtonsoft.Json.Linq.JObject();
             var parameters = new AuthenticationParameters.ApplicationParameters { IsBlazorWasm = true };
 
-            var expected = JObject.FromObject(DefaultProperties.AzureAdBlazor).ToString();
+            var expected = JObject.FromObject(new
+            {
+                DefaultProperties.Authority,
+                DefaultProperties.ClientId,
+                DefaultProperties.ValidateAuthority
+            }).ToString();
 
             var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
 
             Assert.Equal(expected, modifications);
         }
 
-
         [Fact]
         public void ModifyAppSettings_HasInput_NoExistingProperties()
         {
             var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
             var appSettings = new Newtonsoft.Json.Linq.JObject();
-            var inputParameters = new Dictionary<string, string>
+
+            var expected = JObject.FromObject(new
             {
-                { PropertyNames.Domain,  "input domain" },
-                { PropertyNames.TenantId, "input tenantId" },
-                { PropertyNames.ClientId, "input clientId" },
-                { PropertyNames.Instance, "input instance" },
-                { PropertyNames.CallbackPath, "input callbackPath" }
-            };
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = inputInstance,
+                CallbackPath = inputCallbackPath
+            }).ToString();
 
             var parameters = new AuthenticationParameters.ApplicationParameters
             {
-                Domain = inputParameters[PropertyNames.Domain],
-                TenantId = inputParameters[PropertyNames.TenantId],
-                ClientId = inputParameters[PropertyNames.ClientId],
-                Instance = inputParameters[PropertyNames.Instance],
-                CallbackPath = inputParameters[PropertyNames.CallbackPath]
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = inputInstance,
+                CallbackPath = inputCallbackPath
             };
 
-            var expected = JObject.FromObject(inputParameters).ToString();
             var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
 
             Assert.Equal(expected, modifications);
@@ -97,25 +107,24 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 }
             };
 
-            var inputParameters = new Dictionary<string, string>
-            {
-                { PropertyNames.Domain, inputDomain },
-                { PropertyNames.TenantId, inputTenantId },
-                { PropertyNames.ClientId, inputClientId },
-                { PropertyNames.Instance, inputInstance },
-                { PropertyNames.CallbackPath, inputCallbackPath }
-            };
-
             var parameters = new AuthenticationParameters.ApplicationParameters
             {
-                Domain = inputParameters[PropertyNames.Domain],
-                TenantId = inputParameters[PropertyNames.TenantId],
-                ClientId = inputParameters[PropertyNames.ClientId],
-                Instance = inputParameters[PropertyNames.Instance],
-                CallbackPath = inputParameters[PropertyNames.CallbackPath]
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = inputInstance,
+                CallbackPath = inputCallbackPath
             };
 
-            var expected = JObject.FromObject(inputParameters).ToString();
+            var expected = JObject.FromObject(new
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = inputInstance,
+                CallbackPath = inputCallbackPath
+            }).ToString();
+
             var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
 
             Assert.Equal(expected, modifications);
@@ -125,7 +134,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         public void ModifyAppSettings_HasSomeInputParameters_ExistingPropertiesDiffer()
         {
             var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
-            
+
             var appSettings = new Newtonsoft.Json.Linq.JObject
             {
                 {

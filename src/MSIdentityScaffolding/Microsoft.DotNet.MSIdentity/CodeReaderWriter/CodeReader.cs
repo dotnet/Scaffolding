@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return projectAuthenticationSettings;
         }
 
-        private static void ProcessProject(
+        private void ProcessProject(
             ProjectDescription projectDescription,
             ProjectAuthenticationSettings projectAuthenticationSettings,
             IEnumerable<ProjectDescription> projectDescriptions,
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             PostProcessWebUris(projectAuthenticationSettings);
         }
 
-        private static void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
+        private void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
         {
             bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm;
             string callbackPath = projectAuthenticationSettings.ApplicationParameters.CallbackPath ?? "/signin-oidc";

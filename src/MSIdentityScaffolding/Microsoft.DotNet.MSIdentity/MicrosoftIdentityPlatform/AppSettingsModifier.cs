@@ -11,12 +11,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
     {
         internal static string AppSettingsFileName = "appsettings.json";
 
+        internal static Dictionary<string, string?>? _propertiesDictionary;
+        internal static Dictionary<string, string?> PropertiesDictionary => _propertiesDictionary ??= new Dictionary<string, string?>(
+            typeof(DefaultProperties).GetFields().ToDictionary(x => x.Name, x => x.GetValue(x) as string));
+
         public AppSettingsModifier(ProvisioningToolOptions provisioningToolOptions)
         {
-            ProvisioningToolOptions = provisioningToolOptions;
+            _provisioningToolOptions = provisioningToolOptions;
         }
 
-        public ProvisioningToolOptions ProvisioningToolOptions { get; }
+        private readonly ProvisioningToolOptions _provisioningToolOptions;
 
         /// <summary>
         /// Adds 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fills them with default values if empty. 
@@ -37,13 +41,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
              *      };
              */
 
-
-            ProvisioningToolOptions.AppSettingsFilePath = GetAppSettingsFilePath(files);
+            _provisioningToolOptions.AppSettingsFilePath = GetAppSettingsFilePath(files);
 
             JObject appSettings;
             try
             {
-                appSettings = JObject.Parse(System.IO.File.ReadAllText(ProvisioningToolOptions.AppSettingsFilePath)) ?? new JObject();
+                appSettings = JObject.Parse(System.IO.File.ReadAllText(_provisioningToolOptions.AppSettingsFilePath)) ?? new JObject();
             }
             catch
             {
@@ -55,7 +58,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             // TODO: save comments somehow, only write to appsettings.json if changes are made
             if (modifiedAppSettings != null)
             {
-                System.IO.File.WriteAllText(ProvisioningToolOptions.AppSettingsFilePath, modifiedAppSettings.ToString());
+                System.IO.File.WriteAllText(_provisioningToolOptions.AppSettingsFilePath, modifiedAppSettings.ToString());
             }
         }
 
@@ -65,9 +68,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// </summary>
         private string GetAppSettingsFilePath(IEnumerable<string> files)
         {
-            if (File.Exists(ProvisioningToolOptions.AppSettingsFilePath))
+            if (File.Exists(_provisioningToolOptions.AppSettingsFilePath))
             {
-                return ProvisioningToolOptions.AppSettingsFilePath!;
+                return _provisioningToolOptions.AppSettingsFilePath!;
             }
 
             // In the majority of cases, this will give the correct appsettings file path
@@ -83,9 +86,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return filePath ?? DefaultAppSettingsPath;
         }
 
-        private string DefaultAppSettingsPath => ProvisioningToolOptions.IsBlazorWasm
-        ? Path.Combine(ProvisioningToolOptions.ProjectPath, "wwwroot", AppSettingsFileName)
-        : Path.Combine(ProvisioningToolOptions.ProjectPath, AppSettingsFileName);
+        private string DefaultAppSettingsPath => _provisioningToolOptions.IsBlazorWasm
+        ? Path.Combine(_provisioningToolOptions.ProjectPath, "wwwroot", AppSettingsFileName)
+        : Path.Combine(_provisioningToolOptions.ProjectPath, AppSettingsFileName);
 
         /// <summary>
         /// Modifies AppSettings.json if necessary, helper method for testing
@@ -105,7 +108,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 appSettings["AzureAd"] = updatedAzureAdBlock;
             }
 
-            if (ProvisioningToolOptions.CallsGraph) // TODO blazor
+            if (_provisioningToolOptions.CallsGraph) // TODO blazor
             {
                 // update MicrosoftGraph Block
                 var microsoftGraphBlock = GetModifiedMicrosoftGraphBlock(appSettings);
@@ -116,7 +119,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 }
             }
 
-            if (ProvisioningToolOptions.CallsDownstreamApi) // TODO blazor
+            if (_provisioningToolOptions.CallsDownstreamApi) // TODO blazor
             {
                 // update DownstreamAPI Block
                 var updatedDownstreamApiBlock = GetModifiedDownstreamApiBlock(appSettings);
@@ -146,7 +149,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             bool changesMade = ModifyAppSettingsToken(azureAdToken, AzureAdBlock(applicationParameters));
 
-            if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
+            if (_provisioningToolOptions.CallsGraph || _provisioningToolOptions.CallsDownstreamApi)
             {
                 changesMade |= ModifyCredentials(azureAdToken);
             }
@@ -160,7 +163,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="applicationParameters"></param>
         /// <param name="isBlazorWasm"></param>
         /// <returns></returns>
-        private static JToken DefaultAzureAdBlock(ApplicationParameters applicationParameters)
+        private JToken DefaultAzureAdBlock(ApplicationParameters applicationParameters)
         {
             return applicationParameters.IsBlazorWasm ? JToken.FromObject(new
             {
@@ -177,6 +180,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             });
         }
 
+        // TODO: Consider using objects rather than dictionaries
         Dictionary<string, string?> AzureAdBlock(ApplicationParameters parameters) =>
            parameters.IsBlazorWasm ? new Dictionary<string, string?>
            {
@@ -220,17 +224,15 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return changesMade;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="appSettings"></param>
-        /// <param name="changesMade"></param>
-        /// <returns></returns>
         private JToken? GetModifiedMicrosoftGraphBlock(JObject appSettings)
         {
             if (!appSettings.TryGetValue("MicrosoftGraph", out var microsoftGraphToken))
             {
-                return JToken.FromObject(DefaultProperties.MicrosoftGraphDefaults);
+                return JToken.FromObject(new
+                {
+                    BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
+                    Scopes = DefaultProperties.MicrosoftGraphScopes
+                });
             }
 
             var inputParameters = new Dictionary<string, string?>
@@ -242,17 +244,15 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return ModifyAppSettingsToken(microsoftGraphToken, inputParameters) ? microsoftGraphToken : null;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="appSettings"></param>
-        /// <param name="changesMade"></param>
-        /// <returns></returns>
         private JToken? GetModifiedDownstreamApiBlock(JObject appSettings)
         {
             if (!appSettings.TryGetValue("DownstreamApi", out var downstreamApiToken))
             {
-                return JToken.FromObject(DefaultProperties.MicrosoftGraphDefaults);
+                return JToken.FromObject(new
+                {
+                    PropertyNames.BaseUrl,
+                    PropertyNames.Scopes // TODO update defaults
+                });
             }
 
             var inputParameters = new Dictionary<string, string?>
@@ -294,7 +294,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             // If there is no existing property, update 
             if (string.IsNullOrEmpty(existingValue))
             {
-                return string.IsNullOrEmpty(newValue) ? DefaultProperties.AllProperties[propertyName] : newValue;
+                return string.IsNullOrEmpty(newValue) ? PropertiesDictionary.GetValueOrDefault(propertyName) : newValue;
             }
 
             // If newValue exists and it differs from the existing property, update value

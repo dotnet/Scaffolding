@@ -13,16 +13,14 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescriptionReader
     {
+        private readonly string _projectPath;
         private IEnumerable<string>? _directories;
-        private IEnumerable<string> Directories => _directories ??= Directory.EnumerateDirectories(ProjectPath);
-
+        private IEnumerable<string> Directories => _directories ??= Directory.EnumerateDirectories(_projectPath);
         internal List<ProjectDescription>? _projectDescriptions;
-
-        private string ProjectPath { get; }
 
         public ProjectDescriptionReader(string projectPath)
         {
-            ProjectPath = projectPath;
+            _projectPath = projectPath;
         }
 
         public ProjectDescription? GetProjectDescription(string projectTypeIdentifier, IEnumerable<string> files)
@@ -61,7 +59,6 @@ namespace Microsoft.DotNet.MSIdentity.Project
                     {
                         return projectDescription.Identifier;
                     }
-
                 }
             }
 

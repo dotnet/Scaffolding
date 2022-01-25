@@ -155,5 +155,8 @@
         }
       ]
     }
+  ],
+  "CommonPackages": [
+    "Microsoft.Authentication.WebAssembly.Msal"
   ]
 }

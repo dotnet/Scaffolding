@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             bool changesMade = false;
             foreach ((string propertyName, string? newValue) in inputProperties)
             {
-                changesMade |= UpdateStringIfNecessary(token, propertyName, newValue);
+                changesMade |= UpdateIfNecessary(token, propertyName, newValue);
             }
 
             return changesMade;
@@ -228,11 +228,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         {
             if (!appSettings.TryGetValue("MicrosoftGraph", out var microsoftGraphToken))
             {
-                return JToken.FromObject(new
-                {
-                    BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
-                    Scopes = DefaultProperties.MicrosoftGraphScopes
-                });
+                return DefaultApiBlock;
             }
 
             var inputParameters = new Dictionary<string, string?>
@@ -248,32 +244,35 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         {
             if (!appSettings.TryGetValue("DownstreamApi", out var downstreamApiToken))
             {
-                return JToken.FromObject(new
-                {
-                    PropertyNames.BaseUrl,
-                    PropertyNames.Scopes // TODO update defaults
-                });
+                return DefaultApiBlock;
             }
 
             var inputParameters = new Dictionary<string, string?>
             {
-                { PropertyNames.Scopes, "TODO SCOPES" },
-                { PropertyNames.BaseUrl, "TODO Base URL" }
+                { PropertyNames.Scopes, string.Empty }, // Only update if a value is not already present
+                { PropertyNames.BaseUrl, string.Empty }
             };
 
             return ModifyAppSettingsToken(downstreamApiToken, inputParameters) ? downstreamApiToken : null;
         }
 
+        private JToken DefaultApiBlock => JToken.FromObject(new
+        {
+            BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
+            Scopes = DefaultProperties.MicrosoftGraphScopes
+        });
+
         /// <summary>
         /// Updates property in appSettings block when either there is no existing property or the existing property does not match
         /// </summary>
-        /// <param name="inputProperty"></param>
-        /// <param name="existingProperties"></param>
+        /// <param name="token"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="newValue"></param>
         /// <returns></returns>
-        private bool UpdateStringIfNecessary(JToken token, string propertyName, string? newValue)
+        private bool UpdateIfNecessary(JToken token, string propertyName, string? newValue)
         {
             var existingValue = token[propertyName]?.ToString();
-            var update = UpdatePropertyIfNecessary(propertyName, existingValue, newValue);
+            var update = GetUpdatedValue(propertyName, existingValue, newValue);
             if (update != null)
             {
                 token[propertyName] = update;
@@ -289,7 +288,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="inputProperty"></param>
         /// <param name="existingProperties"></param>
         /// <returns></returns>
-        internal static string? UpdatePropertyIfNecessary(string propertyName, string? existingValue, string? newValue)
+        internal static string? GetUpdatedValue(string propertyName, string? existingValue, string? newValue)
         {
             // If there is no existing property, update 
             if (string.IsNullOrEmpty(existingValue))

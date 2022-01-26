@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [InlineData(PropertyNames.Domain, null, null, DefaultProperties.Domain)]
         public void UpdatePropertyIfNecessary(string propertyName, string existingValue, string newValue, string expected)
         {
-            var update = AppSettingsModifier.UpdatePropertyIfNecessary(propertyName, existingValue, newValue);
+            var update = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
 
             Assert.Equal(update, expected);
         }

@@ -36,13 +36,17 @@ namespace Microsoft.DotNet.MSIdentity
         internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
             .Where(p => p.PropertyType == typeof(byte[])).ToArray();
 
-        private IEnumerable<string>? _files;
-        internal IEnumerable<string> Files => _files ??= Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath);
+        internal IEnumerable<string>? _files;
+        internal IEnumerable<string> Files => _files ??=
+            Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.cs", SearchOption.AllDirectories)
+            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.cshtml", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.razor", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.html", SearchOption.AllDirectories));
 
         internal IConsoleLogger ConsoleLogger { get; }
 
         private ProjectDescriptionReader? _projectDescriptionReader;
-        private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(ProvisioningToolOptions.ProjectPath);
+        private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(Files);
 
         public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
@@ -76,7 +80,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(
-                ProvisioningToolOptions.ProjectTypeIdentifier, Files);
+                ProvisioningToolOptions.ProjectTypeIdentifier);
 
             if (projectDescription == null)
             {
@@ -600,7 +604,7 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
                 ConsoleLogger.LogMessage("=============================================\n");
                 // if project is not setup for auth, add updates to Startup.cs, .csproj.
-                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, ConsoleLogger);
+                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, Files, ConsoleLogger);
                 await startupModifier.AddAuthCodeAsync();
             }
         }

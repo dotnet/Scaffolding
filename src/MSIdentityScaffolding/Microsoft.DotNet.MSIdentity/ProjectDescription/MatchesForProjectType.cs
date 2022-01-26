@@ -22,6 +22,8 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         public string? FolderRelativePath { get; set; }
 
+        public string? FileExtension { get; set; }
+
         /// <summary>
         /// Either FileRelativePath is defined, along with MatchAny
         /// Or FolderRelativePath is defined

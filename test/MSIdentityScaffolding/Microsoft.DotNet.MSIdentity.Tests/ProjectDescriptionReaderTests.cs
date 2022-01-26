@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
-using Microsoft.DotNet.MSIdentity.Project;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
+using Microsoft.DotNet.MSIdentity.Project;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -45,12 +45,11 @@ namespace Tests
         [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader(string folderPath, string command, string expectedProjectType, bool isB2C = false)
         {
-            var projectDescriptionReader = new ProjectDescriptionReader(folderPath);
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
-
             var files = Directory.EnumerateFiles(createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
 
-            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty, files);
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
 
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
@@ -92,13 +91,12 @@ namespace Tests
         [Theory(Skip = "The newly created test project wants new packages that don't exist on official feeds. Will rework for next update.")]
         public void TestProjectDescriptionReader_TemplatesWithBlazorWasm(string folderPath, string command, string expectedProjectType, bool isB2C = false)
         {
-            var projectDescriptionReader = new ProjectDescriptionReader(folderPath);
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
-
             var files = Directory.EnumerateFiles(createdProjectFolder);
-            var folders = Directory.EnumerateDirectories(createdProjectFolder);
 
-            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty, files);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
+
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
 
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
@@ -131,13 +129,11 @@ namespace Tests
         [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader_TemplatesWithBlazorWasmHosted(string folderPath, string command, string expectedProjectType)
         {
-            var projectDescriptionReader = new ProjectDescriptionReader(folderPath);
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
-
             var files = Directory.EnumerateFiles(createdProjectFolder);
-            var folders = Directory.EnumerateDirectories(createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
 
-            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty, files);
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
 
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
@@ -161,13 +157,11 @@ namespace Tests
         [Theory(Skip = "The newly created test project wants new packages that don't exist on official feeds. Will rework for next update.")]
         public void TestProjectDescriptionReader_TemplatesWithNoAuth(string folderPath, string command, string expectedProjectType)
         {
-            var projectDescriptionReader = new ProjectDescriptionReader(folderPath);
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "NoAuthTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder); // TODO cache
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
 
-            var files = Directory.EnumerateFiles(createdProjectFolder);
-            var folders = Directory.EnumerateDirectories(createdProjectFolder);
-
-            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty, files);
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
 
@@ -197,7 +191,7 @@ namespace Tests
             bool IsWebApp = authenticationSettings.ApplicationParameters.IsWebApp.HasValue && authenticationSettings.ApplicationParameters.IsWebApp.Value;
             bool IsBlazorWasm = authenticationSettings.ApplicationParameters.IsBlazorWasm;
             Assert.True(IsWebApi || IsWebApp || IsBlazorWasm);
-            
+
             if (isB2C)
             {
                 Assert.True(authenticationSettings.ApplicationParameters.HasAuthentication);
@@ -233,7 +227,7 @@ namespace Tests
             // Create the folder
             string parentFolder = Path.Combine(tempFolder, "Provisioning", testName);
             string createdProjectFolder = Path.Combine(
-                parentFolder, 
+                parentFolder,
                 projectFolderName.Replace("\\", Path.DirectorySeparatorChar.ToString(CultureInfo.InvariantCulture)));
 
             if (!Directory.Exists(createdProjectFolder))

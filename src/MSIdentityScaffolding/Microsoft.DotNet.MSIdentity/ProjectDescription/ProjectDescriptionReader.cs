@@ -13,22 +13,23 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescriptionReader
     {
-        private readonly string _projectPath;
-        private IEnumerable<string>? _directories;
-        private IEnumerable<string> Directories => _directories ??= Directory.EnumerateDirectories(_projectPath);
-        internal List<ProjectDescription>? _projectDescriptions;
+        private const string ProjectTypeIdSuffix = "dotnet-";
 
-        public ProjectDescriptionReader(string projectPath)
+        private readonly IEnumerable<string> _files;
+        public List<ProjectDescription> ProjectDescriptions { get; }
+
+        public ProjectDescriptionReader(IEnumerable<string> files)
         {
-            _projectPath = projectPath;
+            _files = files;
+            ProjectDescriptions = InitializeProjectDescriptions();
         }
 
-        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier, IEnumerable<string> files)
+        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier)
         {
             string? projectTypeId = projectTypeIdentifier;
-            if (string.IsNullOrEmpty(projectTypeId) || projectTypeId == "dotnet-")
+            if (string.IsNullOrEmpty(projectTypeId) || projectTypeId == ProjectTypeIdSuffix)
             {
-                projectTypeId = InferProjectType(files);
+                projectTypeId = InferProjectType();
             }
 
             return projectTypeId != null ? ReadProjectDescription(projectTypeId) : null;
@@ -47,18 +48,16 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return JsonSerializer.Deserialize<ProjectDescription>(jsonText, serializerOptionsWithComments);
         }
 
-        private string? InferProjectType(IEnumerable<string> files)
+        private string? InferProjectType()
         {
             // TODO: could be both a Web app and WEB API.
             foreach (ProjectDescription projectDescription in ProjectDescriptions)
             {
                 var mergedMatches = projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions);
-                foreach (MatchesForProjectType matches in mergedMatches)
+                var foundMatches = mergedMatches.Where(matches => HasMatch(matches));
+                if (foundMatches.Any())
                 {
-                    if (HasMatch(matches, files))
-                    {
-                        return projectDescription.Identifier;
-                    }
+                    return projectDescription.Identifier;
                 }
             }
 
@@ -68,69 +67,95 @@ namespace Microsoft.DotNet.MSIdentity.Project
         /// <summary>
         /// Checks for a match given a list of matches and a list of files
         /// </summary>
-        /// <param name="matchesForProjectType"></param>
-        /// <param name="filePaths"></param>
+        /// <param name="matches"></param>
         /// <returns></returns>
-        private bool HasMatch(MatchesForProjectType matchesForProjectType, IEnumerable<string> filePaths)
+        private bool HasMatch(MatchesForProjectType matches)
         {
-            if (!string.IsNullOrEmpty(matchesForProjectType.FolderRelativePath))
+            if (string.IsNullOrEmpty(matches.FileRelativePath))
             {
-                return Directories.Where(dir => dir.Contains(matchesForProjectType.FolderRelativePath)).Any();
-            }
-            if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
-            {
-                IEnumerable<string>? matchingFiles = filePaths.Where(file => file.Contains(matchesForProjectType.FileRelativePath));
-                foreach (string filePath in matchingFiles)
-                {
-                    if (matchesForProjectType.MatchAny is null)
-                    {
-                        return true; // If MatchAny is null, then the presence of a file is enough
-                    }
-
-                    var fileContent = File.ReadAllText(filePath);
-                    var matches = matchesForProjectType.MatchAny.Where(match => fileContent.Contains(match));
-                    if (matches.Any())
-                    {
-                        return true;  // If MatchAny is not null, at least one needs to match
-                    }
-                }
+                return HasMatchingDirectory(matches.FolderRelativePath, matches.FileExtension, matches.MatchAny);
             }
 
-            return false;
+            return HasFileWithMatch(matches.FileRelativePath, matches.FolderRelativePath, matches.MatchAny);
         }
 
-        public List<ProjectDescription> ProjectDescriptions
+        private bool HasMatchingDirectory(string? folderRelativePath, string? fileExtension, string[]? matchAny)
         {
-            get
+            if (string.IsNullOrEmpty(folderRelativePath))
             {
-                if (_projectDescriptions is null)
-                {
-                    _projectDescriptions = new List<ProjectDescription>();
-                    foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
-                    {
-                        if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
-                        {
-                            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-                            ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
-
-                            if (projectDescription == null)
-                            {
-                                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
-                            }
-                            if (!projectDescription.IsValid())
-                            {
-                                throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
-                            }
-
-                            _projectDescriptions.Add(projectDescription);
-                        }
-                    }
-                }
-
-                //  TODO: provide an extension mechanism to add such files outside the tool.
-                //     In that case the validation would not be an exception? but would need to provide error messages
-                return _projectDescriptions;
+                return false;
             }
+
+            var matchingPaths = _files.Where(file => DirectoryMatches(file, folderRelativePath, fileExtension));
+
+            return AnyFileContainsMatch(matchAny, matchingPaths);
+        }
+
+        private bool HasFileWithMatch(string fileRelativePath, string? folderRelativePath, string[]? matchAny)
+        {
+            var matchingFilePaths = _files.Where(filePath => Path.GetFileName(filePath).Equals(fileRelativePath, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(folderRelativePath))
+            {
+                matchingFilePaths = matchingFilePaths.Where(filePath => DirectoryMatches(filePath, folderRelativePath));
+            }
+
+            return AnyFileContainsMatch(matchAny, matchingFilePaths);
+        }
+
+        private bool DirectoryMatches(string filePath, string folderRelativePath, string? fileExtension = null)
+        {
+            var directoryPath = Path.GetDirectoryName(filePath);
+            var folderFound = directoryPath?.Contains(folderRelativePath, StringComparison.OrdinalIgnoreCase) ?? false;
+            var extensionMatches = fileExtension?.Equals(Path.GetExtension(filePath)) ?? true; // If extension is null, no need to match
+
+            return folderFound && extensionMatches;
+        }
+
+        private bool AnyFileContainsMatch(string[]? matchAny, IEnumerable<string> matchingPaths)
+        {
+            if (matchAny is null)
+            {
+                return matchingPaths.Any();
+            }
+
+            var matchingFiles = matchingPaths.Where(filePath => FileMatches(filePath, matchAny));
+            return matchingFiles.Any(); // If MatchAny is not null, at least file needs to contain a match
+        }
+
+        private bool FileMatches(string filePath, string[] matchAny)
+        {
+            var fileContent = File.ReadAllText(filePath);
+            var fileMatches = matchAny.Where(match => fileContent.Contains(match, StringComparison.OrdinalIgnoreCase));
+            return fileMatches.Any();
+        }
+
+        public List<ProjectDescription> InitializeProjectDescriptions()
+        {
+            var projectDescriptions = new List<ProjectDescription>();
+            foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
+            {
+                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
+                {
+                    byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+                    ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
+
+                    if (projectDescription == null)
+                    {
+                        throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                    }
+                    if (!projectDescription.IsValid())
+                    {
+                        throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
+                    }
+
+                    projectDescriptions.Add(projectDescription);
+                }
+            }
+
+            return projectDescriptions;
+            //  TODO: provide an extension mechanism to add such files outside the tool.
+            //     In that case the validation would not be an exception? but would need to provide error messages
         }
     }
 }

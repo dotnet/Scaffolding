@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,11 +21,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     internal class ProjectModifier
     {
         private readonly ProvisioningToolOptions _toolOptions;
+        private readonly IEnumerable<string> _files;
         private readonly IConsoleLogger _consoleLogger;
 
-        public ProjectModifier(ProvisioningToolOptions toolOptions, IConsoleLogger consoleLogger)
+        public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
+            _files = files;
             _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
         }
 
@@ -55,7 +57,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             // Initialize CodeAnalysis.Project wrapper
-            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
+            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath, _files);
             if (project is null)
             {
                 return;

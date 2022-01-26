@@ -9,7 +9,8 @@
       "Sets": "IsBlazorWasm"
     },
     {
-      "FileRelativePath": "Pages\\*.razor",
+      "FolderRelativePath": "Pages",
+      "FileExtension": ".razor",
       "Sets": "IsBlazorWasm"
     }
   ],

@@ -63,9 +63,9 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] add_CallWebApi_razor {
+        internal static byte[] add_dotnet_blazorserver_CallWebApi_razor {
             get {
-                object obj = ResourceManager.GetObject("add_CallWebApi_razor", resourceCulture);
+                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_CallWebApi_razor", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] add_LoginDisplay_razor {
+        internal static byte[] add_dotnet_blazorserver_LoginDisplay_razor {
             get {
-                object obj = ResourceManager.GetObject("add_LoginDisplay_razor", resourceCulture);
+                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_LoginDisplay_razor", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,9 +83,39 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] add_ShowProfile_razor {
+        internal static byte[] add_dotnet_blazorserver_ShowProfile_razor {
             get {
-                object obj = ResourceManager.GetObject("add_ShowProfile_razor", resourceCulture);
+                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_ShowProfile_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_Authentication_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_Authentication_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_LoginDisplay_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_LoginDisplay_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_RedirectToLogin_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_RedirectToLogin_razor", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -6,12 +6,14 @@
   ],
   "MatchesForProjectType": [
     {
-      "FileRelativePath": "Client\\Program.cs",
+      "FileRelativePath": "Program.cs",
+      "FolderRelativePath": "Client",
       "MatchAny": [ "WebAssemblyHostBuilder.CreateDefault" ],
       "Sets": "IsBlazorWasm"
     },
     {
-      "FileRelativePath": "Server\\Controllers\\*.cs",
+      "FolderRelativePath":"Server\\Controllers",
+      "FileExtension": ".cs",
       "MatchAny": [ "[ApiController]" ],
       "Sets": "IsWebApi"
     }

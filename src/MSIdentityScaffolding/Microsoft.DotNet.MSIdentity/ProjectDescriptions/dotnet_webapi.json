@@ -4,12 +4,17 @@
   "BasedOnProjectDescription": "dotnet-web",
   "MatchesForProjectType": [
     {
-      "FileRelativePath": "Controllers\\*.cs",
+      "FolderRelativePath": "Controllers",
+      "FileExtension":".cs",
       "MatchAny": [ "[ApiController]" ],
       "Sets": "IsWebApi"
     },
     {
       "FileRelativePath": "Startup.cs",
+      "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ]
+    },
+    {
+      "FileRelativePath": "Program.cs",
       "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ]
     }
   ],

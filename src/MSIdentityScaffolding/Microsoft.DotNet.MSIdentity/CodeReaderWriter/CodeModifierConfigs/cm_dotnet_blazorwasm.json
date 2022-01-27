@@ -1,3 +1,84 @@
 {
-
+  "Identifier": "dotnet-blazorwasm",
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Options": [ "MinimalApp" ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "Block": "builder.Services.AddMsalAuthentication(options =>\r\n{\r\n    builder.Configuration.Bind(\"AzureAd\", options.ProviderOptions.Authentication);\r\n});\r\n",
+              "InsertAfter": "builder.Services.AddScoped",
+              "InsertBefore": [
+                "builder.Build"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "_Imports.razor",
+      "Replacements": [
+        {
+          "Block": "@using Microsoft.AspNetCore.Components.Authorization\r\n"
+        }
+      ]
+    },
+    {
+      "FileName": "App.razor",
+      "Replacements": [
+        {
+          "Block": "<CascadingAuthenticationState>\r\n    <Router AppAssembly=\"@typeof(App).Assembly\">",
+          "ReplaceSnippet": "<Router AppAssembly=\"@typeof(App).Assembly\">"
+        },
+        {
+          "Block": "        <Found Context=\"routeData\">\r\n            <AuthorizeRouteView RouteData=\"@routeData\" DefaultLayout=\"@typeof(MainLayout)\">\r\n                <NotAuthorized>\r\n                    @if (context.User.Identity?.IsAuthenticated != true)\r\n                    {\r\n                        <RedirectToLogin />\r\n                    }\r\n                    else\r\n                    {\r\n                        <p role=\"alert\">You are not authorized to access this resource.</p>\r\n                    }\r\n                </NotAuthorized>\r\n            </AuthorizeRouteView>\r\n            <FocusOnNavigate RouteData=\"@routeData\" Selector=\"h1\" />\r\n        </Found>\r\n",
+          "ReplaceSnippet": "    <Found Context=\"routeData\">\r\n        <RouteView RouteData=\"@routeData\" DefaultLayout=\"@typeof(MainLayout)\" />\r\n        <FocusOnNavigate RouteData=\"@routeData\" Selector=\"h1\" />\r\n    </Found>\r\n"
+        },
+        {
+          "Block": "        <NotFound>\r\n            <PageTitle>Not found</PageTitle>\r\n            <LayoutView Layout=\"@typeof(MainLayout)\">\r\n                <p role=\"alert\">Sorry, there's nothing at this address.</p>\r\n            </LayoutView>\r\n        </NotFound>",
+          "ReplaceSnippet": "    <NotFound>\r\n        <PageTitle>Not found</PageTitle>\r\n        <LayoutView Layout=\"@typeof(MainLayout)\">\r\n            <p role=\"alert\">Sorry, there's nothing at this address.</p>\r\n        </LayoutView>\r\n    </NotFound>"
+        },
+        {
+          "Block": "    </Router>\r\n</CascadingAuthenticationState>",
+          "ReplaceSnippet": "</Router>"
+        }
+      ]
+    },
+    {
+      "FileName": "index.html",
+      "Replacements": [
+        {
+          "Block": "    <script src=\"_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js\"></script>    \r\n    <script src=\"_framework/blazor.webassembly.js\"></script>",
+          "ReplaceSnippet": "    <script src=\"_framework/blazor.webassembly.js\"></script>"
+        }
+      ]
+    },
+    {
+      "FileName": "Authentication.razor",
+      "AddFilePath": "Pages/Authentication.razor"
+    },
+    {
+      "FileName": "LoginDisplay.razor", 
+      "AddFilePath": "Shared/LoginDisplay.razor"
+    },
+    {
+      "FileName": "MainLayout.razor",
+      "Replacements": [
+        {
+          "Block": "        <div class=\"top-row px-4 auth\">\r\n            <LoginDisplay />\r\n",
+          "ReplaceSnippet": "        <div class=\"top-row px-4\">\r\n"
+        }
+      ]
+    },
+    {
+      "FileName": "RedirectToLogin.razor",
+      "AddFilePath": "Shared/RedirectToLogin.razor"
+    }
+  ]
 }

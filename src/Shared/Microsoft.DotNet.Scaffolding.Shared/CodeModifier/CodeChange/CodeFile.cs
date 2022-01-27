@@ -5,11 +5,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
     public class CodeFile
     {
         public Dictionary<string, Method> Methods { get; set; }
-        public CodeSnippet[] RazorChanges { get; set; }
+        public CodeSnippet[] Replacements { get; set; }
         public string AddFilePath { get; set; }
         public string[] Usings { get; set; }
         public CodeBlock[] UsingsWithOptions { get; set; }
         public string FileName { get; set; }
+        public string Extension => FileName.Substring(FileName.LastIndexOf('.') + 1);
         public CodeBlock[] ClassProperties { get; set; }
         public CodeBlock[] ClassAttributes { get; set; }
         public string[] GlobalVariables { get; set; }

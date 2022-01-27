@@ -13,27 +13,31 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescriptionReader
     {
-        public List<ProjectDescription> projectDescriptions { get; private set; } = new List<ProjectDescription>();
+        private const string ProjectTypeIdSuffix = "dotnet-";
 
-        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier, string projectPath)
+        private readonly IEnumerable<string> _files;
+        public List<ProjectDescription> ProjectDescriptions { get; }
+
+        public ProjectDescriptionReader(IEnumerable<string> files)
+        {
+            _files = files;
+            ProjectDescriptions = InitializeProjectDescriptions();
+        }
+
+        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier)
         {
             string? projectTypeId = projectTypeIdentifier;
-            if (string.IsNullOrEmpty(projectTypeId) || projectTypeId == "dotnet-")
+            if (string.IsNullOrEmpty(projectTypeId) || projectTypeId == ProjectTypeIdSuffix)
             {
-                projectTypeId = InferProjectType(projectPath);
+                projectTypeId = InferProjectType();
             }
 
             return projectTypeId != null ? ReadProjectDescription(projectTypeId) : null;
         }
 
-        private ProjectDescription? ReadProjectDescription(string projectTypeIdentifier)
-        {
-            ReadProjectDescriptions();
+        private ProjectDescription? ReadProjectDescription(string identifier) => ProjectDescriptions.FirstOrDefault(p => p.Identifier == identifier);
 
-            return projectDescriptions.FirstOrDefault(projectDescription => projectDescription.Identifier == projectTypeIdentifier);
-        }
-
-        static JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
+        static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions
         {
             ReadCommentHandling = JsonCommentHandling.Skip
         };
@@ -44,83 +48,94 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return JsonSerializer.Deserialize<ProjectDescription>(jsonText, serializerOptionsWithComments);
         }
 
-        private string? InferProjectType(string projectPath)
+        private string? InferProjectType()
         {
-            ReadProjectDescriptions();
-
             // TODO: could be both a Web app and WEB API.
-            foreach (ProjectDescription projectDescription in projectDescriptions.Where(p => p.GetMergedMatchesForProjectType(projectDescriptions) != null))
+            foreach (ProjectDescription projectDescription in ProjectDescriptions)
             {
-                var matchesForProjectTypes = projectDescription.GetMergedMatchesForProjectType(projectDescriptions);
-                if (projectDescription.MatchesForProjectType != null)
+                var mergedMatches = projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions);
+                var foundMatches = mergedMatches.Where(matches => HasMatch(matches));
+                if (foundMatches.Any())
                 {
-                    foreach (MatchesForProjectType matchesForProjectType in matchesForProjectTypes)
-                    {
-                        if (!string.IsNullOrEmpty(matchesForProjectType.FileRelativePath))
-                        {
-                            IEnumerable<string> files;
-
-                            try
-                            {
-                                files = Directory.EnumerateFiles(projectPath, matchesForProjectType.FileRelativePath);
-                            }
-                            catch (DirectoryNotFoundException)
-                            {
-                                files = new string[0];
-                            }
-                            foreach (string filePath in files)
-                            {
-                                // If there are matches, one at least needs to match
-                                if (matchesForProjectType.MatchAny != null)
-                                {
-                                    string fileContent = File.ReadAllText(filePath);
-                                    foreach (string match in matchesForProjectType.MatchAny!) // Valid project => 
-                                    {
-                                        if (fileContent.Contains(match))
-                                        {
-                                            return projectDescription.Identifier!;
-                                        }
-                                    }
-                                }
-
-                                // If MatchAny is null, then the presence of a file is enough
-                                else
-                                {
-                                    return projectDescription.Identifier!;
-                                }
-                            }
-                        }
-
-                        if (matchesForProjectType.FolderRelativePath != null)
-                        {
-                            try
-                            {
-                                if (Directory.EnumerateDirectories(projectPath, matchesForProjectType.FolderRelativePath).Any())
-                                {
-                                    return projectDescription.Identifier!;
-                                }
-                            }
-                            catch
-                            {
-                                // No folder
-                            }
-                        }
-                    }
+                    return projectDescription.Identifier;
                 }
             }
+
             return null;
         }
 
-        private void ReadProjectDescriptions()
+        /// <summary>
+        /// Checks for a match given a list of matches and a list of files
+        /// </summary>
+        /// <param name="matches"></param>
+        /// <returns></returns>
+        private bool HasMatch(MatchesForProjectType matches)
         {
-            if (projectDescriptions.Any())
+            if (string.IsNullOrEmpty(matches.FileRelativePath))
             {
-                return;
+                return HasMatchingDirectory(matches.FolderRelativePath, matches.FileExtension, matches.MatchAny);
             }
 
+            return HasFileWithMatch(matches.FileRelativePath, matches.FolderRelativePath, matches.MatchAny);
+        }
+
+        private bool HasMatchingDirectory(string? folderRelativePath, string? fileExtension, string[]? matchAny)
+        {
+            if (string.IsNullOrEmpty(folderRelativePath))
+            {
+                return false;
+            }
+
+            var matchingPaths = _files.Where(file => DirectoryMatches(file, folderRelativePath, fileExtension));
+
+            return AnyFileContainsMatch(matchAny, matchingPaths);
+        }
+
+        private bool HasFileWithMatch(string fileRelativePath, string? folderRelativePath, string[]? matchAny)
+        {
+            var matchingFilePaths = _files.Where(filePath => Path.GetFileName(filePath).Equals(fileRelativePath, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(folderRelativePath))
+            {
+                matchingFilePaths = matchingFilePaths.Where(filePath => DirectoryMatches(filePath, folderRelativePath));
+            }
+
+            return AnyFileContainsMatch(matchAny, matchingFilePaths);
+        }
+
+        private bool DirectoryMatches(string filePath, string folderRelativePath, string? fileExtension = null)
+        {
+            var directoryPath = Path.GetDirectoryName(filePath);
+            var folderFound = directoryPath?.Contains(folderRelativePath, StringComparison.OrdinalIgnoreCase) ?? false;
+            var extensionMatches = fileExtension?.Equals(Path.GetExtension(filePath)) ?? true; // If extension is null, no need to match
+
+            return folderFound && extensionMatches;
+        }
+
+        private bool AnyFileContainsMatch(string[]? matchAny, IEnumerable<string> matchingPaths)
+        {
+            if (matchAny is null)
+            {
+                return matchingPaths.Any();
+            }
+
+            var matchingFiles = matchingPaths.Where(filePath => FileMatches(filePath, matchAny));
+            return matchingFiles.Any(); // If MatchAny is not null, at least file needs to contain a match
+        }
+
+        private bool FileMatches(string filePath, string[] matchAny)
+        {
+            var fileContent = File.ReadAllText(filePath);
+            var fileMatches = matchAny.Where(match => fileContent.Contains(match, StringComparison.OrdinalIgnoreCase));
+            return fileMatches.Any();
+        }
+
+        public List<ProjectDescription> InitializeProjectDescriptions()
+        {
+            var projectDescriptions = new List<ProjectDescription>();
             foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
             {
-                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add"))) 
+                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
                 {
                     byte[] content = (propertyInfo.GetValue(null) as byte[])!;
                     ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
@@ -133,12 +148,14 @@ namespace Microsoft.DotNet.MSIdentity.Project
                     {
                         throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
                     }
+
                     projectDescriptions.Add(projectDescription);
                 }
             }
 
-            // TODO: provide an extension mechanism to add such files outside the tool.
-            // In that case the validation would not be an exception? but would need to provide error messages
+            return projectDescriptions;
+            //  TODO: provide an extension mechanism to add such files outside the tool.
+            //     In that case the validation would not be an exception? but would need to provide error messages
         }
     }
 }

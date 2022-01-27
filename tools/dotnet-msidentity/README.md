@@ -10,7 +10,7 @@ This command will download the specified NuGet package, and then install the too
 in preview, you will need to specify the `--version` parameter when calling `dotnet tool install`. To install the latest version of the tool, run the following.
 
 ```Shell
-  dotnet tool install Microsoft.dotnet-msidentity -g --version "1.0.0-preview.2.21253.1"
+  dotnet tool install Microsoft.dotnet-msidentity -g --version "1.0.2"
 ```
 
 To install a different version of the tool, you can find the available versions at https://www.nuget.org/packages/Microsoft.dotnet-msidentity.

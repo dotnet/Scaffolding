@@ -2,6 +2,18 @@
   "Identifier": "dotnet-blazorwasm",
   "ProjectRelativeFolder": "",
   "BasedOnProjectDescription": "",
+  "MatchesForProjectType": [
+    {
+      "FileRelativePath": "Program.cs",
+      "MatchAny": [ "WebAssemblyHostBuilder.CreateDefault" ],
+      "Sets": "IsBlazorWasm"
+    },
+    {
+      "FolderRelativePath": "Pages",
+      "FileExtension": ".razor",
+      "Sets": "IsBlazorWasm"
+    }
+  ],
   "ConfigurationProperties": [
     {
       "FileRelativePath": "wwwroot\\appsettings.json",
@@ -145,11 +157,7 @@
       ]
     }
   ],
-  "MatchesForProjectType": [
-    {
-      "FileRelativePath": "Program.cs",
-      "MatchAny": [ "WebAssemblyHostBuilder.CreateDefault" ],
-      "Sets": "IsBlazorWasm"
-    }
+  "CommonPackages": [
+    "Microsoft.Authentication.WebAssembly.Msal"
   ]
 }

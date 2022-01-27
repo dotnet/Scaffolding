@@ -426,7 +426,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             var classFileTxt = await document.GetTextAsync();
 
             // Note: Here, document.Name is the full filepath
-            File.WriteAllText(document.Name, classFileTxt.ToString());
+            File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
             consoleLogger.LogMessage($"Modified {document.Name}.\n");
         }
 

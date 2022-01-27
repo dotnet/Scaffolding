@@ -10,13 +10,13 @@ using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
+using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
-using Newtonsoft.Json.Linq;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -27,19 +27,26 @@ namespace Microsoft.DotNet.MSIdentity
     /// </summary>
     public class AppProvisioningTool : IMsAADTool
     {
-        internal IConsoleLogger ConsoleLogger { get; }
-
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
-
         private string CommandName { get; }
-
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
+        internal AppSettingsModifier AppSettingsModifier { get => new AppSettingsModifier(ProvisioningToolOptions); }
 
         internal static PropertyInfo[]? _properties;
         internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
             .Where(p => p.PropertyType == typeof(byte[])).ToArray();
 
-        private ProjectDescriptionReader ProjectDescriptionReader { get; } = new ProjectDescriptionReader();
+        internal IEnumerable<string>? _files;
+        internal IEnumerable<string> Files => _files ??=
+            Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.cs", SearchOption.AllDirectories)
+            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.cshtml", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.razor", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.html", SearchOption.AllDirectories));
+
+        internal IConsoleLogger ConsoleLogger { get; }
+
+        private ProjectDescriptionReader? _projectDescriptionReader;
+        private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(Files);
 
         public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
@@ -50,41 +57,30 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            //get csproj file path
+            // Get csproj file path if it is not input from the tool
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
+                // Enumerate all files because we do not yet know the correct ProjectPath, later we cache all files and pass the list around
                 var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
-                if (csProjfiles.Any())
+                if (csProjfiles is null || csProjfiles.Count() != 1)
                 {
-                    if (csProjfiles.Count() > 1)
-                    {
-                        ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, Resources.ProjectPathError));
-                        ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
-                        return null;
-                    }
-                    var filePath = csProjfiles.First();
-                    ProvisioningToolOptions.ProjectFilePath = filePath;
+                    ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, Resources.ProjectPathError));
+                    ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
+                    return null;
                 }
+
+                ProvisioningToolOptions.ProjectFilePath = csProjfiles.First();
             }
 
-            string currentDirectory = Directory.GetCurrentDirectory();
-            //if its current directory, update it using the ProjectPath
-            if (ProvisioningToolOptions.ProjectPath.Equals(currentDirectory, StringComparison.OrdinalIgnoreCase))
+            // Update the ProjectPath if necessary
+            if (ProvisioningToolOptions.ProjectPath.Equals(Directory.GetCurrentDirectory(), StringComparison.OrdinalIgnoreCase)
+                && Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) is string actualProjectPath)
             {
-                ProvisioningToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) ?? currentDirectory;
+                ProvisioningToolOptions.ProjectPath = actualProjectPath;
             }
 
-            //get appsettings.json file path
-            var appSettingsFile = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "appsettings.json");
-            if (appSettingsFile.Any())
-            {
-                var filePath = appSettingsFile.First();
-                ProvisioningToolOptions.AppSettingsFilePath = filePath;
-            }
-
-            ProjectDescription? projectDescription = ProjectDescriptionReader.GetProjectDescription(
-                ProvisioningToolOptions.ProjectTypeIdentifier,
-                ProvisioningToolOptions.ProjectPath);
+            var projectDescription = ProjectDescriptionReader.GetProjectDescription(
+                ProvisioningToolOptions.ProjectTypeIdentifier);
 
             if (projectDescription == null)
             {
@@ -93,16 +89,12 @@ namespace Microsoft.DotNet.MSIdentity
             else
             {
                 ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription.Identifier));
-                if (!string.IsNullOrEmpty(projectDescription.Identifier))
-                {
-                    string projectType = projectDescription.Identifier.Replace("dotnet-", "");
-                    ProvisioningToolOptions.ProjectType ??= projectType;
-                }
+                ProvisioningToolOptions.ProjectType ??= projectDescription.Identifier?.Replace("dotnet-", "");
             }
 
             ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
                 ProvisioningToolOptions,
-                ProjectDescriptionReader.projectDescriptions,
+                ProjectDescriptionReader.ProjectDescriptions,
                 projectDescription);
 
             // Get developer credentials
@@ -110,20 +102,17 @@ namespace Microsoft.DotNet.MSIdentity
                 ProvisioningToolOptions,
                 ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
 
-            //for now, update project command is handlded seperately.
-            //TODO: switch case to handle all the different commands.
-            ApplicationParameters? applicationParameters = null;
-
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
-            if (projectSettings.ApplicationParameters.IsBlazorWasm.HasValue && projectSettings.ApplicationParameters.IsBlazorWasm.Value
-                && projectSettings.ApplicationParameters.IsWebApi.HasValue && projectSettings.ApplicationParameters.IsWebApi.Value)
+            if (projectSettings.ApplicationParameters.IsBlazorWasm
+                && projectSettings.ApplicationParameters.IsWebApi.GetValueOrDefault())
             {
                 // Processes the hosted web API
                 ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
                 provisioningToolOptionsBlazorServer.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Server");
-                provisioningToolOptionsBlazorServer.AppDisplayName = string.Concat(provisioningToolOptionsBlazorServer.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Server");
+                provisioningToolOptionsBlazorServer.AppDisplayName = string.Concat(
+                    provisioningToolOptionsBlazorServer.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Server");
                 provisioningToolOptionsBlazorServer.ProjectType = string.Empty;
                 provisioningToolOptionsBlazorServer.ClientId = ProvisioningToolOptions.WebApiClientId;
                 provisioningToolOptionsBlazorServer.WebApiClientId = null;
@@ -133,7 +122,8 @@ namespace Microsoft.DotNet.MSIdentity
                 /// Processes the Blazorwasm client
                 ProvisioningToolOptions provisioningToolOptionsBlazorClient = ProvisioningToolOptions.Clone();
                 provisioningToolOptionsBlazorClient.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Client");
-                provisioningToolOptionsBlazorClient.AppDisplayName = string.Concat(provisioningToolOptionsBlazorClient.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Client");
+                provisioningToolOptionsBlazorClient.AppDisplayName = string.Concat(
+                    provisioningToolOptionsBlazorClient.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Client");
                 provisioningToolOptionsBlazorClient.ProjectType = string.Empty;
                 provisioningToolOptionsBlazorClient.WebApiClientId = applicationParametersServer?.ClientId;
                 provisioningToolOptionsBlazorClient.AppIdUri = applicationParametersServer?.AppIdUri;
@@ -142,6 +132,9 @@ namespace Microsoft.DotNet.MSIdentity
                 return await appProvisioningToolBlazorClient.Run();
             }
 
+
+            //for now, update project command is handlded seperately.
+            ApplicationParameters? applicationParameters;
             switch (CommandName)
             {
                 case Commands.UPDATE_PROJECT_COMMAND:
@@ -235,132 +228,10 @@ namespace Microsoft.DotNet.MSIdentity
                     ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
                 }
             }
+
             return resultAppParameters;
         }
 
-        // add 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fill them default values if empty.
-        // Default values can be found https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content
-        private void ModifyAppSettings(ApplicationParameters applicationParameters)
-        {
-            string? filePath = ProvisioningToolOptions.AppSettingsFilePath;
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                bool changesMade = false;
-                //waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
-                JObject appSettings = JObject.Parse(System.IO.File.ReadAllText(filePath));
-                if (appSettings != null)
-                {
-                    var azureAdToken = appSettings["AzureAd"];
-                    if (azureAdToken != null)
-                    {
-                        var azureAdProperty = azureAdToken.ToObject<AzureAdProperties>();
-                        if (azureAdProperty != null)
-                        {
-                            // if property exists, and if suggested value is not already there.
-                            if (!string.IsNullOrEmpty(azureAdProperty.Domain) &&
-                                !azureAdProperty.Domain.Equals(applicationParameters.Domain, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["Domain"] = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.TenantId) &&
-                                !azureAdProperty.TenantId.Equals(applicationParameters.TenantId, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["TenantId"] = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.ClientId) &&
-                                !azureAdProperty.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["ClientId"] = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.Instance) &&
-                                !azureAdProperty.Instance.Equals(applicationParameters.Instance, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["Instance"] = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance;
-                            }
-
-                            if (!string.IsNullOrEmpty(azureAdProperty.CallbackPath) &&
-                                !azureAdProperty.CallbackPath.Equals(applicationParameters.CallbackPath, StringComparison.OrdinalIgnoreCase))
-                            {
-                                changesMade = true;
-                                azureAdToken["CallbackPath"] = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        changesMade = true;
-                        appSettings.Add("AzureAd", JObject.FromObject(new
-                        {
-                            Instance = applicationParameters.Instance ?? AzureAdDefaultProperties.Instance,
-                            Domain = applicationParameters.Domain ?? AzureAdDefaultProperties.Domain,
-                            TenantId = applicationParameters.TenantId ?? AzureAdDefaultProperties.TenantId,
-                            ClientId = applicationParameters.ClientId ?? AzureAdDefaultProperties.ClientId,
-                            CallbackPath = applicationParameters.CallbackPath ?? AzureAdDefaultProperties.CallbackPath
-                        }));
-                    }
-
-                    if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
-                    {
-
-                        if (azureAdToken != null)
-                        {
-                            if (azureAdToken["ClientSecret"] == null)
-                            {
-                                changesMade = true;
-                                azureAdToken["ClientSecret"] = "Client secret from app-registration. Check user secrets/azure portal.";
-                            }
-
-                            if (azureAdToken["ClientCertificates"] == null)
-                            {
-                                changesMade = true;
-                                azureAdToken["ClientCertificates"] = new JArray();
-                            }
-                        }
-
-                        if (ProvisioningToolOptions.CallsDownstreamApi)
-                        {
-                            if (appSettings["DownstreamApi"] == null)
-                            {
-                                changesMade = true;
-                                string apiURL = !string.IsNullOrEmpty(ProvisioningToolOptions.CalledApiUrl) ? ProvisioningToolOptions.CalledApiUrl : "API_URL_HERE";
-                                appSettings.Add("DownstreamApi", JObject.FromObject(new
-                                {
-                                    BaseUrl = apiURL,
-                                    Scopes = "user.read"
-                                }));
-                            }
-                        }
-
-                        if (ProvisioningToolOptions.CallsGraph)
-                        {
-                            if (appSettings["MicrosoftGraph"] == null)
-                            {
-                                changesMade = true;
-                                appSettings.Add("MicrosoftGraph", JObject.FromObject(new
-                                {
-                                    BaseUrl = "https://graph.microsoft.com/v1.0",
-                                    Scopes = "user.read"
-                                }));
-                            }
-                        }
-                    }
-                }
-
-
-                //save comments somehow, only write to appsettings.json if changes are made
-                if (appSettings != null && changesMade)
-                {
-                    System.IO.File.WriteAllText(filePath, appSettings.ToString());
-                }
-            }
-        }
         /// <summary>
         /// Converts an AAD application to a B2C application
         /// </summary>
@@ -380,7 +251,7 @@ namespace Microsoft.DotNet.MSIdentity
                 string updatedContent = fileContent.Replace("AzureAd", "AzureAdB2C");
 
                 // Add the policies to the appsettings.json
-                if (filePath.EndsWith("appsettings.json"))
+                if (filePath.EndsWith(AppSettingsModifier.AppSettingsFileName))
                 {
                     // Insert the policies
                     int indexCallbackPath = updatedContent.IndexOf("\"CallbackPath\"");
@@ -402,7 +273,7 @@ namespace Microsoft.DotNet.MSIdentity
             // reevaulate the project settings
             projectSettings = InferApplicationParameters(
                 ProvisioningToolOptions,
-                ProjectDescriptionReader.projectDescriptions,
+                ProjectDescriptionReader.ProjectDescriptions,
                 projectDescription);
             return projectSettings;
         }
@@ -455,7 +326,9 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters applicationParameters)
         {
             ApplicationParameters? currentApplicationParameters = null;
-            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId)
+                || (!string.IsNullOrEmpty(applicationParameters.ClientId)
+                && !DefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
                 if (currentApplicationParameters == null)
@@ -463,6 +336,7 @@ namespace Microsoft.DotNet.MSIdentity
                     ConsoleLogger.LogMessage($"Couldn't find app {applicationParameters.EffectiveClientId} in tenant {applicationParameters.EffectiveTenantId}. ", LogMessageType.Error);
                 }
             }
+
             return currentApplicationParameters;
         }
 
@@ -471,7 +345,8 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters applicationParameters)
         {
             ApplicationParameters? currentApplicationParameters = null;
-            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !AzureAdDefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
+
+            if (!string.IsNullOrEmpty(applicationParameters.EffectiveClientId) || (!string.IsNullOrEmpty(applicationParameters.ClientId) && !DefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
             {
                 currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters);
                 if (currentApplicationParameters == null)
@@ -500,23 +375,22 @@ namespace Microsoft.DotNet.MSIdentity
             IEnumerable<ProjectDescription> projectDescriptions,
             ProjectDescription? projectDescription = null)
         {
-            CodeReader reader = new CodeReader();
-            ProjectAuthenticationSettings projectSettings = new ProjectAuthenticationSettings();
-            if (projectDescription != null)
-            {
-                projectSettings = reader.ReadFromFiles(provisioningToolOptions.ProjectPath, projectDescription, projectDescriptions);
-            }
+            var projectSettings = projectDescription != null
+                ? new CodeReader().ReadFromFiles(projectDescription, projectDescriptions, Files)
+                : new ProjectAuthenticationSettings();
 
             // Override with the tools options
             projectSettings.ApplicationParameters.ApplicationDisplayName ??= !string.IsNullOrEmpty(provisioningToolOptions.AppDisplayName) ? provisioningToolOptions.AppDisplayName : Path.GetFileName(provisioningToolOptions.ProjectPath);
             projectSettings.ApplicationParameters.ClientId = !string.IsNullOrEmpty(provisioningToolOptions.ClientId) ? provisioningToolOptions.ClientId : projectSettings.ApplicationParameters.ClientId;
             projectSettings.ApplicationParameters.TenantId = !string.IsNullOrEmpty(provisioningToolOptions.TenantId) ? provisioningToolOptions.TenantId : projectSettings.ApplicationParameters.TenantId;
             projectSettings.ApplicationParameters.CalledApiScopes = !string.IsNullOrEmpty(provisioningToolOptions.CalledApiScopes) ? provisioningToolOptions.CalledApiScopes : projectSettings.ApplicationParameters.CalledApiScopes;
+            projectSettings.ApplicationParameters.IsBlazorWasm = provisioningToolOptions.IsBlazorWasm;
 
-            //there can mutliple project types
+            // there can mutliple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
             {
-                if (provisioningToolOptions.ProjectType.Equals("webapp", StringComparison.OrdinalIgnoreCase))
+                if (provisioningToolOptions.ProjectType.Equals("webapp", StringComparison.OrdinalIgnoreCase)
+                    || provisioningToolOptions.ProjectType.Equals("blazorserver", StringComparison.OrdinalIgnoreCase))
                 {
                     projectSettings.ApplicationParameters.IsWebApp = projectSettings.ApplicationParameters.IsWebApp ?? true;
                 }
@@ -524,19 +398,16 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     projectSettings.ApplicationParameters.IsWebApi = projectSettings.ApplicationParameters.IsWebApi ?? true;
                 }
-                if (provisioningToolOptions.ProjectType.Equals("blazorwasm", StringComparison.OrdinalIgnoreCase))
-                {
-                    projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm ?? true;
-                }
                 if (provisioningToolOptions.ProjectType.Equals("blazorwasm-hosted", StringComparison.OrdinalIgnoreCase))
                 {
-                    projectSettings.ApplicationParameters.IsBlazorWasm = projectSettings.ApplicationParameters.IsBlazorWasm ?? true;
+                    projectSettings.ApplicationParameters.IsBlazorWasm = true;
                 }
             }
             if (!string.IsNullOrEmpty(provisioningToolOptions.AppIdUri))
             {
                 projectSettings.ApplicationParameters.AppIdUri = provisioningToolOptions.AppIdUri;
             }
+
             return projectSettings;
         }
 
@@ -651,17 +522,20 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage("=============================================");
                 ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
                 ConsoleLogger.LogMessage("=============================================\n");
-                //dotnet user secrets init
+                // dotnet user secrets init
                 CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
 
-                //modify appsettings.json. 
-                ModifyAppSettings(applicationParameters);
+                // modify appsettings.json if not updated from Code Update
+                if (!ProvisioningToolOptions.CodeUpdate)
+                {
+                    AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
+                }
 
-                //Add ClientSecret if the app wants to call graph/a downstream api.
+                // Add ClientSecret if the app wants to call graph/a downstream api.
                 if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                    //need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
+                    // need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
                     if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
                     {
                         await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(
@@ -671,7 +545,7 @@ namespace Microsoft.DotNet.MSIdentity
                             ConsoleLogger);
 
                         string? password = applicationParameters.PasswordCredentials.LastOrDefault();
-                        //if user wants to update user secrets
+                        // if user wants to update user secrets
                         if (!string.IsNullOrEmpty(password) && ProvisioningToolOptions.UpdateUserSecrets)
                         {
                             CodeWriter.AddUserSecrets(applicationParameters.IsB2C, ProvisioningToolOptions.ProjectPath, password, ConsoleLogger);
@@ -715,7 +589,7 @@ namespace Microsoft.DotNet.MSIdentity
                             {
                                 foreach (var packageToInstall in packages)
                                 {
-                                    //if package doesn't exist, add it.
+                                    // if package doesn't exist, add it.
                                     if (!tfm.Dependencies.Where(x => x.Name.Equals(packageToInstall)).Any())
                                     {
                                         CodeWriter.AddPackage(packageToInstall, shortTfm, ConsoleLogger);
@@ -732,14 +606,13 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage("=============================================");
                 ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
                 ConsoleLogger.LogMessage("=============================================\n");
-                //if project is not setup for auth, add updates to Startup.cs, .csproj.
-                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, ConsoleLogger);
+                // if project is not setup for auth, add updates to Startup.cs, .csproj.
+                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, Files, ConsoleLogger);
                 await startupModifier.AddAuthCodeAsync();
+
+                // modify appsettings.json.
+                AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
             }
         }
-
-        //Layout.cshtml
-        //LoginPartial.cshtml
-        //launchsettings.json --> update
     }
 }

@@ -32,32 +32,30 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="projectDescriptions"></param>
         /// <returns></returns>
         public ProjectAuthenticationSettings ReadFromFiles(
-            string folderToConfigure,
             ProjectDescription projectDescription,
-            IEnumerable<ProjectDescription> projectDescriptions)
+            IEnumerable<ProjectDescription> projectDescriptions,
+            IEnumerable<string> files)
         {
             ProjectAuthenticationSettings projectAuthenticationSettings = new ProjectAuthenticationSettings(projectDescription);
             ProcessProject(
-                folderToConfigure,
                 projectDescription,
                 projectAuthenticationSettings,
-                projectDescriptions);
+                projectDescriptions,
+                files);
             return projectAuthenticationSettings;
         }
 
-        private static void ProcessProject(
-            string folderToConfigure,
+        private void ProcessProject(
             ProjectDescription projectDescription,
             ProjectAuthenticationSettings projectAuthenticationSettings,
-            IEnumerable<ProjectDescription> projectDescriptions)
+            IEnumerable<ProjectDescription> projectDescriptions,
+            IEnumerable<string> files)
         {
-            string projectPath = Path.Combine(folderToConfigure, projectDescription.ProjectRelativeFolder!);
-
             // TO-DO get all the project descriptions
-            var properties = projectDescription.GetMergedConfigurationProperties(projectDescriptions).ToArray();
+            var properties = projectDescription.GetMergedConfigurationProperties(projectDescriptions);
             foreach (ConfigurationProperties configurationProperties in properties)
             {
-                string? filePath = Directory.EnumerateFiles(projectPath, configurationProperties.FileRelativePath!).FirstOrDefault();
+                string? filePath = files.Where(f => f.Contains(configurationProperties.FileRelativePath!)).FirstOrDefault();
                 ProcessFile(projectAuthenticationSettings, filePath, configurationProperties);
             }
 
@@ -72,12 +70,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             PostProcessWebUris(projectAuthenticationSettings);
         }
 
-        private static void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
+        private void PostProcessWebUris(ProjectAuthenticationSettings projectAuthenticationSettings)
         {
-            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue &&
-                                projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm.Value &&
-                                projectAuthenticationSettings.ApplicationParameters.IsWebApp.HasValue &&
-                                !projectAuthenticationSettings.ApplicationParameters.IsWebApp.Value;
+            bool isBlazorWasm = projectAuthenticationSettings.ApplicationParameters.IsBlazorWasm;
             string callbackPath = projectAuthenticationSettings.ApplicationParameters.CallbackPath ?? "/signin-oidc";
             if (isBlazorWasm)
             {
@@ -187,8 +182,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 JsonElement element = pair.Key;
                                 int index = pair.Value;
                                 found = true;
-                                string replaceFrom = element.ValueKind == JsonValueKind.Number 
-                                    ? element.GetInt32().ToString(CultureInfo.InvariantCulture) 
+                                string replaceFrom = element.ValueKind == JsonValueKind.Number
+                                    ? element.GetInt32().ToString(CultureInfo.InvariantCulture)
                                     : element.ToString()!;
 
                                 UpdatePropertyRepresents(
@@ -338,14 +333,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     if (!string.IsNullOrEmpty(value))
                     {
                         // TODO: something more generic
-                        Uri authority = new Uri(value);
-                        string? tenantOrDomain = authority.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[0];
-                        if (tenantOrDomain == "qualified.domain.name")
+                        if (Uri.TryCreate(value, UriKind.Absolute, out Uri? authority))
                         {
-                            tenantOrDomain = null;
+                            var tenantOrDomain = authority.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[0];
+                            if (tenantOrDomain != "qualified.domain.name")
+                            {
+                                projectAuthenticationSettings.ApplicationParameters.Domain = tenantOrDomain;
+                                projectAuthenticationSettings.ApplicationParameters.TenantId = tenantOrDomain;
+                            }
                         }
-                        projectAuthenticationSettings.ApplicationParameters.Domain = tenantOrDomain;
-                        projectAuthenticationSettings.ApplicationParameters.TenantId = tenantOrDomain;
                     }
                     break;
                 case "Directory.Domain":

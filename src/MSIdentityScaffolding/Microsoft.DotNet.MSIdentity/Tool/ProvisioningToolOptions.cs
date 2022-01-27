@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         /// <summary>
         /// Path to appsettings.json file
-        /// </summary>
+        /// </summary>   
         public string? AppSettingsFilePath { get; set; }
 
         ///<summary>

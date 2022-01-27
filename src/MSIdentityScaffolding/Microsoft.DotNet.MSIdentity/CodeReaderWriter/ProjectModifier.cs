@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -19,11 +21,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     internal class ProjectModifier
     {
         private readonly ProvisioningToolOptions _toolOptions;
+        private readonly IEnumerable<string> _files;
         private readonly IConsoleLogger _consoleLogger;
 
-        public ProjectModifier(ProvisioningToolOptions toolOptions, IConsoleLogger consoleLogger)
+        public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
+            _files = files;
             _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
         }
 
@@ -53,7 +57,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             // Initialize CodeAnalysis.Project wrapper
-            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath);
+            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath, _files);
             if (project is null)
             {
                 return;
@@ -71,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
             foreach (var file in filteredFiles)
             {
-                await HandleCodeFileAsync(file, project, options);
+                await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
             }
         }
 
@@ -118,34 +122,39 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
+        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options, string identifier)
         {
             if (!string.IsNullOrEmpty(file.AddFilePath))
             {
-                AddFile(file);
+                AddFile(file, identifier);
             }
-            else if (file.FileName.EndsWith(".cs"))
+            else
             {
-                await ModifyCsFile(file, project, options);
-            }
-            else if (file.FileName.EndsWith(".cshtml"))
-            {
-                await ModifyCshtmlFile(file, project, options);
-            }
-            else if (file.FileName.EndsWith(".razor"))
-            {
-                await ModifyRazorFile(file, project, options);
+                switch (file.Extension)
+                {
+                    case "cs":
+                        await ModifyCsFile(file, project, options);
+                        break;
+                    case "cshtml":
+                        await ModifyCshtmlFile(file, project, options);
+                        break;
+                    case "razor":
+                    case "html":
+                        await ApplyTextReplacements(file, project, options);
+                        break;
+                }
             }
         }
 
         /// <summary>
         /// Determines if specified file exists, and if not then creates the 
         /// file based on template stored in AppProvisioningTool.Properties
-        /// and adds file to the project
+        /// then adds file to the project
         /// </summary>
         /// <param name="file"></param>
+        /// <param name="identifier"></param>
         /// <exception cref="FormatException"></exception>
-        private void AddFile(CodeFile file)
+        private void AddFile(CodeFile file, string identifier)
         {
             var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
             if (File.Exists(filePath))
@@ -153,23 +162,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return; // File exists, don't need to create
             }
 
-            // Resource names for addFiles prefixed with "add" and contain '_' in place of '.'
-            // e.g. fileName: "ShowProfile.razor" -> resourceName: "add_ShowProfile_razor"
-            var resourceName = file.FileName.Replace('.', '_');
-            var propertyInfo = AppProvisioningTool.Properties.Where(
-                p => p.Name.StartsWith("add") && p.Name.EndsWith(resourceName)).FirstOrDefault();
-
-            if (propertyInfo is null)
-            {
-                return;
-            }
-
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-            string codeFileString = Encoding.UTF8.GetString(content);
-            if (string.IsNullOrEmpty(codeFileString))
-            {
-                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
-            }
+            var codeFileString = GetCodeFileString(file, identifier);
 
             var fileDir = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(fileDir))
@@ -177,6 +170,33 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
             }
+        }
+
+        private string GetCodeFileString(CodeFile file, string identifier)
+        {
+            var propertyInfo = GetPropertyInfo(file.FileName, identifier);
+            if (propertyInfo is null)
+            {
+                throw new FormatException($"Resource file for {file.FileName} could not be found. ");
+            }
+
+            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+            string codeFileString = Encoding.UTF8.GetString(content);
+            if (string.IsNullOrEmpty(codeFileString))
+            {
+                throw new FormatException($"Resource file for {file.FileName} could not be parsed. ");
+            }
+
+            return codeFileString;
+        }
+
+        private PropertyInfo? GetPropertyInfo(string fileName, string identifier)
+        {
+            return AppProvisioningTool.Properties.Where(
+                p => p.Name.StartsWith("add")
+                && p.Name.Contains(identifier.Replace('-', '_')) // Resource files cannot have '-' (dash character)
+                && p.Name.Contains(fileName.Replace('.', '_'))) // Resource files cannot have '.' (period character)
+                .FirstOrDefault();
         }
 
         internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -307,7 +327,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        internal async Task ModifyRazorFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
+        /// <summary>
+        /// Updates .razor and .html files via string replacement
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="project"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns></returns>
+        internal async Task ApplyTextReplacements(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
             var document = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
             if (document is null)
@@ -315,13 +342,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            var razorChanges = file.RazorChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-            if (!razorChanges.Any())
+            var replacements = file.Replacements.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+            if (!replacements.Any())
             {
                 return;
             }
 
-            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, razorChanges);
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
                 await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);

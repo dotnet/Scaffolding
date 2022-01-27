@@ -523,10 +523,13 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
                 ConsoleLogger.LogMessage("=============================================\n");
                 // dotnet user secrets init
-                // CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger); TODO do we do this?
+                CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
 
-                // modify appsettings.json.
-                AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
+                // modify appsettings.json if not updated from Code Update
+                if (!ProvisioningToolOptions.CodeUpdate)
+                {
+                    AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
+                }
 
                 // Add ClientSecret if the app wants to call graph/a downstream api.
                 if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
@@ -606,11 +609,10 @@ namespace Microsoft.DotNet.MSIdentity
                 // if project is not setup for auth, add updates to Startup.cs, .csproj.
                 ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, Files, ConsoleLogger);
                 await startupModifier.AddAuthCodeAsync();
+
+                // modify appsettings.json.
+                AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
             }
         }
-
-        //Layout.cshtml
-        //LoginPartial.cshtml
-        //launchsettings.json --> update
     }
 }

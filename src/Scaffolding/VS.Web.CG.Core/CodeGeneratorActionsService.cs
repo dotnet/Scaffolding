@@ -8,10 +8,10 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.Web.CodeGeneration.Core;
-using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 // ConsoleLogger
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
+using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
@@ -74,7 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             Debug.Assert(_fileSystem.FileExists(templatePath));
-            _logger.LogMessage($"Rendering template { templatePath }", LogMessageLevel.Trace);
+            _logger.LogMessage($"Rendering template { templatePath }\n", LogMessageLevel.Trace);
             var templateContent = _fileSystem.ReadAllText(templatePath);
             
             var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);

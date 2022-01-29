@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.Internal
         {
             ThrowIfRunning();
             Command._logger.LogMessage(
-                $"Executing external command:\n{ this }", LogMessageLevel .Trace
+                $"Executing external command:\n{ this }\n", LogMessageLevel.Trace
             );
             _running = true;
             _process.EnableRaisingEvents = true;

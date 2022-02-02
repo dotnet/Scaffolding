@@ -157,9 +157,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                     },
                     projectContext: _projectContext);
             }
-
-            // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, bootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+            //If no bootstrap version could be decided/invalid, return default bootstrap 5 templates.
+            return TemplateFolders;
         }
 
         protected async Task AddRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)
@@ -321,10 +320,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 return ContentVersionBootstrap4;
             }
-            else
-            {
-                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, razorGeneratorModel.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
-            }
+            return ContentVersionDefault;
         }
     }
 }

@@ -114,7 +114,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 throw new InvalidOperationException(string.Format(MessageStrings.ModelClassRequiredForTemplate, templateName));
             }
 
-            if (!string.IsNullOrEmpty(viewGeneratorModel.BootstrapVersion) && !ValidBootstrapVersions.Contains(viewGeneratorModel.BootstrapVersion))
+            if (!string.IsNullOrEmpty(viewGeneratorModel.BootstrapVersion) && !ValidBootstrapVersions.Contains(viewGeneratorModel.BootstrapVersion.Trim(' ', '\n')))
             {
                 throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, viewGeneratorModel.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
             }

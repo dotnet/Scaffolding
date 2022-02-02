@@ -314,17 +314,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     return IdentityGenerator.ContentVersionBootstrap4;
                 }
-                else
-                {
-                    // This should get caught by ValidateCommandLine() and emit the same error.
-                    // But best to be safe here.
-                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
-                }
             }
-            else
-            {
-                return IdentityGenerator.ContentVersionDefault;
-            }
+            //return default bootstrap version if no specific one can be determined. Better than to throw an exception here.
+            return IdentityGenerator.ContentVersionDefault;
         }
 
         private static readonly IReadOnlyList<string> _ExistingLayoutFileCheckLocations = new List<string>()
@@ -743,7 +735,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--layout", "--generateLayout"));
             }
 
-            if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion))
+            if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion.Trim(' ', '\n'))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
             }

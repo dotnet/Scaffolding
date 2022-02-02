@@ -87,11 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 return ViewGenerator.ContentVersionBootstrap4;
             }
-            else
-            {
-                // this should be caught by ViewGenerator.ValidateViewGeneratorModel(), but best to be safe.
-                throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", ViewGenerator.ValidBootstrapVersions)));
-            }
+            return ViewGenerator.ContentVersionDefault;
         }
 
         protected IEnumerable<string> GetTemplateFoldersForContentVersion(ViewGeneratorModel model)
@@ -125,9 +121,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                     baseFolders: new[] { Path.Combine(ViewGenerator.VersionedContentRelativeBaseDir, ViewGenerator.ContentVersionBootstrap4) },
                     projectContext: _projectContext);
             }
-
-            // this should be caught by ViewGenerator.ValidateViewGeneratorModel(), but best to be safe.
-            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", ViewGenerator.ValidBootstrapVersions)));
+            return TemplateFolders;
         }
 
         protected async Task AddRequiredFiles(ViewGeneratorModel viewGeneratorModel)

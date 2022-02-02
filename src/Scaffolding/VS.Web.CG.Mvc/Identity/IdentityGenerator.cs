@@ -117,10 +117,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     _projectContext);
             }
 
-            // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
-            // But best to be safe here.
-            // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-            throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+            //return default template path if ContentVersion == DefaultVersion and if we can't figure out/invalid versions of bootstrap.
+            //better than throwing an invalid bootstrap version exception.
+            return TemplateFolders;
         }
 
         // Returns the root directory of the template folders appropriate for templateModel.ContentVersion
@@ -142,10 +141,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
                 if (string.IsNullOrEmpty(relativePath))
                 {
-                    // This should get caught by IdentityGeneratorTemplateModelBuilder.ValidateCommandLine() and emit the same error. 
-                    // But best to be safe here.
-                    // Note: If we start pivoting content on things other than bootstrap version, this error message will need to be reworked.
-                    throw new InvalidOperationException(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, templateModel2.BootstrapVersion, string.Join(", ", ValidBootstrapVersions)));
+                    //set to defaultPath if invalid ContentVersion for Identity scaffolding. Not throwing an InvalidOpException anymore.
+                    relativePath = DefaultContentRelativeBaseDir;
                 }
             }
             else

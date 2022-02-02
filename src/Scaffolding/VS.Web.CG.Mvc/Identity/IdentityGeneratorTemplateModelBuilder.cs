@@ -735,7 +735,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--layout", "--generateLayout"));
             }
 
-            if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion.Trim(' ', '\n'))
+            if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion.Trim(' ', '\n')))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidBootstrapVersionForScaffolding, model.BootstrapVersion, string.Join(", ", IdentityGenerator.ValidBootstrapVersions)));
             }

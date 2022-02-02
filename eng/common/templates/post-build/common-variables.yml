@@ -20,7 +20,7 @@ variables:
   - name: SourceLinkCLIVersion
     value: 3.0.0
   - name: SymbolToolVersion
-    value: 1.0.1
+    value: 1.0.2
 
   - name: runCodesignValidationInjection
     value: false

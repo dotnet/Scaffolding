@@ -15,7 +15,7 @@
     },
     {
       "FileRelativePath": "Program.cs",
-      "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ]
+      "MatchAny": [ ".AddEndpointsApiExplorer", ".AddSwaggerGen", ".AddMicrosoftIdentityWebApiAuthentication" ]
     }
   ],
   "ConfigurationProperties": [

@@ -38,20 +38,26 @@
     {
       "FileName": "Program.cs",
       "Options": [ "MinimalApp" ],
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.Resource;"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
             {
-              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
-              "InsertBefore": [ "builder.Services.AddControllers()", "builder.Build()" ]
+              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [ "builder.Services.AddEndpointsApiExplorer", "builder.Services.AddSwaggerGen" ]
             },
             {
-              "Parent": "AddMicrosoftIdentityWebApi",
+              "Parent": "AddMicrosoftIdentityWebApi //TODO",
               "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
               "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi //TODO",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
               "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
               "CodeFormatting": {
@@ -60,7 +66,7 @@
               }
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi //TODO",
               "Options": [ "MemberAccess", "DownstreamApi" ],
               "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
               "CodeFormatting": {
@@ -71,7 +77,7 @@
             {
               "Parent": "AddDownstreamWebApi",
               "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddInMemoryTokenCaches()",
+              "Block": "AddInMemoryTokenCaches() //TODO",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
@@ -80,28 +86,43 @@
             {
               "Parent": "AddMicrosoftGraph",
               "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddInMemoryTokenCaches()",
+              "Block": "AddInMemoryTokenCaches() //TODO",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "InsertAfter": "app.UseRouting();",
+              "InsertAfter": "app.UseHttpsRedirection",
               "Block": "app.UseAuthentication();",
-              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
+              "InsertBefore": [
+                "app.UseAuthorization",
+                "app.MapGet"
+              ]
+            },
+            {
+              "InsertAfter": "app.UseAuthentication",
+              "Block": "app.UseAuthorization();",
+              "InsertBefore": [
+                "app.MapGet",
+                "app.Configuration["
+              ]
+            },
+            {
+              "Parent": "app.MapGet",
+              "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
+              "CodeFormatting": {
+                "NumberOfSpaces": 4,
+                "Newline": true
+              }
             }
           ]
         }
-      },
-      "Usings": [
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.Identity.Web",
-        "Microsoft.AspNetCore.Authentication.JwtBearer"
-      ]
+      }
     },
     {
       "FileName": "WeatherForecastController.cs",
+      "Options": [ "NonMinimalApp" ],
       "ClassAttributes": [
         {
           "Block":"Authorize",

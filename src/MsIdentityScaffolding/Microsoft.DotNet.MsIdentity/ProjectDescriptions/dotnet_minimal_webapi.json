@@ -1,0 +1,17 @@
+{
+  "Identifier": "dotnet-minimal_webapi",
+  "ProjectRelativeFolder": "",
+  "BasedOnProjectDescription": "dotnet-web",
+  "MatchesForProjectType": [
+    {
+      "FileRelativePath": "Program.cs",
+      "MatchAny": [ ".MapGet" ]
+    }
+  ],
+  "Packages": [
+    "Microsoft.AspNetCore.Authentication.JwtBearer",
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+    "Microsoft.Identity.Web",
+    "Swashbuckle.AspNetCore"
+  ]
+}

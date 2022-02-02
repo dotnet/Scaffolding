@@ -1,0 +1,129 @@
+{
+  "Identifier": "dotnet-minimal_webapi",
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.Resource"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "// Add services to the container.",
+              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
+              "InsertBefore": [ "builder.Services.AddAuthorization", "builder.Services.AddEndpointsApiExplorer", "builder.Services.AddSwaggerGen" ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "builder.Services.AddAuthentication",
+              "Block": "builder.Services.AddAuthorization();\r\n",
+              "InsertBefore": [ "builder.Services.AddEndpointsApiExplorer", "builder.Services.AddSwaggerGen" ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddDownstreamWebApi",
+              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Parent": "AddMicrosoftGraph",
+              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "AddInMemoryTokenCaches()",
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "app.UseHttpsRedirection",
+              "Block": "app.UseAuthentication();/r/n",
+              "InsertBefore": [
+                "app.UseAuthorization",
+                "app.MapGet"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "app.UseAuthentication",
+              "Block": "app.UseAuthorization();/r/n",
+              "InsertBefore": [
+                "var summaries",
+                "app.MapGet",
+                "app.Configuration["
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "app.UseAuthorization",
+              "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"];", 
+              "InsertBefore": [
+                "var summaries",
+                "app.MapGet"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "app.MapGet",
+              "Options": [ "LambdaExpression" ],
+              "Parameter": "\"/weatherforecast\", (HttpContext httpContext)"
+            },
+            {
+              "Parent": "app.MapGet",
+              "Options": [ "InLambdaBlock" ],
+              "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);"
+            },
+            {
+              "Parent": "app.MapGet",
+              "Options": [ "MemberAccess" ],
+              "Block": "RequireAuthorization()",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ] 
+}

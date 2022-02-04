@@ -14,12 +14,16 @@
   </PropertyGroup>
   <PropertyGroup>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <VersionPrefix>7.0.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
 =======
     <VersionPrefix>6.0.1</VersionPrefix>
+=======
+    <VersionPrefix>6.0.2</VersionPrefix>
+>>>>>>> 1abb1367 (Servicing release for dotnet-aspnet-codegenerator and dotnet-msidentity (#1816))
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
 >>>>>>> 293eace1 (6.0.1 cherry picks (#1730))
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
@@ -121,7 +125,11 @@
     <XunitRunnerVisualStudioPackageVersion>2.4.2-pre.9</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
+<<<<<<< HEAD
     <SystemCollectionsImmutableVersion>7.0.0-preview.1.22076.8</SystemCollectionsImmutableVersion>
+=======
+    <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+>>>>>>> 1abb1367 (Servicing release for dotnet-aspnet-codegenerator and dotnet-msidentity (#1816))
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <SystemPrivateUriVersion>4.3.2</SystemPrivateUriVersion>
   </PropertyGroup>

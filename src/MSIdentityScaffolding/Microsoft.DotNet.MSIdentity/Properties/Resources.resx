@@ -148,6 +148,15 @@
   <data name="add_dotnet_blazorwasm_UserProfile_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\UserProfile.razor.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="add_dotnet_blazorwasm_Authentication_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\Authentication.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="add_dotnet_blazorwasm_LoginDisplay_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\LoginDisplay.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="add_dotnet_blazorwasm_RedirectToLogin_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\RedirectToLogin.razor;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="AuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>
   </data>

@@ -634,38 +634,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             if (attributes == null)
             {
-<<<<<<< HEAD
                 return attributeLists;
-=======
-                foreach (var attribute in attributes)
-                {
-                    var attributeList = new List<AttributeSyntax>();
-                    //filter by apps
-                    if (!string.IsNullOrEmpty(attribute.Block) && !ProjectModifierHelper.AttributeExists(attribute.Block, attributeLists))
-                    {
-                        attributeList.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName(attribute.Block)));
-                    }
-                    if (attributeList.Any())
-                    {
-<<<<<<< HEAD
-                        syntaxList = syntaxList.Insert(0, SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia));
-=======
-                        var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
-                        if (!leadingTrivia.ToString().Contains("\n"))
-                        {
-                            attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-                        }
-                        syntaxList = syntaxList.Insert(0, attributeListSyntax);
->>>>>>> 293eace1 (6.0.1 cherry picks (#1730))
-                    }
-                }
->>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
             }
-<<<<<<< HEAD
-=======
-            return syntaxList;
-        }
->>>>>>> 293eace1 (6.0.1 cherry picks (#1730))
 
             foreach (var attribute in attributes)
             {

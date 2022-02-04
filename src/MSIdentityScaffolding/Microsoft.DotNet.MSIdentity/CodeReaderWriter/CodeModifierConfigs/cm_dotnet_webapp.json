@@ -132,7 +132,6 @@
               }
             },     
             {
-<<<<<<< HEAD
               "CodeChangeType": "Lambda",
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthorization",
               "Block": "options.FallbackPolicy = options.DefaultPolicy",
@@ -141,14 +140,6 @@
               {
                 "Newline":true,
                 "NumberOfSpaces": 4
-=======
-              "CheckBlock": "WebApplication.CreateBuilder.Services.AddAuthorization",
-              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
-              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddRazorPages()", "WebApplication.CreateBuilder.Build()" ],
-              "CodeFormatting": {
-                "Newline": true
->>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
               }
             },
             {

@@ -18,11 +18,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public const string DownstreamApi = nameof(DownstreamApi);
         public const string Skip = nameof(Skip);
         public const string NonMinimalApp = nameof(NonMinimalApp);
-<<<<<<< HEAD
         public const string MinimalApp = nameof(MinimalApp);
         public const string OpenApi = nameof(OpenApi);
-=======
->>>>>>> c9c71cf5 (Cherry picking main into release/6.0 (#1688))
     }
 
     public class CodeChangeOptions

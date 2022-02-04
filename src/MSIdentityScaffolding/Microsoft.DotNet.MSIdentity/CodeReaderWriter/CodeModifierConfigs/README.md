@@ -26,7 +26,7 @@ class CodeChange
     public string? Block { get; set; } --> C# statement that is parsed using SyntaxFactory.ParseStatement
     public string? Parent { get; set; } --> Add C# statement syntax node upon this parent statement syntax node based on Type 
     public string? Type { get; set; } --> CodeChangeType (below) string.
-    public bool? Append { get; set; } = false; --> Insert Block at the top of the method.
+    public bool? Prepend { get; set; } = false; --> Insert Block at the top of the method.
     public string ReplaceSnippet { get; set; } --> Replace snippet with Block
 }
 

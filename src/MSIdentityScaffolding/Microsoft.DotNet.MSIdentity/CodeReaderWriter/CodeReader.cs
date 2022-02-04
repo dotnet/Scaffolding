@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     /// </summary>
     public class CodeReader
     {
-        static readonly JsonSerializerOptions s_serializerOptionsWithComments = new JsonSerializerOptions()
+        static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions()
         {
             ReadCommentHandling = JsonCommentHandling.Skip
         };
@@ -157,8 +157,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 if (filePath.EndsWith(".json"))
                 {
-                    jsonContent = JsonSerializer.Deserialize<JsonElement>(fileContent,
-                                                                          s_serializerOptionsWithComments);
+                    jsonContent = JsonSerializer.Deserialize<JsonElement>(fileContent, serializerOptionsWithComments);
                 }
                 else if (filePath.EndsWith(".csproj"))
                 {

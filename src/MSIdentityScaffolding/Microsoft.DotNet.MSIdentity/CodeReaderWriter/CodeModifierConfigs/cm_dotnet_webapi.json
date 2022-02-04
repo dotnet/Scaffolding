@@ -22,7 +22,7 @@
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
-              "Options": [ "MemberAccess" ],
+              "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"));",
               "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
             }
@@ -194,7 +194,7 @@
           },
           "CodeChanges": [
             {
-              "Append": true,
+              "Prepend": true,
               "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
               "CodeFormatting": {
                 "NumberOfSpaces": 12
@@ -202,7 +202,7 @@
               "Options": [ "MicrosoftGraph" ]
             },
             {
-              "Append": true,
+              "Prepend": true,
               "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
               "CodeFormatting": {
                 "NumberOfSpaces": 12
@@ -218,7 +218,7 @@
               "Options": [ "DownstreamApi" ]
             },
             {
-              "Append": true,
+              "Prepend": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
               "Options": [ "NonMinimalApp" ]
             }

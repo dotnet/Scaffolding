@@ -31,18 +31,18 @@
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
-              "Options": [ "MemberAccess" ],
+              "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"));"
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
-              "Options": [ "MemberAccess" ],
+              "CodeChangeType": "MemberAccess",
               "Block": "AddMvcOptions(options => {})"
             },
             {
-              "Block": "IServiceCollection.AddAuthorization",
-              "Options": [ "LambdaExpression" ],
-              "Parameter": "options",
+              "Parent": "IServiceCollection.AddAuthorization",
+              "Block": "options",
+              "Options": [ "LambdaParameter" ],
               "CodeFormatting": {
                 "NumberOfSpaces": 12
               }
@@ -54,7 +54,7 @@
             },
             {
               "Parent": "IServiceCollection.AddRazorPages()",
-              "Options": [ "MemberAccess" ],
+              "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityUI()"
             }
           ]
@@ -146,7 +146,7 @@
             },
             {
               "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
-              "Options": [ "MemberAccess" ],
+              "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityUI()"
             },
             {

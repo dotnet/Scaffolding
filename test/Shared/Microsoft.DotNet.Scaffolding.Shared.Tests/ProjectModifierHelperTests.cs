@@ -320,43 +320,73 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             var filteredWithNeither = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, optionsWithNeither);
 
             Assert.True(
-                filteredWithGraph.Length == 3 &&
+                filteredWithGraph.Count() == 3 &&
                 filteredWithGraph.Contains(graphSnippet) &&
                 !filteredWithGraph.Contains(apiSnippet) &&
                 filteredWithGraph.Contains(bothSnippet) &&
                 filteredWithGraph.Contains(neitherSnippet));
 
             Assert.True(
-                filteredWithApi.Length == 3 &&
+                filteredWithApi.Count() == 3 &&
                 !filteredWithApi.Contains(graphSnippet) &&
                 filteredWithApi.Contains(apiSnippet) &&
                 filteredWithApi.Contains(neitherSnippet) &&
                 filteredWithApi.Contains(bothSnippet));
 
             Assert.True(
-                filteredWithBoth.Length == 4 &&
+                filteredWithBoth.Count() == 4 &&
                 filteredWithBoth.Contains(graphSnippet) &&
                 filteredWithBoth.Contains(apiSnippet) &&
                 filteredWithBoth.Contains(bothSnippet) &&
                 filteredWithBoth.Contains(neitherSnippet));
 
             Assert.True(
-                filteredWithNeither.Length == 1 &&
+                filteredWithNeither.Count() == 1 &&
                 !filteredWithNeither.Contains(graphSnippet) &&
                 !filteredWithNeither.Contains(apiSnippet) &&
                 filteredWithNeither.Contains(neitherSnippet) &&
                 !filteredWithNeither.Contains(bothSnippet));
         }
 
-        [Fact]
-        public void StatementExistsTests()
+        [Theory]
+        [InlineData("app.UseRouting();", false)]
+        [InlineData("", true)]
+        public void EmptyBlockStatementExistsTests(string contents, bool contains)
         {
-            //create a block with app.UseRouting();
-            StatementSyntax block = SyntaxFactory.ParseStatement(
+            StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
                 @"
-                {
-                    app.UseRouting();
+                {                   
                 }");
+
+            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
+            Assert.Equal(ProjectModifierHelper.StatementExists(emptyBlockSyntax, contents), contains);
+        }
+
+        [Theory]
+        [InlineData("app.UseRouting();", true)]
+        [InlineData("app.UseDeveloperExceptionPage();", false)]
+        [InlineData("", true)]
+        public void BlockStatementExistsTests(string contents, bool contains)
+        {
+            StatementSyntax block = SyntaxFactory.ParseStatement(
+                    @"
+                    {
+                        app.UseRouting();
+                    }");
+            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(block);
+            Assert.Equal(ProjectModifierHelper.StatementExists(emptyBlockSyntax, contents), contains);
+        }
+
+        [Theory]
+        [InlineData("app.UseRouting();", false)]
+        [InlineData("app.UseDeveloperExceptionPage();", true)]
+        [InlineData("env.IsDevelopment()", true)]
+        [InlineData("services.AddRazorPages()", true)]
+        [InlineData("services.AddRazorPages().AddMvcOptions(options => {})", true)]
+        [InlineData("endpoints.MapRazorPages();", true)]
+        [InlineData("", true)]
+        public void DenseBlockStatementExistsTests(string contents, bool contains)
+        {
             StatementSyntax denseBlock = SyntaxFactory.ParseStatement(
                 @"
                 {
@@ -373,29 +403,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 });    
                 }");
 
-            StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
-                @"
-                {                   
-                }");
-
-            BlockSyntax blockSyntax = SyntaxFactory.Block(block);
-            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
             BlockSyntax denseBlockSyntax = SyntaxFactory.Block(denseBlock);
-            StatementSyntax statement = SyntaxFactory.ParseStatement("app.UseRouting();");
-            StatementSyntax statement2 = SyntaxFactory.ParseStatement("app.UseDeveloperExceptionPage();");
-            StatementSyntax statement3 = SyntaxFactory.ParseStatement("endpoints.MapRazorPages();");
-            StatementSyntax statement4 = SyntaxFactory.ParseStatement("env.IsDevelopment()");
-            StatementSyntax statement5 = SyntaxFactory.ParseStatement("services.AddRazorPages()");
-            StatementSyntax statement6 = SyntaxFactory.ParseStatement("services.AddRazorPages().AddMvcOptions(options => {})");
-
-            Assert.True(ProjectModifierHelper.StatementExists(blockSyntax, statement));
-            Assert.False(ProjectModifierHelper.StatementExists(emptyBlockSyntax, statement));
-            Assert.False(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement2));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement3));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement4));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement5));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement6));
+            Assert.Equal(ProjectModifierHelper.StatementExists(denseBlockSyntax, contents), contains);
         }
 
         [Theory]

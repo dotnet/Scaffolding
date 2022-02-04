@@ -240,13 +240,18 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 var formattedStatementString = TrimStatement(statement.ToString());
                 bool foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
-                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
-                if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
+
+                if (foundStatement)
                 {
-                    foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(TrimStatement(checkBlock.ToString()))).Any();
+                    return true;
                 }
-                return foundStatement;
+                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
+                if (!string.IsNullOrEmpty(checkBlock))
+                {
+                    return root.Members.Where(st => TrimStatement(st.ToString()).Contains(TrimStatement(checkBlock.ToString()))).Any();
+                }
             }
+
             return false;
         }
 
@@ -259,23 +264,30 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        internal static bool StatementExists(BlockSyntax blockSyntaxNode, StatementSyntax statement)
+        internal static bool StatementExists(SyntaxNode node, string statement)
         {
-            if (blockSyntaxNode.Statements.Any(st => st.ToString().Contains(statement.ToString(), StringComparison.Ordinal)))
+            if (node is BlockSyntax block)
             {
-                return true;
+                return block.Statements.Any(m => m.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
             }
+            else if (node is CompilationUnitSyntax compilationUnit)
+            {
+                return compilationUnit.Members.Any(m => m.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
+            }
+
             return false;
         }
+        internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
 
-        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(
+            ExpressionStatementSyntax expression, string codeSnippet, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
         {
             if (!string.IsNullOrEmpty(codeSnippet) &&
                 !expression
                     .ToString()
-                    .Trim(ProjectModifierHelper.CodeSnippetTrimChars)
+                    .Trim(CodeSnippetTrimChars)
                     .Contains(
-                        codeSnippet.Trim(ProjectModifierHelper.CodeSnippetTrimChars)))
+                        codeSnippet.Trim(CodeSnippetTrimChars)))
             {
                 var identifier = SyntaxFactory.IdentifierName(codeSnippet)
                             .WithTrailingTrivia(trailingTrivia);
@@ -291,21 +303,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
         }
 
-        //Filter out CodeSnippets that are invalid using FilterOptions
-        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options)
+        // Filter out CodeSnippets that are already present in original node
+        internal static CodeSnippet[] FilterCodeSnippets(SyntaxNode originalMethod, CodeSnippet[] codeSnippets, CodeChangeOptions options, IDictionary<string, string> parameters = null)
         {
-            var filteredCodeSnippets = new HashSet<CodeSnippet>();
-            if (codeSnippets != null && codeSnippets.Any() && options != null)
-            {
-                foreach (var codeSnippet in codeSnippets)
-                {
-                    if (FilterOptions(codeSnippet.Options, options))
-                    {
-                        filteredCodeSnippets.Add(codeSnippet);
-                    }
-                }
-            }
-            return filteredCodeSnippets.ToArray();
+            var filtered = FilterCodeSnippets(codeSnippets, options);
+            var selected = filtered.Select(cs => GetFormattedCodeBlock(cs, parameters));
+            var output = selected.Where(cs => !StatementExists(originalMethod, cs.Block)).ToArray();
+
+            return output;
+        }
+
+        // Filter out CodeSnippets that are invalid using FilterOptions
+        internal static IEnumerable<CodeSnippet> FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options) => codeSnippets.Where(cs => FilterOptions(cs.Options, options));
+
+        private static CodeSnippet GetFormattedCodeBlock(CodeSnippet codeSnippet, IDictionary<string, string> parameters = null)
+        {
+            codeSnippet.Block = FormatCodeBlock(codeSnippet.Block, parameters).Trim(CodeSnippetTrimChars);
+            return codeSnippet;
         }
 
         /// <summary>

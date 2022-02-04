@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 return null;
             }
-
+            Debugger.Launch();
             byte[] content = (propertyInfo.GetValue(null) as byte[])!;
             CodeModifierConfig? codeModifierConfig = ReadCodeModifierConfigFromFileContent(content);
             if (codeModifierConfig is null)
@@ -213,7 +214,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            //get the file document to get the document root for editing.
+            // get the file document to get the document root for editing.
             DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
             if (documentEditor is null)
             {
@@ -236,72 +237,83 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="options"></param>
         /// <param name="file"></param>
         /// <returns>modified root if there are changes, else null</returns>
-        private static CompilationUnitSyntax? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
+        private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
-            var newRoot = documentBuilder.AddUsings(options);
-            if (file.FileName.Equals("Program.cs"))
+            var root = documentBuilder.AddUsings(options);
+            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
-                var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(newRoot.Members);
-                if (file.Methods.TryGetValue("Global", out var globalMethod))
-                {
-                    var filteredChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
-                    if (!filteredChanges.Any())
-                    {
-                        return null;
-                    }
+                var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(root.Members);
+                var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(root, globalChanges.CodeChanges, options);
 
-                    foreach (var change in filteredChanges)
-                    {
-                        //Modify CodeSnippet to have correct variable identifiers present.
-                        var formattedChange = ProjectModifierHelper.FormatCodeSnippet(change, variableDict);
-                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                    }
+                Debugger.Launch();
+
+                var updatedGlobalMethod = DocumentBuilder.ModifyMethod(root, filteredChanges, variableDict);
+                if (updatedGlobalMethod != null)
+                {
+                    return root.ReplaceNode(root, updatedGlobalMethod);
                 }
             }
 
             else
             {
-                var namespaceNode = newRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                FileScopedNamespaceDeclarationSyntax? fileScopedNamespace = null;
-                if (namespaceNode is null)
-                {
-                    fileScopedNamespace = newRoot?.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
-                }
+                Debugger.Launch();
+
+                var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();
 
                 string className = ProjectModifierHelper.GetClassName(file.FileName);
-                //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
-                var classNode =
-                    namespaceNode?.DescendantNodes()?.Where(node =>
-                        node is ClassDeclarationSyntax cds &&
-                        cds.Identifier.ValueText.Contains(className)).FirstOrDefault() ??
-                    fileScopedNamespace?.DescendantNodes()?.Where(node =>
-                        node is ClassDeclarationSyntax cds &&
-                        cds.Identifier.ValueText.Contains(className)).FirstOrDefault();
+                // get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
 
-                if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
+                if (namespaceNode?.DescendantNodes()?.Where(node =>
+                        node is ClassDeclarationSyntax cds &&
+                        cds.Identifier.ValueText.Contains(className)).FirstOrDefault() is ClassDeclarationSyntax classNode)
                 {
-                    var modifiedClassDeclarationSyntax = classDeclarationSyntax;
+                    var modifiedClassDeclarationSyntax = classNode;
 
                     //add class properties
                     modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax, options);
                     //add class attributes
                     modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
 
+                    modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
+                    
                     //add code snippets/changes.
-                    if (file.Methods != null && file.Methods.Any())
-                    {
-                        modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(modifiedClassDeclarationSyntax, options);
-                        modifiedClassDeclarationSyntax = documentBuilder.EditMethodTypes(modifiedClassDeclarationSyntax, options);
-                        modifiedClassDeclarationSyntax = documentBuilder.AddMethodParameters(modifiedClassDeclarationSyntax, options);
-                    }
+
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
-                    newRoot = newRoot.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
+                    root = root.ReplaceNode(classNode, modifiedClassDeclarationSyntax);
 #pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
                 }
             }
 
-            return newRoot;
+            return root;
+        }
+
+        private static ClassDeclarationSyntax ModifyMethods(ClassDeclarationSyntax modifiedClassDeclarationSyntax, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options)
+        {
+            foreach ((string methodName, Method methodChanges) in methods)
+            {
+                var updatedMethodNode = GetModifiedMethod(methodName, methodChanges, documentBuilder, modifiedClassDeclarationSyntax, options);
+                if (updatedMethodNode != null)
+                {
+                    modifiedClassDeclarationSyntax = modifiedClassDeclarationSyntax.ReplaceNode(modifiedClassDeclarationSyntax, updatedMethodNode);
+                }
+            }
+
+            return modifiedClassDeclarationSyntax;
+        }
+
+        private static SyntaxNode? GetModifiedMethod(string methodName, Method methodChanges, DocumentBuilder documentBuilder, SyntaxNode modifiedClassDeclarationSyntax, CodeChangeOptions options)
+        {
+            if (string.IsNullOrEmpty(methodName) || methodChanges is null)
+            {
+                return null;
+            }
+
+            modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippetsToMethod(methodName, methodChanges, modifiedClassDeclarationSyntax, options);
+
+            modifiedClassDeclarationSyntax = documentBuilder.EditMethodType(methodName, methodChanges, modifiedClassDeclarationSyntax, options);
+            modifiedClassDeclarationSyntax = documentBuilder.AddMethodParameters(methodName, methodChanges, modifiedClassDeclarationSyntax, options);
+            return modifiedClassDeclarationSyntax;
         }
 
         internal async Task ModifyCshtmlFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)

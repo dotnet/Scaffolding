@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// <summary>
         /// The project is a blazor web assembly.
         /// </summary>
-        public bool? IsBlazorWasm { get; set; }
+        public bool IsBlazorWasm { get; set; }
 
         /// <summary>
         /// The app calls Microsoft Graph.
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public List<string> PasswordCredentials { get; } = new List<string>();
 
         /// <summary>
-        /// Identitier URIs for web APIs.
+        /// Identifier URIs for web APIs.
         /// </summary>
         public string? AppIdUri { set;  get; }
 

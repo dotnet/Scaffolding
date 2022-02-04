@@ -63,9 +63,59 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] add_ShowProfile_razor {
+        internal static byte[] add_dotnet_blazorserver_CallWebApi_razor {
             get {
-                object obj = ResourceManager.GetObject("add_ShowProfile_razor", resourceCulture);
+                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_CallWebApi_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorserver_LoginDisplay_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_LoginDisplay_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorserver_ShowProfile_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_ShowProfile_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_Authentication_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_Authentication_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_LoginDisplay_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_LoginDisplay_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_RedirectToLogin_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_RedirectToLogin_razor", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -298,6 +348,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to update Azure AD app registration {0} ({1}).
+        /// </summary>
+        internal static string FailedToUpdateApp {
+            get {
+                return ResourceManager.GetString("FailedToUpdateApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update Azure AD app, null {0}.
+        /// </summary>
+        internal static string FailedToUpdateAppNull {
+            get {
+                return ResourceManager.GetString("FailedToUpdateAppNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Initializing User Secrets . . ..
         /// </summary>
         internal static string InitializeUserSecrets {
@@ -321,6 +389,24 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string NoProjectFound {
             get {
                 return ResourceManager.GetString("NoProjectFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find app registration with matching ID in Azure AD (ID: {0}).
+        /// </summary>
+        internal static string NotFound {
+            get {
+                return ResourceManager.GetString("NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure AD app {0} ({1}) did not require any remote updates.
+        /// </summary>
+        internal static string NoUpdateNecessary {
+            get {
+                return ResourceManager.GetString("NoUpdateNecessary", resourceCulture);
             }
         }
         
@@ -352,6 +438,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully updated app registration {0} ({1}).
+        /// </summary>
+        internal static string SuccessfullyUpdatedApp {
+            get {
+                return ResourceManager.GetString("SuccessfullyUpdatedApp", resourceCulture);
             }
         }
         

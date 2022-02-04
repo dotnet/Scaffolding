@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
-using Microsoft.DotNet.MSIdentity.Project;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
+using Microsoft.DotNet.MSIdentity.Project;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,7 +21,6 @@ namespace Tests
             _testOutput = output;
         }
 
-        readonly ProjectDescriptionReader _projectDescriptionReader = new ProjectDescriptionReader();
         readonly CodeReader _codeReader = new CodeReader();
 
         [InlineData(@"blazorserver\blazorserver-b2c", "dotnet new blazorserver --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-webapp", true)]
@@ -43,20 +42,22 @@ namespace Tests
         [InlineData(@"webapp\webapp-singleorg", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapp")]
         [InlineData(@"webapp\webapp-singleorg-callsgraph", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapp")]
         [InlineData(@"webapp\webapp-singleorg-callswebapi", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapp")]
-        [Theory(Skip="Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
+        [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader(string folderPath, string command, string expectedProjectType, bool isB2C = false)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
 
-            var projectDescription = _projectDescriptionReader.GetProjectDescription(string.Empty, createdProjectFolder);
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
 
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
 
             var authenticationSettings = _codeReader.ReadFromFiles(
-                createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                projectDescriptionReader.ProjectDescriptions,
+                files);
 
             bool callsGraph = folderPath.Contains(TestConstants.CallsGraph);
             bool callsWebApi = folderPath.Contains(TestConstants.CallsWebApi) || callsGraph;
@@ -87,20 +88,23 @@ namespace Tests
 
         [InlineData(@"blazorwasm\blazorwasm-b2c", "dotnet new blazorwasm --framework net5.0 --auth IndividualB2C --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-blazorwasm", true)]
         [InlineData(@"blazorwasm\blazorwasm-singleorg", "dotnet new blazorwasm --framework net5.0 --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75", "dotnet-blazorwasm")]
-        [Theory(Skip="The newly created test project wants new packages that don't exist on official feeds. Will rework for next update.")]
+        [Theory(Skip = "The newly created test project wants new packages that don't exist on official feeds. Will rework for next update.")]
         public void TestProjectDescriptionReader_TemplatesWithBlazorWasm(string folderPath, string command, string expectedProjectType, bool isB2C = false)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder);
 
-            var projectDescription = _projectDescriptionReader.GetProjectDescription(string.Empty, createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
+
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
 
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
 
             var authenticationSettings = _codeReader.ReadFromFiles(
-                createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                projectDescriptionReader.ProjectDescriptions,
+                files);
 
             if (isB2C)
             {
@@ -122,20 +126,22 @@ namespace Tests
         //[InlineData(@"blazorwasm\blazorwasm-singleorg-callsgraph-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph --hosted", "dotnet-blazorwasm-hosted")]
         //[InlineData(@"blazorwasm\blazorwasm-singleorg-callswebapi-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\" --hosted", "dotnet-blazorwasm-hosted")]
         [InlineData(@"blazorwasm\blazorwasm-singleorg-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com  --hosted", "dotnet-blazorwasm-hosted")]
-        [Theory(Skip="Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
+        [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader_TemplatesWithBlazorWasmHosted(string folderPath, string command, string expectedProjectType)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
 
-            var projectDescription = _projectDescriptionReader.GetProjectDescription(string.Empty, createdProjectFolder);
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
 
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
 
             var authenticationSettings = _codeReader.ReadFromFiles(
-                createdProjectFolder,
-                projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                           projectDescription,
+                           projectDescriptionReader.ProjectDescriptions,
+                           files);
 
             // Blazorwasm now delegates twice (once to the Client [Blazor], and once to the
             // Server [Web API]
@@ -152,15 +158,17 @@ namespace Tests
         public void TestProjectDescriptionReader_TemplatesWithNoAuth(string folderPath, string command, string expectedProjectType)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "NoAuthTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder); // TODO cache
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
 
-            var projectDescription = _projectDescriptionReader.GetProjectDescription(string.Empty, createdProjectFolder);
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
             Assert.NotNull(projectDescription);
             Assert.Equal(expectedProjectType, projectDescription.Identifier);
 
             var authenticationSettings = _codeReader.ReadFromFiles(
-                createdProjectFolder,
                 projectDescription,
-                _projectDescriptionReader.projectDescriptions);
+                projectDescriptionReader.ProjectDescriptions,
+                files);
 
             Assert.False(authenticationSettings.ApplicationParameters.HasAuthentication);
             Assert.Empty(authenticationSettings.ApplicationParameters.ApiPermissions);
@@ -181,9 +189,9 @@ namespace Tests
         {
             bool IsWebApi = authenticationSettings.ApplicationParameters.IsWebApi.HasValue && authenticationSettings.ApplicationParameters.IsWebApi.Value;
             bool IsWebApp = authenticationSettings.ApplicationParameters.IsWebApp.HasValue && authenticationSettings.ApplicationParameters.IsWebApp.Value;
-            bool IsBlazorWasm = authenticationSettings.ApplicationParameters.IsBlazorWasm.HasValue && authenticationSettings.ApplicationParameters.IsBlazorWasm.Value;
+            bool IsBlazorWasm = authenticationSettings.ApplicationParameters.IsBlazorWasm;
             Assert.True(IsWebApi || IsWebApp || IsBlazorWasm);
-            
+
             if (isB2C)
             {
                 Assert.True(authenticationSettings.ApplicationParameters.HasAuthentication);
@@ -219,7 +227,7 @@ namespace Tests
             // Create the folder
             string parentFolder = Path.Combine(tempFolder, "Provisioning", testName);
             string createdProjectFolder = Path.Combine(
-                parentFolder, 
+                parentFolder,
                 projectFolderName.Replace("\\", Path.DirectorySeparatorChar.ToString(CultureInfo.InvariantCulture)));
 
             if (!Directory.Exists(createdProjectFolder))

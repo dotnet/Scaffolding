@@ -3,6 +3,7 @@
   "Files": [
     {
       "FileName": "Startup.cs",
+      "Options": [ "NonMinimalApp" ],
       "Methods": {
         "Configure": {
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
@@ -70,6 +71,7 @@
     },
     {
       "FileName": "Program.cs",
+      "Options": [ "MinimalApp" ],
       "Methods": {
         "Global": {
           "CodeChanges": [

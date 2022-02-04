@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Globalization;
@@ -17,9 +17,12 @@ namespace Microsoft.DotNet.MSIdentity.Project
         private string? _fileRelativePath;
 
         public string[]? MatchAny { get; set; }
+
         public string? Sets { get; set; }
 
         public string? FolderRelativePath { get; set; }
+
+        public string? FileExtension { get; set; }
 
         /// <summary>
         /// Either FileRelativePath is defined, along with MatchAny

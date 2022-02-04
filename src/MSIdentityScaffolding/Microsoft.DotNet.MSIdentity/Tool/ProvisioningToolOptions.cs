@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         /// <summary>
         /// Path to appsettings.json file
-        /// </summary>
+        /// </summary>   
         public string? AppSettingsFilePath { get; set; }
 
         ///<summary>
@@ -159,6 +159,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// Make PackageReferences in .csproj (add using `dotnet add package`
         /// </summary>
         public bool PackagesUpdate { get; set; } = false;
+
+        /// <summary>
+        /// Determines if the project type is blazor wasm
+        /// </summary>
+        public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType);
 
         /// <summary>
         /// Clones the options

@@ -3,6 +3,7 @@
   "Files": [
     {
       "FileName": "Program.cs",
+      "Options": [ "MinimalApp" ],
       "Methods": {
         "Global": {
           "CodeChanges": [
@@ -25,10 +26,22 @@
             {
               "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
               "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddControllersWithViews",
                 "WebApplication.CreateBuilder.Services.AddAuthorization",
-                "WebApplication.CreateBuilder.Services.AddRazorPages()",
-                "WebApplication.CreateBuilder.Build()"
+                "WebApplication.CreateBuilder.Services.AddRazorPages"
               ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddControllersWithViews()\r\n    .AddMicrosoftIdentityUI();",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
+              "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddAuthorization",
+                "WebApplication.CreateBuilder.Services.AddRazorPages",
+                "WebApplication.CreateBuilder.Build()"
+              ],             
               "CodeFormatting": {
                 "Newline": true
               }
@@ -95,9 +108,8 @@
               }
             },
             {
-              "CheckBlock": "WebApplication.CreateBuilder.Services.AddAuthorization",
-              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\n{\n    options.FallbackPolicy = options.DefaultPolicy;\n});\n\r",
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\r\n{\r\n    // By default, all incoming requests will be authorized according to the default policy\r\n    options.FallbackPolicy = options.DefaultPolicy;\r\n});",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
               "InsertBefore": [
                 "WebApplication.CreateBuilder.Services.AddRazorPages()",
                 "WebApplication.CreateBuilder.Build()"
@@ -107,26 +119,47 @@
               }
             },
             {
-              "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
+              "Parent": "WebApplication.CreateBuilder.Services.AddServerSideBlazor()",
               "Options": [
                 "MemberAccess"
               ],
-              "Block": "AddMicrosoftIdentityUI()"
+              "Block": "AddMicrosoftIdentityConsentHandler()"
             },
             {
-              "InsertAfter": "app.UseRouting();",
               "Block": "app.UseAuthentication();",
+              "InsertAfter": "app.UseRouting()",
               "InsertBefore": [
-                "app.UseAuthorization();",
-                "app.Run();"
-              ]
+                "app.UseAuthorization",
+                "app.MapControllers",
+                "app.MapBlazorHub"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
-              "InsertAfter": "app.MapRazorPages();",
-              "Block": "app.MapControllers();",
+              "Block": "app.UseAuthorization();",
+              "InsertAfter": "app.UseAuthentication()",
               "InsertBefore": [
-                "app.Run();"
-              ]
+                "app.MapControllers",
+                "app.MapBlazorHub",
+                "app.MapFallbackToPage"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "app.MapControllers();",
+              "InsertAfter": "app.UseAuthorization",
+              "InsertBefore": [
+                "app.MapBlazorHub",
+                "app.MapFallbackToPage",
+                "app.Run"
+              ],
+              "CodeFormatting": {
+                "Newline": true
+              }
             }
           ]
         }
@@ -141,26 +174,66 @@
       ]
     },
     {
+      "FileName": "App.razor",
+      "Replacements": [
+        {
+          "Block": "<CascadingAuthenticationState>\r\n    <Router AppAssembly=\"@typeof(App).Assembly\">",
+          "ReplaceSnippet": "<Router AppAssembly=\"@typeof(App).Assembly\">"
+        },
+        {
+          "Block":"    </Router>\r\n</CascadingAuthenticationState>",
+          "ReplaceSnippet": "</Router>"
+        }
+      ]
+    },
+    {
       "FileName": "NavMenu.razor",
       "Options": [
         "MicrosoftGraph",
         "DownstreamApi"
       ],
-      "RazorChanges": [
+      "Replacements": [
         {
           "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"showprofile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
           "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
           "Options": [
             "MicrosoftGraph"
           ]
+        },
+        {
+          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"callwebapi\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "Options": [
+            "DownstreamApi"
+          ]
         }
       ]
+    },
+    {
+      "FileName": "MainLayout.razor",
+      "Replacements": [
+        {
+          "Block": "    <main>\r\n        <div class=\"top-row px-4 auth\">\r\n            <LoginDisplay />",
+          "ReplaceSnippet": "    <main>\r\n        <div class=\"top-row px-4\">"
+        }
+      ]
+    },
+    {
+      "FileName": "LoginDisplay.razor",
+      "AddFilePath": "Shared/LoginDisplay.razor"
     },
     {
       "FileName": "ShowProfile.razor",
       "AddFilePath": "Pages/ShowProfile.razor",
       "Options": [
         "MicrosoftGraph"
+      ]
+    },
+    {
+      "FileName": "CallWebApi.razor",
+      "AddFilePath": "Pages/CallWebApi.razor",
+      "Options": [
+        "DownstreamApi"
       ]
     }
   ]

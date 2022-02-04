@@ -38,45 +38,29 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return startupType == null;
         }
 
+        // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
         {
-            if (project != null)
+            if (project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
             {
-                var startupDocument = project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).FirstOrDefault();
-                if (startupDocument == null)
-                {
-                    //if changed the name in Program.cs, get the class name and check.
-                    var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
-                    var startupClassName = await GetStartupClassName(programDocument);
-                    if (!string.IsNullOrEmpty(startupClassName))
-                    {
-                        startupDocument = project.Documents.Where(d => d.Name.EndsWith($"{startupClassName}.cs")).FirstOrDefault();
-                    }
-                }
-
-                return startupDocument == null;
+                return false;
             }
 
-            return false;
+            // if changed the name in Program.cs, get the class name and check.
+            var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+            var startupClassName = await GetStartupClassName(programDocument);
+
+            return string.IsNullOrEmpty(startupClassName); // If project has UseStartup in Program.cs, it is not a minimal app
         }
 
-        //Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
-        //will bail out.
-        internal static async Task<string> GetStartupClass(string projectPath, CodeAnalysis.Project project)
+        // Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
+        // will return null.
+        internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
         {
-            var programFilePath = Directory.EnumerateFiles(projectPath, "Program.cs").FirstOrDefault();
-            if (!string.IsNullOrEmpty(programFilePath))
-            {
-                var programDoc = project.Documents.Where(d => d.Name.Equals(programFilePath)).FirstOrDefault();
-                var startupClassName = await GetStartupClassName(programDoc);
-                string className = startupClassName;
-                var startupFilePath = string.Empty;
-                if (!string.IsNullOrEmpty(startupClassName))
-                {
-                    return string.Concat(startupClassName, ".cs");
-                }
-            }
-            return string.Empty;
+            var programCsDocument = project.Documents.Where(d => d.Name.Equals("Program.cs")).FirstOrDefault();
+            var startupClassName = await GetStartupClassName(programCsDocument);
+
+            return string.IsNullOrEmpty(startupClassName) ? null : string.Concat(startupClassName, ".cs");
         }
 
         internal static async Task<string> GetStartupClassName(Document programDoc)
@@ -110,6 +94,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     }
                 }
             }
+
             return string.Empty;
         }
 
@@ -343,6 +328,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 return false;
             }
+            // for example, program.cs is only modified when codeChangeOptions.IsMinimalApp is true
+            if (options.Contains(CodeChangeOptionStrings.MinimalApp) && !codeChangeOptions.IsMinimalApp)
+            {
+                return false;
+            }
             //if its a minimal app and options have a "NonMinimalApp", don't add the CodeBlock
             if (options.Contains(CodeChangeOptionStrings.NonMinimalApp) && codeChangeOptions.IsMinimalApp)
             {
@@ -375,16 +365,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     return true;
                 }
             }
+
             return false;
         }
 
         /// <summary>
         /// Replaces text within document or appends text to the end of the document
-        /// depending on whether change.ReplaceSnippet is set
+        /// depending on whether change.ReplaceSnippet is set 
         /// </summary>
         /// <param name="fileDoc"></param>
         /// <param name="codeChanges"></param>
-        /// <returns></returns>
+        /// <returns>updated document, or null if no changes made</returns>
         internal static async Task<Document> ModifyDocumentText(Document fileDoc, IEnumerable<CodeSnippet> codeChanges)
         {
             if (fileDoc is null || codeChanges is null || !codeChanges.Any())
@@ -400,14 +391,25 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
 
             var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
-            var applicableCodeChanges = codeChanges.Where(
-                c => !string.IsNullOrEmpty(c.Block) && !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            if (!applicableCodeChanges.Any())
+            {
+                return null;
+            }
+
             foreach (var change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
-                if (!string.IsNullOrEmpty(change.ReplaceSnippet) && sourceFileString.Contains(change.ReplaceSnippet))
+                if (!string.IsNullOrEmpty(change.ReplaceSnippet))
                 {
-                    sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    if (sourceFileString.Contains(change.ReplaceSnippet))
+                    {
+                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                    }
+                    else
+                    {
+                        // TODO: Generate readme file when replace snippets not found in file
+                    }
                 }
                 else
                 {
@@ -415,20 +417,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 }
             }
 
-            if (string.IsNullOrEmpty(sourceFileString))
-            {
-                return null; // TODO generate README
-            }
-
-            var sourceTextToAdd = SourceText.From(sourceFileString);
-            return fileDoc.WithText(sourceTextToAdd);
+            var updatedSourceText = SourceText.From(sourceFileString);
+            return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task UpdateDocument(Document fileDoc, Document editedDocument, IConsoleLogger consoleLogger)
+        internal static async Task UpdateDocument(Document document, IConsoleLogger consoleLogger)
         {
-            var classFileTxt = await editedDocument.GetTextAsync();
-            File.WriteAllText(fileDoc.Name, classFileTxt.ToString());
-            consoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
+            var classFileTxt = await document.GetTextAsync();
+
+            // Note: Here, document.Name is the full filepath
+            File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
+            consoleLogger.LogMessage($"Modified {document.Name}.\n");
         }
 
         // Filter out CodeBlocks that are invalid using FilterOptions

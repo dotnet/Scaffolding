@@ -50,17 +50,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
             catch (Exception ex)
             {
-                do
+                while (ex is TargetInvocationException)
                 {
-                    while (ex is TargetInvocationException)
-                    {
-                        ex = ex.InnerException;
-                    }
-                    _logger.LogMessage(ex.Message, LogMessageLevel.Error);
-                    _logger.LogMessage(ex.StackTrace);
                     ex = ex.InnerException;
                 }
-                while (ex is Exception);
+                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage(ex.StackTrace);
             }
             return 0;
         }

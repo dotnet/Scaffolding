@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
@@ -24,6 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     internal class EntityFrameworkModelProcessor
     {
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
+        private const string MySqlException = nameof(MySqlException);
         private const string NewDbContextFolderName = "Data";
         private bool _useSqlite;
         private string _dbContextFullTypeName;
@@ -554,8 +556,60 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debugger.Launch();
+                var exceptionType = ex.GetType();
+                // if MySQL exception with error code 1045, discard error message since it contains sensitive dev information
+                if (exceptionType.Name.Equals(MySqlException, StringComparison.OrdinalIgnoreCase) || exceptionType.FullName.Contains(MySqlException, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (ex.Data.Keys.Count > 0 &&
+                        ex.Data["Server Error Code"] != null &&
+                        //based on error code 1045 from here https://dev.mysql.com/doc/
+                        ex.Data["Server Error Code"].ToString().Equals("1045", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //userName will have some value, or will be empty. We're ok with both.
+                        string userName = GetUsername(ex.Message);
+                        ex = new Exception($"{string.Format(MessageStrings.MySQLDbContextExceptionMssg, userName)}\n");
+                        throw ex;
+                    }
+                }
                 throw ex.Unwrap(_logger);
             }
+        }
+
+        /// <summary>
+        /// return the username/user id from exception messages including sensitive information.
+        /// Currently accounting for exception messages using MySQL scenarios.
+        /// </summary>
+        /// <returns>username from connection strings found in exception messages.</returns>
+        internal static string GetUsername(string exceptionMssg)
+        {
+            string username = string.Empty;
+            if (!string.IsNullOrEmpty(exceptionMssg))
+            {
+                //if the exception message is in the format `Access denied for user 'admin'@'localhost',
+                //discard the entire message since username and machine name could be both sensitive based on
+                //our collected telemetry.
+                if (exceptionMssg.Contains("Access denied for user", StringComparison.OrdinalIgnoreCase))
+                {
+                    return string.Empty;
+                }
+                //exception messages could also contain entire SqlServer or MySQL connection strings
+                //format connection strings
+                exceptionMssg = exceptionMssg.Replace(" ", string.Empty);
+                exceptionMssg = exceptionMssg.Replace("\n", string.Empty);
+                exceptionMssg = exceptionMssg.Replace("\r", string.Empty);
+
+                var userIdMatch = Regex.Match(exceptionMssg, "[.]*uid=.*;", RegexOptions.IgnoreCase).Value;
+                userIdMatch = string.IsNullOrEmpty(userIdMatch) ? Regex.Match(exceptionMssg, "[.]*userid=.*;", RegexOptions.IgnoreCase).Value : userIdMatch;
+
+                var equalsIndex = userIdMatch.IndexOf('=');
+                var semiColonIndex = userIdMatch.IndexOf(';');
+                if (equalsIndex >= 0 && equalsIndex < semiColonIndex)
+                {
+                    username = $" '{userIdMatch.Substring(equalsIndex+1, semiColonIndex-equalsIndex-1)}'";
+                }
+            }
+            return username;
         }
 
         private void ValidateEFSqlServerDependency()

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -167,6 +167,9 @@
   </data>
   <data name="ModelTypeNotFound" xml:space="preserve">
     <value>Could not get the reflection type for Model : {0}</value>
+  </data>
+  <data name="MySQLDbContextExceptionMssg" xml:space="preserve">
+    <value>Unable to get DbContext Instance. Access denied for user{0} (MySQL db).</value>
   </data>
   <data name="NoEntityOfTypeInDbContext" xml:space="preserve">
     <value>There is no entity type {0} on DbContext {1}</value>

@@ -108,46 +108,47 @@ stages:
             $(_ValidateSdkArgs)
           displayName: Windows Build / Publish
 
-      - job: OSX
-        pool:
-          vmImage: macOS-11
-        strategy:
-          matrix:
-            release_configuration:
-              _BuildConfig: Release
-            ${{ if eq(variables['System.TeamProject'], 'public') }}:
-              debug_configuration:
-                _BuildConfig: Debug
-        steps:
-        - checkout: self
-          clean: true
-        - script: eng/common/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-          name: Build
-          displayName: Build
-          condition: succeeded()
-          
-      - job: Linux
-        pool:
-          vmImage: ubuntu-18.04
-        container: LinuxContainer
-        strategy:
-          matrix:
-            release_configuration:
-              _BuildConfig: Release
-            ${{ if eq(variables['System.TeamProject'], 'public') }}:
-              debug_configuration:
-                _BuildConfig: Debug
-        steps:
-        - checkout: self
-          clean: true
-        - script: eng/common/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-          name: Build
-          displayName: Build
-          condition: succeeded()
+      - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        - job: OSX
+          pool:
+            vmImage: macOS-11
+          strategy:
+            matrix:
+              release_configuration:
+                _BuildConfig: Release
+              ${{ if eq(variables['System.TeamProject'], 'public') }}:
+                debug_configuration:
+                  _BuildConfig: Debug
+          steps:
+          - checkout: self
+            clean: true
+          - script: eng/common/cibuild.sh
+              --configuration $(_BuildConfig)
+              --prepareMachine
+            name: Build
+            displayName: Build
+            condition: succeeded()
+
+        - job: Linux
+          pool:
+            vmImage: ubuntu-18.04
+          container: LinuxContainer
+          strategy:
+            matrix:
+              release_configuration:
+                _BuildConfig: Release
+              ${{ if eq(variables['System.TeamProject'], 'public') }}:
+                debug_configuration:
+                  _BuildConfig: Debug
+          steps:
+          - checkout: self
+            clean: true
+          - script: eng/common/cibuild.sh
+              --configuration $(_BuildConfig)
+              --prepareMachine
+            name: Build
+            displayName: Build
+            condition: succeeded()
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml

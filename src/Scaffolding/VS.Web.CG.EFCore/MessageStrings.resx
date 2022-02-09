@@ -169,7 +169,7 @@
     <value>Could not get the reflection type for Model : {0}</value>
   </data>
   <data name="MySQLDbContextExceptionMssg" xml:space="preserve">
-    <value>Unable to get DbContext Instance. Access denied for user{0} (MySQL db).</value>
+    <value>Unable to get DbContext Instance. Access denied for user (MySQL db).</value>
   </data>
   <data name="NoEntityOfTypeInDbContext" xml:space="preserve">
     <value>There is no entity type {0} on DbContext {1}</value>

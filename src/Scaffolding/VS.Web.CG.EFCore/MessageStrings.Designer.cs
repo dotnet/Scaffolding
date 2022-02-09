@@ -215,7 +215,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Unable to get DbContext Instance. Access denied for user{0} (MySQL db).
+        ///   Looks up a localized string similar to Unable to get DbContext Instance. Access denied for user (MySQL db).
         /// </summary>
         internal static string MySQLDbContextExceptionMssg
         {

@@ -1,5 +1,5 @@
 {
-  "Identifier": "dotnet-minimal_webapi",
+  "Identifier": "dotnet-minimal_api",
   "Files": [
     {
       "FileName": "Program.cs",
@@ -13,26 +13,30 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
-              "Prepend": true,
-              "InsertBefore": [ "builder.Services.AddAuthorization", "builder.Services.AddEndpointsApiExplorer", "builder.Services.AddSwaggerGen" ],
+              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "InsertAfter": "WebApplication.CreateBuilder",
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "builder.Services.AddAuthorization();",
-              "InsertAfter": "builder.Services.AddAuthentication",
-              "InsertBefore": [ "builder.Services.AddEndpointsApiExplorer", "builder.Services.AddSwaggerGen" ],
+              "Block": "AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "AddAuthentication",
+              "CodeChangeType": "MemberAccess",
               "CodeFormatting": {
-                "Newline": true
+                "Newline": true,
+                "NumberOfSpaces": 4
               }
             },
             {
               "Block": "EnableTokenAcquisitionToCallDownstreamApi()",
               "Parent": "AddMicrosoftIdentityWebApi",
               "CodeChangeType": "MemberAccess",
-              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ]
+              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 8
+              }
             },
             {
               "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
@@ -48,7 +52,7 @@
               "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Options": [ "DownstreamApi" ],
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
@@ -58,52 +62,30 @@
               "Block": "AddInMemoryTokenCaches()",
               "Parent": "AddDownstreamWebApi",
               "CodeChangeType": "MemberAccess",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
+              "Options": [ "DownstreamApi" ],
               "CodeFormatting": {
-                "NumberOfSpaces": 12,
+                "NumberOfSpaces": 16,
                 "Newline": true
               }
             },
             {
-              "Block": "AddInMemoryTokenCaches()",
-              "Parent": "AddMicrosoftGraph",
-              "CodeChangeType": "MemberAccess",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
-                "Newline": true
-              }
+              "Block": "builder.Services.AddAuthorization();",
+              "InsertAfter": "builder.Services.AddAuthentication"
             },
             {
               "Block": "app.UseAuthentication();",
               "InsertAfter": "app.UseHttpsRedirection",
-              "InsertBefore": [
-                "app.UseAuthorization",
-                "app.MapGet"
-              ],
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
               "Block": "app.UseAuthorization();",
-              "InsertAfter": "app.UseAuthentication",
-              "InsertBefore": [
-                "var summaries",
-                "app.MapGet",
-                "app.Configuration["
-              ],
-              "CodeFormatting": {
-                "Newline": true
-              }
+              "InsertAfter": "app.UseAuthentication"
             },
             {
               "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"];", 
               "InsertAfter": "app.UseAuthorization",
-              "InsertBefore": [
-                "var summaries",
-                "app.MapGet"
-              ],
               "CodeFormatting": {
                 "Newline": true
               }

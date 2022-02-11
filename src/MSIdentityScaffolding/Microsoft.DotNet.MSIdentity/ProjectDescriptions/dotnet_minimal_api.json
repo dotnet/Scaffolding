@@ -1,5 +1,5 @@
 {
-  "Identifier": "dotnet-minimal_webapi",
+  "Identifier": "dotnet-minimal_api",
   "ProjectRelativeFolder": "",
   "BasedOnProjectDescription": "dotnet-web",
   "MatchesForProjectType": [

@@ -59,9 +59,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                         if (!newRoot.Usings.Any(node => node.Name.ToString().Equals(usingName)))
                         {
                             newRoot = newRoot.InsertNodesAfter(newRoot.Usings.Last(), new List<SyntaxNode> { usingNode });
+                            // TODO add new line if necessary after usings
                         }
                     }
                 }
+
                 return newRoot;
             }
         }
@@ -239,7 +241,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 if (update != null)
                 {
                     root = root.ReplaceNode(root, update);
-                    root = update;
                 }
             }
 
@@ -256,65 +257,105 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return updatedNode != null ? modifiedMethod.ReplaceNode(modifiedMethod, updatedNode) : originalMethod;
             }
 
-            else
+            if (!string.IsNullOrEmpty(codeChange.InsertAfter))
             {
-                if (!string.IsNullOrEmpty(codeChange.InsertAfter)) // TODO ENUM parent might still be here
+                var precedingNode = GetPrecedingNode(codeChange.InsertAfter, modifiedMethod, parameterValues);
+                if (precedingNode != null)
                 {
-                    var precedingNode = GetPrecedingNode(codeChange.InsertAfter, modifiedMethod, parameterValues);
-                    if (precedingNode != null)
-                    {
-                        var leadingTrivia = precedingNode.GetLeadingTrivia();
-                        var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-                        var nodeListToInsert = new List<SyntaxNode> { GetNode(syntaxKind, codeChange.Block, leadingTrivia, trailingTrivia) };
-                        var updatedNode = modifiedMethod.InsertNodesAfter(precedingNode, nodeListToInsert);
+                    var leadingTrivia = GetLeadingTrivia(codeChange);
+                    var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+                    var nodeToInsert = GetNode(syntaxKind, codeChange.Block, leadingTrivia, trailingTrivia);
+                    var updatedNode = modifiedMethod.InsertNodesAfter(precedingNode, new List<SyntaxNode> { nodeToInsert });
 
-                        return updatedNode != null ? modifiedMethod.ReplaceNode(modifiedMethod, updatedNode) : originalMethod;
-                    }
-                }
-                else
-                {
-                    if (modifiedMethod is BlockSyntax modifiedBlock)
-                    {
-                        var statement = SyntaxFactory.ParseStatement(codeChange.Block);
-                        // .WithAdditionalAnnotations(Formatter.Annotation); // TODO helper method with trivia
-                        return codeChange.Prepend
-                            ? modifiedBlock.WithStatements(modifiedBlock.Statements.Insert(0, statement))
-                            : modifiedBlock.AddStatements(statement);
-                    }
-                    else if (modifiedMethod is CompilationUnitSyntax compilationUnit)
-                    {
-                        var member = SyntaxFactory.ParseMemberDeclaration(codeChange.Block);
-                        //    .WithAdditionalAnnotations(Formatter.Annotation); // TODO helper method with trivia
-                        return codeChange.Prepend
-                            ? compilationUnit.WithMembers(compilationUnit.Members.Insert(0, member))
-                            : compilationUnit.AddMembers(member);
-                    }
+                    return updatedNode != null ? modifiedMethod.ReplaceNode(modifiedMethod, updatedNode) : originalMethod;
                 }
             }
-           
-            return originalMethod;
+
+            return AddCodeSnippet(syntaxKind, modifiedMethod, codeChange);
         }
 
-        private static SyntaxNode GetNode(SyntaxKind syntaxKind, string formattedBlock, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        private static SyntaxNode GetNode(SyntaxKind syntaxKind, string codeChange, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
         {
-            if (syntaxKind is SyntaxKind.Block)
+            if (syntaxKind == SyntaxKind.CompilationUnit)
             {
-                return 
-                    SyntaxFactory.ParseStatement(formattedBlock)
-                    .WithAdditionalAnnotations(Formatter.Annotation)
-                    .WithLeadingTrivia(leadingTrivia)
-                    .WithTrailingTrivia(trailingTrivia);
+                return GetMember(codeChange, leadingTrivia, trailingTrivia);
+                // TODO: getGlobalStatement?
             }
-            else if (syntaxKind is SyntaxKind.CompilationUnit)
+            if (syntaxKind == SyntaxKind.Block)
             {
-                return 
-                    SyntaxFactory.ParseMemberDeclaration(formattedBlock)
-                    .WithAdditionalAnnotations(Formatter.Annotation)
-                    .WithLeadingTrivia(leadingTrivia)
-                    .WithTrailingTrivia(trailingTrivia);
+                return GetStatement(codeChange, leadingTrivia, trailingTrivia);
             }
 
             return null;
+        }
+
+        private static SyntaxNode AddCodeSnippet(SyntaxKind syntaxKind, SyntaxNode node, CodeSnippet codeChange)
+        {
+            if (syntaxKind == SyntaxKind.CompilationUnit && node is CompilationUnitSyntax compilationUnit)
+            {
+                var member = GetGlobalStatement(codeChange); 
+
+                return codeChange.Prepend
+                    ? compilationUnit.WithMembers(compilationUnit.Members.Insert(0, member))
+                    : compilationUnit.AddMembers(member);
+            }
+            if (syntaxKind == SyntaxKind.Block && node is BlockSyntax block)
+            {
+                var statement = GetStatement(codeChange.Block, node.GetLeadingTrivia(), node.GetTrailingTrivia());
+
+                return codeChange.Prepend
+                  ? block.WithStatements(block.Statements.Insert(0, statement))
+                  : block.AddStatements(statement);
+            }
+
+            return node;
+        }
+
+        private static StatementSyntax GetStatement(string formattedBlock, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        {
+            return 
+                SyntaxFactory.ParseStatement(formattedBlock)
+                .WithAdditionalAnnotations(Formatter.Annotation)
+                .WithLeadingTrivia(leadingTrivia)
+                .WithTrailingTrivia(trailingTrivia);
+        }
+
+        private static GlobalStatementSyntax GetGlobalStatement(CodeSnippet change)
+        {
+            var statementLeadingTrivia = GetLeadingTrivia(change);
+            var statementTrailingTrivia = new SyntaxTriviaList();
+
+            var globalStatement = SyntaxFactory.GlobalStatement(GetStatement(change.Block, statementLeadingTrivia, statementTrailingTrivia));
+            return globalStatement;
+        }
+
+        private static SyntaxTriviaList GetLeadingTrivia(CodeSnippet change)
+        {
+            var statementLeadingTrivia = new SyntaxTriviaList();
+
+            if (change.CodeFormatting != null)
+            {
+                if (change.CodeFormatting.Newline)
+                {
+                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.ElasticCarriageReturnLineFeed);
+                }
+                if (change.CodeFormatting.NumberOfSpaces > 0)
+                {
+                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', change.CodeFormatting.NumberOfSpaces)));
+                }
+            }
+
+            return statementLeadingTrivia;
+        }
+
+        private static MemberDeclarationSyntax GetMember(string formattedBlock, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        {
+            return
+                SyntaxFactory.GlobalStatement(GetStatement(formattedBlock, leadingTrivia, trailingTrivia));
+                //SyntaxFactory.ParseMemberDeclaration(formattedBlock)
+                //.WithAdditionalAnnotations(Formatter.Annotation)
+                //.WithLeadingTrivia(leadingTrivia)
+                //.WithTrailingTrivia(trailingTrivia);
         }
 
         private static SyntaxNode GetNodeWithModifiedChild(SyntaxNode originalMethod, CodeSnippet change, SyntaxKind syntaxKind, IDictionary<string, string> parameterValues = null)
@@ -357,27 +398,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             return null;
-        }
-
-        private static GlobalStatementSyntax GetGlobalStatement(CodeSnippet change)
-        {
-            var statementTrailingTrivia = new SyntaxTriviaList();
-            var statementLeadingTrivia = new SyntaxTriviaList();
-
-            if (change.CodeFormatting != null)
-            {
-                if (change.CodeFormatting.Newline)
-                {
-                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.ElasticCarriageReturnLineFeed);
-                }
-                if (change.CodeFormatting.NumberOfSpaces > 0)
-                {
-                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', change.CodeFormatting.NumberOfSpaces)));
-                }
-            }
-
-            var globalStatement = SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(change.Block)).WithLeadingTrivia(statementLeadingTrivia).WithTrailingTrivia(statementTrailingTrivia);
-            return globalStatement;
         }
 
         private static SyntaxNode GetPrecedingNode(string insertAfter, SyntaxNode syntaxNode, IDictionary<string, string> parameterValues = null)
@@ -542,18 +562,20 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             CodeSnippet change,
             SyntaxNode parent)
         {
-                var exprNode = parent.DescendantNodes().FirstOrDefault(n => n.Kind() == SyntaxKind.ExpressionStatement) as ExpressionStatementSyntax;
-                var trailingTrivia = parent.GetTrailingTrivia();
-                if (trailingTrivia.Where(x => x.ToString().Trim(' ').Equals(";")).Any())
-                {
-                    trailingTrivia = trailingTrivia.Insert(0, SemiColonTrivia);
-                }
+            var exprNode = parent.DescendantNodes().FirstOrDefault(n => n.Kind() == SyntaxKind.ExpressionStatement) as ExpressionStatementSyntax;
+            var leadingTrivia = GetLeadingTrivia(change);
+            var identifier = SyntaxFactory.IdentifierName(change.Block);
+            var newExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                exprNode.Expression.WithTrailingTrivia(leadingTrivia),
+                identifier);
 
-                var modifiedExprNode = ProjectModifierHelper.AddSimpleMemberAccessExpression(exprNode, change.Block, new SyntaxTriviaList(), new SyntaxTriviaList())?.WithTrailingTrivia(trailingTrivia);
-                if (modifiedExprNode != null)
-                {
-                    return parent.ReplaceNode(exprNode, modifiedExprNode.WithTrailingTrivia(trailingTrivia));
-                }
+            var modifiedExprNode = exprNode.WithExpression(newExpression);
+
+            if (modifiedExprNode != null)
+            {
+                return parent.ReplaceNode(exprNode, modifiedExprNode);
+            }
 
             return null;
         }
@@ -744,13 +766,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return false;
         }
 
-        private static SyntaxTrivia SemiColonTrivia
-        {
-            get
-            {
-                return SyntaxFactory.Trivia(SyntaxFactory.SkippedTokensTrivia()
+        private static SyntaxTrivia SemiColonTrivia => SyntaxFactory.Trivia(SyntaxFactory.SkippedTokensTrivia()
                     .WithTokens(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.SemicolonToken))));
-            }
-        }
     }
 }

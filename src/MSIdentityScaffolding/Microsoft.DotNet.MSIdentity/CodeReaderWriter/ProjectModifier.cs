@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 return;
             }
-
+            Debugger.Launch();
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
             if (codeModifierConfig is null || !codeModifierConfig.Files.Any())
             {
@@ -87,18 +87,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return null;
             }
 
-            var propertyInfo = AppProvisioningTool.Properties.Where(
-                p => p.Name.StartsWith("cm") && p.Name.Contains(_toolOptions.ProjectType)).FirstOrDefault();
-            if (propertyInfo is null)
+            if (CodeModifierConfigPropertyInfo is null)
             {
                 return null;
             }
-            Debugger.Launch();
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+
+            byte[] content = (CodeModifierConfigPropertyInfo.GetValue(null) as byte[])!;
             CodeModifierConfig? codeModifierConfig = ReadCodeModifierConfigFromFileContent(content);
             if (codeModifierConfig is null)
             {
-                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                throw new FormatException($"Resource file { CodeModifierConfigPropertyInfo.Name } could not be parsed. ");
             }
 
             if (!codeModifierConfig.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
@@ -107,6 +105,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             return codeModifierConfig;
+        }
+
+        private PropertyInfo? CodeModifierConfigPropertyInfo
+        {
+            get
+            {
+                var identifier = _toolOptions.ProjectTypeIdentifier.Replace('-', '_');
+                var propertyInfo = AppProvisioningTool.Properties.FirstOrDefault(p => p.Name.StartsWith("cm") && p.Name.EndsWith(identifier));
+                return propertyInfo;
+            }
         }
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
@@ -318,7 +326,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         internal async Task ModifyCshtmlFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
         {
-            var fileDoc = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
+            var fileDoc = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
             if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
             {
                 return;
@@ -348,7 +356,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         internal async Task ApplyTextReplacements(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
-            var document = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
+            var document = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
             if (document is null)
             {
                 return;

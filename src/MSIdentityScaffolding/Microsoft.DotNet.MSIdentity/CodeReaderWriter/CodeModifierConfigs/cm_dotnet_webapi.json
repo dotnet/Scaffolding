@@ -41,80 +41,77 @@
       "Usings": [
         "Microsoft.AspNetCore.Authentication",
         "Microsoft.AspNetCore.Authentication.JwtBearer",
-        "Microsoft.Identity.Web",
-        "Microsoft.Identity.Web.Resource;"
+        "Microsoft.Identity.Web"
       ],
       "Methods": {
         "Global": {
           "CodeChanges": [
             {
-              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
-              "InsertBefore": [ "builder.Services.AddEndpointsApiExplorer", "builder.Services.AddSwaggerGen" ]
+              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
-              "Parent": "AddMicrosoftIdentityWebApi //TODO",
-              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
-              "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
+              "Block": "AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "AddAuthentication",
+              "CodeChangeType": "MemberAccess",
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi //TODO",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 8
+              }
+            },
+            {
               "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "MicrosoftGraph" ],
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi //TODO",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
               "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "DownstreamApi" ],
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
+              "Block": "AddInMemoryTokenCaches()",
               "Parent": "AddDownstreamWebApi",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddInMemoryTokenCaches() //TODO",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "DownstreamApi" ],
               "CodeFormatting": {
-                "NumberOfSpaces": 12,
+                "NumberOfSpaces": 16,
                 "Newline": true
               }
             },
             {
-              "Parent": "AddMicrosoftGraph",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddInMemoryTokenCaches() //TODO",
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
-                "Newline": true
-              }
-            },
-            {
-              "InsertAfter": "app.UseHttpsRedirection",
               "Block": "app.UseAuthentication();",
-              "InsertBefore": [
-                "app.UseAuthorization",
-                "app.MapGet"
-              ]
-            },
-            {
-              "InsertAfter": "app.UseAuthentication",
-              "Block": "app.UseAuthorization();",
-              "InsertBefore": [
-                "app.MapGet",
-                "app.Configuration["
-              ]
-            },
-            {
-              "Parent": "app.MapGet",
-              "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
+              "InsertAfter": "app.UseHttpsRedirection",
               "CodeFormatting": {
-                "NumberOfSpaces": 4,
                 "Newline": true
               }
+            },
+            {
+              "Block": "app.UseAuthorization();",
+              "InsertAfter": "app.UseAuthentication"
             }
           ]
         }

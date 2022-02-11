@@ -157,8 +157,8 @@
   <data name="cm_dotnet_blazorwasm_hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorwasm_hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="cm_dotnet_minimal_webapi" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_minimal_webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="cm_dotnet_minimal_api" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_minimal_api.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="cm_dotnet_webapi" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -184,8 +184,8 @@
   <data name="dotnet_blazor_server" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_blazor_server.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="dotnet_minimal_webapi" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ProjectDescriptions\dotnet_minimal_webapi.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="dotnet_minimal_api" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ProjectDescriptions\dotnet_minimal_api.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="dotnet_web" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_web.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             if (startupType == null)
             {
                 //if changed the name in Program.cs, get the class name and check.
-                var programDocument = modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+                var programDocument = modelTypesLocator.GetAllDocuments().FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
                 var startupClassName = await GetStartupClassName(programDocument);
                 startupType = modelTypesLocator.GetType(startupClassName).FirstOrDefault();
             }
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
 
             // if changed the name in Program.cs, get the class name and check.
-            var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+            var programDocument = project.Documents.FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
             var startupClassName = await GetStartupClassName(programDocument);
 
             return string.IsNullOrEmpty(startupClassName); // If project has UseStartup in Program.cs, it is not a minimal app
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // will return null.
         internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
         {
-            var programCsDocument = project.Documents.Where(d => d.Name.Equals("Program.cs")).FirstOrDefault();
+            var programCsDocument = project.Documents.FirstOrDefault(d => d.Name.Equals("Program.cs"));
             var startupClassName = await GetStartupClassName(programCsDocument);
 
             return string.IsNullOrEmpty(startupClassName) ? null : string.Concat(startupClassName, ".cs");
@@ -69,19 +69,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
                 var programClassNode = namespaceNode?.DescendantNodes()
-                    .Where(node =>
+                    .First(node =>
                         node is ClassDeclarationSyntax cds &&
                         cds.Identifier
-                           .ValueText.Contains("Program"))
-                    .First();
+                           .ValueText.Contains("Program"));
 
                 var nodes = programClassNode?.DescendantNodes();
                 var useStartupNode = programClassNode?.DescendantNodes()
-                    .Where(node =>
+                    .First(node =>
                         node is MemberAccessExpressionSyntax maes &&
                         maes.ToString()
-                            .Contains("webBuilder.UseStartup"))
-                    .First();
+                            .Contains("webBuilder.UseStartup"));
 
                 var useStartupTxt = useStartupNode?.ToString();
                 if (!string.IsNullOrEmpty(useStartupTxt))
@@ -277,40 +275,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
             return false;
         }
-        internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
 
-        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(
-            ExpressionStatementSyntax expression, string codeSnippet, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
-        {
-            if (!string.IsNullOrEmpty(codeSnippet) &&
-                !expression
-                    .ToString()
-                    .Trim(CodeSnippetTrimChars)
-                    .Contains(
-                        codeSnippet.Trim(CodeSnippetTrimChars)))
-            {
-                var identifier = SyntaxFactory.IdentifierName(codeSnippet)
-                            .WithTrailingTrivia(trailingTrivia);
-                return expression
-                    .WithExpression(SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        expression.Expression.WithTrailingTrivia(leadingTrivia),
-                        identifier));
-            }
-            else
-            {
-                return null;
-            }
-        }
+        internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
 
         // Filter out CodeSnippets that are already present in original node
         internal static CodeSnippet[] FilterCodeSnippets(SyntaxNode originalMethod, CodeSnippet[] codeSnippets, CodeChangeOptions options, IDictionary<string, string> parameters = null)
         {
-            var filtered = FilterCodeSnippets(codeSnippets, options);
-            var selected = filtered.Select(cs => GetFormattedCodeBlock(cs, parameters));
-            var output = selected.Where(cs => !StatementExists(originalMethod, cs.Block)).ToArray();
-
-            return output;
+            return FilterCodeSnippets(codeSnippets, options)
+                .Select(cs => GetFormattedCodeBlock(cs, parameters))
+                .Where(cs => !StatementExists(originalMethod, cs.Block)).ToArray();
         }
 
         // Filter out CodeSnippets that are invalid using FilterOptions

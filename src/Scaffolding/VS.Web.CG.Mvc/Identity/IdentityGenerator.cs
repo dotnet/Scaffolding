@@ -280,7 +280,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             string jsonText = string.Empty;
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("identityMinimalHostingChanges.json")).FirstOrDefault();
+            var resourceName = resourceNames.FirstOrDefault(x => x.EndsWith("identityMinimalHostingChanges.json"));
             if (!string.IsNullOrEmpty(resourceName))
             {
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
@@ -326,7 +326,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
-                    var globalChanges = programCsFile.Methods.Where(x => x.Key == "Global").First().Value;
+                    var globalChanges = programCsFile.Methods.First(x => x.Key == "Global").Value;
                     foreach (var codeChange in globalChanges.CodeChanges)
                     {
                         codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite);

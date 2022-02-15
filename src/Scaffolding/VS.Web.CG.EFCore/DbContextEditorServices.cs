@@ -188,10 +188,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                             textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
                         }
 
+                        //string.Empty instead of InvalidOperationException for legacy scenarios.
                         var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
                             servicesParam.Identifier,
                             dbContextTypeName,
-                            configRootProperty.Name));
+                            configRootProperty.Name,
+                            string.Empty));
 
                         MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
 
@@ -229,10 +231,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         var builderIdentifierString = GetBuilderIdentifier(builderExpression);
 
                         //create syntax expression that adds DbContext
+                        //added InvalidOperationExceptino if Configuration.GetConnectionString returns null.
                         var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
                                 string.Format("{0}.Services", builderIdentifierString),
                                 dbContextTypeName,
-                                string.Format("{0}.Configuration", builderIdentifierString)));
+                                string.Format("{0}.Configuration", builderIdentifierString),
+                                string.Format(" ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")", dbContextTypeName)));
                         var dbContextExpression = SyntaxFactory.GlobalStatement(expression);
 
                         //get global statement to insert after (different for web app vs web api)
@@ -301,13 +305,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 textToAddAtEnd =
                     leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
+                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
             }
             else
             {
                 textToAddAtEnd =
                     leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\")));" + Environment.NewLine;
+                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
             }
             return textToAddAtEnd;
         }

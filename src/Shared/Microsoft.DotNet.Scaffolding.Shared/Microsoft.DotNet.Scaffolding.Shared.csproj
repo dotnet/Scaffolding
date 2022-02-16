@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1; net5.0; net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <AssemblyName>Microsoft.DotNet.Scaffolding.Shared</AssemblyName>
     <RootNamespace>Microsoft.DotNet.Scaffolding.Shared</RootNamespace>
     <Description>Contains interfaces for Project Model and messaging for scaffolding.</Description>
@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="$(CodeAnalysisVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(CodeAnalysisVersion)" />
     
-  
+    
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
   </ItemGroup>
   

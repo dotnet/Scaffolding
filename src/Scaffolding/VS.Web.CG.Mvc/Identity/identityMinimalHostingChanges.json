@@ -12,12 +12,18 @@
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
-              "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n    options.{0}(connectionString));\""
+              "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n    options.{0}(connectionString));\"",
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
               "InsertAfter": "builder.Services.AddDbContext",
               "CheckBlock": "builder.Services.AddDefaultIdentity",
-              "Block": "builder.Services.AddDefaultIdentity<{0}>(options => options.SignIn.RequireConfirmedAccount = true)\r\n    .AddEntityFrameworkStores<{0}>();\""
+              "Block": "builder.Services.AddDefaultIdentity<{0}>(options => options.SignIn.RequireConfirmedAccount = true)\r\n    .AddEntityFrameworkStores<{0}>();\"",
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
               "InsertAfter": "app.UseRouting();",

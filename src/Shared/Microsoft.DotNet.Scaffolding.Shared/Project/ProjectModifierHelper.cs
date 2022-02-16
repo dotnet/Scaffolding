@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.MSIdentity.Shared;
@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
     internal static class ProjectModifierHelper
     {
         internal static string[] CodeSnippetTrimStrings = new string[] { " ", "\r", "\n", ";" };
-        internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
+        internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' }; // TODO maybe unnecessary
+        internal static char[] Parentheses = new char[] { '(', ')' }; // TODO maybe unnecessary
         internal const string VarIdentifier = "var";
         internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
         /// <summary>
@@ -69,14 +70,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
                 var programClassNode = namespaceNode?.DescendantNodes()
-                    .First(node =>
+                    .FirstOrDefault(node =>
                         node is ClassDeclarationSyntax cds &&
                         cds.Identifier
                            .ValueText.Contains("Program"));
 
-                var nodes = programClassNode?.DescendantNodes();
-                var useStartupNode = programClassNode?.DescendantNodes()
-                    .First(node =>
+                var useStartupNode = programClassNode?.DescendantNodes()?
+                    .FirstOrDefault(node =>
                         node is MemberAccessExpressionSyntax maes &&
                         maes.ToString()
                             .Contains("webBuilder.UseStartup"));
@@ -116,8 +116,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         /// </summary>
         /// <param name="codeBlock">SimpleMemberAccessExpression string</param>
         /// <param name="parameterDict">IDictionary with parameter type keys and values</param>
+        /// <param name="trim">Whether to trim the resulting string</param>
         /// <returns></returns>
-        internal static string FormatCodeBlock(string codeBlock, IDictionary<string, string> parameterDict)
+        internal static string FormatCodeBlock(string codeBlock, IDictionary<string, string> parameterDict, bool trim = false)
         {
             string formattedCodeBlock = codeBlock;
             if (!string.IsNullOrEmpty(codeBlock) && parameterDict != null)
@@ -129,58 +130,55 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     formattedCodeBlock = $"{parameter}.{value}";
                 }
             }
-            return formattedCodeBlock;
+            return trim ? formattedCodeBlock.Trim(CodeSnippetTrimChars) : formattedCodeBlock;
         }
 
-        internal static string FormatGlobalStatement(string codeBlock, IDictionary<string, string> replacements)
+        internal static string FormatGlobalStatement(string codeBlock, string oldValue, string newValue)
         {
             string formattedStatement = codeBlock;
-            if (!string.IsNullOrEmpty(formattedStatement) && replacements != null && replacements.Any())
+            if (!string.IsNullOrEmpty(formattedStatement) && !string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue))
             {
-                foreach (var key in replacements.Keys)
-                {
-                    replacements.TryGetValue(key, out string value);
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        formattedStatement = formattedStatement.Replace(key, value);
-                    }
-                }
+                return formattedStatement.Replace(oldValue, newValue);
             }
+
             return formattedStatement;
         }
+        internal static CodeSnippet[] UpdateVariables(CodeSnippet[] changes, string oldValue, string newValue) => changes.Select(c => UpdateVariables(c, oldValue, newValue)).ToArray();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="change"></param>
-        /// <param name="variableDict"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
         /// <returns></returns>
-        internal static CodeSnippet FormatCodeSnippet(CodeSnippet change, IDictionary<string, string> variableDict)
+        internal static CodeSnippet UpdateVariables(CodeSnippet change, string oldValue, string newValue) //TODO
         {
-            //format CodeSnippet fields for any variables or parameters.
+            // format CodeSnippet fields for any variables or parameters.
             if (!string.IsNullOrEmpty(change.Block))
             {
-                change.Block = FormatGlobalStatement(change.Block, variableDict);
+                change.Block = FormatGlobalStatement(change.Block, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.Parent))
             {
-                change.Parent = FormatGlobalStatement(change.Parent, variableDict);
+                change.Parent = FormatGlobalStatement(change.Parent, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.CheckBlock))
             {
-                change.CheckBlock = FormatGlobalStatement(change.CheckBlock, variableDict);
+                change.CheckBlock = FormatGlobalStatement(change.CheckBlock, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.InsertAfter))
             {
-                change.InsertAfter = FormatGlobalStatement(change.InsertAfter, variableDict);
+                change.InsertAfter = FormatGlobalStatement(change.InsertAfter, oldValue, newValue);
             }
             if (change.InsertBefore != null && change.InsertBefore.Any())
             {
                 for (int i = 0; i < change.InsertBefore.Count(); i++)
                 {
-                    change.InsertBefore[i] = FormatGlobalStatement(change.InsertBefore[i], variableDict);
+                    change.InsertBefore[i] = FormatGlobalStatement(change.InsertBefore[i], oldValue, newValue);
                 }
             }
+
             return change;
         }
 
@@ -194,42 +192,42 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             StringBuilder sb = new StringBuilder(statement);
             if (!string.IsNullOrEmpty(statement))
             {
-                foreach (string replaceString in CodeSnippetTrimStrings)
+                foreach (string replacement in CodeSnippetTrimStrings)
                 {
-                    sb.Replace(replaceString, string.Empty);
+                    sb.Replace(replacement, string.Empty);
                 }
             }
+
             return sb.ToString();
         }
 
-        internal static IDictionary<string, string> GetBuilderVariableIdentifier(SyntaxList<MemberDeclarationSyntax> members)
+        internal static (string, string)? GetBuilderVariableIdentifierTransformation(SyntaxList<MemberDeclarationSyntax> members)
         {
-            IDictionary<string, string> variables = new Dictionary<string, string>();
-            if (members.Any())
+            if (!(members.FirstOrDefault(
+                m => TrimStatement(m.ToString())
+                .Contains("=WebApplication.CreateBuilder")) is SyntaxNode memberNode))
             {
-                foreach (var member in members)
-                {
-                    var memberString = TrimStatement(member.ToString());
-                    if (memberString.Contains("=WebApplication.CreateBuilder"))
-                    {
-                        var start = 0;
-                        if (memberString.Contains(VarIdentifier))
-                        {
-                            start = memberString.IndexOf(VarIdentifier) + VarIdentifier.Length;
-                        }
-                        else if (memberString.Contains(WebApplicationBuilderIdentifier))
-                        {
-                            start = memberString.IndexOf(WebApplicationBuilderIdentifier) + WebApplicationBuilderIdentifier.Length;
-                        }
-                        if (start > 0)
-                        {
-                            var end = memberString.IndexOf("=");
-                            variables.Add("WebApplication.CreateBuilder", memberString.Substring(start, end - start));
-                        }
-                    }
-                }
+                return null;
             }
-            return variables;
+
+            var memberString = TrimStatement(memberNode.ToString());
+
+            var start = 0;
+            if (memberString.Contains(VarIdentifier))
+            {
+                start = memberString.IndexOf(VarIdentifier) + VarIdentifier.Length;
+            }
+            else if (memberString.Contains(WebApplicationBuilderIdentifier))
+            {
+                start = memberString.IndexOf(WebApplicationBuilderIdentifier) + WebApplicationBuilderIdentifier.Length;
+            }
+            if (start > 0)
+            {
+                var end = memberString.IndexOf("=");
+                return ("WebApplication.CreateBuilder", memberString.Substring(start, end - start));
+            }
+
+            return null;
         }
 
         internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
@@ -262,38 +260,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        internal static bool StatementExists(SyntaxNode node, string statement)
+        internal static bool StatementExists(IEnumerable<SyntaxNode> nodes, string statement)
         {
-            if (node is BlockSyntax block)
-            {
-                return block.Statements.Any(m => m.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
-            }
-            else if (node is CompilationUnitSyntax compilationUnit)
-            {
-                return compilationUnit.Members.Any(m => m.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
-            }
+            statement = statement.TrimEnd(Parentheses);
 
-            return false;
+            return nodes.Any(n => n.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
         }
 
-        internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
-
-        // Filter out CodeSnippets that are already present in original node
-        internal static CodeSnippet[] FilterCodeSnippets(SyntaxNode originalMethod, CodeSnippet[] codeSnippets, CodeChangeOptions options, IDictionary<string, string> parameters = null)
-        {
-            return FilterCodeSnippets(codeSnippets, options)
-                .Select(cs => GetFormattedCodeBlock(cs, parameters))
-                .Where(cs => !StatementExists(originalMethod, cs.Block)).ToArray();
-        }
+        //internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
 
         // Filter out CodeSnippets that are invalid using FilterOptions
-        internal static IEnumerable<CodeSnippet> FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options) => codeSnippets.Where(cs => FilterOptions(cs.Options, options));
-
-        private static CodeSnippet GetFormattedCodeBlock(CodeSnippet codeSnippet, IDictionary<string, string> parameters = null)
-        {
-            codeSnippet.Block = FormatCodeBlock(codeSnippet.Block, parameters).Trim(CodeSnippetTrimChars);
-            return codeSnippet;
-        }
+        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options) => codeSnippets.Where(cs => FilterOptions(cs.Options, options)).ToArray();
 
         /// <summary>
         /// Filter Options string array to matching CodeChangeOptions.

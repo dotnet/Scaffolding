@@ -7,9 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
     {
         Default,
         MemberAccess,
-        InLambdaBlock,
-        LambdaExpression,
-        LambdaParameter
+        Lambda
     }
 
     public class CodeChangeOptionStrings

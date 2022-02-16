@@ -13,14 +13,14 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
               "InsertAfter": "WebApplication.CreateBuilder",
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"))",
+              "Block": "AddMicrosoftIdentityWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"AzureAd\"))",
               "Parent": "AddAuthentication",
               "CodeChangeType": "MemberAccess",
               "CodeFormatting": {
@@ -39,7 +39,7 @@
               }
             },
             {
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
               "Options": [ "MicrosoftGraph" ],
@@ -49,7 +49,7 @@
               }
             },
             {
-              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
               "Options": [ "DownstreamApi" ],
@@ -59,53 +59,39 @@
               }
             },
             {
-              "Block": "AddInMemoryTokenCaches()",
-              "Parent": "AddDownstreamWebApi",
-              "CodeChangeType": "MemberAccess",
-              "Options": [ "DownstreamApi" ],
-              "CodeFormatting": {
-                "NumberOfSpaces": 16,
-                "Newline": true
-              }
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication"
             },
             {
-              "Block": "builder.Services.AddAuthorization();",
-              "InsertAfter": "builder.Services.AddAuthentication"
-            },
-            {
-              "Block": "app.UseAuthentication();",
-              "InsertAfter": "app.UseHttpsRedirection",
+              "Block": "WebApplication.CreateBuilder.UseAuthentication()",
+              "InsertAfter": "WebApplication.CreateBuilder.UseHttpsRedirection",
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "app.UseAuthorization();",
-              "InsertAfter": "app.UseAuthentication"
+              "Block": "WebApplication.CreateBuilder.UseAuthorization()",
+              "InsertAfter": "WebApplication.CreateBuilder.UseAuthentication"
             },
             {
-              "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"];", 
-              "InsertAfter": "app.UseAuthorization",
+              "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]", 
+              "InsertAfter": "WebApplication.CreateBuilder.UseAuthorization",
               "CodeFormatting": {
                 "Newline": true
               }
-            },
-            {
-              "Block": "HttpContext httpContext",
-              "Parent": "app.MapGet",
-              "CodeChangeType": "LambdaParameter"
             },
             {
               "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
-              "Parent": "app.MapGet",
-              "CodeChangeType": "InLambdaBlock",
+              "Parent": "WebApplication.CreateBuilder.Services.MapGet",
+              "Parameter": "HttpContext httpContext",
+              "CodeChangeType": "Lambda",
               "Prepend": true,
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Parent": "app.MapGet",
+              "Parent": "WebApplication.CreateBuilder.Services.MapGet",
               "CodeChangeType": "MemberAccess",
               "Block": "RequireAuthorization()",
               "CodeFormatting": {

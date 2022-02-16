@@ -33,8 +33,9 @@ class CodeChange
 class CodeChangeType
 {
     public const string MemberAccess = nameof(MemberAccess); --> Add a SimpleMemberAccess expression to the parent statement syntax. 
-    public const string InLambdaBlock = nameof(InBlock); --> Add in lambda block to the parent statement syntax. 
+    public const string Lambda = nameof(InBlock); --> Add in lambda block to the parent statement syntax. 
 }
+
 This info is also available in CodeModifierConfig folder as well.
 
 The scenarios below need to be supported for all project types :

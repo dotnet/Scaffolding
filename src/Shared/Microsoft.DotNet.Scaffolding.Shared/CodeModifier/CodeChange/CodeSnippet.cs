@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public string[] Options { get; set; }
         public Formatting CodeFormatting { get; set; }
         public string ReplaceSnippet { get; set; }
+        public string Parameter { get; set; }
         public CodeChangeType CodeChangeType { get; set; } = CodeChangeType.Default;
     }
 }

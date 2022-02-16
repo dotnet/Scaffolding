@@ -332,7 +332,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite);
                     }
 
-                    var modifiedRoot = DocumentBuilder.ModifyMethod(rootWithUsings, globalChanges.CodeChanges);
+                    var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(rootWithUsings, globalChanges.CodeChanges);
                     //replace root node with all the updates.
                     docEditor.ReplaceNode(docRoot, modifiedRoot);
                 }

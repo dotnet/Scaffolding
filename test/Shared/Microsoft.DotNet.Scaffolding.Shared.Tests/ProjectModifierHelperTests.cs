@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Moq;
@@ -107,40 +108,35 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
         [Theory]
         [InlineData(
-            new object[] {
-                new string[] {
-                    "var builder = WebApplication.CreateBuilder(args);",
-                    "var      builderThing = WebApplication.CreateBuilder(args);",
-                    "var builderVar=WebApplication.CreateBuilder(args);",
-                    "var realBuilder =             WebApplication.CreateBuilder(args);",
-                    "WebApplicationBuilder fakeBuilder = WebApplication.CreateBuilder(args);",
-                    "WebApplicationBuilder           builderr =      WebApplication.CreateBuilder(args);",
-                    "WebApplicationBuilder Builder=WebApplication.CreateBuilder(args);"
-                },
-                new string[] {
-                    "builder",
-                    "builderThing",
-                    "builderVar",
-                    "realBuilder",
-                    "fakeBuilder",
-                    "builderr",
-                    "Builder",
-                }
-            }
-        )]
+            new string[] {
+                "var builder = WebApplication.CreateBuilder(args);",
+                "var      builderThing = WebApplication.CreateBuilder(args);",
+                "var builderVar=WebApplication.CreateBuilder(args);",
+                "var realBuilder =             WebApplication.CreateBuilder(args);",
+                "WebApplicationBuilder fakeBuilder = WebApplication.CreateBuilder(args);",
+                "WebApplicationBuilder           builderr =      WebApplication.CreateBuilder(args);",
+                "WebApplicationBuilder Builder=WebApplication.CreateBuilder(args);"
+            },
+            new string[] {
+                "builder",
+                "builderThing",
+                "builderVar",
+                "realBuilder",
+                "fakeBuilder",
+                "builderr",
+                "Builder",
+            })
+        ]
         public void GetVariablesTests(string[] statements, string[] builderVariableIdentifierValues)
         {
             for (int i = 0; i < statements.Length; i++)
             {
-                var members = new SyntaxList<MemberDeclarationSyntax>() { SyntaxFactory.ParseMemberDeclaration(statements[i]) } ;
+                var member = SyntaxFactory.ParseMemberDeclaration(statements[i]);
+                var members = new SyntaxList<MemberDeclarationSyntax>().Add(member);
                 string builderVariableIdentifierValue = builderVariableIdentifierValues[i];
-                var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(members);
-                variableDict.TryGetValue("WebApplication.CreateBuilder", out string builderVariableString);
-                if (!string.IsNullOrEmpty(builderVariableString))
-                {
-                    Assert.Equal(builderVariableIdentifierValue, builderVariableString);
-                }    
-                
+                var transform = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(members);
+                Assert.True(transform.HasValue);
+                Assert.Equal(builderVariableIdentifierValue, transform.Value.Item2);
             }
         }
 
@@ -172,13 +168,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 { "Builder", "builderVar" }
             };
 
-            var formattedSnippet = ProjectModifierHelper.FormatCodeSnippet(snippet, variableDict);
+            foreach (var kvp in variableDict)
+            {
+                snippet = ProjectModifierHelper.UpdateVariables(snippet, kvp.Key, kvp.Value);
+            }
 
-            Assert.Equal(correctlyFormattedSnippet.Block, formattedSnippet.Block);
-            Assert.Equal(correctlyFormattedSnippet.CheckBlock, formattedSnippet.CheckBlock);
-            Assert.Equal(correctlyFormattedSnippet.InsertBefore, formattedSnippet.InsertBefore);
-            Assert.Equal(correctlyFormattedSnippet.InsertAfter, formattedSnippet.InsertAfter);
-            Assert.Equal(correctlyFormattedSnippet.Parent, formattedSnippet.Parent);
+            Assert.Equal(correctlyFormattedSnippet.Block, snippet.Block);
+            Assert.Equal(correctlyFormattedSnippet.CheckBlock, snippet.CheckBlock);
+            Assert.Equal(correctlyFormattedSnippet.InsertBefore, snippet.InsertBefore);
+            Assert.Equal(correctlyFormattedSnippet.InsertAfter, snippet.InsertAfter);
+            Assert.Equal(correctlyFormattedSnippet.Parent, snippet.Parent);
         }
 
         [Fact]
@@ -213,7 +212,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
             for (int i = 0; i < globalStatements.Length; i++)
             {
-                Assert.Equal(correctlyFormattedStatements[i], ProjectModifierHelper.FormatGlobalStatement(globalStatements[i], variablesDict));
+                var formattedGlobalStatements = ProjectModifierHelper.FormatGlobalStatement(globalStatements[i], "string", "myCustomString");
+                formattedGlobalStatements = ProjectModifierHelper.FormatGlobalStatement(formattedGlobalStatements, "Boolean", "myCustomBoolean");
+                formattedGlobalStatements = ProjectModifierHelper.FormatGlobalStatement(formattedGlobalStatements, "Builder", "builderVar");
+                Assert.Equal(correctlyFormattedStatements[i], formattedGlobalStatements);
             }
         }
 
@@ -320,28 +322,28 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             var filteredWithNeither = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, optionsWithNeither);
 
             Assert.True(
-                filteredWithGraph.Count() == 3 &&
+                filteredWithGraph.Length == 3 &&
                 filteredWithGraph.Contains(graphSnippet) &&
                 !filteredWithGraph.Contains(apiSnippet) &&
                 filteredWithGraph.Contains(bothSnippet) &&
                 filteredWithGraph.Contains(neitherSnippet));
 
             Assert.True(
-                filteredWithApi.Count() == 3 &&
+                filteredWithApi.Length == 3 &&
                 !filteredWithApi.Contains(graphSnippet) &&
                 filteredWithApi.Contains(apiSnippet) &&
                 filteredWithApi.Contains(neitherSnippet) &&
                 filteredWithApi.Contains(bothSnippet));
 
             Assert.True(
-                filteredWithBoth.Count() == 4 &&
+                filteredWithBoth.Length == 4 &&
                 filteredWithBoth.Contains(graphSnippet) &&
                 filteredWithBoth.Contains(apiSnippet) &&
                 filteredWithBoth.Contains(bothSnippet) &&
                 filteredWithBoth.Contains(neitherSnippet));
 
             Assert.True(
-                filteredWithNeither.Count() == 1 &&
+                filteredWithNeither.Length == 1 &&
                 !filteredWithNeither.Contains(graphSnippet) &&
                 !filteredWithNeither.Contains(apiSnippet) &&
                 filteredWithNeither.Contains(neitherSnippet) &&
@@ -359,7 +361,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 }");
 
             BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
-            Assert.Equal(ProjectModifierHelper.StatementExists(emptyBlockSyntax, contents), contains);
+            var children = DocumentBuilder.GetDescendantNodes(emptyBlockSyntax);
+            Assert.Equal(ProjectModifierHelper.StatementExists(children, contents), contains);
         }
 
         [Theory]
@@ -374,7 +377,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                         app.UseRouting();
                     }");
             BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(block);
-            Assert.Equal(ProjectModifierHelper.StatementExists(emptyBlockSyntax, contents), contains);
+            var children = DocumentBuilder.GetDescendantNodes(emptyBlockSyntax);
+            Assert.Equal(ProjectModifierHelper.StatementExists(children, contents), contains);
         }
 
         [Theory]
@@ -404,7 +408,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 }");
 
             BlockSyntax denseBlockSyntax = SyntaxFactory.Block(denseBlock);
-            Assert.Equal(ProjectModifierHelper.StatementExists(denseBlockSyntax, contents), contains);
+            var children = DocumentBuilder.GetDescendantNodes(denseBlockSyntax);
+            Assert.Equal(ProjectModifierHelper.StatementExists(children, contents), contains);
         }
 
         [Theory]

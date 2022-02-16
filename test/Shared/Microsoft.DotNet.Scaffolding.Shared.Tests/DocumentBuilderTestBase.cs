@@ -40,10 +40,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
             //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
             var classNode = namespaceNode?
-                .DescendantNodes()?
-                .Where(node =>
-                    node is ClassDeclarationSyntax cds)
-                .FirstOrDefault();
+                .DescendantNodes()?.FirstOrDefault(node =>
+                    node.IsKind(SyntaxKind.ClassDeclaration));
 
             return (ClassDeclarationSyntax)classNode;
         }

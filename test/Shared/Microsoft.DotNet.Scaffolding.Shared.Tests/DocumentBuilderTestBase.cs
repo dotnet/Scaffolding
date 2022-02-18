@@ -256,8 +256,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 }
             }";
 
-        protected SyntaxTriviaList MemberLeadingTrivia = new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
-        protected SyntaxTriviaList MemberTrailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+        protected SyntaxTriviaList MemberLeadingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace("    "));
+        protected SyntaxTriviaList MemberTrailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
         protected static SyntaxTrivia SemiColonTrivia
         {
             get

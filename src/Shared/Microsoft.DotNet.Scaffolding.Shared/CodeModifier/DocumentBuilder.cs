@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,11 +11,6 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
@@ -34,7 +34,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         internal BaseMethodDeclarationSyntax GetOriginalMethod(ClassDeclarationSyntax classNode, string methodName, Method methodChanges)
         {
-            //TODO test me
             if (classNode?.Members.FirstOrDefault(node
                 => node is MethodDeclarationSyntax mds && mds.Identifier.ValueText.Equals(methodName)
                 || node is ConstructorDeclarationSyntax cds && cds.Identifier.ValueText.Equals(methodName))
@@ -55,7 +54,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal BaseMethodDeclarationSyntax GetModifiedMethod(BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options)
         {
             method = AddCodeSnippetsToMethod(method, methodChanges, options);
-            method = EditMethodType(method, methodChanges, options);
+            method = EditMethodReturnType(method, methodChanges, options);
             method = AddMethodParameters(method, methodChanges, options);
             return method;
         }
@@ -74,25 +73,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var usingNodes = CreateUsings(_codeFile.Usings);
             if (usingNodes.Any() && _docRoot.Usings.Count == 0)
             {
-                return _docRoot.WithUsings(new SyntaxList<UsingDirectiveSyntax>(usingNodes));
+                return _docRoot.WithUsings(SyntaxFactory.List(usingNodes));
             }
             else
             {
-                var newRoot = _docRoot;
-                foreach (var usingNode in usingNodes)
-                {
-                    // if usings exist (very likely), add it after the last one.
-                    if (newRoot.Usings.Count > 0)
-                    {
-                        var usingName = usingNode.Name.ToString();
-                        if (!newRoot.Usings.Any(node => node.Name.ToString().Equals(usingName)))
-                        {
-                            newRoot = newRoot.InsertNodesAfter(newRoot.Usings.Last(), new List<SyntaxNode> { usingNode });
-                        }
-                    }
-                }
+                var uniqueUsings = SyntaxFactory.List(
+                    usingNodes.Where(u => !_docRoot.Usings.Any(
+                            oldUsing => oldUsing.Name.ToString().Equals(u.Name.ToString()))));
 
-                return newRoot;
+                return uniqueUsings.Any() ? _docRoot.WithUsings(_docRoot.Usings.AddRange(uniqueUsings)) : _docRoot;
             }
         }
 
@@ -120,8 +109,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 _codeFile.ClassProperties = ProjectModifierHelper.FilterCodeBlocks(_codeFile.ClassProperties, options);
                 //get a sample member for leading trivia. Trailing trivia will still be semi colon and new line.
                 var sampleMember = modifiedClassDeclarationSyntax.Members.FirstOrDefault();
-                var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
-                var memberTrailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+                var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? SyntaxFactory.TriviaList(SyntaxFactory.Whitespace("    "));
+                var memberTrailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
 
                 //create MemberDeclarationSyntax[] with all the Property strings. 
                 var classProperties = CreateClassProperties(modifiedClassDeclarationSyntax.Members, memberLeadingTrivia, memberTrailingTrivia);
@@ -181,7 +170,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
         {
             var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(methodChanges.CodeChanges, options);
-             
+
             if (!filteredChanges.Any())
             {
                 return originalMethod;
@@ -198,7 +187,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             foreach (var change in filteredChanges)
             {
-                var update = ModifyMethod(root, change, change.CodeChangeType);
+                var update = ModifyMethod(root, change);
                 if (update != null)
                 {
                     root = root.ReplaceNode(root, update);
@@ -208,151 +197,166 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return root;
         }
 
-        // TODO lots of docs
-        internal static SyntaxNode ModifyMethod(SyntaxNode originalMethod, CodeSnippet codeChange, CodeChangeType codeChangeType = CodeChangeType.Default)
+        internal static SyntaxNode ModifyMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
         {
-            switch (codeChangeType)
+            SyntaxNode modifiedMethod;
+            switch (codeChange.CodeChangeType)
             {
                 case CodeChangeType.Lambda:
-                    { 
-                        var updatedNode = AddOrUpdateLambda(originalMethod, codeChange);
-                        return updatedNode != null ? originalMethod.ReplaceNode(originalMethod, updatedNode) : originalMethod;
+                    {
+                        modifiedMethod = AddOrUpdateLambda(originalMethod, codeChange);
+                        break;
                     }
                 case CodeChangeType.MemberAccess:
-                    {   
-                        var updatedNode = AddExpressionToParent(originalMethod, codeChange);
-                        return updatedNode != null ? originalMethod.ReplaceNode(originalMethod, updatedNode) : originalMethod;
+                    {
+                        modifiedMethod = AddExpressionToParent(originalMethod, codeChange);
+                        break;
                     }
                 default:
                     {
-                        var updatedNode = UpdateMethod(originalMethod, codeChange);
-                        return updatedNode != null ? originalMethod.ReplaceNode(originalMethod, updatedNode) : originalMethod;
+                        modifiedMethod = UpdateMethod(originalMethod, codeChange);
+                        break;
                     }
             }
+
+            return modifiedMethod != null ? originalMethod.ReplaceNode(originalMethod, modifiedMethod) : originalMethod;
         }
 
         private static SyntaxNode UpdateMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
         {
             var children = GetDescendantNodes(originalMethod);
-
             if (ProjectModifierHelper.StatementExists(children, codeChange.Block))
             {
                 return originalMethod;
             }
 
-            SyntaxNode updatedMethod = null;
-
-            if (!string.IsNullOrEmpty(codeChange.InsertAfter))
+            SyntaxNode updatedMethod;
+            if (codeChange.InsertBefore?.Any() is true)
             {
-                var precedingNode = GetSpecifiedNode(codeChange.InsertAfter, children);
-                if (precedingNode is null)
-                {
-                    return originalMethod;
-                }
-
-                var nodeToInsert = GetNode(originalMethod.Kind(), codeChange);
-                if (nodeToInsert is null)
-                {
-                    return originalMethod;
-                }
-
-                updatedMethod = originalMethod.InsertNodesAfter(precedingNode, new List<SyntaxNode> { nodeToInsert });
+                updatedMethod = InsertBefore(codeChange, children, originalMethod);
+            }
+            else if (!string.IsNullOrEmpty(codeChange.InsertAfter))
+            {
+                updatedMethod = InsertAfter(codeChange, children, originalMethod);
+            }
+            else
+            {
+                updatedMethod = AddStatement(originalMethod, codeChange);
             }
 
-            if (updatedMethod == null && (codeChange.InsertBefore?.Any() ?? false))
-            {
-                var followingNode = GetFollowingNode(codeChange.InsertBefore, children);
-                if (followingNode is null)
-                {
-                    return originalMethod;
-                }
 
-                var nodeToInsert = GetNode(originalMethod.Kind(), codeChange);
-                if (nodeToInsert is null)
-                {
-                    return originalMethod;
-                }
-
-                updatedMethod = originalMethod.InsertNodesBefore(followingNode, new List<SyntaxNode> { nodeToInsert });
-            }
-
-            if (updatedMethod == null)
-            {
-                updatedMethod = AddCodeSnippet(originalMethod, codeChange);
-            }
-
-            return updatedMethod != null ? updatedMethod : originalMethod;
+            return updatedMethod ?? originalMethod;
         }
 
-        private static SyntaxNode GetNode(SyntaxKind syntaxKind, CodeSnippet codeChange)
+        private static SyntaxNode InsertBefore(CodeSnippet codeChange, IEnumerable<SyntaxNode> children, SyntaxNode originalMethod)
         {
-            var leadingTrivia = GetLeadingTrivia(codeChange);
-            var trailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-
-            if (syntaxKind == SyntaxKind.CompilationUnit)
+            var followingNode = GetFollowingNode(codeChange.InsertBefore, children);
+            if (followingNode is null)
             {
-                return SyntaxFactory.GlobalStatement(GetStatement(codeChange.Block, leadingTrivia, trailingTrivia));
+                return originalMethod;
             }
-            if (syntaxKind == SyntaxKind.Block)
+
+            var newNodes = GetNodeInsertionList(codeChange, originalMethod.Kind());
+            if (newNodes is null)
             {
-                return GetStatement(codeChange.Block, leadingTrivia, trailingTrivia);
+                return originalMethod;
+            }
+
+            return originalMethod.InsertNodesBefore(followingNode, newNodes);
+        }
+
+
+        private static SyntaxNode InsertAfter(CodeSnippet codeChange, IEnumerable<SyntaxNode> children, SyntaxNode originalMethod)
+        {
+            var precedingNode = GetSpecifiedNode(codeChange.InsertAfter, children);
+            if (precedingNode is null)
+            {
+                return originalMethod;
+            }
+
+            var newNodes = GetNodeInsertionList(codeChange, originalMethod.Kind());
+            if (newNodes is null)
+            {
+                return originalMethod;
+            }
+
+            return originalMethod.InsertNodesAfter(precedingNode, newNodes);
+        }
+
+        private static SyntaxNode GetFollowingNode(string[] insertBefore, IEnumerable<SyntaxNode> descendantNodes)
+        {
+            foreach (var specifier in insertBefore)
+            {
+                if (GetSpecifiedNode(specifier, descendantNodes) is SyntaxNode insertBeforeNode)
+                {
+                    return insertBeforeNode;
+                }
             }
 
             return null;
         }
 
-        private static SyntaxNode AddCodeSnippet(SyntaxNode node, CodeSnippet codeChange)
+        private static List<SyntaxNode> GetNodeInsertionList(CodeSnippet codeChange, SyntaxKind syntaxKind)
+        {
+            var leadingTrivia = GetLeadingTrivia(codeChange.CodeFormatting);
+            var trailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+            var statement = GetStatementWithTrivia(codeChange.Block, leadingTrivia, trailingTrivia);
+
+            if (statement is null)
+            {
+                return null;
+            }
+
+            return syntaxKind == SyntaxKind.CompilationUnit
+               ? new List<SyntaxNode> { SyntaxFactory.GlobalStatement(statement) }
+               : new List<SyntaxNode> { statement };
+        }
+
+        private static SyntaxNode AddStatement(SyntaxNode node, CodeSnippet codeChange)
         {
             var syntaxKind = node.Kind();
-            if (syntaxKind == SyntaxKind.CompilationUnit && node is CompilationUnitSyntax compilationUnit)
-            {
-                var member = GetGlobalStatement(codeChange); 
 
-                return codeChange.Prepend ? compilationUnit.WithMembers(compilationUnit.Members.Insert(0, member))
-                    : compilationUnit.AddMembers(member);
-            }
+            var statement = GetStatementWithTrivia(codeChange.Block, GetLeadingTrivia(codeChange.CodeFormatting),
+                    SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed));
+
             if (syntaxKind == SyntaxKind.Block && node is BlockSyntax block)
             {
-                var statement = GetStatement(codeChange.Block, node.GetLeadingTrivia(), node.GetTrailingTrivia());
-
-                return codeChange.Prepend ? block.WithStatements(block.Statements.Insert(0, statement))
-                  : block.AddStatements(statement);
+                return codeChange.Prepend
+                    ? block.WithStatements(block.Statements.Insert(0, statement))
+                    : block.AddStatements(statement);
+            }
+            else if (syntaxKind == SyntaxKind.CompilationUnit && node is CompilationUnitSyntax compilationUnit)
+            {
+                var globalStatement = SyntaxFactory.GlobalStatement(statement);
+                return codeChange.Prepend
+                    ? compilationUnit.WithMembers(compilationUnit.Members.Insert(0, globalStatement))
+                    : compilationUnit.AddMembers(globalStatement);
             }
 
             return node;
         }
 
-        private static StatementSyntax GetStatement(string formattedBlock, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        private static StatementSyntax GetStatementWithTrivia(string formattedBlock, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
         {
-            return 
-                SyntaxFactory.ParseStatement(formattedBlock)
+            return SyntaxFactory.ParseStatement(formattedBlock)
                 .WithAdditionalAnnotations(Formatter.Annotation)
                 .WithLeadingTrivia(leadingTrivia)
                 .WithTrailingTrivia(trailingTrivia);
         }
 
-        private static GlobalStatementSyntax GetGlobalStatement(CodeSnippet change)
+        private static SyntaxTriviaList GetLeadingTrivia(Formatting codeFormatting)
         {
-            var statementLeadingTrivia = GetLeadingTrivia(change);
-            var statementTrailingTrivia = new SyntaxTriviaList();
+            var statementLeadingTrivia = SyntaxFactory.TriviaList();
 
-            var globalStatement = SyntaxFactory.GlobalStatement(GetStatement(change.Block, statementLeadingTrivia, statementTrailingTrivia));
-            return globalStatement;
-        }
-
-        private static SyntaxTriviaList GetLeadingTrivia(CodeSnippet change)
-        {
-            var statementLeadingTrivia = new SyntaxTriviaList();
-
-            if (change.CodeFormatting != null)
+            if (codeFormatting != null)
             {
-                if (change.CodeFormatting.Newline)
+                if (codeFormatting.Newline)
                 {
                     statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.ElasticCarriageReturnLineFeed);
                 }
-                if (change.CodeFormatting.NumberOfSpaces > 0)
+                if (codeFormatting.NumberOfSpaces > 0)
                 {
-                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', change.CodeFormatting.NumberOfSpaces)));
+                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', codeFormatting.NumberOfSpaces)));
                 }
             }
 
@@ -373,20 +377,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return specifiedDescendant;
         }
 
-        private static SyntaxNode GetFollowingNode(string[] insertBefore, IEnumerable<SyntaxNode> descendantNodes)
-        {
-            foreach (var specifier in insertBefore)
-            {
-                if (GetSpecifiedNode(specifier, descendantNodes) is SyntaxNode insertBeforeNode)
-                {
-                    return insertBeforeNode;
-                }
-            }
-
-            return null;
-        }
-
-        internal BaseMethodDeclarationSyntax EditMethodType(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+        internal BaseMethodDeclarationSyntax EditMethodReturnType(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
         {
             if (methodChanges is null || methodChanges.EditType is null || !(originalMethod is MethodDeclarationSyntax modifiedMethod))
             {
@@ -394,22 +385,26 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             methodChanges.EditType = ProjectModifierHelper.FilterCodeBlocks(new CodeBlock[] { methodChanges.EditType }, options).FirstOrDefault();
-            //if after filtering, the method type might not need editing
-            if (methodChanges.EditType != null)
-            {
-                    var returnTypeString = modifiedMethod.ReturnType.ToFullString();
-                    if (originalMethod.Modifiers.Any(m => m.ToFullString().Contains("async")))
-                    {
-                        returnTypeString = $"async {returnTypeString}";
-                    }
-                    if (!ProjectModifierHelper.TrimStatement(returnTypeString).Equals(ProjectModifierHelper.TrimStatement(methodChanges.EditType.Block)))
-                    {
-                        var typeIdentifier = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(methodChanges.EditType.Block));
-                    modifiedMethod = modifiedMethod.WithReturnType(typeIdentifier.WithTrailingTrivia(SyntaxFactory.Whitespace(" ")));
 
-                        originalMethod = originalMethod.ReplaceNode(originalMethod, modifiedMethod); //TODO fix me
-                    }
-                }
+            // After filtering, the method type might not need editing
+            if (methodChanges.EditType is null)
+            {
+                return originalMethod;
+            }
+
+            var returnTypeString = modifiedMethod.ReturnType.ToFullString();
+            if (modifiedMethod.Modifiers.Any(m => m.ToFullString().Contains("async")))
+            {
+                returnTypeString = $"async {returnTypeString}";
+            }
+
+            if (!ProjectModifierHelper.TrimStatement(returnTypeString).Equals(ProjectModifierHelper.TrimStatement(methodChanges.EditType.Block)))
+            {
+                var typeIdentifier = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(methodChanges.EditType.Block));
+                modifiedMethod = modifiedMethod.WithReturnType(typeIdentifier.WithTrailingTrivia(SyntaxFactory.Whitespace(" ")));
+
+                return modifiedMethod;
+            }
 
             return originalMethod;
         }
@@ -451,7 +446,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             {
                 updatedParent = AddLambdaToParent(parent, children, change);
             }
-            
+
             return originalMethod.ReplaceNode(parent, updatedParent);
         }
 
@@ -464,24 +459,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return parent.ReplaceNode(existingLambda, modifiedLambda);
         }
 
-        private static LambdaExpressionSyntax UpdateLambdaBlock(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
-        {
-            if (ProjectModifierHelper.StatementExists(lambdaChildren, change.Block))
-            {
-                return existingLambda;
-            }
-
-            var lambdaBlock = SyntaxFactory.Block(SyntaxFactory.ParseStatement(change.Block));
-            var updatedLambda = existingLambda.AddBlockStatements(lambdaBlock);
-
-            if (!(updatedLambda is LambdaExpressionSyntax lambdaExpressionSyntax))
-            {
-                return existingLambda;
-            }
-
-            return lambdaExpressionSyntax;
-        }
-
         private static LambdaExpressionSyntax UpdateLambdaParameter(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
         {
             if (ProjectModifierHelper.StatementExists(lambdaChildren, change.Parameter))
@@ -489,7 +466,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return existingLambda;
             }
 
-            var lambdaParam = SyntaxFactory.Parameter(SyntaxFactory.Identifier(change.Block));
+            var lambdaParam = SyntaxFactory.Parameter(SyntaxFactory.Identifier(change.Parameter));
             if (existingLambda is ParenthesizedLambdaExpressionSyntax updatedLambda)
             {
                 updatedLambda = updatedLambda.AddParameterListParameters(lambdaParam);
@@ -507,7 +484,22 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return updatedLambda;
         }
 
-        // TODO
+        private static LambdaExpressionSyntax UpdateLambdaBlock(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
+        {
+            if (ProjectModifierHelper.StatementExists(existingLambda.Block, change.Block))
+            {
+                return existingLambda;
+            }
+
+            var updatedBlock = AddStatement(existingLambda.Block, change);
+            if (existingLambda.WithBlock(updatedBlock as BlockSyntax)  is LambdaExpressionSyntax updatedLambda)
+            {
+                return updatedLambda;
+            }
+
+            return existingLambda;
+        }
+
         internal static SyntaxNode AddLambdaToParent(SyntaxNode parent, IEnumerable<SyntaxNode> children, CodeSnippet change)
         {
             if (ProjectModifierHelper.StatementExists(children, change.Block))
@@ -520,22 +512,21 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return parent;
             }
 
-            var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(
-                SyntaxFactory.Parameter(SyntaxFactory.Identifier(change.Parameter)),
-                SyntaxFactory.Block(SyntaxFactory.ParseStatement(change.Block)));
+            var parameter = SyntaxFactory.Parameter(
+                SyntaxFactory.Identifier(change.Parameter))
+                .WithTrailingTrivia(SyntaxFactory.Space);
 
-            var argument = SyntaxFactory.Argument(newLambdaExpression);
-
-            var updatedParent = parent.ReplaceNode(argList, argList.AddArguments(argument));
-            if (updatedParent is null)
+            if (!(AddStatement(SyntaxFactory.Block(), change) is BlockSyntax block))
             {
                 return parent;
             }
 
+            var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(parameter, block);
+            var argument = SyntaxFactory.Argument(newLambdaExpression);
+            var updatedParent = parent.ReplaceNode(argList, argList.AddArguments(argument));
+
             return updatedParent;
         }
-
-
 
         // return modified parent node with code snippet added
         internal static SyntaxNode AddExpressionToParent(SyntaxNode originalMethod, CodeSnippet change)
@@ -552,7 +543,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return originalMethod;
             }
 
-            var leadingTrivia = GetLeadingTrivia(change);
+            var leadingTrivia = GetLeadingTrivia(change.CodeFormatting);
             var identifier = SyntaxFactory.IdentifierName(change.Block);
 
             var newExpression = SyntaxFactory.MemberAccessExpression(
@@ -572,7 +563,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return updatedParent != null ? originalMethod.ReplaceNode(parent, updatedParent) : originalMethod;
         }
 
-
         internal static IEnumerable<SyntaxNode> GetDescendantNodes(SyntaxNode root)
         {
             if (root is BlockSyntax block)
@@ -586,7 +576,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
             return root.DescendantNodes();
         }
-       
+
         // create UsingDirectiveSyntax[] using a string[] to add to the root of the class (root.Usings).
         internal UsingDirectiveSyntax[] CreateUsings(string[] usings)
         {
@@ -596,22 +586,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return usingDirectiveList.ToArray();
             }
 
-            for (int i = 0; i < usings.Length; i++)
+            var nameLeadingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Space);
+            var usingTrailingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.CarriageReturnLineFeed);
+            foreach (var usingDirectiveString in usings)
             {
-                var usingDirectiveString = usings[i];
                 if (!string.IsNullOrEmpty(usingDirectiveString))
                 {
                     //leading space on the value of the using eg. (using' 'Microsoft.Yadada)
-                    var nameLeadingTrivia = new SyntaxTriviaList(SyntaxFactory.Space);
-                    var additionalAnnotation = Formatter.Annotation;
-                    var usingTrailingTrivia = new SyntaxTriviaList(SyntaxFactory.CarriageReturnLineFeed);
-                    var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName(usingDirectiveString).WithLeadingTrivia(nameLeadingTrivia))
-                        .WithAdditionalAnnotations(additionalAnnotation)
+                    var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName(usingDirectiveString)
+                        .WithLeadingTrivia(nameLeadingTrivia))
+                        .WithAdditionalAnnotations(Formatter.Annotation)
                         .WithTrailingTrivia(usingTrailingTrivia);
-                    if (i == usings.Length - 1 && !_docRoot.Usings.Any())
-                    {
-                        usingDirective = usingDirective.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-                    }
 
                     usingDirectiveList.Add(usingDirective);
                 }
@@ -620,7 +605,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return usingDirectiveList.ToArray();
         }
 
-        //create AttributeListSyntax using string[] to add on top of a ClassDeclrationSyntax
+        // create AttributeListSyntax using string[] to add on top of a ClassDeclrationSyntax
         internal SyntaxList<AttributeListSyntax> CreateAttributeList(CodeBlock[] attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
         {
             var syntaxList = attributeLists;
@@ -737,107 +722,3 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     .WithTokens(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.SemicolonToken))));
     }
 }
-
-
-////For inserting global statements in a minimal hosting C# file (.NET 6 Preview 7+)
-//internal static SyntaxNode AddGlobalStatements(CodeSnippet change, CompilationUnitSyntax root)
-//{
-//    var newRoot = root;
-//    var statementTrailingTrivia = new SyntaxTriviaList();
-//    var statementLeadingTrivia = new SyntaxTriviaList();
-
-//    if (change.CodeFormatting != null)
-//    {
-//        if (change.CodeFormatting.Newline)
-//        {
-//            statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.ElasticCarriageReturnLineFeed);
-//        }
-//        if (change.CodeFormatting.NumberOfSpaces > 0)
-//        {
-//            statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', change.CodeFormatting.NumberOfSpaces)));
-//        }
-//    }
-
-//    var globalStatement = SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(change.Block)).WithLeadingTrivia(statementLeadingTrivia).WithTrailingTrivia(statementTrailingTrivia);
-//    if (ProjectModifierHelper.GlobalStatementExists(newRoot, globalStatement, change.CheckBlock))
-//    {
-//        return newRoot;
-//    }
-
-//    GetMethodModification(change, root);
-//    return ModifyMethod(change, root, globalStatement);
-
-//    // //insert after, before, or at the end of file.
-//    // //insert global statement after particular statement
-//    // if (!string.IsNullOrEmpty(change.InsertAfter) || change.InsertBefore != null)
-//    // {
-//    //     MemberDeclarationSyntax insertAfterStatement = null;
-//    //     if (!string.IsNullOrEmpty(change.InsertAfter))
-//    //     {
-//    //         insertAfterStatement = newRoot.Members.Where(st => st.ToString().Contains(change.InsertAfter)).FirstOrDefault();
-//    //     }
-//    //     if (insertAfterStatement != null && insertAfterStatement is GlobalStatementSyntax insertAfterGlobalStatment)
-//    //     {
-//    //         newRoot = newRoot.InsertNodesAfter(insertAfterGlobalStatment, new List<SyntaxNode> { globalStatement });
-//    //     }
-//    //     else
-//    //     {
-//    //         //find a statement to insert before.
-//    //         foreach (var insertBeforeText in change.InsertBefore)
-//    //         {
-//    //             var insertBeforeStatement = newRoot.Members.Where(st => st.ToString().Contains(insertBeforeText)).FirstOrDefault();
-//    //             if (insertBeforeStatement != null && insertBeforeStatement is GlobalStatementSyntax insertBeforeGlobalStatment)
-//    //             {
-//    //                 newRoot = newRoot.InsertNodesBefore(insertBeforeGlobalStatment, new List<SyntaxNode> { globalStatement });
-//    //                 //exit if we found a statement to insert before
-//    //                 break;
-//    //             }
-//    //         }
-//    //     }
-//    // }
-//    // else if (!string.IsNullOrEmpty(change.Parent))
-//    // {
-//    //     return AddCodeSnippetOnParent(change, root);
-//    //     //newRoot = ModifyGlobalParent(newRoot, change, statementLeadingTrivia, statementTrailingTrivia);
-//    // }
-//    // //insert global statement at the beginning or end of the file
-//    // else
-//    // {
-//    //     var updatedMembers = change.Prepend ? newRoot.Members.Insert(0, globalStatement) : newRoot.Members.Add(globalStatement);
-//    //     newRoot = newRoot.WithMembers(updatedMembers);
-//    // }
-
-//    // return newRoot;
-//}
-
-
-//private static SyntaxToken GetFormattedStatement(CodeSnippet change, SyntaxTriviaList trailingTrivia, SyntaxTriviaList leadingTrivia, IDictionary<string, string> parameterValues)
-//{
-
-//    //using defaults for leading and trailing trivia
-//    if (trailingTrivia == null)
-//        {
-//            trailingTrivia = new SyntaxTriviaList(SyntaxFactory.CarriageReturnLineFeed);
-//        }
-//    if (leadingTrivia == null)
-//    {
-//        leadingTrivia = new SyntaxTriviaList();
-//    }
-
-//    if (change.CodeFormatting != null)
-//    {
-//        if (change.CodeFormatting.NumberOfSpaces > 0)
-//        {
-//            leadingTrivia = leadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', change.CodeFormatting.NumberOfSpaces)));
-//        }
-//        if (change.CodeFormatting.Newline)
-//        {
-//            change.Block = "\n" + change.Block;
-//        }
-//    }
-//    //set leading and trailing trivia if block has any existing statements.
-//    var formattedCodeBlock = SyntaxFactory.ParseToken(formattedCodeBlock)
-//                                    .WithAdditionalAnnotations(Formatter.Annotation)
-//                                    .WithTrailingTrivia(trailingTrivia)
-//                                    .WithLeadingTrivia(leadingTrivia);
-//}

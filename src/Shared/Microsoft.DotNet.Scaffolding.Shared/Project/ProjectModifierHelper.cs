@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -263,9 +262,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         internal static bool StatementExists(IEnumerable<SyntaxNode> nodes, string statement)
         {
             statement = statement.TrimEnd(Parentheses);
-
-            return nodes.Any(n => n.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
+            return nodes.Any(n => StatementExists(n, statement));
         }
+
+        internal static bool StatementExists(SyntaxNode node, string statement) => node.ToString().Contains(statement.Trim(), StringComparison.Ordinal);
 
         //internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
 

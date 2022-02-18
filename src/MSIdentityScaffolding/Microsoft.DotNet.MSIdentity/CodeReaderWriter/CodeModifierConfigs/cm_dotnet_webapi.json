@@ -9,7 +9,7 @@
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
           "CodeChanges": [
             {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "InsertAfter": "IApplicationBuilder.UseRouting",
               "Block": "IApplicationBuilder.UseAuthentication()"
             }
           ]
@@ -81,7 +81,7 @@
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
-            }
+            },
             {
               "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -91,10 +91,10 @@
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
-            }
+            },
             {
               "Block": "app.UseAuthentication()",
-              "InsertBefore": ["app.UseAuthorization"],
+              "InsertBefore": [ "app.UseAuthorization" ],
               "CodeFormatting": {
                 "Newline": true
               }
@@ -135,7 +135,7 @@
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
           "CodeChanges": [
             {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "InsertAfter": "IApplicationBuilder.UseRouting",
               "Block": "IApplicationBuilder.UseAuthentication()"
             }
           ]
@@ -194,15 +194,16 @@
             },
             {
               "InsertAfter": "await _downstreamWebApi.CallWebApiForUserAsync",
-              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\r\r\r\n            {\r\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
+              "Block": "\r\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\r\n            {\r\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\r\n                // Do something\r\n            }\r\n            else\r\n            {\r\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\r\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\r\n            }",
               "CodeFormatting": {
-                "NumberOfSpaces": 12
+                "NumberOfSpaces": 12,
+                "Newline": true
               },
               "Options": [ "DownstreamApi" ]
             },
             {
               "Prepend": true,
-              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)",
               "Options": [ "NonMinimalApp" ]
             }
           ]

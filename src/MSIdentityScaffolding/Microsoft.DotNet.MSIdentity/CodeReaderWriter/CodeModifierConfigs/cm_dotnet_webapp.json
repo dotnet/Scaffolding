@@ -134,23 +134,33 @@
             {
               "CodeChangeType": "Lambda",
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthorization",
-              "Block": "options.FallbackPolicy = options.DefaultPolicy;",
-              "Parameter": "options"
+              "Block": "options.FallbackPolicy = options.DefaultPolicy",
+              "Parameter": "options",
+              "CodeFormatting":
+              {
+                "Newline":true,
+                "NumberOfSpaces": 4
+              }
             },
             {
-              "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages()",
+              "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages",
               "CodeChangeType": "MemberAccess",
-              "Block": "AddMicrosoftIdentityUI()"
+              "Block": "AddMicrosoftIdentityUI()",
+              "CodeFormatting":
+              {
+                "Newline":true, 
+                "NumberOfSpaces": 4
+              }
             },
             {
-              "InsertAfter": "app.UseRouting()",
+              "InsertAfter": "app.UseRouting",
               "Block": "app.UseAuthentication()",
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "InsertAfter": "app.MapRazorPages()",
+              "InsertAfter": "app.MapRazorPages",
               "Block": "app.MapControllers()"
             }
           ]

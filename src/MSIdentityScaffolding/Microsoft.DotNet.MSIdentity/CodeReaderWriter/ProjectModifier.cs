@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +8,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.Shared;
@@ -45,7 +43,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 return;
             }
-            Debugger.Launch();
+
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
             if (codeModifierConfig is null || !codeModifierConfig.Files.Any())
             {
@@ -266,8 +264,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             else
             {
-                Debugger.Launch();
-
                 var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();
 
                 string className = ProjectModifierHelper.GetClassName(file.FileName);

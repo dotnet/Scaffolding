@@ -63,35 +63,35 @@
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication"
             },
             {
-              "Block": "WebApplication.CreateBuilder.UseAuthentication()",
-              "InsertAfter": "WebApplication.CreateBuilder.UseHttpsRedirection",
+              "Block": "app.UseAuthentication()",
+              "InsertAfter": "app.UseHttpsRedirection",
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "WebApplication.CreateBuilder.UseAuthorization()",
-              "InsertAfter": "WebApplication.CreateBuilder.UseAuthentication"
+              "Block": "app.UseAuthorization()",
+              "InsertAfter": "app.UseAuthentication"
             },
             {
               "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]", 
-              "InsertAfter": "WebApplication.CreateBuilder.UseAuthorization",
+              "InsertAfter": "app.UseAuthorization",
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
-              "Parent": "WebApplication.CreateBuilder.Services.MapGet",
+              "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)",
+              "Parent": "app.MapGet",
               "Parameter": "HttpContext httpContext",
               "CodeChangeType": "Lambda",
               "Prepend": true,
               "CodeFormatting": {
-                "Newline": true
+                "NumberOfSpaces": 4
               }
             },
             {
-              "Parent": "WebApplication.CreateBuilder.Services.MapGet",
+              "Parent": "app.MapGet",
               "CodeChangeType": "MemberAccess",
               "Block": "RequireAuthorization()",
               "CodeFormatting": {

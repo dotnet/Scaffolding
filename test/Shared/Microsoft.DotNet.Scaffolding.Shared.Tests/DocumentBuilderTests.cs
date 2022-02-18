@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             var classAttributes = attributeStrings.Select(at => new CodeBlock() { Block = at }).ToArray();
-            var attributes = docBuilder.CreateAttributeList(classAttributes, new SyntaxList<AttributeListSyntax>(), new SyntaxTriviaList());
+            var attributes = docBuilder.CreateAttributeList(classAttributes, new SyntaxList<AttributeListSyntax>(), SyntaxFactory.TriviaList());
             Assert.True(attributes.Count == 4);
 
             foreach (var attributeString in attributeStrings)
@@ -259,8 +259,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }"/*, /*"public string Name { get; set; }",*//* "bool IsProperty { get; set; } = false" */ },
-                                   new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()", "app.UseStaticFiles()", "app.UseRouting()"/*, "bool IsProperty { get; set; } = false"*/ } }
+        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false"  },
+                                   new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()", "app.UseStaticFiles()", "app.UseRouting()", "bool IsProperty { get; set; } = false" } }
         )]
         public async Task AddGlobalStatementsTests(string[] statementsToAdd, string[] duplicateStatements) // TODO fix this test
         {

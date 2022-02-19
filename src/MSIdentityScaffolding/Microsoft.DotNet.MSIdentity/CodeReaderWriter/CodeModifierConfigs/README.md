@@ -28,12 +28,13 @@ class CodeChange
     public string? Type { get; set; } --> CodeChangeType (below) string.
     public bool? Prepend { get; set; } = false; --> Insert Block at the top of the method.
     public string ReplaceSnippet { get; set; } --> Replace snippet with Block
+    public string Parameter { get; set; } --> Parameter for adding or updating a lambda expression
 }
 
 class CodeChangeType
 {
     public const string MemberAccess = nameof(MemberAccess); --> Add a SimpleMemberAccess expression to the parent statement syntax. 
-    public const string Lambda = nameof(InBlock); --> Add in lambda block to the parent statement syntax. 
+    public const string Lambda = nameof(Lambda); --> Add or update lambda to the parent statement syntax. 
 }
 
 This info is also available in CodeModifierConfig folder as well.
@@ -45,9 +46,9 @@ The scenarios below need to be supported for all project types :
 | ASP .NET Core Web App (w/ B2C tenant) | Config w/out layout(.cshtml) files | 
 | ASP .NET Core Web Api | Config w/out layout(.cshtml) files | 
 | ASP .NET Core Web Api (w/ B2C tenant) | Config w/out layout(.cshtml) files | 
-| Blazor Server App | Need config |
+| Blazor Server App | Config w/ .razor files |
 | Blazor Server App (w/ B2C tenant) | Need config |
-| Blazor WebAssembly App | Need config |
+| Blazor WebAssembly App | Config w/ .razor files, needs config for Calls Graph / Downstream API |
 | Blazor WebAssembly App (w/ B2C tenant) | Need config | 
 | Blazor Hosted WebAssembly App | Need config |
 | Blazor Hosted WebAssembly App (w/ B2C tenant) | Need config | 

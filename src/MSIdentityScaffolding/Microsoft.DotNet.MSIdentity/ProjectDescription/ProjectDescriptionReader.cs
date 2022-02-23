@@ -125,9 +125,16 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         private bool FileMatches(string filePath, string[] matchAny)
         {
-            var fileContent = File.ReadAllText(filePath);
-            var fileMatches = matchAny.Where(match => fileContent.Contains(match, StringComparison.OrdinalIgnoreCase));
-            return fileMatches.Any();
+            try
+            {
+                var fileContent = File.ReadAllText(filePath);
+                var fileMatches = matchAny.Where(match => fileContent.Contains(match, StringComparison.OrdinalIgnoreCase));
+                return fileMatches.Any();
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public List<ProjectDescription> InitializeProjectDescriptions()

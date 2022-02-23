@@ -27,26 +27,25 @@ namespace Microsoft.DotNet.MSIdentity
     /// </summary>
     public class AppProvisioningTool : IMsAADTool
     {
+        private static readonly string[] s_fileExtensions = new string[] { "*.cs", "*.cshtml", "*.razor", "*.html" };
+
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();
         internal AppSettingsModifier AppSettingsModifier { get => new AppSettingsModifier(ProvisioningToolOptions); }
 
-        internal static PropertyInfo[]? _properties;
-        internal static PropertyInfo[] Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
-            .Where(p => p.PropertyType == typeof(byte[])).ToArray();
+        internal static IEnumerable<PropertyInfo>? _properties;
+        internal static IEnumerable<PropertyInfo> Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
+            .Where(p => p.PropertyType == typeof(byte[]));
 
-        internal IEnumerable<string>? _files;
-        internal IEnumerable<string> Files => _files ??=
-            Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.cs", SearchOption.AllDirectories)
-            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.cshtml", SearchOption.AllDirectories))
-            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.razor", SearchOption.AllDirectories))
-            .Concat(Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.html", SearchOption.AllDirectories));
+        internal IEnumerable<string>? _filePaths;
+        private IEnumerable<string> FilePaths => _filePaths ??= s_fileExtensions.SelectMany(
+            ext => Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, ext, SearchOption.AllDirectories));
 
         internal IConsoleLogger ConsoleLogger { get; }
 
         private ProjectDescriptionReader? _projectDescriptionReader;
-        private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(Files);
+        private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
 
         public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
         {
@@ -57,26 +56,11 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            // Get csproj file path if it is not input from the tool
-            if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
+            if (!ValidateProjectFilePath())
             {
-                // Enumerate all files because we do not yet know the correct ProjectPath, later we cache all files and pass the list around
-                var csProjfiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
-                if (csProjfiles is null || csProjfiles.Count() != 1)
-                {
-                    ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, Resources.ProjectPathError));
-                    ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
-                    return null;
-                }
-
-                ProvisioningToolOptions.ProjectFilePath = csProjfiles.First();
-            }
-
-            // Update the ProjectPath if necessary
-            if (ProvisioningToolOptions.ProjectPath.Equals(Directory.GetCurrentDirectory(), StringComparison.OrdinalIgnoreCase)
-                && Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) is string actualProjectPath)
-            {
-                ProvisioningToolOptions.ProjectPath = actualProjectPath;
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, Resources.ProjectPathError));
+                ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
+                Environment.Exit(1);
             }
 
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(
@@ -210,6 +194,37 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             return effectiveApplicationParameters;
+        }
+
+        /// <summary>
+        /// Ensures existence of csproj file and ensures that projectFilePath and projectPath are set correctly,
+        /// </summary>
+        /// <returns>true if valid else false</returns>
+        private bool ValidateProjectFilePath()
+        {
+            if (!string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath)
+                && System.IO.File.Exists(ProvisioningToolOptions.ProjectFilePath)
+                && Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) is string projectPath)
+            {
+                if (!projectPath.Equals(ProvisioningToolOptions.ProjectPath))
+                {
+                    ProvisioningToolOptions.ProjectPath = projectPath;
+                }
+
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
+            {
+                var csProjFiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
+                if (csProjFiles.Count() == 1)
+                {
+                    ProvisioningToolOptions.ProjectFilePath = csProjFiles.First();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task<ApplicationParameters?> CreateAppRegistration(TokenCredential tokenCredential, ApplicationParameters? applicationParameters)
@@ -376,7 +391,7 @@ namespace Microsoft.DotNet.MSIdentity
             ProjectDescription? projectDescription = null)
         {
             var projectSettings = projectDescription != null
-                ? new CodeReader().ReadFromFiles(projectDescription, projectDescriptions, Files)
+                ? new CodeReader().ReadFromFiles(projectDescription, projectDescriptions, FilePaths)
                 : new ProjectAuthenticationSettings();
 
             // Override with the tools options
@@ -517,19 +532,19 @@ namespace Microsoft.DotNet.MSIdentity
                 return;
             }
 
-            if (ProvisioningToolOptions.ConfigUpdate)
+            if (ProvisioningToolOptions.CodeUpdate || ProvisioningToolOptions.ConfigUpdate)
             {
                 ConsoleLogger.LogMessage("=============================================");
                 ConsoleLogger.LogMessage(Resources.UpdatingAppSettingsJson);
                 ConsoleLogger.LogMessage("=============================================\n");
+                // modify appsettings.json.
+                AppSettingsModifier.ModifyAppSettings(applicationParameters, FilePaths);
+            }
+
+            if (ProvisioningToolOptions.ConfigUpdate)
+            {
                 // dotnet user secrets init
                 CodeWriter.InitUserSecrets(ProvisioningToolOptions.ProjectPath, ConsoleLogger);
-
-                // modify appsettings.json if not updated from Code Update
-                if (!ProvisioningToolOptions.CodeUpdate)
-                {
-                    AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
-                }
 
                 // Add ClientSecret if the app wants to call graph/a downstream api.
                 if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
@@ -607,11 +622,8 @@ namespace Microsoft.DotNet.MSIdentity
                 ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
                 ConsoleLogger.LogMessage("=============================================\n");
                 // if project is not setup for auth, add updates to Startup.cs, .csproj.
-                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, Files, ConsoleLogger);
+                ProjectModifier startupModifier = new ProjectModifier(ProvisioningToolOptions, FilePaths, ConsoleLogger);
                 await startupModifier.AddAuthCodeAsync();
-
-                // modify appsettings.json.
-                AppSettingsModifier.ModifyAppSettings(applicationParameters, Files);
             }
         }
     }

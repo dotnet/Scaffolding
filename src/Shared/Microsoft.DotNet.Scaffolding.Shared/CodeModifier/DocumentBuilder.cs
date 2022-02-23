@@ -422,6 +422,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     newParameters.Add(parameterSyntax);
                 }
             }
+
             if (newParameters.Any())
             {
                 newMethod = newMethod.AddParameterListParameters(newParameters.ToArray());
@@ -492,7 +493,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             var updatedBlock = AddStatement(existingLambda.Block, change);
-            if (existingLambda.WithBlock(updatedBlock as BlockSyntax)  is LambdaExpressionSyntax updatedLambda)
+            if (existingLambda.WithBlock(updatedBlock as BlockSyntax) is LambdaExpressionSyntax updatedLambda)
             {
                 return updatedLambda;
             }
@@ -521,7 +522,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return parent;
             }
 
-            var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(parameter, block);
+            var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(
+                parameter,
+                block.WithLeadingTrivia(
+                    SyntaxFactory.CarriageReturnLineFeed));
+
             var argument = SyntaxFactory.Argument(newLambdaExpression);
             var updatedParent = parent.ReplaceNode(argList, argList.AddArguments(argument));
 
@@ -608,30 +613,33 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         // create AttributeListSyntax using string[] to add on top of a ClassDeclrationSyntax
         internal SyntaxList<AttributeListSyntax> CreateAttributeList(CodeBlock[] attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
         {
-            var syntaxList = attributeLists;
-
-            if (attributes != null && attributes.Any())
+            if (attributes == null)
             {
-                foreach (var attribute in attributes)
+                return attributeLists;
+            }
+
+            foreach (var attribute in attributes)
+            {
+                var attributeList = new List<AttributeSyntax>();
+                // filter by apps
+                if (!string.IsNullOrEmpty(attribute.Block) && !ProjectModifierHelper.AttributeExists(attribute.Block, attributeLists))
                 {
-                    var attributeList = new List<AttributeSyntax>();
-                    //filter by apps
-                    if (!string.IsNullOrEmpty(attribute.Block) && !ProjectModifierHelper.AttributeExists(attribute.Block, attributeLists))
+                    attributeList.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName(attribute.Block)));
+                }
+
+                if (attributeList.Any())
+                {
+                    var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
+                    if (!leadingTrivia.ToString().Contains("\n"))
                     {
-                        attributeList.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName(attribute.Block)));
+                        attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
                     }
-                    if (attributeList.Any())
-                    {
-                        var attributeListSyntax = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList)).WithLeadingTrivia(leadingTrivia);
-                        if (!leadingTrivia.ToString().Contains("\n"))
-                        {
-                            attributeListSyntax = attributeListSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-                        }
-                        syntaxList = syntaxList.Insert(0, attributeListSyntax);
-                    }
+
+                    attributeLists = attributeLists.Insert(0, attributeListSyntax);
                 }
             }
-            return syntaxList;
+
+            return attributeLists;
         }
 
         // check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.
@@ -666,15 +674,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         //here for mostly testing
-        internal Document GetDocument()
-        {
-            return _documentEditor.GetChangedDocument();
-        }
-
-        internal CompilationUnitSyntax GetChangedRoot()
-        {
-            return _documentEditor.GetChangedRoot() as CompilationUnitSyntax;
-        }
+        internal Document GetDocument() => _documentEditor.GetChangedDocument();
 
         //create MemberDeclarationSyntax[] to add at the top of ClassDeclarationSynax. Created from the property strings.
         internal MemberDeclarationSyntax[] CreateClassProperties(
@@ -702,20 +702,19 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     }
                 }
             }
+
             return propertyDeclarationList.ToArray();
         }
 
         internal bool PropertyExists(string property, SyntaxList<MemberDeclarationSyntax> members)
         {
-            if (!string.IsNullOrEmpty(property))
+            if (string.IsNullOrEmpty(property))
             {
-                if (members.Where(m => m.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Equals(property.Trim(ProjectModifierHelper.CodeSnippetTrimChars))).Any())
-                {
-                    return true;
-                }
+                return false;
             }
+            var trimmedProperty = property.Trim(ProjectModifierHelper.CodeSnippetTrimChars);
 
-            return false;
+            return members.Where(m => m.ToString().Trim(ProjectModifierHelper.CodeSnippetTrimChars).Equals(trimmedProperty)).Any();
         }
 
         private static SyntaxTrivia SemiColonTrivia => SyntaxFactory.Trivia(SyntaxFactory.SkippedTokensTrivia()

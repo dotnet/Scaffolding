@@ -105,7 +105,6 @@
     },
     {
       "FileName": "WeatherForecastController.cs",
-      "Options": [ "NonMinimalApp" ],
       "ClassAttributes": [
         {
           "Block":"Authorize",

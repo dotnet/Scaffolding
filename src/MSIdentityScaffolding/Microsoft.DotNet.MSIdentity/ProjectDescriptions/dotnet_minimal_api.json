@@ -5,7 +5,8 @@
   "MatchesForProjectType": [
     {
       "FileRelativePath": "Program.cs",
-      "MatchAny": [ ".MapGet" ]
+      "MatchAny": [ ".MapGet" ],
+      "Sets": "IsWebApi"
     }
   ],
   "Packages": [

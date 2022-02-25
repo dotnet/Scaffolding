@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return AnyFileContainsMatch(matchAny, matchingFilePaths);
         }
 
-        private bool DirectoryMatches(string filePath, string folderRelativePath, string? fileExtension = null)
+        private static bool DirectoryMatches(string filePath, string folderRelativePath, string? fileExtension = null)
         {
             var directoryPath = Path.GetDirectoryName(filePath);
             var folderFound = directoryPath?.Contains(folderRelativePath, StringComparison.OrdinalIgnoreCase) ?? false;
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return folderFound && extensionMatches;
         }
 
-        private bool AnyFileContainsMatch(string[]? matchAny, IEnumerable<string> matchingPaths)
+        private static bool AnyFileContainsMatch(string[]? matchAny, IEnumerable<string> matchingPaths)
         {
             if (matchAny is null)
             {
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return matchingFiles.Any(); // If MatchAny is not null, at least file needs to contain a match
         }
 
-        private bool FileMatches(string filePath, string[] matchAny)
+        private static bool FileMatches(string filePath, string[] matchAny)
         {
             try
             {

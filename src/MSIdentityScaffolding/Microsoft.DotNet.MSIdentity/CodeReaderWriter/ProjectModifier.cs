@@ -303,13 +303,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     continue;
                 }
 
-                var methodNode = documentBuilder.GetOriginalMethod(classNode, methodName, methodChanges);
+                var methodNode = ProjectModifierHelper.GetOriginalMethod(classNode, methodName, methodChanges);
                 if (methodNode is null)
                 {
                     continue;
                 }
 
-                var updatedMethodNode = documentBuilder.GetModifiedMethod(methodNode, methodChanges, options);
+                var updatedMethodNode = DocumentBuilder.GetModifiedMethod(methodNode, methodChanges, options);
                 if (updatedMethodNode != null)
                 {
                     classNode = classNode.ReplaceNode(methodNode, updatedMethodNode);

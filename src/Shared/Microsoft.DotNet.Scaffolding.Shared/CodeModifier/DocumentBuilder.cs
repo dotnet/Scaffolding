@@ -32,26 +32,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _docRoot = (CompilationUnitSyntax)_documentEditor.OriginalRoot ?? throw new ArgumentNullException(nameof(_documentEditor.OriginalRoot));
         }
 
-        internal BaseMethodDeclarationSyntax GetOriginalMethod(ClassDeclarationSyntax classNode, string methodName, Method methodChanges)
-        {
-            if (classNode?.Members.FirstOrDefault(node
-                => node is MethodDeclarationSyntax mds && mds.Identifier.ValueText.Equals(methodName)
-                || node is ConstructorDeclarationSyntax cds && cds.Identifier.ValueText.Equals(methodName))
-                 is BaseMethodDeclarationSyntax foundMethod)
-            {
-                var parameters = VerifyParameters(methodChanges.Parameters, foundMethod.ParameterList.Parameters.ToList());
-                if (parameters == null)
-                {
-                    return null;
-                }
-
-                return foundMethod;
-            }
-
-            return null;
-        }
-
-        internal BaseMethodDeclarationSyntax GetModifiedMethod(BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options)
+        internal static BaseMethodDeclarationSyntax GetModifiedMethod(BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options)
         {
             method = AddCodeSnippetsToMethod(method, methodChanges, options);
             method = EditMethodReturnType(method, methodChanges, options);
@@ -77,12 +58,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
             else
             {
-                var uniqueUsings = SyntaxFactory.List(
-                    usingNodes.Where(u => !_docRoot.Usings.Any(
-                            oldUsing => oldUsing.Name.ToString().Equals(u.Name.ToString()))));
+                var uniqueUsings = GetUniqueUsings(_docRoot.Usings.ToArray(), usingNodes);
 
                 return uniqueUsings.Any() ? _docRoot.WithUsings(_docRoot.Usings.AddRange(uniqueUsings)) : _docRoot;
             }
+        }
+
+        internal static SyntaxList<UsingDirectiveSyntax> GetUniqueUsings(UsingDirectiveSyntax[] existingUsings, UsingDirectiveSyntax[] newUsings)
+        {
+            return SyntaxFactory.List(
+                newUsings.Where(u => !existingUsings.Any(oldUsing => oldUsing.Name.ToString().Equals(u.Name.ToString()))));
         }
 
         internal static IList<string> FilterUsingsWithOptions(CodeFile codeFile, CodeChangeOptions options)
@@ -153,7 +138,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _consoleLogger.LogMessage($"Modified {filePath}.\n");
         }
 
-        internal BaseMethodDeclarationSyntax AddMethodParameters(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+        internal static BaseMethodDeclarationSyntax AddMethodParameters(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
         {
             if (methodChanges is null || methodChanges.AddParameters is null || !methodChanges.AddParameters.Any())
             {
@@ -167,7 +152,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         // Add all the different code snippet.
-        internal BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+        internal static BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
         {
             var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(methodChanges.CodeChanges, options);
 
@@ -222,7 +207,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return modifiedMethod != null ? originalMethod.ReplaceNode(originalMethod, modifiedMethod) : originalMethod;
         }
 
-        private static SyntaxNode UpdateMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
+        internal static SyntaxNode UpdateMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
         {
             var children = GetDescendantNodes(originalMethod);
             if (ProjectModifierHelper.StatementExists(children, codeChange.Block))
@@ -241,7 +226,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
             else
             {
-                updatedMethod = AddStatement(originalMethod, codeChange);
+                updatedMethod = GetBlockStatement(originalMethod, codeChange);
             }
 
 
@@ -296,6 +281,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return null;
         }
 
+        /// <summary>
+        /// Creates a List of SyntaxNodes with the code change added, useful as an input for methods such as SyntaxNode.InsertNodesBefore that require a list
+        /// Additionally, with this method we can use the same code for StatementSyntax and GlobalStatementSyntax nodes
+        /// </summary>
+        /// <param name="codeChange"></param>
+        /// <param name="syntaxKind"></param>
+        /// <returns></returns>
         private static List<SyntaxNode> GetNodeInsertionList(CodeSnippet codeChange, SyntaxKind syntaxKind)
         {
             var leadingTrivia = GetLeadingTrivia(codeChange.CodeFormatting);
@@ -312,7 +304,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                : new List<SyntaxNode> { statement };
         }
 
-        private static SyntaxNode AddStatement(SyntaxNode node, CodeSnippet codeChange)
+        private static SyntaxNode GetBlockStatement(SyntaxNode node, CodeSnippet codeChange)
         {
             var syntaxKind = node.Kind();
 
@@ -347,7 +339,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         private static SyntaxTriviaList GetLeadingTrivia(Formatting codeFormatting)
         {
             var statementLeadingTrivia = SyntaxFactory.TriviaList();
-
             if (codeFormatting != null)
             {
                 if (codeFormatting.Newline)
@@ -363,7 +354,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return statementLeadingTrivia;
         }
 
-        private static SyntaxNode GetSpecifiedNode(string specifierStatement, IEnumerable<SyntaxNode> descendantNodes)
+        /// <summary>
+        /// Searches through list of nodes and returns the first node that contains the specifierStatement
+        /// </summary>
+        /// <param name="specifierStatement"></param>
+        /// <param name="descendantNodes"></param>
+        /// <returns></returns>
+        internal static SyntaxNode GetSpecifiedNode(string specifierStatement, IEnumerable<SyntaxNode> descendantNodes)
         {
             if (string.IsNullOrEmpty(specifierStatement))
             {
@@ -377,7 +374,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return specifiedDescendant;
         }
 
-        internal BaseMethodDeclarationSyntax EditMethodReturnType(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+        internal static BaseMethodDeclarationSyntax EditMethodReturnType(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
         {
             if (methodChanges is null || methodChanges.EditType is null || !(originalMethod is MethodDeclarationSyntax modifiedMethod))
             {
@@ -409,7 +406,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return originalMethod;
         }
 
-        private BaseMethodDeclarationSyntax AddParameters(BaseMethodDeclarationSyntax methodNode, CodeBlock[] addParameters, CodeChangeOptions toolOptions)
+        internal static BaseMethodDeclarationSyntax AddParameters(BaseMethodDeclarationSyntax methodNode, CodeBlock[] addParameters, CodeChangeOptions toolOptions)
         {
             var newMethod = methodNode;
             List<ParameterSyntax> newParameters = new List<ParameterSyntax>();
@@ -438,10 +435,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var children = GetDescendantNodes(parent);
 
             var updatedParent = parent;
+
             // Check for existing lambda
-            if (children.FirstOrDefault(d => d.IsKind(SyntaxKind.ParenthesizedLambdaExpression) || d.IsKind(SyntaxKind.SimpleLambdaExpression)) is LambdaExpressionSyntax existingLambda)
+            if (children.FirstOrDefault(
+                d => d.IsKind(SyntaxKind.ParenthesizedLambdaExpression)
+                || d.IsKind(SyntaxKind.SimpleLambdaExpression)) is LambdaExpressionSyntax existingLambda)
             {
-                updatedParent = UpdateLambda(existingLambda, change, parent);
+                updatedParent = GetNodeWithUpdatedLambda(existingLambda, change, parent);
             }
             else // Add a new lambda
             {
@@ -451,7 +451,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return originalMethod.ReplaceNode(parent, updatedParent);
         }
 
-        private static SyntaxNode UpdateLambda(LambdaExpressionSyntax existingLambda, CodeSnippet change, SyntaxNode parent)
+        /// <summary>
+        /// Given an existing lamba expression, updates the parameters and block as necessary
+        /// </summary>
+        /// <param name="existingLambda"></param>
+        /// <param name="change"></param>
+        /// <param name="parent"></param>
+        /// <returns>parent with updated lambda expression</returns>
+        internal static SyntaxNode GetNodeWithUpdatedLambda(LambdaExpressionSyntax existingLambda, CodeSnippet change, SyntaxNode parent)
         {
             var children = GetDescendantNodes(existingLambda);
             var modifiedLambda = UpdateLambdaParameter(existingLambda, children, change);
@@ -468,11 +475,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             var lambdaParam = SyntaxFactory.Parameter(SyntaxFactory.Identifier(change.Parameter));
+            // Lambda might be ParenthesizedLambda or SimpleLambda
             if (existingLambda is ParenthesizedLambdaExpressionSyntax updatedLambda)
             {
                 updatedLambda = updatedLambda.AddParameterListParameters(lambdaParam);
             }
-            else
+            else // if SimpleLambda we are adding a parameter and making it a ParenthesizedLambda
             {
                 updatedLambda = SyntaxFactory.ParenthesizedLambdaExpression(existingLambda).AddParameterListParameters(lambdaParam);
             }
@@ -492,7 +500,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return existingLambda;
             }
 
-            var updatedBlock = AddStatement(existingLambda.Block, change);
+            // Get new lambda block
+            var updatedBlock = GetBlockStatement(existingLambda.Block, change);
+
+            // Try to replace existing block with updated block
             if (existingLambda.WithBlock(updatedBlock as BlockSyntax) is LambdaExpressionSyntax updatedLambda)
             {
                 return updatedLambda;
@@ -508,25 +519,29 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return parent;
             }
 
+            // Determine if there is an existing argument list to add the lambda
             if (!(children.FirstOrDefault(n => n.IsKind(SyntaxKind.ArgumentList)) is ArgumentListSyntax argList))
             {
                 return parent;
             }
 
+            // Create a lambda parameter 
             var parameter = SyntaxFactory.Parameter(
                 SyntaxFactory.Identifier(change.Parameter))
                 .WithTrailingTrivia(SyntaxFactory.Space);
 
-            if (!(AddStatement(SyntaxFactory.Block(), change) is BlockSyntax block))
+            // Ensure that block statement is valid
+            if (!(GetBlockStatement(SyntaxFactory.Block(), change) is BlockSyntax block))
             {
                 return parent;
             }
 
+            // Create lambda expression with parameter and block (add leading newline to block for formatting)
             var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(
                 parameter,
-                block.WithLeadingTrivia(
-                    SyntaxFactory.CarriageReturnLineFeed));
+                block.WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed));
 
+            // Add lambda to parent block's argument list
             var argument = SyntaxFactory.Argument(newLambdaExpression);
             var updatedParent = parent.ReplaceNode(argList, argList.AddArguments(argument));
 
@@ -536,6 +551,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         // return modified parent node with code snippet added
         internal static SyntaxNode AddExpressionToParent(SyntaxNode originalMethod, CodeSnippet change)
         {
+            // Determine the parent node onto which we are adding
             var parent = GetSpecifiedNode(change.Parent, GetDescendantNodes(originalMethod));
             var children = GetDescendantNodes(parent);
             if (ProjectModifierHelper.StatementExists(children, change.Block))
@@ -543,11 +559,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return originalMethod;
             }
 
+            // Find parent's expression statement
             if (!(children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) is ExpressionStatementSyntax exprNode))
             {
                 return originalMethod;
             }
 
+            // Create new expression to update old expression
             var leadingTrivia = GetLeadingTrivia(change.CodeFormatting);
             var identifier = SyntaxFactory.IdentifierName(change.Block);
 
@@ -563,6 +581,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return originalMethod;
             }
 
+            // Replace existing expression with updated expression
             var updatedParent = parent.ReplaceNode(exprNode, modifiedExprNode);
 
             return updatedParent != null ? originalMethod.ReplaceNode(parent, updatedParent) : originalMethod;
@@ -583,7 +602,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         // create UsingDirectiveSyntax[] using a string[] to add to the root of the class (root.Usings).
-        internal UsingDirectiveSyntax[] CreateUsings(string[] usings)
+        internal static UsingDirectiveSyntax[] CreateUsings(string[] usings)
         {
             var usingDirectiveList = new List<UsingDirectiveSyntax>();
             if (usings == null)
@@ -611,7 +630,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         // create AttributeListSyntax using string[] to add on top of a ClassDeclrationSyntax
-        internal SyntaxList<AttributeListSyntax> CreateAttributeList(CodeBlock[] attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
+        internal static SyntaxList<AttributeListSyntax> CreateAttributeList(CodeBlock[] attributes, SyntaxList<AttributeListSyntax> attributeLists, SyntaxTriviaList leadingTrivia)
         {
             if (attributes == null)
             {
@@ -640,37 +659,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             return attributeLists;
-        }
-
-        // check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.
-        internal IDictionary<string, string> VerifyParameters(string[] parametersToCheck, List<ParameterSyntax> foundParameters)
-        {
-            IDictionary<string, string> parametersWithNames = new Dictionary<string, string>();
-            if (foundParameters.Any() && parametersToCheck != null && parametersToCheck.Any())
-            {
-                var pars = foundParameters.ToList();
-                foreach (var parameter in parametersToCheck)
-                {
-                    //Trim(' ') for the additional whitespace at the end of the parameter.Type string. Parameter.Type should be a singular word.
-                    var verifiedParams = pars.Where(p => (p.Type?.ToFullString()?.Trim(' ')?.Equals(parameter)).GetValueOrDefault(false));
-                    if (verifiedParams.Any())
-                    {
-                        parametersWithNames.Add(parameter, verifiedParams.First().Identifier.ValueText);
-                    }
-                }
-
-                //Dictionary should have the same number of parameters we are trying to verify.
-                if (parametersWithNames.Count == parametersToCheck.Length)
-                {
-                    return parametersWithNames;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            return parametersWithNames;
         }
 
         //here for mostly testing
@@ -706,7 +694,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return propertyDeclarationList.ToArray();
         }
 
-        internal bool PropertyExists(string property, SyntaxList<MemberDeclarationSyntax> members)
+        internal static bool PropertyExists(string property, SyntaxList<MemberDeclarationSyntax> members)
         {
             if (string.IsNullOrEmpty(property))
             {

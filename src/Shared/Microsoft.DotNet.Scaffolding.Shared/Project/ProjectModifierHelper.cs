@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
     internal static class ProjectModifierHelper
     {
-        internal static string[] CodeSnippetTrimStrings = new string[] { " ", "\r", "\n", ";" };
-        internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' }; // TODO maybe unnecessary
-        internal static char[] Parentheses = new char[] { '(', ')' }; // TODO maybe unnecessary
+        internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
+        internal static IEnumerable<string> CodeSnippetTrimStrings = CodeSnippetTrimChars.Select(c => c.ToString());
+        internal static char[] Parentheses = new char[] { '(', ')' }; 
         internal const string VarIdentifier = "var";
         internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
         /// <summary>
@@ -109,6 +109,56 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return formattedClassName;
         }
 
+        internal static BaseMethodDeclarationSyntax GetOriginalMethod(ClassDeclarationSyntax classNode, string methodName, Method methodChanges)
+        {
+            if (classNode?.Members.FirstOrDefault(node
+                => node is MethodDeclarationSyntax mds && mds.Identifier.ValueText.Equals(methodName)
+                || node is ConstructorDeclarationSyntax cds && cds.Identifier.ValueText.Equals(methodName))
+                 is BaseMethodDeclarationSyntax foundMethod)
+            {
+                var parameters = VerifyParameters(methodChanges.Parameters, foundMethod.ParameterList.Parameters.ToList());
+                if (parameters == null)
+                {
+                    return null;
+                }
+
+                return foundMethod;
+            }
+
+            return null;
+        }
+
+        // check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.
+        internal static IDictionary<string, string> VerifyParameters(string[] parametersToCheck, List<ParameterSyntax> foundParameters)
+        {
+            IDictionary<string, string> parametersWithNames = new Dictionary<string, string>();
+            if (foundParameters.Any() && parametersToCheck != null && parametersToCheck.Any())
+            {
+                var pars = foundParameters.ToList();
+                foreach (var parameter in parametersToCheck)
+                {
+                    //Trim(' ') for the additional whitespace at the end of the parameter.Type string. Parameter.Type should be a singular word.
+                    var verifiedParams = pars.Where(p => (p.Type?.ToFullString()?.Trim(' ')?.Equals(parameter)).GetValueOrDefault(false));
+                    if (verifiedParams.Any())
+                    {
+                        parametersWithNames.Add(parameter, verifiedParams.First().Identifier.ValueText);
+                    }
+                }
+
+                //Dictionary should have the same number of parameters we are trying to verify.
+                if (parametersWithNames.Count == parametersToCheck.Length)
+                {
+                    return parametersWithNames;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return parametersWithNames;
+        }
+
         /// <summary>
         /// Format a string of a SimpleMemberAccessExpression(eg., Type.Value)
         /// Replace Type with its value from the parameterDict.
@@ -129,10 +179,18 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     formattedCodeBlock = $"{parameter}.{value}";
                 }
             }
+
             return trim ? formattedCodeBlock.Trim(CodeSnippetTrimChars) : formattedCodeBlock;
         }
 
-        internal static string FormatGlobalStatement(string codeBlock, string oldValue, string newValue)
+        /// <summary>
+        /// Looks for oldValue in codeBlock and replaces with newValue
+        /// </summary>
+        /// <param name="codeBlock"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns>codeBlock where any instance of 'oldValue' is replaced with 'newValue'</returns>
+        internal static string ReplaceValue(string codeBlock, string oldValue, string newValue)
         {
             string formattedStatement = codeBlock;
             if (!string.IsNullOrEmpty(formattedStatement) && !string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue))
@@ -142,39 +200,47 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
             return formattedStatement;
         }
+
+        /// <summary>
+        /// Replaces all instances of the old value with the new value
+        /// </summary>
+        /// <param name="changes"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns>updated CodeSnippet array</returns>
         internal static CodeSnippet[] UpdateVariables(CodeSnippet[] changes, string oldValue, string newValue) => changes.Select(c => UpdateVariables(c, oldValue, newValue)).ToArray();
 
         /// <summary>
-        /// 
+        /// Replaces all instances of the old value with the new value
         /// </summary>
         /// <param name="change"></param>
         /// <param name="oldValue"></param>
         /// <param name="newValue"></param>
-        /// <returns></returns>
+        /// <returns>updated CodeSnippet</returns>
         internal static CodeSnippet UpdateVariables(CodeSnippet change, string oldValue, string newValue) //TODO
         {
             // format CodeSnippet fields for any variables or parameters.
             if (!string.IsNullOrEmpty(change.Block))
             {
-                change.Block = FormatGlobalStatement(change.Block, oldValue, newValue);
+                change.Block = ReplaceValue(change.Block, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.Parent))
             {
-                change.Parent = FormatGlobalStatement(change.Parent, oldValue, newValue);
+                change.Parent = ReplaceValue(change.Parent, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.CheckBlock))
             {
-                change.CheckBlock = FormatGlobalStatement(change.CheckBlock, oldValue, newValue);
+                change.CheckBlock = ReplaceValue(change.CheckBlock, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.InsertAfter))
             {
-                change.InsertAfter = FormatGlobalStatement(change.InsertAfter, oldValue, newValue);
+                change.InsertAfter = ReplaceValue(change.InsertAfter, oldValue, newValue);
             }
             if (change.InsertBefore != null && change.InsertBefore.Any())
             {
                 for (int i = 0; i < change.InsertBefore.Count(); i++)
                 {
-                    change.InsertBefore[i] = FormatGlobalStatement(change.InsertBefore[i], oldValue, newValue);
+                    change.InsertBefore[i] = ReplaceValue(change.InsertBefore[i], oldValue, newValue);
                 }
             }
 
@@ -200,6 +266,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Searches through the list of nodes to find replacement variable identifier names
+        /// </summary>
+        /// <param name="members"></param>
+        /// <returns></returns>
         internal static (string, string)? GetBuilderVariableIdentifierTransformation(SyntaxList<MemberDeclarationSyntax> members)
         {
             if (!(members.FirstOrDefault(
@@ -229,7 +300,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return null;
         }
 
-        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
+        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement)
         {
             if (root != null && statement != null)
             {
@@ -239,11 +310,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 if (foundStatement)
                 {
                     return true;
-                }
-                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
-                if (!string.IsNullOrEmpty(checkBlock))
-                {
-                    return root.Members.Where(st => TrimStatement(st.ToString()).Contains(TrimStatement(checkBlock.ToString()))).Any();
                 }
             }
 
@@ -266,8 +332,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         }
 
         internal static bool StatementExists(SyntaxNode node, string statement) => node.ToString().Contains(statement.Trim(), StringComparison.Ordinal);
-
-        //internal static bool StatementExists(BlockSyntax node, string statement) => node.Statements.Any(s => s.ToString().Contains(statement.Trim(), StringComparison.Ordinal));
 
         // Filter out CodeSnippets that are invalid using FilterOptions
         internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options) => codeSnippets.Where(cs => FilterOptions(cs.Options, options)).ToArray();

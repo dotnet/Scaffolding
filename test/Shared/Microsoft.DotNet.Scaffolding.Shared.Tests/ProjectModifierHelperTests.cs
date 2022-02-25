@@ -203,18 +203,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 "builderVar.myCustomBoolean.ToString()"
             };
 
-            var variablesDict = new Dictionary<string, string>()
-            {
-                { "string", "myCustomString" },
-                { "Boolean", "myCustomBoolean" },
-                { "Builder", "builderVar" }
-            };
-
             for (int i = 0; i < globalStatements.Length; i++)
             {
-                var formattedGlobalStatements = ProjectModifierHelper.FormatGlobalStatement(globalStatements[i], "string", "myCustomString");
-                formattedGlobalStatements = ProjectModifierHelper.FormatGlobalStatement(formattedGlobalStatements, "Boolean", "myCustomBoolean");
-                formattedGlobalStatements = ProjectModifierHelper.FormatGlobalStatement(formattedGlobalStatements, "Builder", "builderVar");
+                var formattedGlobalStatements = ProjectModifierHelper.ReplaceValue(globalStatements[i], "string", "myCustomString");
+                formattedGlobalStatements = ProjectModifierHelper.ReplaceValue(formattedGlobalStatements, "Boolean", "myCustomBoolean");
+                formattedGlobalStatements = ProjectModifierHelper.ReplaceValue(formattedGlobalStatements, "Builder", "builderVar");
                 Assert.Equal(correctlyFormattedStatements[i], formattedGlobalStatements);
             }
         }

@@ -68,22 +68,15 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// </summary>
         private string GetAppSettingsFilePath(IEnumerable<string> files)
         {
-            if (File.Exists(_provisioningToolOptions.AppSettingsFilePath))
+            if (!File.Exists(_provisioningToolOptions.AppSettingsFilePath))
             {
-                return _provisioningToolOptions.AppSettingsFilePath!;
+                // If default appsettings file does not exist, try to find it, if not found, create in the default location
+                _provisioningToolOptions.AppSettingsFilePath = File.Exists(DefaultAppSettingsPath)
+                    ? DefaultAppSettingsPath
+                    : files.Where(f => f.Contains(AppSettingsFileName)).FirstOrDefault();
             }
 
-            // In the majority of cases, this will give the correct appsettings file path
-            if (File.Exists(DefaultAppSettingsPath))
-            {
-                return DefaultAppSettingsPath;
-            }
-
-            // If default appsettings file does not exist, try to find it elsewhere
-            var filePath = files.Where(f => f.Contains(AppSettingsFileName)).FirstOrDefault();
-
-            // If not found, it will be created in the default location
-            return filePath ?? DefaultAppSettingsPath;
+            return _provisioningToolOptions.AppSettingsFilePath ??= DefaultAppSettingsPath;
         }
 
         private string DefaultAppSettingsPath => _provisioningToolOptions.IsBlazorWasm

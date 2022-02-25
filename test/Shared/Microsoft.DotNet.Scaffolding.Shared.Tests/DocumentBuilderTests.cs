@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             //Add usings
             DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
-            var usingDirectiveSyntax = docBuilder.CreateUsings(usingsStrings);
+            var usingDirectiveSyntax = DocumentBuilder.CreateUsings(usingsStrings);
             Assert.True(usingDirectiveSyntax.Length == 3);
 
             foreach (var usingString in usingsStrings)
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             var classAttributes = attributeStrings.Select(at => new CodeBlock() { Block = at }).ToArray();
-            var attributes = docBuilder.CreateAttributeList(classAttributes, new SyntaxList<AttributeListSyntax>(), new SyntaxTriviaList());
+            var attributes = DocumentBuilder.CreateAttributeList(classAttributes, new SyntaxList<AttributeListSyntax>(), SyntaxFactory.TriviaList());
             Assert.True(attributes.Count == 4);
 
             foreach (var attributeString in attributeStrings)
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
             var paramList = CreateParameterList(types, vals);
-            var paramDict = docBuilder.VerfiyParameters(types, paramList);
+            var paramDict = ProjectModifierHelper.VerifyParameters(types, paramList);
             Assert.True(paramDict != null);
 
             foreach (var type in types)
@@ -248,37 +248,38 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
             foreach (var property in existingProperties)
             {
-                Assert.True(docBuilder.PropertyExists(property, members));
+                Assert.True(DocumentBuilder.PropertyExists(property, members));
             }
 
             //mpm 
             foreach (var property in nonExistingProperties)
             {
-                Assert.False(docBuilder.PropertyExists(property, members));
+                Assert.False(DocumentBuilder.PropertyExists(property, members));
             }
         }
 
         [Theory]
-        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false" },
-                                   new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()", "app.UseStaticFiles()", "app.UseRouting()", "bool IsProperty { get; set; } = false" } }
+        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "app.DoMethod1()", "app.Method2()" },
+                                   new string[] { "var app = builder.Build()", "app.UseHttpsRedirection()", "app.UseStaticFiles()", "app.UseRouting()",  "app.DoMethod1()", "app.Method2()",
+                                   "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }"} }
         )]
         public async Task AddGlobalStatementsTests(string[] statementsToAdd, string[] duplicateStatements)
         {
             Document minimalProgramCsDoc = CreateDocument(MinimalProgramCsFile);
             var root = await minimalProgramCsDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
+            var codeChanges = statementsToAdd.Select(s => new CodeSnippet { Block = s }).ToArray();
+            var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(root, codeChanges) as CompilationUnitSyntax;
+
             foreach (var statementToAdd in statementsToAdd)
             {
                 var expression = SyntaxFactory.ParseStatement(statementToAdd);
                 var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
-                root = DocumentBuilder.AddGlobalStatements(new CodeSnippet { Block = statementToAdd }, root);
-                Assert.True(ProjectModifierHelper.GlobalStatementExists(root, globalStatement));
+                Assert.True(ProjectModifierHelper.GlobalStatementExists(modifiedRoot, globalStatement));
             }
-            var statementCount = root.Members.Count;
-            foreach (var duplicateStatement in duplicateStatements)
-            {
-                root = DocumentBuilder.AddGlobalStatements(new CodeSnippet { Block = duplicateStatement }, root);
-                Assert.Equal(statementCount, root.Members.Count);
-            }
+
+            var duplicates = duplicateStatements.Select(s => new CodeSnippet { Block = s }).ToArray();
+            var rootWithDuplicates = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, duplicates) as CompilationUnitSyntax;
+            Assert.Equal(rootWithDuplicates.Members.Count, modifiedRoot.Members.Count);
         }
     }
 }

@@ -40,10 +40,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
             //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
             var classNode = namespaceNode?
-                .DescendantNodes()?
-                .Where(node =>
-                    node is ClassDeclarationSyntax cds)
-                .FirstOrDefault();
+                .DescendantNodes()?.FirstOrDefault(node =>
+                    node.IsKind(SyntaxKind.ClassDeclaration));
 
             return (ClassDeclarationSyntax)classNode;
         }
@@ -258,8 +256,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 }
             }";
 
-        protected SyntaxTriviaList MemberLeadingTrivia = new SyntaxTriviaList(SyntaxFactory.Whitespace("    "));
-        protected SyntaxTriviaList MemberTrailingTrivia = new SyntaxTriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+        protected SyntaxTriviaList MemberLeadingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace("    "));
+        protected SyntaxTriviaList MemberTrailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
         protected static SyntaxTrivia SemiColonTrivia
         {
             get

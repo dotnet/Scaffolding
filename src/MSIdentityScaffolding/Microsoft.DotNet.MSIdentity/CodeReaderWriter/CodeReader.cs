@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (filePath.EndsWith(".json"))
                 {
                     jsonContent = JsonSerializer.Deserialize<JsonElement>(fileContent,
-                                                                          s_serializerOptionsWithComments);
+                        s_serializerOptionsWithComments);
                 }
                 else if (filePath.EndsWith(".csproj"))
                 {

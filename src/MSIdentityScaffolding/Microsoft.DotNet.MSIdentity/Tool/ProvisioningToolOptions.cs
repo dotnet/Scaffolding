@@ -1,18 +1,18 @@
 // Licensed under the MIT License.
-
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
     public class ProvisioningToolOptions : IDeveloperCredentialsOptions
     {
-        public string ProjectPath { get; set; } = System.IO.Directory.GetCurrentDirectory();
+        public string ProjectPath { get; set; } = Directory.GetCurrentDirectory();
 
         /// <summary>
-        /// Path to csproj file 
+        /// Path to csproj file
         /// </summary>
-        public string? ProjectFilePath{ get; set; }
+        public string? ProjectFilePath { get; set; }
 
         /// <summary>
         /// Path to appsettings.json file

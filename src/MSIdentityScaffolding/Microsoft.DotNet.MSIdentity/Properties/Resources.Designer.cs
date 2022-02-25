@@ -189,6 +189,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] cm_dotnet_minimal_api {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_minimal_api", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] cm_dotnet_webapi {
             get {
                 object obj = ResourceManager.GetObject("cm_dotnet_webapi", resourceCulture);
@@ -250,6 +260,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static byte[] dotnet_blazorwasm_hosted {
             get {
                 object obj = ResourceManager.GetObject("dotnet_blazorwasm_hosted", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] dotnet_minimal_api {
+            get {
+                object obj = ResourceManager.GetObject("dotnet_minimal_api", resourceCulture);
                 return ((byte[])(obj));
             }
         }

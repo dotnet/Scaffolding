@@ -10,12 +10,15 @@
       "Sets": "IsWebApi"
     },
     {
+      "FileRelativePath": "WeatherForecast.cs"
+    },
+    {
       "FileRelativePath": "Startup.cs",
       "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ]
     },
     {
       "FileRelativePath": "Program.cs",
-      "MatchAny": [ ".AddAzureAdBearer", ".AddMicrosoftIdentityWebApi", ".AddMicrosoftIdentityWebApiAuthentication" ]
+      "MatchAny": [ ".AddEndpointsApiExplorer", ".AddSwaggerGen" ]
     }
   ],
   "ConfigurationProperties": [

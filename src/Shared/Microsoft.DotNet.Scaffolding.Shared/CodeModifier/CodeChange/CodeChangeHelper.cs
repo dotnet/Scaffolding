@@ -1,10 +1,13 @@
+using System.Text.Json.Serialization;
+
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
 {
-    public class CodeChangeType
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum CodeChangeType
     {
-        public const string MemberAccess = nameof(MemberAccess);
-        public const string InLambdaBlock = nameof(InLambdaBlock);
-        public const string LambdaExpression = nameof(LambdaExpression);
+        Default,
+        MemberAccess,
+        Lambda
     }
 
     public class CodeChangeOptionStrings

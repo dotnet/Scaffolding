@@ -1,0 +1,88 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
+    string modelName = Model.ModelType.Name;
+    string modelConstructor = $"{modelName}()";
+    string modelArray = $"{modelName}[]";
+    string routePrefix = "/api/" + modelName;
+    string endPointsClassName = Model.EndpointsName;
+    string methodName = $"Map{@modelName}Endpoints";
+    string pluralModel = $"{@modelName}s";
+    string getAllModels = $"GetAll{@pluralModel}";
+    string getModelById = $"Get{@modelName}ById";
+    string deleteModel = $"Delete{@modelName}";
+    string createModel = $"Create{@modelName}";
+    string updateModel = $"Update{@modelName}";
+}
+@{
+    foreach (var namespaceName in Model.RequiredNamespaces)
+    {
+@:using @namespaceName;
+    }
+}
+namespace @Model.EndpointsNamespace;
+
+public static class @endPointsClassName
+{
+    public static void @methodName (this IEndpointRouteBuilder routes)
+    {
+        routes.MapGet("@routePrefix", () =>
+        {
+            return new [] { new @modelConstructor };
+        })
+        .WithName("@getAllModels");
+@{
+    if(Model.OpenAPI)
+    {
+      @:.Produces<@modelArray>(StatusCodes.Status200OK);
+    }
+}
+
+        routes.MapGet("@routePrefix/{id}", (int id) =>
+        {
+            //return new @modelName { ID = id };
+        })
+        .WithName("@getModelById");
+@{
+    if(Model.OpenAPI)
+    {
+      @:.Produces<@modelName>(StatusCodes.Status200OK);
+    }
+}
+
+        routes.MapPut("@routePrefix/{id}", (int id, @modelName input) =>
+        {
+            return Results.NoContent();
+        })
+        .WithName("@updateModel");
+@{
+    if(Model.OpenAPI)
+    {
+      @:.Produces(StatusCodes.Status204NoContent);
+    }
+}
+
+        routes.MapPost("@routePrefix/", (@modelName model) =>
+        {
+            //return Results.Created($"/@pluralModel/{model.ID}", model);
+        })
+        .WithName("@createModel");
+@{
+    if(Model.OpenAPI)
+    {
+      @:.Produces<@modelName>(StatusCodes.Status201Created);
+    }
+}
+
+        routes.MapDelete("@routePrefix/{id}", (int id) =>
+        {
+            //return Results.Ok(new @modelName { ID = id });
+        })
+        .WithName("@deleteModel");
+@{
+    if(Model.OpenAPI)
+    {
+      @:.Produces<@modelName>(StatusCodes.Status200OK);
+    }
+}
+    }
+}

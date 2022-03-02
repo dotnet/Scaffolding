@@ -252,4 +252,7 @@
   <data name="IdentityNotSupported" xml:space="preserve">
     <value>Scaffolding Identity is not supported for web applications with minimal APIs for hosting and routing.</value>
   </data>
+  <data name="AddedEndpoints" xml:space="preserve">
+    <value>Added Endpoints : '{0}'.</value>
+  </data>
 </root>

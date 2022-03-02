@@ -13,5 +13,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         Task AddFileFromTemplateAsync(string outputPath, string templateName, IEnumerable<string> templateFolders, object templateModel);
 
         Task AddFileAsync(string outputPath, string sourceFilePath);
+        Task<string> ExecuteTemplate(string templateName, IEnumerable<string> templateFolders, object templateModel);
     }
 }

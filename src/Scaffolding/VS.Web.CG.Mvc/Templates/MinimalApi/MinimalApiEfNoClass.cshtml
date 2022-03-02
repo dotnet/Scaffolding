@@ -1,0 +1,77 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
+    string modelName = Model.ModelType.Name;
+    string routePrefix = "/api/" + modelName;
+    string endPointsClassName = Model.EndpointsName;
+    string methodName = $"Map{@modelName}Endpoints";
+    string pluralModel = $"{@modelName}s";
+    string getAllModels = $"GetAll{@pluralModel}";
+    string getModelById = $"Get{@modelName}ById";
+    string deleteModel = $"Delete{@modelName}";
+    string createModel = $"Create{@modelName}";
+    string updateModel = $"Update{@modelName}";
+    string dbContextName = Model.ContextTypeName;
+    var entitySetName = Model.ModelMetadata.EntitySetName;
+    var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
+    var modelList = $"{@entitySetName}.ToListAsync()";
+    var findModel = $"{@entitySetName}.FindAsync({@primaryKeyName})";
+    var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
+    var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
+    var model2 = $"{@Model.ModelVariable}2";
+}
+
+public static void @methodName (this IEndpointRouteBuilder routes)
+{
+    routes.MapGet("@routePrefix", async (@dbContextName db) =>
+    {
+        return await db.@modelList;
+    })
+    .WithName("@getAllModels");
+
+    routes.MapGet("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+    {
+        return await db.@findModel
+            is @modelName model
+                ? Results.Ok(model)
+                : Results.NotFound();
+    })
+    .WithName("@getModelById");
+
+    routes.MapPut("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
+    {
+        var @model2 = await db.@findModel;
+
+        if (@model2 is null)
+        {
+            return Results.NotFound();
+        }
+
+        await db.SaveChangesAsync();
+
+        return Results.NoContent();
+    })
+    .WithName("@updateModel");
+
+    routes.MapPost("@routePrefix/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
+    {
+        db.@add;
+        await db.SaveChangesAsync();
+        return Results.Created($"/@pluralModel/{@Model.ModelVariable.@primaryKeyName}", @Model.ModelVariable);
+    })
+    .WithName("@createModel");
+
+    routes.MapDelete("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+    {
+        if (await db.@findModel is @modelName @Model.ModelVariable)
+        {
+            db.@remove;
+            await db.SaveChangesAsync();
+            return Results.Ok(@Model.ModelVariable);
+        }
+
+        return Results.NotFound();
+    })
+    .WithName("@deleteModel");
+}

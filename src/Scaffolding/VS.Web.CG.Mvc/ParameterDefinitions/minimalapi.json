@@ -1,0 +1,35 @@
+{
+  "Alias": "minimalapi",
+  "Description": "Generates an endpoints file (with CRUD API endpoints) given a model and optional DbContext.",
+  "Arguments": [
+    {
+      "Name": "Endpoints",
+      "Description": "Endpoints class to use. (not file name)"
+    },
+    {
+      "Name": "Model",
+      "Description": "Model class to use"
+    },
+    {
+      "Name": "DataContext",
+      "Description": "DbContext class to use"
+    },
+    {
+      "Name": "Force",
+      "Description": "Use this option to overwrite existing files"
+    },
+    {
+      "Name": "RelativeFolderPath",
+      "Description": "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder"
+    },
+    {
+      "Name": "Open",
+      "Description": "Use this option to enable OpenAPI"
+    },
+    {
+      "Name": "EndpointsNamespace",
+      "Description": "Specify the name of the namespace to use for the generated Endpoints file"
+    }
+  ],
+  "Options": []
+}

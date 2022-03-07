@@ -1,0 +1,21 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "app.MapRazorPages();",
+              "Block": "app.{0}();",
+              "InsertBefore": [ "app.Run();" ],
+              "CodeFormatting": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

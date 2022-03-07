@@ -14,65 +14,85 @@
     string updateModel = $"Update{@modelName}";
 }
  
-    public static void @methodName (this IEndpointRouteBuilder routes)
+    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
         routes.MapGet("@routePrefix", () =>
         {
             return new [] { new @modelConstructor };
         })
-        .WithName("@getAllModels");
-@{
+    @{
     if(Model.OpenAPI)
     {
-      @:.Produces<@modelArray>(StatusCodes.Status200OK);
+        @:.WithName("@getAllModels")
+        @:.Produces<@modelArray>(StatusCodes.Status200OK);
     }
-}
+    else
+    {
+        @:.WithName("@getAllModels");
+    }
+    }
 
         routes.MapGet("@routePrefix/{id}", (int id) =>
         {
             //return new @modelName { ID = id };
         })
-        .WithName("@getModelById");
-@{
+    @{
     if(Model.OpenAPI)
     {
-      @:.Produces<@modelName>(StatusCodes.Status200OK);
+        @:.WithName("@getModelById")
+        @:.Produces<@modelName>(StatusCodes.Status200OK);
     }
-}
+    else
+    {
+        @:.WithName("@getModelById");
+    }
+    }
 
         routes.MapPut("@routePrefix/{id}", (int id, @modelName input) =>
         {
             return Results.NoContent();
         })
-        .WithName("@updateModel");
-@{
+    @{
     if(Model.OpenAPI)
     {
-      @:.Produces(StatusCodes.Status204NoContent);
+        @:.WithName("@updateModel")
+        @:.Produces(StatusCodes.Status204NoContent);
     }
-}
+    else
+    {
+        @:.WithName("@updateModel");
+    }
+    }
 
         routes.MapPost("@routePrefix/", (@modelName model) =>
         {
             //return Results.Created($"/@pluralModel/{model.ID}", model);
         })
-        .WithName("@createModel");
-@{
+    @{
     if(Model.OpenAPI)
     {
-      @:.Produces<@modelName>(StatusCodes.Status201Created);
+        @:.WithName("@createModel")
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
     }
-}
+    else
+    {
+        @:.WithName("@createModel");
+    }
+    }
 
         routes.MapDelete("@routePrefix/{id}", (int id) =>
         {
             //return Results.Ok(new @modelName { ID = id });
         })
-        .WithName("@deleteModel");
-@{
+    @{
     if(Model.OpenAPI)
     {
-      @:.Produces<@modelName>(StatusCodes.Status200OK);
+        @:.WithName("@deleteModel")
+        @:.Produces<@modelName>(StatusCodes.Status200OK);
     }
-}
+    else
+    {
+        @:.WithName("@deleteModel");  
+    }
+    }
     }

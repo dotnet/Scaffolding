@@ -29,5 +29,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public const string MvcEmptyControllerTemplate = "EmptyController.cshtml";
         public const string MvcControllerWithActionsTemplate = "ControllerWithActions.cshtml";
         public const string MvcControllerWithContextTemplate = "MvcControllerWithContext.cshtml";
+        public const string MinimalApiTemplate = "MinimalApi.cshtml";
+        public const string MinimalApiEfTemplate = "MinimalApiEf.cshtml";
+        public const string MinimalApiNoClassTemplate = "MinimalApiNoClass.cshtml";
+        public const string MinimalApiEfNoClassTemplate = "MinimalApiEfNoClass.cshtml";
     }
 }

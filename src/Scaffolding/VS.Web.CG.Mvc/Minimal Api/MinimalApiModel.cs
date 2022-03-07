@@ -37,25 +37,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         public bool NullableEnabled { get; set; }
         public bool OpenAPI { get; set; }
         public string EndpointsNamespace { get; set; }
+        public string MethodName { get; set; }
 
         public IModelMetadata ModelMetadata { get; set; }
 
         public ModelType ModelType { get; private set; }
 
-        public string ControllerRootName
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(EndpointsName))
-                {
-                    if (EndpointsName.EndsWith(Constants.ControllerSuffix, StringComparison.Ordinal))
-                    {
-                        return EndpointsName.Substring(0, EndpointsName.Length - Constants.ControllerSuffix.Length);
-                    }
-                }
-                return EndpointsName;
-            }
-        }
 
         public string ContextTypeName { get; private set; }
 

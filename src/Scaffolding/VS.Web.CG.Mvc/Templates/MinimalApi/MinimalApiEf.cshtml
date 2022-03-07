@@ -33,14 +33,23 @@ namespace @Model.EndpointsNamespace;
 
 public static class @endPointsClassName
 {
-    public static void @methodName (this IEndpointRouteBuilder routes)
+    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
         routes.MapGet("@routePrefix", async (@dbContextName db) =>
         {
             return await db.@modelToList;
         })
-        .WithName("@getAllModels");
-        .Produces<@modelList>>(StatusCodes.Status200OK);
+@{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@getAllModels")
+        @:.Produces<@modelList>(StatusCodes.Status200OK);
+    }
+    else
+    {
+        @:.WithName("@getAllModels");
+    }
+}
 
         routes.MapGet("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
         {
@@ -49,9 +58,18 @@ public static class @endPointsClassName
                     ? Results.Ok(model)
                     : Results.NotFound();
         })
-        .WithName("@getModelById");
-        .Produces<@modelName>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound);
+@{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@getModelById")
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
+    }
+    else
+    {
+        @:.WithName("@getModelById");
+    }
+}
 
         routes.MapPut("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
@@ -67,9 +85,18 @@ public static class @endPointsClassName
 
             return Results.NoContent();
         })
-        .WithName("@updateModel");
-        .Produces(StatusCodes.Status404NotFound)
-        .Produces(StatusCodes.Status204NoContent);
+@{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@updateModel")
+        @:.Produces(StatusCodes.Status404NotFound)
+        @:.Produces(StatusCodes.Status204NoContent);
+    }
+    else
+    {
+        @:.WithName("@updateModel");
+    }
+}
 
         routes.MapPost("@routePrefix/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
         {
@@ -77,8 +104,17 @@ public static class @endPointsClassName
             await db.SaveChangesAsync();
             return Results.Created($"/@pluralModel/{@Model.ModelVariable.@primaryKeyName}", @Model.ModelVariable);
         })
-        .WithName("@createModel");
-        .Produces<@modelName>(StatusCodes.Status201Created);
+@{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@createModel")
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
+    }
+    else
+    {
+        @:.WithName("@createModel");
+    }
+}
 
         routes.MapDelete("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
         {
@@ -91,8 +127,17 @@ public static class @endPointsClassName
 
             return Results.NotFound();
         })
-        .WithName("@deleteModel");
-        .Produces<@modelName>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound);
+@{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@deleteModel")
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
+    }
+    else
+    {
+        @:.WithName("@deleteModel");
+    }
+}
     }
 }

@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
+using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 {
@@ -35,10 +35,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         private IProjectContext ProjectContext { get; set; }
         private IEntityFrameworkService EntityFrameworkService { get; set;}
         private ICodeGeneratorActionsService CodeGeneratorActionsService { get; set; }
-        private ICodeModelService CodeModelService { get; set; }
         private Workspace Workspace { get; set; }
-
-        private const string ProgramCsFileName = "Program.cs";
+        private ConsoleLogger ConsoleLogger { get; set; }
 
         public MinimalApiGenerator(IApplicationInfo applicationInfo,
             IServiceProvider serviceProvider,
@@ -48,7 +46,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IProjectContext projectContext,
             IEntityFrameworkService entityframeworkService,
-            ICodeModelService codeModelService,
             Workspace workspace)
         {
             ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)); ;
@@ -60,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             ProjectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
             Workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             EntityFrameworkService = entityframeworkService ?? throw new ArgumentNullException(nameof(entityframeworkService));
-            CodeModelService = codeModelService ?? throw new ArgumentNullException(nameof(codeModelService));
+            ConsoleLogger = new DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false);
         }
 
         /// <summary>
@@ -70,9 +67,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         /// <returns></returns>
         public async Task GenerateCode(MinimalApiGeneratorCommandLineModel model)
         {
-            System.Diagnostics.Debugger.Launch();
-
-            ValidateModel(model);
             var namespaceName = NameSpaceUtilities.GetSafeNameSpaceFromPath(model.RelativeFolderPath, AppInfo.ApplicationName);
             //get model and dbcontext
             var modelTypeAndContextModel = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
@@ -97,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             };
 
             var endpointsModel = ModelTypesLocator.GetAllTypes().FirstOrDefault(t => t.Name.Equals(model.EndpintsClassName));
-            var endpointsFilePath = endpointsModel?.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath ?? ValidateAndGetOutputPath(model, model.EndpintsClassName + Constants.CodeFileExtension);
+            var endpointsFilePath = endpointsModel?.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath ?? ValidateAndGetOutputPath(model);
 
             //endpoints file exists, use CodeAnalysis to add required clauses.
             if (FileSystem.FileExists(endpointsFilePath))
@@ -121,6 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             else 
             {
                 //Add endpoints file with endpoints class since it does not exist.
+                ValidateModel(model);
                 await CodeGeneratorActionsService.AddFileFromTemplateAsync(endpointsFilePath, GetTemplateName(model, existingEndpointsFile: false), TemplateFolders, templateModel);
                 Logger.LogMessage(string.Format(MessageStrings.AddedController, endpointsFilePath.Substring(AppInfo.ApplicationBasePath.Length)));
                 //add app.Map statement to Program.cs
@@ -128,8 +123,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
-        internal string ValidateAndGetOutputPath(MinimalApiGeneratorCommandLineModel commandLineModel, string outputFileName)
+        internal string ValidateAndGetOutputPath(MinimalApiGeneratorCommandLineModel commandLineModel)
         {
+            string outputFileName = commandLineModel.EndpintsClassName + Constants.CodeFileExtension;
             string outputFolder = string.IsNullOrEmpty(commandLineModel.RelativeFolderPath)
                 ? AppInfo.ApplicationBasePath
                 : Path.Combine(AppInfo.ApplicationBasePath, commandLineModel.RelativeFolderPath);
@@ -182,7 +178,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
-
         internal static string GetTemplateName(MinimalApiGeneratorCommandLineModel model, bool existingEndpointsFile)
         {
             if (existingEndpointsFile)
@@ -195,38 +190,56 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
-
+        //Validates  endpoints class  and namespace name when creating a new file/class.
         internal static void ValidateModel(MinimalApiGeneratorCommandLineModel model)
         {
             if (model == null)
             {
                 throw new ArgumentNullException(nameof(model));
             }
+
+            List<string> errorList = new List<string>();
+
             //check namespace for the Endpoints class for invalid keywords 
             if (!string.IsNullOrEmpty(model.EndpointsNamespace) &&
                 !RoslynUtilities.IsValidNamespace(model.EndpointsNamespace))
             {
-                throw new InvalidOperationException(string.Format(
+                errorList.Add(string.Format(
                     CultureInfo.CurrentCulture,
                     MessageStrings.InvalidNamespaceName,
                     model.EndpointsNamespace));
             }
+
+            if (!string.IsNullOrEmpty(model.EndpintsClassName) &&
+                !RoslynUtilities.IsValidIdentifier(model.EndpintsClassName))
+            {
+                errorList.Add(string.Format(
+                    CultureInfo.CurrentCulture,
+                    MessageStrings.InvalidClassName,
+                    model.EndpintsClassName));
+            }
+
+            if (errorList.Any())
+            {
+                throw new InvalidOperationException(string.Join("\n", errorList.ToArray()));
+            }
         }
-        private async Task ModifyProgramCs(string mapMethodName, string entityClassNamepsace)
+
+        internal async Task ModifyProgramCs(string mapMethodName, string endpointsNamespace)
         {
             var jsonText = GetMinimalApiCodeModifierConfig();
             CodeModifierConfig minimalApiChangesConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
             if (minimalApiChangesConfig != null)
             {
                 var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault();
-                programCsFile.Usings = new string[] { entityClassNamepsace };
+                programCsFile.Usings = new string[] { endpointsNamespace };
                 var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
                 var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName == ProjectContext.AssemblyName);
                 var programDocument = GetUpdatedDocument(project, programType);
                 var docEditor = await DocumentEditor.CreateAsync(programDocument);
 
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-                var docBuilder = new DocumentBuilder(docEditor, programCsFile, new DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
+                var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
                 //adding usings
                 var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                 //add code snippets/changes.
@@ -242,10 +255,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 //replace root node with all the updates.
                 docEditor.ReplaceNode(docRoot, newRoot);
                 //write to Program.cs file
-                await docBuilder.WriteToClassFileAsync(programDocument.Name);
+                var changedDocument = docEditor.GetChangedDocument();
+                var classFileTxt = await changedDocument.GetTextAsync();
+                FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
+                ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
             }
         }
 
+        //Given CodeAnalysis.Project and ModelType, return CodeAnalysis.Document by reading the latest file from disk.
+        //Need CodeAnalysis.Project for AddDocument method.
+        internal Document GetUpdatedDocument(Project project, ModelType type)
+        {
+            if (type != null)
+            {
+                string filePath = type?.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath;
+                string fileText = FileSystem.ReadAllText(filePath);
+                return project.AddDocument(filePath, fileText);
+            }
+            return null;
+        }
         private string GetMinimalApiCodeModifierConfig()
         {
             string jsonText = string.Empty;
@@ -277,18 +305,5 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         }
 
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
-
-        //Given CodeAnalysis.Project and ModelType, return CodeAnalysis.Document by reading the latest file from disk.
-        //Need CodeAnalysis.Project for AddDocument method.
-        private Document GetUpdatedDocument(Project project, ModelType type)
-        {
-            if (type != null)
-            {
-                string filePath = type?.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath;
-                string fileText = FileSystem.ReadAllText(filePath);
-                return project.AddDocument(filePath, fileText);
-            }
-            return null;
-        }
     }
 }

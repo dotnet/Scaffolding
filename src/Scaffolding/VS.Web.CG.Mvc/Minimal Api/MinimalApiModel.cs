@@ -5,6 +5,9 @@ using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 {
+    /// <summary>
+    /// Model for Razor templates to create or add to existing Endpoints file for the 'dotnet-aspnet-codegenerator minimalapi' scenario 
+    /// </summary>
     public class MinimalApiModel
     {
         public MinimalApiModel(
@@ -32,20 +35,29 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             ModelType = modelType ?? throw new ArgumentNullException(nameof(modelType));
         }
 
+        //Endpoints class name
         public string EndpointsName { get; set; }
-        public bool UseAsync { get; set; }
         public bool NullableEnabled { get; set; }
+
+        //If CRUD endpoints support Open API
         public bool OpenAPI { get; set; }
+
+        //Generated namespace for a Endpoints class/file. If using an existing file, does not apply.
         public string EndpointsNamespace { get; set; }
+
+        //Method name for the new static method with the CRUD endpoints.
         public string MethodName { get; set; }
 
+        //Holds Model and EF Context metadata.
         public IModelMetadata ModelMetadata { get; set; }
 
+        //Model info
         public ModelType ModelType { get; private set; }
 
-
+        //DbContext class' name
         public string ContextTypeName { get; private set; }
 
+        //Model class' name
         public string ModelTypeName
         {
             get
@@ -54,6 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
+        //Model class' name but lower case
         public string ModelVariable
         {
             get
@@ -62,6 +75,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
+        //variable name holding the models in the DbContext class
         public string EntitySetVariable
         {
             get
@@ -72,6 +86,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 
         public string DbContextNamespace { get; private set; }
 
+        //namespaces to add in Endpoints file.
         public HashSet<string> RequiredNamespaces
         {
             get

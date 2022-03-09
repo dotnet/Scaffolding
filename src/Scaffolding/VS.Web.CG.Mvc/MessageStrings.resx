@@ -255,4 +255,7 @@
   <data name="AddedEndpoints" xml:space="preserve">
     <value>Added Endpoints : '{0}'.</value>
   </data>
+  <data name="InvalidClassName" xml:space="preserve">
+    <value>The class name '{0}' is not valid.</value>
+  </data>
 </root>

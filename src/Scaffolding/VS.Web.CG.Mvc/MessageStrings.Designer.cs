@@ -232,6 +232,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The class name &apos;{0}&apos; is not valid..
+        /// </summary>
+        internal static string InvalidClassName {
+            get {
+                return ResourceManager.GetString("InvalidClassName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Value of --dbContext &apos;{0}&apos; is not a valid class name..
         /// </summary>
         internal static string InvalidDbContextClassName {

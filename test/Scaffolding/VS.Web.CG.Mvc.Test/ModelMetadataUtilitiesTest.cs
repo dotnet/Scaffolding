@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 using Moq;
 using Xunit;
 
@@ -19,11 +20,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         private Mock<ICodeModelService> codeModelService;
         private CommonCommandLineModel model;
         private Mock<IModelTypesLocator> modelTypesLocator;
+        private Mock<IModelTypesLocator> modelTypesLocatorWithoutContext;
 
         public ModelMetadataUtilitiesTest()
         {
             efService = new Mock<IEntityFrameworkService>();
             modelTypesLocator = new Mock<IModelTypesLocator>();
+            modelTypesLocatorWithoutContext = new Mock<IModelTypesLocator>();
             codeModelService = new Mock<ICodeModelService>();
         }
 
@@ -139,6 +142,119 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             //Act
             result = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                     model,
+                    efService.Object,
+                    modelTypesLocator.Object,
+                    string.Empty);
+
+            //Assert
+            Assert.Equal(contextProcessingResult.ContextProcessingStatus, result.ContextProcessingResult.ContextProcessingStatus);
+            Assert.Equal(modelType, result.ModelType);
+            Assert.Equal(dataContextType.FullName, result.DbContextFullName);
+        }
+
+        [Fact]
+        public async void TestGetModelEFMetadataMinimalAsync()
+        {
+
+            var modelTypes = new List<ModelType>();
+            var dataContextTypes = new List<ModelType>();
+            //Arrange
+            MinimalApiGeneratorCommandLineModel minimalApiModelWithContext = new MinimalApiGeneratorCommandLineModel()
+            {
+                ModelClass = "SampleModel",
+                DataContextClass = "SampleDataContext"
+            };
+
+            MinimalApiGeneratorCommandLineModel minimalApiModelWithoutContext = new MinimalApiGeneratorCommandLineModel()
+            {
+                ModelClass = "SampleModel",
+                DataContextClass = string.Empty
+            };
+
+            modelTypesLocator.Setup(m => m.GetType("SampleModel")).Returns(() => { return modelTypes; });
+            modelTypesLocator.Setup(m => m.GetType("SampleDataContext")).Returns(() => { return dataContextTypes; });
+
+            modelTypesLocatorWithoutContext.Setup(m => m.GetType("SampleModel")).Returns(() => { return modelTypes; });
+
+            //Act & Assert
+            Exception ex = await Assert.ThrowsAsync<ArgumentException>(
+                async () => await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
+                    minimalApiModelWithContext,
+                    efService.Object,
+                    modelTypesLocator.Object,
+                    areaName: string.Empty));
+
+            Exception exWithoutContext = await Assert.ThrowsAsync<ArgumentException>(
+                async () => await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
+                    minimalApiModelWithoutContext,
+                    efService.Object,
+                    modelTypesLocatorWithoutContext.Object,
+                    areaName: string.Empty));
+
+            Assert.Equal("A type with the name SampleModel does not exist", ex.Message);
+            Assert.Equal("A type with the name SampleModel does not exist", exWithoutContext.Message);
+
+            // Arrange
+            var modelType = new ModelType()
+            {
+                Name = "SampleModel",
+                FullName = "SampleModel",
+                Namespace = ""
+            };
+
+            modelTypes.Add(modelType);
+            var contextProcessingResult = new ContextProcessingResult()
+            {
+                ContextProcessingStatus = ContextProcessingStatus.ContextAdded,
+                ModelMetadata = null
+            };
+
+
+            var noContext = new ContextProcessingResult()
+            {
+                ContextProcessingStatus = ContextProcessingStatus.MissingContext,
+                ModelMetadata = null
+            };
+
+            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, false))
+                .Returns(Task.FromResult(contextProcessingResult));
+
+            //Act
+            var result = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
+                    minimalApiModelWithContext,
+                    efService.Object,
+                    modelTypesLocator.Object,
+                    string.Empty);
+
+            var resultWithoutContext = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
+                minimalApiModelWithoutContext,
+                efService.Object,
+                modelTypesLocatorWithoutContext.Object,
+                string.Empty);
+
+            //Assert scenario with DbContext
+            Assert.Equal(contextProcessingResult.ContextProcessingStatus, result.ContextProcessingResult.ContextProcessingStatus);
+            Assert.Equal(modelType, result.ModelType);
+            Assert.Equal(minimalApiModelWithContext.DataContextClass, result.DbContextFullName);
+
+            //Assert scenario without DbContext
+            Assert.Equal(noContext.ContextProcessingStatus, resultWithoutContext.ContextProcessingResult.ContextProcessingStatus);
+            Assert.Equal(modelType, resultWithoutContext.ModelType);
+            Assert.Equal(minimalApiModelWithoutContext.DataContextClass, string.Empty);
+
+            // Arrange
+            var dataContextType = new ModelType()
+            {
+                Name = "SampleDatContext",
+                FullName = "A.B.C.SampleDataContext"
+            };
+            dataContextTypes.Add(dataContextType);
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, false))
+                .Returns(Task.FromResult(contextProcessingResult));
+
+            //Act
+            result = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
+                    minimalApiModelWithContext,
                     efService.Object,
                     modelTypesLocator.Object,
                     string.Empty);

@@ -73,7 +73,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             ModelType dataContext = null;
             var dbContextFullName = string.Empty;
-            ContextProcessingResult modelMetadata = null;
+            ContextProcessingResult modelMetadata  = new ContextProcessingResult()
+            {
+                ContextProcessingStatus = ContextProcessingStatus.MissingContext,
+                ModelMetadata = null
+            };
+
 
             if (!string.IsNullOrEmpty(commandLineModel.DataContextClass))
             {

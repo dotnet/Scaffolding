@@ -14,6 +14,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -105,9 +106,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.Contains(minimalApiModel.MethodName, programCsText);
         }
 
-        [Fact]
+        [SkippableFact]
         public void ValidateAndGetOutputPathTests()
         {
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
             Mock<IApplicationInfo> _mockApp = new Mock<IApplicationInfo>();
             var applicationBasePath = @"C:\AppPath";
             _mockApp.Setup(app => app.ApplicationBasePath)
@@ -124,9 +126,35 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 ModelClass = "testModel2",
                 EndpintsClassName = "testClass2",
             };
-
+                
             Assert.Equal(@"C:\AppPath\Endpoints\Endpoint\testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
             Assert.Equal(@"C:\AppPath\testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
+        }
+
+        [SkippableFact]
+        public void ValidateAndGetOutputPathTestsLinuxAndMac()
+        {
+            Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Mock<IApplicationInfo> _mockApp = new Mock<IApplicationInfo>();
+            //we can assume the path will be forward slash instead of backslash due to the runtime.
+            var applicationBasePath = @"C:/AppPath";
+            _mockApp.Setup(app => app.ApplicationBasePath)
+                .Returns(applicationBasePath);
+            var minimalApiGenerator = CreateMinimalApiGenerator();
+            var minimalCommandline = new MinimalApiGeneratorCommandLineModel
+            {
+                ModelClass = "testModel",
+                EndpintsClassName = "testClass",
+                RelativeFolderPath = @"Endpoints/Endpoint"
+            };
+            var minimalCommandlineWithoutRelativePath = new MinimalApiGeneratorCommandLineModel
+            {
+                ModelClass = "testModel2",
+                EndpintsClassName = "testClass2",
+            };
+
+            Assert.Equal(@"C:/AppPath/Endpoints/Endpoint/testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
+            Assert.Equal(@"C:/AppPath/testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
         }
 
         [Fact]

@@ -8,6 +8,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     internal static class Constants
     {
+        public const string MicrosoftEntityFrameworkCorePackageName = "Microsoft.EntityFrameworkCore";
+
         public const string ControllerSuffix = "Controller";
         public const string ControllersFolderName = "Controllers";
         public const string ViewsFolderName = "Views";

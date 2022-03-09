@@ -19,8 +19,8 @@
     var findModel = $"{@entitySetName}.FindAsync({@primaryKeyName})";
     var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
-    var model2 = $"{@Model.ModelVariable}2";
 }
+
 
 public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
@@ -129,4 +129,4 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
         @:.WithName("@deleteModel");
     }
     }
-}
+    }

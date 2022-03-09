@@ -7,7 +7,7 @@
           "CodeChanges": [
             {
               "InsertAfter": "app.MapRazorPages();",
-              "Block": "app.{0}();",
+              "Block": "app.{0}()",
               "InsertBefore": [ "app.Run();" ],
               "CodeFormatting": {
                 "Newline": true

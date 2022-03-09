@@ -128,9 +128,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             string outputFileName = commandLineModel.EndpintsClassName + Constants.CodeFileExtension;
             string outputFolder = string.IsNullOrEmpty(commandLineModel.RelativeFolderPath)
                 ? AppInfo.ApplicationBasePath
-                : Path.Combine(AppInfo.ApplicationBasePath, commandLineModel.RelativeFolderPath);
+                : Path.Join(AppInfo.ApplicationBasePath, commandLineModel.RelativeFolderPath);
 
-            var outputPath = Path.Combine(outputFolder, outputFileName);
+            var outputPath = Path.Join(outputFolder, outputFileName);
             return outputPath;
         }
 
@@ -152,7 +152,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     }
                     //Get class syntax node to add members to the class
                     var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-                    var classNode = docRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
+                    //create CodeFile just to add usings
+                    var endpointsCodeFile = new CodeFile { Usings = new string[] { Constants.MicrosoftEntityFrameworkCorePackageName } };
+                    var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
+                    var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
+                    var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
                     //get namespace node just for the namespace name.
                     var namespaceSyntax = classNode.Parent.DescendantNodes().FirstOrDefault(node => node is NamespaceDeclarationSyntax nsDeclarationSyntax || node is FileScopedNamespaceDeclarationSyntax fsDeclarationSyntax);
                     templateModel.EndpointsNamespace = string.IsNullOrEmpty(namespaceSyntax?.ToString()) ? templateModel.EndpointsNamespace : namespaceSyntax?.ToString();
@@ -163,7 +167,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                             SyntaxFactory.GlobalStatement(
                                 SyntaxFactory.ParseStatement(membersBlockText))
                             .WithLeadingTrivia(SyntaxFactory.Tab));
-                        docEditor.ReplaceNode(classNode, modifiedClass);
+                        newRoot = newRoot.ReplaceNode(classNode, modifiedClass);
+                        docEditor.ReplaceNode(docRoot, newRoot);
                         var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
                         var classFileTxt = classFileSourceTxt?.ToString();
                         if (!string.IsNullOrEmpty(classFileTxt))
@@ -249,7 +254,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     foreach (var change in globalChanges.CodeChanges)
                     {
                         change.Block = string.Format(change.Block, mapMethodName);
-                        newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                        newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, new CodeSnippet[] {change}) as CompilationUnitSyntax;
                     }
                 }
                 //replace root node with all the updates.

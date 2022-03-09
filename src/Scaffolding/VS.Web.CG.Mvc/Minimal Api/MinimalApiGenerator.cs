@@ -234,7 +234,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault();
                 programCsFile.Usings = new string[] { endpointsNamespace };
                 var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
-                var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName == ProjectContext.AssemblyName);
+                var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
                 var programDocument = GetUpdatedDocument(project, programType);
                 var docEditor = await DocumentEditor.CreateAsync(programDocument);
 
@@ -245,7 +245,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
-                    var globalChanges = programCsFile.Methods.Where(x => x.Key == "Global").First().Value;
+                    var globalChanges = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
                     foreach (var change in globalChanges.CodeChanges)
                     {
                         change.Block = string.Format(change.Block, mapMethodName);
@@ -266,9 +266,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         //Need CodeAnalysis.Project for AddDocument method.
         internal Document GetUpdatedDocument(Project project, ModelType type)
         {
-            if (type != null)
+            if (project!= null && type != null)
             {
-                string filePath = type?.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath;
+                string filePath = type.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath;
                 string fileText = FileSystem.ReadAllText(filePath);
                 return project.AddDocument(filePath, fileText);
             }

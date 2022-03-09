@@ -131,32 +131,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.Equal(@"C:\AppPath\testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
         }
 
-        [SkippableFact]
-        public void ValidateAndGetOutputPathTestsLinuxAndMac()
-        {
-            Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-            Mock<IApplicationInfo> _mockApp = new Mock<IApplicationInfo>();
-            //we can assume the path will be forward slash instead of backslash due to the runtime.
-            var applicationBasePath = @"C:/AppPath";
-            _mockApp.Setup(app => app.ApplicationBasePath)
-                .Returns(applicationBasePath);
-            var minimalApiGenerator = CreateMinimalApiGenerator();
-            var minimalCommandline = new MinimalApiGeneratorCommandLineModel
-            {
-                ModelClass = "testModel",
-                EndpintsClassName = "testClass",
-                RelativeFolderPath = @"Endpoints/Endpoint"
-            };
-            var minimalCommandlineWithoutRelativePath = new MinimalApiGeneratorCommandLineModel
-            {
-                ModelClass = "testModel2",
-                EndpintsClassName = "testClass2",
-            };
-
-            Assert.Equal(@"C:/AppPath/Endpoints/Endpoint/testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
-            Assert.Equal(@"C:/AppPath/testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
-        }
-
         [Fact]
         public async Task AddEndpointsMethodTests()
         {

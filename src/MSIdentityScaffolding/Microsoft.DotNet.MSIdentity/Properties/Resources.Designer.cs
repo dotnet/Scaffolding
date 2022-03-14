@@ -103,6 +103,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_GraphClientExtensions_cs {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_GraphClientExtensions_cs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] add_dotnet_blazorwasm_LoginDisplay_razor {
             get {
                 object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_LoginDisplay_razor", resourceCulture);
@@ -116,6 +126,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static byte[] add_dotnet_blazorwasm_RedirectToLogin_razor {
             get {
                 object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_RedirectToLogin_razor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] add_dotnet_blazorwasm_UserProfile_razor {
+            get {
+                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_UserProfile_razor", resourceCulture);
                 return ((byte[])(obj));
             }
         }

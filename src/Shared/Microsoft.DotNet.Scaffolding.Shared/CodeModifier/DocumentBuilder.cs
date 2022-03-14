@@ -46,9 +46,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             if (_codeFile.UsingsWithOptions != null && _codeFile.UsingsWithOptions.Any())
             {
                 var usingsWithOptions = FilterUsingsWithOptions(_codeFile, options);
-                var usingList = _codeFile.Usings.ToList();
-                usingList.AddRange(usingsWithOptions);
-                _codeFile.Usings = usingList.ToArray();
+                if (usingsWithOptions != null)
+                {
+                    var usingList = _codeFile.Usings?.ToList() ?? new List<string>();
+                    usingList.AddRange(usingsWithOptions);
+                    _codeFile.Usings = usingList.ToArray();
+                }
             }
 
             var usingNodes = CreateUsings(_codeFile.Usings);
@@ -75,7 +78,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             List<string> usingsWithOptions = new List<string>();
             if (codeFile != null)
             {
-                var filteredCodeBlocks = codeFile.UsingsWithOptions.Where(us => ProjectModifierHelper.FilterOptions(us.Options, options)).ToList();
+                var filteredCodeBlocks = codeFile.UsingsWithOptions.Where(us => ProjectModifierHelper.FilterOptions(us.Options, options));
                 if (filteredCodeBlocks.Any())
                 {
                     usingsWithOptions = filteredCodeBlocks.Select(us => us.Block)?.ToList();

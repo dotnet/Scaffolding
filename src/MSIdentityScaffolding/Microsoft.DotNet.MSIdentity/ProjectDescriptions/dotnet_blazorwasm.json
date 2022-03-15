@@ -159,5 +159,8 @@
   ],
   "CommonPackages": [
     "Microsoft.Authentication.WebAssembly.Msal"
+  ],
+  "MicrosoftGraphPackages": [
+    "Microsoft.Graph"
   ]
 }

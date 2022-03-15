@@ -3,10 +3,22 @@
   "Files": [
     {
       "FileName": "Program.cs",
-      "Options": [ "MinimalApp" ],
+      "Options": [
+        "MinimalApp"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
+            {
+              "Block": "builder.Services.AddMicrosoftGraphClient(\"https://graph.microsoft.com/User.Read\")",
+              "Options": [
+                "MicrosoftGraph"
+              ],
+              "InsertAfter": "builder.Services.AddScoped",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
             {
               "Block": "builder.Services.AddMsalAuthentication()",
               "InsertAfter": "builder.Services.AddScoped",
@@ -16,6 +28,19 @@
             },
             {
               "Block": "builder.Configuration.Bind(\"AzureAd\", options.ProviderOptions.Authentication)",
+              "CodeChangeType": "Lambda",
+              "Parameter": "options",
+              "Parent": "builder.Services.AddMsalAuthentication",
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "options.ProviderOptions.DefaultAccessTokenScopes.Add(\"https://graph.microsoft.com/User.Read\")",
+              "Options": [
+                "MicrosoftGraph"
+              ],
               "CodeChangeType": "Lambda",
               "Parameter": "options",
               "Parent": "builder.Services.AddMsalAuthentication",
@@ -71,7 +96,7 @@
       "AddFilePath": "Pages/Authentication.razor"
     },
     {
-      "FileName": "LoginDisplay.razor", 
+      "FileName": "LoginDisplay.razor",
       "AddFilePath": "Shared/LoginDisplay.razor"
     },
     {
@@ -86,6 +111,50 @@
     {
       "FileName": "RedirectToLogin.razor",
       "AddFilePath": "Shared/RedirectToLogin.razor"
+    },
+    {
+      "FileName": "NavMenu.razor",
+      "Options": [
+        "MicrosoftGraph",
+        "DownstreamApi"
+      ],
+      "Replacements": [
+        {
+          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"profile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "Options": [
+            "MicrosoftGraph"
+          ]
+        },
+        {
+          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"callwebapi\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "Options": [
+            "DownstreamApi"
+          ]
+        }
+      ]
+    },
+    {
+      "FileName": "UserProfile.razor",
+      "AddFilePath": "Pages/UserProfile.razor",
+      "Options": [
+        "MicrosoftGraph"
+      ]
+    },
+    {
+      "FileName": "CallWebApi.razor",
+      "AddFilePath": "Pages/CallWebApi.razor",
+      "Options": [
+        "DownstreamApi"
+      ]
+    },
+    {
+      "FileName": "GraphClientExtensions.cs",
+      "AddFilePath": "Data/GraphClientExtensions.cs",
+      "Options": [
+        "MicrosoftGraph"
+      ]
     }
   ]
 }

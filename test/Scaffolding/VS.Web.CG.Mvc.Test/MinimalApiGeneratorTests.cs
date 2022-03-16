@@ -101,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 EndpointsNamespace = "MinimalApiTest",
                 MethodName = "MapCarEndpoints"
             };
-            await minimalApiGenerator.ModifyProgramCs(minimalApiModel.MethodName, minimalApiModel.EndpointsNamespace);
+            await minimalApiGenerator.ModifyProgramCs(minimalApiModel);
             string programCsText = fileSystem.ReadAllText("Program.cs");
             Assert.Contains(minimalApiModel.MethodName, programCsText);
         }

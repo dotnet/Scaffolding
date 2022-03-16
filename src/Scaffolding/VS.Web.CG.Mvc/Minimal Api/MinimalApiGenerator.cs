@@ -80,6 +80,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 MSBuildLocator.RegisterDefaults();
             }
 
+            if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
+            {
+                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, useSqlite: false);
+            }
+
             var templateModel = new MinimalApiModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName, model.EndpintsClassName)
             {
                 EndpointsName = model.EndpintsClassName,
@@ -96,10 +101,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             //endpoints file exists, use CodeAnalysis to add required clauses.
             if (FileSystem.FileExists(endpointsFilePath))
             {
-                if (CalledFromCommandline)
-                {
-                    EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, useSqlite: false);
-                }
                 //get method block with the api endpoints.
                 string membersBlockText = await CodeGeneratorActionsService.ExecuteTemplate(GetTemplateName(model, existingEndpointsFile: true), TemplateFolders, templateModel);
                 var className = model.EndpintsClassName;
@@ -119,7 +120,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 await CodeGeneratorActionsService.AddFileFromTemplateAsync(endpointsFilePath, GetTemplateName(model, existingEndpointsFile: false), TemplateFolders, templateModel);
                 Logger.LogMessage(string.Format(MessageStrings.AddedController, endpointsFilePath.Substring(AppInfo.ApplicationBasePath.Length)));
                 //add app.Map statement to Program.cs
-                await ModifyProgramCs(templateModel.MethodName, templateModel.EndpointsNamespace);
+                await ModifyProgramCs(templateModel);
             }
         }
 
@@ -153,7 +154,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     //Get class syntax node to add members to the class
                     var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                     //create CodeFile just to add usings
-                    var endpointsCodeFile = new CodeFile { Usings = new string[] { Constants.MicrosoftEntityFrameworkCorePackageName } };
+                    var endpointsCodeFile = new CodeFile { Usings = new string[] { Constants.MicrosoftEntityFrameworkCorePackageName, templateModel.DbContextNamespace } };
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                     var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
@@ -176,7 +177,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                             //write to endpoints class path.
                             FileSystem.WriteAllText(endPointsDocument.FilePath, classFileTxt);
                             //add app.Map statement to Program.cs
-                            await ModifyProgramCs(templateModel.MethodName, templateModel.EndpointsNamespace);
+                            await ModifyProgramCs(templateModel);
                         }
                     }
                 }
@@ -230,19 +231,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
-        internal async Task ModifyProgramCs(string mapMethodName, string endpointsNamespace)
+        internal async Task ModifyProgramCs(MinimalApiModel templateModel)
         {
+            string endpointsNamespace = templateModel.EndpointsNamespace;
+            string mapMethodName = templateModel.MethodName;
             var jsonText = GetMinimalApiCodeModifierConfig();
             CodeModifierConfig minimalApiChangesConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
             if (minimalApiChangesConfig != null)
             {
+                //Getting Program.cs document
                 var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault();
                 programCsFile.Usings = new string[] { endpointsNamespace };
                 var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
                 var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
                 var programDocument = GetUpdatedDocument(project, programType);
-                var docEditor = await DocumentEditor.CreateAsync(programDocument);
 
+                //Modifying Program.cs document
+                var docEditor = await DocumentEditor.CreateAsync(programDocument);
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
                 //adding usings
@@ -250,11 +255,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
-                    var globalChanges = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
-                    foreach (var change in globalChanges.CodeChanges)
+                    var addMethodMapping = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+                    foreach (var change in addMethodMapping.CodeChanges)
                     {
                         change.Block = string.Format(change.Block, mapMethodName);
                         newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, new CodeSnippet[] {change}) as CompilationUnitSyntax;
+                    }
+
+                    if (templateModel.OpenAPI)
+                    {
+                        var builderVariable = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
+                        var openApiMethodChanges = programCsFile.Methods.Where(x => x.Key.Equals("OpenApi", StringComparison.OrdinalIgnoreCase)).First().Value;
+                        if (builderVariable.HasValue)
+                        {
+                            (string oldValue, string newValue) = builderVariable.Value;
+                            var filteredChanges = ProjectModifierHelper.UpdateVariables(openApiMethodChanges.CodeChanges, oldValue, newValue);
+                            newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, filteredChanges) as CompilationUnitSyntax;
+                        }
                     }
                 }
                 //replace root node with all the updates.

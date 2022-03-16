@@ -168,8 +168,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
             filesToGenerate.Add(IdentityHostingStartup);
-            
-            
+
+
             filesToGenerate.Add(ReadMe);
 
             return filesToGenerate.Distinct(new IdentityGeneratorFileComparer()).ToArray();
@@ -179,7 +179,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         /// Returns a list of ViewImport template files based on the files to generate and also on which _ViewImports already exist in the project.
         /// We start from the innermost directory requested, if a _ViewImports file exists at this level, we are done.
         /// If not, we add one to be generated and then look in the outer directory.
-        /// Sequence is: 
+        /// Sequence is:
         ///    - Account.Manage._ViewImports
         ///    - Account._ViewImports
         ///    - _ViewImports
@@ -252,8 +252,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 outputDirectory = templateModel.SupportFileLocation;
             }
 
-            List<IdentityGeneratorFile> peerFiles = new List<IdentityGeneratorFile>();
-
             IdentityGeneratorFile layoutPeerViewImportsFile = new IdentityGeneratorFile()
             {
                 Name = "_ViewImports",
@@ -262,20 +260,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 IsTemplate = true,
                 ShouldOverWrite = OverWriteCondition.Never
             };
-            peerFiles.Add(layoutPeerViewImportsFile);
 
-            IdentityGeneratorFile layoutPeerViewStart = new IdentityGeneratorFile()
-            {
-                Name = "_ViewStart",
-                SourcePath = "SupportPages._ViewStart.cshtml",
-                OutputPath = Path.Combine(outputDirectory, "_ViewStart.cshtml"),
-                IsTemplate = true,
-                ShowInListFiles = false,
-                ShouldOverWrite = OverWriteCondition.Never
-            };
-            peerFiles.Add(layoutPeerViewStart);
-
-            layoutPeerFiles = peerFiles;
+            layoutPeerFiles = new[] { layoutPeerViewImportsFile };
             return true;
         }
 

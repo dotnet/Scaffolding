@@ -239,7 +239,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 razorGeneratorModel.BootstrapVersion = RazorPageScaffolderBase.DefaultBootstrapVersion;
             }
-            System.Diagnostics.Debugger.Launch();
             RazorPageGeneratorTemplateModel2 templateModel = new RazorPageGeneratorTemplateModel2()
             {
                 NamespaceName = namespaceName,

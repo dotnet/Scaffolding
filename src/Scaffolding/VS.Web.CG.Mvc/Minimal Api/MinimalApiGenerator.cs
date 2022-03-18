@@ -288,14 +288,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         //Need CodeAnalysis.Project for AddDocument method.
         internal Document GetUpdatedDocument(Project project, ModelType type)
         {
-            if (project!= null && type != null)
+            if (project != null && type != null)
             {
                 string filePath = type.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath;
                 string fileText = FileSystem.ReadAllText(filePath);
-                return project.AddDocument(filePath, fileText);
+                if (!string.IsNullOrEmpty(fileText))
+                {
+                    return project.AddDocument(filePath, fileText);
+                }
             }
+
             return null;
         }
+
         private string GetMinimalApiCodeModifierConfig()
         {
             string jsonText = string.Empty;

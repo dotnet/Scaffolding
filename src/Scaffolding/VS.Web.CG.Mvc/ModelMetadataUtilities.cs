@@ -79,7 +79,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 ModelMetadata = null
             };
 
-
             if (!string.IsNullOrEmpty(commandLineModel.DataContextClass))
             {
                 dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);

@@ -255,13 +255,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
+                    //should only include one change to add "app.Map%MODEL%Method to the Program.cs file. Check the minimalApiChanges.json for more info.
                     var addMethodMapping = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
-                    foreach (var change in addMethodMapping.CodeChanges)
-                    {
-                        change.Block = string.Format(change.Block, mapMethodName);
-                        newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, new CodeSnippet[] {change}) as CompilationUnitSyntax;
-                    }
-
+                    var addMethodMappingChange = addMethodMapping.CodeChanges.First();
+                    addMethodMappingChange.Block = string.Format(addMethodMappingChange.Block, mapMethodName);
+                    newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, new CodeSnippet[] { addMethodMappingChange }) as CompilationUnitSyntax;
+                    
                     if (templateModel.OpenAPI)
                     {
                         var builderVariable = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);

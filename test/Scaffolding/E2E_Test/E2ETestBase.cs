@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -35,17 +35,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         protected void Scaffold(string[] args, string testProjectPath)
         {
             var muxerPath = DotNetMuxer.MuxerPathOrDefault();
-            var outputPath = Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
 
-            var codegenToolPath = Path.Combine(outputPath, "dotnet-aspnet-codegenerator.dll");
-            var invocationArgs = new [] 
+            var invocationArgs = new[]
             {
-                "exec",
-                "--runtimeconfig",
-                Path.Combine(outputPath, "E2E_Test.runtimeconfig.json"),
-                "--depsfile",
-                Path.Combine(outputPath, "E2E_Test.deps.json"),
-                codegenToolPath
+                "aspnet-codegenerator"
             }.Concat(args);
 
             Output.WriteLine($"Executing {muxerPath} {string.Join(" ", invocationArgs)}");

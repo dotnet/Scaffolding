@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public const string Skip = nameof(Skip);
         public const string NonMinimalApp = nameof(NonMinimalApp);
         public const string MinimalApp = nameof(MinimalApp);
+        public const string OpenApi = nameof(OpenApi);
     }
 
     public class CodeChangeOptions

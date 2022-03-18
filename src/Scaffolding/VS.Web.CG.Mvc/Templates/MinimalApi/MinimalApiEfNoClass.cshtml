@@ -1,0 +1,132 @@
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{
+    string modelName = Model.ModelType.Name;
+    string routePrefix = "/api/" + modelName;
+    string endPointsClassName = Model.EndpointsName;
+    string pluralModel = $"{@modelName}s";
+    string getAllModels = $"GetAll{@pluralModel}";
+    string getModelById = $"Get{@modelName}ById";
+    string deleteModel = $"Delete{@modelName}";
+    string createModel = $"Create{@modelName}";
+    string updateModel = $"Update{@modelName}";
+    string dbContextName = Model.ContextTypeName;
+    var entitySetName = Model.ModelMetadata.EntitySetName;
+    var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
+    var modelList = $"List<{@modelName}>";
+    var modelToList = $"{@entitySetName}.ToListAsync()";
+    var findModel = $"{@entitySetName}.FindAsync({@primaryKeyName})";
+    var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
+    var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
+}
+
+
+public static void @Model.MethodName (this IEndpointRouteBuilder routes)
+    {
+        routes.MapGet("@routePrefix", async (@dbContextName db) =>
+        {
+            return await db.@modelToList;
+        })
+    @{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@getAllModels")
+        @:.Produces<@modelList>(StatusCodes.Status200OK);
+    }
+    else
+    {
+        @:.WithName("@getAllModels");
+    }
+    }
+
+        routes.MapGet("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        {
+            return await db.@findModel
+                is @modelName model
+                    ? Results.Ok(model)
+                    : Results.NotFound();
+        })
+    @{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@getModelById")
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
+    }
+    else
+    {
+        @:.WithName("@getModelById");
+    }
+    }
+
+        routes.MapPut("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
+        {
+            var foundModel = await db.@findModel;
+
+            if (foundModel is null)
+            {
+                return Results.NotFound();
+            }
+            //update model properties here
+
+            await db.SaveChangesAsync();
+
+            return Results.NoContent();
+        })   
+    @{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@updateModel")
+        @:.Produces(StatusCodes.Status404NotFound)
+        @:.Produces(StatusCodes.Status204NoContent);
+    }
+    else
+    {
+        @:.WithName("@updateModel");
+    }
+    }
+
+        routes.MapPost("@routePrefix/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
+        {
+            db.@add;
+            await db.SaveChangesAsync();
+            return Results.Created($"/@pluralModel/{@Model.ModelVariable.@primaryKeyName}", @Model.ModelVariable);
+        })
+    @{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@createModel")
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
+    }
+    else
+    {
+        @:.WithName("@createModel");
+    }
+    }
+
+
+        routes.MapDelete("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        {
+            if (await db.@findModel is @modelName @Model.ModelVariable)
+            {
+                db.@remove;
+                await db.SaveChangesAsync();
+                return Results.Ok(@Model.ModelVariable);
+            }
+
+            return Results.NotFound();
+        })
+    @{
+    if(Model.OpenAPI)
+    {
+        @:.WithName("@deleteModel")
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
+    }
+    else
+    {
+        @:.WithName("@deleteModel");
+    }
+    }
+    }

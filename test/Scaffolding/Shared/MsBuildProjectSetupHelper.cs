@@ -118,6 +118,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }
 
+        internal void SetupProjectsForMinimalApiScaffolder(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net6.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            fileProvider.Add("global.json", GlobalJsonText);
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.SimpleNet70ProjectText);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.MinimalProgramcsFile);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.CarContextTxt);
+            fileProvider.Add($"Root/Car.cs", MsBuildProjectStrings.CarTxt);
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
         private void RestoreAndBuild(string path, ITestOutputHelper output)
         {
             var result = Command.CreateDotNet("restore",

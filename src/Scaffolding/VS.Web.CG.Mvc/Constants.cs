@@ -8,6 +8,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     internal static class Constants
     {
+        public const string MicrosoftEntityFrameworkCorePackageName = "Microsoft.EntityFrameworkCore";
+
         public const string ControllerSuffix = "Controller";
         public const string ControllersFolderName = "Controllers";
         public const string ViewsFolderName = "Views";
@@ -29,5 +31,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public const string MvcEmptyControllerTemplate = "EmptyController.cshtml";
         public const string MvcControllerWithActionsTemplate = "ControllerWithActions.cshtml";
         public const string MvcControllerWithContextTemplate = "MvcControllerWithContext.cshtml";
+        public const string MinimalApiTemplate = "MinimalApi.cshtml";
+        public const string MinimalApiEfTemplate = "MinimalApiEf.cshtml";
+        public const string MinimalApiNoClassTemplate = "MinimalApiNoClass.cshtml";
+        public const string MinimalApiEfNoClassTemplate = "MinimalApiEfNoClass.cshtml";
     }
 }

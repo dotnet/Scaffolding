@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
@@ -18,10 +18,12 @@
     <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net6.0\" />
+    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net6.0\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
+    <None Pack="true" Include="Templates\MinimalApi\*" PackagePath="Templates\MinimalApi\" />
     <None Pack="true" Include="Templates\ControllerGenerator\*" PackagePath="Templates\ControllerGenerator\" />
     <None Pack="true" Include="Templates\MvcLayout\*" PackagePath="Templates\MvcLayout\" />
     <None Pack="true" Include="Templates\Startup\*" PackagePath="Templates\Startup\" />
@@ -96,6 +98,10 @@
 
   <ItemGroup>
     <Compile Remove="Templates\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Minimal Api\minimalApiChanges.json" />
   </ItemGroup>
 
   <ItemGroup>

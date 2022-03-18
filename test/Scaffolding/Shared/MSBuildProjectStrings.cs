@@ -20,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -68,7 +68,7 @@ public const string RootProjectTxtWithoutEF = @"
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -111,7 +111,7 @@ public const string RootProjectTxtWithoutEF = @"
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -275,7 +275,66 @@ namespace WebApplication1
     }
 }
 ";
+        public const string EndpointsMethod = @"    public static void MapCarEndpoints (this IEndpointRouteBuilder routes)
+    {
+        routes.MapGet(""/api/Car"", () =>
+        {
+            return new [] { new Car() };
+})
+        .WithName(""GetAllCars"");
 
+routes.MapGet(""/api/Car/{id}"", (int id) =>
+{
+    //return new Car { ID = id };
+})
+.WithName(""GetCarById"");
+
+routes.MapPut(""/api/Car/{id}"", (int id, Car input) =>
+{
+    return Results.NoContent();
+})
+.WithName(""UpdateCar"");
+
+routes.MapPost(""/api/Car/"", (Car model) =>
+{
+    //return Results.Created($""/Cars/{model.ID}"", model);
+})
+.WithName(""CreateCar"");
+
+routes.MapDelete(""/api/Car/{id}"", (int id) =>
+{
+    //return Results.Ok(new Car { ID = id });
+})
+.WithName(""DeleteCar"");  
+    }
+}";
+        public const string EndpointsEmptyClass = @"namespace MinimalApiTest { class Endpoints { } } ";
+        public const string MinimalProgramcsFile = @"var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorPages();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("" / Error"");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+    app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+app.Run();
+";
 
         public const string LibraryProjectName = "Library1.csproj";
         public const string LibraryProjectTxt = @"
@@ -285,7 +344,7 @@ namespace WebApplication1
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -365,7 +424,7 @@ namespace Library1.Models
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -412,7 +471,7 @@ namespace Library1.Models
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -501,7 +560,7 @@ namespace WebApplication1
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -548,7 +607,7 @@ namespace DAL
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -770,7 +829,7 @@ namespace Test
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      C:\ScaffoldingArcade\Scaffolding\test\..\artifacts\build;
+      
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
@@ -804,6 +863,34 @@ namespace Test
 </Project>
 ";
 
+        public const string SimpleNet70ProjectText = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
+  <PropertyGroup>
+    <RestoreSources>
+      C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping;
+    </RestoreSources>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Microsoft.Test</RootNamespace>
+    <ProjectName>Test</ProjectName>
+    <NoWarn>NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-dev"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""7.0.0-preview.1.22076.6"">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include = ""Microsoft.EntityFrameworkCore.SqlServer"" Version=""7.0.0-preview.1.22076.6"" />
+    <PackageReference Include = ""Microsoft.EntityFrameworkCore.Tools"" Version=""7.0.0-preview.1.22076.6"">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+";
         public const string SimpleNet60ProjectText = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />

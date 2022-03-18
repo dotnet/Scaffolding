@@ -93,6 +93,43 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
         }
 
+        public async Task<string> ExecuteTemplate(string templateName,
+            IEnumerable<string> templateFolders,
+            object templateModel)
+        {
+            if (templateFolders == null)
+            {
+                throw new ArgumentNullException(nameof(templateFolders));
+            }
+
+            ExceptionUtilities.ValidateStringArgument(templateName, "templateName");
+
+            var templatePath = _filesLocator.GetFilePath(templateName, templateFolders);
+            if (string.IsNullOrEmpty(templatePath))
+            {
+                throw new InvalidOperationException(string.Format(
+                    MessageStrings.TemplateFileNotFound,
+                    templateName,
+                    string.Join(";", templateFolders)));
+            }
+
+            Debug.Assert(_fileSystem.FileExists(templatePath));
+            _logger.LogMessage($"Rendering template { templatePath }\n", LogMessageLevel.Trace);
+            var templateContent = _fileSystem.ReadAllText(templatePath);
+
+            var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
+
+            if (templateResult.ProcessingException != null)
+            {
+                throw new InvalidOperationException(string.Format(
+                    MessageStrings.TemplateProcessingError,
+                    templatePath,
+                    templateResult.ProcessingException.Message));
+            }
+
+            return templateResult.GeneratedText;
+        }
+
         private async Task AddFileHelper(string outputPath, Stream sourceStream)
         {
             _fileSystem.CreateDirectory(Path.GetDirectoryName(outputPath));

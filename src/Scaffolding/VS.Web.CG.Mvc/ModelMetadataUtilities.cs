@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -57,6 +58,45 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 DbContextFullName = dbContextFullName,
                 ContextProcessingResult = modelMetadata,
                 UseSqlite = commandLineModel.UseSqlite
+            };
+        }
+
+        internal static async Task<ModelTypeAndContextModel> GetModelEFMetadataMinimalAsync(
+            MinimalApiGeneratorCommandLineModel commandLineModel,
+            IEntityFrameworkService entityFrameworkService,
+            IModelTypesLocator modelTypesLocator,
+            string areaName)
+        {
+            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
+            // Validation successful
+            Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
+
+            ModelType dataContext = null;
+            var dbContextFullName = string.Empty;
+            ContextProcessingResult modelMetadata  = new ContextProcessingResult()
+            {
+                ContextProcessingStatus = ContextProcessingStatus.MissingContext,
+                ModelMetadata = null
+            };
+
+            if (!string.IsNullOrEmpty(commandLineModel.DataContextClass))
+            {
+                dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
+                dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
+
+                modelMetadata = await entityFrameworkService.GetModelMetadata(
+                    dbContextFullName,
+                    model,
+                    areaName,
+                    useSqlite: false);
+            }
+
+            return new ModelTypeAndContextModel()
+            {
+                ModelType = model,
+                DbContextFullName = dbContextFullName,
+                ContextProcessingResult = modelMetadata,
+                UseSqlite = false
             };
         }
     }

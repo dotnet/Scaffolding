@@ -115,8 +115,7 @@
     {
       "FileName": "NavMenu.razor",
       "Options": [
-        "MicrosoftGraph",
-        "DownstreamApi"
+        "MicrosoftGraph"
       ],
       "Replacements": [
         {
@@ -124,13 +123,6 @@
           "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
           "Options": [
             "MicrosoftGraph"
-          ]
-        },
-        {
-          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"callwebapi\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "Options": [
-            "DownstreamApi"
           ]
         }
       ]
@@ -140,13 +132,6 @@
       "AddFilePath": "Pages/UserProfile.razor",
       "Options": [
         "MicrosoftGraph"
-      ]
-    },
-    {
-      "FileName": "CallWebApi.razor",
-      "AddFilePath": "Pages/CallWebApi.razor",
-      "Options": [
-        "DownstreamApi"
       ]
     },
     {

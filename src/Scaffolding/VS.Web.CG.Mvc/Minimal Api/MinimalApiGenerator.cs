@@ -154,7 +154,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     //Get class syntax node to add members to the class
                     var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                     //create CodeFile just to add usings
-                    var endpointsCodeFile = new CodeFile { Usings = new string[] { Constants.MicrosoftEntityFrameworkCorePackageName, templateModel.DbContextNamespace } };
+
+                    var usings = new List<string>();
+                    //add usings for DbContext related actins.
+                    if (!string.IsNullOrEmpty(templateModel.DbContextNamespace))
+                    {
+                        usings.Add(Constants.MicrosoftEntityFrameworkCorePackageName);
+                        usings.Add(templateModel.DbContextNamespace);
+                    }
+
+                    var endpointsCodeFile = new CodeFile { Usings = usings.ToArray()};
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                     var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));

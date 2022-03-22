@@ -3,17 +3,13 @@
   "Files": [
     {
       "FileName": "Program.cs",
-      "Options": [
-        "MinimalApp"
-      ],
+      "Options": [ "MinimalApp" ],
       "Methods": {
         "Global": {
           "CodeChanges": [
             {
               "Block": "builder.Services.AddMicrosoftGraphClient(\"https://graph.microsoft.com/User.Read\")",
-              "Options": [
-                "MicrosoftGraph"
-              ],
+              "Options": [ "MicrosoftGraph" ],
               "InsertAfter": "builder.Services.AddScoped",
               "CodeFormatting": {
                 "Newline": true
@@ -38,14 +34,11 @@
             },
             {
               "Block": "options.ProviderOptions.DefaultAccessTokenScopes.Add(\"https://graph.microsoft.com/User.Read\")",
-              "Options": [
-                "MicrosoftGraph"
-              ],
+              "Options": [ "MicrosoftGraph" ],
               "CodeChangeType": "Lambda",
               "Parameter": "options",
               "Parent": "builder.Services.AddMsalAuthentication",
               "CodeFormatting": {
-                "Newline": true,
                 "NumberOfSpaces": 4
               }
             }
@@ -114,32 +107,24 @@
     },
     {
       "FileName": "NavMenu.razor",
-      "Options": [
-        "MicrosoftGraph"
-      ],
+      "Options": [ "MicrosoftGraph" ],
       "Replacements": [
         {
           "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"profile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
           "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "Options": [
-            "MicrosoftGraph"
-          ]
+          "Options": [ "MicrosoftGraph" ]
         }
       ]
     },
     {
       "FileName": "UserProfile.razor",
       "AddFilePath": "Pages/UserProfile.razor",
-      "Options": [
-        "MicrosoftGraph"
-      ]
+      "Options": [ "MicrosoftGraph" ]
     },
     {
       "FileName": "GraphClientExtensions.cs",
       "AddFilePath": "Data/GraphClientExtensions.cs",
-      "Options": [
-        "MicrosoftGraph"
-      ]
+      "Options": [ "MicrosoftGraph" ]
     }
   ]
 }

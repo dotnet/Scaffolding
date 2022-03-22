@@ -35,8 +35,7 @@ namespace Microsoft.DotNet.MSIdentity
         internal AppSettingsModifier AppSettingsModifier { get => new AppSettingsModifier(ProvisioningToolOptions); }
 
         internal static IEnumerable<PropertyInfo>? _properties;
-        internal static IEnumerable<PropertyInfo> Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic)
-            .Where(p => p.PropertyType == typeof(byte[]));
+        internal static IEnumerable<PropertyInfo> Properties => _properties ??= typeof(Resources).GetProperties(BindingFlags.Static | BindingFlags.NonPublic);
 
         internal IEnumerable<string>? _filePaths;
         private IEnumerable<string> FilePaths => _filePaths ??= s_fileExtensions.SelectMany(
@@ -63,8 +62,7 @@ namespace Microsoft.DotNet.MSIdentity
                 Environment.Exit(1);
             }
 
-            var projectDescription = ProjectDescriptionReader.GetProjectDescription(
-                ProvisioningToolOptions.ProjectTypeIdentifier);
+            var projectDescription = ProjectDescriptionReader.GetProjectDescription(ProvisioningToolOptions.ProjectTypeIdentifier);
 
             if (projectDescription == null)
             {

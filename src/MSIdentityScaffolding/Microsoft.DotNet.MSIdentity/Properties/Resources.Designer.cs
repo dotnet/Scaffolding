@@ -61,62 +61,195 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to @page &quot;/callwebapi&quot;
+        ///
+        ///@using Microsoft.Identity.Web
+        ///
+        ///@inject IDownstreamWebApi downstreamAPI
+        ///@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+        ///
+        ///&lt;h1&gt;Call an API&lt;/h1&gt;
+        ///
+        ///&lt;p&gt;This component demonstrates fetching data from a Web API.&lt;/p&gt;
+        ///
+        ///@if (apiResult == null)
+        ///{
+        ///    &lt;p&gt;&lt;em&gt;Loading...&lt;/em&gt;&lt;/p&gt;
+        ///}
+        ///else
+        ///{
+        ///    &lt;h2&gt;API Result&lt;/h2&gt;
+        ///    @apiResult
+        ///}
+        ///
+        ///@code {
+        ///    private HttpResponseMessage response;
+        ///    private string apiResult;
+        ///
+        ///    protected override async Task OnInitia [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] add_dotnet_blazorserver_CallWebApi_razor {
+        internal static string add_dotnet_blazorserver_CallWebApi_razor {
             get {
-                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_CallWebApi_razor", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("add_dotnet_blazorserver_CallWebApi_razor", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to &lt;AuthorizeView&gt;
+        ///    &lt;Authorized&gt;
+        ///        Hello, @context.User.Identity?.Name!
+        ///        &lt;a href=&quot;MicrosoftIdentity/Account/SignOut&quot;&gt;Log out&lt;/a&gt;
+        ///    &lt;/Authorized&gt;
+        ///    &lt;NotAuthorized&gt;
+        ///        &lt;a href=&quot;MicrosoftIdentity/Account/SignIn&quot;&gt;Log in&lt;/a&gt;
+        ///    &lt;/NotAuthorized&gt;
+        ///&lt;/AuthorizeView&gt;
+        ///.
         /// </summary>
-        internal static byte[] add_dotnet_blazorserver_LoginDisplay_razor {
+        internal static string add_dotnet_blazorserver_LoginDisplay_razor {
             get {
-                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_LoginDisplay_razor", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("add_dotnet_blazorserver_LoginDisplay_razor", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to @page &quot;/showprofile&quot;
+        ///
+        ///@using Microsoft.Identity.Web
+        ///@using Microsoft.Graph
+        ///@inject Microsoft.Graph.GraphServiceClient GraphServiceClient
+        ///@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+        ///
+        ///&lt;h1&gt;Me&lt;/h1&gt;
+        ///
+        ///&lt;p&gt;This component demonstrates fetching data from a service.&lt;/p&gt;
+        ///
+        ///@if (user == null)
+        ///{
+        ///    &lt;p&gt;&lt;em&gt;Loading...&lt;/em&gt;&lt;/p&gt;
+        ///}
+        ///else
+        ///{
+        ///    &lt;table class=&quot;table table-striped table-condensed&quot; style=&quot;font-family: monospace&quot;&gt;
+        ///        &lt;tr&gt;
+        ///            &lt;th&gt;Property&lt;/th&gt;
+        ///          [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] add_dotnet_blazorserver_ShowProfile_razor {
+        internal static string add_dotnet_blazorserver_ShowProfile_razor {
             get {
-                object obj = ResourceManager.GetObject("add_dotnet_blazorserver_ShowProfile_razor", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("add_dotnet_blazorserver_ShowProfile_razor", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to @page &quot;/authentication/{action}&quot;
+        ///@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+        ///&lt;RemoteAuthenticatorView Action=&quot;@Action&quot; /&gt;
+        ///
+        ///@code{
+        ///    [Parameter] public string? Action { get; set; }
+        ///}
+        ///.
         /// </summary>
-        internal static byte[] add_dotnet_blazorwasm_Authentication_razor {
+        internal static string add_dotnet_blazorwasm_Authentication_razor {
             get {
-                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_Authentication_razor", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("add_dotnet_blazorwasm_Authentication_razor", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to using System;
+        ///using System.Net.Http;
+        ///using System.Net.Http.Headers;
+        ///using System.Threading;
+        ///using System.Threading.Tasks;
+        ///using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+        ///using Microsoft.Authentication.WebAssembly.Msal.Models;
+        ///using Microsoft.Extensions.DependencyInjection;
+        ///using Microsoft.Graph;
+        ///
+        ////// &lt;summary&gt;
+        ////// Adds services and implements methods to use Microsoft Graph SDK.
+        ////// &lt;/summary&gt;
+        ///internal static class GraphClientExtensions
+        ///{
+        ///    /// &lt;summary&gt;
+        ///    /// Extension  [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] add_dotnet_blazorwasm_LoginDisplay_razor {
+        internal static string add_dotnet_blazorwasm_GraphClientExtensions_cs {
             get {
-                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_LoginDisplay_razor", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("add_dotnet_blazorwasm_GraphClientExtensions_cs", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to @using Microsoft.AspNetCore.Components.Authorization
+        ///@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+        ///
+        ///@inject NavigationManager Navigation
+        ///@inject SignOutSessionStateManager SignOutManager
+        ///
+        ///&lt;AuthorizeView&gt;
+        ///    &lt;Authorized&gt;
+        ///        Hello, @context.User.Identity?.Name!
+        ///        &lt;button class=&quot;nav-link btn btn-link&quot; @onclick=&quot;BeginLogout&quot;&gt;Log out&lt;/button&gt;
+        ///    &lt;/Authorized&gt;
+        ///    &lt;NotAuthorized&gt;
+        ///        &lt;a href=&quot;authentication/login&quot;&gt;Log in&lt;/a&gt;
+        ///    &lt;/NotAuthorized&gt;
+        ///&lt;/AuthorizeView&gt;        /// [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] add_dotnet_blazorwasm_RedirectToLogin_razor {
+        internal static string add_dotnet_blazorwasm_LoginDisplay_razor {
             get {
-                object obj = ResourceManager.GetObject("add_dotnet_blazorwasm_RedirectToLogin_razor", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("add_dotnet_blazorwasm_LoginDisplay_razor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to @inject NavigationManager Navigation
+        ///
+        ///@code {
+        ///    protected override void OnInitialized()
+        ///    {
+        ///        Navigation.NavigateTo($&quot;authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}&quot;);
+        ///    }
+        ///}
+        ///.
+        /// </summary>
+        internal static string add_dotnet_blazorwasm_RedirectToLogin_razor {
+            get {
+                return ResourceManager.GetString("add_dotnet_blazorwasm_RedirectToLogin_razor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to @page &quot;/profile&quot;
+        ///@using Microsoft.AspNetCore.Authorization
+        ///@using Microsoft.Graph
+        ///@inject Microsoft.Graph.GraphServiceClient GraphServiceClient
+        ///@attribute [Authorize]
+        ///
+        ///&lt;h3&gt;User Profile&lt;/h3&gt;
+        ///@if (user == null)
+        ///{
+        ///    &lt;p&gt;&lt;em&gt;Loading...&lt;/em&gt;&lt;/p&gt;
+        ///}
+        ///else
+        ///{
+        ///    &lt;table class=&quot;table&quot;&gt;
+        ///        &lt;thead&gt;
+        ///            &lt;tr&gt;
+        ///                &lt;th&gt;Property&lt;/th&gt;
+        ///                &lt;th&gt;Value&lt;/th&gt;
+        ///            &lt;/tr&gt;
+        ///        &lt;/thead&gt;
+        ///        &lt;tr&gt;
+        ///            &lt;td&gt; DisplayName &lt;/td&gt;
+        ///            &lt;td&gt; @user.DisplayNa [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string add_dotnet_blazorwasm_UserProfile_razor {
+            get {
+                return ResourceManager.GetString("add_dotnet_blazorwasm_UserProfile_razor", resourceCulture);
             }
         }
         

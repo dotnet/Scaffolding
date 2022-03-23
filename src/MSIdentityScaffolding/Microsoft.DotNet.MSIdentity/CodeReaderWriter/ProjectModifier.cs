@@ -10,6 +10,7 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
@@ -23,6 +24,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private readonly ProvisioningToolOptions _toolOptions;
         private readonly IEnumerable<string> _files;
         private readonly IConsoleLogger _consoleLogger;
+        private PropertyInfo? _codeModifierConfigPropertyInfo;
 
         public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
         {
@@ -110,9 +112,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             get
             {
-                var identifier = _toolOptions.ProjectTypeIdentifier.Replace('-', '_');
-                var propertyInfo = AppProvisioningTool.Properties.FirstOrDefault(p => p.Name.StartsWith("cm") && p.Name.EndsWith(identifier));
-                return propertyInfo;
+                if (_codeModifierConfigPropertyInfo == null)
+                {
+                    var codeModifierName = $"cm_{_toolOptions.ProjectTypeIdentifier.Replace('-', '_')}";
+                    _codeModifierConfigPropertyInfo = AppProvisioningTool.Properties.FirstOrDefault(
+                        p => p.Name.Equals(codeModifierName));
+                }
+
+                return _codeModifierConfigPropertyInfo;
             }
         }
 
@@ -177,34 +184,30 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
+                _consoleLogger.LogMessage($"Added {filePath}.\n");
             }
         }
 
-        private string GetCodeFileString(CodeFile file, string identifier)
+        internal static string GetCodeFileString(CodeFile file, string identifier) // todo make all code files strings
         {
-            var propertyInfo = GetPropertyInfo(file.FileName, identifier);
-            if (propertyInfo is null)
+            // Resource files cannot contain '-' (dash) or '.' (period)
+            var codeFilePropertyName = $"add_{identifier.Replace('-', '_')}_{file.FileName.Replace('.', '_')}";
+            var property = AppProvisioningTool.Properties.FirstOrDefault(
+                p => p.Name.Equals(codeFilePropertyName));
+
+            if (property is null)
             {
-                throw new FormatException($"Resource file for {file.FileName} could not be found. ");
+                throw new FormatException($"Resource property for {file.FileName} could not be found. ");
             }
 
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-            string codeFileString = Encoding.UTF8.GetString(content);
+            var codeFileString = property.GetValue(typeof(Resources))?.ToString();
+
             if (string.IsNullOrEmpty(codeFileString))
             {
-                throw new FormatException($"Resource file for {file.FileName} could not be parsed. ");
+                throw new FormatException($"CodeFile string for {file.FileName} was empty.");
             }
 
             return codeFileString;
-        }
-
-        private PropertyInfo? GetPropertyInfo(string fileName, string identifier)
-        {
-            return AppProvisioningTool.Properties.Where(
-                p => p.Name.StartsWith("add")
-                && p.Name.Contains(identifier.Replace('-', '_')) // Resource files cannot have '-' (dash character)
-                && p.Name.Contains(fileName.Replace('.', '_'))) // Resource files cannot have '.' (period character)
-                .FirstOrDefault();
         }
 
         internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -249,7 +252,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var root = documentBuilder.AddUsings(options);
             if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
-                
+
                 var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
                 if (updatedIdentifer.HasValue)
@@ -281,7 +284,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
 
                     modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
-                    
+
                     //add code snippets/changes.
 
                     //replace class node with all the updates.

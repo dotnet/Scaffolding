@@ -243,6 +243,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         break;
                 }
             }
+
+            return codeFileString;
         }
 
         /// <summary>

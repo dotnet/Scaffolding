@@ -61,7 +61,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
 
+<<<<<<< HEAD
             if (CalledFromCommandline)
+=======
+            if (!CalledFromCommandline)
+>>>>>>> 1abb1367b81d1ef7cc9fac52b3ab628cad7f5bae
             {
                 EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite);
             }

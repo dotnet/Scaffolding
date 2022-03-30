@@ -19,7 +19,7 @@
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
     -->
-    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
+    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
   </PropertyGroup>
   <PropertyGroup>
@@ -39,11 +39,11 @@
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>7.0.0-preview.1.22076.6</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
@@ -54,13 +54,13 @@
     <!-- Microsoft.ApplicationInsights.AspNetCore -->
     <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.18.0</MicrosoftApplicationInsightsAspNetCorePackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>7.0.0-preview.1.22076.6</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>6.0.0</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>7.0.0-preview.1.22076.6</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>6.0.0</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>7.0.0-preview.1.22076.6</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.0</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>7.0.0-preview.1.22081.6</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>6.0.0</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
     <MicrosoftAspNetCorePackageVersion>6.0.0</MicrosoftAspNetCorePackageVersion>
@@ -77,31 +77,31 @@
     <!-- Microsoft.DotNet.ProjectModel -->
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
-    <MicrosoftEntityFrameworkCorePackageVersion>7.0.0-preview.1.22076.6</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>6.0.0</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFramework.Design for test-->
-    <MicrosoftEntityFrameworkCoreDesignTestPackageVersion>7.0.0-preview.1.22076.6</MicrosoftEntityFrameworkCoreDesignTestPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignTestPackageVersion>6.0.0</MicrosoftEntityFrameworkCoreDesignTestPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>7.0.0-preview.1.22076.6</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>6.0.0</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>6.0.0</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>6.0.0</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>6.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <!-- Microsoft.Extensions.Configuration.UserSecrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>6.0.0</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <!--Microsoft.Extensions.DependencyMoel -->
-    <MicrosoftExtensionsDependencyModelPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>6.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>7.0.0-preview.1.22081.6</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>6.0.0</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
-    <MicrosoftExtensionsLoggingConsolePackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>6.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
-    <MicrosoftExtensionsLoggingDebugPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>6.0.0</MicrosoftExtensionsLoggingDebugPackageVersion>
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>6.0.0</MicrosoftExtensionsLoggingPackageVersion>
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>7.0.0-preview.1.22076.8</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>6.0.0</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>5.0.0-preview.6.20312.15</MicrosoftNETSdkRazorPackageVersion>
     <!-- Microsoft.NET.Test.Sdk-->

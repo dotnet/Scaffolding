@@ -121,8 +121,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 return _codeModifierConfigPropertyInfo;
             }
-
-            return codeModifierConfig;
         }
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
@@ -161,90 +159,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         break;
                 }
             }
-        }
-
-        /// <summary>
-        /// Determines if specified file exists, and if not then creates the 
-        /// file based on template stored in AppProvisioningTool.Properties
-        /// then adds file to the project
-        /// </summary>
-        /// <param name="file"></param>
-        /// <param name="identifier"></param>
-        /// <exception cref="FormatException"></exception>
-        private void AddFile(CodeFile file, string identifier)
-        {
-            var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
-            if (File.Exists(filePath))
-            {
-                return; // File exists, don't need to create
-            }
-
-            var codeFileString = GetCodeFileString(file, identifier);
-
-            var fileDir = Path.GetDirectoryName(filePath);
-            if (!string.IsNullOrEmpty(fileDir))
-            {
-                Directory.CreateDirectory(fileDir);
-                File.WriteAllText(filePath, codeFileString);
-            }
-        }
-
-        private string GetCodeFileString(CodeFile file, string identifier)
-        {
-            var propertyInfo = GetPropertyInfo(file.FileName, identifier);
-            if (propertyInfo is null)
-            {
-                throw new FormatException($"Resource file for {file.FileName} could not be found. ");
-            }
-
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-            string codeFileString = Encoding.UTF8.GetString(content);
-            if (string.IsNullOrEmpty(codeFileString))
-            {
-                throw new FormatException($"Resource file for {file.FileName} could not be parsed. ");
-            }
-
-            return codeFileString;
-        }
-
-        private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
-        {
-            try
-            {
-                string jsonText = Encoding.UTF8.GetString(fileContent);
-                return JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
-            }
-            catch (Exception e)
-            {
-                _consoleLogger.LogMessage($"Error parsing Code Modifier Config for project type { _toolOptions.ProjectType }, exception: { e.Message }");
-                return null;
-            }
-        }
-
-        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options, string identifier)
-        {
-            if (!string.IsNullOrEmpty(file.AddFilePath))
-            {
-                AddFile(file, identifier);
-            }
-            else
-            {
-                switch (file.Extension)
-                {
-                    case "cs":
-                        await ModifyCsFile(file, project, options);
-                        break;
-                    case "cshtml":
-                        await ModifyCshtmlFile(file, project, options);
-                        break;
-                    case "razor":
-                    case "html":
-                        await ApplyTextReplacements(file, project, options);
-                        break;
-                }
-            }
-
-            return codeFileString;
         }
 
         /// <summary>
@@ -324,6 +238,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
                 await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
             }
+        }
 
         /// <summary>
         /// Modifies root if there any applicable changes
@@ -371,6 +286,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
 
                     //add code snippets/changes.
+
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
                     root = root.ReplaceNode(classNode, modifiedClassDeclarationSyntax);

@@ -32,12 +32,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
             { ".NETCoreApp,Version=v3.1", "netcoreapp3.1" },
             { ".NETCoreApp,Version=v5.0", "net5.0" },
             { ".NETCoreApp,Version=v6.0", "net6.0" },
-<<<<<<< HEAD
             { ".NETCoreApp,Version=v2.1", "netcoreapp2.1" },
             { ".NETCoreApp,Version=v7.0", "net7.0" }
-=======
-            { ".NETCoreApp,Version=v2.1", "netcoreapp2.1" }
->>>>>>> 1abb1367b81d1ef7cc9fac52b3ab628cad7f5bae
         };
     }
 }

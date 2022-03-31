@@ -297,12 +297,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
         private string GetTargetsLocation()
         {
+            const string build = "build";
             var assembly = typeof(Program).GetTypeInfo().Assembly;
             var path = Path.GetDirectoryName(assembly.Location);
             // Crawl up from assembly location till we find 'build' directory.
             do
             {
-                if (Directory.EnumerateDirectories(path, "build", SearchOption.TopDirectoryOnly).Any())
+                if (Directory.EnumerateDirectories(path, build, SearchOption.TopDirectoryOnly).Any())
                 {
                     return path;
                 }
@@ -310,8 +311,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 path = Path.GetDirectoryName(path);
             } while (path != null);
 
-
-            return string.Empty;
+            throw new DirectoryNotFoundException(string.Format(Resources .TargetDirectoryNotFound, build));
         }
 
         private int Build(ILogger logger, string projectPath, string configuration, string shortFramework, string buildBasePath)

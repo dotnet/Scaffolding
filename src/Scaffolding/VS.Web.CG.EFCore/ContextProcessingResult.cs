@@ -43,6 +43,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <summary>
         /// A context was available but it was edited to add DbSet property.
         /// </summary>
-        ContextEdited = 4
+        ContextEdited = 4,
+
+        /// <summary>
+        /// Context is not needed or missing.
+        /// </summary>
+        MissingContext = 5
     }
 }

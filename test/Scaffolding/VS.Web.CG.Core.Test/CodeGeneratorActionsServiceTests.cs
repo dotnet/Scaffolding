@@ -97,5 +97,38 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             Assert.True(mockFileSystem.FileExists(outputPath));
             Assert.Equal(generatedText, mockFileSystem.ReadAllText(outputPath));
         }
+
+        [Fact]
+        public async Task ExecuteTemplateTests()
+        {
+            var mockFilesLocator = new Mock<IFilesLocator>();
+            var mockTemplating = new Mock<ITemplating>();
+            var mockFileSystem = new MockFileSystem();
+
+            var templateName = "TemplateName";
+            var templatePath = "C:\template.cshtml";
+            var templateContent = "TemplateContent";
+            var generatedText = "GeneratedText";
+
+            mockFilesLocator.Setup(fl => fl.GetFilePath(templateName, It.IsAny<IEnumerable<string>>()))
+                   .Returns(templatePath);
+            mockFileSystem.WriteAllText(templatePath, templateContent);
+            mockTemplating.Setup(templating => templating.RunTemplateAsync(templateContent, null))
+                .Returns(Task.FromResult(new TemplateResult()
+                {
+                    ProcessingException = null,
+                    GeneratedText = generatedText
+                }));
+
+            var codeGeneratorActionService = new CodeGeneratorActionsService(
+                mockTemplating.Object, mockFilesLocator.Object, mockFileSystem);
+
+            string generatedTextFromExecutingTemplate = await codeGeneratorActionService.ExecuteTemplate(
+                    templateName,
+                    new[] { "TemplateFolder1", "TemplateFolder2" },
+                    null);
+
+            Assert.Equal(generatedText, generatedTextFromExecutingTemplate);
+        }
     }
 }

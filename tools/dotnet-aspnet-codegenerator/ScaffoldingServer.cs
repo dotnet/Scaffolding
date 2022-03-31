@@ -180,9 +180,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 if (disposing)
                 {
                     _server.Stop();
-                    _writer.Dispose();
-                    _reader.Dispose();
-                    _socket.Dispose();
+                    _writer?.Dispose();
+                    _reader?.Dispose();
+                    _socket?.Dispose();
                 }
 
                 disposedValue = true;

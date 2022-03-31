@@ -16,50 +16,79 @@ namespace Microsoft.DotNet.MSIdentity.Project
         private const string ProjectTypeIdSuffix = "dotnet-";
 
         private readonly IEnumerable<string> _files;
-        public List<ProjectDescription> ProjectDescriptions { get; }
+        private List<ProjectDescription>? _projectDescriptions;
 
         public ProjectDescriptionReader(IEnumerable<string> files)
         {
             _files = files;
-            ProjectDescriptions = InitializeProjectDescriptions();
         }
 
-        public ProjectDescription? GetProjectDescription(string projectTypeIdentifier)
+        public ProjectDescription? GetProjectDescription(string projectTypeId)
         {
-            string? projectTypeId = projectTypeIdentifier;
-            if (string.IsNullOrEmpty(projectTypeId) || projectTypeId == ProjectTypeIdSuffix)
+            if (!string.IsNullOrEmpty(projectTypeId) && !projectTypeId.Equals(ProjectTypeIdSuffix))
             {
-                projectTypeId = InferProjectType();
+                return ProjectDescriptions.FirstOrDefault(p => p.Identifier == projectTypeId);
             }
 
-            return projectTypeId != null ? ReadProjectDescription(projectTypeId) : null;
-        }
+            // TODO: could be both a Web app and WEB API.
+            foreach (ProjectDescription projectDescription in ProjectDescriptions)
+            {
+                var mergedMatches = projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions);
+                if (mergedMatches.Any(matches => HasMatch(matches)))
+                {
+                    return projectDescription;
+                }
+            }
 
-        private ProjectDescription? ReadProjectDescription(string identifier) => ProjectDescriptions.FirstOrDefault(p => p.Identifier == identifier);
+            return null;
+        }
 
         static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions
         {
             ReadCommentHandling = JsonCommentHandling.Skip
         };
 
-        private ProjectDescription? ReadDescriptionFromFileContent(byte[] fileContent)
+        public List<ProjectDescription> ProjectDescriptions
         {
-            string jsonText = Encoding.UTF8.GetString(fileContent);
-            return JsonSerializer.Deserialize<ProjectDescription>(jsonText, serializerOptionsWithComments);
+            get
+            {
+                if (_projectDescriptions == null)
+                {
+                    _projectDescriptions = AppProvisioningTool.Properties
+                        .Where(p => p.Name.StartsWith("dotnet") && p.PropertyType == typeof(byte[]))
+                        .Select(p => GetProjectDescription(p))
+                        .ToList();
+
+                    //  TODO: provide an extension mechanism to add such files outside the tool.
+                    //  In that case the validation would not be an exception? but would need to provide error messages
+                }
+
+                return _projectDescriptions;
+            }
+        }
+
+        internal static ProjectDescription GetProjectDescription(PropertyInfo propertyInfo)
+        {
+            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+
+            string jsonText = Encoding.UTF8.GetString(content);
+            var projectDescription = JsonSerializer.Deserialize<ProjectDescription>(jsonText, serializerOptionsWithComments);
+
+            if (projectDescription == null)
+            {
+                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+            }
+            if (!projectDescription.IsValid())
+            {
+                throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
+            }
+
+            return projectDescription;
         }
 
         private string? InferProjectType()
         {
-            // TODO: could be both a Web app and WEB API.
-            foreach (ProjectDescription projectDescription in ProjectDescriptions)
-            {
-                var mergedMatches = projectDescription.GetMergedMatchesForProjectType(ProjectDescriptions);
-                var foundMatches = mergedMatches.Where(matches => HasMatch(matches));
-                if (foundMatches.Any())
-                {
-                    return projectDescription.Identifier;
-                }
-            }
+           
 
             return null;
         }
@@ -103,7 +132,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return AnyFileContainsMatch(matchAny, matchingFilePaths);
         }
 
-        private bool DirectoryMatches(string filePath, string folderRelativePath, string? fileExtension = null)
+        private static bool DirectoryMatches(string filePath, string folderRelativePath, string? fileExtension = null)
         {
             var directoryPath = Path.GetDirectoryName(filePath);
             var folderFound = directoryPath?.Contains(folderRelativePath, StringComparison.OrdinalIgnoreCase) ?? false;
@@ -112,7 +141,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return folderFound && extensionMatches;
         }
 
-        private bool AnyFileContainsMatch(string[]? matchAny, IEnumerable<string> matchingPaths)
+        private static bool AnyFileContainsMatch(string[]? matchAny, IEnumerable<string> matchingPaths)
         {
             if (matchAny is null)
             {
@@ -123,39 +152,18 @@ namespace Microsoft.DotNet.MSIdentity.Project
             return matchingFiles.Any(); // If MatchAny is not null, at least file needs to contain a match
         }
 
-        private bool FileMatches(string filePath, string[] matchAny)
+        private static bool FileMatches(string filePath, string[] matchAny)
         {
-            var fileContent = File.ReadAllText(filePath);
-            var fileMatches = matchAny.Where(match => fileContent.Contains(match, StringComparison.OrdinalIgnoreCase));
-            return fileMatches.Any();
-        }
-
-        public List<ProjectDescription> InitializeProjectDescriptions()
-        {
-            var projectDescriptions = new List<ProjectDescription>();
-            foreach (PropertyInfo propertyInfo in AppProvisioningTool.Properties)
+            try
             {
-                if (!(propertyInfo.Name.StartsWith("cm") || propertyInfo.Name.StartsWith("add")))
-                {
-                    byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-                    ProjectDescription? projectDescription = ReadDescriptionFromFileContent(content);
-
-                    if (projectDescription == null)
-                    {
-                        throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
-                    }
-                    if (!projectDescription.IsValid())
-                    {
-                        throw new FormatException($"Resource file {propertyInfo.Name} is missing Identitier or ProjectRelativeFolder is null. ");
-                    }
-
-                    projectDescriptions.Add(projectDescription);
-                }
+                var fileContent = File.ReadAllText(filePath);
+                var fileMatches = matchAny.Where(match => fileContent.Contains(match, StringComparison.OrdinalIgnoreCase));
+                return fileMatches.Any();
             }
-
-            return projectDescriptions;
-            //  TODO: provide an extension mechanism to add such files outside the tool.
-            //     In that case the validation would not be an exception? but would need to provide error messages
+            catch
+            {
+                return false;
+            }
         }
     }
 }

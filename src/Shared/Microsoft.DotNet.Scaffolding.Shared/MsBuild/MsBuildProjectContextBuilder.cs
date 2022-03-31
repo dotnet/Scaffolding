@@ -20,12 +20,12 @@ namespace Microsoft.Extensions.ProjectModel
         {
             if (string.IsNullOrEmpty(projectPath))
             {
-                throw new ArgumentNullException(nameof(projectPath));
+                throw new ArgumentException(MessageStrings.ProjectPathNotGiven);
             }
 
             if (string.IsNullOrEmpty(targetsLocation))
             {
-                throw new ArgumentNullException(nameof(targetsLocation));
+                throw new ArgumentException(MessageStrings.TargetLocationNotGiven);
             }
 
             _configuration = configuration;

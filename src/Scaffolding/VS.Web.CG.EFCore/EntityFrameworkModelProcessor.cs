@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
@@ -18,12 +19,14 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
+using System.Collections;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     internal class EntityFrameworkModelProcessor
     {
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
+        private const string MySqlException = nameof(MySqlException);
         private const string NewDbContextFolderName = "Data";
         private bool _useSqlite;
         private string _dbContextFullTypeName;
@@ -554,6 +557,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             catch (Exception ex)
             {
+                var exceptionType = ex.GetType();
+                // if MySQL exception with error code 1045, discard error message since it contains sensitive dev information
+                if (exceptionType.Name.Equals(MySqlException, StringComparison.OrdinalIgnoreCase) || exceptionType.FullName.Contains(MySqlException, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (ex.Data.Keys.Count > 0 &&
+                        ex.Data["Server Error Code"] != null &&
+                        //based on error code 1045 from here https://dev.mysql.com/doc/
+                        ex.Data["Server Error Code"].ToString().Equals("1045", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ex = new Exception($"{MessageStrings.MySQLDbContextExceptionMssg}\n");
+                        throw ex;
+                    }
+                }
                 throw ex.Unwrap(_logger);
             }
         }

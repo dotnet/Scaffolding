@@ -9,7 +9,7 @@
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
           "CodeChanges": [
             {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "InsertAfter": "IApplicationBuilder.UseRouting",
               "Block": "IApplicationBuilder.UseAuthentication()"
             }
           ]
@@ -22,7 +22,7 @@
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
-              "Options": [ "MemberAccess" ],
+              "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"));",
               "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
             }
@@ -38,67 +38,70 @@
     {
       "FileName": "Program.cs",
       "Options": [ "MinimalApp" ],
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "Microsoft.Identity.Web"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
             {
-              "Block": "\nWebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));",
-              "InsertBefore": [ "builder.Services.AddControllers()", "builder.Build()" ]
+              "Block": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "InsertBefore": ["WebApplication.CreateBuilder.Services.AddControllers"],
+              "CodeFormatting": {
+                "Newline": true
+              }
             },
             {
+              "Block": "AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "AddAuthentication",
+              "CodeChangeType": "MemberAccess",
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()",
               "Parent": "AddMicrosoftIdentityWebApi",
-              "Options": [ "MemberAccess", "MicrosoftGraph", "DownstreamApi" ],
-              "Block": "EnableTokenAcquisitionToCallDownstreamApi()"
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 8
+              }
             },
             {
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "MicrosoftGraph" ],
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "DownstreamApi" ],
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "Parent": "AddDownstreamWebApi",
-              "Options": [ "MemberAccess", "DownstreamApi" ],
-              "Block": "AddInMemoryTokenCaches()",
+              "Block": "app.UseAuthentication()",
+              "InsertBefore": [ "app.UseAuthorization" ],
               "CodeFormatting": {
-                "NumberOfSpaces": 12,
                 "Newline": true
               }
-            },
-            {
-              "Parent": "AddMicrosoftGraph",
-              "Options": [ "MemberAccess", "MicrosoftGraph" ],
-              "Block": "AddInMemoryTokenCaches()",
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
-                "Newline": true
-              }
-            },
-            {
-              "InsertAfter": "app.UseRouting();",
-              "Block": "app.UseAuthentication();",
-              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ]
             }
           ]
         }
-      },
-      "Usings": [
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.Identity.Web",
-        "Microsoft.AspNetCore.Authentication.JwtBearer"
-      ]
+      }
     },
     {
       "FileName": "WeatherForecastController.cs",
@@ -131,7 +134,7 @@
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
           "CodeChanges": [
             {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
+              "InsertAfter": "IApplicationBuilder.UseRouting",
               "Block": "IApplicationBuilder.UseAuthentication()"
             }
           ]
@@ -173,7 +176,7 @@
           },
           "CodeChanges": [
             {
-              "Append": true,
+              "Prepend": true,
               "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
               "CodeFormatting": {
                 "NumberOfSpaces": 12
@@ -181,7 +184,7 @@
               "Options": [ "MicrosoftGraph" ]
             },
             {
-              "Append": true,
+              "Prepend": true,
               "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
               "CodeFormatting": {
                 "NumberOfSpaces": 12
@@ -190,15 +193,16 @@
             },
             {
               "InsertAfter": "await _downstreamWebApi.CallWebApiForUserAsync",
-              "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                // Do something\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
+              "Block": "\r\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\r\n            {\r\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\r\n                // Do something\r\n            }\r\n            else\r\n            {\r\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\r\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\r\n            }",
               "CodeFormatting": {
-                "NumberOfSpaces": 12
+                "NumberOfSpaces": 12,
+                "Newline": true
               },
               "Options": [ "DownstreamApi" ]
             },
             {
-              "Append": true,
-              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);",
+              "Prepend": true,
+              "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)",
               "Options": [ "NonMinimalApp" ]
             }
           ]

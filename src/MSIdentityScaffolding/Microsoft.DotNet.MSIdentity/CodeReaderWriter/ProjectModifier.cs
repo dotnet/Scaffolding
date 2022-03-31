@@ -10,6 +10,7 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
@@ -23,6 +24,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private readonly ProvisioningToolOptions _toolOptions;
         private readonly IEnumerable<string> _files;
         private readonly IConsoleLogger _consoleLogger;
+        private PropertyInfo? _codeModifierConfigPropertyInfo;
 
         public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
         {
@@ -86,18 +88,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return null;
             }
 
-            var propertyInfo = AppProvisioningTool.Properties.Where(
-                p => p.Name.StartsWith("cm") && p.Name.Contains(_toolOptions.ProjectType)).FirstOrDefault();
-            if (propertyInfo is null)
+            if (CodeModifierConfigPropertyInfo is null)
             {
                 return null;
             }
 
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
+            byte[] content = (CodeModifierConfigPropertyInfo.GetValue(null) as byte[])!;
             CodeModifierConfig? codeModifierConfig = ReadCodeModifierConfigFromFileContent(content);
             if (codeModifierConfig is null)
             {
-                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                throw new FormatException($"Resource file { CodeModifierConfigPropertyInfo.Name } could not be parsed. ");
             }
 
             if (!codeModifierConfig.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
@@ -106,6 +106,21 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             return codeModifierConfig;
+        }
+
+        private PropertyInfo? CodeModifierConfigPropertyInfo
+        {
+            get
+            {
+                if (_codeModifierConfigPropertyInfo == null)
+                {
+                    var codeModifierName = $"cm_{_toolOptions.ProjectTypeIdentifier.Replace('-', '_')}";
+                    _codeModifierConfigPropertyInfo = AppProvisioningTool.Properties.FirstOrDefault(
+                        p => p.Name.Equals(codeModifierName));
+                }
+
+                return _codeModifierConfigPropertyInfo;
+            }
         }
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
@@ -169,34 +184,30 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
+                _consoleLogger.LogMessage($"Added {filePath}.\n");
             }
         }
 
-        private string GetCodeFileString(CodeFile file, string identifier)
+        internal static string GetCodeFileString(CodeFile file, string identifier) // todo make all code files strings
         {
-            var propertyInfo = GetPropertyInfo(file.FileName, identifier);
-            if (propertyInfo is null)
+            // Resource files cannot contain '-' (dash) or '.' (period)
+            var codeFilePropertyName = $"add_{identifier.Replace('-', '_')}_{file.FileName.Replace('.', '_')}";
+            var property = AppProvisioningTool.Properties.FirstOrDefault(
+                p => p.Name.Equals(codeFilePropertyName));
+
+            if (property is null)
             {
-                throw new FormatException($"Resource file for {file.FileName} could not be found. ");
+                throw new FormatException($"Resource property for {file.FileName} could not be found. ");
             }
 
-            byte[] content = (propertyInfo.GetValue(null) as byte[])!;
-            string codeFileString = Encoding.UTF8.GetString(content);
+            var codeFileString = property.GetValue(typeof(Resources))?.ToString();
+
             if (string.IsNullOrEmpty(codeFileString))
             {
-                throw new FormatException($"Resource file for {file.FileName} could not be parsed. ");
+                throw new FormatException($"CodeFile string for {file.FileName} was empty.");
             }
 
             return codeFileString;
-        }
-
-        private PropertyInfo? GetPropertyInfo(string fileName, string identifier)
-        {
-            return AppProvisioningTool.Properties.Where(
-                p => p.Name.StartsWith("add")
-                && p.Name.Contains(identifier.Replace('-', '_')) // Resource files cannot have '-' (dash character)
-                && p.Name.Contains(fileName.Replace('.', '_'))) // Resource files cannot have '.' (period character)
-                .FirstOrDefault();
         }
 
         internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
@@ -213,7 +224,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            //get the file document to get the document root for editing.
+            // get the file document to get the document root for editing.
             DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
             if (documentEditor is null)
             {
@@ -236,77 +247,84 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="options"></param>
         /// <param name="file"></param>
         /// <returns>modified root if there are changes, else null</returns>
-        private static CompilationUnitSyntax? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
+        private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
-            var newRoot = documentBuilder.AddUsings(options);
-            if (file.FileName.Equals("Program.cs"))
+            var root = documentBuilder.AddUsings(options);
+            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
-                var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(newRoot.Members);
-                if (file.Methods.TryGetValue("Global", out var globalMethod))
-                {
-                    var filteredChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
-                    if (!filteredChanges.Any())
-                    {
-                        return null;
-                    }
 
-                    foreach (var change in filteredChanges)
-                    {
-                        //Modify CodeSnippet to have correct variable identifiers present.
-                        var formattedChange = ProjectModifierHelper.FormatCodeSnippet(change, variableDict);
-                        newRoot = DocumentBuilder.AddGlobalStatements(formattedChange, newRoot);
-                    }
+                var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
+                var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
+                if (updatedIdentifer.HasValue)
+                {
+                    (string oldValue, string newValue) = updatedIdentifer.Value;
+                    filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
                 }
+
+                var updatedRoot = DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
+                return updatedRoot;
             }
 
             else
             {
-                var namespaceNode = newRoot?.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                FileScopedNamespaceDeclarationSyntax? fileScopedNamespace = null;
-                if (namespaceNode is null)
-                {
-                    fileScopedNamespace = newRoot?.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
-                }
+                var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();
 
                 string className = ProjectModifierHelper.GetClassName(file.FileName);
-                //get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
-                var classNode =
-                    namespaceNode?.DescendantNodes()?.Where(node =>
-                        node is ClassDeclarationSyntax cds &&
-                        cds.Identifier.ValueText.Contains(className)).FirstOrDefault() ??
-                    fileScopedNamespace?.DescendantNodes()?.Where(node =>
-                        node is ClassDeclarationSyntax cds &&
-                        cds.Identifier.ValueText.Contains(className)).FirstOrDefault();
+                // get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
 
-                if (classNode is ClassDeclarationSyntax classDeclarationSyntax)
+                if (namespaceNode?.DescendantNodes().FirstOrDefault(node =>
+                        node is ClassDeclarationSyntax cds &&
+                        cds.Identifier.ValueText.Contains(className)) is ClassDeclarationSyntax classNode)
                 {
-                    var modifiedClassDeclarationSyntax = classDeclarationSyntax;
+                    var modifiedClassDeclarationSyntax = classNode;
 
                     //add class properties
                     modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax, options);
                     //add class attributes
                     modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
 
+                    modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
+
                     //add code snippets/changes.
-                    if (file.Methods != null && file.Methods.Any())
-                    {
-                        modifiedClassDeclarationSyntax = documentBuilder.AddCodeSnippets(modifiedClassDeclarationSyntax, options);
-                        modifiedClassDeclarationSyntax = documentBuilder.EditMethodTypes(modifiedClassDeclarationSyntax, options);
-                        modifiedClassDeclarationSyntax = documentBuilder.AddMethodParameters(modifiedClassDeclarationSyntax, options);
-                    }
+
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
-                    newRoot = newRoot.ReplaceNode(classDeclarationSyntax, modifiedClassDeclarationSyntax);
+                    root = root.ReplaceNode(classNode, modifiedClassDeclarationSyntax);
 #pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
                 }
             }
 
-            return newRoot;
+            return root;
+        }
+
+        private static ClassDeclarationSyntax ModifyMethods(ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options)
+        {
+            foreach ((string methodName, Method methodChanges) in methods)
+            {
+                if (methodChanges == null)
+                {
+                    continue;
+                }
+
+                var methodNode = ProjectModifierHelper.GetOriginalMethod(classNode, methodName, methodChanges);
+                if (methodNode is null)
+                {
+                    continue;
+                }
+
+                var updatedMethodNode = DocumentBuilder.GetModifiedMethod(methodNode, methodChanges, options);
+                if (updatedMethodNode != null)
+                {
+                    classNode = classNode.ReplaceNode(methodNode, updatedMethodNode);
+                }
+            }
+
+            return classNode;
         }
 
         internal async Task ModifyCshtmlFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
         {
-            var fileDoc = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
+            var fileDoc = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
             if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
             {
                 return;
@@ -336,7 +354,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         internal async Task ApplyTextReplacements(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
         {
-            var document = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
+            var document = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
             if (document is null)
             {
                 return;

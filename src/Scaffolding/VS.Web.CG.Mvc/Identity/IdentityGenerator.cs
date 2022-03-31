@@ -280,7 +280,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             string jsonText = string.Empty;
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("identityMinimalHostingChanges.json")).FirstOrDefault();
+            var resourceName = resourceNames.FirstOrDefault(x => x.EndsWith("identityMinimalHostingChanges.json"));
             if (!string.IsNullOrEmpty(resourceName))
             {
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
@@ -322,19 +322,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
                 //adding usings
-                var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
+                var rootWithUsings = docBuilder.AddUsings(new CodeChangeOptions());
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
-                    var globalChanges = programCsFile.Methods.Where(x => x.Key == "Global").First().Value;
-                    foreach (var change in globalChanges.CodeChanges)
+                    var globalChanges = programCsFile.Methods.First(x => x.Key == "Global").Value;
+                    foreach (var codeChange in globalChanges.CodeChanges)
                     {
-                        change.Block = EditIdentityStrings(change.Block, dbContextClassName, identityUserClassName, useSqlite);
-                        newRoot = DocumentBuilder.AddGlobalStatements(change, newRoot);
+                        codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite);
                     }
+
+                    var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(rootWithUsings, globalChanges.CodeChanges);
+                    //replace root node with all the updates.
+                    docEditor.ReplaceNode(docRoot, modifiedRoot);
+                }
+                else
+                {
+                    docEditor.ReplaceNode(docRoot, rootWithUsings);
                 }
                 //replace root node with all the updates.
-                docEditor.ReplaceNode(docRoot, newRoot);
                 //write to Program.cs file
                 await docBuilder.WriteToClassFileAsync(programDocument.FilePath);
             }

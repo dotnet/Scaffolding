@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.Extensions.Internal
 {
@@ -15,6 +16,7 @@ namespace Microsoft.Extensions.Internal
         private bool _running = false;
         private Action<string> _stdErrorHandler;
         private Action<string> _stdOutHandler;
+        private static readonly ConsoleLogger _logger = new ConsoleLogger ();
 
         internal static Command CreateDotNet(string commandName, IEnumerable<string> args)
         {
@@ -63,9 +65,18 @@ namespace Microsoft.Extensions.Internal
             return this;
         }
 
+        public override string ToString()
+        {
+            var psi = _process .StartInfo;
+            return $"{ psi .FileName } { psi .Arguments }";
+        }
+
         public CommandResult Execute()
         {
             ThrowIfRunning();
+            Command._logger.LogMessage(
+                $"Executing external command:\n{ this }\n", LogMessageLevel.Trace
+            );
             _running = true;
             _process.EnableRaisingEvents = true;
 

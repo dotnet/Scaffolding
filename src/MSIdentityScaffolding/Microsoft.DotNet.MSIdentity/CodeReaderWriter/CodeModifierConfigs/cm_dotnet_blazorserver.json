@@ -8,7 +8,7 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ') ?? WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ');\n",
+              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ') ?? WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ')",
               "Options": [
                 "DownstreamApi",
                 "MicrosoftGraph"
@@ -16,15 +16,15 @@
               "InsertBefore": [
                 "WebApplication.CreateBuilder.Services.AddAuthentication",
                 "WebApplication.CreateBuilder.Services.AddAuthorization",
-                "WebApplication.CreateBuilder.Services.AddRazorPages()",
-                "WebApplication.CreateBuilder.Build()"
+                "WebApplication.CreateBuilder.Services.AddRazorPages",
+                "WebApplication.CreateBuilder.Build"
               ],
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
               "InsertBefore": [
                 "WebApplication.CreateBuilder.Services.AddControllersWithViews",
                 "WebApplication.CreateBuilder.Services.AddAuthorization",
@@ -35,21 +35,37 @@
               }
             },
             {
-              "Block": "WebApplication.CreateBuilder.Services.AddControllersWithViews()\r\n    .AddMicrosoftIdentityUI();",
+              "Block": "AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "WebApplication.CreateBuilder.Services.AddAuthentication",
+              "CodeChangeType": "MemberAccess",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddControllersWithViews()",
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
               "InsertBefore": [
                 "WebApplication.CreateBuilder.Services.AddAuthorization",
                 "WebApplication.CreateBuilder.Services.AddRazorPages",
-                "WebApplication.CreateBuilder.Build()"
+                "WebApplication.CreateBuilder.Build"
               ],             
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
+              "Block": "AddMicrosoftIdentityUI()",
+              "Parent": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
+              "CodeChangeType":"MemberAccess",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
               "Parent": "AddMicrosoftIdentityWebApp",
+              "CodeChangeType": "MemberAccess",
               "Options": [
-                "MemberAccess",
                 "MicrosoftGraph",
                 "DownstreamApi"
               ],
@@ -60,12 +76,12 @@
               }
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
               "Options": [
-                "MemberAccess",
                 "MicrosoftGraph"
               ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
@@ -73,90 +89,59 @@
             },
             {
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "CodeChangeType": "MemberAccess",
               "Options": [
-                "MemberAccess",
                 "DownstreamApi"
               ],
-              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
               "CodeFormatting": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "Parent": "AddDownstreamWebApi",
-              "Options": [
-                "MemberAccess",
-                "DownstreamApi"
-              ],
-              "Block": "AddInMemoryTokenCaches()",
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
-                "Newline": true
-              }
-            },
-            {
-              "Parent": "AddMicrosoftGraph",
-              "Options": [
-                "MemberAccess",
-                "MicrosoftGraph"
-              ],
-              "Block": "AddInMemoryTokenCaches()",
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
-                "Newline": true
-              }
-            },
-            {
-              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization(options =>\r\n{\r\n    // By default, all incoming requests will be authorized according to the default policy\r\n    options.FallbackPolicy = options.DefaultPolicy;\r\n});",
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
-              "InsertBefore": [
-                "WebApplication.CreateBuilder.Services.AddRazorPages()",
-                "WebApplication.CreateBuilder.Build()"
-              ],
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
+              "Block": "options.FallbackPolicy = options.DefaultPolicy",
+              "Parameter": "options",
+              "CodeChangeType": "Lambda",
+              "Parent": "WebApplication.CreateBuilder.Services.AddAuthorization",
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "AddMicrosoftIdentityConsentHandler()",
               "Parent": "WebApplication.CreateBuilder.Services.AddServerSideBlazor()",
-              "Options": [
-                "MemberAccess"
-              ],
-              "Block": "AddMicrosoftIdentityConsentHandler()"
+              "CodeChangeType": "MemberAccess",
+              "CodeFormatting":{
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
             },
             {
-              "Block": "app.UseAuthentication();",
+              "Block": "app.UseAuthentication()",
               "InsertAfter": "app.UseRouting()",
-              "InsertBefore": [
-                "app.UseAuthorization",
-                "app.MapControllers",
-                "app.MapBlazorHub"
-              ],
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "app.UseAuthorization();",
+              "Block": "app.UseAuthorization()",
               "InsertAfter": "app.UseAuthentication()",
-              "InsertBefore": [
-                "app.MapControllers",
-                "app.MapBlazorHub",
-                "app.MapFallbackToPage"
-              ],
               "CodeFormatting": {
                 "Newline": true
               }
             },
             {
-              "Block": "app.MapControllers();",
+              "Block": "app.MapControllers()",
               "InsertAfter": "app.UseAuthorization",
-              "InsertBefore": [
-                "app.MapBlazorHub",
-                "app.MapFallbackToPage",
-                "app.Run"
-              ],
               "CodeFormatting": {
                 "Newline": true
               }

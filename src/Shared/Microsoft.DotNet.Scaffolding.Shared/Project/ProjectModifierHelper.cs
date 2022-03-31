@@ -6,7 +6,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.MSIdentity.Shared;
@@ -16,8 +15,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
     internal static class ProjectModifierHelper
     {
-        internal static string[] CodeSnippetTrimStrings = new string[] { " ", "\r", "\n", ";" };
         internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
+        internal static IEnumerable<string> CodeSnippetTrimStrings = CodeSnippetTrimChars.Select(c => c.ToString());
+        internal static char[] Parentheses = new char[] { '(', ')' }; 
         internal const string VarIdentifier = "var";
         internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
         /// <summary>
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             if (startupType == null)
             {
                 //if changed the name in Program.cs, get the class name and check.
-                var programDocument = modelTypesLocator.GetAllDocuments().Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+                var programDocument = modelTypesLocator.GetAllDocuments().FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
                 var startupClassName = await GetStartupClassName(programDocument);
                 startupType = modelTypesLocator.GetType(startupClassName).FirstOrDefault();
             }
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
 
             // if changed the name in Program.cs, get the class name and check.
-            var programDocument = project.Documents.Where(d => d.Name.EndsWith("Program.cs")).FirstOrDefault();
+            var programDocument = project.Documents.FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
             var startupClassName = await GetStartupClassName(programDocument);
 
             return string.IsNullOrEmpty(startupClassName); // If project has UseStartup in Program.cs, it is not a minimal app
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         // will return null.
         internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
         {
-            var programCsDocument = project.Documents.Where(d => d.Name.Equals("Program.cs")).FirstOrDefault();
+            var programCsDocument = project.Documents.FirstOrDefault(d => d.Name.Equals("Program.cs"));
             var startupClassName = await GetStartupClassName(programCsDocument);
 
             return string.IsNullOrEmpty(startupClassName) ? null : string.Concat(startupClassName, ".cs");
@@ -69,19 +69,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             {
                 var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
                 var programClassNode = namespaceNode?.DescendantNodes()
-                    .Where(node =>
+                    .FirstOrDefault(node =>
                         node is ClassDeclarationSyntax cds &&
                         cds.Identifier
-                           .ValueText.Contains("Program"))
-                    .First();
+                           .ValueText.Contains("Program"));
 
-                var nodes = programClassNode?.DescendantNodes();
-                var useStartupNode = programClassNode?.DescendantNodes()
-                    .Where(node =>
+                var useStartupNode = programClassNode?.DescendantNodes()?
+                    .FirstOrDefault(node =>
                         node is MemberAccessExpressionSyntax maes &&
                         maes.ToString()
-                            .Contains("webBuilder.UseStartup"))
-                    .First();
+                            .Contains("webBuilder.UseStartup"));
 
                 var useStartupTxt = useStartupNode?.ToString();
                 if (!string.IsNullOrEmpty(useStartupTxt))
@@ -112,14 +109,65 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return formattedClassName;
         }
 
+        internal static BaseMethodDeclarationSyntax GetOriginalMethod(ClassDeclarationSyntax classNode, string methodName, Method methodChanges)
+        {
+            if (classNode?.Members.FirstOrDefault(node
+                => node is MethodDeclarationSyntax mds && mds.Identifier.ValueText.Equals(methodName)
+                || node is ConstructorDeclarationSyntax cds && cds.Identifier.ValueText.Equals(methodName))
+                 is BaseMethodDeclarationSyntax foundMethod)
+            {
+                var parameters = VerifyParameters(methodChanges.Parameters, foundMethod.ParameterList.Parameters.ToList());
+                if (parameters == null)
+                {
+                    return null;
+                }
+
+                return foundMethod;
+            }
+
+            return null;
+        }
+
+        // check if the parameters match for the given method, and populate a Dictionary with parameter.Type keys and Parameter.Identifier values.
+        internal static IDictionary<string, string> VerifyParameters(string[] parametersToCheck, List<ParameterSyntax> foundParameters)
+        {
+            IDictionary<string, string> parametersWithNames = new Dictionary<string, string>();
+            if (foundParameters.Any() && parametersToCheck != null && parametersToCheck.Any())
+            {
+                var pars = foundParameters.ToList();
+                foreach (var parameter in parametersToCheck)
+                {
+                    //Trim(' ') for the additional whitespace at the end of the parameter.Type string. Parameter.Type should be a singular word.
+                    var verifiedParams = pars.Where(p => (p.Type?.ToFullString()?.Trim(' ')?.Equals(parameter)).GetValueOrDefault(false));
+                    if (verifiedParams.Any())
+                    {
+                        parametersWithNames.Add(parameter, verifiedParams.First().Identifier.ValueText);
+                    }
+                }
+
+                //Dictionary should have the same number of parameters we are trying to verify.
+                if (parametersWithNames.Count == parametersToCheck.Length)
+                {
+                    return parametersWithNames;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return parametersWithNames;
+        }
+
         /// <summary>
         /// Format a string of a SimpleMemberAccessExpression(eg., Type.Value)
         /// Replace Type with its value from the parameterDict.
         /// </summary>
         /// <param name="codeBlock">SimpleMemberAccessExpression string</param>
         /// <param name="parameterDict">IDictionary with parameter type keys and values</param>
+        /// <param name="trim">Whether to trim the resulting string</param>
         /// <returns></returns>
-        internal static string FormatCodeBlock(string codeBlock, IDictionary<string, string> parameterDict)
+        internal static string FormatCodeBlock(string codeBlock, IDictionary<string, string> parameterDict, bool trim = false)
         {
             string formattedCodeBlock = codeBlock;
             if (!string.IsNullOrEmpty(codeBlock) && parameterDict != null)
@@ -131,58 +179,71 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                     formattedCodeBlock = $"{parameter}.{value}";
                 }
             }
-            return formattedCodeBlock;
+
+            return trim ? formattedCodeBlock.Trim(CodeSnippetTrimChars) : formattedCodeBlock;
         }
 
-        internal static string FormatGlobalStatement(string codeBlock, IDictionary<string, string> replacements)
+        /// <summary>
+        /// Looks for oldValue in codeBlock and replaces with newValue
+        /// </summary>
+        /// <param name="codeBlock"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns>codeBlock where any instance of 'oldValue' is replaced with 'newValue'</returns>
+        internal static string ReplaceValue(string codeBlock, string oldValue, string newValue)
         {
             string formattedStatement = codeBlock;
-            if (!string.IsNullOrEmpty(formattedStatement) && replacements != null && replacements.Any())
+            if (!string.IsNullOrEmpty(formattedStatement) && !string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue))
             {
-                foreach (var key in replacements.Keys)
-                {
-                    replacements.TryGetValue(key, out string value);
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        formattedStatement = formattedStatement.Replace(key, value);
-                    }
-                }
+                return formattedStatement.Replace(oldValue, newValue);
             }
+
             return formattedStatement;
         }
 
         /// <summary>
-        /// 
+        /// Replaces all instances of the old value with the new value
+        /// </summary>
+        /// <param name="changes"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns>updated CodeSnippet array</returns>
+        internal static CodeSnippet[] UpdateVariables(CodeSnippet[] changes, string oldValue, string newValue) => changes.Select(c => UpdateVariables(c, oldValue, newValue)).ToArray();
+
+        /// <summary>
+        /// Replaces all instances of the old value with the new value
         /// </summary>
         /// <param name="change"></param>
-        /// <param name="variableDict"></param>
-        /// <returns></returns>
-        internal static CodeSnippet FormatCodeSnippet(CodeSnippet change, IDictionary<string, string> variableDict)
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns>updated CodeSnippet</returns>
+        internal static CodeSnippet UpdateVariables(CodeSnippet change, string oldValue, string newValue) //TODO
         {
-            //format CodeSnippet fields for any variables or parameters.
+            // format CodeSnippet fields for any variables or parameters.
             if (!string.IsNullOrEmpty(change.Block))
             {
-                change.Block = FormatGlobalStatement(change.Block, variableDict);
+                change.Block = ReplaceValue(change.Block, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.Parent))
             {
-                change.Parent = FormatGlobalStatement(change.Parent, variableDict);
+                change.Parent = ReplaceValue(change.Parent, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.CheckBlock))
             {
-                change.CheckBlock = FormatGlobalStatement(change.CheckBlock, variableDict);
+                change.CheckBlock = ReplaceValue(change.CheckBlock, oldValue, newValue);
             }
             if (!string.IsNullOrEmpty(change.InsertAfter))
             {
-                change.InsertAfter = FormatGlobalStatement(change.InsertAfter, variableDict);
+                change.InsertAfter = ReplaceValue(change.InsertAfter, oldValue, newValue);
             }
             if (change.InsertBefore != null && change.InsertBefore.Any())
             {
                 for (int i = 0; i < change.InsertBefore.Count(); i++)
                 {
-                    change.InsertBefore[i] = FormatGlobalStatement(change.InsertBefore[i], variableDict);
+                    change.InsertBefore[i] = ReplaceValue(change.InsertBefore[i], oldValue, newValue);
                 }
             }
+
             return change;
         }
 
@@ -196,57 +257,62 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             StringBuilder sb = new StringBuilder(statement);
             if (!string.IsNullOrEmpty(statement))
             {
-                foreach (string replaceString in CodeSnippetTrimStrings)
+                foreach (string replacement in CodeSnippetTrimStrings)
                 {
-                    sb.Replace(replaceString, string.Empty);
+                    sb.Replace(replacement, string.Empty);
                 }
             }
+
             return sb.ToString();
         }
 
-        internal static IDictionary<string, string> GetBuilderVariableIdentifier(SyntaxList<MemberDeclarationSyntax> members)
+        /// <summary>
+        /// Searches through the list of nodes to find replacement variable identifier names
+        /// </summary>
+        /// <param name="members"></param>
+        /// <returns></returns>
+        internal static (string, string)? GetBuilderVariableIdentifierTransformation(SyntaxList<MemberDeclarationSyntax> members)
         {
-            IDictionary<string, string> variables = new Dictionary<string, string>();
-            if (members.Any())
+            if (!(members.FirstOrDefault(
+                m => TrimStatement(m.ToString())
+                .Contains("=WebApplication.CreateBuilder")) is SyntaxNode memberNode))
             {
-                foreach (var member in members)
-                {
-                    var memberString = TrimStatement(member.ToString());
-                    if (memberString.Contains("=WebApplication.CreateBuilder"))
-                    {
-                        var start = 0;
-                        if (memberString.Contains(VarIdentifier))
-                        {
-                            start = memberString.IndexOf(VarIdentifier) + VarIdentifier.Length;
-                        }
-                        else if (memberString.Contains(WebApplicationBuilderIdentifier))
-                        {
-                            start = memberString.IndexOf(WebApplicationBuilderIdentifier) + WebApplicationBuilderIdentifier.Length;
-                        }
-                        if (start > 0)
-                        {
-                            var end = memberString.IndexOf("=");
-                            variables.Add("WebApplication.CreateBuilder", memberString.Substring(start, end - start));
-                        }
-                    }
-                }
+                return null;
             }
-            return variables;
+
+            var memberString = TrimStatement(memberNode.ToString());
+
+            var start = 0;
+            if (memberString.Contains(VarIdentifier))
+            {
+                start = memberString.IndexOf(VarIdentifier) + VarIdentifier.Length;
+            }
+            else if (memberString.Contains(WebApplicationBuilderIdentifier))
+            {
+                start = memberString.IndexOf(WebApplicationBuilderIdentifier) + WebApplicationBuilderIdentifier.Length;
+            }
+            if (start > 0)
+            {
+                var end = memberString.IndexOf("=");
+                return ("WebApplication.CreateBuilder", memberString.Substring(start, end - start));
+            }
+
+            return null;
         }
 
-        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement, string checkBlock = null)
+        internal static bool GlobalStatementExists(CompilationUnitSyntax root, GlobalStatementSyntax statement)
         {
             if (root != null && statement != null)
             {
                 var formattedStatementString = TrimStatement(statement.ToString());
                 bool foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(formattedStatementString)).Any();
-                //if statement is not found due to our own mofications, check for a CheckBlock snippet 
-                if (!string.IsNullOrEmpty(checkBlock) && !foundStatement)
+
+                if (foundStatement)
                 {
-                    foundStatement = root.Members.Where(st => TrimStatement(st.ToString()).Contains(TrimStatement(checkBlock.ToString()))).Any();
+                    return true;
                 }
-                return foundStatement;
             }
+
             return false;
         }
 
@@ -259,54 +325,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        internal static bool StatementExists(BlockSyntax blockSyntaxNode, StatementSyntax statement)
+        internal static bool StatementExists(IEnumerable<SyntaxNode> nodes, string statement)
         {
-            if (blockSyntaxNode.Statements.Any(st => st.ToString().Contains(statement.ToString(), StringComparison.Ordinal)))
-            {
-                return true;
-            }
-            return false;
+            statement = statement.TrimEnd(Parentheses);
+            return nodes.Any(n => StatementExists(n, statement));
         }
 
-        internal static ExpressionStatementSyntax AddSimpleMemberAccessExpression(ExpressionStatementSyntax expression, string codeSnippet, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
-        {
-            if (!string.IsNullOrEmpty(codeSnippet) &&
-                !expression
-                    .ToString()
-                    .Trim(ProjectModifierHelper.CodeSnippetTrimChars)
-                    .Contains(
-                        codeSnippet.Trim(ProjectModifierHelper.CodeSnippetTrimChars)))
-            {
-                var identifier = SyntaxFactory.IdentifierName(codeSnippet)
-                            .WithTrailingTrivia(trailingTrivia);
-                return expression
-                    .WithExpression(SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        expression.Expression.WithTrailingTrivia(leadingTrivia),
-                        identifier));
-            }
-            else
-            {
-                return null;
-            }
-        }
+        internal static bool StatementExists(SyntaxNode node, string statement) => node.ToString().Contains(statement.Trim(), StringComparison.Ordinal);
 
-        //Filter out CodeSnippets that are invalid using FilterOptions
-        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options)
-        {
-            var filteredCodeSnippets = new HashSet<CodeSnippet>();
-            if (codeSnippets != null && codeSnippets.Any() && options != null)
-            {
-                foreach (var codeSnippet in codeSnippets)
-                {
-                    if (FilterOptions(codeSnippet.Options, options))
-                    {
-                        filteredCodeSnippets.Add(codeSnippet);
-                    }
-                }
-            }
-            return filteredCodeSnippets.ToArray();
-        }
+        // Filter out CodeSnippets that are invalid using FilterOptions
+        internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options) => codeSnippets.Where(cs => FilterOptions(cs.Options, options)).ToArray();
 
         /// <summary>
         /// Filter Options string array to matching CodeChangeOptions.

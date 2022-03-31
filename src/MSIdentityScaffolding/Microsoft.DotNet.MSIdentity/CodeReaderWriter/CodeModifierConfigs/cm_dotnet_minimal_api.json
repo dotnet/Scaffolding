@@ -1,0 +1,106 @@
+{
+  "Identifier": "dotnet-minimal_api",
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.Resource"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "AddMicrosoftIdentityWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "AddAuthentication",
+              "CodeChangeType": "MemberAccess",
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
+              "CodeFormatting": {
+                "Newline": true,
+                "NumberOfSpaces": 8
+              }
+            },
+            {
+              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "MicrosoftGraph" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Block": "AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "DownstreamApi" ],
+              "CodeFormatting": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication"
+            },
+            {
+              "Block": "app.UseAuthentication()",
+              "InsertAfter": "app.UseHttpsRedirection",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "app.UseAuthorization()",
+              "InsertAfter": "app.UseAuthentication"
+            },
+            {
+              "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]", 
+              "InsertAfter": "app.UseAuthorization",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)",
+              "Parent": "app.MapGet",
+              "Parameter": "HttpContext httpContext",
+              "CodeChangeType": "Lambda",
+              "Prepend": true,
+              "CodeFormatting": {
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Parent": "app.MapGet",
+              "CodeChangeType": "MemberAccess",
+              "Block": "RequireAuthorization()",
+              "CodeFormatting": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ] 
+}

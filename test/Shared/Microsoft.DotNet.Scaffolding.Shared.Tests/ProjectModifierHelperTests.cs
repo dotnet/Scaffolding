@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Moq;
@@ -107,40 +108,35 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
         [Theory]
         [InlineData(
-            new object[] {
-                new string[] {
-                    "var builder = WebApplication.CreateBuilder(args);",
-                    "var      builderThing = WebApplication.CreateBuilder(args);",
-                    "var builderVar=WebApplication.CreateBuilder(args);",
-                    "var realBuilder =             WebApplication.CreateBuilder(args);",
-                    "WebApplicationBuilder fakeBuilder = WebApplication.CreateBuilder(args);",
-                    "WebApplicationBuilder           builderr =      WebApplication.CreateBuilder(args);",
-                    "WebApplicationBuilder Builder=WebApplication.CreateBuilder(args);"
-                },
-                new string[] {
-                    "builder",
-                    "builderThing",
-                    "builderVar",
-                    "realBuilder",
-                    "fakeBuilder",
-                    "builderr",
-                    "Builder",
-                }
-            }
-        )]
+            new string[] {
+                "var builder = WebApplication.CreateBuilder(args);",
+                "var      builderThing = WebApplication.CreateBuilder(args);",
+                "var builderVar=WebApplication.CreateBuilder(args);",
+                "var realBuilder =             WebApplication.CreateBuilder(args);",
+                "WebApplicationBuilder fakeBuilder = WebApplication.CreateBuilder(args);",
+                "WebApplicationBuilder           builderr =      WebApplication.CreateBuilder(args);",
+                "WebApplicationBuilder Builder=WebApplication.CreateBuilder(args);"
+            },
+            new string[] {
+                "builder",
+                "builderThing",
+                "builderVar",
+                "realBuilder",
+                "fakeBuilder",
+                "builderr",
+                "Builder",
+            })
+        ]
         public void GetVariablesTests(string[] statements, string[] builderVariableIdentifierValues)
         {
             for (int i = 0; i < statements.Length; i++)
             {
-                var members = new SyntaxList<MemberDeclarationSyntax>() { SyntaxFactory.ParseMemberDeclaration(statements[i]) } ;
+                var member = SyntaxFactory.ParseMemberDeclaration(statements[i]);
+                var members = new SyntaxList<MemberDeclarationSyntax>().Add(member);
                 string builderVariableIdentifierValue = builderVariableIdentifierValues[i];
-                var variableDict = ProjectModifierHelper.GetBuilderVariableIdentifier(members);
-                variableDict.TryGetValue("WebApplication.CreateBuilder", out string builderVariableString);
-                if (!string.IsNullOrEmpty(builderVariableString))
-                {
-                    Assert.Equal(builderVariableIdentifierValue, builderVariableString);
-                }    
-                
+                var transform = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(members);
+                Assert.True(transform.HasValue);
+                Assert.Equal(builderVariableIdentifierValue, transform.Value.Item2);
             }
         }
 
@@ -172,13 +168,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 { "Builder", "builderVar" }
             };
 
-            var formattedSnippet = ProjectModifierHelper.FormatCodeSnippet(snippet, variableDict);
+            foreach (var kvp in variableDict)
+            {
+                snippet = ProjectModifierHelper.UpdateVariables(snippet, kvp.Key, kvp.Value);
+            }
 
-            Assert.Equal(correctlyFormattedSnippet.Block, formattedSnippet.Block);
-            Assert.Equal(correctlyFormattedSnippet.CheckBlock, formattedSnippet.CheckBlock);
-            Assert.Equal(correctlyFormattedSnippet.InsertBefore, formattedSnippet.InsertBefore);
-            Assert.Equal(correctlyFormattedSnippet.InsertAfter, formattedSnippet.InsertAfter);
-            Assert.Equal(correctlyFormattedSnippet.Parent, formattedSnippet.Parent);
+            Assert.Equal(correctlyFormattedSnippet.Block, snippet.Block);
+            Assert.Equal(correctlyFormattedSnippet.CheckBlock, snippet.CheckBlock);
+            Assert.Equal(correctlyFormattedSnippet.InsertBefore, snippet.InsertBefore);
+            Assert.Equal(correctlyFormattedSnippet.InsertAfter, snippet.InsertAfter);
+            Assert.Equal(correctlyFormattedSnippet.Parent, snippet.Parent);
         }
 
         [Fact]
@@ -204,16 +203,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 "builderVar.myCustomBoolean.ToString()"
             };
 
-            var variablesDict = new Dictionary<string, string>()
-            {
-                { "string", "myCustomString" },
-                { "Boolean", "myCustomBoolean" },
-                { "Builder", "builderVar" }
-            };
-
             for (int i = 0; i < globalStatements.Length; i++)
             {
-                Assert.Equal(correctlyFormattedStatements[i], ProjectModifierHelper.FormatGlobalStatement(globalStatements[i], variablesDict));
+                var formattedGlobalStatements = ProjectModifierHelper.ReplaceValue(globalStatements[i], "string", "myCustomString");
+                formattedGlobalStatements = ProjectModifierHelper.ReplaceValue(formattedGlobalStatements, "Boolean", "myCustomBoolean");
+                formattedGlobalStatements = ProjectModifierHelper.ReplaceValue(formattedGlobalStatements, "Builder", "builderVar");
+                Assert.Equal(correctlyFormattedStatements[i], formattedGlobalStatements);
             }
         }
 
@@ -348,15 +343,47 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 !filteredWithNeither.Contains(bothSnippet));
         }
 
-        [Fact]
-        public void StatementExistsTests()
+        [Theory]
+        [InlineData("app.UseRouting();", false)]
+        [InlineData("", true)]
+        public void EmptyBlockStatementExistsTests(string contents, bool contains)
         {
-            //create a block with app.UseRouting();
-            StatementSyntax block = SyntaxFactory.ParseStatement(
+            StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
                 @"
-                {
-                    app.UseRouting();
+                {                   
                 }");
+
+            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
+            var children = DocumentBuilder.GetDescendantNodes(emptyBlockSyntax);
+            Assert.Equal(ProjectModifierHelper.StatementExists(children, contents), contains);
+        }
+
+        [Theory]
+        [InlineData("app.UseRouting();", true)]
+        [InlineData("app.UseDeveloperExceptionPage();", false)]
+        [InlineData("", true)]
+        public void BlockStatementExistsTests(string contents, bool contains)
+        {
+            StatementSyntax block = SyntaxFactory.ParseStatement(
+                    @"
+                    {
+                        app.UseRouting();
+                    }");
+            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(block);
+            var children = DocumentBuilder.GetDescendantNodes(emptyBlockSyntax);
+            Assert.Equal(ProjectModifierHelper.StatementExists(children, contents), contains);
+        }
+
+        [Theory]
+        [InlineData("app.UseRouting();", false)]
+        [InlineData("app.UseDeveloperExceptionPage();", true)]
+        [InlineData("env.IsDevelopment()", true)]
+        [InlineData("services.AddRazorPages()", true)]
+        [InlineData("services.AddRazorPages().AddMvcOptions(options => {})", true)]
+        [InlineData("endpoints.MapRazorPages();", true)]
+        [InlineData("", true)]
+        public void DenseBlockStatementExistsTests(string contents, bool contains)
+        {
             StatementSyntax denseBlock = SyntaxFactory.ParseStatement(
                 @"
                 {
@@ -373,29 +400,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 });    
                 }");
 
-            StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
-                @"
-                {                   
-                }");
-
-            BlockSyntax blockSyntax = SyntaxFactory.Block(block);
-            BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
             BlockSyntax denseBlockSyntax = SyntaxFactory.Block(denseBlock);
-            StatementSyntax statement = SyntaxFactory.ParseStatement("app.UseRouting();");
-            StatementSyntax statement2 = SyntaxFactory.ParseStatement("app.UseDeveloperExceptionPage();");
-            StatementSyntax statement3 = SyntaxFactory.ParseStatement("endpoints.MapRazorPages();");
-            StatementSyntax statement4 = SyntaxFactory.ParseStatement("env.IsDevelopment()");
-            StatementSyntax statement5 = SyntaxFactory.ParseStatement("services.AddRazorPages()");
-            StatementSyntax statement6 = SyntaxFactory.ParseStatement("services.AddRazorPages().AddMvcOptions(options => {})");
-
-            Assert.True(ProjectModifierHelper.StatementExists(blockSyntax, statement));
-            Assert.False(ProjectModifierHelper.StatementExists(emptyBlockSyntax, statement));
-            Assert.False(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement2));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement3));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement4));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement5));
-            Assert.True(ProjectModifierHelper.StatementExists(denseBlockSyntax, statement6));
+            var children = DocumentBuilder.GetDescendantNodes(denseBlockSyntax);
+            Assert.Equal(ProjectModifierHelper.StatementExists(children, contents), contains);
         }
 
         [Theory]

@@ -8,8 +8,11 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+// ConsoleLogger
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
+
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -18,6 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         private readonly IFilesLocator _filesLocator;
         private readonly IFileSystem _fileSystem;
         private readonly ITemplating _templatingService;
+        private readonly static ConsoleLogger _logger = new ConsoleLogger();
 
         public CodeGeneratorActionsService(
             ITemplating templatingService,
@@ -70,6 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             Debug.Assert(_fileSystem.FileExists(templatePath));
+            _logger.LogMessage($"Rendering template { templatePath }\n", LogMessageLevel.Trace);
             var templateContent = _fileSystem.ReadAllText(templatePath);
             
             var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
@@ -86,6 +91,43 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
                 await AddFileHelper(outputPath, sourceStream);
             }
+        }
+
+        public async Task<string> ExecuteTemplate(string templateName,
+            IEnumerable<string> templateFolders,
+            object templateModel)
+        {
+            if (templateFolders == null)
+            {
+                throw new ArgumentNullException(nameof(templateFolders));
+            }
+
+            ExceptionUtilities.ValidateStringArgument(templateName, "templateName");
+
+            var templatePath = _filesLocator.GetFilePath(templateName, templateFolders);
+            if (string.IsNullOrEmpty(templatePath))
+            {
+                throw new InvalidOperationException(string.Format(
+                    MessageStrings.TemplateFileNotFound,
+                    templateName,
+                    string.Join(";", templateFolders)));
+            }
+
+            Debug.Assert(_fileSystem.FileExists(templatePath));
+            _logger.LogMessage($"Rendering template { templatePath }\n", LogMessageLevel.Trace);
+            var templateContent = _fileSystem.ReadAllText(templatePath);
+
+            var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
+
+            if (templateResult.ProcessingException != null)
+            {
+                throw new InvalidOperationException(string.Format(
+                    MessageStrings.TemplateProcessingError,
+                    templatePath,
+                    templateResult.ProcessingException.Message));
+            }
+
+            return templateResult.GeneratedText;
         }
 
         private async Task AddFileHelper(string outputPath, Stream sourceStream)

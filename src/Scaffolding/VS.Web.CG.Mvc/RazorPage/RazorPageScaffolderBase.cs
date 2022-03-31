@@ -239,7 +239,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 razorGeneratorModel.BootstrapVersion = RazorPageScaffolderBase.DefaultBootstrapVersion;
             }
-
             RazorPageGeneratorTemplateModel2 templateModel = new RazorPageGeneratorTemplateModel2()
             {
                 NamespaceName = namespaceName,
@@ -252,7 +251,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 ReferenceScriptLibraries = razorGeneratorModel.ReferenceScriptLibraries,
                 JQueryVersion = "1.10.2", //Todo
                 BootstrapVersion = razorGeneratorModel.BootstrapVersion,
-                ContentVersion = DetermineContentVersion(razorGeneratorModel)
+                ContentVersion = DetermineContentVersion(razorGeneratorModel),
+                NullableEnabled = "enable".Equals(ApplicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase)
             };
 
             return templateModel;

@@ -213,7 +213,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore {
                 return ResourceManager.GetString("ModelTypeNotFound", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to get DbContext Instance. Access denied for user (MySQL db).
+        /// </summary>
+        internal static string MySQLDbContextExceptionMssg
+        {
+            get
+            {
+                return ResourceManager.GetString("MySQLDbContextExceptionMssg", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to There is no entity type {0} on DbContext {1}.
         /// </summary>

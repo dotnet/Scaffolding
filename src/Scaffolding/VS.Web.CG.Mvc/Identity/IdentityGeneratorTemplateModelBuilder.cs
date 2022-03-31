@@ -273,7 +273,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.AddRange(IdentityGeneratorFilesConfig.GetViewImports(filesToGenerate, _fileSystem, _applicationInfo.ApplicationBasePath));
             }
 
-            if (IdentityGeneratorFilesConfig.TryGetLayoutPeerFiles(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles))
+            if (IdentityGeneratorFilesConfig.TryGetLayoutPeerFiles(_fileSystem, _applicationInfo.ApplicationBasePath, templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles, templateModel.IsBlazorProject))
             {
                 filesToGenerate.AddRange(layoutPeerFiles);
             }

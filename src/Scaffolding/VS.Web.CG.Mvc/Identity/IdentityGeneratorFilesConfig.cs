@@ -223,7 +223,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         private static readonly string _ViewImportFileName = "_ViewImports";
 
         // Note: "peer" is somewhat of a misnomer, not all of the "peer" files are in the same directory as the layout file.
-        internal static bool TryGetLayoutPeerFiles(IFileSystem fileSystem, string rootPath, IdentityGeneratorTemplateModel templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles)
+        internal static bool TryGetLayoutPeerFiles(IFileSystem fileSystem, string rootPath, IdentityGeneratorTemplateModel templateModel, out IReadOnlyList<IdentityGeneratorFile> layoutPeerFiles, bool isBlazorProject)
         {
             string viewImportsFileNameWithExtension = string.Concat(_ViewImportFileName, ".cshtml");
 
@@ -273,8 +273,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ShowInListFiles = false,
                 ShouldOverWrite = OverWriteCondition.Never
             };
-            peerFiles.Add(layoutPeerViewStart);
 
+            //don't need Layout for the start page of a Blazor Server application.
+            //Still adding Layout file for other added pages.
+            if (!isBlazorProject)
+            {
+                peerFiles.Add(layoutPeerViewStart);
+            }
+            
             layoutPeerFiles = peerFiles;
             return true;
         }

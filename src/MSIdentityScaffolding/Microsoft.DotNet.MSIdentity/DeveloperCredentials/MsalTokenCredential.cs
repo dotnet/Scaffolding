@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                 string cacheDir = Path.Combine(userProfile, @"AppData\Local\.IdentityService");
 
                 // TODO: what about the other platforms?
-                string clientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+                string clientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"; // TODO switch client ID if WAM
                 var storageProperties =
                      new StorageCreationPropertiesBuilder(
                          "msal.cache",

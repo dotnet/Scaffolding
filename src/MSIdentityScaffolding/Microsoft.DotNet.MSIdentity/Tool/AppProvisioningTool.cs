@@ -87,32 +87,32 @@ namespace Microsoft.DotNet.MSIdentity
             // Case of a blazorwasm hosted application. We need to create two applications:
             // - the hosted web API
             // - the SPA.
-            if (projectSettings.ApplicationParameters.IsBlazorWasm
-                && projectSettings.ApplicationParameters.IsWebApi.GetValueOrDefault())
-            {
-                // Processes the hosted web API
-                ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
-                provisioningToolOptionsBlazorServer.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Server");
-                provisioningToolOptionsBlazorServer.AppDisplayName = string.Concat(
-                    provisioningToolOptionsBlazorServer.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Server");
-                provisioningToolOptionsBlazorServer.ProjectType = string.Empty;
-                provisioningToolOptionsBlazorServer.ClientId = ProvisioningToolOptions.WebApiClientId;
-                provisioningToolOptionsBlazorServer.WebApiClientId = null;
-                AppProvisioningTool appProvisioningToolBlazorServer = new AppProvisioningTool(CommandName, provisioningToolOptionsBlazorServer);
-                ApplicationParameters? applicationParametersServer = await appProvisioningToolBlazorServer.Run();
+            //if (projectSettings.ApplicationParameters.IsBlazorWasm
+            //    && projectSettings.ApplicationParameters.IsWebApi.GetValueOrDefault())
+            //{
+            //    // Processes the hosted web API
+            //    ProvisioningToolOptions provisioningToolOptionsBlazorServer = ProvisioningToolOptions.Clone();
+            //    provisioningToolOptionsBlazorServer.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Server");
+            //    provisioningToolOptionsBlazorServer.AppDisplayName = string.Concat(
+            //        provisioningToolOptionsBlazorServer.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Server");
+            //    provisioningToolOptionsBlazorServer.ProjectType = string.Empty;
+            //    provisioningToolOptionsBlazorServer.ClientId = ProvisioningToolOptions.WebApiClientId;
+            //    provisioningToolOptionsBlazorServer.WebApiClientId = null;
+            //    AppProvisioningTool appProvisioningToolBlazorServer = new AppProvisioningTool(CommandName, provisioningToolOptionsBlazorServer);
+            //    ApplicationParameters? applicationParametersServer = await appProvisioningToolBlazorServer.Run();
 
-                /// Processes the Blazorwasm client
-                ProvisioningToolOptions provisioningToolOptionsBlazorClient = ProvisioningToolOptions.Clone();
-                provisioningToolOptionsBlazorClient.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Client");
-                provisioningToolOptionsBlazorClient.AppDisplayName = string.Concat(
-                    provisioningToolOptionsBlazorClient.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Client");
-                provisioningToolOptionsBlazorClient.ProjectType = string.Empty;
-                provisioningToolOptionsBlazorClient.WebApiClientId = applicationParametersServer?.ClientId;
-                provisioningToolOptionsBlazorClient.AppIdUri = applicationParametersServer?.AppIdUri;
-                provisioningToolOptionsBlazorClient.CalledApiScopes = $"{applicationParametersServer?.AppIdUri}/access_as_user";
-                AppProvisioningTool appProvisioningToolBlazorClient = new AppProvisioningTool(CommandName, provisioningToolOptionsBlazorClient);
-                return await appProvisioningToolBlazorClient.Run();
-            }
+            //    /// Processes the Blazorwasm client
+            //    ProvisioningToolOptions provisioningToolOptionsBlazorClient = ProvisioningToolOptions.Clone();
+            //    provisioningToolOptionsBlazorClient.ProjectPath = Path.Combine(ProvisioningToolOptions.ProjectPath, "Client");
+            //    provisioningToolOptionsBlazorClient.AppDisplayName = string.Concat(
+            //        provisioningToolOptionsBlazorClient.AppDisplayName ?? projectSettings.ApplicationParameters.ApplicationDisplayName, "-Client");
+            //    provisioningToolOptionsBlazorClient.ProjectType = string.Empty;
+            //    provisioningToolOptionsBlazorClient.WebApiClientId = applicationParametersServer?.ClientId;
+            //    provisioningToolOptionsBlazorClient.AppIdUri = applicationParametersServer?.AppIdUri;
+            //    provisioningToolOptionsBlazorClient.CalledApiScopes = $"{applicationParametersServer?.AppIdUri}/access_as_user";
+            //    AppProvisioningTool appProvisioningToolBlazorClient = new AppProvisioningTool(CommandName, provisioningToolOptionsBlazorClient);
+            //    return await appProvisioningToolBlazorClient.Run();
+            //}
 
 
             //for now, update project command is handlded seperately.

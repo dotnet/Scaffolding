@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -356,6 +357,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         /// <summary>
         /// Searches through list of nodes and returns the first node that contains the specifierStatement
+        /// Note: can be null
         /// </summary>
         /// <param name="specifierStatement"></param>
         /// <param name="descendantNodes"></param>
@@ -432,6 +434,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             var rootDescendants = GetDescendantNodes(originalMethod);
             var parent = GetSpecifiedNode(change.Parent, rootDescendants);
+            if (parent is null)
+            {
+                return originalMethod;
+            }
+
             var children = GetDescendantNodes(parent);
 
             var updatedParent = parent;
@@ -495,16 +502,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         private static LambdaExpressionSyntax UpdateLambdaBlock(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
         {
-            if (ProjectModifierHelper.StatementExists(existingLambda.Block, change.Block))
+            Debugger.Launch();
+            if (ProjectModifierHelper.StatementExists(existingLambda.Body, change.Block))
             {
                 return existingLambda;
             }
 
             // Get new lambda block
-            var updatedBlock = GetBlockStatement(existingLambda.Block, change);
+            var updatedBlock = GetBlockStatement(existingLambda.Body, change);
 
             // Try to replace existing block with updated block
-            if (existingLambda.WithBlock(updatedBlock as BlockSyntax) is LambdaExpressionSyntax updatedLambda)
+            if (existingLambda.WithBody(updatedBlock as CSharpSyntaxNode) is LambdaExpressionSyntax updatedLambda)
             {
                 return updatedLambda;
             }
@@ -553,6 +561,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             // Determine the parent node onto which we are adding
             var parent = GetSpecifiedNode(change.Parent, GetDescendantNodes(originalMethod));
+            if (parent is null)
+            {
+                return originalMethod;
+            }
+
             var children = GetDescendantNodes(parent);
             if (ProjectModifierHelper.StatementExists(children, change.Block))
             {

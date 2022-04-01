@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.Properties;
@@ -85,12 +87,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             if (string.IsNullOrEmpty(_toolOptions.ProjectType))
             {
-                return null;
+                throw new ArgumentNullException(nameof(_toolOptions.ProjectType));
             }
 
             if (CodeModifierConfigPropertyInfo is null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(CodeModifierConfigPropertyInfo));
             }
 
             byte[] content = (CodeModifierConfigPropertyInfo.GetValue(null) as byte[])!;
@@ -100,9 +102,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 throw new FormatException($"Resource file { CodeModifierConfigPropertyInfo.Name } could not be parsed. ");
             }
 
-            if (!codeModifierConfig.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
             {
-                return null;
+                throw new FormatException($"Config identifier: {codeModifierConfig.Identifier} does not match toolOptions identifier: {_toolOptions.ProjectTypeIdentifier}");
             }
 
             return codeModifierConfig;
@@ -250,9 +252,10 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
             var root = documentBuilder.AddUsings(options);
-            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
+            Debugger.Launch();
+            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges)
+                && root.DescendantNodes().Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
             {
-
                 var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
                 if (updatedIdentifer.HasValue)
@@ -264,7 +267,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 var updatedRoot = DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
                 return updatedRoot;
             }
-
             else
             {
                 var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();

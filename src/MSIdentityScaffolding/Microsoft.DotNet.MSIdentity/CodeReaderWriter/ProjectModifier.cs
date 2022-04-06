@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -252,9 +251,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
             var root = documentBuilder.AddUsings(options);
-            Debugger.Launch();
             if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges)
-                && root.DescendantNodes().Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
+                && root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
             {
                 var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);

@@ -3,22 +3,54 @@
   "Files": [
     {
       "FileName": "Program.cs",
-      "Options": [ "MinimalApp" ],
+      "Options": [
+        "MinimalApp"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
             {
+              "MultiLineBlock": [
+                "{",
+                "    var authorizationMessageHandler = sp.GetRequiredService<AuthorizationMessageHandler>();",
+                "    authorizationMessageHandler.InnerHandler = new HttpClientHandler();",
+                "    authorizationMessageHandler = authorizationMessageHandler.ConfigureHandler(",
+                "        authorizedUrls: new[] { builder.Configuration[\"DownstreamApi:BaseUrl\"] },",
+                "        scopes: new[] { builder.Configuration[\"DownstreamApi:Scopes\"] });",
+                "    return new HttpClient(authorizationMessageHandler)",
+                "    {",
+                "        BaseAddress = new Uri(builder.Configuration[\"DownstreamApi:BaseUrl\"] ?? string.Empty)",
+                "    };",
+                "}"
+              ],
+              "Options": [
+                "DownstreamApi"
+              ],
+              "Replace": true,
+              "CodeChangeType": "Lambda",
+              "Parameter": "sp",
+              "Parent": "builder.Services.AddScoped",
+              "LeadingTrivia": {
+                "Newline": true
+              },
+              "TrailingTrivia": {
+                "Semicolon": false
+              }
+            },
+            {
               "Block": "builder.Services.AddMicrosoftGraphClient(\"https://graph.microsoft.com/User.Read\")",
-              "Options": [ "MicrosoftGraph" ],
+              "Options": [
+                "MicrosoftGraph"
+              ],
               "InsertAfter": "builder.Services.AddScoped",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "Block": "builder.Services.AddMsalAuthentication()",
               "InsertAfter": "builder.Services.AddScoped",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -27,30 +59,52 @@
               "CodeChangeType": "Lambda",
               "Parameter": "options",
               "Parent": "builder.Services.AddMsalAuthentication",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true,
                 "NumberOfSpaces": 4
               }
             },
             {
               "Block": "options.ProviderOptions.DefaultAccessTokenScopes.Add(\"https://graph.microsoft.com/User.Read\")",
-              "Options": [ "MicrosoftGraph" ],
+              "Options": [
+                "MicrosoftGraph"
+              ],
               "CodeChangeType": "Lambda",
               "Parameter": "options",
               "Parent": "builder.Services.AddMsalAuthentication",
-              "CodeFormatting": {
+              "LeadingTrivia": {
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "options.ProviderOptions.DefaultAccessTokenScopes.Add(builder.Configuration[\"DownstreamApi:Scopes\"])",
+              "Options": [
+                "DownstreamApi"
+              ],
+              "CodeChangeType": "Lambda",
+              "Parameter": "options",
+              "Parent": "builder.Services.AddMsalAuthentication",
+              "LeadingTrivia": {
                 "NumberOfSpaces": 4
               }
             }
           ]
         }
-      }
+      },
+      "UsingsWithOptions": [
+        {
+          "Block": "Microsoft.AspNetCore.Components.WebAssembly.Authentication",
+          "Options": [
+            "DownstreamApi"
+          ]
+        }
+      ]
     },
     {
       "FileName": "_Imports.razor",
       "Replacements": [
         {
-          "Block": "@using Microsoft.AspNetCore.Components.Authorization\r\n"
+          "Block": "@using Microsoft.AspNetCore.Components.Authorization"
         }
       ]
     },
@@ -58,20 +112,65 @@
       "FileName": "App.razor",
       "Replacements": [
         {
-          "Block": "<CascadingAuthenticationState>\r\n    <Router AppAssembly=\"@typeof(App).Assembly\">",
-          "ReplaceSnippet": "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          "MultiLineBlock": [
+            "<CascadingAuthenticationState>",
+            "    <Router AppAssembly=\"@typeof(App).Assembly\">"
+          ],
+          "ReplaceSnippet": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          ]
         },
         {
-          "Block": "        <Found Context=\"routeData\">\r\n            <AuthorizeRouteView RouteData=\"@routeData\" DefaultLayout=\"@typeof(MainLayout)\">\r\n                <NotAuthorized>\r\n                    @if (context.User.Identity?.IsAuthenticated != true)\r\n                    {\r\n                        <RedirectToLogin />\r\n                    }\r\n                    else\r\n                    {\r\n                        <p role=\"alert\">You are not authorized to access this resource.</p>\r\n                    }\r\n                </NotAuthorized>\r\n            </AuthorizeRouteView>\r\n            <FocusOnNavigate RouteData=\"@routeData\" Selector=\"h1\" />\r\n        </Found>\r\n",
-          "ReplaceSnippet": "    <Found Context=\"routeData\">\r\n        <RouteView RouteData=\"@routeData\" DefaultLayout=\"@typeof(MainLayout)\" />\r\n        <FocusOnNavigate RouteData=\"@routeData\" Selector=\"h1\" />\r\n    </Found>\r\n"
+          "MultiLineBlock": [
+            "       <Found Context=\"routeData\">",
+            "            <AuthorizeRouteView RouteData=\"@routeData\" DefaultLayout=\"@typeof(MainLayout)\">",
+            "                <NotAuthorized>",
+            "                    @if (context.User.Identity?.IsAuthenticated != true)",
+            "                    {",
+            "                        <RedirectToLogin />",
+            "                    }",
+            "                    else",
+            "                    {",
+            "                        <p role=\"alert\">You are not authorized to access this resource.</p>",
+            "                    }",
+            "                </NotAuthorized>",
+            "            </AuthorizeRouteView>",
+            "            <FocusOnNavigate RouteData=\"@routeData\" Selector=\"h1\" />",
+            "        </Found>"
+          ],
+          "ReplaceSnippet": [
+            "    <Found Context=\"routeData\">",
+            "        <RouteView RouteData=\"@routeData\" DefaultLayout=\"@typeof(MainLayout)\" />",
+            "        <FocusOnNavigate RouteData=\"@routeData\" Selector=\"h1\" />",
+            "    </Found>"
+          ]
         },
         {
-          "Block": "        <NotFound>\r\n            <PageTitle>Not found</PageTitle>\r\n            <LayoutView Layout=\"@typeof(MainLayout)\">\r\n                <p role=\"alert\">Sorry, there's nothing at this address.</p>\r\n            </LayoutView>\r\n        </NotFound>",
-          "ReplaceSnippet": "    <NotFound>\r\n        <PageTitle>Not found</PageTitle>\r\n        <LayoutView Layout=\"@typeof(MainLayout)\">\r\n            <p role=\"alert\">Sorry, there's nothing at this address.</p>\r\n        </LayoutView>\r\n    </NotFound>"
+          "MultiLineBlock": [
+            "        <NotFound>",
+            "            <PageTitle>Not found</PageTitle>",
+            "            <LayoutView Layout=\"@typeof(MainLayout)\">",
+            "                <p role=\"alert\">Sorry, there's nothing at this address.</p>",
+            "            </LayoutView>",
+            "        </NotFound>"
+          ],
+          "ReplaceSnippet": [
+            "    <NotFound>",
+            "        <PageTitle>Not found</PageTitle>",
+            "        <LayoutView Layout=\"@typeof(MainLayout)\">",
+            "            <p role=\"alert\">Sorry, there's nothing at this address.</p>",
+            "        </LayoutView>",
+            "    </NotFound>"
+          ]
         },
         {
-          "Block": "    </Router>\r\n</CascadingAuthenticationState>",
-          "ReplaceSnippet": "</Router>"
+          "MultiLineBlock": [
+            "    </Router>",
+            "</CascadingAuthenticationState>"
+          ],
+          "ReplaceSnippet": [
+            "</Router>"
+          ]
         }
       ]
     },
@@ -79,8 +178,11 @@
       "FileName": "index.html",
       "Replacements": [
         {
-          "Block": "    <script src=\"_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js\"></script>    \r\n    <script src=\"_framework/blazor.webassembly.js\"></script>",
-          "ReplaceSnippet": "    <script src=\"_framework/blazor.webassembly.js\"></script>"
+          "Block": "    <script src=\"_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js\"></script>    ",
+          "    <script src=\"_framework/blazor.webassembly.js\"></script>",
+          "ReplaceSnippet": [
+            "    <script src=\"_framework/blazor.webassembly.js\"></script>"
+          ]
         }
       ]
     },
@@ -96,8 +198,15 @@
       "FileName": "MainLayout.razor",
       "Replacements": [
         {
-          "Block": "        <div class=\"top-row px-4 auth\">\r\n            <LoginDisplay />\r\n",
-          "ReplaceSnippet": "        <div class=\"top-row px-4\">\r\n"
+          "MultiLineBlock": [
+            "        <div class=\"top-row px-4 auth\">",
+            "            <LoginDisplay />",
+            ""
+          ],
+          "ReplaceSnippet": [
+            "        <div class=\"top-row px-4\">",
+            ""
+          ]
         }
       ]
     },
@@ -107,24 +216,110 @@
     },
     {
       "FileName": "NavMenu.razor",
-      "Options": [ "MicrosoftGraph" ],
+      "Options": [
+        "MicrosoftGraph",
+        "DownstreamApi"
+      ],
       "Replacements": [
         {
-          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"profile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "Options": [ "MicrosoftGraph" ]
+          "MultiLineBlock": [
+            "</NavLink>",
+            "        </div>",
+            "        <div class=\"nav-item px-3\">",
+            "            <NavLink class=\"nav-link\" href=\"profile\">",
+            "                <span class=\"oi oi-person\" aria-hidden=\"true\"></span> Show profile",
+            "            </NavLink>",
+            "        </div>",
+            "    </nav>",
+            "</div>"
+          ],
+          "ReplaceSnippet": [
+            "</NavLink>",
+            "        </div>",
+            "    </nav>",
+            "</div>"
+          ],
+          "Options": [
+            "MicrosoftGraph"
+          ]
+        },
+        {
+          "Block": "<NavLink class=\"nav-link\" href=\"callwebapi\">",
+          "ReplaceSnippet": [
+            "<NavLink class=\"nav-link\" href=\"fetchdata\">"
+          ],
+          "Options": [
+            "DownstreamApi"
+          ]
+        },
+        {
+          "Block": "<span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API",
+          "ReplaceSnippet": [
+            "<span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Fetch data"
+          ],
+          "Options": [
+            "DownstreamApi"
+          ]
         }
       ]
     },
     {
       "FileName": "UserProfile.razor",
       "AddFilePath": "Pages/UserProfile.razor",
-      "Options": [ "MicrosoftGraph" ]
+      "Options": [
+        "MicrosoftGraph"
+      ]
     },
     {
       "FileName": "GraphClientExtensions.cs",
       "AddFilePath": "Data/GraphClientExtensions.cs",
-      "Options": [ "MicrosoftGraph" ]
+      "Options": [
+        "MicrosoftGraph"
+      ]
+    },
+    {
+      "FileName": "FetchData.razor",
+      "Replacements": [
+        {
+          "MultiLineBlock": [
+            "@page \"/callwebapi\"",
+            "@using Microsoft.AspNetCore.Authorization"
+          ],
+          "ReplaceSnippet": [
+            "@page \"/fetchdata\""
+          ]
+        },
+        {
+          "MultiLineBlock": [
+            "@inject HttpClient Http",
+            "@attribute [Authorize]"
+          ],
+          "ReplaceSnippet": [
+            "@inject HttpClient Http"
+          ]
+        },
+        {
+          "Block": "<p>This component demonstrates fetching data from the downstream API.</p>",
+          "ReplaceSnippet": [
+            "<p>This component demonstrates fetching data from the server.</p>"
+          ]
+        },
+        {
+          "MultiLineBlock": [
+            "try",
+            "        {",
+            "            forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>(\"weatherforecast\");",
+            "        }",
+            "        catch(Exception e)",
+            "        {",
+            "            Console.WriteLine(e.Message);",
+            "        }"
+          ],
+          "ReplaceSnippet": [
+            "forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>(\"sample-data/weather.json\");"
+          ]
+        }
+      ]
     }
   ]
 }

@@ -15,7 +15,7 @@
             {
               "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
               "InsertAfter": "WebApplication.CreateBuilder",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -23,7 +23,7 @@
               "Block": "AddMicrosoftIdentityWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"AzureAd\"))",
               "Parent": "AddAuthentication",
               "CodeChangeType": "MemberAccess",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true,
                 "NumberOfSpaces": 4
               }
@@ -32,28 +32,41 @@
               "Block": "EnableTokenAcquisitionToCallDownstreamApi()",
               "Parent": "AddMicrosoftIdentityWebApi",
               "CodeChangeType": "MemberAccess",
-              "Options": [ "MicrosoftGraph", "DownstreamApi" ],
-              "CodeFormatting": {
+              "Options": [
+                "MicrosoftGraph",
+                "DownstreamApi"
+              ],
+              "LeadingTrivia": {
                 "Newline": true,
                 "NumberOfSpaces": 8
               }
             },
             {
-              "Block": "AddMicrosoftGraph(WebApplication.CreateBuilder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
+              "MultiLineBlock": [
+                "            AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
-              "Options": [ "MicrosoftGraph" ],
-              "CodeFormatting": {
+              "Options": [
+                "MicrosoftGraph"
+              ],
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "Block": "AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
+              "MultiLineBlock": [
+                "            AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
-              "Options": [ "DownstreamApi" ],
-              "CodeFormatting": {
+              "Options": [
+                "DownstreamApi"
+              ],
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
@@ -65,7 +78,7 @@
             {
               "Block": "app.UseAuthentication()",
               "InsertAfter": "app.UseHttpsRedirection",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -74,9 +87,9 @@
               "InsertAfter": "app.UseAuthentication"
             },
             {
-              "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]", 
+              "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]",
               "InsertAfter": "app.UseAuthorization",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -86,7 +99,7 @@
               "Parameter": "HttpContext httpContext",
               "CodeChangeType": "Lambda",
               "Prepend": true,
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 4
               }
             },
@@ -94,7 +107,7 @@
               "Parent": "app.MapGet",
               "CodeChangeType": "MemberAccess",
               "Block": "RequireAuthorization()",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             }
@@ -102,5 +115,5 @@
         }
       }
     }
-  ] 
+  ]
 }

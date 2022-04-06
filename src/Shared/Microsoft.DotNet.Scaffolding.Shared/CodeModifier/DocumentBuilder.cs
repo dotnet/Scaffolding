@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,9 +46,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             if (_codeFile.UsingsWithOptions != null && _codeFile.UsingsWithOptions.Any())
             {
                 var usingsWithOptions = FilterUsingsWithOptions(_codeFile, options);
-                var usingList = _codeFile.Usings.ToList();
-                usingList.AddRange(usingsWithOptions);
-                _codeFile.Usings = usingList.ToArray();
+                _codeFile.Usings = _codeFile.Usings?.Concat(usingsWithOptions).ToArray() ?? usingsWithOptions.ToArray();
             }
 
             var usingNodes = CreateUsings(_codeFile.Usings);
@@ -291,10 +288,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         /// <returns></returns>
         private static List<SyntaxNode> GetNodeInsertionList(CodeSnippet codeChange, SyntaxKind syntaxKind)
         {
-            var leadingTrivia = GetLeadingTrivia(codeChange.CodeFormatting);
-            var trailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
-            var statement = GetStatementWithTrivia(codeChange.Block, leadingTrivia, trailingTrivia);
-
+            var statement = GetStatementWithTrivia(codeChange);
             if (statement is null)
             {
                 return null;
@@ -308,17 +302,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         private static SyntaxNode GetBlockStatement(SyntaxNode node, CodeSnippet codeChange)
         {
             var syntaxKind = node.Kind();
-
-            var statement = GetStatementWithTrivia(codeChange.Block, GetLeadingTrivia(codeChange.CodeFormatting),
-                    SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed));
-
+            var statement = GetStatementWithTrivia(codeChange);
             if (syntaxKind == SyntaxKind.Block && node is BlockSyntax block)
             {
                 return codeChange.Prepend
                     ? block.WithStatements(block.Statements.Insert(0, statement))
                     : block.AddStatements(statement);
             }
-            else if (syntaxKind == SyntaxKind.CompilationUnit && node is CompilationUnitSyntax compilationUnit)
+            if (syntaxKind == SyntaxKind.CompilationUnit && node is CompilationUnitSyntax compilationUnit)
             {
                 var globalStatement = SyntaxFactory.GlobalStatement(statement);
                 return codeChange.Prepend
@@ -329,9 +320,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return node;
         }
 
-        private static StatementSyntax GetStatementWithTrivia(string formattedBlock, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia)
+        private static StatementSyntax GetStatementWithTrivia(CodeSnippet change)
         {
-            return SyntaxFactory.ParseStatement(formattedBlock)
+            var leadingTrivia = GetLeadingTrivia(change.LeadingTrivia);
+            var trailingTrivia = GetTrailingTrivia(change.TrailingTrivia);
+
+            return SyntaxFactory.ParseStatement(change.Block)
                 .WithAdditionalAnnotations(Formatter.Annotation)
                 .WithLeadingTrivia(leadingTrivia)
                 .WithTrailingTrivia(trailingTrivia);
@@ -349,6 +343,25 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 if (codeFormatting.NumberOfSpaces > 0)
                 {
                     statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.Whitespace(new string(' ', codeFormatting.NumberOfSpaces)));
+                }
+            }
+
+            return statementLeadingTrivia;
+        }
+
+
+        private static SyntaxTriviaList GetTrailingTrivia(Formatting codeFormatting)
+        {
+            var statementLeadingTrivia = SyntaxFactory.TriviaList();
+            if (codeFormatting != null)
+            {
+                if (codeFormatting.Semicolon)
+                {
+                    statementLeadingTrivia = statementLeadingTrivia.Add(SemiColonTrivia);
+                }
+                if (codeFormatting.Newline)
+                {
+                    statementLeadingTrivia = statementLeadingTrivia.Add(SyntaxFactory.ElasticCarriageReturnLineFeed);
                 }
             }
 
@@ -468,13 +481,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal static SyntaxNode GetNodeWithUpdatedLambda(LambdaExpressionSyntax existingLambda, CodeSnippet change, SyntaxNode parent)
         {
             var children = GetDescendantNodes(existingLambda);
-            var modifiedLambda = UpdateLambdaParameter(existingLambda, children, change);
-            modifiedLambda = UpdateLambdaBlock(modifiedLambda, children, change);
+            var lambdaWithUpdatedParameters = UpdateLambdaParameters(existingLambda, children, change);
+            var lambdaWithUpdatedBlock = UpdateLambdaBlock(lambdaWithUpdatedParameters, children, change);
 
-            return parent.ReplaceNode(existingLambda, modifiedLambda);
+            return parent.ReplaceNode(existingLambda, lambdaWithUpdatedBlock);
         }
 
-        private static LambdaExpressionSyntax UpdateLambdaParameter(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
+        private static LambdaExpressionSyntax UpdateLambdaParameters(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
         {
             if (ProjectModifierHelper.StatementExists(lambdaChildren, change.Parameter))
             {
@@ -502,10 +515,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         private static LambdaExpressionSyntax UpdateLambdaBlock(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
         {
-            Debugger.Launch();
             if (ProjectModifierHelper.StatementExists(existingLambda.Body, change.Block))
             {
                 return existingLambda;
+            }
+
+            if (change.Replace)
+            {
+                return existingLambda.WithBody(GetStatementWithTrivia(change));
             }
 
             // Get new lambda block
@@ -579,7 +596,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             }
 
             // Create new expression to update old expression
-            var leadingTrivia = GetLeadingTrivia(change.CodeFormatting);
+            var leadingTrivia = GetLeadingTrivia(change.LeadingTrivia);
             var identifier = SyntaxFactory.IdentifierName(change.Block);
 
             var newExpression = SyntaxFactory.MemberAccessExpression(

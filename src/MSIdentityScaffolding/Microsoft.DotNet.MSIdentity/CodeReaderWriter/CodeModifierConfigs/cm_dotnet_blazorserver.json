@@ -172,14 +172,18 @@
             "<CascadingAuthenticationState>",
             "    <Router AppAssembly=\"@typeof(App).Assembly\">"
           ],
-          "ReplaceSnippet": ["<Router AppAssembly=\"@typeof(App).Assembly\">"
+          "ReplaceSnippet": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          ]
         },
         {
           "MultiLineBlock": [
             "    </Router>",
             "</CascadingAuthenticationState>"
           ],
-          "ReplaceSnippet": ["</Router>"
+          "ReplaceSnippet": [
+            "</Router>"
+          ]
         }
       ]
     },
@@ -202,10 +206,12 @@
             "    </nav>",
             "</div>"
           ],
-          "ReplaceSnippet": ["</NavLink>",
-"        </div>",
-"    </nav>",
-"</div>",
+          "ReplaceSnippet": [
+            "</NavLink>",
+            "        </div>",
+            "    </nav>",
+            "</div>"
+          ],
           "Options": [
             "MicrosoftGraph"
           ]
@@ -214,13 +220,13 @@
           "MultiLineBlock": [
             "<NavLink class=\"nav-link\" href=\"callwebapi\">",
             "                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API",
-            "            </NavLink>",
-            ""
+            "            </NavLink>"
           ],
-          "ReplaceSnippet": ["<NavLink class=\"nav-link\" href=\"fetchdata\">",
-"                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Fetch data",
-"            </NavLink>",
-"",
+          "ReplaceSnippet": [
+            "<NavLink class=\"nav-link\" href=\"fetchdata\">",
+            "                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Fetch data",
+            "            </NavLink>"
+          ],
           "Options": [
             "DownstreamApi"
           ]
@@ -236,8 +242,10 @@
             "        <div class=\"top-row px-4 auth\">",
             "            <LoginDisplay />"
           ],
-          "ReplaceSnippet": ["    <main>",
-"        <div class=\"top-row px-4\">"
+          "ReplaceSnippet": [
+            "    <main>",
+            "        <div class=\"top-row px-4\">"
+          ]
         }
       ]
     },

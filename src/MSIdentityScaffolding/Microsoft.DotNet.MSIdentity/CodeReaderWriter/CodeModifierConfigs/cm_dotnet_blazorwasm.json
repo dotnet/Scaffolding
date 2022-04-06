@@ -178,8 +178,10 @@
       "FileName": "index.html",
       "Replacements": [
         {
-          "Block": "    <script src=\"_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js\"></script>    ",
-          "    <script src=\"_framework/blazor.webassembly.js\"></script>",
+          "MultiLineBlock": [
+            "    <script src=\"_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js\"></script>    ",
+            "    <script src=\"_framework/blazor.webassembly.js\"></script>"
+          ],
           "ReplaceSnippet": [
             "    <script src=\"_framework/blazor.webassembly.js\"></script>"
           ]

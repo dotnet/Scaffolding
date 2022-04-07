@@ -537,6 +537,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Config identifier: {0} does not match toolOptions identifier: {1}.
+        /// </summary>
+        internal static string MismatchedProjectTypeIdentifier {
+            get {
+                return ResourceManager.GetString("MismatchedProjectTypeIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No project found in {0}..
         /// </summary>
         internal static string NoProjectFound {

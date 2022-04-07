@@ -428,11 +428,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             foreach (var change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
-                if (!string.IsNullOrEmpty(change.ReplaceSnippet))
+                if (change.ReplaceSnippet != null)
                 {
-                    if (sourceFileString.Contains(change.ReplaceSnippet))
+                    var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                    if (sourceFileString.Contains(replaceSnippet))
                     {
-                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                        sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
                     }
                     else
                     {

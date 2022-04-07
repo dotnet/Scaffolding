@@ -27,5 +27,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
     {
         public bool Newline { get ; set; }
         public int NumberOfSpaces { get; set; }
+        public bool Semicolon { get; set; }
     }
 }

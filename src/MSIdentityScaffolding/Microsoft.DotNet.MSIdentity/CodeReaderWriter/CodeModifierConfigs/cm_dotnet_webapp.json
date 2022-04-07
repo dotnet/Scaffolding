@@ -24,7 +24,7 @@
           "CodeChanges": [
             {
               "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               }
             },
@@ -43,7 +43,7 @@
               "Parameter": "options",
               "Block": "options.FallbackPolicy = options.DefaultPolicy",
               "CodeChangeType": "Lambda",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               }
             },
@@ -74,14 +74,14 @@
               "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ') ?? WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ')",
               "Options": [ "DownstreamApi", "MicrosoftGraph" ],
               "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddAuthentication", "WebApplication.CreateBuilder.Services.AddRazorPages" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
               "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddRazorPages" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -89,7 +89,7 @@
               "Block": "AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))",
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthentication",
               "CodeChangeType": "MemberAccess",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true,
                 "NumberOfSpaces": 4
               }
@@ -99,27 +99,33 @@
               "Parent": "AddMicrosoftIdentityWebApp",
               "CodeChangeType": "MemberAccess",
               "Options": [ "MicrosoftGraph", "DownstreamApi" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 8,
                 "Newline": true
               }
             },
             {
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
+              "MultiLineBlock": [
+                "            AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
               "Options": [ "MicrosoftGraph" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
             },
             {
-              "Block": "AddDownstreamWebApi(\"DownstreamApi\", builder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
+              "MultiLineBlock": [
+                "            AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
               "Options": [ "DownstreamApi" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
@@ -127,7 +133,7 @@
             {
               "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },     
@@ -136,7 +142,7 @@
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthorization",
               "Block": "options.FallbackPolicy = options.DefaultPolicy",
               "Parameter": "options",
-              "CodeFormatting":
+              "LeadingTrivia":
               {
                 "Newline":true,
                 "NumberOfSpaces": 4
@@ -146,7 +152,7 @@
               "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages",
               "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityUI()",
-              "CodeFormatting":
+              "LeadingTrivia":
               {
                 "Newline":true, 
                 "NumberOfSpaces": 4
@@ -155,7 +161,7 @@
             {
               "InsertAfter": "app.UseRouting",
               "Block": "app.UseAuthentication()",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -207,21 +213,21 @@
           "CodeChanges": [
             {
               "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
               "Options" : [ "MicrosoftGraph"]
             },
             {
               "Block": "ViewData[\"GraphApiResult\"] = user.DisplayName;",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
               "Options" : [ "MicrosoftGraph"]
             },
             {
               "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
               "Options" : [ "DownstreamApi"]
@@ -248,14 +254,14 @@
             {
               "Block": "_graphServiceClient = graphServiceClient;",
               "Options": [ "MicrosoftGraph" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               }
             },
             {
               "Block": "_downstreamWebApi = downstreamWebApi;",
               "Options": [ "DownstreamApi" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 12
               }
             }

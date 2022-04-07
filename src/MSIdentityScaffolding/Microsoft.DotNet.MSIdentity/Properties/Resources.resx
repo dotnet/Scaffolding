@@ -234,6 +234,10 @@
   <data name="MicrosoftGraphNotSupported" xml:space="preserve">
     <value>You'll need to remove the calls to Microsoft Graph as it's not supported by B2C apps.</value>
   </data>
+  <data name="MismatchedProjectTypeIdentifier" xml:space="preserve">
+    <value>Config identifier: {0} does not match toolOptions identifier: {1}</value>
+    <comment>0 = codeModifierConfig.Identifier, 1 = _toolOptions.ProjectTypeIdentifier</comment>
+  </data>
   <data name="NoProjectFound" xml:space="preserve">
     <value>No project found in {0}.</value>
   </data>

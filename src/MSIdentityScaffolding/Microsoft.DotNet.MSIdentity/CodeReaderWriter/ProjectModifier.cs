@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
             if (!string.Equals(codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
             {
-                throw new FormatException($"Config identifier: {codeModifierConfig.Identifier} does not match toolOptions identifier: {_toolOptions.ProjectTypeIdentifier}");
+                throw new FormatException(string.Format(Resources.MismatchedProjectTypeIdentifier, codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier));
             }
 
             return codeModifierConfig;

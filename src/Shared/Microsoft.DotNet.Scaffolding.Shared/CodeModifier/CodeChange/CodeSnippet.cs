@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public string Block {
             get
             {
-                if (_block == null)
+                if (string.IsNullOrEmpty(_block))
                 {
                     _block = string.Join(Environment.NewLine, MultiLineBlock);
                 }

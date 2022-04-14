@@ -8,7 +8,7 @@
             {
               "InsertAfter": "WebApplication.CreateBuilder",
               "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\");"
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\") ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")));"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",

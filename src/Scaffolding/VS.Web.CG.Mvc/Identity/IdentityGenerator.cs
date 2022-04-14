@@ -375,7 +375,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (stringToModify.Contains(GetConnectionString))
             {
                 modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
+                modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}Connection'");
             }
+
             return modifiedString;
         }
 

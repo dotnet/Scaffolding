@@ -135,12 +135,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool UpdateUserSecrets { get; set; }
 
         /// <summary>
-        /// The App ID Uri for the blazorwasm hosted API. It's only used
-        /// on the case of a blazorwasm hosted application.
-        /// </summary>
-        public string? AppIdUri { get; set; }
-
-        /// <summary>
         /// Format for console output for list commands.
         /// </summary>
         public bool Json { get; set; } = false;
@@ -156,14 +150,45 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool CodeUpdate { get; set; } = false;
 
         /// <summary>
-        /// Make PackageReferences in .csproj (add using `dotnet add package`
+        /// Make PackageReferences in .csproj (add using `dotnet add package`)
         /// </summary>
         public bool PackagesUpdate { get; set; } = false;
+
+        /// <summary>
+        /// Provisions app registrations and applies code updates for Blazor WASM client and server in hosted scenario
+        /// </summary>
+        public bool IsBlazorWasmHostedClient => !string.IsNullOrEmpty(HostedAppIdUri);
+
+        /// <summary>
+        /// The App ID Uri for the blazorwasm hosted API. It's only used
+        /// on the case of a blazorwasm hosted application.
+        /// </summary>
+        public string? HostedAppIdUri { get; set; }
+
+        /// <summary>
+        /// Provisions app registrations and applies code updates for Blazor WASM client and server in hosted scenario
+        /// </summary>
+        public bool IsBlazorWasmHostedServer => !string.IsNullOrEmpty(ClientProject);
+
+        /// <summary>
+        /// Path to csproj file of the Blazor WASM hosted client
+        /// </summary>
+        public string? ClientProject { get; set; }
 
         /// <summary>
         /// Determines if the project type is blazor wasm
         /// </summary>
         public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType);
+
+        /// <summary>
+        /// App registration ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
+        /// </summary>
+        public string? BlazorWasmClientAppId { get; internal set; }
+
+        /// <summary>
+        /// Delegated Permission ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
+        /// </summary>
+        public string? DelegatedPermissionId { get; internal set; }
 
         /// <summary>
         /// Clones the options
@@ -191,9 +216,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 ProjectFilePath = ProjectFilePath,
                 AppSettingsFilePath = AppSettingsFilePath,
                 WebApiClientId = WebApiClientId,
-                AppIdUri = AppIdUri,
+                HostedAppIdUri = HostedAppIdUri,
                 Json = Json,
-                AppDisplayName = AppDisplayName
+                AppDisplayName = AppDisplayName,
+                RedirectUris = RedirectUris
             };
         }
     }

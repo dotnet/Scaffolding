@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// Adds 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fills them with default values if empty. 
         /// </summary>
         /// <param name="applicationParameters"></param>
-        public void ModifyAppSettings(ApplicationParameters applicationParameters, IEnumerable<string> files)
+        public void ModifyAppSettings(ApplicationParameters applicationParameters, IEnumerable<string>? files = null)
         {
             // Default values can be found https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content
             // waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
@@ -41,7 +41,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
              *      };
              */
 
-            _provisioningToolOptions.AppSettingsFilePath = GetAppSettingsFilePath(files);
+            if (!File.Exists(_provisioningToolOptions.AppSettingsFilePath))
+            {
+                // If default appsettings file does not exist, try to find it, if not found, create in the default location
+                var defaultAppSettingsPath = DefaultAppSettingsPath;
+                _provisioningToolOptions.AppSettingsFilePath = File.Exists(defaultAppSettingsPath) ? defaultAppSettingsPath
+                    : files?.Where(f => f.Contains(AppSettingsFileName)).FirstOrDefault() ?? defaultAppSettingsPath;
+            }
 
             JObject appSettings;
             try
@@ -62,26 +68,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
         }
 
-        /// <summary>
-        /// First checks if default appsettings file exists, if not searches for the file.
-        /// If the file does not exist anywhere, it will be created later.
-        /// </summary>
-        private string GetAppSettingsFilePath(IEnumerable<string> files)
-        {
-            if (!File.Exists(_provisioningToolOptions.AppSettingsFilePath))
-            {
-                // If default appsettings file does not exist, try to find it, if not found, create in the default location
-                _provisioningToolOptions.AppSettingsFilePath = File.Exists(DefaultAppSettingsPath)
-                    ? DefaultAppSettingsPath
-                    : files.Where(f => f.Contains(AppSettingsFileName)).FirstOrDefault();
-            }
-
-            return _provisioningToolOptions.AppSettingsFilePath ??= DefaultAppSettingsPath;
-        }
-
         private string DefaultAppSettingsPath => _provisioningToolOptions.IsBlazorWasm
-        ? Path.Combine(_provisioningToolOptions.ProjectPath, "wwwroot", AppSettingsFileName)
-        : Path.Combine(_provisioningToolOptions.ProjectPath, AppSettingsFileName);
+            ? Path.Combine(_provisioningToolOptions.ProjectPath, "wwwroot", AppSettingsFileName)
+            : Path.Combine(_provisioningToolOptions.ProjectPath, AppSettingsFileName);
 
         /// <summary>
         /// Modifies AppSettings.json if necessary, helper method for testing
@@ -101,7 +90,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 appSettings["AzureAd"] = updatedAzureAdBlock;
             }
 
-            if (_provisioningToolOptions.CallsGraph) // TODO blazor
+            if (_provisioningToolOptions.CallsGraph)
             {
                 // update MicrosoftGraph Block
                 var microsoftGraphBlock = GetModifiedMicrosoftGraphBlock(appSettings);
@@ -112,7 +101,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 }
             }
 
-            if (_provisioningToolOptions.CallsDownstreamApi) // TODO blazor
+            if (_provisioningToolOptions.CallsDownstreamApi)
             {
                 // update DownstreamAPI Block
                 var updatedDownstreamApiBlock = GetModifiedDownstreamApiBlock(appSettings);

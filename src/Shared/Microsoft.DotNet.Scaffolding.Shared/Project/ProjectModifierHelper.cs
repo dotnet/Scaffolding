@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -418,8 +419,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return null;
             }
 
-            var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
-            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            var trimmedSourceFile = TrimStatement(sourceFileString);
+            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
             if (!applicableCodeChanges.Any())
             {
                 return null;
@@ -454,8 +455,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         {
             var classFileTxt = await document.GetTextAsync();
 
-            // Note: Here, document.Name is the full filepath
-            File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
+            Debugger.Launch(); // TODO test with cshtml, razor, cs
+            var filePath = document.Name.EndsWith(".cs") ? document.FilePath : document.Name; 
+            File.WriteAllText(filePath, classFileTxt.ToString(), new UTF8Encoding(false));
             consoleLogger.LogMessage($"Modified {document.Name}.\n");
         }
 

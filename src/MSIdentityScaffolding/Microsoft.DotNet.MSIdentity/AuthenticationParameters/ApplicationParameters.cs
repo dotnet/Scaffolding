@@ -86,9 +86,6 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// Is authenticated with Azure AD B2C (set by reflection).
         /// </summary>
         public bool IsB2C { get; set; }
-
-
-        // TODO: propose a fix for the blazorwasm project template
         
         /// <summary>
         /// Sign-up/sign-in policy in the case of B2C.
@@ -157,7 +154,12 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// <summary>
         /// Identifier URIs for web APIs.
         /// </summary>
-        public string? AppIdUri { set;  get; }
+        public string? AppIdUri { get; set; }
+
+        /// <summary>
+        /// Delegated Permission ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
+        /// </summary>
+        public string? DelegatedPermissionId { get; set; }
 
         /// <summary>
         /// API permissions.

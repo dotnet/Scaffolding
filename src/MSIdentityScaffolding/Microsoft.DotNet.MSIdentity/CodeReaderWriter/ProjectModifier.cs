@@ -297,57 +297,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return root;
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
-        /// <returns></returns>
-        internal async Task AddApiScopes()
-        {
-            if (string.IsNullOrEmpty(_toolOptions.CalledApiScopes))
-            {
-                return;
-            }
-
-            // Initialize Microsoft.Build assemblies
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
-
-            // Initialize CodeAnalysis.Project wrapper
-            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath, _files);
-            if (project is null)
-            {
-                return;
-            }
-
-            var multiLineBlock = new string[]
-            {
-                "{",
-                "    builder.Configuration.Bind(\"AzureAd\", options.ProviderOptions.Authentication);",
-                $"    options.ProviderOptions.DefaultAccessTokenScopes.Add(\"{_toolOptions.CalledApiScopes}\");",
-                "{"
-            };
-
-            CodeFile file = new CodeFile
-            {
-                FileName = "Program.cs",
-                Replacements = new CodeSnippet[]
-                {
-                    new CodeSnippet
-                    {
-                        Parent = "builder.Services.AddMsalAuthentication",
-                        MultiLineBlock = multiLineBlock,
-                        CodeChangeType = CodeChangeType.Lambda,
-                        Parameter = "options",
-                        Replace = true
-                    }
-                }
-            };
-
-            await ApplyTextReplacements(file, project, new CodeChangeOptions());
-        }
-
         private static ClassDeclarationSyntax ModifyMethods(ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options)
         {
             foreach ((string methodName, Method methodChanges) in methods)

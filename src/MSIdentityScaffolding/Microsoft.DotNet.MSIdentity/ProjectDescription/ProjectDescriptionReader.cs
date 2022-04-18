@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
         {
             if (!string.IsNullOrEmpty(projectTypeId) && !projectTypeId.Equals(ProjectTypeIdSuffix))
             {
-                return ProjectDescriptions.FirstOrDefault(p => p.Identifier == projectTypeId);
+               return ProjectDescriptions.FirstOrDefault(p => p.Identifier == projectTypeId);
             }
 
             // TODO: could be both a Web app and WEB API.

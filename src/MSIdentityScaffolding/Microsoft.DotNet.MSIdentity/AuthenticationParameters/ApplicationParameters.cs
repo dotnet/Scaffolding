@@ -157,11 +157,6 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public string? AppIdUri { get; set; }
 
         /// <summary>
-        /// Delegated Permission ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
-        /// </summary>
-        public string? DelegatedPermissionId { get; set; }
-
-        /// <summary>
         /// API permissions.
         /// </summary>
         public List<ApiPermission> ApiPermissions { get; } = new List<ApiPermission>();

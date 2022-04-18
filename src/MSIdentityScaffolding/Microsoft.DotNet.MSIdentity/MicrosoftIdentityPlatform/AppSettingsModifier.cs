@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// Adds 'AzureAd', 'MicrosoftGraph' or 'DownstreamAPI' sections as appropriate. Fills them with default values if empty. 
         /// </summary>
         /// <param name="applicationParameters"></param>
-        public void ModifyAppSettings(ApplicationParameters applicationParameters, IEnumerable<string>? files = null)
+        public void ModifyAppSettings(ApplicationParameters applicationParameters, IEnumerable<string> files)
         {
             // Default values can be found https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content
             // waiting for https://github.com/dotnet/runtime/issues/29690 + https://github.com/dotnet/runtime/issues/31068 to switch over to System.Text.Json
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 // If default appsettings file does not exist, try to find it, if not found, create in the default location
                 var defaultAppSettingsPath = DefaultAppSettingsPath;
                 _provisioningToolOptions.AppSettingsFilePath = File.Exists(defaultAppSettingsPath) ? defaultAppSettingsPath
-                    : files?.Where(f => f.Contains(AppSettingsFileName)).FirstOrDefault() ?? defaultAppSettingsPath;
+                    : files.FirstOrDefault(f => f.Contains(AppSettingsFileName)) ?? defaultAppSettingsPath;
             }
 
             JObject appSettings;
@@ -110,6 +110,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                     changesMade = true;
                     appSettings["DownstreamApi"] = updatedDownstreamApiBlock;
                 }
+            }
+
+            if (!string.IsNullOrEmpty(_provisioningToolOptions.HostedApiScopes))
+            {
+                // update ServerAPI Block
+                changesMade = true;
+                appSettings["ServerApi"] = _provisioningToolOptions.HostedApiScopes;
             }
 
             return changesMade ? appSettings : null;

@@ -110,9 +110,9 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool Unregister { get; set; }
 
         /// <summary>
-        /// Scopes for the called web API.
+        /// Scopes for the Blazor WASM hosted API.
         /// </summary>
-        public string? CalledApiScopes { get; set; }
+        public string? HostedApiScopes { get; set; }
 
         /// <summary>
         /// Url for the called web API.
@@ -155,13 +155,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool PackagesUpdate { get; set; } = false;
 
         /// <summary>
-        /// Provisions app registrations and applies code updates for Blazor WASM client and server in hosted scenario
-        /// </summary>
-        public bool IsBlazorWasmHostedClient => !string.IsNullOrEmpty(HostedAppIdUri);
-
-        /// <summary>
         /// The App ID Uri for the blazorwasm hosted API. It's only used
-        /// on the case of a blazorwasm hosted application.
+        /// in the case of a blazorwasm hosted application.
         /// </summary>
         public string? HostedAppIdUri { get; set; }
 
@@ -178,17 +173,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// <summary>
         /// Determines if the project type is blazor wasm
         /// </summary>
-        public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType);
+        public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType) || "blazorwasm-client".Equals(ProjectType);
 
         /// <summary>
         /// App registration ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
         /// </summary>
         public string? BlazorWasmClientAppId { get; internal set; }
-
-        /// <summary>
-        /// Delegated Permission ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
-        /// </summary>
-        public string? DelegatedPermissionId { get; internal set; }
 
         /// <summary>
         /// Clones the options
@@ -198,7 +188,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         {
             return new ProvisioningToolOptions()
             {
-                CalledApiScopes = CalledApiScopes,
+                HostedApiScopes = HostedApiScopes,
                 CalledApiUrl = CalledApiUrl,
                 CallsDownstreamApi = CallsDownstreamApi,
                 UpdateUserSecrets = UpdateUserSecrets,

@@ -272,6 +272,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t find app {0} in tenant {1}.
+        /// </summary>
+        internal static string AppNotFound {
+            get {
+                return ResourceManager.GetString("AppNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress)..
         /// </summary>
         internal static string AuthNotEnabled {
@@ -305,6 +314,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static byte[] cm_dotnet_blazorwasm {
             get {
                 object obj = ResourceManager.GetObject("cm_dotnet_blazorwasm", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_blazorwasm_client {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_blazorwasm_client", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -350,6 +369,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Configured Blazor WASM client app registration &quot;{0}&quot; ({1}).
+        /// </summary>
+        internal static string ConfiguredBlazorWasmClient {
+            get {
+                return ResourceManager.GetString("ConfiguredBlazorWasmClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Created app {0} - {1}..
         /// </summary>
         internal static string CreatedAppRegistration {
@@ -383,6 +411,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static byte[] dotnet_blazorwasm {
             get {
                 object obj = ResourceManager.GetObject("dotnet_blazorwasm", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] dotnet_blazorwasm_client {
+            get {
+                object obj = ResourceManager.GetObject("dotnet_blazorwasm_client", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -443,6 +481,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string DotnetUserSecretsError {
             get {
                 return ResourceManager.GetString("DotnetUserSecretsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exposing API scopes for Server App Registration &quot;{0}&quot; ({1}).
+        /// </summary>
+        internal static string ExposingScopes {
+            get {
+                return ResourceManager.GetString("ExposingScopes", resourceCulture);
             }
         }
         
@@ -542,6 +589,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string MismatchedProjectTypeIdentifier {
             get {
                 return ResourceManager.GetString("MismatchedProjectTypeIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No valid project description found with project type identifier &quot;{0}&quot;.
+        /// </summary>
+        internal static string NoProjectDescriptionFound {
+            get {
+                return ResourceManager.GetString("NoProjectDescriptionFound", resourceCulture);
             }
         }
         

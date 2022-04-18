@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,9 +17,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
     {
         internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
         internal static IEnumerable<string> CodeSnippetTrimStrings = CodeSnippetTrimChars.Select(c => c.ToString());
-        internal static char[] Parentheses = new char[] { '(', ')' }; 
+        internal static char[] Parentheses = new char[] { '(', ')' };
         internal const string VarIdentifier = "var";
         internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
+
         /// <summary>
         /// Check if Startup.cs or similar file exists.
         /// </summary>
@@ -455,8 +455,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         {
             var classFileTxt = await document.GetTextAsync();
 
-            Debugger.Launch(); // TODO test with cshtml, razor, cs
-            var filePath = document.Name.EndsWith(".cs") ? document.FilePath : document.Name; 
+            // Note: For files without .cs extension, document.Name is the full filepath
+            var filePath = document.Name.EndsWith(".cs") ? document.FilePath : document.Name;
             File.WriteAllText(filePath, classFileTxt.ToString(), new UTF8Encoding(false));
             consoleLogger.LogMessage($"Modified {document.Name}.\n");
         }

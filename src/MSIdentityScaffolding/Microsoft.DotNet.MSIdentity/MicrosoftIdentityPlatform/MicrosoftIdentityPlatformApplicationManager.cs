@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,48 +60,36 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
             else if (applicationParameters.IsBlazorWasm)
             {
-                // In .NET Core 3.1, Blazor uses MSAL.js 1.x (web redirect URIs)
-                // whereas in .NET 5.0 and .NET 6.0, Blazor uses MSAL.js 2.x (SPA redirect URIs)
-                switch (applicationParameters.TargetFramework)
-                {
-                    case "net5.0":
-                    case "net6.0":
-                        AddSpaPlatform(application, applicationParameters.WebRedirectUris);
-                        break;
-                    default:
-                        AddWebAppPlatform(application, applicationParameters, withImplicitFlow: true);
-                        break;
-                }
+                AddSpaPlatform(application, applicationParameters.WebRedirectUris);
             }
 
-            IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
-                applicationParameters,
-                graphServiceClient,
-                application).ConfigureAwait(false);
-
-            Application createdApplication = await graphServiceClient.Applications
+            var createdApplication = await graphServiceClient.Applications
                 .Request()
                 .AddAsync(application);
 
-            // Creates a service principal (needed for B2C) // TODO: What if it's not B2C?
-            ServicePrincipal servicePrincipal = new ServicePrincipal
+            if (applicationParameters.IsB2C) // TODO B2C not fully supported at the moment
             {
-                AppId = createdApplication.AppId,
-            };
+                // Creates a service principal (needed for B2C) // TODO: What if it's not B2C?
+                ServicePrincipal servicePrincipal = new ServicePrincipal
+                {
+                    AppId = createdApplication.AppId,
+                };
 
-            ServicePrincipal? createdServicePrincipal = null;
-            // B2C does not allow user consent, and therefore we need to explicity create
-            // a service principal and permission grants. It's also useful for Blazorwasm hosted
-            // applications. We create it always.
-            if (applicationParameters.IsB2C || applicationParameters.IsBlazorWasm)
-            {
-                createdServicePrincipal = await graphServiceClient.ServicePrincipals
-                .Request()
-                .AddAsync(servicePrincipal).ConfigureAwait(false);
+                // B2C does not allow user consent, and therefore we need to explicity create
+                // a service principal and permission grants. It's also useful for Blazorwasm hosted
+                // applications. We create it always.
+                ServicePrincipal? createdServicePrincipal = await graphServiceClient.ServicePrincipals
+                    .Request()
+                    .AddAsync(servicePrincipal).ConfigureAwait(false);
 
                 // B2C does not allow user consent, and therefore we need to explicity grant permissions
                 if (applicationParameters.IsB2C)
                 {
+                    IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
+                        applicationParameters,
+                        graphServiceClient,
+                        application).ConfigureAwait(false);
+
                     await AddAdminConsentToApiPermissions(
                         graphServiceClient,
                         createdServicePrincipal,
@@ -116,51 +103,40 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 && createdApplication.Api != null
                 && (createdApplication.IdentifierUris == null || !createdApplication.IdentifierUris.Any()))
             {
-                await ExposeScopes(graphServiceClient, createdApplication); 
+                await ExposeScopes(graphServiceClient, createdApplication);
 
-                // Blazorwasm hosted: add permission to server web API from client SPA
-                if (applicationParameters.IsBlazorWasm)
-                {
-                    await AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
-                        graphServiceClient,
-                        createdApplication,
-                        createdServicePrincipal,
-                        applicationParameters.IsB2C);
-                }
+                // Re-reading the app to be sure to have everything.
+                createdApplication = (await graphServiceClient.Applications
+                    .Request()
+                    .Filter($"appId eq '{createdApplication.AppId}'")
+                    .GetAsync()).FirstOrDefault();
             }
 
             ApplicationParameters? effectiveApplicationParameters = null;
-            // Re-reading the app to be sure to have everything.
-            createdApplication = (await graphServiceClient.Applications
-                .Request()
-                .Filter($"appId eq '{createdApplication.AppId}'")
-                .GetAsync()).First();
-
             // log json console message here since we need the Microsoft.Graph.Application
             JsonResponse jsonResponse = new JsonResponse(commandName);
-            if (createdApplication != null)
-            {
-                jsonResponse.State = State.Success;
-                jsonResponse.Content = createdApplication;
-                effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
-
-                // Add password credentials
-                if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
-                {
-                    await AddPasswordCredentialsAsync(
-                        graphServiceClient,
-                        createdApplication.Id,
-                        effectiveApplicationParameters,
-                        consoleLogger);
-                }
-            }
-            else
+            if (createdApplication is null)
             {
                 jsonResponse.State = State.Fail;
                 jsonResponse.Content = Resources.FailedToCreateApp;
                 consoleLogger.LogJsonMessage(jsonResponse);
+                return null;
+            }
+            
+            effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
+
+            // Add password credentials
+            if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
+            {
+                await AddPasswordCredentialsAsync(
+                    graphServiceClient,
+                    createdApplication.Id,
+                    effectiveApplicationParameters,
+                    consoleLogger);
             }
 
+            jsonResponse.State = State.Success;
+            jsonResponse.Content = createdApplication;
             consoleLogger.LogJsonMessage(jsonResponse);
             return effectiveApplicationParameters;
         }
@@ -228,13 +204,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return new JsonResponse(commandName, State.Fail, string.Format(Resources.NotFound, parameters.ClientId));
             }
 
-            var appUpdates = GetApplicationUpdates(remoteApp, toolOptions);
-            if (appUpdates is null)
+            (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions);
+            if (!needsUpdates)
             {
                 return new JsonResponse(commandName, State.Success, string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
             }
 
-            return await UpdateRemoteApp(graphServiceClient, remoteApp, appUpdates, commandName).ConfigureAwait(false);
+            return await UpdateRemoteApp(graphServiceClient, remoteApp, appUpdates, commandName);
         }
 
         private static async Task<JsonResponse> UpdateRemoteApp(GraphServiceClient graphServiceClient, Application remoteApp, Application appUpdates, string commandName)
@@ -258,7 +234,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="existingApplication"></param>
         /// <param name="toolOptions"></param>
         /// <returns>Updated Application if changes were made, otherwise null</returns>
-        internal static Application? GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
+        internal static (bool needsUpdate, Application appUpdates) GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
         {
             bool needsUpdate = false;
 
@@ -277,14 +253,25 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 needsUpdate |= PreAuthorizeBlazorWasmClientApp(existingApplication, toolOptions, updatedApp);
             }
 
-            return needsUpdate ? updatedApp : null;
+            return (needsUpdate, updatedApp);
         }
 
         private static bool PreAuthorizeBlazorWasmClientApp(Application existingApplication, ProvisioningToolOptions toolOptions, Application updatedApp)
         {
+            if (string.IsNullOrEmpty(toolOptions.BlazorWasmClientAppId))
+            {
+                return false;
+            }
+
+            var delegatedPermissionId = existingApplication.Api?.Oauth2PermissionScopes.FirstOrDefault()?.Id.ToString();
+            if (string.IsNullOrEmpty(delegatedPermissionId))
+            {
+                return false;
+            }
+
             if (existingApplication.Api?.PreAuthorizedApplications?.Any(
-                    app => app.DelegatedPermissionIds.Contains(toolOptions.DelegatedPermissionId)
-                    && string.Equals(toolOptions.BlazorWasmClientAppId, app.AppId)) is true)
+                app => string.Equals(toolOptions.BlazorWasmClientAppId, app.AppId)
+                && app.DelegatedPermissionIds.Any(id => id.Equals(delegatedPermissionId))) is true)
             {
                 return false;
             }
@@ -292,7 +279,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var preAuthorizedApp = new PreAuthorizedApplication
             {
                 AppId = toolOptions.BlazorWasmClientAppId,
-                DelegatedPermissionIds = new List<string> { toolOptions.DelegatedPermissionId ?? string.Empty }
+                DelegatedPermissionIds = new List<string> { delegatedPermissionId }
             };
 
             updatedApp.Api = existingApplication.Api ?? new ApiApplication();
@@ -379,7 +366,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             bool needsUpdate = false;
             var currentSettings = updatedApp.Web.ImplicitGrantSettings;
 
-            if (toolOptions.IsBlazorWasmHostedClient) // Implies that this is the blazor wasm hosted client
+            if (!string.IsNullOrEmpty(toolOptions.HostedAppIdUri)) // Implies that this is the blazor wasm hosted client
             {
                 updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
                 updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
@@ -422,8 +409,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             ServicePrincipal? createdServicePrincipal,
             bool isB2C)
         {
-            Debugger.Launch(); // TODO what's happening here?
-             if (createdServicePrincipal is null)
+            if (createdServicePrincipal is null)
             {
                 throw new ArgumentNullException(nameof(createdServicePrincipal));
             }
@@ -511,15 +497,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// Expose scopes for the web API.
         /// </summary>
         /// <param name="graphServiceClient"></param>
-        /// <param name="createdApplication"></param>
-        /// <returns></returns>
-        private static async Task ExposeScopes(GraphServiceClient graphServiceClient, Application createdApplication)
+        /// <param name="appId"></param>
+        /// <param name="graphEntityId"></param>
+        /// <param name="scopes">existing scopes</param>
+        /// <returns>Identifier URI for exposed scope</returns>
+        internal static async Task<string> ExposeScopes(GraphServiceClient graphServiceClient, string? appId, string? graphEntityId, List<PermissionScope>? scopes = null)
         {
+            var scope = $"api://{appId}";
             var updatedApp = new Application
             {
-                IdentifierUris = new[] { $"api://{createdApplication.AppId}" },
+                IdentifierUris = new[] { scope }
             };
-            var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
+
+            scopes ??= new List<PermissionScope>();
             var newScope = new PermissionScope
             {
                 Id = Guid.NewGuid(),
@@ -531,12 +521,26 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 UserConsentDisplayName = "Access the API on your behalf",
                 Value = "access_as_user",
             };
+
             scopes.Add(newScope);
             updatedApp.Api = new ApiApplication { Oauth2PermissionScopes = scopes };
-
-            await graphServiceClient.Applications[createdApplication.Id]
+            await graphServiceClient.Applications[graphEntityId]
                 .Request()
-                .UpdateAsync(updatedApp).ConfigureAwait(false);
+                .UpdateAsync(updatedApp);
+
+            return scope;
+        }
+
+        /// <summary>
+        /// Expose scopes for the web API.
+        /// </summary>
+        /// <param name="graphServiceClient"></param>
+        /// <param name="createdApplication"></param>
+        /// <returns></returns>
+        private static async Task ExposeScopes(GraphServiceClient graphServiceClient, Application createdApplication)
+        {
+            var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
+            await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);
         }
 
         /// <summary>
@@ -796,23 +800,39 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return _graphServiceClient;
         }
 
-        public async Task<ApplicationParameters?> ReadApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        /// <summary>
+        /// Reads application parameters from Azure AD for a given app registration client ID
+        /// </summary>
+        /// <param name="tokenCredential"></param>
+        /// <param name="applicationParameters"></param>
+        /// <param name="consoleLogger"></param>
+        /// <returns></returns>
+        public async Task<ApplicationParameters?> ReadApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters, IConsoleLogger consoleLogger)
         {
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
-            // Get the tenant
-            Organization? tenant = await GetTenant(graphServiceClient);
-            var application = await GetApplication(tokenCredential, applicationParameters);
-            if (application != null)
+            if (string.IsNullOrEmpty(applicationParameters.EffectiveClientId) &&
+               (string.IsNullOrEmpty(applicationParameters.ClientId) || DefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))
             {
-                ApplicationParameters effectiveApplicationParameters = GetEffectiveApplicationParameters(
-                    tenant!,
-                    application,
-                    applicationParameters);
-
-                return effectiveApplicationParameters;
+                var exception = new ArgumentException(nameof(applicationParameters.ClientId));
+                consoleLogger.LogMessage(exception.Message, LogMessageType.Error);
+                return null;
             }
 
-            return null;
+            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+            Organization? tenant = await GetTenant(graphServiceClient);
+            var application = await GetApplication(tokenCredential, applicationParameters);
+            if (application is null)
+            {
+                var errorMsg = string.Format(Resources.AppNotFound, applicationParameters.EffectiveClientId, applicationParameters.EffectiveTenantId);
+                consoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+                return null;
+            }
+
+            ApplicationParameters effectiveApplicationParameters = GetEffectiveApplicationParameters(
+                tenant!,
+                application,
+                applicationParameters);
+
+            return effectiveApplicationParameters;
         }
 
         public async Task<Application?> GetApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
@@ -823,13 +843,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Filter($"appId eq '{applicationParameters.ClientId}'")
                 .GetAsync();
 
-            var readApplication = apps.FirstOrDefault();
-
-            if (readApplication == null)
-            {
-                return null;
-            }
-            return readApplication;
+            return apps.FirstOrDefault();
         }
 
         private ApplicationParameters GetEffectiveApplicationParameters(
@@ -853,10 +867,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 CallsDownstreamApi = application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
                 LogoutUrl = application.Web?.LogoutUrl,
                 GraphEntityId = application.Id,
-                DelegatedPermissionId = application.Api?.Oauth2PermissionScopes?.First()?.Id.ToString(),
 
                 // Parameters that cannot be infered from the registered app
-                IsWebApp = originalApplicationParameters.IsWebApp, // TODO
+                IsWebApp = originalApplicationParameters.IsWebApp,
                 IsBlazorWasm = originalApplicationParameters.IsBlazorWasm,
                 SusiPolicy = originalApplicationParameters.SusiPolicy,
                 SecretsId = originalApplicationParameters.SecretsId,

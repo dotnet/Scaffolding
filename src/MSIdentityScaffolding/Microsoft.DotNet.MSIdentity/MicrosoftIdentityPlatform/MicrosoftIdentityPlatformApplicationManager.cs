@@ -210,17 +210,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return new JsonResponse(commandName, State.Success, string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
             }
 
-            return await UpdateRemoteApp(graphServiceClient, remoteApp, appUpdates, commandName);
-        }
-
-        private static async Task<JsonResponse> UpdateRemoteApp(GraphServiceClient graphServiceClient, Application remoteApp, Application appUpdates, string commandName)
-        {
             try
             {
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
-                return new JsonResponse(commandName, State.Success, updatedApp);
-                //return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
+                return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
             }
             catch (ServiceException se)
             {

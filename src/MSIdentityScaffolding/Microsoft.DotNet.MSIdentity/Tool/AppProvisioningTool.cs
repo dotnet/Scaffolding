@@ -310,7 +310,6 @@ namespace Microsoft.DotNet.MSIdentity
                                         CommandName);
 
             output.AppendLine(jsonResponse.Content.ToString());
-
             var response = new JsonResponse(CommandName, jsonResponse.State, output.ToString());
 
             ConsoleLogger.LogMessage(response.Content as string);

@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
         {
-            if (file.FileName.Equals("Startup.cs"))
+            if (file.FileName.Equals("Startup.cs")) // TODO probably don't need this any more
             {
                 // Startup class file name may be different
                 file.FileName = await ProjectModifierHelper.GetStartupClass(project) ?? file.FileName;

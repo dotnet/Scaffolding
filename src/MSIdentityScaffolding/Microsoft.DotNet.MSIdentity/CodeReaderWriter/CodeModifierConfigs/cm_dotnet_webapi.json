@@ -2,40 +2,6 @@
   "Identifier": "dotnet-webapi",
   "Files": [
     {
-      "FileName": "Startup.cs",
-      "Options": [ "NonMinimalApp" ],
-      "Methods": {
-        "Configure": {
-          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
-          "CodeChanges": [
-            {
-              "InsertAfter": "IApplicationBuilder.UseRouting",
-              "Block": "IApplicationBuilder.UseAuthentication()"
-            }
-          ]
-        },
-        "ConfigureServices": {
-          "Parameters": [ "IServiceCollection" ],
-          "CodeChanges": [
-            {
-              "Block": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)"
-            },
-            {
-              "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
-              "CodeChangeType": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAd\"));",
-              "BlockB2C": "AddMicrosoftIdentityWebApi(Configuration.GetSection(\"AzureAdB2C\"))"
-            }
-          ]
-        }
-      },
-      "Usings": [
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.Identity.Web",
-        "Microsoft.AspNetCore.Authentication.JwtBearer"
-      ]
-    },
-    {
       "FileName": "Program.cs",
       "Options": [ "MinimalApp" ],
       "Usings": [
@@ -123,7 +89,7 @@
       "ClassProperties": [
         {
           "Block": "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }",
-          "Options": ["NonMinimalApp"]
+          "Options": ["NonMinimalApp"] // TODO remove
         },
         {
           "Block": "private readonly GraphServiceClient _graphServiceClient",
@@ -220,7 +186,7 @@
             {
               "Prepend": true,
               "Block": "HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi)",
-              "Options": [ "NonMinimalApp" ]
+              "Options": [ "NonMinimalApp" ] // TODO remove
             }
           ]
         }

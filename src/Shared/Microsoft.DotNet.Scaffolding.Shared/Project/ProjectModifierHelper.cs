@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         }
 
         // Returns true when there is no Startup.cs or equivalent
-        internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
+        internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project) // TODO probably unnecessary
         {
             if (project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
             {

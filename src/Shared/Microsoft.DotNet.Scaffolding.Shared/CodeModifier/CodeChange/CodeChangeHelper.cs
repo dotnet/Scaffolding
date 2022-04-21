@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public const string MicrosoftGraph = nameof(MicrosoftGraph);
         public const string DownstreamApi = nameof(DownstreamApi);
         public const string Skip = nameof(Skip);
-        public const string NonMinimalApp = nameof(NonMinimalApp);
+        public const string NonMinimalApp = nameof(NonMinimalApp); // TODO probably don't need
+        
         public const string MinimalApp = nameof(MinimalApp);
         public const string OpenApi = nameof(OpenApi);
     }

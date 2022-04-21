@@ -2,69 +2,6 @@
   "Identifier": "dotnet-webapp",
   "Files": [
     {
-      "FileName": "Startup.cs",
-      "Options": [ "NonMinimalApp" ],
-      "Methods": {
-        "Configure": {
-          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
-          "CodeChanges": [
-            {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
-              "Block": "IApplicationBuilder.UseAuthentication()"
-            },
-            {
-              "Parent": "IApplicationBuilder.UseEndpoints",
-              "CodeChangeType": "Lambda",
-              "Block": "endpoints.MapControllers()"
-            }
-          ]
-        },
-        "ConfigureServices": {
-          "Parameters": [ "IServiceCollection" ],
-          "CodeChanges": [
-            {
-              "Block": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
-              "LeadingTrivia": {
-                "NumberOfSpaces": 12
-              }
-            },
-            {
-              "Parent": "IServiceCollection.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
-              "CodeChangeType": "MemberAccess",
-              "Block": "AddMicrosoftIdentityWebApp(Configuration.GetSection(\"AzureAd\"));"
-            },
-            {
-              "Parent": "IServiceCollection.AddRazorPages()",
-              "CodeChangeType": "MemberAccess",
-              "Block": "AddMvcOptions(options => {})"
-            },
-            {
-              "Parent": "IServiceCollection.AddAuthorization",
-              "Parameter": "options",
-              "Block": "options.FallbackPolicy = options.DefaultPolicy",
-              "CodeChangeType": "Lambda",
-              "LeadingTrivia": {
-                "NumberOfSpaces": 12
-              }
-            },
-            {
-              "Parent": "IServiceCollection.AddRazorPages()",
-              "CodeChangeType": "MemberAccess",
-              "Block": "AddMicrosoftIdentityUI()"
-            }
-          ]
-        }
-      },
-      "Usings": [
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.Identity.Web",
-        "Microsoft.Identity.Web.UI",
-        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
-        "Microsoft.AspNetCore.Authorization",
-        "Microsoft.AspNetCore.Mvc.Authorization"
-      ]
-    },
-    {
       "FileName": "Program.cs",
       "Options": [ "MinimalApp" ],
       "Methods": {

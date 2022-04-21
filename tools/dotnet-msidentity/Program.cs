@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.UPDATE_PROJECT_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure and the project." +
                              "\n\t- Updates the appsettings.json file." +
-                             "\n\t- Updates the Startup.cs file." +
+                             "\n\t- Updates the project code." +
                              "\n\t- Updates the user secrets.\n")
             {
                 TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption()

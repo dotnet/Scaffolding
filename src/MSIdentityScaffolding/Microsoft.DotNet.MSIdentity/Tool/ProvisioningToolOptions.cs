@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool ConfigUpdate { get; set; } = false;
 
         /// <summary>
-        /// Make changes to Startup.cs 
+        /// Make changes to project 
         /// </summary>
         public bool CodeUpdate { get; set; } = false;
 

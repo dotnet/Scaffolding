@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Msbuild</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Msbuild</RootNamespace>
     <IsPackable>false</IsPackable>
+    <Nullable>disable</Nullable>
+    <LangVersion>10</LangVersion
   </PropertyGroup>
 
   <ItemGroup>

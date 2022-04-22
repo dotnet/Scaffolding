@@ -163,5 +163,69 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 && app.DelegatedPermissionIds.Any(
                     id => id.ToString().Equals(permissionId.ToString())));
         }
+
+        [Fact]
+        public void UpdateImplicitGrantSettingsTest_WhenBlazorWasm_SetCheckboxesFalse()
+        {
+            var originalApp = new Graph.Application
+            {
+                Web = new WebApplication
+                {
+                    ImplicitGrantSettings = new ImplicitGrantSettings
+                    {
+                        EnableAccessTokenIssuance = true,
+                        EnableIdTokenIssuance = true
+                    }
+                }
+            };
+            var toolOptions = new ProvisioningToolOptions
+            {
+                ProjectType = "blazorwasm"
+            };
+
+            var output = MicrosoftIdentityPlatformApplicationManager.UpdateImplicitGrantSettings(originalApp, toolOptions); // TODO unit tests
+            Assert.True(output);
+            Assert.False(originalApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance);
+            Assert.False(originalApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance);
+        }
+
+        [Theory]
+        [InlineData(false, false, false, false, false)]
+        [InlineData(true, true, true, true, false)]
+        [InlineData(false, false, true, true, false)]
+        [InlineData(true, true, false, false, false)]
+        [InlineData(false, true, false, true, true)]
+        [InlineData(false, true, false, false, true)]
+        [InlineData(false, false, true, false, true)]
+        [InlineData(false, false, false, true, true)]
+        [InlineData(true, false, true, false, true)]
+        [InlineData(true, false, true, true, true)]
+        [InlineData(true, true, false, true, true)]
+        [InlineData(true, true, true, false, true)]
+        public void UpdateImplicitGrantSettingsTest_SetCheckboxes(bool appAccessToken, bool toolAccessToken, bool appIdToken, bool toolIdToken, bool expected)
+        {
+            var originalApp = new Graph.Application
+            {
+                Web = new WebApplication
+                {
+                    ImplicitGrantSettings = new ImplicitGrantSettings
+                    {
+                        EnableAccessTokenIssuance = appAccessToken,
+                        EnableIdTokenIssuance = appIdToken
+                    }
+                }
+            };
+
+            var toolOptions = new ProvisioningToolOptions
+            {
+                EnableAccessToken = toolAccessToken,
+                EnableIdToken = toolIdToken
+            };
+
+            var needsUpdate = MicrosoftIdentityPlatformApplicationManager.UpdateImplicitGrantSettings(originalApp, toolOptions);
+            Assert.Equal(expected, needsUpdate);
+            Assert.Equal(originalApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance, toolAccessToken);
+            Assert.Equal(originalApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance, toolIdToken);
+        }
     }
 }

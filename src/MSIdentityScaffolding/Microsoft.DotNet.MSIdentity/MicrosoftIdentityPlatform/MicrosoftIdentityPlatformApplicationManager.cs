@@ -348,29 +348,22 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         }
 
         /// <summary>
-        /// Updates implicit grant settings if necessary
+        /// Updates application's implicit grant settings if necessary
         /// </summary>
-        /// <param name="updatedApp"></param>
+        /// <param name="app"></param>
         /// <param name="toolOptions"></param>
         /// <returns>true if ImplicitGrantSettings require updates, else false</returns>
-        private static bool UpdateImplicitGrantSettings(Application updatedApp, ProvisioningToolOptions toolOptions)
+        internal static bool UpdateImplicitGrantSettings(Application app, ProvisioningToolOptions toolOptions)
         {
             bool needsUpdate = false;
-            var currentSettings = updatedApp.Web.ImplicitGrantSettings;
+            var currentSettings = app.Web.ImplicitGrantSettings;
 
-            if (!string.IsNullOrEmpty(toolOptions.HostedAppIdUri)) // Implies that this is the blazor wasm hosted client
+            if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
             {
-                updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
-                updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
-
-                needsUpdate = true;
-            }
-            else if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
-            {
-                if (currentSettings.EnableAccessTokenIssuance != true || currentSettings.EnableIdTokenIssuance != true)
+                if (currentSettings.EnableAccessTokenIssuance is true || currentSettings.EnableIdTokenIssuance is true)
                 {
-                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
-                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
+                    app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
+                    app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
 
                     needsUpdate = true;
                 }
@@ -380,14 +373,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 if (toolOptions.EnableAccessToken.HasValue &&
                     currentSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
                 {
-                    updatedApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+                    app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
                     needsUpdate = true;
                 }
 
                 if (toolOptions.EnableIdToken.HasValue &&
                     currentSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
                 {
-                    updatedApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+                    app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
                     needsUpdate = true;
                 }
             }
@@ -529,7 +522,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="graphServiceClient"></param>
         /// <param name="createdApplication"></param>
         /// <returns></returns>
-        private static async Task ExposeScopes(GraphServiceClient graphServiceClient, Application createdApplication)
+        internal static async Task ExposeScopes(GraphServiceClient graphServiceClient, Application createdApplication)
         {
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
             await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);

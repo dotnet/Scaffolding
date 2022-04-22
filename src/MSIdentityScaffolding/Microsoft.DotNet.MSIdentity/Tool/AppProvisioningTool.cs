@@ -562,7 +562,7 @@ namespace Microsoft.DotNet.MSIdentity
         {
             // Get all the files in which "AzureAD" needs to be replaced by "AzureADB2C"
             IEnumerable<string> filesWithReplacementsForB2C = projectSettings.Replacements
-                .Where(r => r.ReplaceBy == "Application.ConfigurationSection")
+                .Where(r => string.Equals(r.ReplaceBy, "Application.ConfigurationSection", StringComparison.OrdinalIgnoreCase))
                 .Select(r => r.FilePath);
 
             foreach (string filePath in filesWithReplacementsForB2C)

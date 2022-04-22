@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             CodeModifierConfig? codeModifierConfig = ReadCodeModifierConfigFromFileContent(content);
             if (codeModifierConfig is null)
             {
-                throw new FormatException($"Resource file {CodeModifierConfigPropertyInfo.Name} could not be parsed. ");
+                throw new FormatException(string.Format(Resources.ResourceFileParseError, CodeModifierConfigPropertyInfo.Name));
             }
 
             if (!string.Equals(codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             catch (Exception e)
             {
-                _consoleLogger.LogMessage($"Error parsing Code Modifier Config for project type {_toolOptions.ProjectType}, exception: {e.Message}");
+                _consoleLogger.LogMessage(string.Format(Resources.CodeModifierConfigParsingError, _toolOptions.ProjectType, e.Message));
                 return null;
             }
         }

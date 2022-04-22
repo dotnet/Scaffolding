@@ -111,8 +111,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     .Filter($"appId eq '{createdApplication.AppId}'")
                     .GetAsync()).FirstOrDefault();
             }
-
-            ApplicationParameters? effectiveApplicationParameters = null;
             // log json console message here since we need the Microsoft.Graph.Application
             JsonResponse jsonResponse = new JsonResponse(commandName);
             if (createdApplication is null)
@@ -122,8 +120,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 consoleLogger.LogJsonMessage(jsonResponse);
                 return null;
             }
-            
-            effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
+
+            ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
 
             // Add password credentials
             if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
@@ -250,14 +248,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return (needsUpdate, updatedApp);
         }
 
-        private static bool PreAuthorizeBlazorWasmClientApp(Application existingApplication, ProvisioningToolOptions toolOptions, Application updatedApp)
+        internal static bool PreAuthorizeBlazorWasmClientApp(Application existingApplication, ProvisioningToolOptions toolOptions, Application updatedApp)
         {
             if (string.IsNullOrEmpty(toolOptions.BlazorWasmClientAppId))
             {
                 return false;
             }
 
-            var delegatedPermissionId = existingApplication.Api?.Oauth2PermissionScopes.FirstOrDefault()?.Id.ToString();
+            var delegatedPermissionId = existingApplication.Api?.Oauth2PermissionScopes?.FirstOrDefault()?.Id.ToString();
             if (string.IsNullOrEmpty(delegatedPermissionId))
             {
                 return false;

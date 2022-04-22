@@ -369,6 +369,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error parsing Code Modifier Config for project type {0}, exception: {1}.
+        /// </summary>
+        internal static string CodeModifierConfigParsingError {
+            get {
+                return ResourceManager.GetString("CodeModifierConfigParsingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Configured Blazor WASM client app registration &quot;{0}&quot; ({1}).
         /// </summary>
         internal static string ConfiguredBlazorWasmClient {
@@ -647,6 +656,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string ProjectPathError {
             get {
                 return ResourceManager.GetString("ProjectPathError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resource file {0} could not be parsed..
+        /// </summary>
+        internal static string ResourceFileParseError {
+            get {
+                return ResourceManager.GetString("ResourceFileParseError", resourceCulture);
             }
         }
         

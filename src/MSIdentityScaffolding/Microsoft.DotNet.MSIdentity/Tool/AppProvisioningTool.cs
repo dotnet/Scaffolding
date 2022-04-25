@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.MSIdentity
 {
     public class AppProvisioningTool : IMsAADTool
     {
-        private static readonly string[] s_fileExtensions = new string[] { "*.cs", "*.cshtml", "*.razor", "*.html" };
+        private static readonly string[] s_fileExtensions = new string[] { "*.cs", "*.cshtml", "*.razor", "*.html", "*.csproj" };
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         private MicrosoftIdentityPlatformApplicationManager MicrosoftIdentityPlatformApplicationManager { get; } = new MicrosoftIdentityPlatformApplicationManager();

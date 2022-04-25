@@ -651,7 +651,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify one .csproj file for the --project-path.
+        ///   Looks up a localized string similar to Failed to validate project path {0}.
         /// </summary>
         internal static string ProjectPathError {
             get {

@@ -44,7 +44,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
-                return;
+                var csProjFiles = _files.Where(file => file.EndsWith(".csproj"));
+                if (csProjFiles.Count() != 1)
+                {
+                    var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
+                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, errorMsg));
+                    _consoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+                    return;
+                }
+
+                _toolOptions.ProjectFilePath = csProjFiles.First();
             }
 
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();

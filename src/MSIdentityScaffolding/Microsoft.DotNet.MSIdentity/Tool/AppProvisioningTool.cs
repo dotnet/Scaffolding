@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            if (!ValidateProjectFilePath(ConsoleLogger))
+            if (!ValidateProjectPath())
             {
                 Environment.Exit(1);
             }
@@ -156,13 +156,17 @@ namespace Microsoft.DotNet.MSIdentity
         }
 
         /// <summary>
-        /// Ensures existence of csproj file and ensures that projectFilePath and projectPath are set correctly,
+        /// Ensures that ProjectPath is updated if ProjectFilePath argument exists
         /// </summary>
         /// <returns>true if valid else false</returns>
-        private bool ValidateProjectFilePath(IConsoleLogger consoleLogger)
+        private bool ValidateProjectPath()
         {
-            if (!string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath)
-                && System.IO.File.Exists(ProvisioningToolOptions.ProjectFilePath)
+            if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
+            {
+                return true;
+            }
+
+            if (System.IO.File.Exists(ProvisioningToolOptions.ProjectFilePath)
                 && Path.GetDirectoryName(ProvisioningToolOptions.ProjectFilePath) is string projectPath)
             {
                 if (!projectPath.Equals(ProvisioningToolOptions.ProjectPath))
@@ -173,18 +177,9 @@ namespace Microsoft.DotNet.MSIdentity
                 return true;
             }
 
-            if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
-            {
-                var csProjFiles = Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, "*.csproj");
-                if (csProjFiles.Count() == 1)
-                {
-                    ProvisioningToolOptions.ProjectFilePath = csProjFiles.First();
-                    return true;
-                }
-            }
-
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, Resources.ProjectPathError));
-            ConsoleLogger.LogMessage(Resources.ProjectPathError, LogMessageType.Error);
+            var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
+            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMsg));
+            ConsoleLogger.LogMessage(errorMsg, LogMessageType.Error);
             return false;
         }
 
@@ -296,7 +291,7 @@ namespace Microsoft.DotNet.MSIdentity
                     output.AppendLine(string.Format(Resources.ExposingScopes, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId));
                     applicationParameters.AppIdUri = await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.ClientId, applicationParameters.GraphEntityId);
                 }
-                
+
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);
                 output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId));
 
@@ -328,7 +323,8 @@ namespace Microsoft.DotNet.MSIdentity
             var clientToolOptions = ProvisioningToolOptions.Clone();
 
             clientToolOptions.CodeUpdate = true;
-            clientToolOptions.ProjectFilePath = ProvisioningToolOptions.ClientProject!;
+            clientToolOptions.ProjectPath = Path.GetDirectoryName(ProvisioningToolOptions.ClientProject) ?? string.Empty;
+            clientToolOptions.ProjectFilePath = ProvisioningToolOptions.ClientProject ?? string.Empty;
             clientToolOptions.ClientId = null;
             clientToolOptions.ClientProject = null;
             clientToolOptions.ProjectType = "blazorwasm-client";

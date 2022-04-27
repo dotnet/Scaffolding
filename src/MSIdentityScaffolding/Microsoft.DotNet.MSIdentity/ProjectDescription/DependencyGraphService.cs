@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Microsoft.Extensions.Internal;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.MSIdentity.Project
 {
     internal class DependencyGraphService : IDependencyGraphService
     {
-        private string? _projectFilePath;
+        private readonly string? _projectFilePath;
         public DependencyGraphService(string? projectPath = null)
         {
             _projectFilePath = projectPath;

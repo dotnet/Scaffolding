@@ -349,7 +349,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return statementLeadingTrivia;
         }
 
-
         private static SyntaxTriviaList GetTrailingTrivia(Formatting codeFormatting)
         {
             var statementLeadingTrivia = SyntaxFactory.TriviaList();

@@ -86,9 +86,6 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// Is authenticated with Azure AD B2C (set by reflection).
         /// </summary>
         public bool IsB2C { get; set; }
-
-
-        // TODO: propose a fix for the blazorwasm project template
         
         /// <summary>
         /// Sign-up/sign-in policy in the case of B2C.
@@ -157,7 +154,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// <summary>
         /// Identifier URIs for web APIs.
         /// </summary>
-        public string? AppIdUri { set;  get; }
+        public string? AppIdUri { get; set; }
 
         /// <summary>
         /// API permissions.

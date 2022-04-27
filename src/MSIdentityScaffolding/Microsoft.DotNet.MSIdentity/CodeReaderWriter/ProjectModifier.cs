@@ -44,7 +44,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
-                return;
+                var csProjFiles = _files.Where(file => file.EndsWith(".csproj"));
+                if (csProjFiles.Count() != 1)
+                {
+                    var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
+                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, errorMsg));
+                    _consoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+                    return;
+                }
+
+                _toolOptions.ProjectFilePath = csProjFiles.First();
             }
 
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
@@ -98,7 +107,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             CodeModifierConfig? codeModifierConfig = ReadCodeModifierConfigFromFileContent(content);
             if (codeModifierConfig is null)
             {
-                throw new FormatException($"Resource file { CodeModifierConfigPropertyInfo.Name } could not be parsed. ");
+                throw new FormatException(string.Format(Resources.ResourceFileParseError, CodeModifierConfigPropertyInfo.Name));
             }
 
             if (!string.Equals(codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
@@ -133,7 +142,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             catch (Exception e)
             {
-                _consoleLogger.LogMessage($"Error parsing Code Modifier Config for project type { _toolOptions.ProjectType }, exception: { e.Message }");
+                _consoleLogger.LogMessage(string.Format(Resources.CodeModifierConfigParsingError, _toolOptions.ProjectType, e.Message));
                 return null;
             }
         }

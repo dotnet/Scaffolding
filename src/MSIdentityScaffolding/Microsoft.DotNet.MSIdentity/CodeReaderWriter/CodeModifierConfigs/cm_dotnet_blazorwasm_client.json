@@ -1,0 +1,32 @@
+{
+  "Identifier": "dotnet-blazorwasm-client",
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Options": [
+        "MinimalApp"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "MultiLineBlock": [
+                "{",
+                "    builder.Configuration.Bind(\"AzureAd\", options.ProviderOptions.Authentication);",
+                "    options.ProviderOptions.DefaultAccessTokenScopes.Add(builder.Configuration[\"ServerApi\"]);",
+                "}"
+              ],
+              "Replace": true,
+              "CodeChangeType": "Lambda",
+              "Parameter": "options",
+              "Parent": "builder.Services.AddMsalAuthentication",
+              "TrailingTrivia": {
+                "Semicolon": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "Identifier": "dotnet-blazorwasm-client",
+  "ProjectRelativeFolder": "",
+  "BasedOnProjectDescription": "",
+  "ConfigurationProperties": [
+  ],
+  "MatchesForProjectType": [
+  ]
+}

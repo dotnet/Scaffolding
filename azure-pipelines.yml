@@ -125,7 +125,7 @@ stages:
             condition: succeeded()
 
         - job: Linux
-           pool:
+          pool:
             ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
               vmImage: ubuntu-18.04
             ${{ if and(eq(variables['System.TeamProject'], 'internal'), notin(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:

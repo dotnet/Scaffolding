@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>$(StandardTestTfms)</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 

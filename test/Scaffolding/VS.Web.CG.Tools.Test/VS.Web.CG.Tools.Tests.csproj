@@ -3,7 +3,7 @@
   <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(StandardTestTfms)</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Tools</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>

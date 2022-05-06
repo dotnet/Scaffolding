@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -50,11 +43,14 @@ namespace @Model.NamespaceName
             _context = context;
         }
 
-        public IList<@Model.ViewDataTypeShortName> @Model.ViewDataTypeShortName { get;set; }
+        public IList<@Model.ViewDataTypeShortName> @Model.ViewDataTypeShortName { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).ToListAsync();
+            if (_context.@(entitySetName) != null)
+            {
+                @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).ToListAsync();
+            }
         }
     }
 }

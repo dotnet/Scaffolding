@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -51,17 +44,25 @@ namespace @Model.NamespaceName
             _context = context;
         }
 
-        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+@{
+    if (@Model.NullableEnabled)
+    {
+    @:  public @Model.ViewDataTypeShortName? @Model.ViewDataTypeShortName { get; set; }
+    }
+    else 
+    {
+    @:  public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+    }
+}
 
         public async Task<IActionResult> OnGetAsync(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
 
             @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
-
             if (@Model.ViewDataTypeShortName == null)
             {
                 return NotFound();

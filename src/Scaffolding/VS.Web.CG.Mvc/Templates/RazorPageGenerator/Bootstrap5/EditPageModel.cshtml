@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -18,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 @{
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    var viewDataTypeShortNameLowerCase = Model.ViewDataTypeShortName.ToLowerInvariant();
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
     var primaryKeyNullableTypeName = GetNullableTypeName(primaryKeyType, primaryKeyShortTypeName);
@@ -53,21 +47,21 @@ namespace @Model.NamespaceName
         }
 
         [BindProperty]
-        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
-
-            if (@Model.ViewDataTypeShortName == null)
+            var @viewDataTypeShortNameLowerCase =  await _context.@(entitySetName).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
+            if (@viewDataTypeShortNameLowerCase == null)
             {
                 return NotFound();
             }
+            @Model.ViewDataTypeShortName = @viewDataTypeShortNameLowerCase;
 @{
     foreach (var property in relatedProperties.Values)
     {
@@ -109,7 +103,17 @@ namespace @Model.NamespaceName
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+@{
+        if (@Model.NullableEnabled)
+        {
+            @:(_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
+        }
+        else 
+        {
+            @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+        }
+}
+            
         }
     }
 }

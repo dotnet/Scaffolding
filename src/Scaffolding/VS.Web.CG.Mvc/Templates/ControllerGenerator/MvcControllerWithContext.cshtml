@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic;
 @using System.Linq;
 using System;
@@ -103,7 +96,7 @@ namespace @Model.ControllerNamespace
         // GET: @routePrefix/Details/5
         public async Task<IActionResult> Details(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
@@ -222,7 +215,7 @@ namespace @Model.ControllerNamespace
         // GET: @routePrefix/Delete/5
         public async Task<IActionResult> Delete(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
@@ -250,7 +243,16 @@ namespace @Model.ControllerNamespace
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+            @{
+            if (@Model.NullableEnabled)
+            {
+            @:  return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
+            }
+            else 
+            {
+                @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+            }
+            }
         }
     }
 }

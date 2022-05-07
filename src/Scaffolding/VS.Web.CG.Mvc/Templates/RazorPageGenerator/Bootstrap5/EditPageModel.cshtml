@@ -106,7 +106,7 @@ namespace @Model.NamespaceName
 @{
         if (@Model.NullableEnabled)
         {
-            @:(_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
+            @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
         }
         else 
         {

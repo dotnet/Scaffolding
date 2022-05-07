@@ -97,7 +97,7 @@ namespace @Model.ControllerNamespace
             }
             else 
             {
-            @:  return View(await _context.@(entitySetName).ToListAsync());
+              @:return View(await _context.@(entitySetName).ToListAsync());
             }
     }
 }        }
@@ -260,16 +260,16 @@ namespace @Model.ControllerNamespace
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            @{
-            if (@Model.NullableEnabled)
-            {
-              @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
-            }
-            else 
-            {
-              @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
-            }
-            }
+    @{
+        if (@Model.NullableEnabled)
+        {
+          @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
+        }
+        else 
+        {
+          @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+        }
+    }
         }
     }
 }

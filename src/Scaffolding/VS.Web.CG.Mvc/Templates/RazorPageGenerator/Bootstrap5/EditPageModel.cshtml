@@ -106,14 +106,13 @@ namespace @Model.NamespaceName
 @{
         if (@Model.NullableEnabled)
         {
-            @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
+          @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
         }
         else 
         {
-            @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+          @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
 }
-            
         }
     }
 }

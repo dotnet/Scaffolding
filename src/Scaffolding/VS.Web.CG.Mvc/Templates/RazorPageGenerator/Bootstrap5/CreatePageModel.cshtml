@@ -69,11 +69,11 @@ namespace @Model.NamespaceName
 @{
         if (@Model.NullableEnabled)
         {
-        @:  if (!ModelState.IsValid || _context.@(entitySetName) == null || @Model.ViewDataTypeShortName == null)
+          @:if (!ModelState.IsValid || _context.@(entitySetName) == null || @Model.ViewDataTypeShortName == null)
         }
         else 
         {
-        @:  if (!ModelState.IsValid)
+          @:if (!ModelState.IsValid)
         }
 }
             {

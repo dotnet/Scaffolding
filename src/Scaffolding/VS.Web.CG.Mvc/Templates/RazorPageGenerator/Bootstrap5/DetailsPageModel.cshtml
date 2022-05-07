@@ -48,11 +48,11 @@ namespace @Model.NamespaceName
 @{
     if (@Model.NullableEnabled)
     {
-    @:  public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!; 
+      @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!; 
     }
     else 
     {
-    @:  public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+      @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
     }
 }
 
@@ -64,7 +64,6 @@ namespace @Model.NamespaceName
             }
 
             var @viewDataTypeShortNameLowerCase = await _context.@(entitySetName).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
-
             if (@viewDataTypeShortNameLowerCase == null)
             {
                 return NotFound();

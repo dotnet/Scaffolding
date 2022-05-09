@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -56,13 +49,33 @@ namespace @Model.NamespaceName
             return Page();
         }
 
-        [BindProperty]
-        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+@{
+        if (@Model.NullableEnabled)
+        {
+        @:[BindProperty]
+        @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!;
+        }
+        else 
+        {
+        @:[BindProperty]
+        @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+        }
+}
+        
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+@{
+        if (@Model.NullableEnabled)
+        {
+          @:if (!ModelState.IsValid || _context.@(entitySetName) == null || @Model.ViewDataTypeShortName == null)
+        }
+        else 
+        {
+          @:if (!ModelState.IsValid)
+        }
+}
             {
                 return Page();
             }

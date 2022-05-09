@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -17,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 @{
     var entitySetName = Model.ModelMetadata.EntitySetName;
+    var viewDataTypeShortNameLowerCase = Model.ViewDataTypeShortName.ToLowerInvariant();
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
@@ -51,20 +45,32 @@ namespace @Model.NamespaceName
             _context = context;
         }
 
-        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+@{
+    if (@Model.NullableEnabled)
+    {
+      @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!; 
+    }
+    else 
+    {
+      @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
+    }
+}
 
         public async Task<IActionResult> OnGetAsync(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
 
-            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).FirstOrDefaultAsync(m => m.@(primaryKeyName) == id);
-
-            if (@Model.ViewDataTypeShortName == null)
+            var @viewDataTypeShortNameLowerCase = await _context.@(entitySetName).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
+            if (@viewDataTypeShortNameLowerCase == null)
             {
                 return NotFound();
+            }
+            else 
+            {
+                @Model.ViewDataTypeShortName = @viewDataTypeShortNameLowerCase;
             }
             return Page();
         }

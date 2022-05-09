@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic;
 using System;
 using System.Collections.Generic;
@@ -52,7 +45,7 @@ using Microsoft.EntityFrameworkCore;
         {
         }
 
-        public DbSet<@Model.ModelTypeFullName> @Model.ModelTypeName { get; set; }
+        public DbSet<@Model.ModelTypeFullName>? @Model.ModelTypeName { get; set; }
     }
 @{
     if (!String.IsNullOrEmpty(Model.DbContextNamespace))

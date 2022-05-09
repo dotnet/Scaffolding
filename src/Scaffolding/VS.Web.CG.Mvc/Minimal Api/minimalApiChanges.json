@@ -9,7 +9,7 @@
               "InsertAfter": "app.MapRazorPages();",
               "Block": "app.{0}()",
               "InsertBefore": [ "app.Run();" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             }
@@ -22,7 +22,7 @@
               "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddSwaggerGen();", "var app = builder.Build();" ],
               "Options": [ "OpenApi" ],
               "Block": "WebApplication.CreateBuilder.Services.AddEndpointsApiExplorer()",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -31,7 +31,7 @@
               "InsertBefore": [ "var app = builder.Build();" ],
               "Options": [ "OpenApi" ],
               "Block": "WebApplication.CreateBuilder.Services.AddSwaggerGen()",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -40,7 +40,7 @@
               "Options": [ "OpenApi" ],
               "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
               "InsertBefore": [ "app.UseHttpsRedirection();" ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             }

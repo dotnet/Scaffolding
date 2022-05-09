@@ -212,7 +212,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Register an Azure AD or Azure AD B2C app registration in Azure and update the project." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), AppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectFilePathOption()
+                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), HostedAppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectFilePathOption()
             };
 
         private static Command UpdateProjectCommand() =>
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption(),
+                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption()
             };
 
         private static Command UpdateAppRegistrationCommand() =>
@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken()
+                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption()
             };
 
         private static Command CreateAppRegistrationCommand() =>
@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.CREATE_APP_REGISTRATION_COMMAND,
                 description: "Create an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppDisplayName(), ProjectFilePathOption(), ProjectType()
+                TenantOption(), UsernameOption(), JsonOption(), AppDisplayName(), ProjectFilePathOption(), ProjectType(), ClientProjectOption()
             };
 
         private static Command UnregisterApplicationCommand() =>
@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Unregister an Azure AD or Azure AD B2C app registration in Azure." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppIdUriOption(), ProjectFilePathOption(), ClientIdOption()
+                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ProjectFilePathOption(), ClientIdOption()
             };
 
         private static Option JsonOption() =>
@@ -377,9 +377,17 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option AppIdUriOption() =>
+        private static Option ClientProjectOption() =>
             new Option<string>(
-                aliases: new[] { "--app-id-uri" },
+                aliases: new[] { "--client-project" },
+                description: "Path to the project file (.csproj file) for a hosted Blazor WASM client. If provided, implies that project is Blazor WASM Hosted\n")
+            {
+                IsRequired = false
+            };
+
+        private static Option HostedAppIdUriOption() =>
+            new Option<string>(
+                aliases: new[] { "--hosted-app-id-uri" },
                 description: "The App ID Uri for the Blazor WebAssembly hosted API. This parameter will only be used for Blazor WebAssembly hosted applications.\n")
             {
                 IsRequired = false

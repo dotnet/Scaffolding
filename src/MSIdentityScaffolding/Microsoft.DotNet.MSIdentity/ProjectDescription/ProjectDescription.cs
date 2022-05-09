@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
         /// <summary>
         /// Empty files
         /// </summary>
-        static readonly ConfigurationProperties[] s_emptyFiles = new ConfigurationProperties[0];
+        static readonly ConfigurationProperties[] s_emptyFiles = Array.Empty<ConfigurationProperties>();
 
         /// <summary>
         /// Identifier of the project description.

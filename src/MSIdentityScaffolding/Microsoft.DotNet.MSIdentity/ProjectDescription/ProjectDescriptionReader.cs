@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ProjectDescriptionReader
     {
-        private const string ProjectTypeIdSuffix = "dotnet-";
+        private const string ProjectTypeIdPrefix = "dotnet-";
 
         private readonly IEnumerable<string> _files;
         private List<ProjectDescription>? _projectDescriptions;
@@ -23,11 +23,11 @@ namespace Microsoft.DotNet.MSIdentity.Project
             _files = files;
         }
 
-        public ProjectDescription? GetProjectDescription(string projectTypeId)
+        public ProjectDescription? GetProjectDescription(string? projectTypeId)
         {
-            if (!string.IsNullOrEmpty(projectTypeId) && !projectTypeId.Equals(ProjectTypeIdSuffix))
+            if (!string.IsNullOrEmpty(projectTypeId) && !projectTypeId.Equals(ProjectTypeIdPrefix))
             {
-                return ProjectDescriptions.FirstOrDefault(p => p.Identifier == projectTypeId);
+               return ProjectDescriptions.FirstOrDefault(p => string.Equals(projectTypeId, p.Identifier));
             }
 
             // TODO: could be both a Web app and WEB API.
@@ -84,13 +84,6 @@ namespace Microsoft.DotNet.MSIdentity.Project
             }
 
             return projectDescription;
-        }
-
-        private string? InferProjectType()
-        {
-           
-
-            return null;
         }
 
         /// <summary>

@@ -148,6 +148,10 @@
   <data name="add_dotnet_blazorwasm_UserProfile_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\UserProfile.razor.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="AppNotFound" xml:space="preserve">
+    <value>Couldn't find app {0} in tenant {1}</value>
+    <comment>0 = EffectiveClientId, 1 = EffectiveTenantId</comment>
+  </data>
   <data name="AuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>
   </data>
@@ -159,6 +163,9 @@
   </data>
   <data name="cm_dotnet_blazorwasm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorwasm.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cm_dotnet_blazorwasm_client" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorwasm_client.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="cm_dotnet_blazorwasm_hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_blazorwasm_hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -172,6 +179,14 @@
   <data name="cm_dotnet_webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="CodeModifierConfigParsingError" xml:space="preserve">
+    <value>Error parsing Code Modifier Config for project type {0}, exception: {1}</value>
+    <comment>0 = projectType, 1 = exception.Message</comment>
+  </data>
+  <data name="ConfiguredBlazorWasmClient" xml:space="preserve">
+    <value>Configured Blazor WASM client app registration "{0}" ({1})</value>
+    <comment>0 = ApplicationDisplayName, 1 = ClientId</comment>
+  </data>
   <data name="CreatedAppRegistration" xml:space="preserve">
     <value>Created app {0} - {1}.</value>
   </data>
@@ -183,6 +198,9 @@
   </data>
   <data name="dotnet_blazorwasm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_blazorwasm.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="dotnet_blazorwasm_client" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ProjectDescriptions\dotnet_blazorwasm_client.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="dotnet_blazorwasm_hosted" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_blazorwasm_hosted.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -201,6 +219,10 @@
   </data>
   <data name="dotnet_webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ExposingScopes" xml:space="preserve">
+    <value>Exposing API scopes for Server App Registration "{0}" ({1})</value>
+    <comment>0 = ApplicationDisplayName, 1 = ClientId</comment>
   </data>
   <data name="Failed" xml:space="preserve">
     <value>FAILED\n\n</value>
@@ -234,6 +256,14 @@
   <data name="MicrosoftGraphNotSupported" xml:space="preserve">
     <value>You'll need to remove the calls to Microsoft Graph as it's not supported by B2C apps.</value>
   </data>
+  <data name="MismatchedProjectTypeIdentifier" xml:space="preserve">
+    <value>Config identifier: {0} does not match toolOptions identifier: {1}</value>
+    <comment>0 = codeModifierConfig.Identifier, 1 = _toolOptions.ProjectTypeIdentifier</comment>
+  </data>
+  <data name="NoProjectDescriptionFound" xml:space="preserve">
+    <value>No valid project description found with project type identifier "{0}"</value>
+    <comment>0 = ProjectTypeIdentifier</comment>
+  </data>
   <data name="NoProjectFound" xml:space="preserve">
     <value>No project found in {0}.</value>
   </data>
@@ -249,7 +279,12 @@
     <value>..\Resources\Policies.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="ProjectPathError" xml:space="preserve">
-    <value>Specify one .csproj file for the --project-path</value>
+    <value>Failed to validate project path {0}</value>
+    <comment>0 = projectPath</comment>
+  </data>
+  <data name="ResourceFileParseError" xml:space="preserve">
+    <value>Resource file {0} could not be parsed.</value>
+    <comment>0 = CodeModifierConfigPropertyInfo.Name</comment>
   </data>
   <data name="Success" xml:space="preserve">
     <value>SUCCESS</value>

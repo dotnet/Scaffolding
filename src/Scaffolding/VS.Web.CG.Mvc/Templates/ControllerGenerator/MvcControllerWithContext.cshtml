@@ -1,11 +1,4 @@
 @inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@{
-if (@Model.NullableEnabled)
-{
-@:#nullable disable
-
-}
-}
 @using System.Collections.Generic;
 @using System.Linq;
 using System;
@@ -96,14 +89,23 @@ namespace @Model.ControllerNamespace
     }
     else
     {
-            @:return View(await _context.@(entitySetName).ToListAsync());
+            if (@Model.NullableEnabled)
+            {
+              @:return _context.Movie != null ? 
+                        @:  View(await _context.Movie.ToListAsync()) :
+                        @:  Problem("Entity set '@Model.ContextTypeName.@(entitySetName)'  is null.");
+            }
+            else 
+            {
+              @:return View(await _context.@(entitySetName).ToListAsync());
+            }
     }
 }        }
 
         // GET: @routePrefix/Details/5
         public async Task<IActionResult> Details(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
@@ -159,7 +161,7 @@ namespace @Model.ControllerNamespace
         // GET: @routePrefix/Edit/5
         public async Task<IActionResult> Edit(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
@@ -222,7 +224,7 @@ namespace @Model.ControllerNamespace
         // GET: @routePrefix/Delete/5
         public async Task<IActionResult> Delete(@primaryKeyNullableTypeName id)
         {
-            if (id == null)
+            if (id == null || _context.@(entitySetName) == null)
             {
                 return NotFound();
             }
@@ -242,15 +244,32 @@ namespace @Model.ControllerNamespace
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(@primaryKeyShortTypeName id)
         {
+            if (_context.@(entitySetName) == null)
+            {
+                return Problem("Entity set '@Model.ContextTypeName.@(entitySetName)'  is null.");
+            }
             var @Model.ModelVariable = await _context.@(entitySetName).FindAsync(id);
-            _context.@(entitySetName).Remove(@Model.ModelVariable);
+            if (@Model.ModelVariable != null)
+            {
+                _context.@(entitySetName).Remove(@Model.ModelVariable);
+            }
+            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+    @{
+        if (@Model.NullableEnabled)
+        {
+          @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
+        }
+        else 
+        {
+          @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
+        }
+    }
         }
     }
 }

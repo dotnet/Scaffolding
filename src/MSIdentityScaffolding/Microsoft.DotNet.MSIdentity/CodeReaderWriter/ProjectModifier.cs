@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.Properties;
@@ -43,7 +44,16 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
-                return;
+                var csProjFiles = _files.Where(file => file.EndsWith(".csproj"));
+                if (csProjFiles.Count() != 1)
+                {
+                    var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
+                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, errorMsg));
+                    _consoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+                    return;
+                }
+
+                _toolOptions.ProjectFilePath = csProjFiles.First();
             }
 
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
@@ -85,24 +95,24 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             if (string.IsNullOrEmpty(_toolOptions.ProjectType))
             {
-                return null;
+                throw new ArgumentNullException(nameof(_toolOptions.ProjectType));
             }
 
             if (CodeModifierConfigPropertyInfo is null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(CodeModifierConfigPropertyInfo));
             }
 
             byte[] content = (CodeModifierConfigPropertyInfo.GetValue(null) as byte[])!;
             CodeModifierConfig? codeModifierConfig = ReadCodeModifierConfigFromFileContent(content);
             if (codeModifierConfig is null)
             {
-                throw new FormatException($"Resource file { CodeModifierConfigPropertyInfo.Name } could not be parsed. ");
+                throw new FormatException(string.Format(Resources.ResourceFileParseError, CodeModifierConfigPropertyInfo.Name));
             }
 
-            if (!codeModifierConfig.Identifier.Equals(_toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier, StringComparison.OrdinalIgnoreCase))
             {
-                return null;
+                throw new FormatException(string.Format(Resources.MismatchedProjectTypeIdentifier, codeModifierConfig.Identifier, _toolOptions.ProjectTypeIdentifier));
             }
 
             return codeModifierConfig;
@@ -132,7 +142,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
             catch (Exception e)
             {
-                _consoleLogger.LogMessage($"Error parsing Code Modifier Config for project type { _toolOptions.ProjectType }, exception: { e.Message }");
+                _consoleLogger.LogMessage(string.Format(Resources.CodeModifierConfigParsingError, _toolOptions.ProjectType, e.Message));
                 return null;
             }
         }
@@ -250,9 +260,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
             var root = documentBuilder.AddUsings(options);
-            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
+            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges)
+                && root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
             {
-
                 var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
                 if (updatedIdentifer.HasValue)
@@ -264,7 +274,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 var updatedRoot = DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
                 return updatedRoot;
             }
-
             else
             {
                 var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();

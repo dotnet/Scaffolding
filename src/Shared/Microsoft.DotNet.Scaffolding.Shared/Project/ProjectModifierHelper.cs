@@ -17,9 +17,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
     {
         internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
         internal static IEnumerable<string> CodeSnippetTrimStrings = CodeSnippetTrimChars.Select(c => c.ToString());
-        internal static char[] Parentheses = new char[] { '(', ')' }; 
+        internal static char[] Parentheses = new char[] { '(', ')' };
         internal const string VarIdentifier = "var";
         internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
+
         /// <summary>
         /// Check if Startup.cs or similar file exists.
         /// </summary>
@@ -418,8 +419,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return null;
             }
 
-            var trimmedSourceFile = ProjectModifierHelper.TrimStatement(sourceFileString);
-            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(ProjectModifierHelper.TrimStatement(c.Block)));
+            var trimmedSourceFile = TrimStatement(sourceFileString);
+            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
             if (!applicableCodeChanges.Any())
             {
                 return null;
@@ -428,11 +429,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             foreach (var change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
-                if (!string.IsNullOrEmpty(change.ReplaceSnippet))
+                if (change.ReplaceSnippet != null)
                 {
-                    if (sourceFileString.Contains(change.ReplaceSnippet))
+                    var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                    if (sourceFileString.Contains(replaceSnippet))
                     {
-                        sourceFileString = sourceFileString.Replace(change.ReplaceSnippet, change.Block);
+                        sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
                     }
                     else
                     {
@@ -453,8 +455,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         {
             var classFileTxt = await document.GetTextAsync();
 
-            // Note: Here, document.Name is the full filepath
-            File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
+            // Note: For files without .cs extension, document.Name is the full filepath
+            var filePath = document.Name.EndsWith(".cs") ? document.FilePath : document.Name;
+            File.WriteAllText(filePath, classFileTxt.ToString(), new UTF8Encoding(false));
             consoleLogger.LogMessage($"Modified {document.Name}.\n");
         }
 

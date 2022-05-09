@@ -8,12 +8,12 @@
             {
               "InsertAfter": "WebApplication.CreateBuilder",
               "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\");"
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\") ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")));"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
               "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n    options.{0}(connectionString));\"",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -21,7 +21,7 @@
               "InsertAfter": "builder.Services.AddDbContext",
               "CheckBlock": "builder.Services.AddDefaultIdentity",
               "Block": "builder.Services.AddDefaultIdentity<{0}>(options => options.SignIn.RequireConfirmedAccount = true)\r\n    .AddEntityFrameworkStores<{0}>();\"",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },

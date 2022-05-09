@@ -3,7 +3,9 @@
   "Files": [
     {
       "FileName": "Program.cs",
-      "Options": [ "MinimalApp" ],
+      "Options": [
+        "MinimalApp"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
@@ -19,7 +21,7 @@
                 "WebApplication.CreateBuilder.Services.AddRazorPages",
                 "WebApplication.CreateBuilder.Build"
               ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -30,7 +32,7 @@
                 "WebApplication.CreateBuilder.Services.AddAuthorization",
                 "WebApplication.CreateBuilder.Services.AddRazorPages"
               ],
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -38,7 +40,7 @@
               "Block": "AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))",
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthentication",
               "CodeChangeType": "MemberAccess",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -49,16 +51,16 @@
                 "WebApplication.CreateBuilder.Services.AddAuthorization",
                 "WebApplication.CreateBuilder.Services.AddRazorPages",
                 "WebApplication.CreateBuilder.Build"
-              ],             
-              "CodeFormatting": {
+              ],
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "Block": "AddMicrosoftIdentityUI()",
               "Parent": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
-              "CodeChangeType":"MemberAccess",
-              "CodeFormatting": {
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -70,7 +72,7 @@
                 "DownstreamApi"
               ],
               "Block": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "NumberOfSpaces": 8,
                 "Newline": true
               }
@@ -81,28 +83,32 @@
               "Options": [
                 "MicrosoftGraph"
               ],
-              "Block": "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))\r\n            .AddInMemoryTokenCaches()",
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
+              "MultiLineBlock": [
+                "            AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "Parent": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
               "CodeChangeType": "MemberAccess",
               "Options": [
                 "DownstreamApi"
               ],
-              "Block": "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))\r\n            .AddInMemoryTokenCaches()",
-              "CodeFormatting": {
-                "NumberOfSpaces": 12,
+              "MultiLineBlock": [
+                "            AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
@@ -111,7 +117,7 @@
               "Parameter": "options",
               "CodeChangeType": "Lambda",
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthorization",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true,
                 "NumberOfSpaces": 4
               }
@@ -120,7 +126,7 @@
               "Block": "AddMicrosoftIdentityConsentHandler()",
               "Parent": "WebApplication.CreateBuilder.Services.AddServerSideBlazor()",
               "CodeChangeType": "MemberAccess",
-              "CodeFormatting":{
+              "LeadingTrivia": {
                 "Newline": true,
                 "NumberOfSpaces": 4
               }
@@ -128,21 +134,21 @@
             {
               "Block": "app.UseAuthentication()",
               "InsertAfter": "app.UseRouting()",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "Block": "app.UseAuthorization()",
               "InsertAfter": "app.UseAuthentication()",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "Block": "app.MapControllers()",
               "InsertAfter": "app.UseAuthorization",
-              "CodeFormatting": {
+              "LeadingTrivia": {
                 "Newline": true
               }
             }
@@ -162,12 +168,22 @@
       "FileName": "App.razor",
       "Replacements": [
         {
-          "Block": "<CascadingAuthenticationState>\r\n    <Router AppAssembly=\"@typeof(App).Assembly\">",
-          "ReplaceSnippet": "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          "MultiLineBlock": [
+            "<CascadingAuthenticationState>",
+            "    <Router AppAssembly=\"@typeof(App).Assembly\">"
+          ],
+          "ReplaceSnippet": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          ]
         },
         {
-          "Block":"    </Router>\r\n</CascadingAuthenticationState>",
-          "ReplaceSnippet": "</Router>"
+          "MultiLineBlock": [
+            "    </Router>",
+            "</CascadingAuthenticationState>"
+          ],
+          "ReplaceSnippet": [
+            "</Router>"
+          ]
         }
       ]
     },
@@ -179,15 +195,38 @@
       ],
       "Replacements": [
         {
-          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"showprofile\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Show profile\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "MultiLineBlock": [
+            "</NavLink>",
+            "        </div>",
+            "        <div class=\"nav-item px-3\">",
+            "            <NavLink class=\"nav-link\" href=\"showprofile\">",
+            "                <span class=\"oi oi-person\" aria-hidden=\"true\"></span> Show profile",
+            "            </NavLink>",
+            "        </div>",
+            "    </nav>",
+            "</div>"
+          ],
+          "ReplaceSnippet": [
+            "</NavLink>",
+            "        </div>",
+            "    </nav>",
+            "</div>"
+          ],
           "Options": [
             "MicrosoftGraph"
           ]
         },
         {
-          "Block": "</NavLink>\r\n        </div>\r\n        <div class=\"nav-item px-3\">\r\n            <NavLink class=\"nav-link\" href=\"callwebapi\">\r\n                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API\r\n            </NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
-          "ReplaceSnippet": "</NavLink>\r\n        </div>\r\n    </nav>\r\n</div>",
+          "MultiLineBlock": [
+            "<NavLink class=\"nav-link\" href=\"callwebapi\">",
+            "                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Call Web API",
+            "            </NavLink>"
+          ],
+          "ReplaceSnippet": [
+            "<NavLink class=\"nav-link\" href=\"fetchdata\">",
+            "                <span class=\"oi oi-list-rich\" aria-hidden=\"true\"></span> Fetch data",
+            "            </NavLink>"
+          ],
           "Options": [
             "DownstreamApi"
           ]
@@ -198,8 +237,15 @@
       "FileName": "MainLayout.razor",
       "Replacements": [
         {
-          "Block": "    <main>\r\n        <div class=\"top-row px-4 auth\">\r\n            <LoginDisplay />",
-          "ReplaceSnippet": "    <main>\r\n        <div class=\"top-row px-4\">"
+          "MultiLineBlock": [
+            "    <main>",
+            "        <div class=\"top-row px-4 auth\">",
+            "            <LoginDisplay />"
+          ],
+          "ReplaceSnippet": [
+            "    <main>",
+            "        <div class=\"top-row px-4\">"
+          ]
         }
       ]
     },

@@ -98,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         }
 
 
-        public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType)
+        public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType, bool nullableEnabled)
         {
             if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
             {
@@ -112,9 +112,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var lastNode = dbContextNode.ChildNodes().Last();
 
                     var safeModelName = GetSafeModelName(modelType.Name, dbContext.TypeSymbol);
+                    var nullablilitySign = nullableEnabled ? "? " : " ";
                     // Todo : Need pluralization for property name below.
                     // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
-                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + Environment.NewLine;
+                    var dbSetProperty = "public DbSet<" + modelType.FullName + ">" + nullablilitySign + safeModelName + " { get; set; }" + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                     var newNode = rootNode.InsertNodesAfter(lastNode,

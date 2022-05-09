@@ -42,10 +42,38 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var modelType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyModel").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
-            var result = testObj.AddModelToContext(contextType, modelType);
+            var result = testObj.AddModelToContext(contextType, modelType, nullableEnabled: false);
 
             Assert.True(result.Edited);
 
+            Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
+        }
+
+        [Theory]
+        [InlineData("DbContext_Before.txt", "MyModel.txt", "DbContextNullable_After.txt")]
+        public void AddModelToContext_Adds_Model_From_Same_Project_To_Context_With_Nullable_Enabled(string beforeContextResource, string modelResource, string afterContextResource)
+        {
+            string resourcePrefix = "compiler/resources/";
+
+            var beforeDbContextText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + beforeContextResource);
+            var modelText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + modelResource);
+            var afterDbContextText = ResourceUtilities.GetEmbeddedResourceFileContent(resourcePrefix + afterContextResource);
+
+            var contextTree = CSharpSyntaxTree.ParseText(beforeDbContextText);
+            var modelTree = CSharpSyntaxTree.ParseText(modelText);
+            var efReference = MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location);
+
+            var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { contextTree, modelTree }, new[] { efReference });
+
+            DbContextEditorServices testObj = GetTestObject();
+
+            var types = RoslynUtilities.GetDirectTypesInCompilation(compilation);
+            var modelType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyModel").First());
+            var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
+
+            var result = testObj.AddModelToContext(contextType, modelType, nullableEnabled: true);
+
+            Assert.True(result.Edited);
             Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
         }
 

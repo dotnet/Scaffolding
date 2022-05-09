@@ -111,7 +111,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
                 {
-                    await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject);
+                    await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject, _applicationInfo);
                 }
                 else
                 {
@@ -174,7 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
                 {
-                    await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject);
+                    await AddModelTypeToExistingDbContextIfNeeded(dbContextSymbolInWebProject, _applicationInfo);
                 }
                 else
                 {
@@ -305,9 +305,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
         }
 
-        private async Task AddModelTypeToExistingDbContextIfNeeded(ModelType dbContextSymbol)
+        private async Task AddModelTypeToExistingDbContextIfNeeded(ModelType dbContextSymbol, IApplicationInfo appInfo)
         {
-            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol);
+            bool nullabledEnabled = "enable".Equals(appInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, nullabledEnabled);
             var projectCompilation = await _workspace.CurrentSolution.Projects
                 .First(project => project.AssemblyName == _projectContext.AssemblyName)
                 .GetCompilationAsync();

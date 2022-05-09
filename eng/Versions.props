@@ -13,8 +13,15 @@
     <!-- Ref packages -->
   </PropertyGroup>
   <PropertyGroup>
+<<<<<<< HEAD
     <VersionPrefix>6.0.3</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
+=======
+    <VersionPrefix>7.0.0</VersionPrefix>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>4</PreReleaseVersionIteration>
+    <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
+>>>>>>> 2e647c68 (Enabling nullable templates (#1887))
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
@@ -39,11 +46,19 @@
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.EntityFrameworkCore.Design -->
+<<<<<<< HEAD
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.0</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+=======
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>7.0.0-preview.3.22175.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <!-- Microsoft.Extensions.DependencyInjection -->
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <!-- Microsoft.Extensions.FileProviders.Physical -->
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+>>>>>>> 2e647c68 (Enabling nullable templates (#1887))
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
@@ -77,6 +92,7 @@
     <!-- Microsoft.DotNet.ProjectModel -->
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
+<<<<<<< HEAD
     <MicrosoftEntityFrameworkCorePackageVersion>6.0.0</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFramework.Design for test-->
     <MicrosoftEntityFrameworkCoreDesignTestPackageVersion>6.0.0</MicrosoftEntityFrameworkCoreDesignTestPackageVersion>
@@ -92,9 +108,27 @@
     <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>6.0.0</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <!--Microsoft.Extensions.DependencyMoel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>6.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
+=======
+    <MicrosoftEntityFrameworkCorePackageVersion>7.0.0-preview.3.22175.1</MicrosoftEntityFrameworkCorePackageVersion>
+    <!-- Microsoft.EntityFramework.Design for test-->
+    <MicrosoftEntityFrameworkCoreDesignTestPackageVersion>7.0.0-preview.3.22175.1</MicrosoftEntityFrameworkCoreDesignTestPackageVersion>
+    <!-- Microsoft.EntityFrameworkCore.SqlServer -->
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>7.0.0-preview.3.22175.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Abstractions -->
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Json -->
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.UserSecrets -->
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <!--Microsoft.Extensions.DependencyMoel -->
+    <MicrosoftExtensionsDependencyModelPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsDependencyModelPackageVersion>
+>>>>>>> 2e647c68 (Enabling nullable templates (#1887))
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>6.0.0</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
+<<<<<<< HEAD
     <MicrosoftExtensionsLoggingConsolePackageVersion>6.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
     <MicrosoftExtensionsLoggingDebugPackageVersion>6.0.0</MicrosoftExtensionsLoggingDebugPackageVersion>
@@ -102,6 +136,15 @@
     <MicrosoftExtensionsLoggingPackageVersion>6.0.0</MicrosoftExtensionsLoggingPackageVersion>
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>6.0.0</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+=======
+    <MicrosoftExtensionsLoggingConsolePackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <!-- Microsoft.Extensions.Logging.Debug -->
+    <MicrosoftExtensionsLoggingDebugPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <!-- Microsoft.Extensions.Logging -->
+    <MicrosoftExtensionsLoggingPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsLoggingPackageVersion>
+    <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>7.0.0-preview.3.22175.4</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+>>>>>>> 2e647c68 (Enabling nullable templates (#1887))
     <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>5.0.0-preview.6.20312.15</MicrosoftNETSdkRazorPackageVersion>
     <!-- Microsoft.NET.Test.Sdk-->
@@ -114,7 +157,11 @@
     <XunitRunnerVisualStudioPackageVersion>2.4.2-pre.9</XunitRunnerVisualStudioPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
+<<<<<<< HEAD
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+=======
+    <SystemCollectionsImmutableVersion>7.0.0-preview.3.22175.4</SystemCollectionsImmutableVersion>
+>>>>>>> 2e647c68 (Enabling nullable templates (#1887))
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <SystemPrivateUriVersion>4.3.2</SystemPrivateUriVersion>
     <SystemSecurityCryptographyX509CertificatesVersion>4.3.0</SystemSecurityCryptographyX509CertificatesVersion>

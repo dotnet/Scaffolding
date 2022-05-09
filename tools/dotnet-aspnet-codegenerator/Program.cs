@@ -170,7 +170,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 throw new ArgumentNullException(nameof(projectPath));
             }
-
             var context = GetProjectInformation(projectPath, configuration);
             var tfmMoniker = context.TargetFrameworkMoniker;
             var shortFramework = context.TargetFramework;

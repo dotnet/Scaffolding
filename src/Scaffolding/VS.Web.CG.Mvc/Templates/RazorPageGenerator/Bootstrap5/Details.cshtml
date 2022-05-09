@@ -77,7 +77,7 @@
     string pkName = GetPrimaryKeyName();
     if (pkName != null)
     {
-    @:<a asp-page="./Edit" asp-route-id="@@Model.@(Model.ModelTypeName).@pkName">Edit</a> |
+    @:<a asp-page="./Edit" asp-route-id="@@Model.@(Model.ModelTypeName)?.@pkName">Edit</a> |
     @:<a asp-page="./Index">Back to List</a>
     }
     else

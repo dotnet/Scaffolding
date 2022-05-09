@@ -31,6 +31,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@getAllModels")
         @:.Produces<@modelList>(StatusCodes.Status200OK);
     }
@@ -50,6 +51,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@getModelById")
         @:.Produces<@modelName>(StatusCodes.Status200OK)
         @:.Produces(StatusCodes.Status404NotFound);
@@ -77,6 +79,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@updateModel")
         @:.Produces(StatusCodes.Status404NotFound)
         @:.Produces(StatusCodes.Status204NoContent);
@@ -96,6 +99,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@createModel")
         @:.Produces<@modelName>(StatusCodes.Status201Created);
     }
@@ -120,6 +124,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@deleteModel")
         @:.Produces<@modelName>(StatusCodes.Status200OK)
         @:.Produces(StatusCodes.Status404NotFound);

@@ -23,6 +23,7 @@
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@getAllModels")
         @:.Produces<@modelArray>(StatusCodes.Status200OK);
     }
@@ -39,6 +40,7 @@
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@getModelById")
         @:.Produces<@modelName>(StatusCodes.Status200OK);
     }
@@ -55,6 +57,7 @@
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@updateModel")
         @:.Produces(StatusCodes.Status204NoContent);
     }
@@ -71,6 +74,7 @@
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@createModel")
         @:.Produces<@modelName>(StatusCodes.Status201Created);
     }
@@ -87,6 +91,7 @@
     @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@deleteModel")
         @:.Produces<@modelName>(StatusCodes.Status200OK);
     }

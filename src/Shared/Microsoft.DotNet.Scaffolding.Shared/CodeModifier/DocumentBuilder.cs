@@ -180,6 +180,39 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return root;
         }
 
+        internal static MethodDeclarationSyntax GetMethodFromSyntaxRoot(CompilationUnitSyntax root, string methodIdentifier)
+        {
+            var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+            var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault() ??
+                            root?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();  
+            if (classNode?.ChildNodes().FirstOrDefault(
+                n => n is MethodDeclarationSyntax syntax &&
+                syntax.Identifier.ToString().Equals(methodIdentifier, StringComparison.OrdinalIgnoreCase)) is MethodDeclarationSyntax method)
+            {
+                return method;
+            }
+            return null;
+        }
+
+        internal static CodeSnippet AddLeadingTriviaSpaces(CodeSnippet snippet, int spaces)
+        {
+            snippet.LeadingTrivia = snippet.LeadingTrivia ?? new Formatting();
+            snippet.LeadingTrivia.NumberOfSpaces += spaces;
+            return snippet;
+        }
+
+        internal static CodeSnippet[] AddLeadingTriviaSpaces(CodeSnippet[] snippets, int spaces)
+        {
+            for(int i = 0; i < snippets.Length; i++)
+            {
+                var snippet = snippets[i];
+                snippet = AddLeadingTriviaSpaces(snippet, spaces);
+                snippets[i] = snippet;
+            }
+
+            return snippets;
+        }
+
         internal static SyntaxNode ModifyMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
         {
             SyntaxNode modifiedMethod;

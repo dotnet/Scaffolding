@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
@@ -35,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string WebApplicationCreateBuilder = "WebApplication.CreateBuilder";
         private const string AddRazorPages = "Services.AddRazorPages()";
         private const string CreateBuilder = "CreateBuilder(args)";
-
+        private const string Main = nameof(Main);
 
         public DbContextEditorServices(
             IProjectContext projectContext,
@@ -155,7 +156,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return safeName;
         }
 
-        public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, string dbContextTypeName, string dbContextNamespace, string dataBaseName, bool useSqlite)
+        public EditSyntaxTreeResult EditStartupForNewContext(
+            ModelType startUp,
+            string dbContextTypeName,
+            string dbContextNamespace,
+            string dataBaseName,
+            bool useSqlite,
+            bool useTopLevelStatements)
         {
             Contract.Assert(startUp != null && startUp.TypeSymbol != null);
             Contract.Assert(!String.IsNullOrEmpty(dbContextTypeName));
@@ -169,12 +176,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                 var startUpClassNode = rootNode.FindNode(declarationReference.Span);
 
-                var configServicesMethod = startUpClassNode.ChildNodes()
-                    .FirstOrDefault(n => n is MethodDeclarationSyntax
-                        && ((MethodDeclarationSyntax)n).Identifier.ToString() == ConfigureServices) as MethodDeclarationSyntax;
                 var configRootProperty = TryGetIConfigurationRootProperty(startUp.TypeSymbol);
                 //if using Startup.cs, the ConfigureServices method should exist. 
-                if (configServicesMethod != null && configRootProperty != null)
+                if (startUpClassNode.ChildNodes()
+                    .FirstOrDefault(n =>
+                        n is MethodDeclarationSyntax syntax &&
+                        syntax.Identifier.ToString() == ConfigureServices)
+                            is MethodDeclarationSyntax configServicesMethod && configRootProperty != null)
                 {
                     var servicesParam = configServicesMethod.ParameterList.Parameters
                         .FirstOrDefault(p => p.Type.ToString().Equals(IServiceCollection));
@@ -217,46 +225,56 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 //minimal hosting scenario
                 else
                 {
-                    CompilationUnitSyntax classSyntax = startUpClassNode as CompilationUnitSyntax;
-                    if (classSyntax != null)
+                    var statementLeadingTrivia = string.Empty;
+                    StatementSyntax dbContextExpression = null;
+                    var compilationSyntax = rootNode as CompilationUnitSyntax;
+                    if (!useTopLevelStatements)
                     {
-                        //get leading trivia. there should be atleast one member 
-                        var statementLeadingTrivia = classSyntax.Members.First()?.GetLeadingTrivia().ToString();
+                        MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
+                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, dbContextNamespace, useSqlite);
+                    }
+                    else if(useTopLevelStatements)
+                    {
+                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, dbContextNamespace, useSqlite);
+                    }
 
-                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, useSqlite, statementLeadingTrivia);
-                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
-                        textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
-
-                        //get builder identifier string, should exist
-                        var builderExpression = classSyntax.Members.Where(st => st.ToString().Contains(WebApplicationCreateBuilder)).FirstOrDefault();
-                        var builderIdentifierString = GetBuilderIdentifier(builderExpression);
-
-                        //create syntax expression that adds DbContext
-                        //added InvalidOperationExceptino if Configuration.GetConnectionString returns null.
-                        var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
-                                string.Format("{0}.Services", builderIdentifierString),
-                                dbContextTypeName,
-                                string.Format("{0}.Configuration", builderIdentifierString),
-                                string.Format(" ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")", dbContextTypeName)));
-                        var dbContextExpression = SyntaxFactory.GlobalStatement(expression);
-
-                        //get global statement to insert after (different for web app vs web api)
-                        var statementToInsertAfter = classSyntax.Members.Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
-                        if (statementToInsertAfter == null)
-                        {
-                            statementToInsertAfter = classSyntax.Members.Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault(); 
-                        }
-
-                        var newClassSyntax = classSyntax.InsertNodesAfter(statementToInsertAfter, new List<GlobalStatementSyntax>() { dbContextExpression });
-                        var newRoot = rootNode.ReplaceNode(classSyntax, newClassSyntax);
-
+                    if (statementLeadingTrivia != null && dbContextExpression != null)
+                    {
+                        var newRoot = compilationSyntax;
                         //add additional namespaces
                         var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
                         foreach (var namespaceName in namespacesToAdd)
                         {
-                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
+                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot);
                         }
+                        if (!useTopLevelStatements)
+                        {
+                            MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
+                            var modifiedBlock = methodSyntax.Body;
+                            var statementToInsertAround = methodSyntax.Body.ChildNodes().Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
+                            if (statementToInsertAround == null)
+                            {
+                                statementToInsertAround = methodSyntax.Body.ChildNodes().Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault();
+                                modifiedBlock = methodSyntax.Body.InsertNodesAfter(statementToInsertAround, new List<StatementSyntax>() { dbContextExpression });
+                            }
+                            else
+                            {
+                                modifiedBlock = methodSyntax.Body.InsertNodesBefore(statementToInsertAround, new List<StatementSyntax>() { dbContextExpression });
+                            }
+                            var modifiedMethod = methodSyntax.WithBody(modifiedBlock);
+                            newRoot = newRoot.ReplaceNode(methodSyntax, modifiedMethod);
+                        }
+                        else
+                        {
+                            var statementToInsertAfter = newRoot.Members.Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
+                            if (statementToInsertAfter == null)
+                            {
+                                statementToInsertAfter = newRoot.Members.Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault();
+                            }
 
+                            newRoot = newRoot.InsertNodesAfter(statementToInsertAfter, new List<GlobalStatementSyntax>() { SyntaxFactory.GlobalStatement(dbContextExpression) });
+                        }
+                       
                         return new EditSyntaxTreeResult()
                         {
                             Edited = true,
@@ -271,6 +289,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 Edited = false
             };
+        }
+
+        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, bool useSqlite)
+        {
+            //get leading trivia. there should be atleast one member var statementLeadingTrivia = classSyntax.ChildNodes()
+            var statementLeadingTrivia = rootNode.ChildNodes().First()?.GetLeadingTrivia().ToString();
+            string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, useSqlite, statementLeadingTrivia);
+            _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
+            textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
+
+            //get builder identifier string, should exist
+            var builderExpression = rootNode.ChildNodes().Where(st => st.ToString().Contains(WebApplicationCreateBuilder)).FirstOrDefault() as MemberDeclarationSyntax;
+            var builderIdentifierString = GetBuilderIdentifier(builderExpression);
+
+            //create syntax expression that adds DbContext
+            //added InvalidOperationExceptino if Configuration.GetConnectionString returns null.
+            var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
+                    string.Format("{0}.Services", builderIdentifierString),
+                    dbContextTypeName,
+                    string.Format("{0}.Configuration", builderIdentifierString),
+                    string.Format(" ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")", dbContextTypeName))).WithLeadingTrivia(SyntaxFactory.Whitespace(statementLeadingTrivia));
+
+            return expression;
         }
 
         private string GetBuilderIdentifier(MemberDeclarationSyntax builderMember)

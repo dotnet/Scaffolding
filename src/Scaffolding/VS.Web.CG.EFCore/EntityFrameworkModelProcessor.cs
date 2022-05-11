@@ -103,7 +103,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, "Program"));
                 }
-
                 if (!dbContextSymbols.Any())
                 {
                     //add nullable properties
@@ -367,6 +366,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _loader,
                 _logger);
         }
+
         private async Task GenerateNewDbContextAndRegisterProgramFile(ModelType programType, IApplicationInfo applicationInfo)
         {
             AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
@@ -382,17 +382,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
             bool nullabledEnabled = "enable".Equals(applicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            bool useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_modelTypesLocator);
             var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType, nullabledEnabled);
             _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
             ContextProcessingStatus = ContextProcessingStatus.ContextAdded;
 
             if (programType != null)
             {
-                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(programType,
+                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(
+                    programType,
                     dbContextTemplateModel.DbContextTypeName,
                     dbContextTemplateModel.DbContextNamespace,
                     dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
-                    _useSqlite);
+                    _useSqlite,
+                    useTopLevelsStatements);
             }
 
             if (!_programEditResult.Edited)
@@ -452,14 +455,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
             ContextProcessingStatus = ContextProcessingStatus.ContextAdded;
-
+            bool useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_modelTypesLocator);
             if (startupType != null)
             {
                 _startupEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType,
                     dbContextTemplateModel.DbContextTypeName,
                     dbContextTemplateModel.DbContextNamespace,
                     dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
-                    _useSqlite);
+                    _useSqlite,
+                    useTopLevelsStatements);
             }
 
             if (!_startupEditResult.Edited)

@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
@@ -20,6 +21,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         internal static char[] Parentheses = new char[] { '(', ')' };
         internal const string VarIdentifier = "var";
         internal const string WebApplicationBuilderIdentifier = "WebApplicationBuilder";
+
+        public const string Main = nameof(Main);
 
         /// <summary>
         /// Check if Startup.cs or similar file exists.
@@ -39,16 +42,75 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return startupType == null;
         }
 
-        // Returns true when there is no Startup.cs or equivalent
-        internal static async Task<bool> IsMinimalApp(CodeAnalysis.Project project)
+        internal static async Task<bool> IsUsingTopLevelStatements(List<Document> documents)
         {
-            if (project.Documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
+            var programDocument = documents?.FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
+            if (programDocument != null && await programDocument.GetSyntaxRootAsync() is CompilationUnitSyntax root)
+            {
+                var fileScopedNamespaceNode = root.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
+                if (fileScopedNamespaceNode == null)
+                {
+                    var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(root, Main);
+                    return mainMethod == null;
+                }
+            }
+
+            return true;
+        }
+
+        internal static async Task<bool> IsUsingTopLevelStatements(IModelTypesLocator modelTypesLocator)
+        {
+            var programDocument = modelTypesLocator.GetAllDocuments().FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
+            if (programDocument != null && await programDocument.GetSyntaxRootAsync() is CompilationUnitSyntax root)
+            {
+                var fileScopedNamespaceNode = root.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
+                if (fileScopedNamespaceNode == null)
+                {
+                    var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+                    var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();
+                    var mainMethod = classNode?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
+                        && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
+
+                    return mainMethod == null;
+                }
+            }
+
+            return true;
+        }
+
+<<<<<<< HEAD
+=======
+        internal static async Task<bool> IsUsingTopLevelStatements(IModelTypesLocator modelTypesLocator)
+        {
+            var programDocument = modelTypesLocator.GetAllDocuments().FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
+            if (programDocument != null && await programDocument.GetSyntaxRootAsync() is CompilationUnitSyntax root)
+            {
+                var fileScopedNamespaceNode = root.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
+                if (fileScopedNamespaceNode == null)
+                {
+                    var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+                    var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();
+                    var mainMethod = classNode?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
+                        && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
+
+                    return mainMethod == null;
+                }
+            }
+
+            return true;
+        }
+
+>>>>>>> 99894f8e (update for identity)
+        // Returns true when there is no Startup.cs or equivalent
+        internal static async Task<bool> IsMinimalApp(List<Document> documents)
+        {
+            if (documents.Where(d => d.Name.EndsWith("Startup.cs")).Any())
             {
                 return false;
             }
 
             // if changed the name in Program.cs, get the class name and check.
-            var programDocument = project.Documents.FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
+            var programDocument = documents.FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
             var startupClassName = await GetStartupClassName(programDocument);
 
             return string.IsNullOrEmpty(startupClassName); // If project has UseStartup in Program.cs, it is not a minimal app
@@ -56,12 +118,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         // Get Startup class name from CreateHostBuilder in Program.cs. If Program.cs is not being used, method
         // will return null.
-        internal static async Task<string> GetStartupClass(CodeAnalysis.Project project)
+        internal static async Task<string> GetStartupClass(List<Document> documents)
         {
-            var programCsDocument = project.Documents.FirstOrDefault(d => d.Name.Equals("Program.cs"));
-            var startupClassName = await GetStartupClassName(programCsDocument);
+            string startupClassName = string.Empty;
+            if (documents != null && documents.Any())
+            {
+                var programCsDocument = documents.FirstOrDefault(d => d.Name.Equals("Program.cs"));
+                startupClassName = await GetStartupClassName(programCsDocument);
+            }
 
-            return string.IsNullOrEmpty(startupClassName) ? null : string.Concat(startupClassName, ".cs");
+            return string.IsNullOrEmpty(startupClassName) ? string.Empty : string.Concat(startupClassName, ".cs");
         }
 
         internal static async Task<string> GetStartupClassName(Document programDoc)
@@ -69,11 +135,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             if (programDoc != null && await programDoc.GetSyntaxRootAsync() is CompilationUnitSyntax root)
             {
                 var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                var programClassNode = namespaceNode?.DescendantNodes()
-                    .FirstOrDefault(node =>
-                        node is ClassDeclarationSyntax cds &&
-                        cds.Identifier
-                           .ValueText.Contains("Program"));
+                var programClassNode =
+                    namespaceNode?.DescendantNodes()
+                        .FirstOrDefault(node =>
+                            node is ClassDeclarationSyntax cds &&
+                            cds.Identifier
+                               .ValueText.Contains("Program")) ??
+                    root?.DescendantNodes()
+                        .FirstOrDefault(node =>
+                            node is ClassDeclarationSyntax cds &&
+                            cds.Identifier
+                               .ValueText.Contains("Program"));
 
                 var useStartupNode = programClassNode?.DescendantNodes()?
                     .FirstOrDefault(node =>

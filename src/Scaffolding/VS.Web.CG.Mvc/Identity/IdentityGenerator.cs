@@ -89,6 +89,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
+        public const string Main = nameof(Main);
+
         // Returns the set of template folders appropriate for templateModel.ContentVersion
         private IEnumerable<string> GetTemplateFoldersForContentVersion(IdentityGeneratorTemplateModel templateModel)
         {
@@ -268,7 +270,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     templateModel.UserClass,
                     templateModel.DbContextNamespace,
                     templateModel.UseSQLite);
-                //return;
             }
 
             await AddTemplateFiles(templateModel);
@@ -322,23 +323,61 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
                 //adding usings
+<<<<<<< HEAD
+                var modifiedRoot = docBuilder.AddUsings(new CodeChangeOptions());
+=======
                 var rootWithUsings = docBuilder.AddUsings(new CodeChangeOptions());
+>>>>>>> 99894f8e (update for identity)
+                var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(modelTypesLocator);
                 //add code snippets/changes.
-                if (programCsFile.Methods != null && programCsFile.Methods.Any())
+                if (programCsFile.Methods != null && programCsFile.Methods.TryGetValue("Global", out var globalChanges))
                 {
-                    var globalChanges = programCsFile.Methods.First(x => x.Key == "Global").Value;
-                    foreach (var codeChange in globalChanges.CodeChanges)
+                    var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, new CodeChangeOptions());
+                    var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(modifiedRoot.Members);
+                    if (updatedIdentifer.HasValue)
                     {
-                        codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite);
+                        (string oldValue, string newValue) = updatedIdentifer.Value;
+                        filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
                     }
+<<<<<<< HEAD
 
-                    var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(rootWithUsings, globalChanges.CodeChanges);
+                    filteredChanges = ApplyIdentityChanges(filteredChanges, dbContextClassName, identityUserClassName, useSqlite, useTopLevelsStatements);
+
+                    if (useTopLevelsStatements)
+                    {
+                        modifiedRoot = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, filteredChanges) as CompilationUnitSyntax;
+                    }
+                    else
+                    {
+                        var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(modifiedRoot, Main);
+                        if (mainMethod != null)
+                        {
+                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges);
+                            modifiedRoot = modifiedRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
+=======
+                    var modifiedRoot = rootWithUsings;
+                    if (useTopLevelsStatements)
+                    {
+                        modifiedRoot = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, globalChanges.CodeChanges) as CompilationUnitSyntax;
+                    }
+                    else
+                    {
+                        var mainMethod = modifiedRoot?.ChildNodes().FirstOrDefault(
+                            n => n is MethodDeclarationSyntax syntax &&
+                            syntax.Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
+                        if (mainMethod != null)
+                        {
+                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, globalChanges.CodeChanges);
+                            modifiedRoot = rootWithUsings?.ReplaceNode(mainMethod, updatedMethod);
+>>>>>>> 99894f8e (update for identity)
+                        }
+                    }
                     //replace root node with all the updates.
                     docEditor.ReplaceNode(docRoot, modifiedRoot);
                 }
                 else
                 {
-                    docEditor.ReplaceNode(docRoot, rootWithUsings);
+                    docEditor.ReplaceNode(docRoot, modifiedRoot);
                 }
                 //replace root node with all the updates.
                 //write to Program.cs file
@@ -346,7 +385,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, bool isSqlite)
+        private CodeSnippet[] ApplyIdentityChanges(CodeSnippet[] filteredChanges, string dbContextClassName, string identityUserClassName, bool useSqlite, bool useTopLevelsStatements)
+        {
+            foreach (var codeChange in filteredChanges)
+            {
+                if (!useTopLevelsStatements)
+                {
+                    codeChange.LeadingTrivia = codeChange.LeadingTrivia ?? new Formatting();
+                    codeChange.LeadingTrivia.NumberOfSpaces += 12;
+                }
+                codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite, codeChange?.LeadingTrivia?.NumberOfSpaces);
+            }
+
+            return filteredChanges;
+        }
+
+        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, bool isSqlite, int? spaces)
         {
             if (string.IsNullOrEmpty(stringToModify))
             {
@@ -376,6 +430,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
                 modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}Connection'");
+            }
+
+            if (stringToModify.Contains("{1}"))
+            {
+                modifiedString = modifiedString.Replace("{1}", new string(' ', spaces.GetValueOrDefault() + 4));
             }
 
             return modifiedString;

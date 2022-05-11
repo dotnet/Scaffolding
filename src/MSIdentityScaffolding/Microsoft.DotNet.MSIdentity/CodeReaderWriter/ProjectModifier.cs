@@ -75,12 +75,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project);
+            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project.Documents.ToList());
+            var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
             CodeChangeOptions options = new CodeChangeOptions
             {
                 MicrosoftGraph = _toolOptions.CallsGraph,
                 DownstreamApi = _toolOptions.CallsDownstreamApi,
-                IsMinimalApp = isMinimalApp
+                IsMinimalApp = isMinimalApp,
+                UsingTopLevelsStatements = useTopLevelsStatements
             };
 
             // Go through all the files, make changes using DocumentBuilder.
@@ -132,6 +134,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return _codeModifierConfigPropertyInfo;
             }
         }
+
+        public const string Main = nameof(Main);
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
         {
@@ -225,7 +229,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (file.FileName.Equals("Startup.cs"))
             {
                 // Startup class file name may be different
-                file.FileName = await ProjectModifierHelper.GetStartupClass(project) ?? file.FileName;
+                file.FileName = await ProjectModifierHelper.GetStartupClass(project.Documents.ToList()) ?? file.FileName;
             }
 
             var fileDoc = project.Documents.Where(d => d.Name.Equals(file.FileName)).FirstOrDefault();
@@ -260,19 +264,48 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
             var root = documentBuilder.AddUsings(options);
-            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges)
-                && root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
+            if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
-                var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
-                var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
-                if (updatedIdentifer.HasValue)
+                file.Methods.TryGetValue("Global", out var globalChanges);
+                if (globalChanges != null)
                 {
-                    (string oldValue, string newValue) = updatedIdentifer.Value;
-                    filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
+                    var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
+                    var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
+                    if (updatedIdentifer.HasValue)
+                    {
+                        (string oldValue, string newValue) = updatedIdentifer.Value;
+                        filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
+                    }
+                    if (!options.UsingTopLevelsStatements)
+                    {
+                        var mainMethod = root?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
+                            && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
+                        if (mainMethod != null)
+                        {
+                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, filteredChanges);
+                            return root?.ReplaceNode(mainMethod, updatedMethod);
+                        }
+                    }
+                    else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
+                    {
+                        return DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
+                    }
                 }
 
-                var updatedRoot = DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
-                return updatedRoot;
+                if (!options.UsingTopLevelsStatements)
+                {
+                    var mainMethod = root?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
+                        && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
+                    if (mainMethod != null)
+                    {
+                        var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, filteredChanges);
+                        return root?.ReplaceNode(mainMethod, updatedMethod);
+                    }
+                }
+                else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
+                {
+                    return DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
+                }
             }
             else
             {

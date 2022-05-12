@@ -91,8 +91,8 @@ namespace @Model.ControllerNamespace
     {
             if (@Model.NullableEnabled)
             {
-              @:return _context.Movie != null ? 
-                        @:  View(await _context.Movie.ToListAsync()) :
+              @:return _context.@entitySetName != null ? 
+                        @:  View(await _context.@entitySetName.ToListAsync()) :
                         @:  Problem("Entity set '@Model.ContextTypeName.@(entitySetName)'  is null.");
             }
             else 

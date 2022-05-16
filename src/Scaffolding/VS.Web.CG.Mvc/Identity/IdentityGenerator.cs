@@ -323,11 +323,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
                 //adding usings
-<<<<<<< HEAD
                 var modifiedRoot = docBuilder.AddUsings(new CodeChangeOptions());
-=======
-                var rootWithUsings = docBuilder.AddUsings(new CodeChangeOptions());
->>>>>>> 99894f8e (update for identity)
                 var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(modelTypesLocator);
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.TryGetValue("Global", out var globalChanges))
@@ -339,7 +335,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         (string oldValue, string newValue) = updatedIdentifer.Value;
                         filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
                     }
-<<<<<<< HEAD
 
                     filteredChanges = ApplyIdentityChanges(filteredChanges, dbContextClassName, identityUserClassName, useSqlite, useTopLevelsStatements);
 
@@ -354,22 +349,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         {
                             var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges);
                             modifiedRoot = modifiedRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
-=======
-                    var modifiedRoot = rootWithUsings;
-                    if (useTopLevelsStatements)
-                    {
-                        modifiedRoot = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, globalChanges.CodeChanges) as CompilationUnitSyntax;
-                    }
-                    else
-                    {
-                        var mainMethod = modifiedRoot?.ChildNodes().FirstOrDefault(
-                            n => n is MethodDeclarationSyntax syntax &&
-                            syntax.Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
-                        if (mainMethod != null)
-                        {
-                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, globalChanges.CodeChanges);
-                            modifiedRoot = rootWithUsings?.ReplaceNode(mainMethod, updatedMethod);
->>>>>>> 99894f8e (update for identity)
                         }
                     }
                     //replace root node with all the updates.

@@ -92,7 +92,7 @@ namespace @Model.ControllerNamespace
             if (@Model.NullableEnabled)
             {
               @:return _context.@entitySetName != null ? 
-                        @:  View(await _context.@entitySetName.ToListAsync()) :
+                        @:  View(await _context.@(entitySetName).ToListAsync()) :
                         @:  Problem("Entity set '@Model.ContextTypeName.@(entitySetName)'  is null.");
             }
             else 

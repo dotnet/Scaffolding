@@ -41,6 +41,7 @@ public static class @endPointsClassName
 @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@getAllModels")
         @:.Produces<@modelList>(StatusCodes.Status200OK);
     }
@@ -60,6 +61,7 @@ public static class @endPointsClassName
 @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@getModelById")
         @:.Produces<@modelName>(StatusCodes.Status200OK)
         @:.Produces(StatusCodes.Status404NotFound);
@@ -87,6 +89,7 @@ public static class @endPointsClassName
 @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@updateModel")
         @:.Produces(StatusCodes.Status404NotFound)
         @:.Produces(StatusCodes.Status204NoContent);
@@ -106,6 +109,7 @@ public static class @endPointsClassName
 @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@createModel")
         @:.Produces<@modelName>(StatusCodes.Status201Created);
     }
@@ -129,6 +133,7 @@ public static class @endPointsClassName
 @{
     if(Model.OpenAPI)
     {
+        @:.WithTags(nameof(@modelName))
         @:.WithName("@deleteModel")
         @:.Produces<@modelName>(StatusCodes.Status200OK)
         @:.Produces(StatusCodes.Status404NotFound);

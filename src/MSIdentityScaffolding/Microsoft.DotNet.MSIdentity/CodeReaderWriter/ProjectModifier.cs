@@ -266,32 +266,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var root = documentBuilder.AddUsings(options);
             if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
-                file.Methods.TryGetValue("Global", out var globalChanges);
-                if (globalChanges != null)
+                var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
+                var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
+                if (updatedIdentifer.HasValue)
                 {
-                    var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
-                    var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
-                    if (updatedIdentifer.HasValue)
-                    {
-                        (string oldValue, string newValue) = updatedIdentifer.Value;
-                        filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
-                    }
-                    if (!options.UsingTopLevelsStatements)
-                    {
-                        var mainMethod = root?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
-                            && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
-                        if (mainMethod != null)
-                        {
-                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, filteredChanges);
-                            return root?.ReplaceNode(mainMethod, updatedMethod);
-                        }
-                    }
-                    else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
-                    {
-                        return DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
-                    }
+                    (string oldValue, string newValue) = updatedIdentifer.Value;
+                    filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
                 }
-
                 if (!options.UsingTopLevelsStatements)
                 {
                     var mainMethod = root?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax

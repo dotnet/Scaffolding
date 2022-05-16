@@ -119,18 +119,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.False(await ProjectModifierHelper.IsUsingTopLevelStatements(programDocumentNoNamespace));
         }
 
-        [Fact]
-        public async Task IsUsingTopLevelStatements()
-        {
-            var programDocumentList = new List<Document>() { CreateDocument(ProgramCsFile).WithName("Program.cs") };
-            var minimalProgramDocumentList = new List<Document>() { CreateDocument(MinimalProgramCsFile).WithName("Program.cs") };
-            var programDocumentDifferentStartupList = new List<Document>() { CreateDocument(ProgramCsFileWithDifferentStartup).WithName("Program.cs") };
-
-            Assert.True(await ProjectModifierHelper.IsUsingTopLevelStatements(minimalProgramDocumentList));
-            Assert.False(await ProjectModifierHelper.IsUsingTopLevelStatements(programDocumentList));
-            Assert.False(await ProjectModifierHelper.IsUsingTopLevelStatements(programDocumentDifferentStartupList));
-        }
-
         [Theory]
         [InlineData(
             new object[] {

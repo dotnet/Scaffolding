@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+
 namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
     public class PropertyNames
@@ -29,9 +31,40 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string ClientSecret = "Client secret from app-registration. Check user secrets/azure portal.";
 
         public const string Authority = "https://login.microsoftonline.com/22222222-2222-2222-2222-222222222222";
-        public const string ValidateAuthority = "true";
+        public const bool ValidateAuthority = true;
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
-        public const string MicrosoftGraphScopes = "user.read";
+        public const string DefaultScopes = "user.read";
+    }
+
+    public class AppSettings
+    {
+        public string? ClientId;
+    }
+
+    public class BlazorSettings : AppSettings
+    {
+        public string? Authority;
+        public bool? ValidateAuthority;
+    }
+
+    public class WebAppSettings : AppSettings
+    {
+        public string? Instance = DefaultProperties.Instance;
+        public string? Domain;
+        public string? TenantId;
+        public string? CallbackPath = DefaultProperties.CallbackPath;
+    }
+
+    public class WebAPISettings : WebAppSettings
+    {
+        public string? Scopes;
+        public string? ClientSecret = DefaultProperties.ClientSecret;
+    }
+
+    public class ApiSettings
+    {
+        public string? BaseUrl;
+        public string? Scopes;
     }
 }

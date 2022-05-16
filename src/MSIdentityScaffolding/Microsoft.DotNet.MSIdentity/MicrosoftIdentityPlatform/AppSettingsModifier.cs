@@ -130,13 +130,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <returns></returns>
         private JToken? GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
         {
+            var azureAdBlock = JObject.FromObject(GetAzureAdBlock(applicationParameters));
             if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
             {
                 // Create and return AzureAd block if none exists, differs for Blazor apps
-                return DefaultAzureAdBlock(applicationParameters);
+                return JToken.FromObject(azureAdBlock);
             }
-
-            bool changesMade = ModifyAppSettingsToken(azureAdToken, AzureAdBlock(applicationParameters));
+           
+            bool changesMade = ModifyAppSettingsObject(azureAdToken, azureAdBlock);
 
             if (_provisioningToolOptions.CallsGraph || _provisioningToolOptions.CallsDownstreamApi)
             {
@@ -152,45 +153,46 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="applicationParameters"></param>
         /// <param name="isBlazorWasm"></param>
         /// <returns></returns>
-        private JToken DefaultAzureAdBlock(ApplicationParameters applicationParameters)
+        internal static AppSettings GetAzureAdBlock(ApplicationParameters applicationParameters)
         {
-            return applicationParameters.IsBlazorWasm ? JToken.FromObject(new
+            if (applicationParameters.IsBlazorWasm)
             {
-                Authority = applicationParameters.Authority ?? DefaultProperties.Authority,
-                ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
-                DefaultProperties.ValidateAuthority
-            }) : JToken.FromObject(new
+                return new BlazorSettings
+                {
+                    Authority = applicationParameters.Authority ?? DefaultProperties.Authority,
+                    ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
+                    ValidateAuthority = DefaultProperties.ValidateAuthority
+                };
+            }
+            if (applicationParameters.IsWebApi.GetValueOrDefault())
+            {
+                return new WebAPISettings
+                {
+                    Domain = applicationParameters.Domain ?? DefaultProperties.Domain,
+                    TenantId = applicationParameters.TenantId ?? DefaultProperties.TenantId,
+                    ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
+                    Instance = applicationParameters.Instance ?? DefaultProperties.Instance,
+                    CallbackPath = applicationParameters.CallbackPath ?? DefaultProperties.CallbackPath,
+                    Scopes = applicationParameters.CalledApiScopes ?? DefaultProperties.DefaultScopes
+                };
+            }
+
+            return new WebAppSettings
             {
                 Domain = applicationParameters.Domain ?? DefaultProperties.Domain,
                 TenantId = applicationParameters.TenantId ?? DefaultProperties.TenantId,
                 ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
                 Instance = applicationParameters.Instance ?? DefaultProperties.Instance,
                 CallbackPath = applicationParameters.CallbackPath ?? DefaultProperties.CallbackPath
-            });
+            };
         }
 
-        // TODO: Consider using objects rather than dictionaries
-        Dictionary<string, string?> AzureAdBlock(ApplicationParameters parameters) =>
-           parameters.IsBlazorWasm ? new Dictionary<string, string?>
-           {
-                { PropertyNames.Authority,  $"{DefaultProperties.Instance}{parameters.TenantId}" },
-                { PropertyNames.ClientId, parameters.ClientId },
-                { PropertyNames.ValidateAuthority, DefaultProperties.ValidateAuthority.ToString() },
-           } : new Dictionary<string, string?>
-           {
-                { PropertyNames.Domain,  parameters.Domain },
-                { PropertyNames.TenantId, parameters.TenantId },
-                { PropertyNames.ClientId, parameters.ClientId },
-                { PropertyNames.Instance, parameters.Instance },
-                { PropertyNames.CallbackPath, parameters.CallbackPath }
-           };
-
-        private bool ModifyAppSettingsToken(JToken token, Dictionary<string, string?> inputProperties)
+        private bool ModifyAppSettingsObject(JToken existingSettings, JObject inputProperties)
         {
             bool changesMade = false;
-            foreach ((string propertyName, string? newValue) in inputProperties)
+            foreach ((var propertyName, var newValue) in inputProperties)
             {
-                changesMade |= UpdateIfNecessary(token, propertyName, newValue);
+                changesMade |= UpdateIfNecessary(existingSettings, propertyName, newValue);
             }
 
             return changesMade;
@@ -217,39 +219,37 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         {
             if (!appSettings.TryGetValue("MicrosoftGraph", out var microsoftGraphToken))
             {
-                return DefaultApiBlock;
+                return DefaultApiBlock();
             }
 
-            var inputParameters = new Dictionary<string, string?>
+            var inputParameters = JObject.FromObject(new ApiSettings
             {
-                { PropertyNames.Scopes, DefaultProperties.MicrosoftGraphScopes },
-                { PropertyNames.BaseUrl, DefaultProperties.MicrosoftGraphBaseUrl }
-            };
+                Scopes = DefaultProperties.DefaultScopes,
+                BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl 
+            });
 
-            return ModifyAppSettingsToken(microsoftGraphToken, inputParameters) ? microsoftGraphToken : null;
+            return ModifyAppSettingsObject(microsoftGraphToken, inputParameters) ? microsoftGraphToken : null;
         }
 
-        private JToken? GetModifiedDownstreamApiBlock(JObject appSettings)
+        internal JToken? GetModifiedDownstreamApiBlock(JObject appSettings)
         {
+            var downstreamApiBlock = JObject.FromObject(new ApiSettings());
             if (!appSettings.TryGetValue("DownstreamApi", out var downstreamApiToken))
             {
-                return DefaultApiBlock;
+                return downstreamApiBlock;
             }
 
-            var inputParameters = new Dictionary<string, string?>
-            {
-                { PropertyNames.Scopes, string.Empty }, // Only update if a value is not already present
-                { PropertyNames.BaseUrl, string.Empty }
-            };
-
-            return ModifyAppSettingsToken(downstreamApiToken, inputParameters) ? downstreamApiToken : null;
+            return ModifyAppSettingsObject(downstreamApiToken, downstreamApiBlock) ? downstreamApiToken : null;
         }
 
-        private JToken DefaultApiBlock => JToken.FromObject(new
+        internal static JObject DefaultApiBlock()
         {
-            BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
-            Scopes = DefaultProperties.MicrosoftGraphScopes
-        });
+            return JObject.FromObject(new ApiSettings
+            {
+                BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
+                Scopes = DefaultProperties.DefaultScopes
+            });
+        }
 
         /// <summary>
         /// Updates property in appSettings block when either there is no existing property or the existing property does not match
@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="propertyName"></param>
         /// <param name="newValue"></param>
         /// <returns></returns>
-        private bool UpdateIfNecessary(JToken token, string propertyName, string? newValue)
+        private bool UpdateIfNecessary(JToken token, string propertyName, JToken? newValue)
         {
             var existingValue = token[propertyName]?.ToString();
             var update = GetUpdatedValue(propertyName, existingValue, newValue);
@@ -277,16 +277,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="inputProperty"></param>
         /// <param name="existingProperties"></param>
         /// <returns></returns>
-        internal static string? GetUpdatedValue(string propertyName, string? existingValue, string? newValue)
+        internal static JToken? GetUpdatedValue(string propertyName, JToken? existingValue, JToken? newValue)
         {
             // If there is no existing property, update 
-            if (string.IsNullOrEmpty(existingValue))
+            if (existingValue is null)
             {
-                return string.IsNullOrEmpty(newValue) ? PropertiesDictionary.GetValueOrDefault(propertyName) : newValue;
+                return newValue ?? PropertiesDictionary.GetValueOrDefault(propertyName);
             }
 
             // If newValue exists and it differs from the existing property, update value
-            if (!string.IsNullOrEmpty(newValue) && !newValue.Equals(existingValue))
+            if (newValue != null && !newValue.Equals(existingValue))
             {
                 return newValue;
             }

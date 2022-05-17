@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="appSettings"></param>
         /// <param name="applicationParameters"></param>
         /// <returns></returns>
-        private JToken? GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
+        internal JToken? GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
         {
             var azureAdBlock = JObject.FromObject(GetAzureAdBlock(applicationParameters));
             if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <returns></returns>
         private bool UpdateIfNecessary(JToken token, string propertyName, JToken? newValue)
         {
-            var existingValue = token[propertyName]?.ToString();
+            var existingValue = token[propertyName];
             var update = GetUpdatedValue(propertyName, existingValue, newValue);
             if (update != null)
             {
@@ -276,7 +276,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// </summary>
         /// <param name="inputProperty"></param>
         /// <param name="existingProperties"></param>
-        /// <returns></returns>
+        /// <returns>updated value or null if no update necessary</returns>
         internal static JToken? GetUpdatedValue(string propertyName, JToken? existingValue, JToken? newValue)
         {
             // If there is no existing property, update 
@@ -284,6 +284,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             {
                 return newValue ?? PropertiesDictionary.GetValueOrDefault(propertyName);
             }
+
+            // If there is not a new value, do nothing
+            //if (newValue is null || !newValue.Any())
+            //{
+            //    return null; // No updates necessary
+            //}
 
             // If newValue exists and it differs from the existing property, update value
             if (newValue != null && !newValue.Equals(existingValue))

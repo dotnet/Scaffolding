@@ -116,16 +116,17 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = inputCallbackPath
             };
 
-            var expected = JObject.FromObject(new
-            {
-                Domain = inputDomain,
-                TenantId = inputTenantId,
-                ClientId = inputClientId,
-                Instance = inputInstance,
-                CallbackPath = inputCallbackPath
-            }).ToString();
+            var expected = JObject.FromObject(
+                new WebAppSettings
+                {
+                    Domain = inputDomain,
+                    TenantId = inputTenantId,
+                    ClientId = inputClientId,
+                    Instance = inputInstance,
+                    CallbackPath = inputCallbackPath
+                });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
             Assert.Equal(expected, modifications);
         }
@@ -203,9 +204,9 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = existingClientId,
                 Instance = existingInstance,
                 CallbackPath = existingCallbackPath
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"];
 
             Assert.Equal(expected, modifications);
         }

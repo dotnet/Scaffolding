@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
@@ -20,6 +21,34 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     public class DbContextEditorServicesTests
     {
+        private const string MinimalProgramCsFile = @"
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Add services to the container.
+            builder.Services.AddRazorPages();
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler(""/Error"");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.MapRazorPages();
+
+            app.Run();
+            ";
+
         [Theory]
         [InlineData("DbContext_Before.txt", "MyModel.txt", "DbContext_After.txt")]
         public void AddModelToContext_Adds_Model_From_Same_Project_To_Context(string beforeContextResource, string modelResource, string afterContextResource)
@@ -106,10 +135,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var startupType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "Startup").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
-            var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid", false);
+            var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid", false, false);
 
             Assert.True(result.Edited);
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
+        }
+
+        [Fact]
+        public async Task GetAddDbContextStatementTests()
+        {
+            DbContextEditorServices testObj = GetTestObject();
+            var syntaxTree = CSharpSyntaxTree.ParseText(MinimalProgramCsFile);
+            var root = await syntaxTree.GetRootAsync();
+            var dbContextExpression = testObj.GetAddDbContextStatement(root, "DbContextName", "DatabaseName", useSqlite: false);
+            var correctDbContextString = "builder.Services.AddDbContext<DbContextName>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(\"DbContextName\") ?? throw new InvalidOperationException(\"Connection string 'DbContextName' not found.\")));";
+
+            var trimmedDbContextString = ProjectModifierHelper.TrimStatement(dbContextExpression.ToString());
+            var trimmedCorrectDbContextString = ProjectModifierHelper.TrimStatement(correctDbContextString);
+            Assert.Equal(trimmedCorrectDbContextString, trimmedDbContextString);
         }
 
 

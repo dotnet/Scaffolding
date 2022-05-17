@@ -281,5 +281,71 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             var rootWithDuplicates = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, duplicates) as CompilationUnitSyntax;
             Assert.Equal(rootWithDuplicates.Members.Count, modifiedRoot.Members.Count);
         }
+
+        [Fact]
+        public async Task GetMethodFromSyntaxRootTests()
+        {
+            var testDoc = CreateDocument(FullDocument);
+            var root = await testDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
+            var methodName = "Test";
+            var method = DocumentBuilder.GetMethodFromSyntaxRoot(root, methodName);
+            var invalidMethod = DocumentBuilder.GetMethodFromSyntaxRoot(root, "NotTest");
+
+            Assert.NotNull(method);
+            Assert.Null(invalidMethod);
+            Assert.Equal(method.Identifier.ToString(), methodName);
+        }
+
+        [Fact]
+        public void AddLeadingTriviaSpacesTests()
+        {
+            CodeSnippet snippetNullTrivia = new CodeSnippet
+            {
+                Block = "TestBlock()",
+                InsertAfter = "InsertAfter;",
+                LeadingTrivia = null
+            };
+
+            CodeSnippet snippetWithTrivia = new CodeSnippet
+            {
+                Block = "TestBlock()",
+                InsertAfter = "InsertAfter;",
+                LeadingTrivia = new Formatting()
+            };
+
+            CodeSnippet snippetNoSpaceTrivia = new CodeSnippet
+            {
+                Block = "TestBlock()",
+                InsertAfter = "InsertAfter;",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 0 }
+            };
+
+            CodeSnippet snippetFourSpaceTrivia = new CodeSnippet
+            {
+                Block = "TestBlock()",
+                InsertAfter = "InsertAfter;",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            int whitespaceBeingAdded = 4;
+            CodeSnippet[] snippets = new CodeSnippet[] { snippetNullTrivia, snippetWithTrivia, snippetNoSpaceTrivia, snippetFourSpaceTrivia };
+            var snippetNullTriviaWithAddition = DocumentBuilder.AddLeadingTriviaSpaces(snippetNullTrivia, whitespaceBeingAdded);
+            var snippetWithTriviaWithAddition = DocumentBuilder.AddLeadingTriviaSpaces(snippetWithTrivia, whitespaceBeingAdded);
+            var snippetNoSpaceTriviaWithAddition = DocumentBuilder.AddLeadingTriviaSpaces(snippetNoSpaceTrivia, whitespaceBeingAdded);
+            var snippetFourSpaceTriviaWithAddition = DocumentBuilder.AddLeadingTriviaSpaces(snippetFourSpaceTrivia, whitespaceBeingAdded);
+
+            Assert.True(snippetNullTriviaWithAddition.LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
+            Assert.True(snippetWithTriviaWithAddition.LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
+            Assert.True(snippetNoSpaceTriviaWithAddition.LeadingTrivia.NumberOfSpaces ==  whitespaceBeingAdded);
+            Assert.True(snippetFourSpaceTriviaWithAddition.LeadingTrivia.NumberOfSpaces == 4 + whitespaceBeingAdded);
+
+            var formattedCodeSnippets = DocumentBuilder.AddLeadingTriviaSpaces(snippets, whitespaceBeingAdded);
+            whitespaceBeingAdded += whitespaceBeingAdded;
+            Assert.True(formattedCodeSnippets[0].LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
+            Assert.True(formattedCodeSnippets[1].LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
+            Assert.True(formattedCodeSnippets[2].LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
+            Assert.True(formattedCodeSnippets[3].LeadingTrivia.NumberOfSpaces == 4 + whitespaceBeingAdded);
+        }
+
     }
 }

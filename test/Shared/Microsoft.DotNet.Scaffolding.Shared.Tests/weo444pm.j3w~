@@ -29,27 +29,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task GetStartupClassTests()
-        {
-            var programDocumentList = new List<Document>() { CreateDocument(ProgramCsFile).WithName("Program.cs") };
-            var programDocumentDifferentStartupList = new List<Document>() { CreateDocument(ProgramCsFileWithDifferentStartup).WithName("Program.cs") };
-            var programDocumentNoNamespace = new List<Document>() { CreateDocument(ProgramCsFileNoNamespace).WithName("Program.cs") };
-            var programDocumentNoStartup = new List<Document>() { CreateDocument(ProgramCsFileNoStartup).WithName("Program.cs") };
-
-            string startupName = await ProjectModifierHelper.GetStartupClass(programDocumentList);
-            string startupName2 = await ProjectModifierHelper.GetStartupClass(programDocumentNoNamespace);
-            string emptyStartupName = await ProjectModifierHelper.GetStartupClass(programDocumentNoStartup);
-            string notStartupName = await ProjectModifierHelper.GetStartupClass(programDocumentDifferentStartupList);
-            string nullStartup = await ProjectModifierHelper.GetStartupClass(null);
-
-            Assert.Equal("Startup.cs", startupName);
-            Assert.Equal("Startup.cs", startupName2);
-            Assert.Equal("", emptyStartupName);
-            Assert.Equal("", nullStartup);
-            Assert.Equal("NotStartup.cs", notStartupName);
-        }
-
-        [Fact]
         public async Task GetStartupClassNameTests()
         {
             Document programDocument = CreateDocument(ProgramCsFile);
@@ -96,29 +75,22 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.False(await ProjectModifierHelper.IsMinimalApp(nonMinimalTypesLocator.Object));
 
             //test other IsMinimalApp method
-            var programDocumentList = new List<Document>() { CreateDocument(ProgramCsFile).WithName("Program.cs") };
-            var minimalProgramDocumentList = new List<Document>() { CreateDocument(MinimalProgramCsFile).WithName("Program.cs") };
-            var programDocumentDifferentStartupList = new List<Document>() { CreateDocument(ProgramCsFileWithDifferentStartup).WithName("Program.cs") };
-            var programDocumentNoNamespace = new List<Document>() { CreateDocument(ProgramCsFileNoNamespace).WithName("Program.cs") };
-            Assert.True(await ProjectModifierHelper.IsMinimalApp(minimalProgramDocumentList));
-            Assert.False(await ProjectModifierHelper.IsMinimalApp(programDocumentList));
-            Assert.False(await ProjectModifierHelper.IsMinimalApp(programDocumentDifferentStartupList));
-            Assert.False(await ProjectModifierHelper.IsMinimalApp(programDocumentNoNamespace));
         }
 
         [Fact]
         public async Task IsUsingTopLevelStatements()
         {
-            var programDocumentList = new List<Document>() { CreateDocument(ProgramCsFile).WithName("Program.cs") };
-            var minimalProgramDocumentList = new List<Document>() { CreateDocument(MinimalProgramCsFile).WithName("Program.cs") };
-            var programDocumentDifferentStartupList = new List<Document>() { CreateDocument(ProgramCsFileWithDifferentStartup).WithName("Program.cs") };
-            var programDocumentNoNamespace = new List<Document>() { CreateDocument(ProgramCsFileNoNamespace).WithName("Program.cs") };
-            Assert.True(await ProjectModifierHelper.IsUsingTopLevelStatements(minimalProgramDocumentList));
-            Assert.False(await ProjectModifierHelper.IsUsingTopLevelStatements(programDocumentList));
-            Assert.False(await ProjectModifierHelper.IsUsingTopLevelStatements(programDocumentDifferentStartupList));
-            Assert.False(await ProjectModifierHelper.IsUsingTopLevelStatements(programDocumentNoNamespace));
-        }
+            var minimalModelTypesLocator = new Mock<IModelTypesLocator>();
+            var nonMinimalTypesLocator = new Mock<IModelTypesLocator>();
+            var nonMinimalTypesLocator2 = new Mock<IModelTypesLocator>();
+            Document programDocument = CreateDocument(ProgramCsFile);
+            Document minimalProgramDocument = CreateDocument(MinimalProgramCsFile);
+            Document programDocumentDifferentStartup = CreateDocument(ProgramCsFileWithDifferentStartup);
 
+            minimalModelTypesLocator.Setup(m => m.GetAllDocuments()).Returns(() => new List<Document>)_ { programD})
+
+
+        }
         [Theory]
         [InlineData(
             new object[] {

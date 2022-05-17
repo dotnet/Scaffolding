@@ -129,7 +129,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 public class Test
                 {
                     static readonly string[] scopeRequiredByApi = new string[] { ""access_as_user"" };
-                    public int Id { get; set; }                    
+                    public int Id { get; set; }
+
+                    public void Test()
+                    {
+                    }
                 }
             }";
 
@@ -159,6 +163,32 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                                 webBuilder.UseStartup<Startup>();
                             });
                 }
+            }
+        ";
+
+        protected const string ProgramCsFileNoNamespace = @"
+            using System;
+            using System.Collections.Generic;
+            using System.Linq;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Hosting;
+            using Microsoft.Extensions.Configuration;
+            using Microsoft.Extensions.Hosting;
+            using Microsoft.Extensions.Logging;
+
+            public class Program
+            {
+                public static void Main(string[] args)
+                {
+                    CreateHostBuilder(args).Build().Run();
+                }
+
+                public static IHostBuilder CreateHostBuilder(string[] args) =>
+                    Host.CreateDefaultBuilder(args)
+                        .ConfigureWebHostDefaults(webBuilder =>
+                        {
+                            webBuilder.UseStartup<Startup>();
+                        });
             }
         ";
 

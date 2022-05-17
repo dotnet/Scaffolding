@@ -129,7 +129,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 public class Test
                 {
                     static readonly string[] scopeRequiredByApi = new string[] { ""access_as_user"" };
-                    public int Id { get; set; }                    
+                    public int Id { get; set; }
+
+                    public void Test()
+                    {
+                    }
                 }
             }";
 

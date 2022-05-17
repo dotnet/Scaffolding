@@ -103,6 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, "Program"));
                 }
+                
                 if (!dbContextSymbols.Any())
                 {
                     //add nullable properties

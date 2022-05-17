@@ -291,6 +291,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             };
         }
 
+        /// <summary>
+        /// Get the StatementSyntax that adds the db context to the WebApplicationBuilder.
+        /// </summary>
+        /// <param name="rootNode">Using the base class to allow this var to be either CompilationUnitSyntax or a MethodBodySyntax
+        ///                         To get the WebApplicationBuilder variable name
+        /// </param>
+        /// <param name="dbContextTypeName"></param>
+        /// <param name="dataBaseName"></param>
+        /// <param name="useSqlite"></param>
         internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, bool useSqlite)
         {
             //get leading trivia. there should be atleast one member var statementLeadingTrivia = classSyntax.ChildNodes()

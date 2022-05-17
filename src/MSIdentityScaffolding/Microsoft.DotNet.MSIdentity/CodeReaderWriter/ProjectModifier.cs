@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private readonly IEnumerable<string> _files;
         private readonly IConsoleLogger _consoleLogger;
         private PropertyInfo? _codeModifierConfigPropertyInfo;
-
+        private const string Main = nameof(Main);
         public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
@@ -134,8 +134,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return _codeModifierConfigPropertyInfo;
             }
         }
-
-        public const string Main = nameof(Main);
 
         private CodeModifierConfig? ReadCodeModifierConfigFromFileContent(byte[] fileContent)
         {

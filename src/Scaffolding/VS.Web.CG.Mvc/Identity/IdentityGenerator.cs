@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     public class IdentityGenerator : ICodeGenerator
     {
         private const string IdentityAreaName = "Identity";
-
+        private const string Main = nameof(Main);
         internal static readonly string DefaultBootstrapVersion = "5";
         // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
@@ -88,8 +88,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     _projectContext);
             }
         }
-
-        public const string Main = nameof(Main);
 
         // Returns the set of template folders appropriate for templateModel.ContentVersion
         private IEnumerable<string> GetTemplateFoldersForContentVersion(IdentityGeneratorTemplateModel templateModel)

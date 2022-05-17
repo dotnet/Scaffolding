@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
     public class IdentityGenerator : ICodeGenerator
     {
         private const string IdentityAreaName = "Identity";
-
+        private const string Main = nameof(Main);
         internal static readonly string DefaultBootstrapVersion = "5";
         // A hashset would allow faster lookups, but would cause a perf hit when formatting the error string for invalid bootstrap version.
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
@@ -268,7 +268,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     templateModel.UserClass,
                     templateModel.DbContextNamespace,
                     templateModel.UseSQLite);
-                //return;
             }
 
             await AddTemplateFiles(templateModel);
@@ -322,23 +321,40 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
                 //adding usings
-                var rootWithUsings = docBuilder.AddUsings(new CodeChangeOptions());
+                var modifiedRoot = docBuilder.AddUsings(new CodeChangeOptions());
+                var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(modelTypesLocator);
                 //add code snippets/changes.
-                if (programCsFile.Methods != null && programCsFile.Methods.Any())
+                if (programCsFile.Methods != null && programCsFile.Methods.TryGetValue("Global", out var globalChanges))
                 {
-                    var globalChanges = programCsFile.Methods.First(x => x.Key == "Global").Value;
-                    foreach (var codeChange in globalChanges.CodeChanges)
+                    var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, new CodeChangeOptions());
+                    var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(modifiedRoot.Members);
+                    if (updatedIdentifer.HasValue)
                     {
-                        codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite);
+                        (string oldValue, string newValue) = updatedIdentifer.Value;
+                        filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
                     }
 
-                    var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(rootWithUsings, globalChanges.CodeChanges);
+                    filteredChanges = ApplyIdentityChanges(filteredChanges, dbContextClassName, identityUserClassName, useSqlite, useTopLevelsStatements);
+
+                    if (useTopLevelsStatements)
+                    {
+                        modifiedRoot = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, filteredChanges) as CompilationUnitSyntax;
+                    }
+                    else
+                    {
+                        var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(modifiedRoot, Main);
+                        if (mainMethod != null)
+                        {
+                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges);
+                            modifiedRoot = modifiedRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
+                        }
+                    }
                     //replace root node with all the updates.
                     docEditor.ReplaceNode(docRoot, modifiedRoot);
                 }
                 else
                 {
-                    docEditor.ReplaceNode(docRoot, rootWithUsings);
+                    docEditor.ReplaceNode(docRoot, modifiedRoot);
                 }
                 //replace root node with all the updates.
                 //write to Program.cs file
@@ -346,7 +362,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, bool isSqlite)
+        private CodeSnippet[] ApplyIdentityChanges(CodeSnippet[] filteredChanges, string dbContextClassName, string identityUserClassName, bool useSqlite, bool useTopLevelsStatements)
+        {
+            foreach (var codeChange in filteredChanges)
+            {
+                if (!useTopLevelsStatements)
+                {
+                    codeChange.LeadingTrivia = codeChange.LeadingTrivia ?? new Formatting();
+                    codeChange.LeadingTrivia.NumberOfSpaces += 12;
+                }
+                codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite, codeChange?.LeadingTrivia?.NumberOfSpaces);
+            }
+
+            return filteredChanges;
+        }
+
+        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, bool isSqlite, int? spaces)
         {
             if (string.IsNullOrEmpty(stringToModify))
             {
@@ -376,6 +407,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
                 modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}Connection'");
+            }
+
+            if (stringToModify.Contains("{1}"))
+            {
+                modifiedString = modifiedString.Replace("{1}", new string(' ', spaces.GetValueOrDefault() + 4));
             }
 
             return modifiedString;

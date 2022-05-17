@@ -27,5 +27,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public bool MicrosoftGraph { get; set; } = false;
         public bool DownstreamApi { get; set; } = false;
         public bool IsMinimalApp { get; set; } = false;
+        public bool UsingTopLevelsStatements { get; set; } = true;
     }
 }

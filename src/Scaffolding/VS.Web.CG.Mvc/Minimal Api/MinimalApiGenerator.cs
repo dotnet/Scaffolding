@@ -261,15 +261,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
                 //adding usings
                 var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
+                var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
                 //add code snippets/changes.
                 if (programCsFile.Methods != null && programCsFile.Methods.Any())
                 {
                     //should only include one change to add "app.Map%MODEL%Method to the Program.cs file. Check the minimalApiChanges.json for more info.
                     var addMethodMapping = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
                     var addMethodMappingChange = addMethodMapping.CodeChanges.First();
+                    if (!useTopLevelsStatements)
+                    {
+                        addMethodMappingChange = DocumentBuilder.AddLeadingTriviaSpaces(addMethodMappingChange, spaces: 12);
+                    }
+
                     addMethodMappingChange.Block = string.Format(addMethodMappingChange.Block, mapMethodName);
-                    newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, new CodeSnippet[] { addMethodMappingChange }) as CompilationUnitSyntax;
-                    
+                    var globalChanges = new CodeSnippet[] { addMethodMappingChange };
+                    if (useTopLevelsStatements)
+                    {
+                        newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
+                    }
+                    else
+                    {
+                        var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
+                        if (mainMethod != null)
+                        {
+                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, globalChanges);
+                            newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
+                        }
+                    }
+                                        
                     if (templateModel.OpenAPI)
                     {
                         var builderVariable = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
@@ -278,7 +297,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         {
                             (string oldValue, string newValue) = builderVariable.Value;
                             var filteredChanges = ProjectModifierHelper.UpdateVariables(openApiMethodChanges.CodeChanges, oldValue, newValue);
-                            newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, filteredChanges) as CompilationUnitSyntax;
+                            if (!useTopLevelsStatements)
+                            {
+                                filteredChanges = DocumentBuilder.AddLeadingTriviaSpaces(filteredChanges, spaces: 12);
+                                var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
+                                { 
+                                    var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges);
+                                    newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
+                                }
+                            }
+                            else
+                            {
+                                newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, filteredChanges) as CompilationUnitSyntax;
+                            }
                         }
                     }
                 }
@@ -340,5 +371,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         }
 
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+
+        public const string Main = nameof(Main);
     }
 }

@@ -21,6 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 };
             }
         }
+
         [Theory]
         [MemberData(nameof(TestData))]
         public void ReplaceIdentityStringsTests(
@@ -35,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 {
                     for (int i = 0; i < unModifiedStrings.Count; i++)
                     {
-                        string editResult = IdentityGenerator.EditIdentityStrings(unModifiedStrings[i], dbContext, identityUser, false);
+                        string editResult = IdentityGenerator.EditIdentityStrings(unModifiedStrings[i], dbContext, identityUser, false, 0);
                         Assert.Contains(editResult, modifiedStrings);
                     }
                 }

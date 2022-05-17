@@ -56,7 +56,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                useSqlite))
+                useSqlite,
+                false))
                 .Returns(editSyntaxTreeResult);
 
             var connectionStringsWriter = new Mock<IConnectionStringsWriter>();

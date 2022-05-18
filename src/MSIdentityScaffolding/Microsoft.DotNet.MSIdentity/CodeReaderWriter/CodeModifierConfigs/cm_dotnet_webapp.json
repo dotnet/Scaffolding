@@ -106,7 +106,7 @@
             },
             {
               "MultiLineBlock": [
-                "            AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -119,7 +119,7 @@
             },
             {
               "MultiLineBlock": [
-                "            AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",

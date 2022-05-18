@@ -84,7 +84,7 @@
                 "MicrosoftGraph"
               ],
               "MultiLineBlock": [
-                "            AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "LeadingTrivia": {
@@ -98,7 +98,7 @@
                 "DownstreamApi"
               ],
               "MultiLineBlock": [
-                "            AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "LeadingTrivia": {

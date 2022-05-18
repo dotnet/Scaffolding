@@ -43,7 +43,7 @@
             },
             {
               "MultiLineBlock": [
-                "            AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -58,7 +58,7 @@
             },
             {
               "MultiLineBlock": [
-                "            AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -88,7 +88,9 @@
             },
             {
               "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]",
-              "InsertAfter": "app.UseAuthorization",
+              "InsertBefore": [
+                "app.MapGet"
+              ],
               "LeadingTrivia": {
                 "Newline": true
               }

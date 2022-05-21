@@ -33,11 +33,11 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.ClientId,
                 DefaultProperties.Instance,
                 DefaultProperties.CallbackPath
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
-            Assert.Equal(expected, modifications);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -52,11 +52,11 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.Authority,
                 DefaultProperties.ClientId,
                 DefaultProperties.ValidateAuthority
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
-            Assert.Equal(expected, modifications);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = inputClientId,
                 Instance = inputInstance,
                 CallbackPath = inputCallbackPath
-            }).ToString();
+            });
 
             var parameters = new AuthenticationParameters.ApplicationParameters
             {
@@ -83,9 +83,47 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = inputCallbackPath
             };
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
-            Assert.Equal(expected, modifications);
+            Assert.True(JToken.DeepEquals(expected, modifications));
+        }
+
+        [Fact]
+        public void ModifyAppSettings_HasInput_SomePropertiesMissing_InsertDefaults()
+        {
+            var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
+            var appSettings = new Newtonsoft.Json.Linq.JObject
+            {
+                {
+                    "AzureAd",
+                    JToken.FromObject(new
+                    {
+                        Domain = existingDomain,
+                        TenantId = existingTenantId,
+                        ClientId = existingClientId
+                    })
+                }
+            };
+
+            var expected = JObject.FromObject(new
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = DefaultProperties.Instance,
+                CallbackPath = DefaultProperties.CallbackPath
+            });
+
+            var parameters = new AuthenticationParameters.ApplicationParameters
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId
+            };
+
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -128,7 +166,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
-            Assert.Equal(expected, modifications);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -163,11 +201,11 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = existingClientId,
                 Instance = existingInstance,
                 CallbackPath = existingCallbackPath
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
-            Assert.Equal(expected, modifications);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -206,9 +244,9 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = existingCallbackPath
             });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"];
+            var modifications = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
-            Assert.Equal(expected, modifications);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Theory]
@@ -220,9 +258,9 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [InlineData(PropertyNames.Domain, null, null, DefaultProperties.Domain)]
         public void UpdatePropertyIfNecessary(string propertyName, string existingValue, string newValue, string expected)
         {
-            var update = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
+            (bool needsUpdate, JToken update) = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
 
-            Assert.Equal(update, expected);
+            Assert.Equal(update?.ToString(), expected);
         }
     }
 }

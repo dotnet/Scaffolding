@@ -37,18 +37,18 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string DefaultScopes = "user.read";
     }
 
-    public class AppSettings
+    public class AzureAdBlock
     {
         public string? ClientId;
     }
 
-    public class BlazorSettings : AppSettings
+    public class BlazorSettings : AzureAdBlock
     {
         public string? Authority;
         public bool? ValidateAuthority;
     }
 
-    public class WebAppSettings : AppSettings
+    public class WebAppSettings : AzureAdBlock
     {
         public string? Instance = DefaultProperties.Instance;
         public string? Domain;
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public string? ClientSecret = DefaultProperties.ClientSecret;
     }
 
-    public class ApiSettings
+    public class ApiSettingsBlock
     {
         public string? BaseUrl;
         public string? Scopes;

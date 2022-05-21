@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsGraph)
             {
                 // update MicrosoftGraph Block
-                var microsoftGraphBlock = GetModifiedMicrosoftGraphBlock(appSettings);
+                var microsoftGraphBlock = GetApiBlock(appSettings, "MicrosoftGraph", DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (microsoftGraphBlock != null)
                 {
                     changesMade = true;
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsDownstreamApi)
             {
                 // update DownstreamAPI Block
-                var updatedDownstreamApiBlock = GetModifiedDownstreamApiBlock(appSettings);
+                var updatedDownstreamApiBlock = GetApiBlock(appSettings, "DownstreamApi", DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (updatedDownstreamApiBlock != null)
                 {
                     changesMade = true;
@@ -114,9 +114,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (!string.IsNullOrEmpty(_provisioningToolOptions.HostedApiScopes))
             {
-                // update ServerAPI Block
-                changesMade = true;
-                appSettings["ServerApi"] = _provisioningToolOptions.HostedApiScopes;
+                // update ServerApi Block
+                var serverApiBlock = GetApiBlock(appSettings, "ServerApi", scopes: _provisioningToolOptions.HostedApiScopes, _provisioningToolOptions.HostedAppIdUri)
+                if (serverApiBlock != null)
+                {
+                    changesMade = true;
+                    appSettings["ServerApi"] = serverApiBlock;
+                }
             }
 
             return changesMade ? appSettings : null;
@@ -128,23 +132,23 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="appSettings"></param>
         /// <param name="applicationParameters"></param>
         /// <returns></returns>
-        internal JToken? GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
+        internal JObject? GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
         {
-            var azureAdBlock = JObject.FromObject(GetAzureAdBlock(applicationParameters));
             if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
             {
                 // Create and return AzureAd block if none exists, differs for Blazor apps
-                return JToken.FromObject(azureAdBlock);
+                return JObject.FromObject(GetAzureAdParameters(applicationParameters, insertDefaults: true));
             }
-           
-            bool changesMade = ModifyAppSettingsObject(azureAdToken, azureAdBlock);
 
+            var existingParameters = JObject.FromObject(azureAdToken);
+            var inputParameters = JObject.FromObject(GetAzureAdParameters(applicationParameters, insertDefaults: false));
+            bool changesMade = ModifyAppSettingsObject(existingParameters, inputParameters);
             if (_provisioningToolOptions.CallsGraph || _provisioningToolOptions.CallsDownstreamApi)
             {
                 changesMade |= ModifyCredentials(azureAdToken);
             }
 
-            return changesMade ? azureAdToken : null;
+            return changesMade ? existingParameters : null;
         }
 
         /// <summary>
@@ -153,14 +157,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="applicationParameters"></param>
         /// <param name="isBlazorWasm"></param>
         /// <returns></returns>
-        internal static AppSettings GetAzureAdBlock(ApplicationParameters applicationParameters)
+        internal static AzureAdBlock GetAzureAdParameters(ApplicationParameters applicationParameters, bool insertDefaults)
         {
             if (applicationParameters.IsBlazorWasm)
             {
                 return new BlazorSettings
                 {
-                    Authority = applicationParameters.Authority ?? DefaultProperties.Authority,
-                    ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
+                    Authority = applicationParameters.Authority ?? (insertDefaults ? DefaultProperties.Authority : null),
+                    ClientId = applicationParameters.ClientId ?? (insertDefaults ? DefaultProperties.ClientId : null),
                     ValidateAuthority = DefaultProperties.ValidateAuthority
                 };
             }
@@ -168,26 +172,26 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             {
                 return new WebAPISettings
                 {
-                    Domain = applicationParameters.Domain ?? DefaultProperties.Domain,
-                    TenantId = applicationParameters.TenantId ?? DefaultProperties.TenantId,
-                    ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
-                    Instance = applicationParameters.Instance ?? DefaultProperties.Instance,
-                    CallbackPath = applicationParameters.CallbackPath ?? DefaultProperties.CallbackPath,
-                    Scopes = applicationParameters.CalledApiScopes ?? DefaultProperties.DefaultScopes
+                    Domain = applicationParameters.Domain ?? (insertDefaults ? DefaultProperties.Domain : null),
+                    TenantId = applicationParameters.TenantId ?? (insertDefaults ? DefaultProperties.TenantId : null),
+                    ClientId = applicationParameters.ClientId ?? (insertDefaults ? DefaultProperties.ClientId : null),
+                    Instance = applicationParameters.Instance ?? (insertDefaults ? DefaultProperties.Instance : null),
+                    CallbackPath = applicationParameters.CallbackPath ?? (insertDefaults ? DefaultProperties.CallbackPath : null),
+                    Scopes = applicationParameters.CalledApiScopes ?? (insertDefaults ? DefaultProperties.DefaultScopes : null)
                 };
             }
 
             return new WebAppSettings
             {
-                Domain = applicationParameters.Domain ?? DefaultProperties.Domain,
-                TenantId = applicationParameters.TenantId ?? DefaultProperties.TenantId,
-                ClientId = applicationParameters.ClientId ?? DefaultProperties.ClientId,
-                Instance = applicationParameters.Instance ?? DefaultProperties.Instance,
-                CallbackPath = applicationParameters.CallbackPath ?? DefaultProperties.CallbackPath
+                Domain = applicationParameters.Domain ?? (insertDefaults ? DefaultProperties.Domain : null),
+                TenantId = applicationParameters.TenantId ?? (insertDefaults ? DefaultProperties.TenantId : null),
+                ClientId = applicationParameters.ClientId ?? (insertDefaults ? DefaultProperties.ClientId : null),
+                Instance = applicationParameters.Instance ?? (insertDefaults ? DefaultProperties.Instance : null),
+                CallbackPath = applicationParameters.CallbackPath ?? (insertDefaults ? DefaultProperties.CallbackPath : null)
             };
         }
 
-        private bool ModifyAppSettingsObject(JToken existingSettings, JObject inputProperties)
+        private bool ModifyAppSettingsObject(JObject existingSettings, JObject inputProperties)
         {
             bool changesMade = false;
             foreach ((var propertyName, var newValue) in inputProperties)
@@ -215,36 +219,58 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return changesMade;
         }
 
-        private JToken? GetModifiedMicrosoftGraphBlock(JObject appSettings)
+        private JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
+        {
+            var inputParameters = JObject.FromObject(new ApiSettingsBlock
+            {
+                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.DefaultScopes : scopes,
+                BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
+            });;
+
+            if (appSettings.TryGetValue(key, out var apiToken))
+            {
+                // block exists
+                var apiBlock = JObject.FromObject(apiToken);
+                return ModifyAppSettingsObject(apiBlock, inputParameters) ? apiBlock : null;
+            }
+            // block does not exist, create a new one
+            return inputParameters;
+        }
+
+
+        private JObject? GetModifiedMicrosoftGraphBlock(JObject appSettings)
         {
             if (!appSettings.TryGetValue("MicrosoftGraph", out var microsoftGraphToken))
             {
                 return DefaultApiBlock();
             }
 
-            var inputParameters = JObject.FromObject(new ApiSettings
+            var microsoftGraphBlock = JObject.FromObject(microsoftGraphToken);
+            var inputParameters = JObject.FromObject(new ApiSettingsBlock
             {
                 Scopes = DefaultProperties.DefaultScopes,
-                BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl 
+                BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl
             });
 
-            return ModifyAppSettingsObject(microsoftGraphToken, inputParameters) ? microsoftGraphToken : null;
+            return ModifyAppSettingsObject(microsoftGraphBlock, inputParameters) ? microsoftGraphBlock : null;
         }
 
-        internal JToken? GetModifiedDownstreamApiBlock(JObject appSettings)
+        internal JObject? GetModifiedDownstreamApiBlock(JObject appSettings)
         {
-            var downstreamApiBlock = JObject.FromObject(new ApiSettings());
+            var newBlock = JObject.FromObject(new ApiSettingsBlock());
             if (!appSettings.TryGetValue("DownstreamApi", out var downstreamApiToken))
             {
-                return downstreamApiBlock;
+                return newBlock;
             }
 
-            return ModifyAppSettingsObject(downstreamApiToken, downstreamApiBlock) ? downstreamApiToken : null;
+            var existingBlock = JObject.FromObject(downstreamApiToken);
+
+            return ModifyAppSettingsObject(existingBlock, newBlock) ? existingBlock : null;
         }
 
         internal static JObject DefaultApiBlock()
         {
-            return JObject.FromObject(new ApiSettings
+            return JObject.FromObject(new ApiSettingsBlock
             {
                 BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
                 Scopes = DefaultProperties.DefaultScopes
@@ -254,21 +280,20 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <summary>
         /// Updates property in appSettings block when either there is no existing property or the existing property does not match
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="block"></param>
         /// <param name="propertyName"></param>
         /// <param name="newValue"></param>
         /// <returns></returns>
-        private bool UpdateIfNecessary(JToken token, string propertyName, JToken? newValue)
+        internal static bool UpdateIfNecessary(JObject block, string propertyName, JToken? newValue)
         {
-            var existingValue = token[propertyName];
-            var update = GetUpdatedValue(propertyName, existingValue, newValue);
-            if (update != null)
+            var existingValue = block[propertyName];
+            (bool needsUpdate, JToken? update) = GetUpdatedValue(propertyName, existingValue, newValue);
+            if (needsUpdate)
             {
-                token[propertyName] = update;
-                return true;
+                block[propertyName] = update;
             }
 
-            return false;
+            return needsUpdate;
         }
 
         /// <summary>
@@ -277,27 +302,26 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="inputProperty"></param>
         /// <param name="existingProperties"></param>
         /// <returns>updated value or null if no update necessary</returns>
-        internal static JToken? GetUpdatedValue(string propertyName, JToken? existingValue, JToken? newValue)
+        internal static (bool needsUpdate, JToken? update) GetUpdatedValue(string propertyName, JToken? existingValue, JToken? newValue)
         {
-            // If there is no existing property, update 
-            if (existingValue is null)
-            {
-                return newValue ?? PropertiesDictionary.GetValueOrDefault(propertyName);
-            }
+            bool needsUpdate = false;
+            JToken? updatedValue = null;
 
-            // If there is not a new value, do nothing
-            //if (newValue is null || !newValue.Any())
-            //{
-            //    return null; // No updates necessary
-            //}
+            // If there is no existing property, update 
+            if (existingValue is null || string.IsNullOrEmpty(existingValue.ToString()))
+            {
+                needsUpdate = true;
+                updatedValue = string.IsNullOrEmpty(newValue?.ToString()) ? PropertiesDictionary.GetValueOrDefault(propertyName) : newValue;
+            }
 
             // If newValue exists and it differs from the existing property, update value
-            if (newValue != null && !newValue.Equals(existingValue))
+            if (newValue != null && !string.IsNullOrEmpty(newValue.ToString()) && !newValue.Equals(existingValue))
             {
-                return newValue;
+                needsUpdate = true;
+                updatedValue = newValue;
             }
 
-            return null; // No updates necessary
+            return (needsUpdate, updatedValue);
         }
     }
 }

@@ -13,7 +13,7 @@
               "MultiLineBlock": [
                 "{",
                 "    builder.Configuration.Bind(\"AzureAd\", options.ProviderOptions.Authentication);",
-                "    options.ProviderOptions.DefaultAccessTokenScopes.Add(builder.Configuration[\"ServerApi\"]);",
+                "    options.ProviderOptions.DefaultAccessTokenScopes.Add(builder.Configuration.GetSection(\"ServerApi\")[\"Scopes\"]);",
                 "}"
               ],
               "Replace": true,

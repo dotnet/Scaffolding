@@ -9,6 +9,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 {
     internal class AppSettingsModifier
     {
+        private const string MicrosoftGraph = "MicrosoftGraph";
+        private const string DownstreamApi = "DownstreamApi";
+        private const string ServerApi = "ServerApi";
         internal static string AppSettingsFileName = "appsettings.json";
 
         internal static Dictionary<string, string?>? _propertiesDictionary;
@@ -80,20 +83,17 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <returns>appSettings JObject if changes were made, else null</returns>
         internal JObject? GetModifiedAppSettings(JObject appSettings, ApplicationParameters applicationParameters)
         {
-            bool changesMade = false;
-
             // update Azure AD Block
-            var updatedAzureAdBlock = GetModifiedAzureAdBlock(appSettings, applicationParameters);
-            if (updatedAzureAdBlock != null)
+            (bool changesMade, JObject? updatedAzureAdBlock) = GetModifiedAzureAdBlock(appSettings, applicationParameters);
+            if (changesMade)
             {
-                changesMade = true;
                 appSettings["AzureAd"] = updatedAzureAdBlock;
             }
 
             if (_provisioningToolOptions.CallsGraph)
             {
                 // update MicrosoftGraph Block
-                var microsoftGraphBlock = GetApiBlock(appSettings, "MicrosoftGraph", DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (microsoftGraphBlock != null)
                 {
                     changesMade = true;
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsDownstreamApi)
             {
                 // update DownstreamAPI Block
-                var updatedDownstreamApiBlock = GetApiBlock(appSettings, "DownstreamApi", DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (updatedDownstreamApiBlock != null)
                 {
                     changesMade = true;
@@ -112,14 +112,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 }
             }
 
-            if (!string.IsNullOrEmpty(_provisioningToolOptions.HostedApiScopes))
+            if (!string.IsNullOrEmpty(_provisioningToolOptions.HostedApiScopes)) // Blazor Wasm Hosted scenario
             {
                 // update ServerApi Block
-                var serverApiBlock = GetApiBlock(appSettings, "ServerApi", scopes: _provisioningToolOptions.HostedApiScopes, _provisioningToolOptions.HostedAppIdUri)
+                var serverApiBlock = GetApiBlock(appSettings, ServerApi, scopes: _provisioningToolOptions.HostedApiScopes, _provisioningToolOptions.HostedAppIdUri);
                 if (serverApiBlock != null)
                 {
                     changesMade = true;
-                    appSettings["ServerApi"] = serverApiBlock;
+                    appSettings[ServerApi] = serverApiBlock;
                 }
             }
 
@@ -127,68 +127,66 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         }
 
         /// <summary>
-        /// 
+        /// Returns bool stating if changes were made and updated AzureAd appSettings JObject if any changes were made
         /// </summary>
         /// <param name="appSettings"></param>
         /// <param name="applicationParameters"></param>
-        /// <returns></returns>
-        internal JObject? GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
+        /// <returns>(bool changesMade, JObject? updatedBlock)</returns>
+        internal (bool changesMade, JObject? updatedBlock) GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
         {
+            var azureAdBlock = new AzureAdBlock(applicationParameters);
             if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
             {
                 // Create and return AzureAd block if none exists, differs for Blazor apps
-                return JObject.FromObject(GetAzureAdParameters(applicationParameters, insertDefaults: true));
+                return (true, azureAdBlock.ToJObject());
             }
 
-            var existingParameters = JObject.FromObject(azureAdToken);
-            var inputParameters = JObject.FromObject(GetAzureAdParameters(applicationParameters, insertDefaults: false));
-            bool changesMade = ModifyAppSettingsObject(existingParameters, inputParameters);
-            if (_provisioningToolOptions.CallsGraph || _provisioningToolOptions.CallsDownstreamApi)
+            var existingBlock = JObject.FromObject(azureAdToken);
+            var updatedBlock = azureAdBlock.UpdateFromJToken(azureAdToken).ToJObject();
+            if (NeedsUpdate(existingBlock, updatedBlock))
             {
-                changesMade |= ModifyCredentials(azureAdToken);
+                return (true, updatedBlock);
             }
 
-            return changesMade ? existingParameters : null;
+            return (false, null);  // If no changes were made, return null
         }
 
         /// <summary>
-        /// Create and return AzureAd block when none exists, fields differ for Blazor apps
+        /// Checks all keys in updatedBlock, if any differ from existingBlock then update is necessary
         /// </summary>
-        /// <param name="applicationParameters"></param>
-        /// <param name="isBlazorWasm"></param>
+        /// <param name="existingBlock"></param>
+        /// <param name="updatedBlock"></param>
         /// <returns></returns>
-        internal static AzureAdBlock GetAzureAdParameters(ApplicationParameters applicationParameters, bool insertDefaults)
+        internal bool NeedsUpdate(JObject existingBlock, JObject updatedBlock)
         {
-            if (applicationParameters.IsBlazorWasm)
+            foreach ((var key, var updatedValue) in updatedBlock)
             {
-                return new BlazorSettings
+                if (existingBlock.GetValue(key) != updatedValue)
                 {
-                    Authority = applicationParameters.Authority ?? (insertDefaults ? DefaultProperties.Authority : null),
-                    ClientId = applicationParameters.ClientId ?? (insertDefaults ? DefaultProperties.ClientId : null),
-                    ValidateAuthority = DefaultProperties.ValidateAuthority
-                };
-            }
-            if (applicationParameters.IsWebApi.GetValueOrDefault())
-            {
-                return new WebAPISettings
-                {
-                    Domain = applicationParameters.Domain ?? (insertDefaults ? DefaultProperties.Domain : null),
-                    TenantId = applicationParameters.TenantId ?? (insertDefaults ? DefaultProperties.TenantId : null),
-                    ClientId = applicationParameters.ClientId ?? (insertDefaults ? DefaultProperties.ClientId : null),
-                    Instance = applicationParameters.Instance ?? (insertDefaults ? DefaultProperties.Instance : null),
-                    CallbackPath = applicationParameters.CallbackPath ?? (insertDefaults ? DefaultProperties.CallbackPath : null),
-                    Scopes = applicationParameters.CalledApiScopes ?? (insertDefaults ? DefaultProperties.DefaultScopes : null)
-                };
+                    return true;
+                }
             }
 
-            return new WebAppSettings
+            return false;
+        }
+
+        private JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
+        {
+            var inputParameters = JObject.FromObject(new ApiSettingsBlock
             {
-                Domain = applicationParameters.Domain ?? (insertDefaults ? DefaultProperties.Domain : null),
-                TenantId = applicationParameters.TenantId ?? (insertDefaults ? DefaultProperties.TenantId : null),
-                ClientId = applicationParameters.ClientId ?? (insertDefaults ? DefaultProperties.ClientId : null),
-                Instance = applicationParameters.Instance ?? (insertDefaults ? DefaultProperties.Instance : null),
-                CallbackPath = applicationParameters.CallbackPath ?? (insertDefaults ? DefaultProperties.CallbackPath : null)
-            };
+                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.DefaultScopes : scopes,
+                BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
+            }); ;
+
+            if (appSettings.TryGetValue(key, out var apiToken))
+            {
+                // block exists
+                var existingBlock = JObject.FromObject(apiToken);
+                return ModifyAppSettingsObject(existingBlock, inputParameters) ? existingBlock : null;
+            }
+
+            // block does not exist, create a new one
+            return inputParameters;
         }
 
         private bool ModifyAppSettingsObject(JObject existingSettings, JObject inputProperties)
@@ -200,81 +198,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
 
             return changesMade;
-        }
-
-        private bool ModifyCredentials(JToken azureAdToken)
-        {
-            bool changesMade = false;
-            if (azureAdToken[PropertyNames.ClientSecret] == null)
-            {
-                changesMade = true;
-                azureAdToken[PropertyNames.ClientSecret] = DefaultProperties.ClientSecret;
-            }
-            if (azureAdToken[PropertyNames.ClientCertificates] == null)
-            {
-                changesMade = true;
-                azureAdToken[PropertyNames.ClientCertificates] = new JArray();
-            }
-
-            return changesMade;
-        }
-
-        private JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
-        {
-            var inputParameters = JObject.FromObject(new ApiSettingsBlock
-            {
-                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.DefaultScopes : scopes,
-                BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
-            });;
-
-            if (appSettings.TryGetValue(key, out var apiToken))
-            {
-                // block exists
-                var apiBlock = JObject.FromObject(apiToken);
-                return ModifyAppSettingsObject(apiBlock, inputParameters) ? apiBlock : null;
-            }
-            // block does not exist, create a new one
-            return inputParameters;
-        }
-
-
-        private JObject? GetModifiedMicrosoftGraphBlock(JObject appSettings)
-        {
-            if (!appSettings.TryGetValue("MicrosoftGraph", out var microsoftGraphToken))
-            {
-                return DefaultApiBlock();
-            }
-
-            var microsoftGraphBlock = JObject.FromObject(microsoftGraphToken);
-            var inputParameters = JObject.FromObject(new ApiSettingsBlock
-            {
-                Scopes = DefaultProperties.DefaultScopes,
-                BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl
-            });
-
-            return ModifyAppSettingsObject(microsoftGraphBlock, inputParameters) ? microsoftGraphBlock : null;
-        }
-
-        internal JObject? GetModifiedDownstreamApiBlock(JObject appSettings)
-        {
-            var newBlock = JObject.FromObject(new ApiSettingsBlock());
-            if (!appSettings.TryGetValue("DownstreamApi", out var downstreamApiToken))
-            {
-                return newBlock;
-            }
-
-            var existingBlock = JObject.FromObject(downstreamApiToken);
-
-            return ModifyAppSettingsObject(existingBlock, newBlock) ? existingBlock : null;
-        }
-
-        internal static JObject DefaultApiBlock()
-        {
-            return JObject.FromObject(new ApiSettingsBlock
-            {
-                BaseUrl = DefaultProperties.MicrosoftGraphBaseUrl,
-                Scopes = DefaultProperties.DefaultScopes
-            });
         }
 
         /// <summary>

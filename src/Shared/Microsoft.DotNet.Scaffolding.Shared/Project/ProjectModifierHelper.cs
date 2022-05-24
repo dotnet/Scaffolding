@@ -166,12 +166,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 || node is ConstructorDeclarationSyntax cds && cds.Identifier.ValueText.Equals(methodName))
                  is BaseMethodDeclarationSyntax foundMethod)
             {
-                var parameters = VerifyParameters(methodChanges.Parameters, foundMethod.ParameterList.Parameters.ToList());
-                if (parameters == null)
-                {
-                    return null;
-                }
-
                 return foundMethod;
             }
 

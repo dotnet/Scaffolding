@@ -272,6 +272,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return originalMethod;
             }
 
+            var leadingWhitespaceTrivia = followingNode.GetLeadingTrivia().LastOrDefault();
+            if (leadingWhitespaceTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
+            {
+                codeChange.LeadingTrivia.NumberOfSpaces += leadingWhitespaceTrivia.Span.Length;
+            }
+
             var newNodes = GetNodeInsertionList(codeChange, originalMethod.Kind());
             if (newNodes is null)
             {
@@ -288,6 +294,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             if (precedingNode is null)
             {
                 return originalMethod;
+            }
+
+            var leadingWhitespaceTrivia = precedingNode.GetLeadingTrivia().LastOrDefault();
+            if (leadingWhitespaceTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
+            {
+                codeChange.LeadingTrivia.NumberOfSpaces += leadingWhitespaceTrivia.Span.Length;
             }
 
             var newNodes = GetNodeInsertionList(codeChange, originalMethod.Kind());
@@ -512,16 +524,16 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         /// <returns>parent with updated lambda expression</returns>
         internal static SyntaxNode GetNodeWithUpdatedLambda(LambdaExpressionSyntax existingLambda, CodeSnippet change, SyntaxNode parent)
         {
-            var children = GetDescendantNodes(existingLambda);
-            var lambdaWithUpdatedParameters = UpdateLambdaParameters(existingLambda, children, change);
-            var lambdaWithUpdatedBlock = UpdateLambdaBlock(lambdaWithUpdatedParameters, children, change);
+            var lambdaWithUpdatedParameters = UpdateLambdaParameters(existingLambda, change);
+            var lambdaWithUpdatedBlock = UpdateLambdaBlock(lambdaWithUpdatedParameters, change);
 
             return parent.ReplaceNode(existingLambda, lambdaWithUpdatedBlock);
         }
 
-        private static LambdaExpressionSyntax UpdateLambdaParameters(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
+        private static LambdaExpressionSyntax UpdateLambdaParameters(LambdaExpressionSyntax existingLambda, CodeSnippet change)
         {
-            if (ProjectModifierHelper.StatementExists(lambdaChildren, change.Parameter))
+            var existingParameters = GetDescendantNodes(existingLambda).Where(n => n.IsKind(SyntaxKind.Parameter));
+            if (ProjectModifierHelper.StatementExists(existingParameters, change.Parameter))
             {
                 return existingLambda;
             }
@@ -545,11 +557,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return updatedLambda;
         }
 
-        private static LambdaExpressionSyntax UpdateLambdaBlock(LambdaExpressionSyntax existingLambda, IEnumerable<SyntaxNode> lambdaChildren, CodeSnippet change)
+        private static LambdaExpressionSyntax UpdateLambdaBlock(LambdaExpressionSyntax existingLambda, CodeSnippet change)
         {
             if (ProjectModifierHelper.StatementExists(existingLambda.Body, change.Block))
             {
                 return existingLambda;
+            }
+
+            var leadingWhitespaceTrivia = existingLambda.GetLeadingTrivia().LastOrDefault();
+            if (leadingWhitespaceTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
+            {
+                change.LeadingTrivia.NumberOfSpaces += leadingWhitespaceTrivia.Span.Length;
             }
 
             if (change.Replace)

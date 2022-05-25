@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project.Documents.ToList());
+            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project.Documents.ToList()); // TODO can use "files" list of strings
             var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
             CodeChangeOptions options = new CodeChangeOptions
             {
@@ -264,6 +265,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var root = documentBuilder.AddUsings(options);
             if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
+                Debugger.Launch();
                 var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
                 if (updatedIdentifer.HasValue)
@@ -273,13 +275,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 }
                 if (!options.UsingTopLevelsStatements)
                 {
-                    var mainMethod = root?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
-                        && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
-                    if (mainMethod != null)
+                    var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
+                        .FirstOrDefault(n => Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
+                    if (mainMethod != null
+                        && DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges) is BlockSyntax updatedBody)
                     {
-                        var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, filteredChanges);
+                        var updatedMethod = mainMethod.WithBody(updatedBody);
                         return root?.ReplaceNode(mainMethod, updatedMethod);
                     }
+
                 }
                 else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
                 {

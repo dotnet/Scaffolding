@@ -10,10 +10,7 @@
           "CodeChanges": [
             {
               "InsertAfter": "IApplicationBuilder.UseRouting()",
-              "Block": "IApplicationBuilder.UseAuthentication()",
-              "LeadingTrivia": {
-                "NumberOfSpaces": 12
-              }
+              "Block": "IApplicationBuilder.UseAuthentication()"
             },
             {
               "Parent": "IApplicationBuilder.UseEndpoints",

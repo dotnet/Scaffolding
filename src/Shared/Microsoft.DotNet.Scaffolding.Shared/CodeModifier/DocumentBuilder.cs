@@ -350,9 +350,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var statement = GetStatementWithTrivia(codeChange);
             if (syntaxKind == SyntaxKind.Block && node is BlockSyntax block)
             {
-                return codeChange.Prepend
+                block = codeChange.Prepend
                     ? block.WithStatements(block.Statements.Insert(0, statement))
                     : block.AddStatements(statement);
+
+                return block;
             }
             if (syntaxKind == SyntaxKind.CompilationUnit && node is CompilationUnitSyntax compilationUnit)
             {
@@ -605,16 +607,30 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 SyntaxFactory.Identifier(change.Parameter))
                 .WithTrailingTrivia(SyntaxFactory.Space);
 
+            var parentLeadingWhiteSpace = parent.GetLeadingTrivia().LastOrDefault();
+            if (parentLeadingWhiteSpace.IsKind(SyntaxKind.WhitespaceTrivia))
+            {
+                change.LeadingTrivia.NumberOfSpaces += parentLeadingWhiteSpace.Span.Length;
+            }
+
             // Ensure that block statement is valid
             if (!(GetBlockStatement(SyntaxFactory.Block(), change) is BlockSyntax block))
             {
                 return parent;
             }
 
+            // Update white space for non-top-level statements
+            if (parentLeadingWhiteSpace.IsKind(SyntaxKind.WhitespaceTrivia))
+            {
+                block = block
+                    .WithOpenBraceToken(block.OpenBraceToken.WithLeadingTrivia(parentLeadingWhiteSpace))
+                    .WithCloseBraceToken(block.CloseBraceToken.WithLeadingTrivia(parentLeadingWhiteSpace));
+            }
+
             // Create lambda expression with parameter and block (add leading newline to block for formatting)
             var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(
                 parameter,
-                block.WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+                block.WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, parentLeadingWhiteSpace));
 
             // Add lambda to parent block's argument list
             var argument = SyntaxFactory.Argument(newLambdaExpression);

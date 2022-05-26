@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -76,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return;
             }
 
-            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project.Documents.ToList()); // TODO can use "files" list of strings
+            var isMinimalApp = await ProjectModifierHelper.IsMinimalApp(project.Documents.ToList());
             var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
             CodeChangeOptions options = new CodeChangeOptions
             {
@@ -265,7 +264,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var root = documentBuilder.AddUsings(options);
             if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
             {
-                Debugger.Launch();
                 var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(globalChanges.CodeChanges, options);
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(root.Members);
                 if (updatedIdentifer.HasValue)

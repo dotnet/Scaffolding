@@ -18,7 +18,11 @@
           "Parameters": [ "IServiceCollection" ],
           "CodeChanges": [
             {
-              "Block": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)"
+              "Block": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "LeadingTrivia": {
+                "NumberOfSpaces": 12, 
+                "Newline": true
+              }
             },
             {
               "Parent": "IServiceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
@@ -140,7 +144,11 @@
           "CodeChanges": [
             {
               "InsertAfter": "IApplicationBuilder.UseRouting",
-              "Block": "IApplicationBuilder.UseAuthentication()"
+              "Block": "IApplicationBuilder.UseAuthentication()",
+              "LeadingTrivia": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
             }
           ]
         },

@@ -14,8 +14,12 @@
             },
             {
               "Parent": "IApplicationBuilder.UseEndpoints",
+              "Parameter": "endpoints",
               "CodeChangeType": "Lambda",
-              "Block": "endpoints.MapControllers()"
+              "Block": "endpoints.MapControllers()",
+              "LeadingTrivia": {
+                "NumberOfSpaces": 16
+              }
             }
           ]
         },
@@ -174,11 +178,11 @@
       },
       "Usings": [
         "Microsoft.AspNetCore.Authentication",
-        "Microsoft.Identity.Web",
-        "Microsoft.Identity.Web.UI",
         "Microsoft.AspNetCore.Authentication.OpenIdConnect",
         "Microsoft.AspNetCore.Authorization",
-        "Microsoft.AspNetCore.Mvc.Authorization"
+        "Microsoft.AspNetCore.Mvc.Authorization",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.UI"
       ]
     },
     {

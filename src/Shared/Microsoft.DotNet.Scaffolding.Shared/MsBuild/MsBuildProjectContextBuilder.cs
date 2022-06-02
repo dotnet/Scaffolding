@@ -44,7 +44,8 @@ namespace Microsoft.Extensions.ProjectModel
                 {
                     _projectPath,
                     $"/t:EvaluateProjectInfoForCodeGeneration",
-                    $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation};Configuration={_configuration}"
+                    $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation};Configuration={_configuration}",
+                    "-restore"
                 })
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))

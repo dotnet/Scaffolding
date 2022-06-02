@@ -6,7 +6,7 @@
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>1.0.4</VersionPrefix>
+    <VersionPrefix>1.0.5</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--

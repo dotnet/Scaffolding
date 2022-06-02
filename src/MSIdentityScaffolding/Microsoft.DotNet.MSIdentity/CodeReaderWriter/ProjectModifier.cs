@@ -273,13 +273,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 }
                 if (!options.UsingTopLevelsStatements)
                 {
-                    var mainMethod = root?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
-                        && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
-                    if (mainMethod != null)
+                    var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
+                        .FirstOrDefault(n => Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
+                    if (mainMethod != null
+                        && DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges) is BlockSyntax updatedBody)
                     {
-                        var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod, filteredChanges);
+                        var updatedMethod = mainMethod.WithBody(updatedBody);
                         return root?.ReplaceNode(mainMethod, updatedMethod);
                     }
+
                 }
                 else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
                 {
@@ -291,8 +293,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();
 
                 string className = ProjectModifierHelper.GetClassName(file.FileName);
-                // get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
 
+                // get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
                 if (namespaceNode?.DescendantNodes().FirstOrDefault(node =>
                         node is ClassDeclarationSyntax cds &&
                         cds.Identifier.ValueText.Contains(className)) is ClassDeclarationSyntax classNode)
@@ -303,10 +305,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     modifiedClassDeclarationSyntax = documentBuilder.AddProperties(modifiedClassDeclarationSyntax, options);
                     //add class attributes
                     modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
-
-                    modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
-
                     //add code snippets/changes.
+                    modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
 
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
@@ -331,6 +331,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (methodNode is null)
                 {
                     continue;
+                }
+
+                var parameters = ProjectModifierHelper.VerifyParameters(methodChanges.Parameters, methodNode.ParameterList.Parameters.ToList());
+                foreach ((string oldValue, string newValue) in parameters)
+                {
+                    methodChanges.CodeChanges = ProjectModifierHelper.UpdateVariables(methodChanges.CodeChanges, oldValue, newValue);
                 }
 
                 var updatedMethodNode = DocumentBuilder.GetModifiedMethod(methodNode, methodChanges, options);

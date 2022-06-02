@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public bool Replace { get; set; } = false;
         public string[] InsertBefore { get; set; }
         public string[] Options { get; set; }
-        public Formatting LeadingTrivia { get; set; }
+        public Formatting LeadingTrivia { get; set; } = new Formatting();
         public Formatting TrailingTrivia { get; set; } = new Formatting { Semicolon = true, Newline = true };
         public string Parameter { get; set; }
         public CodeChangeType CodeChangeType { get; set; } = CodeChangeType.Default;

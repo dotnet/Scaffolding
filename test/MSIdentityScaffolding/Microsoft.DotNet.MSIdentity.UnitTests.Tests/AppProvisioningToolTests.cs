@@ -36,7 +36,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -55,7 +54,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -84,7 +82,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -122,7 +119,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -164,7 +160,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -203,7 +198,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -243,7 +237,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -252,7 +245,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         public void ModifyAppSettings_BlazorWasm_AuthorityIsCorrect()
         {
             var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
-
             var appSettings = new Newtonsoft.Json.Linq.JObject
             {
                 {
@@ -285,7 +277,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
-
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -299,7 +290,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         public void UpdatePropertyIfNecessary(string propertyName, string existingValue, string newValue, string expected)
         {
             (bool needsUpdate, JToken update) = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
-
             Assert.Equal(update?.ToString(), expected);
         }
     }

@@ -9,9 +9,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 {
     internal class AppSettingsModifier
     {
-        private const string MicrosoftGraph = "MicrosoftGraph";
-        private const string DownstreamApi = "DownstreamApi";
-        private const string ServerApi = "ServerApi";
+        private const string MicrosoftGraph = nameof(MicrosoftGraph);
+        private const string DownstreamApi = nameof(DownstreamApi);
+        private const string ServerApi = nameof(ServerApi);
         internal static string AppSettingsFileName = "appsettings.json";
 
         internal static Dictionary<string, string?>? _propertiesDictionary;
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             {
                 Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.DefaultScopes : scopes,
                 BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
-            }); ;
+            });
 
             if (appSettings.TryGetValue(key, out var apiToken))
             {
@@ -209,7 +209,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <returns></returns>
         internal static bool UpdateIfNecessary(JObject block, string propertyName, JToken? newValue)
         {
-            var existingValue = block[propertyName];
+            if (!block.TryGetValue(propertyName, out var existingValue))
+            {
+                block.Add(propertyName, newValue);
+                return true;
+            }
+
             (bool needsUpdate, JToken? update) = GetUpdatedValue(propertyName, existingValue, newValue);
             if (needsUpdate)
             {

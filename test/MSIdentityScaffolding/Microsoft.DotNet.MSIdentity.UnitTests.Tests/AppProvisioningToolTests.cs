@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         const string inputDomain = "input domain";
         const string inputTenantId = "input tenant Id";
         const string inputClientId = "input client Id";
-        const string inputInstance = "input Instance";
+        const string inputInstance = "http://inputInstance/";
         const string inputCallbackPath = "input Callback Path";
 
         [Fact]
@@ -33,11 +33,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.ClientId,
                 DefaultProperties.Instance,
                 DefaultProperties.CallbackPath
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
-
-            Assert.Equal(expected, modifications);
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -52,11 +51,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.Authority,
                 DefaultProperties.ClientId,
                 DefaultProperties.ValidateAuthority
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
-
-            Assert.Equal(expected, modifications);
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -72,7 +70,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = inputClientId,
                 Instance = inputInstance,
                 CallbackPath = inputCallbackPath
-            }).ToString();
+            });
 
             var parameters = new AuthenticationParameters.ApplicationParameters
             {
@@ -83,9 +81,45 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = inputCallbackPath
             };
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
+        }
 
-            Assert.Equal(expected, modifications);
+        [Fact]
+        public void ModifyAppSettings_HasInput_SomePropertiesMissing_InsertDefaults()
+        {
+            var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
+            var appSettings = new Newtonsoft.Json.Linq.JObject
+            {
+                {
+                    "AzureAd",
+                    JToken.FromObject(new
+                    {
+                        Domain = existingDomain,
+                        TenantId = existingTenantId,
+                        ClientId = existingClientId
+                    })
+                }
+            };
+
+            var expected = JObject.FromObject(new
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = DefaultProperties.Instance,
+                CallbackPath = DefaultProperties.CallbackPath
+            });
+
+            var parameters = new AuthenticationParameters.ApplicationParameters
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId
+            };
+
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -117,17 +151,16 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             var expected = JObject.FromObject(new
-            {
-                Domain = inputDomain,
-                TenantId = inputTenantId,
-                ClientId = inputClientId,
-                Instance = inputInstance,
-                CallbackPath = inputCallbackPath
-            }).ToString();
+                {
+                    Domain = inputDomain,
+                    TenantId = inputTenantId,
+                    ClientId = inputClientId,
+                    Instance = inputInstance,
+                    CallbackPath = inputCallbackPath
+                });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
-
-            Assert.Equal(expected, modifications);
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
@@ -162,18 +195,16 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = existingClientId,
                 Instance = existingInstance,
                 CallbackPath = existingCallbackPath
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
-
-            Assert.Equal(expected, modifications);
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Fact]
         public void ModifyAppSettings_HasEmptyInputParameter_ExistingPropertiesNotModified()
         {
             var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
-
             var appSettings = new Newtonsoft.Json.Linq.JObject
             {
                 {
@@ -203,11 +234,50 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = existingClientId,
                 Instance = existingInstance,
                 CallbackPath = existingCallbackPath
-            }).ToString();
+            });
 
-            var modifications = modifier.GetModifiedAppSettings(appSettings, parameters)["AzureAd"].ToString();
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
+        }
 
-            Assert.Equal(expected, modifications);
+
+        [Fact]
+        public void ModifyAppSettings_BlazorWasm_AuthorityIsCorrect()
+        {
+            var modifier = new AppSettingsModifier(new Tool.ProvisioningToolOptions());
+            var appSettings = new Newtonsoft.Json.Linq.JObject
+            {
+                {
+                    "AzureAd",
+                    JToken.FromObject(new
+                    {
+                        Domain = existingDomain,
+                        TenantId = existingTenantId,
+                        ClientId = existingClientId,
+                        Instance = existingInstance,
+                        CallbackPath = existingCallbackPath
+                    })
+                }
+            };
+
+            var parameters = new AuthenticationParameters.ApplicationParameters
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = inputInstance,
+                IsBlazorWasm = true
+            };
+
+            var expected = JObject.FromObject(new
+            {
+                ClientId = inputClientId,
+                Authority = $"{inputInstance}{inputTenantId}",
+                ValidateAuthority = true
+            });
+
+            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
         [Theory]
@@ -219,9 +289,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [InlineData(PropertyNames.Domain, null, null, DefaultProperties.Domain)]
         public void UpdatePropertyIfNecessary(string propertyName, string existingValue, string newValue, string expected)
         {
-            var update = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
-
-            Assert.Equal(update, expected);
+            (bool needsUpdate, JToken update) = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
+            Assert.Equal(update?.ToString(), expected);
         }
     }
 }

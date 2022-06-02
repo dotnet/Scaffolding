@@ -845,7 +845,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 IsAAD = !isB2C,
                 IsB2C = isB2C,
                 HasAuthentication = true,
-                IsWebApi = application.Api?.Oauth2PermissionScopes?.Any() is true || application.AppRoles?.Any() is true,
+                IsWebApi = originalApplicationParameters.IsWebApi.GetValueOrDefault()
+                || application.Api?.Oauth2PermissionScopes?.Any() is true
+                || application.AppRoles?.Any() is true,
                 TenantId = tenant.Id,
                 Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.GetValueOrDefault())?.Name,
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,

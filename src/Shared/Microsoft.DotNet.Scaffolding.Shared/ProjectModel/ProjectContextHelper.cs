@@ -48,6 +48,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared
                             //"targets" gives us all top-level and transitive dependencies. "packageFolders" gives us the path where the dependencies are on disk.
                             if (root.TryGetProperty(TargetsProperty, out var targets) && root.TryGetProperty(PackageFoldersProperty, out var packageFolderPath))
                             {
+                                if (targetFramework.EndsWith("-windows"))
+                                {
+                                    //tfm in project.assets.json is netX-windows7.0 instead of netX-windows
+                                    targetFramework = $"{targetFramework}7.0";
+                                }
+
                                 if (targets.TryGetProperty(targetFramework, out var packages))
                                 {
                                     packageDependencies = DeserializePackages(packages, packageFolderPath, targetFrameworkMoniker);

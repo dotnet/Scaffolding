@@ -9,15 +9,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <X86BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-x86\</X86BinDirectory>
-    <ARMBinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-arm\</ARMBinDirectory>
-    <ARM64BinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-arm64\</ARM64BinDirectory>
-    <AnyCpuBinDirectory>$(ArtifactsBinDir)VS.Web.CG.Design-anycpu\</AnyCpuBinDirectory>
-
-    <X86ProjectDirectory>$(RepoRoot)src\Scaffolding\VS.Web.CG.Design-x86\</X86ProjectDirectory>
-    <ARMProjectDirectory>$(RepoRoot)src\Scaffolding\VS.Web.CG.Design-arm\</ARMProjectDirectory>
-    <ARM64ProjectDirectory>$(RepoRoot)src\Scaffolding\VS.Web.CG.Design-arm64\</ARM64ProjectDirectory>
-    <AnyCpuProjectDirectory>$(RepoRoot)src\Scaffolding\VS.Web.CG.Design-anycpu\</AnyCpuProjectDirectory>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
   
@@ -31,20 +22,6 @@
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
       <PackagePath>lib\net6.0\</PackagePath>
-    </Content>
-
-    <Content Include="$(ARMBinDirectory)$(Configuration)\net6.0\win-arm\$(AssemblyName).exe;
-                      $(ARMBinDirectory)$(Configuration)\net6.0\win-arm\$(AssemblyName).xml;"
-             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
-      <Pack>true</Pack>
-      <PackagePath>runtimes\win-arm\lib\net6.0\</PackagePath>
-    </Content>
-
-    <Content Include="$(ARM64BinDirectory)$(Configuration)\net6.0\win-arm64\$(AssemblyName).exe;
-                      $(ARM64BinDirectory)$(Configuration)\net6.0\win-arm64\$(AssemblyName).xml;" 
-             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
-      <Pack>true</Pack>
-      <PackagePath>runtimes\win-arm64\lib\net6.0\</PackagePath>
     </Content>
   </ItemGroup>
 </Project>

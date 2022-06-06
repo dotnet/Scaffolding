@@ -82,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 
             if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, useSqlite: false);
+                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, useSqlite: model.UseSqlite);
             }
 
             var templateModel = new MinimalApiModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName, model.EndpintsClassName)
@@ -92,7 +92,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata,
                 NullableEnabled = "enable".Equals(AppInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase),
                 OpenAPI = model.OpenApi,
-                MethodName = $"Map{modelTypeAndContextModel.ModelType.Name}Endpoints"
+                MethodName = $"Map{modelTypeAndContextModel.ModelType.Name}Endpoints",
+                UseSqlite = model.UseSqlite
             };
 
             var endpointsModel = ModelTypesLocator.GetAllTypes().FirstOrDefault(t => t.Name.Equals(model.EndpintsClassName));

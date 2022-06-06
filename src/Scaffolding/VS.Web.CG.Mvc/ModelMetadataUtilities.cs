@@ -88,7 +88,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     dbContextFullName,
                     model,
                     areaName,
-                    useSqlite: false);
+                    useSqlite: commandLineModel.UseSqlite);
             }
 
             return new ModelTypeAndContextModel()

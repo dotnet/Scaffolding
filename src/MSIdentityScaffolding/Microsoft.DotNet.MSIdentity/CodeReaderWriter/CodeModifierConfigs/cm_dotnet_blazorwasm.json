@@ -281,6 +281,9 @@
     },
     {
       "FileName": "FetchData.razor",
+      "Options": [
+        "DownstreamApi"
+      ],
       "Replacements": [
         {
           "MultiLineBlock": [

@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             TenantId = TenantId ?? DefaultProperties.TenantId,
             ClientId = ClientId ?? DefaultProperties.ClientId,
             CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath,
-            Scopes = Scopes ?? DefaultProperties.MicrosoftGraphScopes,
+            Scopes = Scopes ?? DefaultProperties.ApiScopes,
             ClientSecret = ClientSecret ?? DefaultProperties.ClientSecret,
             ClientCertificates = ClientCertificates ?? Array.Empty<string>()
         };

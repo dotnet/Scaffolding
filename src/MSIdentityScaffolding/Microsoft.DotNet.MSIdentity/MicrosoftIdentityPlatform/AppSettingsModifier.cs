@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsGraph)
             {
                 // update MicrosoftGraph Block
-                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.MicrosoftGraphScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (microsoftGraphBlock != null)
                 {
                     changesMade = true;
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsDownstreamApi)
             {
                 // update DownstreamAPI Block
-                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, DefaultProperties.DefaultScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, DefaultProperties.ApiScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (updatedDownstreamApiBlock != null)
                 {
                     changesMade = true;
@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         {
             var inputParameters = JObject.FromObject(new ApiSettingsBlock
             {
-                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.DefaultScopes : scopes,
+                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes,
                 BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
             });
 

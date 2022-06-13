@@ -67,21 +67,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Request()
                 .AddAsync(application);
 
+            // Create service principal, necessary for Web API applications
+            // and useful for Blazorwasm hosted applications. We create it always.
+            ServicePrincipal servicePrincipal = new ServicePrincipal
+            {
+                AppId = createdApplication.AppId,
+            };
+
+            ServicePrincipal? createdServicePrincipal = await graphServiceClient.ServicePrincipals
+                .Request()
+                .AddAsync(servicePrincipal).ConfigureAwait(false);
+
             if (applicationParameters.IsB2C) // TODO B2C not fully supported at the moment
             {
-                // Creates a service principal (needed for B2C) // TODO: What if it's not B2C?
-                ServicePrincipal servicePrincipal = new ServicePrincipal
-                {
-                    AppId = createdApplication.AppId,
-                };
-
-                // B2C does not allow user consent, and therefore we need to explicity create
-                // a service principal and permission grants. It's also useful for Blazorwasm hosted
-                // applications. We create it always.
-                ServicePrincipal? createdServicePrincipal = await graphServiceClient.ServicePrincipals
-                    .Request()
-                    .AddAsync(servicePrincipal).ConfigureAwait(false);
-
                 // B2C does not allow user consent, and therefore we need to explicity grant permissions
                 if (applicationParameters.IsB2C)
                 {
@@ -103,7 +101,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 && createdApplication.Api != null
                 && (createdApplication.IdentifierUris == null || !createdApplication.IdentifierUris.Any()))
             {
-                await ExposeScopes(graphServiceClient, createdApplication);
+                await ExposeScopesForNewWebApi(graphServiceClient, createdApplication);
 
                 // Re-reading the app to be sure to have everything.
                 createdApplication = (await graphServiceClient.Applications
@@ -402,7 +400,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var requiredResourceAccess = new List<RequiredResourceAccess>();
             var resourcesAccessAndScopes = new List<ResourceAndScope>
                 {
-                    new ResourceAndScope($"api://{createdApplication.AppId}", "access_as_user")
+                    new ResourceAndScope($"api://{createdApplication.AppId}", DefaultProperties.ApiScopes)
                     {
                          ResourceServicePrincipalId = createdServicePrincipal.Id
                     }
@@ -430,7 +428,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     ConsentType = "AllPrincipals",
                     PrincipalId = null,
                     ResourceId = createdServicePrincipal.Id,
-                    Scope = "access_as_user"
+                    Scope = DefaultProperties.ApiScopes
                 };
 
                 await graphServiceClient.Oauth2PermissionGrants
@@ -504,7 +502,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 IsEnabled = true,
                 UserConsentDescription = "Allows this app to access the web API on your behalf",
                 UserConsentDisplayName = "Access the API on your behalf",
-                Value = "access_as_user",
+                Value = DefaultProperties.ApiScopes,
             };
 
             scopes.Add(newScope);
@@ -522,11 +520,41 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="graphServiceClient"></param>
         /// <param name="createdApplication"></param>
         /// <returns></returns>
-        internal static async Task ExposeScopes(GraphServiceClient graphServiceClient, Application createdApplication)
+        internal static async Task ExposeScopesForNewWebApi(GraphServiceClient graphServiceClient, Application createdApplication)
         {
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
             await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);
         }
+
+        // TODO 1.0.6
+        ///// <summary>
+        ///// Expose scopes for the web API.
+        ///// </summary>
+        ///// <param name="graphServiceClient"></param>
+        ///// <param name="createdApplication"></param>
+        ///// <returns></returns>
+        //internal static async Task ExposeScopesForExistingWebApi(GraphServiceClient graphServiceClient, Application createdApplication)
+        //{
+        //    var scopes = createdApplication.Api?.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
+        //    var existingServicePrincipal = await graphServiceClient.ServicePrincipals[createdApplication.AppId]
+        //        .Request()
+        //        .GetAsync();
+
+        //    if (existingServicePrincipal is null)
+        //    {
+        //        // Creates a service principal if necessary
+        //        var servicePrincipal = new ServicePrincipal
+        //        {
+        //            AppId = createdApplication.AppId,
+        //        };
+
+        //        await graphServiceClient.ServicePrincipals
+        //         .Request()
+        //         .AddAsync(servicePrincipal).ConfigureAwait(false);
+        //    }
+
+        //    await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);
+        //}
 
         /// <summary>
         /// Admin consent to API permissions

@@ -526,36 +526,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);
         }
 
-        // TODO 1.0.6
-        ///// <summary>
-        ///// Expose scopes for the web API.
-        ///// </summary>
-        ///// <param name="graphServiceClient"></param>
-        ///// <param name="createdApplication"></param>
-        ///// <returns></returns>
-        //internal static async Task ExposeScopesForExistingWebApi(GraphServiceClient graphServiceClient, Application createdApplication)
-        //{
-        //    var scopes = createdApplication.Api?.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
-        //    var existingServicePrincipal = await graphServiceClient.ServicePrincipals[createdApplication.AppId]
-        //        .Request()
-        //        .GetAsync();
-
-        //    if (existingServicePrincipal is null)
-        //    {
-        //        // Creates a service principal if necessary
-        //        var servicePrincipal = new ServicePrincipal
-        //        {
-        //            AppId = createdApplication.AppId,
-        //        };
-
-        //        await graphServiceClient.ServicePrincipals
-        //         .Request()
-        //         .AddAsync(servicePrincipal).ConfigureAwait(false);
-        //    }
-
-        //    await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);
-        //}
-
         /// <summary>
         /// Admin consent to API permissions
         /// </summary>

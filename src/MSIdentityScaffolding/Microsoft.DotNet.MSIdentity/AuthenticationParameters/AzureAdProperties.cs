@@ -35,7 +35,8 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const bool ValidateAuthority = true;
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
-        public const string DefaultScopes = "user.read";
+        public const string MicrosoftGraphScopes = "user.read";
+        public const string ApiScopes = "access_as_user";
     }
 
     public class AzureAdBlock
@@ -77,15 +78,15 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         {
             JObject azureAdObj = JObject.FromObject(azureAdToken);
 
-            ClientId ??= azureAdObj.Value<string>(PropertyNames.ClientId); // here, if the applicationparameters value is null, we use the existing app settings value
-            Instance ??= azureAdObj.Value<string>(PropertyNames.Instance);
-            Domain ??= azureAdObj.Value<string>(PropertyNames.Domain);
-            TenantId ??= azureAdObj.Value<string>(PropertyNames.TenantId);
-            Authority ??= azureAdObj.Value<string>(PropertyNames.Authority);
-            CallbackPath ??= azureAdObj.Value<string>(PropertyNames.CallbackPath);
-            Scopes ??= azureAdObj.Value<string>(PropertyNames.Scopes);
-            ClientSecret ??= azureAdObj.Value<string>(PropertyNames.ClientSecret);
-            ClientCertificates ??= azureAdObj.Value<string[]>(PropertyNames.ClientCertificates);
+            ClientId ??= azureAdObj.GetValue(PropertyNames.ClientId)?.ToString(); // here, if the applicationparameters value is null, we use the existing app settings value
+            Instance ??= azureAdObj.GetValue(PropertyNames.Instance)?.ToString();
+            Domain ??= azureAdObj.GetValue(PropertyNames.Domain)?.ToString();
+            TenantId ??= azureAdObj.GetValue(PropertyNames.TenantId)?.ToString();
+            Authority ??= azureAdObj.GetValue(PropertyNames.Authority)?.ToString();
+            CallbackPath ??= azureAdObj.GetValue(PropertyNames.CallbackPath)?.ToString();
+            Scopes ??= azureAdObj.GetValue(PropertyNames.Scopes)?.ToString();
+            ClientSecret ??= azureAdObj.GetValue(PropertyNames.ClientSecret)?.ToString();
+            ClientCertificates ??= azureAdObj.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
 
             return this;
         }
@@ -113,7 +114,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             TenantId = TenantId ?? DefaultProperties.TenantId,
             ClientId = ClientId ?? DefaultProperties.ClientId,
             CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath,
-            Scopes = Scopes ?? DefaultProperties.DefaultScopes,
+            Scopes = Scopes ?? DefaultProperties.MicrosoftGraphScopes,
             ClientSecret = ClientSecret ?? DefaultProperties.ClientSecret,
             ClientCertificates = ClientCertificates ?? Array.Empty<string>()
         };

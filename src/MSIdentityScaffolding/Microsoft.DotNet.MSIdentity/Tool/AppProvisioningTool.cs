@@ -330,7 +330,7 @@ namespace Microsoft.DotNet.MSIdentity
             clientToolOptions.ProjectType = "blazorwasm-client";
             clientToolOptions.AppDisplayName = string.Concat(clientToolOptions.AppDisplayName ?? serverApplicationParameters.ApplicationDisplayName, "-Client");
             clientToolOptions.HostedAppIdUri = serverApplicationParameters.AppIdUri;
-            clientToolOptions.HostedApiScopes = $"{serverApplicationParameters.AppIdUri}/access_as_user";
+            clientToolOptions.HostedApiScopes = $"{serverApplicationParameters.AppIdUri}/{DefaultProperties.ApiScopes}";
 
             // Provision client app registration
             var provisionClientAppRegistration = new AppProvisioningTool(Commands.CREATE_APP_REGISTRATION_COMMAND, clientToolOptions, silent: true);

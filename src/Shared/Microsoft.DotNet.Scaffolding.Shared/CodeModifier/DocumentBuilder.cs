@@ -241,7 +241,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal static SyntaxNode UpdateMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
         {
             var children = GetDescendantNodes(originalMethod);
-            if (ProjectModifierHelper.StatementExists(children, codeChange.Block))
+            //check for CodeChange.Block and CodeChange.CheckBlock for  block's are easy to check.
+            if (ProjectModifierHelper.StatementExists(children, codeChange.Block) || (!string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock)))
             {
                 return originalMethod;
             }

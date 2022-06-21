@@ -170,60 +170,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             IFileSystem fileSystem,
             ILogger logger)
         {
-            if (applicationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(applicationInfo));
-            }
-
-            if (serviceProvider == null)
-            {
-                throw new ArgumentNullException(nameof(serviceProvider));
-            }
-
-            if (actionService == null)
-            {
-                throw new ArgumentNullException(nameof(actionService));
-            }
-
-            if (projectContext == null)
-            {
-                throw new ArgumentNullException(nameof(projectContext));
-            }
-
-            if (connectionStringsWriter == null)
-            {
-                throw new ArgumentNullException(nameof(connectionStringsWriter));
-            }
-
-            if (workspace == null)
-            {
-                throw new ArgumentNullException(nameof(workspace));
-            }
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
-            }
-
-            if (fileSystem == null)
-            {
-                throw new ArgumentNullException(nameof(fileSystem));
-            }
-
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
-            _applicationInfo = applicationInfo;
-            _serviceProvider = serviceProvider;
-            _codegeneratorActionService = actionService;
-            _projectContext = projectContext;
-            _connectionStringsWriter = connectionStringsWriter;
-            _workspace = workspace;
-            _loader = loader;
-            _fileSystem = fileSystem;
-            _logger = logger;
+            _applicationInfo = applicationInfo ?? throw new ArgumentNullException(nameof(applicationInfo));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _codegeneratorActionService = actionService ?? throw new ArgumentNullException(nameof(actionService));
+            _projectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
+            _connectionStringsWriter = connectionStringsWriter ?? throw new ArgumentNullException(nameof(connectionStringsWriter));
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _loader = loader ?? throw new ArgumentNullException(nameof(loader));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task GenerateCode(IdentityGeneratorCommandLineModel commandlineModel)

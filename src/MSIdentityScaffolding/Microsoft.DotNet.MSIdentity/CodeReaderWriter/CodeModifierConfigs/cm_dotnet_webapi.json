@@ -166,14 +166,14 @@
           ],
           "CodeChanges": [
             {
-              "Block": "_graphServiceClient = graphServiceClient;",
+              "Block": "_graphServiceClient = graphServiceClient",
               "Options": [ "MicrosoftGraph" ],
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               }
             },
             {
-              "Block": "_downstreamWebApi = downstreamWebApi;",
+              "Block": "_downstreamWebApi = downstreamWebApi",
               "Options": [ "DownstreamApi" ],
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
@@ -190,7 +190,7 @@
           "CodeChanges": [
             {
               "Prepend": true,
-              "Block": "var user = await _graphServiceClient.Me.Request().GetAsync();",
+              "Block": "var user = await _graphServiceClient.Me.Request().GetAsync()",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
@@ -198,7 +198,7 @@
             },
             {
               "Prepend": true,
-              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
+              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
@@ -220,7 +220,10 @@
                 "            }"
               ],
               "LeadingTrivia": {
-                "NumberOfSpaces": 12,
+                "Newline": true
+              },
+              "TrailingTrivia": {
+                "Semicolon": false, 
                 "Newline": true
               },
               "Options": [ "DownstreamApi" ]

@@ -12,7 +12,8 @@
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
-              "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n{1}options.{0}(connectionString));\"",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContext<{0}>(options =>\r\n{1}options.{0}(connectionString))\"",
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -20,7 +21,7 @@
             {
               "InsertAfter": "builder.Services.AddDbContext",
               "CheckBlock": "builder.Services.AddDefaultIdentity",
-              "Block": "builder.Services.AddDefaultIdentity<{0}>(options => options.SignIn.RequireConfirmedAccount = true)\r\n{1}.AddEntityFrameworkStores<{0}>();\"",
+              "Block": "builder.Services.AddDefaultIdentity<{0}>(options => options.SignIn.RequireConfirmedAccount = true)\r\n{1}.AddEntityFrameworkStores<{0}>()\"",
               "LeadingTrivia": {
                 "Newline": true
               }

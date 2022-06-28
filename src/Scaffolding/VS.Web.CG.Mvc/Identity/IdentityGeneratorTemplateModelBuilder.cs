@@ -705,11 +705,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                             Environment.NewLine,
                             string.Join(Environment.NewLine, _reflectedTypesProvider.GetCompilationErrors())));
                 }
+              
             }
-
-            var reflectedType = _reflectedTypesProvider.GetReflectedType(type, true);
-
-            return reflectedType;
+            //get all types and return the one with the same name. There should be no duplicates so only one should match.
+            return _reflectedTypesProvider.GetAllTypesInProject().FirstOrDefault(r => r.Name.Equals(type, StringComparison.OrdinalIgnoreCase));
         }
 
         private void ValidateCommandLine(IdentityGeneratorCommandLineModel model)

@@ -5,7 +5,7 @@
   "MatchesForProjectType": [
     {
       "FileRelativePath": "Startup.cs",
-      "MatchAny": [ ".AddAzureAD", ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebAppAuthentication" ]
+      "MatchAny": [ ".AddAzureAD", ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebAppAuthentication", "Microsoft.Owin" ]
     },
     {
       "FolderRelativePath": "Views",

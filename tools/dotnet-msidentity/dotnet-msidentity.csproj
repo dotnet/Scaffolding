@@ -54,6 +54,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="NuGet.Packaging" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>

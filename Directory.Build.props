@@ -26,6 +26,7 @@
     <PackageReference Include="System.Private.Uri" Version="$(SystemPrivateUriVersion)" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="$(SystemSecurityCryptographyX509CertificatesVersion)"/>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManager)"/>
+    <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingVersion)" />
   </ItemGroup>
 
 </Project>

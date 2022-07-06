@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (projectDescription == null)
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMessage));
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, errorMessage));
                 ConsoleLogger.LogMessage(errorMessage, LogMessageType.Error);
                 Environment.Exit(1);
             }
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMsg));
+            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, errorMsg));
             ConsoleLogger.LogMessage(errorMsg, LogMessageType.Error);
             return false;
         }
@@ -304,8 +304,8 @@ namespace Microsoft.DotNet.MSIdentity
                                         ProvisioningToolOptions,
                                         CommandName);
 
-            output.AppendLine(jsonResponse.Content.ToString());
-            var response = new JsonResponse(CommandName, jsonResponse.State, output.ToString());
+            output.AppendLine(jsonResponse.Output.ToString());
+            var response = new JsonResponse(CommandName, jsonResponse.State, null, output.ToString());
 
             ConsoleLogger.LogMessage(response.Content as string);
             ConsoleLogger.LogJsonMessage(response);
@@ -338,7 +338,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, exception.Message));
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, exception.Message));
                 throw exception;
             }
 
@@ -349,7 +349,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, exception.Message));
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, exception.Message));
                 throw exception;
             }
 
@@ -474,9 +474,8 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
-                output = Resources.FailedClientSecret;
                 jsonResponse.State = State.Fail;
-                jsonResponse.Content = output;
+                jsonResponse.Output = Resources.FailedClientSecret;
             }
             else
             {
@@ -512,7 +511,7 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     output = se.Error?.ToString();
                     jsonResponse.State = State.Fail;
-                    jsonResponse.Content = se.Error?.Code;
+                    jsonResponse.Output = se.Error?.Code; // TODO refactor
                 }
 
                 ConsoleLogger.LogMessage(output);
@@ -534,7 +533,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 string outputMessage = $"Unregistered the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 jsonResponse.State = State.Success;
-                jsonResponse.Content = outputMessage;
+                jsonResponse.Output = outputMessage;
                 ConsoleLogger.LogMessage(outputMessage);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
@@ -542,7 +541,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 jsonResponse.State = State.Fail;
-                jsonResponse.Content = outputMessage;
+                jsonResponse.Output = outputMessage;
                 ConsoleLogger.LogMessage(outputMessage);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }

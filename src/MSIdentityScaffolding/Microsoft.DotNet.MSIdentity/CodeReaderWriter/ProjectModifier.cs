@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (csProjFiles.Count() != 1)
                 {
                     var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
-                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, errorMsg));
+                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, null, errorMsg));
                     _consoleLogger.LogMessage(errorMsg, LogMessageType.Error);
                     return;
                 }

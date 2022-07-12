@@ -17,13 +17,8 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public void LogMessage(string message, LogMessageType level, bool removeNewLine = false)
         {
-            if (_silent)
-            {
-                return;
-            }
-
             //if json output is enabled, don't write to console at all.
-            if (!_jsonOutput)
+            if (!_silent && !_jsonOutput)
             {
                 switch (level)
                 {
@@ -53,12 +48,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public void LogJsonMessage(JsonResponse jsonMessage)
         {
-            if (_silent)
-            {
-                return;
-            }
-
-            if (_jsonOutput)
+            if (!_silent && !_jsonOutput)
             {
                 Console.WriteLine(jsonMessage.ToJsonString());
             }
@@ -66,12 +56,10 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public void LogMessage(string message, bool removeNewLine = false)
         {
-            if (_silent)
+            if (!_silent)
             {
-                return;
+                LogMessage(message, LogMessageType.Information, removeNewLine);
             }
-
-            LogMessage(message, LogMessageType.Information, removeNewLine);
         }
     }
 }

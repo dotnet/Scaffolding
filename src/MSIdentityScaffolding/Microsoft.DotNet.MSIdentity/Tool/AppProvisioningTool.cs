@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -41,7 +42,7 @@ namespace Microsoft.DotNet.MSIdentity
         private ProjectDescriptionReader? _projectDescriptionReader;
         private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
 
-        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false) // TODO silent is temporary
+        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = true) // TODO silent is temporary
         {
             CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;
@@ -282,20 +283,18 @@ namespace Microsoft.DotNet.MSIdentity
         /// <returns></returns>
         private async Task UpdateAppRegistration(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            StringBuilder output = new StringBuilder(); // TODO: implement streaming output
+            StringBuilder output = new StringBuilder();
             if (ProvisioningToolOptions.IsBlazorWasmHostedServer) // Provision Blazor WASM Hosted client app registration
             {
                 if (string.IsNullOrEmpty(applicationParameters.AppIdUri)) // Expose server API scopes
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                    output.AppendLine(string.Format(Resources.ExposingScopes, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId));
                     applicationParameters.AppIdUri = await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.ClientId, applicationParameters.GraphEntityId);
                 }
 
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);
-                output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId));
-
                 ProvisioningToolOptions.BlazorWasmClientAppId = clientApplicationParameters.ClientId;
+                output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, clientApplicationParameters.ApplicationDisplayName, clientApplicationParameters.ClientId));
             }
 
             var jsonResponse = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
@@ -303,12 +302,11 @@ namespace Microsoft.DotNet.MSIdentity
                                         applicationParameters,
                                         ProvisioningToolOptions,
                                         CommandName);
-
             output.AppendLine(jsonResponse.Output.ToString());
             var response = new JsonResponse(CommandName, jsonResponse.State, null, output.ToString());
 
-            ConsoleLogger.LogMessage(response.Content as string);
             ConsoleLogger.LogJsonMessage(response);
+            ConsoleLogger.LogMessage(response.Content as string);
         }
 
         /// <summary>

@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.MSIdentity
         private ProjectDescriptionReader? _projectDescriptionReader;
         private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
 
-        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = true) // TODO silent is temporary
+        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false) // TODO silent is temporary
         {
             CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;

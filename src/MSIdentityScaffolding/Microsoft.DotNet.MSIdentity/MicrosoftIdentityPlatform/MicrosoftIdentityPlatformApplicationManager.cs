@@ -109,13 +109,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     .Filter($"appId eq '{createdApplication.AppId}'")
                     .GetAsync()).FirstOrDefault();
             }
-            // log json console message here since we need the Microsoft.Graph.Application
-            JsonResponse jsonResponse = new JsonResponse(commandName);
+
+            // log json console message inside this method since we need the Microsoft.Graph.Application
             if (createdApplication is null)
             {
-                jsonResponse.State = State.Fail;
-                jsonResponse.Output = Resources.FailedToCreateApp;
-                consoleLogger.LogJsonMessage(jsonResponse);
+                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, null, Resources.FailedToCreateApp));
                 return null;
             }
 
@@ -131,9 +129,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     consoleLogger);
             }
 
-            jsonResponse.State = State.Success;
-            jsonResponse.Content = createdApplication;
-            consoleLogger.LogJsonMessage(jsonResponse);
+            consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Success, createdApplication));
             return effectiveApplicationParameters;
         }
 

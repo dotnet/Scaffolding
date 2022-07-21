@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.MSIdentity
         private ProjectDescriptionReader? _projectDescriptionReader;
         private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
 
-        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = true) // TODO silent is temporary
+        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false) // TODO silent is temporary
         {
             CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;
@@ -61,7 +61,6 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
                 ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, errorMessage));
-                ConsoleLogger.LogMessage(errorMessage, LogMessageType.Error);
                 Environment.Exit(1);
             }
 
@@ -180,7 +179,6 @@ namespace Microsoft.DotNet.MSIdentity
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
             ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, errorMsg));
-            ConsoleLogger.LogMessage(errorMsg, LogMessageType.Error);
             return false;
         }
 
@@ -302,11 +300,11 @@ namespace Microsoft.DotNet.MSIdentity
                                         applicationParameters,
                                         ProvisioningToolOptions,
                                         CommandName);
-            output.AppendLine(jsonResponse.Output.ToString());
+
+            output.Append(jsonResponse.Output);
             var response = new JsonResponse(CommandName, jsonResponse.State, null, output.ToString());
 
             ConsoleLogger.LogJsonMessage(response);
-            ConsoleLogger.LogMessage(response.Content as string);
         }
 
         /// <summary>
@@ -336,6 +334,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
+
                 ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, exception.Message));
                 throw exception;
             }
@@ -347,6 +346,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
+
                 ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, exception.Message));
                 throw exception;
             }
@@ -512,7 +512,6 @@ namespace Microsoft.DotNet.MSIdentity
                     jsonResponse.Output = se.Error?.Code; // TODO refactor
                 }
 
-                ConsoleLogger.LogMessage(output);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
         }
@@ -532,7 +531,6 @@ namespace Microsoft.DotNet.MSIdentity
                 string outputMessage = $"Unregistered the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 jsonResponse.State = State.Success;
                 jsonResponse.Output = outputMessage;
-                ConsoleLogger.LogMessage(outputMessage);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
             else
@@ -540,7 +538,6 @@ namespace Microsoft.DotNet.MSIdentity
                 string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 jsonResponse.State = State.Fail;
                 jsonResponse.Output = outputMessage;
-                ConsoleLogger.LogMessage(outputMessage);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
         }

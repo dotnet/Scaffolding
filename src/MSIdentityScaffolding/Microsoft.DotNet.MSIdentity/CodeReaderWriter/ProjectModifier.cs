@@ -27,11 +27,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private readonly IConsoleLogger _consoleLogger;
         private PropertyInfo? _codeModifierConfigPropertyInfo;
         private const string Main = nameof(Main);
+        private readonly StringBuilder _output;
+
         public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
             _files = files;
             _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
+            _output = new StringBuilder();
         }
 
         /// <summary>
@@ -48,8 +51,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (csProjFiles.Count() != 1)
                 {
                     var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
-                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, null, errorMsg));
-                    _consoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, null, errorMsg)); // TODO: every time LogJsonMessage is called, it should also log message if --json is disabled.
                     return;
                 }
 
@@ -91,6 +93,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
             }
+
+            _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, null, _output.ToString()));
         }
 
         private CodeModifierConfig? GetCodeModifierConfig()
@@ -196,7 +200,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
-                _consoleLogger.LogMessage($"Added {filePath}.\n");
+                // TODO JsonResponse stringbuilder
+                _output.AppendLine($"Added {filePath}");
             }
         }
 
@@ -249,6 +254,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
                 await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
+                _output.AppendLine($"Modified {file.FileName}"); // TODO strings.
             }
         }
 
@@ -368,7 +374,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (editedDocument != null)
             {
                 //replace the document
-                await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
+                var output = await ProjectModifierHelper.UpdateDocument(editedDocument);
+                _output.AppendLine(output);
             }
         }
 
@@ -396,7 +403,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
-                await ProjectModifierHelper.UpdateDocument(editedDocument, _consoleLogger);
+                var output = await ProjectModifierHelper.UpdateDocument(editedDocument);
+                _output.AppendLine(output);
             }
         }
     }

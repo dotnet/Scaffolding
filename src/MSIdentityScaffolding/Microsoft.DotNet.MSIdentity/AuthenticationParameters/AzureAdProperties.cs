@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 
         public const string BaseUrl = nameof(BaseUrl);
         public const string Scopes = nameof(Scopes);
+        public const string SignUpSignInPolicyId = nameof(SignUpSignInPolicyId);
     }
 
     // getting default properties from
@@ -29,9 +30,11 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string ClientId = "11111111-1111-1111-11111111111111111";
         public const string Instance = "https://login.microsoftonline.com/";
         public const string CallbackPath = "/signin-oidc";
+        public const string SignUpSignInPolicyId = "b2c_1_susi";
         public const string ClientSecret = "Client secret from app-registration. Check user secrets/azure portal.";
 
-        public const string Authority = "https://login.microsoftonline.com/22222222-2222-2222-2222-222222222222";
+        public const string Authority = Instance + TenantId;
+        public const string B2CAuthority = Authority + "/" + SignUpSignInPolicyId;
         public const bool ValidateAuthority = true;
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
@@ -43,6 +46,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
     {
         public bool IsBlazorWasm;
         public bool IsWebApi;
+        public bool IsB2C;
 
         public string? ClientId;
         public string? Instance = DefaultProperties.Instance;
@@ -50,6 +54,10 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public string? TenantId;
         public string? Authority;
         public string? CallbackPath = DefaultProperties.CallbackPath;
+        public string? SignUpSignInPolicyId = DefaultProperties.SignUpSignInPolicyId;
+        public string? ResetPasswordPolicyId = "b2c_1_reset"; // TODO constants
+        public string? EditProfilePolicyId = "b2c_1_edit_profile";
+        public string? SignedOutCallbackPath = "/signout/B2C_1_susi";
 
         public string? Scopes;
 
@@ -60,6 +68,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         {
             IsBlazorWasm = applicationParameters.IsBlazorWasm;
             IsWebApi = applicationParameters.IsWebApi.GetValueOrDefault();
+            IsB2C = applicationParameters.IsB2C;
 
             Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : null;
             TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : null;
@@ -68,6 +77,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Authority = !string.IsNullOrEmpty(applicationParameters.Authority) ? applicationParameters.Authority : null;
             CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : null;
             Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : null;
+            SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : null;
         }
 
         /// <summary>
@@ -85,6 +95,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Authority ??= azureAdObj.GetValue(PropertyNames.Authority)?.ToString();
             CallbackPath ??= azureAdObj.GetValue(PropertyNames.CallbackPath)?.ToString();
             Scopes ??= azureAdObj.GetValue(PropertyNames.Scopes)?.ToString();
+            SignUpSignInPolicyId ??= azureAdObj.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString();
             ClientSecret ??= azureAdObj.GetValue(PropertyNames.ClientSecret)?.ToString();
             ClientCertificates ??= azureAdObj.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
 
@@ -94,9 +105,24 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public dynamic BlazorSettings => new
         {
             ClientId = ClientId ?? DefaultProperties.ClientId, // here, if a value is null, we could use the default properties
-            Authority = Authority ?? (string.IsNullOrEmpty(Instance) || string.IsNullOrEmpty(TenantId) ? DefaultProperties.Authority : $"{Instance}{TenantId}"),
-            ValidateAuthority = true
+            Authority = GetAuthority(),
+            ValidateAuthority = !IsB2C
         };
+
+        internal string GetAuthority()
+        {
+            string authority;
+            if (string.IsNullOrEmpty(Instance) || string.IsNullOrEmpty(TenantId))
+            {
+                authority = IsB2C ? DefaultProperties.B2CAuthority : DefaultProperties.Authority;
+            }
+            else
+            {
+                authority = IsB2C ? $"{Instance}{TenantId}/{SignUpSignInPolicyId}" : $"{Instance}{TenantId}";
+            }
+
+            return authority;
+        }
 
         public dynamic WebAppSettings => new
         {
@@ -104,7 +130,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Domain = Domain ?? DefaultProperties.Domain,
             TenantId = TenantId ?? DefaultProperties.TenantId,
             ClientId = ClientId ?? DefaultProperties.ClientId,
-            CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath
+            CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath,
         };
 
         public dynamic WebApiSettings => new
@@ -119,18 +145,30 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             ClientCertificates = ClientCertificates ?? Array.Empty<string>()
         };
 
+        public dynamic B2CSettings => new
+        {
+            SignUpSignInPolicyId,
+            SignedOutCallbackPath,
+            ResetPasswordPolicyId,
+            EditProfilePolicyId,
+            EnablePiiLogging = true
+        };
+
         public JObject ToJObject()
         {
             if (IsBlazorWasm)
             {
                 return JObject.FromObject(BlazorSettings);
             }
-            if (IsWebApi)
+
+            var jObject = IsWebApi ? JObject.FromObject(WebApiSettings) : JObject.FromObject(WebAppSettings);
+
+            if (IsB2C) // Add B2C appsettings properties
             {
-                return JObject.FromObject(WebApiSettings);
+                jObject = jObject.Merge(JObject.FromObject(B2CSettings));
             }
 
-            return JObject.FromObject(WebAppSettings);
+            return jObject;
         }
     }
 

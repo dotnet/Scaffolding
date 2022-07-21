@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -61,7 +62,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             {
                 appSettings = new JObject();
             }
-
+            Debugger.Launch();
             var modifiedAppSettings = GetModifiedAppSettings(appSettings, applicationParameters);
 
             // TODO: save comments somehow, only write to appsettings.json if changes are made

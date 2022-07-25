@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 {
     internal class ConsoleLogger : IConsoleLogger
     {
-        private bool _jsonOutput;
+        private readonly bool _jsonOutput;
         private bool _silent;
 
         public ConsoleLogger(bool jsonOutput = false, bool silent = false)
@@ -17,13 +17,8 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public void LogMessage(string message, LogMessageType level, bool removeNewLine = false)
         {
-            if (_silent)
-            {
-                return;
-            }
-
             //if json output is enabled, don't write to console at all.
-            if (!_jsonOutput)
+            if (!_silent && !_jsonOutput)
             {
                 switch (level)
                 {
@@ -53,25 +48,30 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public void LogJsonMessage(JsonResponse jsonMessage)
         {
-            if (_silent)
+            if (!_silent)
             {
-                return;
-            }
+                if (_jsonOutput)
+                {
+                    Console.WriteLine(jsonMessage.ToJsonString());
+                }
+                else
+                {
+                    if (jsonMessage.State == State.Fail)
+                    {
+                        LogMessage(jsonMessage.Output, LogMessageType.Error);
+                    }
 
-            if (_jsonOutput)
-            {
-                Console.WriteLine(jsonMessage.ToJsonString());
+                    LogMessage(jsonMessage.Output);
+                }
             }
         }
 
         public void LogMessage(string message, bool removeNewLine = false)
         {
-            if (_silent)
+            if (!_silent && !_jsonOutput)
             {
-                return;
+                LogMessage(message, LogMessageType.Information, removeNewLine);
             }
-
-            LogMessage(message, LogMessageType.Information, removeNewLine);
         }
     }
 }

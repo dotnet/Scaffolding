@@ -109,13 +109,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     .Filter($"appId eq '{createdApplication.AppId}'")
                     .GetAsync()).FirstOrDefault();
             }
-            // log json console message here since we need the Microsoft.Graph.Application
-            JsonResponse jsonResponse = new JsonResponse(commandName);
+
+            // log json console message inside this method since we need the Microsoft.Graph.Application
             if (createdApplication is null)
             {
-                jsonResponse.State = State.Fail;
-                jsonResponse.Content = Resources.FailedToCreateApp;
-                consoleLogger.LogJsonMessage(jsonResponse);
+                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToCreateApp));
                 return null;
             }
 
@@ -131,9 +129,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     consoleLogger);
             }
 
-            jsonResponse.State = State.Success;
-            jsonResponse.Content = createdApplication;
-            consoleLogger.LogJsonMessage(jsonResponse);
+            consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Success, createdApplication));
             return effectiveApplicationParameters;
         }
 
@@ -187,7 +183,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             if (parameters is null)
             {
-                return new JsonResponse(commandName, State.Fail, string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
+                return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
@@ -197,24 +193,24 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (remoteApp is null)
             {
-                return new JsonResponse(commandName, State.Fail, string.Format(Resources.NotFound, parameters.ClientId));
+                return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.NotFound, parameters.ClientId));
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions);
             if (!needsUpdates)
             {
-                return new JsonResponse(commandName, State.Success, string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
+                return new JsonResponse(commandName, State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
             }
 
             try
             {
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
-                return new JsonResponse(commandName, State.Success, string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
+                return new JsonResponse(commandName, State.Success, output: string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
             }
             catch (ServiceException se)
             {
-                return new JsonResponse(commandName, State.Fail, se.Error?.Message);
+                return new JsonResponse(commandName, State.Fail, output: se.Error?.Message);
             }
         }
 

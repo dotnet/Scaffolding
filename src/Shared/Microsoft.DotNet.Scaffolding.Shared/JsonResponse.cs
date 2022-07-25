@@ -8,12 +8,14 @@ namespace Microsoft.DotNet.MSIdentity.Shared
         public string Command { get; }
         public string State { get; set; }
         public object Content { get; set; }
+        public string Output { get; set; }
 
-        public JsonResponse(string command, string state = null, object content = null)
+        public JsonResponse(string command, string state = null, object content = null, string output = null)
         {
             State = state;
             Content = content;
             Command = command ?? throw new ArgumentNullException(nameof(command));
+            Output = output;
         }
 
         public string ToJsonString()

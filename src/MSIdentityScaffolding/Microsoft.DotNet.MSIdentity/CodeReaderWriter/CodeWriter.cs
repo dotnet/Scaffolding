@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
                 if (result.ExitCode != 0)
                 {
-                    consoleLogger.LogMessage($"{Resources.Success}\n\n", removeNewLine: true);
+                    consoleLogger.LogMessage($"{Resources.Failed}\n\n", removeNewLine: true);
                     consoleLogger.LogMessage(string.Format(Resources.FailedAddPackage, packageName));
                 }
                 else

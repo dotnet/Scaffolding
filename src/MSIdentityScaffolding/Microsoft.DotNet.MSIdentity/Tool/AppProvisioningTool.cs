@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (projectDescription == null)
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, errorMessage));
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMessage));
                 Environment.Exit(1);
             }
 
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, errorMsg));
+            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMsg));
             return false;
         }
 
@@ -302,7 +302,7 @@ namespace Microsoft.DotNet.MSIdentity
                                         CommandName);
 
             output.Append(jsonResponse.Output);
-            var response = new JsonResponse(CommandName, jsonResponse.State, null, output.ToString());
+            var response = new JsonResponse(CommandName, jsonResponse.State, output: output.ToString());
 
             ConsoleLogger.LogJsonMessage(response);
         }
@@ -335,7 +335,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
 
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, exception.Message));
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
                 throw exception;
             }
 
@@ -347,7 +347,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
 
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, null, exception.Message));
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
                 throw exception;
             }
 

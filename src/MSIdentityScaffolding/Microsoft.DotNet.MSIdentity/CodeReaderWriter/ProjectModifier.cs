@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (csProjFiles.Count() != 1)
                 {
                     var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
-                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, null, errorMsg)); // TODO: every time LogJsonMessage is called, it should also log message if --json is disabled.
+                    _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, output: errorMsg));
                     return;
                 }
 
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
             }
 
-            _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, null, _output.ToString()));
+            _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString()));
         }
 
         private CodeModifierConfig? GetCodeModifierConfig()

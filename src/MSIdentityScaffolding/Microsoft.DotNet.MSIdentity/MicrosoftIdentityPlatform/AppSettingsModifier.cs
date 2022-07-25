@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -62,7 +61,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             {
                 appSettings = new JObject();
             }
-            Debugger.Launch();
+
             var modifiedAppSettings = GetModifiedAppSettings(appSettings, applicationParameters);
 
             // TODO: save comments somehow, only write to appsettings.json if changes are made
@@ -135,32 +134,27 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <returns>(bool changesMade, JObject? updatedBlock)</returns>
         internal (bool changesMade, JObject? updatedBlock) GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
         {
-            var azureAdBlock = new AzureAdBlock(applicationParameters);
-            if (!appSettings.TryGetValue("AzureAd", out var azureAdToken))
+            var azAdToken = appSettings.GetValue("AzureAd") ?? appSettings.GetValue("AzureAdB2C"); // TODO test AzureAdB2C
+            if (azAdToken is null)
             {
-                // Create and return AzureAd block if none exists, differs for Blazor apps
-                return (true, azureAdBlock.ToJObject());
+                return (true, new AzureAdBlock(applicationParameters).ToJObject());
             }
 
-            var existingBlock = JObject.FromObject(azureAdToken);
-            var updatedBlock = azureAdBlock.UpdateFromJToken(azureAdToken).ToJObject();
-            if (NeedsUpdate(existingBlock, updatedBlock))
-            {
-                return (true, updatedBlock);
-            }
+            var existingParameters = JObject.FromObject(azAdToken);
+            var newBlock = new AzureAdBlock(applicationParameters, existingParameters).ToJObject();
 
-            return (false, null);  // If no changes were made, return null
+            return (NeedsUpdate(existingParameters, newBlock), newBlock);
         }
 
         /// <summary>
         /// Checks all keys in updatedBlock, if any differ from existingBlock then update is necessary
         /// </summary>
         /// <param name="existingBlock"></param>
-        /// <param name="updatedBlock"></param>
+        /// <param name="newBlock"></param>
         /// <returns></returns>
-        internal bool NeedsUpdate(JObject existingBlock, JObject updatedBlock)
+        internal static bool NeedsUpdate(JObject existingBlock, JObject newBlock)
         {
-            foreach ((var key, var updatedValue) in updatedBlock)
+            foreach ((var key, var updatedValue) in newBlock)
             {
                 if (existingBlock.GetValue(key) != updatedValue)
                 {
@@ -171,7 +165,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return false;
         }
 
-        private JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
+        internal static JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
         {
             var inputParameters = JObject.FromObject(new ApiSettingsBlock
             {
@@ -190,7 +184,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return inputParameters;
         }
 
-        private bool ModifyAppSettingsObject(JObject existingSettings, JObject inputProperties)
+        internal static bool ModifyAppSettingsObject(JObject existingSettings, JObject inputProperties)
         {
             bool changesMade = false;
             foreach ((var propertyName, var newValue) in inputProperties)

@@ -55,7 +55,11 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.ClientId,
                 DefaultProperties.Instance,
                 DefaultProperties.CallbackPath,
-                DefaultProperties.SignUpSignInPolicyId
+                DefaultProperties.SignUpSignInPolicyId,
+                DefaultProperties.SignedOutCallbackPath,
+                DefaultProperties.ResetPasswordPolicyId,
+                DefaultProperties.EditProfilePolicyId,
+                EnablePiiLogging = true
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
@@ -71,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var expected = JObject.FromObject(new
             {
-                DefaultProperties.Authority,
+                Authority = $"{DefaultProperties.Instance}{DefaultProperties.TenantId}",
                 DefaultProperties.ClientId,
                 DefaultProperties.ValidateAuthority
             });
@@ -89,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var expected = JObject.FromObject(new
             {
-                Authority = DefaultProperties.B2CAuthority,
+                Authority = $"{DefaultProperties.Instance}{DefaultProperties.TenantId}/{DefaultProperties.SignUpSignInPolicyId}",
                 DefaultProperties.ClientId,
                 ValidateAuthority = false
             });
@@ -138,7 +142,12 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 TenantId = inputTenantId,
                 ClientId = inputClientId,
                 Instance = inputInstance,
-                CallbackPath = inputCallbackPath
+                CallbackPath = inputCallbackPath,
+                DefaultProperties.SignUpSignInPolicyId,
+                DefaultProperties.SignedOutCallbackPath,
+                DefaultProperties.ResetPasswordPolicyId,
+                DefaultProperties.EditProfilePolicyId,
+                EnablePiiLogging = true
             });
 
             var parameters = new AuthenticationParameters.ApplicationParameters
@@ -215,7 +224,12 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 TenantId = inputTenantId,
                 ClientId = inputClientId,
                 Instance = DefaultProperties.Instance,
-                CallbackPath = DefaultProperties.CallbackPath
+                CallbackPath = DefaultProperties.CallbackPath,
+                DefaultProperties.SignUpSignInPolicyId,
+                DefaultProperties.SignedOutCallbackPath,
+                DefaultProperties.ResetPasswordPolicyId,
+                DefaultProperties.EditProfilePolicyId,
+                EnablePiiLogging = true
             });
 
             var parameters = new AuthenticationParameters.ApplicationParameters
@@ -309,10 +323,15 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = inputClientId,
                 Instance = inputInstance,
                 CallbackPath = inputCallbackPath,
-                SignUpSignInPolicyId = inputSusi
-            });
+                SignUpSignInPolicyId = inputSusi,
+                SignedOutCallbackPath = DefaultProperties.SignedOutCallbackPath,
+                ResetPasswordPolicyId = DefaultProperties.ResetPasswordPolicyId,
+                EditProfilePolicyId = DefaultProperties.EditProfilePolicyId,
+                EnablePiiLogging = true
+        });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -386,7 +405,12 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 TenantId = existingTenantId,
                 ClientId = existingClientId,
                 Instance = existingInstance,
-                CallbackPath = existingCallbackPath
+                CallbackPath = existingCallbackPath,
+                DefaultProperties.SignUpSignInPolicyId,
+                DefaultProperties.SignedOutCallbackPath,
+                DefaultProperties.ResetPasswordPolicyId,
+                DefaultProperties.EditProfilePolicyId,
+                EnablePiiLogging = true
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
@@ -465,13 +489,17 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 TenantId = existingTenantId,
                 ClientId = existingClientId,
                 Instance = existingInstance,
-                CallbackPath = existingCallbackPath
+                CallbackPath = existingCallbackPath,
+                DefaultProperties.SignUpSignInPolicyId,
+                DefaultProperties.SignedOutCallbackPath,
+                DefaultProperties.ResetPasswordPolicyId,
+                DefaultProperties.EditProfilePolicyId,
+                EnablePiiLogging = true
             });
 
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
-
 
         [Fact]
         public void ModifyAppSettings_BlazorWasm_AuthorityIsCorrect()
@@ -511,7 +539,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
-
 
         [Fact]
         public void ModifyAppSettings_BlazorWasmB2C_AuthorityIsCorrect()

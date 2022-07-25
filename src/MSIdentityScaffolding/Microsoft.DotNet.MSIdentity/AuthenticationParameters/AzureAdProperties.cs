@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
-    public class PropertyNames
+    public static class PropertyNames
     {
         public const string Domain = nameof(Domain);
         public const string TenantId = nameof(TenantId);
@@ -12,13 +12,14 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string ClientCertificates = nameof(ClientCertificates);
         public const string CallbackPath = nameof(CallbackPath);
         public const string Instance = nameof(Instance);
-
         public const string Authority = nameof(Authority);
         public const string ValidateAuthority = nameof(ValidateAuthority);
-
         public const string BaseUrl = nameof(BaseUrl);
         public const string Scopes = nameof(Scopes);
         public const string SignUpSignInPolicyId = nameof(SignUpSignInPolicyId);
+        public const string ResetPasswordPolicyId = nameof(ResetPasswordPolicyId);
+        public const string EditProfilePolicyId = nameof(EditProfilePolicyId);
+        public const string SignedOutCallbackPath = nameof(SignedOutCallbackPath);
     }
 
     // getting default properties from
@@ -30,12 +31,14 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string ClientId = "11111111-1111-1111-11111111111111111";
         public const string Instance = "https://login.microsoftonline.com/";
         public const string CallbackPath = "/signin-oidc";
-        public const string SignUpSignInPolicyId = "b2c_1_susi";
         public const string ClientSecret = "Client secret from app-registration. Check user secrets/azure portal.";
-
-        public const string Authority = Instance + TenantId;
-        public const string B2CAuthority = Authority + "/" + SignUpSignInPolicyId;
         public const bool ValidateAuthority = true;
+
+        // B2C properties 
+        public const string SignUpSignInPolicyId = "b2c_1_susi";
+        public const string ResetPasswordPolicyId = "b2c_1_reset";
+        public const string EditProfilePolicyId = "b2c_1_edit_profile";
+        public const string SignedOutCallbackPath = "/signout/B2C_1_susi";
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
         public const string MicrosoftGraphScopes = "user.read";
@@ -55,74 +58,41 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public string? Authority;
         public string? CallbackPath = DefaultProperties.CallbackPath;
         public string? SignUpSignInPolicyId = DefaultProperties.SignUpSignInPolicyId;
-        public string? ResetPasswordPolicyId = "b2c_1_reset"; // TODO constants
-        public string? EditProfilePolicyId = "b2c_1_edit_profile";
-        public string? SignedOutCallbackPath = "/signout/B2C_1_susi";
+        public string? ResetPasswordPolicyId = DefaultProperties.ResetPasswordPolicyId;
+        public string? EditProfilePolicyId = DefaultProperties.EditProfilePolicyId;
+        public string? SignedOutCallbackPath = DefaultProperties.SignedOutCallbackPath;
 
         public string? Scopes;
 
-        public string? ClientSecret = DefaultProperties.ClientSecret;
+        public string? ClientSecret;
         public string[]? ClientCertificates;
 
-        public AzureAdBlock(ApplicationParameters applicationParameters)
+        public AzureAdBlock(ApplicationParameters applicationParameters, JObject? existingBlock = null)
         {
             IsBlazorWasm = applicationParameters.IsBlazorWasm;
             IsWebApi = applicationParameters.IsWebApi.GetValueOrDefault();
             IsB2C = applicationParameters.IsB2C;
 
-            Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : null;
-            TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : null;
-            ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : null;
-            Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : null;
-            Authority = !string.IsNullOrEmpty(applicationParameters.Authority) ? applicationParameters.Authority : null;
-            CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : null;
-            Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : null;
-            SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : null;
-        }
+            Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : existingBlock?.GetValue(PropertyNames.Domain)?.ToString() ?? DefaultProperties.Domain;
+            TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : existingBlock?.GetValue(PropertyNames.TenantId)?.ToString() ?? DefaultProperties.TenantId;
+            ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : existingBlock?.GetValue(PropertyNames.ClientId)?.ToString() ?? DefaultProperties.ClientId;
+            Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
+            CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : existingBlock?.GetValue(PropertyNames.CallbackPath)?.ToString() ?? DefaultProperties.CallbackPath;
+            Authority = !string.IsNullOrEmpty(applicationParameters.Authority) ? applicationParameters.Authority : existingBlock?.GetValue(PropertyNames.Authority)?.ToString();
+            Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
+                ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : null);
+            SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : existingBlock?.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString() ?? DefaultProperties.SignUpSignInPolicyId;
 
-        /// <summary>
-        /// Updates AzureAdBlock object from existing appSettings.json
-        /// </summary>
-        /// <param name="azureAdToken"></param>
-        public AzureAdBlock UpdateFromJToken(JToken azureAdToken)
-        {
-            JObject azureAdObj = JObject.FromObject(azureAdToken);
-
-            ClientId ??= azureAdObj.GetValue(PropertyNames.ClientId)?.ToString(); // here, if the applicationparameters value is null, we use the existing app settings value
-            Instance ??= azureAdObj.GetValue(PropertyNames.Instance)?.ToString();
-            Domain ??= azureAdObj.GetValue(PropertyNames.Domain)?.ToString();
-            TenantId ??= azureAdObj.GetValue(PropertyNames.TenantId)?.ToString();
-            Authority ??= azureAdObj.GetValue(PropertyNames.Authority)?.ToString();
-            CallbackPath ??= azureAdObj.GetValue(PropertyNames.CallbackPath)?.ToString();
-            Scopes ??= azureAdObj.GetValue(PropertyNames.Scopes)?.ToString();
-            SignUpSignInPolicyId ??= azureAdObj.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString();
-            ClientSecret ??= azureAdObj.GetValue(PropertyNames.ClientSecret)?.ToString();
-            ClientCertificates ??= azureAdObj.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
-
-            return this;
+            ClientSecret = existingBlock?.GetValue(PropertyNames.ClientSecret)?.ToString() ?? DefaultProperties.ClientSecret;
+            ClientCertificates = existingBlock?.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
         }
 
         public dynamic BlazorSettings => new
         {
             ClientId = ClientId ?? DefaultProperties.ClientId, // here, if a value is null, we could use the default properties
-            Authority = GetAuthority(),
+            Authority = Authority ?? (IsB2C ? $"{Instance}{TenantId}/{SignUpSignInPolicyId}" : $"{Instance}{TenantId}"),
             ValidateAuthority = !IsB2C
         };
-
-        internal string GetAuthority()
-        {
-            string authority;
-            if (string.IsNullOrEmpty(Instance) || string.IsNullOrEmpty(TenantId))
-            {
-                authority = IsB2C ? DefaultProperties.B2CAuthority : DefaultProperties.Authority;
-            }
-            else
-            {
-                authority = IsB2C ? $"{Instance}{TenantId}/{SignUpSignInPolicyId}" : $"{Instance}{TenantId}";
-            }
-
-            return authority;
-        }
 
         public dynamic WebAppSettings => new
         {
@@ -147,10 +117,10 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 
         public dynamic B2CSettings => new
         {
-            SignUpSignInPolicyId,
-            SignedOutCallbackPath,
-            ResetPasswordPolicyId,
-            EditProfilePolicyId,
+            SignUpSignInPolicyId = SignUpSignInPolicyId ?? DefaultProperties.SignUpSignInPolicyId,
+            SignedOutCallbackPath = SignedOutCallbackPath ?? DefaultProperties.SignedOutCallbackPath,
+            ResetPasswordPolicyId = ResetPasswordPolicyId ?? DefaultProperties.ResetPasswordPolicyId,
+            EditProfilePolicyId = EditProfilePolicyId ?? DefaultProperties.EditProfilePolicyId,
             EnablePiiLogging = true
         };
 
@@ -163,9 +133,9 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 
             var jObject = IsWebApi ? JObject.FromObject(WebApiSettings) : JObject.FromObject(WebAppSettings);
 
-            if (IsB2C) // Add B2C appsettings properties
+            if (IsB2C)
             {
-                jObject = jObject.Merge(JObject.FromObject(B2CSettings));
+                jObject.Merge(JObject.FromObject(B2CSettings));
             }
 
             return jObject;

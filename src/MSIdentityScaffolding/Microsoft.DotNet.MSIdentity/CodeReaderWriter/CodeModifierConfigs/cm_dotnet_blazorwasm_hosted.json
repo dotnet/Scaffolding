@@ -1,4 +1,79 @@
 {
   "Identifier": "dotnet-blazorwasm-hosted",
-  "Files": []
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "Microsoft.AspNetCore.ResponseCompression",
+        "Microsoft.Identity.Web"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "AddMicrosoftIdentityWebApi(WebApplication.CreateBuilder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "AddAuthentication",
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi()",
+              "Parent": "AddMicrosoftIdentityWebApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [
+                "MicrosoftGraph",
+                "DownstreamApi"
+              ],
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 8
+              }
+            },
+            {
+              "MultiLineBlock": [
+                "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [
+                "MicrosoftGraph"
+              ],
+              "LeadingTrivia": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "MultiLineBlock": [
+                "AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [
+                "DownstreamApi"
+              ],
+              "LeadingTrivia": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
 }

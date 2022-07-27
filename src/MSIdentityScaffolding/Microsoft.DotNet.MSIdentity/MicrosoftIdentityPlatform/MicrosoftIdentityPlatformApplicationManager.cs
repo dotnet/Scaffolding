@@ -352,32 +352,40 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             bool needsUpdate = false;
             var currentSettings = app.Web.ImplicitGrantSettings;
 
-            if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
+            if (currentSettings.EnableAccessTokenIssuance is false || currentSettings.EnableIdTokenIssuance is false)
             {
-                if (currentSettings.EnableAccessTokenIssuance is true || currentSettings.EnableIdTokenIssuance is true)
-                {
-                    app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
-                    app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
+                app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
+                app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
 
-                    needsUpdate = true;
-                }
+                needsUpdate = true;
             }
-            else // Otherwise we make changes only when the tool options differ from the existing settings.
-            {
-                if (toolOptions.EnableAccessToken.HasValue &&
-                    currentSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
-                {
-                    app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
-                    needsUpdate = true;
-                }
 
-                if (toolOptions.EnableIdToken.HasValue &&
-                    currentSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
-                {
-                    app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
-                    needsUpdate = true;
-                }
-            }
+            //if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
+            //{
+            //    if (currentSettings.EnableAccessTokenIssuance is false || currentSettings.EnableIdTokenIssuance is false)
+            //    {
+            //        app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
+            //        app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
+
+            //        needsUpdate = true;
+            //    }
+            //}
+            //else // Otherwise we make changes only when the tool options differ from the existing settings.
+            //{
+            //    if (toolOptions.EnableAccessToken.HasValue &&
+            //        currentSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
+            //    {
+            //        app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
+            //        needsUpdate = true;
+            //    }
+
+            //    if (toolOptions.EnableIdToken.HasValue &&
+            //        currentSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
+            //    {
+            //        app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
+            //        needsUpdate = true;
+            //    }
+            //}
 
             return needsUpdate;
         }

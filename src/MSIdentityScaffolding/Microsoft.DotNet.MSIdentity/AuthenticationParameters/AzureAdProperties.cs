@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Domain = Domain ?? DefaultProperties.Domain,
             TenantId = TenantId ?? DefaultProperties.TenantId,
             ClientId = ClientId ?? DefaultProperties.ClientId,
-            CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath,
+            CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath
         };
 
         public dynamic WebApiSettings => new

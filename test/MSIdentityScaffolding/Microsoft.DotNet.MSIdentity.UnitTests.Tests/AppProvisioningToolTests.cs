@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.CallbackPath
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 EnablePiiLogging = true
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 DefaultProperties.ValidateAuthority
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ValidateAuthority = false
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = inputCallbackPath
             };
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 IsB2C = true
             };
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ClientId = inputClientId
             };
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 IsB2C = true
             };
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -281,7 +281,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                     CallbackPath = inputCallbackPath
                 });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -330,7 +330,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 EnablePiiLogging = true
         });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
 
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
@@ -369,7 +369,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = existingCallbackPath
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -413,7 +413,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 EnablePiiLogging = true
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -452,7 +452,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 CallbackPath = existingCallbackPath
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -497,7 +497,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 EnablePiiLogging = true
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -536,7 +536,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ValidateAuthority = true
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 
@@ -577,7 +577,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ValidateAuthority = false
             });
 
-            (bool needsUpdate, JObject modifications) = modifier.GetModifiedAzureAdBlock(appSettings, parameters);
+            (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
         }
 

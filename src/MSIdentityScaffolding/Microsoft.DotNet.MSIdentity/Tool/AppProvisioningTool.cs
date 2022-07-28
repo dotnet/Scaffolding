@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
             {
                 if (provisioningToolOptions.ProjectType.Equals("webapp", StringComparison.OrdinalIgnoreCase)
-                    || provisioningToolOptions.ProjectType.Equals("blazorserver", StringComparison.OrdinalIgnoreCase))
+                    || provisioningToolOptions.ProjectType.Equals("blazorserver", StringComparison.OrdinalIgnoreCase)) // TODO move project types to constants
                 {
                     projectSettings.ApplicationParameters.IsWebApp = projectSettings.ApplicationParameters.IsWebApp ?? true;
                 }

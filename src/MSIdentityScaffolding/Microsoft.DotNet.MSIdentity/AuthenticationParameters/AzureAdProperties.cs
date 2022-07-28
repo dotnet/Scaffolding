@@ -52,12 +52,12 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public bool IsB2C;
 
         public string? ClientId;
-        public string? Instance = DefaultProperties.Instance;
+        public string? Instance;
         public string? Domain;
         public string? TenantId;
         public string? Authority;
-        public string? CallbackPath = DefaultProperties.CallbackPath;
-        public string? SignUpSignInPolicyId = DefaultProperties.SignUpSignInPolicyId;
+        public string? CallbackPath;
+        public string? SignUpSignInPolicyId;
         public string? ResetPasswordPolicyId = DefaultProperties.ResetPasswordPolicyId;
         public string? EditProfilePolicyId = DefaultProperties.EditProfilePolicyId;
         public string? SignedOutCallbackPath = DefaultProperties.SignedOutCallbackPath;
@@ -78,19 +78,19 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : existingBlock?.GetValue(PropertyNames.ClientId)?.ToString() ?? DefaultProperties.ClientId;
             Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
             CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : existingBlock?.GetValue(PropertyNames.CallbackPath)?.ToString() ?? DefaultProperties.CallbackPath;
-            Authority = !string.IsNullOrEmpty(applicationParameters.Authority) ? applicationParameters.Authority : existingBlock?.GetValue(PropertyNames.Authority)?.ToString();
             Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
                 ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : null);
             SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : existingBlock?.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString() ?? DefaultProperties.SignUpSignInPolicyId;
-
+            // TODO determine the SusiPolicy from the graph beta
+            Authority = IsB2C ? $"{Instance}{TenantId}/{SignUpSignInPolicyId}" : $"{Instance}{TenantId}";
             ClientSecret = existingBlock?.GetValue(PropertyNames.ClientSecret)?.ToString() ?? DefaultProperties.ClientSecret;
             ClientCertificates = existingBlock?.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
         }
 
         public dynamic BlazorSettings => new
         {
-            ClientId = ClientId ?? DefaultProperties.ClientId, // here, if a value is null, we could use the default properties
-            Authority = Authority ?? (IsB2C ? $"{Instance}{TenantId}/{SignUpSignInPolicyId}" : $"{Instance}{TenantId}"),
+            ClientId,
+            Authority,
             ValidateAuthority = !IsB2C
         };
 

@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <returns>(bool changesMade, JObject? updatedBlock)</returns>
         internal static (bool changesMade, JObject? updatedBlock) GetModifiedAzureAdBlock(JObject appSettings, ApplicationParameters applicationParameters)
         {
-            var azAdToken = appSettings.GetValue("AzureAd") ?? appSettings.GetValue("AzureAdB2C"); // TODO test AzureAdB2C, make sure that blazor WASM works
+            var azAdToken = appSettings.GetValue("AzureAd") ?? appSettings.GetValue("AzureAdB2C"); // TODO test "AzureAdB2C" string, make sure that blazor WASM works
             if (azAdToken is null)
             {
                 return (true, new AzureAdBlock(applicationParameters).ToJObject());

@@ -78,21 +78,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Request()
                 .AddAsync(servicePrincipal).ConfigureAwait(false);
 
-            if (applicationParameters.IsB2C) // TODO B2C not fully supported at the moment
+            // B2C does not allow user consent, and therefore we need to explicity grant permissions
+            if (applicationParameters.IsB2C)
             {
-                // B2C does not allow user consent, and therefore we need to explicity grant permissions
-                if (applicationParameters.IsB2C)
-                {
-                    IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
-                        applicationParameters,
-                        graphServiceClient,
-                        application).ConfigureAwait(false);
+                IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
+                    applicationParameters,
+                    graphServiceClient,
+                    application).ConfigureAwait(false);
 
-                    await AddAdminConsentToApiPermissions(
-                        graphServiceClient,
-                        createdServicePrincipal,
-                        scopesPerResource);
-                }
+                await AddAdminConsentToApiPermissions(
+                    graphServiceClient,
+                    createdServicePrincipal,
+                    scopesPerResource);
             }
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI, 
@@ -188,12 +185,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
-
-            // TODO: Add if it's B2C, acquire the SUSI Policy
-
-            //TODO: If it's B2c and there is no SUSI policy, create one
-
-
+            // TODO: Add if it's B2C, acquire or create the SUSI Policy
             var remoteApp = (await graphServiceClient.Applications.Request()
                 .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
@@ -363,8 +355,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // In the case of Blazor WASM and B2C, Access Tokens and Id Tokens must both be true.
             if ((toolOptions.IsBlazorWasm || isB2C)
-                && currentSettings.EnableAccessTokenIssuance is false
-                || currentSettings.EnableAccessTokenIssuance is false) 
+                && (currentSettings.EnableAccessTokenIssuance is false
+                || currentSettings.EnableAccessTokenIssuance is false))
             {
                 app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
                 app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;

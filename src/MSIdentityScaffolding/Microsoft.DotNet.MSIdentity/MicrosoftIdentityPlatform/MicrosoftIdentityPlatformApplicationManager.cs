@@ -188,6 +188,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
+
+            // TODO: Add if it's B2C, acquire the SUSI Policy
+
+            //TODO: If it's B2c and there is no SUSI policy, create one
+
+
             var remoteApp = (await graphServiceClient.Applications.Request()
                 .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 

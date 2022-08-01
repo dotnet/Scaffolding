@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// <summary>
         /// Determines if the project type is blazor wasm
         /// </summary>
-        public bool IsBlazorWasm => "blazorwasm".Equals(ProjectType) || "blazorwasm-client".Equals(ProjectType);
+        public bool IsBlazorWasm => ProjectTypes.BlazorWasm.Equals(ProjectType) || ProjectTypes.BlazorWasmClient.Equals(ProjectType);
 
         /// <summary>
         /// App registration ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app

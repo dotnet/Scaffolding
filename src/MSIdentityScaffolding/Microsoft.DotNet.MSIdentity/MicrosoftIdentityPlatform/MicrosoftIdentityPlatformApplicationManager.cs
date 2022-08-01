@@ -78,21 +78,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .Request()
                 .AddAsync(servicePrincipal).ConfigureAwait(false);
 
-            if (applicationParameters.IsB2C) // TODO B2C not fully supported at the moment
+            // B2C does not allow user consent, and therefore we need to explicity grant permissions
+            if (applicationParameters.IsB2C)
             {
-                // B2C does not allow user consent, and therefore we need to explicity grant permissions
-                if (applicationParameters.IsB2C)
-                {
-                    IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
-                        applicationParameters,
-                        graphServiceClient,
-                        application).ConfigureAwait(false);
+                IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
+                    applicationParameters,
+                    graphServiceClient,
+                    application).ConfigureAwait(false);
 
-                    await AddAdminConsentToApiPermissions(
-                        graphServiceClient,
-                        createdServicePrincipal,
-                        scopesPerResource);
-                }
+                await AddAdminConsentToApiPermissions(
+                    graphServiceClient,
+                    createdServicePrincipal,
+                    scopesPerResource);
             }
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI, 
@@ -188,6 +185,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
+            // TODO: Add if it's B2C, acquire or create the SUSI Policy
             var remoteApp = (await graphServiceClient.Applications.Request()
                 .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
@@ -196,7 +194,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.NotFound, parameters.ClientId));
             }
 
-            (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions);
+            (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
             if (!needsUpdates)
             {
                 return new JsonResponse(commandName, State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
@@ -220,7 +218,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="existingApplication"></param>
         /// <param name="toolOptions"></param>
         /// <returns>Updated Application if changes were made, otherwise null</returns>
-        internal static (bool needsUpdate, Application appUpdates) GetApplicationUpdates(Application existingApplication, ProvisioningToolOptions toolOptions)
+        internal static (bool needsUpdate, Application appUpdates) GetApplicationUpdates(
+            Application existingApplication,
+            ProvisioningToolOptions toolOptions,
+            ApplicationParameters parameters)
         {
             bool needsUpdate = false;
 
@@ -233,7 +234,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // Make updates if necessary
             needsUpdate |= UpdateRedirectUris(updatedApp, toolOptions);
-            needsUpdate |= UpdateImplicitGrantSettings(updatedApp, toolOptions);
+            needsUpdate |= UpdateImplicitGrantSettings(updatedApp, toolOptions, parameters.IsB2C);
             if (toolOptions.IsBlazorWasmHostedServer)
             {
                 needsUpdate |= PreAuthorizeBlazorWasmClientApp(existingApplication, toolOptions, updatedApp);
@@ -347,32 +348,30 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="app"></param>
         /// <param name="toolOptions"></param>
         /// <returns>true if ImplicitGrantSettings require updates, else false</returns>
-        internal static bool UpdateImplicitGrantSettings(Application app, ProvisioningToolOptions toolOptions)
+        internal static bool UpdateImplicitGrantSettings(Application app, ProvisioningToolOptions toolOptions, bool isB2C = false)
         {
             bool needsUpdate = false;
             var currentSettings = app.Web.ImplicitGrantSettings;
 
-            if (toolOptions.IsBlazorWasm) // In the case of Blazor WASM, Access Tokens and Id Tokens must both be true.
+            // In the case of Blazor WASM and B2C, Access Tokens and Id Tokens must both be true.
+            if ((toolOptions.IsBlazorWasm || isB2C)
+                && (currentSettings.EnableAccessTokenIssuance is false
+                || currentSettings.EnableAccessTokenIssuance is false))
             {
-                if (currentSettings.EnableAccessTokenIssuance is true || currentSettings.EnableIdTokenIssuance is true)
-                {
-                    app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = false;
-                    app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = false;
-
-                    needsUpdate = true;
-                }
+                app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
+                app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
+                needsUpdate = true;
             }
-            else // Otherwise we make changes only when the tool options differ from the existing settings.
+            // Otherwise we make changes only when the tool options differ from the existing settings.
+            else
             {
-                if (toolOptions.EnableAccessToken.HasValue &&
-                    currentSettings.EnableAccessTokenIssuance != toolOptions.EnableAccessToken.Value)
+                if (toolOptions.EnableAccessToken.HasValue && toolOptions.EnableAccessToken.Value != currentSettings.EnableAccessTokenIssuance)
                 {
                     app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = toolOptions.EnableAccessToken.Value;
                     needsUpdate = true;
                 }
 
-                if (toolOptions.EnableIdToken.HasValue &&
-                    currentSettings.EnableIdTokenIssuance != toolOptions.EnableIdToken.Value)
+                if (toolOptions.EnableIdToken.HasValue && toolOptions.EnableIdToken.Value != currentSettings.EnableIdTokenIssuance)
                 {
                     app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = toolOptions.EnableIdToken.Value;
                     needsUpdate = true;

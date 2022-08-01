@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         }
 
         [Fact]
-        public void UpdateImplicitGrantSettingsTest_WhenBlazorWasm_SetCheckboxesFalse()
+        public void UpdateImplicitGrantSettingsTest_WhenBlazorWasm_SetCheckboxesTrue()
         {
             var originalApp = new Graph.Application
             {
@@ -173,8 +173,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 {
                     ImplicitGrantSettings = new ImplicitGrantSettings
                     {
-                        EnableAccessTokenIssuance = true,
-                        EnableIdTokenIssuance = true
+                        EnableAccessTokenIssuance = false,
+                        EnableIdTokenIssuance = false
                     }
                 }
             };
@@ -183,10 +183,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ProjectType = "blazorwasm"
             };
 
-            var output = MicrosoftIdentityPlatformApplicationManager.UpdateImplicitGrantSettings(originalApp, toolOptions); // TODO unit tests
+            var output = MicrosoftIdentityPlatformApplicationManager.UpdateImplicitGrantSettings(originalApp, toolOptions);
             Assert.True(output);
-            Assert.False(originalApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance);
-            Assert.False(originalApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance);
+            Assert.True(originalApp.Web.ImplicitGrantSettings.EnableAccessTokenIssuance);
+            Assert.True(originalApp.Web.ImplicitGrantSettings.EnableIdTokenIssuance);
         }
 
         [Theory]

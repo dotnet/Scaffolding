@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -42,7 +41,7 @@ namespace Microsoft.DotNet.MSIdentity
         private ProjectDescriptionReader? _projectDescriptionReader;
         private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
 
-        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false) // TODO silent is temporary
+        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false)
         {
             CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;
@@ -202,12 +201,12 @@ namespace Microsoft.DotNet.MSIdentity
             // there can multiple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
             {
-                if (provisioningToolOptions.ProjectType.Equals("webapp", StringComparison.OrdinalIgnoreCase)
-                    || provisioningToolOptions.ProjectType.Equals("blazorserver", StringComparison.OrdinalIgnoreCase))
+                if (provisioningToolOptions.ProjectType.Equals(ProjectTypes.WebApp, StringComparison.OrdinalIgnoreCase)
+                    || provisioningToolOptions.ProjectType.Equals(ProjectTypes.BlazorServer, StringComparison.OrdinalIgnoreCase))
                 {
                     projectSettings.ApplicationParameters.IsWebApp = projectSettings.ApplicationParameters.IsWebApp ?? true;
                 }
-                if (provisioningToolOptions.ProjectType.Equals("webapi", StringComparison.OrdinalIgnoreCase) || provisioningToolOptions.IsBlazorWasmHostedServer)
+                if (provisioningToolOptions.ProjectType.Equals(ProjectTypes.WebApi, StringComparison.OrdinalIgnoreCase) || provisioningToolOptions.IsBlazorWasmHostedServer)
                 {
                     projectSettings.ApplicationParameters.IsWebApi = projectSettings.ApplicationParameters.IsWebApi ?? true;
                 }
@@ -304,7 +303,6 @@ namespace Microsoft.DotNet.MSIdentity
             output.Append(jsonResponse.Output);
             var response = new JsonResponse(CommandName, jsonResponse.State, output: output.ToString());
 
-            ConsoleLogger.LogJsonMessage(response);
         }
 
         /// <summary>
@@ -323,7 +321,7 @@ namespace Microsoft.DotNet.MSIdentity
             clientToolOptions.ProjectFilePath = ProvisioningToolOptions.ClientProject ?? string.Empty;
             clientToolOptions.ClientId = null;
             clientToolOptions.ClientProject = null;
-            clientToolOptions.ProjectType = "blazorwasm-client";
+            clientToolOptions.ProjectType = ProjectTypes.BlazorWasmClient;
             clientToolOptions.AppDisplayName = string.Concat(clientToolOptions.AppDisplayName ?? serverApplicationParameters.ApplicationDisplayName, "-Client");
             clientToolOptions.HostedAppIdUri = serverApplicationParameters.AppIdUri;
             clientToolOptions.HostedApiScopes = $"{serverApplicationParameters.AppIdUri}/{DefaultProperties.ApiScopes}";

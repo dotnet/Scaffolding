@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 {
-    public class PropertyNames
+    public static class PropertyNames
     {
         public const string Domain = nameof(Domain);
         public const string TenantId = nameof(TenantId);
@@ -12,12 +12,14 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string ClientCertificates = nameof(ClientCertificates);
         public const string CallbackPath = nameof(CallbackPath);
         public const string Instance = nameof(Instance);
-
         public const string Authority = nameof(Authority);
         public const string ValidateAuthority = nameof(ValidateAuthority);
-
         public const string BaseUrl = nameof(BaseUrl);
         public const string Scopes = nameof(Scopes);
+        public const string SignUpSignInPolicyId = nameof(SignUpSignInPolicyId);
+        public const string ResetPasswordPolicyId = nameof(ResetPasswordPolicyId);
+        public const string EditProfilePolicyId = nameof(EditProfilePolicyId);
+        public const string SignedOutCallbackPath = nameof(SignedOutCallbackPath);
     }
 
     // getting default properties from
@@ -30,9 +32,13 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string Instance = "https://login.microsoftonline.com/";
         public const string CallbackPath = "/signin-oidc";
         public const string ClientSecret = "Client secret from app-registration. Check user secrets/azure portal.";
-
-        public const string Authority = "https://login.microsoftonline.com/22222222-2222-2222-2222-222222222222";
         public const bool ValidateAuthority = true;
+
+        // B2C properties 
+        public const string SignUpSignInPolicyId = "b2c_1_susi";
+        public const string ResetPasswordPolicyId = "b2c_1_reset";
+        public const string EditProfilePolicyId = "b2c_1_edit_profile";
+        public const string SignedOutCallbackPath = "/signout/B2C_1_susi";
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
         public const string MicrosoftGraphScopes = "user.read";
@@ -43,59 +49,49 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
     {
         public bool IsBlazorWasm;
         public bool IsWebApi;
+        public bool IsB2C;
 
         public string? ClientId;
-        public string? Instance = DefaultProperties.Instance;
+        public string? Instance;
         public string? Domain;
         public string? TenantId;
         public string? Authority;
-        public string? CallbackPath = DefaultProperties.CallbackPath;
+        public string? CallbackPath;
+        public string? SignUpSignInPolicyId;
+        public string? ResetPasswordPolicyId = DefaultProperties.ResetPasswordPolicyId;
+        public string? EditProfilePolicyId = DefaultProperties.EditProfilePolicyId;
+        public string? SignedOutCallbackPath = DefaultProperties.SignedOutCallbackPath;
 
         public string? Scopes;
 
-        public string? ClientSecret = DefaultProperties.ClientSecret;
+        public string? ClientSecret;
         public string[]? ClientCertificates;
 
-        public AzureAdBlock(ApplicationParameters applicationParameters)
+        public AzureAdBlock(ApplicationParameters applicationParameters, JObject? existingBlock = null)
         {
             IsBlazorWasm = applicationParameters.IsBlazorWasm;
             IsWebApi = applicationParameters.IsWebApi.GetValueOrDefault();
+            IsB2C = applicationParameters.IsB2C;
 
-            Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : null;
-            TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : null;
-            ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : null;
-            Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : null;
-            Authority = !string.IsNullOrEmpty(applicationParameters.Authority) ? applicationParameters.Authority : null;
-            CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : null;
-            Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : null;
-        }
-
-        /// <summary>
-        /// Updates AzureAdBlock object from existing appSettings.json
-        /// </summary>
-        /// <param name="azureAdToken"></param>
-        public AzureAdBlock UpdateFromJToken(JToken azureAdToken)
-        {
-            JObject azureAdObj = JObject.FromObject(azureAdToken);
-
-            ClientId ??= azureAdObj.GetValue(PropertyNames.ClientId)?.ToString(); // here, if the applicationparameters value is null, we use the existing app settings value
-            Instance ??= azureAdObj.GetValue(PropertyNames.Instance)?.ToString();
-            Domain ??= azureAdObj.GetValue(PropertyNames.Domain)?.ToString();
-            TenantId ??= azureAdObj.GetValue(PropertyNames.TenantId)?.ToString();
-            Authority ??= azureAdObj.GetValue(PropertyNames.Authority)?.ToString();
-            CallbackPath ??= azureAdObj.GetValue(PropertyNames.CallbackPath)?.ToString();
-            Scopes ??= azureAdObj.GetValue(PropertyNames.Scopes)?.ToString();
-            ClientSecret ??= azureAdObj.GetValue(PropertyNames.ClientSecret)?.ToString();
-            ClientCertificates ??= azureAdObj.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
-
-            return this;
+            Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : existingBlock?.GetValue(PropertyNames.Domain)?.ToString() ?? DefaultProperties.Domain;
+            TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : existingBlock?.GetValue(PropertyNames.TenantId)?.ToString() ?? DefaultProperties.TenantId;
+            ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : existingBlock?.GetValue(PropertyNames.ClientId)?.ToString() ?? DefaultProperties.ClientId;
+            Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
+            CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : existingBlock?.GetValue(PropertyNames.CallbackPath)?.ToString() ?? DefaultProperties.CallbackPath;
+            Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
+                ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : null);
+            SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : existingBlock?.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString() ?? DefaultProperties.SignUpSignInPolicyId;
+            // TODO determine the SusiPolicy from the graph beta
+            Authority = IsB2C ? $"{Instance}{TenantId}/{SignUpSignInPolicyId}" : $"{Instance}{TenantId}";
+            ClientSecret = existingBlock?.GetValue(PropertyNames.ClientSecret)?.ToString() ?? DefaultProperties.ClientSecret;
+            ClientCertificates = existingBlock?.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
         }
 
         public dynamic BlazorSettings => new
         {
-            ClientId = ClientId ?? DefaultProperties.ClientId, // here, if a value is null, we could use the default properties
-            Authority = Authority ?? (string.IsNullOrEmpty(Instance) || string.IsNullOrEmpty(TenantId) ? DefaultProperties.Authority : $"{Instance}{TenantId}"),
-            ValidateAuthority = true
+            ClientId,
+            Authority,
+            ValidateAuthority = !IsB2C
         };
 
         public dynamic WebAppSettings => new
@@ -119,18 +115,30 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             ClientCertificates = ClientCertificates ?? Array.Empty<string>()
         };
 
+        public dynamic B2CSettings => new
+        {
+            SignUpSignInPolicyId = SignUpSignInPolicyId ?? DefaultProperties.SignUpSignInPolicyId,
+            SignedOutCallbackPath = SignedOutCallbackPath ?? DefaultProperties.SignedOutCallbackPath,
+            ResetPasswordPolicyId = ResetPasswordPolicyId ?? DefaultProperties.ResetPasswordPolicyId,
+            EditProfilePolicyId = EditProfilePolicyId ?? DefaultProperties.EditProfilePolicyId,
+            EnablePiiLogging = true
+        };
+
         public JObject ToJObject()
         {
             if (IsBlazorWasm)
             {
                 return JObject.FromObject(BlazorSettings);
             }
-            if (IsWebApi)
+
+            var jObject = IsWebApi ? JObject.FromObject(WebApiSettings) : JObject.FromObject(WebAppSettings);
+
+            if (IsB2C)
             {
-                return JObject.FromObject(WebApiSettings);
+                jObject.Merge(JObject.FromObject(B2CSettings));
             }
 
-            return JObject.FromObject(WebAppSettings);
+            return jObject;
         }
     }
 

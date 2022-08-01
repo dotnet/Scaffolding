@@ -1,6 +1,6 @@
 namespace Microsoft.DotNet.MSIdentity
 {
-    public class ProjectTypes
+    public static class ProjectTypes
     {
         public const string BlazorServer = "blazorserver";
         public const string WebApp = "webapp";

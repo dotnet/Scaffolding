@@ -6,7 +6,7 @@
 
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -21,7 +21,7 @@
                       $(OutputPath)$(AssemblyName).xml;"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
-      <PackagePath>lib\net6.0\</PackagePath>
+      <PackagePath>lib\net7.0\</PackagePath>
     </Content>
   </ItemGroup>
 </Project>

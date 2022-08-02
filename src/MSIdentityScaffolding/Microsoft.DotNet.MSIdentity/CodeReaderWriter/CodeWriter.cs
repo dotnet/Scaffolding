@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private static bool IsTfmPreRelease(string tfm)
         {
-            return tfm.Equals("net6.0", StringComparison.OrdinalIgnoreCase);
+            return tfm.Equals("net7.0", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void SetUserSecrets(string projectPath, string key, string value, IConsoleLogger consoleLogger)

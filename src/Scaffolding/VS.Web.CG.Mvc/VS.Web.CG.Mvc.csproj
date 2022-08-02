@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -11,14 +11,14 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
-    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
+    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\bootstrap5_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
+    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
+    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net6.0\" />
-    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net6.0\" />
+    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net7.0\" />
+    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>

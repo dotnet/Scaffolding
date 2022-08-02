@@ -21,7 +21,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
   </PropertyGroup>
 
   <PropertyGroup>
-    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)..\toolassets\net7.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
   </PropertyGroup>
 
   <UsingTask TaskName="ProjectContextWriter"

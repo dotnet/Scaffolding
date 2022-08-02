@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <AssemblyName>Microsoft.DotNet.Scaffolding.Shared</AssemblyName>
     <RootNamespace>Microsoft.DotNet.Scaffolding.Shared</RootNamespace>
     <Description>Contains interfaces for Project Model and messaging for scaffolding.</Description>

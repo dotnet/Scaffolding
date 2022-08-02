@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
     {
         [Theory]
         [InlineData(new object[] {
-            new string[] { ".NETCoreApp,Version=v3.1", ".NETCoreApp,Version=v5.0", ".NETCoreApp,Version=v6.0", ".NETCoreApp, Version = v2.1" },
-            new string[] { "netcoreapp3.1", "net5.0", "net6.0", "netcoreapp2.1" }
+            new string[] { ".NETCoreApp,Version=v3.1", ".NETCoreApp,Version=v5.0", ".NETCoreApp,Version=v6.0", ".NETCoreApp, Version = v2.1", ".NETCoreApp,Version=v7.0" },
+            new string[] { "netcoreapp3.1", "net5.0", "net6.0", "netcoreapp2.1", "net7.0" }
         })]
         public void GetShortTfmTests(string[] tfmMonikers, string[] shortTfms)
         {

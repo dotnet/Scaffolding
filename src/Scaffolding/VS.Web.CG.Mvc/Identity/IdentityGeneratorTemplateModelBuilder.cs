@@ -708,7 +708,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
               
             }
             //get all types and return the one with the same name. There should be no duplicates so only one should match.
-            return _reflectedTypesProvider.GetAllTypesInProject().FirstOrDefault(r => r.Name.Equals(type, StringComparison.OrdinalIgnoreCase));
+            return _reflectedTypesProvider.GetAllTypesInProject().FirstOrDefault(
+                r => r.Name.Equals(type, StringComparison.OrdinalIgnoreCase) ||
+                     r.FullName.Equals(type, StringComparison.OrdinalIgnoreCase));
         }
 
         private void ValidateCommandLine(IdentityGeneratorCommandLineModel model)

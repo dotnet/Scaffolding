@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return await parser.InvokeAsync(args);
         }
 
-        public static async Task<int> HandleListApps(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleListApps(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleListTenants(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleListTenants(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleListServicePrincipals(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleListServicePrincipals(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleRegisterApplication(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleRegisterApplication(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleUpdateApplication(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleUpdateApplication(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleUnregisterApplication(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleUnregisterApplication(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleCreateAppRegistration(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleCreateAppRegistration(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleUpdateProject(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleUpdateProject(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static async Task<int> HandleClientSecrets(ProvisioningToolOptions provisioningToolOptions)
+        internal static async Task<int> HandleClientSecrets(ProvisioningToolOptions provisioningToolOptions)
         {
             if (provisioningToolOptions != null)
             {
@@ -168,13 +168,13 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return -1;
         }
 
-        public static RootCommand MsIdentityCommand() =>
+        internal static RootCommand MsIdentityCommand() =>
             new RootCommand(
                 description: "Creates or updates an Azure AD / Azure AD B2C application, and updates the project, using your developer credentials (from Visual Studio, Azure CLI, Azure RM PowerShell, VS Code).\n")
             {
             };
 
-        public static Command ListAADAppsCommand() =>
+        internal static Command ListAADAppsCommand() =>
             new Command(
                 name: Commands.LIST_AAD_APPS_COMMAND,
                 description: "Lists AAD Applications for a given tenant/username.\n")
@@ -182,7 +182,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), JsonOption()
             };
 
-        public static Command ListServicePrincipalsCommand() =>
+        internal static Command ListServicePrincipalsCommand() =>
             new Command(
                 name: Commands.LIST_SERVICE_PRINCIPALS_COMMAND,
                 description: "Lists AAD Service Principals.\n")
@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), JsonOption()
             };
 
-        public static Command ListTenantsCommand() =>
+        internal static Command ListTenantsCommand() =>
             new Command(
                 name: Commands.LIST_TENANTS_COMMAND,
                 description: "Lists AAD and AAD B2C tenants for a given user.\n")
@@ -198,7 +198,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 UsernameOption(), JsonOption()
             };
 
-        public static Command CreateClientSecretCommand() =>
+        internal static Command CreateClientSecretCommand() =>
             new Command(
                 name: Commands.ADD_CLIENT_SECRET,
                 description: "Create client secret for an Azure AD or AD B2C app registration.\n")
@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ProjectFilePathOption(), UpdateUserSecretsOption()
             };
 
-        public static Command RegisterApplicationCommand() =>
+        internal static Command RegisterApplicationCommand() =>
             new Command(
                 name: Commands.REGISTER_APPLICATIION_COMMAND,
                 description: "Register an Azure AD or Azure AD B2C app registration in Azure and update the project." +
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), HostedAppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectFilePathOption()
             };
 
-        public static Command UpdateProjectCommand() =>
+        internal static Command UpdateProjectCommand() =>
             new Command(
                 name: Commands.UPDATE_PROJECT_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure and the project." +
@@ -226,7 +226,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption()
             };
 
-        public static Command UpdateAppRegistrationCommand() =>
+        internal static Command UpdateAppRegistrationCommand() =>
             new Command(
                 name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure.\n")
@@ -234,7 +234,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption()
             };
 
-        public static Command CreateAppRegistrationCommand() =>
+        internal static Command CreateAppRegistrationCommand() =>
             new Command(
                 name: Commands.CREATE_APP_REGISTRATION_COMMAND,
                 description: "Create an Azure AD/AD B2C app registration in Azure.\n")
@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption(), UsernameOption(), JsonOption(), AppDisplayName(), ProjectFilePathOption(), ProjectType(), ClientProjectOption()
             };
 
-        public static Command UnregisterApplicationCommand() =>
+        internal static Command UnregisterApplicationCommand() =>
             new Command(
                 name: Commands.UNREGISTER_APPLICATION_COMMAND,
 

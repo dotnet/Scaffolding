@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Option TargetFrameworkOption() =>
             new Option<string>(
                 aliases: new[] { "-tfm", "--target-framework" },
-                description: "Target Framework to use.For example, net46.")
+                description: "Target Framework to use. For example, net46.")
             {
                 IsRequired = false
             };
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Command ScaffoldAreaCommand() =>
             new Command(
                 name: AREA_COMMAND,
-                description: "Scaffolds an Area.")
+                description: "Scaffolds an Area")
             {
                 // Arguments & Options
                 AreaNameArgument()
@@ -366,7 +366,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Command ScaffoldRazorPageCommand() =>
             new Command(
                 name: RAZORPAGE_COMMAND,
-                description: "Scaffolds Razor pages.")
+                description: "Scaffolds Razor pages")
             {
                 // Arguments
                 RazorPageNameArgument(), TemplateNameArgument(),

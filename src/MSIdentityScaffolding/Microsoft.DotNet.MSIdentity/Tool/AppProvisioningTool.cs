@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.MSIdentity
         private ProjectDescriptionReader? _projectDescriptionReader;
         private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
 
-        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false) // TODO silent is temporary
+        public AppProvisioningTool(string commandName, ProvisioningToolOptions provisioningToolOptions, bool silent = false)
         {
             CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;
@@ -59,8 +59,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (projectDescription == null)
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMessage));
-                ConsoleLogger.LogMessage(errorMessage, LogMessageType.Error);
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMessage));
                 Environment.Exit(1);
             }
 
@@ -178,8 +177,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, errorMsg));
-            ConsoleLogger.LogMessage(errorMsg, LogMessageType.Error);
+            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMsg));
             return false;
         }
 
@@ -203,12 +201,12 @@ namespace Microsoft.DotNet.MSIdentity
             // there can multiple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
             {
-                if (provisioningToolOptions.ProjectType.Equals("webapp", StringComparison.OrdinalIgnoreCase)
-                    || provisioningToolOptions.ProjectType.Equals("blazorserver", StringComparison.OrdinalIgnoreCase))
+                if (provisioningToolOptions.ProjectType.Equals(ProjectTypes.WebApp, StringComparison.OrdinalIgnoreCase)
+                    || provisioningToolOptions.ProjectType.Equals(ProjectTypes.BlazorServer, StringComparison.OrdinalIgnoreCase))
                 {
                     projectSettings.ApplicationParameters.IsWebApp = projectSettings.ApplicationParameters.IsWebApp ?? true;
                 }
-                if (provisioningToolOptions.ProjectType.Equals("webapi", StringComparison.OrdinalIgnoreCase) || provisioningToolOptions.IsBlazorWasmHostedServer)
+                if (provisioningToolOptions.ProjectType.Equals(ProjectTypes.WebApi, StringComparison.OrdinalIgnoreCase) || provisioningToolOptions.IsBlazorWasmHostedServer)
                 {
                     projectSettings.ApplicationParameters.IsWebApi = projectSettings.ApplicationParameters.IsWebApi ?? true;
                 }
@@ -282,20 +280,18 @@ namespace Microsoft.DotNet.MSIdentity
         /// <returns></returns>
         private async Task UpdateAppRegistration(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            StringBuilder output = new StringBuilder(); // TODO: implement streaming output
+            StringBuilder output = new StringBuilder();
             if (ProvisioningToolOptions.IsBlazorWasmHostedServer) // Provision Blazor WASM Hosted client app registration
             {
                 if (string.IsNullOrEmpty(applicationParameters.AppIdUri)) // Expose server API scopes
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                    output.AppendLine(string.Format(Resources.ExposingScopes, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId));
                     applicationParameters.AppIdUri = await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.ClientId, applicationParameters.GraphEntityId);
                 }
 
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);
-                output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId));
-
                 ProvisioningToolOptions.BlazorWasmClientAppId = clientApplicationParameters.ClientId;
+                output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, clientApplicationParameters.ApplicationDisplayName, clientApplicationParameters.ClientId));
             }
 
             var jsonResponse = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
@@ -304,11 +300,9 @@ namespace Microsoft.DotNet.MSIdentity
                                         ProvisioningToolOptions,
                                         CommandName);
 
-            output.AppendLine(jsonResponse.Content.ToString());
-            var response = new JsonResponse(CommandName, jsonResponse.State, output.ToString());
+            output.Append(jsonResponse.Output);
+            var response = new JsonResponse(CommandName, jsonResponse.State, output: output.ToString());
 
-            ConsoleLogger.LogMessage(response.Content as string);
-            ConsoleLogger.LogJsonMessage(response);
         }
 
         /// <summary>
@@ -327,7 +321,7 @@ namespace Microsoft.DotNet.MSIdentity
             clientToolOptions.ProjectFilePath = ProvisioningToolOptions.ClientProject ?? string.Empty;
             clientToolOptions.ClientId = null;
             clientToolOptions.ClientProject = null;
-            clientToolOptions.ProjectType = "blazorwasm-client";
+            clientToolOptions.ProjectType = ProjectTypes.BlazorWasmClient;
             clientToolOptions.AppDisplayName = string.Concat(clientToolOptions.AppDisplayName ?? serverApplicationParameters.ApplicationDisplayName, "-Client");
             clientToolOptions.HostedAppIdUri = serverApplicationParameters.AppIdUri;
             clientToolOptions.HostedApiScopes = $"{serverApplicationParameters.AppIdUri}/{DefaultProperties.ApiScopes}";
@@ -338,7 +332,8 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, exception.Message));
+
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
                 throw exception;
             }
 
@@ -349,7 +344,8 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, exception.Message));
+
+                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
                 throw exception;
             }
 
@@ -474,9 +470,8 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
-                output = Resources.FailedClientSecret;
                 jsonResponse.State = State.Fail;
-                jsonResponse.Content = output;
+                jsonResponse.Output = Resources.FailedClientSecret;
             }
             else
             {
@@ -512,10 +507,9 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     output = se.Error?.ToString();
                     jsonResponse.State = State.Fail;
-                    jsonResponse.Content = se.Error?.Code;
+                    jsonResponse.Output = se.Error?.Code; // TODO refactor
                 }
 
-                ConsoleLogger.LogMessage(output);
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
         }
@@ -534,16 +528,14 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 string outputMessage = $"Unregistered the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 jsonResponse.State = State.Success;
-                jsonResponse.Content = outputMessage;
-                ConsoleLogger.LogMessage(outputMessage);
+                jsonResponse.Output = outputMessage;
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
             else
             {
                 string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 jsonResponse.State = State.Fail;
-                jsonResponse.Content = outputMessage;
-                ConsoleLogger.LogMessage(outputMessage);
+                jsonResponse.Output = outputMessage;
                 ConsoleLogger.LogJsonMessage(jsonResponse);
             }
         }

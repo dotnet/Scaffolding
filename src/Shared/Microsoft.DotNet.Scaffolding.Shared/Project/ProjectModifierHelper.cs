@@ -494,14 +494,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task UpdateDocument(Document document, IConsoleLogger consoleLogger)
+        internal static async Task<string> UpdateDocument(Document document)
         {
             var classFileTxt = await document.GetTextAsync();
 
             // Note: For files without .cs extension, document.Name is the full filepath
             var filePath = document.Name.EndsWith(".cs") ? document.FilePath : document.Name;
             File.WriteAllText(filePath, classFileTxt.ToString(), new UTF8Encoding(false));
-            consoleLogger.LogMessage($"Modified {document.Name}.\n");
+
+            return $"Modified {document.Name}.\n"; // todo strings.
         }
 
         // Filter out CodeBlocks that are invalid using FilterOptions

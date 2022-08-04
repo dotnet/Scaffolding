@@ -1,20 +1,20 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
+using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Diagnostics;
-using System.Threading.Tasks;
+using Microsoft.DotNet.MSIdentity.Tool;
 
 namespace Microsoft.DotNet.Tools.Scaffold
 {
     public class Program
     {
         private const string SCAFFOLD_COMMAND = "scaffold";
-        private const string AREA_COMMAND = "area";
-        private const string CONTROLLER_COMMAND = "controller";
-        private const string IDENTITY_COMMAND = "identity";
-        private const string RAZORPAGE_COMMAND = "razorpage";
-        private const string VIEW_COMMAND = "view";
+        private const string AREA_COMMAND = "--area";
+        private const string CONTROLLER_COMMAND = "--controller";
+        private const string IDENTITY_COMMAND = "--identity";
+        private const string RAZORPAGE_COMMAND = "--razorpage";
+        private const string VIEW_COMMAND = "--view";
         /* 
         dotnet scaffold [generator] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build] 
 
@@ -40,6 +40,45 @@ namespace Microsoft.DotNet.Tools.Scaffold
             rootCommand.AddCommand(ScaffoldRazorPageCommand());
             rootCommand.AddCommand(ScaffoldViewCommand());
             rootCommand.AddCommand(ScaffoldIdentityCommand());
+            //msidentity commands
+            //internal commands
+            var listAadAppsCommand = MSIdentity.Tool.Program.ListAADAppsCommand();
+            var listServicePrincipalsCommand = MSIdentity.Tool.Program.ListServicePrincipalsCommand();
+            var listTenantsCommand = MSIdentity.Tool.Program.ListTenantsCommand();
+            var createClientSecretCommand = MSIdentity.Tool.Program.CreateClientSecretCommand();
+
+            //exposed commands
+            var registerApplicationCommand = MSIdentity.Tool.Program.RegisterApplicationCommand();
+            var unregisterApplicationCommand = MSIdentity.Tool.Program.UnregisterApplicationCommand();
+            var updateAppRegistrationCommand = MSIdentity.Tool.Program.UpdateAppRegistrationCommand();
+            var updateProjectCommand = MSIdentity.Tool.Program.UpdateProjectCommand();
+            var createAppRegistration = MSIdentity.Tool.Program.CreateAppRegistrationCommand();
+
+            //hide internal commands.
+            listAadAppsCommand.IsHidden = true;
+            listServicePrincipalsCommand.IsHidden = true;
+            listTenantsCommand.IsHidden = true;
+            updateProjectCommand.IsHidden = true;
+            createClientSecretCommand.IsHidden = true;
+
+            listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListApps);
+            listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListServicePrincipals);
+            listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListTenants);
+            registerApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleRegisterApplication);
+            unregisterApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUnregisterApplication);
+            createAppRegistration.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleCreateAppRegistration);
+            updateAppRegistrationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUpdateApplication);
+            updateProjectCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUpdateProject);
+            createClientSecretCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleClientSecrets);
+            rootCommand.AddCommand(listAadAppsCommand);
+            rootCommand.AddCommand(listServicePrincipalsCommand);
+            rootCommand.AddCommand(listTenantsCommand);
+            rootCommand.AddCommand(registerApplicationCommand);
+            rootCommand.AddCommand(unregisterApplicationCommand);
+            rootCommand.AddCommand(createAppRegistration);
+            rootCommand.AddCommand(updateAppRegistrationCommand);
+            rootCommand.AddCommand(updateProjectCommand);
+            rootCommand.AddCommand(createClientSecretCommand);
 
             rootCommand.Description = "dotnet scaffold [command] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build] ";
             if (args.Length == 0)
@@ -71,6 +110,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
                         // The help option for the commands are handled by System.Commandline.
                         return 0;
                     }
+                    args[0] = args[0].Replace("--", "");
                     return VisualStudio.Web.CodeGeneration.Tools.Program.Main(args);
                 default:
                     // The command is not handled by 'dotnet scaffold'.
@@ -106,7 +146,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Option TargetFrameworkOption() =>
             new Option<string>(
                 aliases: new[] { "-tfm", "--target-framework" },
-                description: "Target Framework to use.For example, net46.")
+                description: "Target Framework to use. For example, net46.")
             {
                 IsRequired = false
             };
@@ -148,7 +188,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Command ScaffoldAreaCommand() =>
             new Command(
                 name: AREA_COMMAND,
-                description: "Scaffolds an Area.")
+                description: "Scaffolds an Area")
             {
                 // Arguments & Options
                 AreaNameArgument()
@@ -326,7 +366,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Command ScaffoldRazorPageCommand() =>
             new Command(
                 name: RAZORPAGE_COMMAND,
-                description: "Scaffolds Razor pages.")
+                description: "Scaffolds Razor pages")
             {
                 // Arguments
                 RazorPageNameArgument(), TemplateNameArgument(),

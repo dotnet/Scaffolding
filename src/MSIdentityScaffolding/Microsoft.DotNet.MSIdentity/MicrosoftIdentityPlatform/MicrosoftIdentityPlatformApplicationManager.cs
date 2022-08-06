@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .AddAsync(servicePrincipal).ConfigureAwait(false);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (applicationParameters.IsB2C)
+            if (applicationParameters.IsB2C && applicationParameters.CallsDownstreamApi) // TODO need to have admin permissions for the downstream API
             {
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                     applicationParameters,

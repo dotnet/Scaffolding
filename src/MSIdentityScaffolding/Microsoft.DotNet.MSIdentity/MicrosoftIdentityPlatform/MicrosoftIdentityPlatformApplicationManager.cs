@@ -114,6 +114,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return null;
             }
 
+            if (applicationParameters.IsB2C)
+            {
+                createdApplication.AdditionalData.Add("IsB2C", true);
+            }
+
             ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
 
             // Add password credentials

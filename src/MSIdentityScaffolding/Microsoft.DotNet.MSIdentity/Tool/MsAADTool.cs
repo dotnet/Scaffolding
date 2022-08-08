@@ -125,15 +125,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
                 if (applicationList.Any())
                 {
-                    Organization? tenant = await GetTenant(GraphServiceClient);
-                    if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
-                    {
-                        foreach (Application app in applicationList)
-                        {
-                            app.AdditionalData.Add("IsB2C", true);
-                        }
-                    }
-
                     //order list by created date.
                     applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
 
@@ -158,40 +149,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
             return outputJsonString;
         }
-
-        private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient)
-        {
-            Organization? tenant = null;
-            try
-            {
-                tenant = (await graphServiceClient.Organization
-                    .Request()
-                    .GetAsync()).FirstOrDefault();
-            }
-            catch (ServiceException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine(ex.InnerException.Message);
-                }
-                else
-                {
-                    if (ex.Message.Contains("User was not found") || ex.Message.Contains("not found in tenant"))
-                    {
-                        Console.WriteLine("User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.");
-                    }
-                    else
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-
-                Environment.Exit(1);
-            }
-
-            return tenant;
-        }
-
 
         internal async Task<string> PrintServicePrincipalList()
         {

@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .AddAsync(servicePrincipal).ConfigureAwait(false);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (applicationParameters.IsB2C)
+            if (applicationParameters.IsB2C && applicationParameters.CallsDownstreamApi) // TODO need to have admin permissions for the downstream API
             {
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                     applicationParameters,
@@ -112,6 +112,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToCreateApp));
                 return null;
+            }
+
+            if (applicationParameters.IsB2C)
+            {
+                createdApplication.AdditionalData.Add("IsB2C", true);
             }
 
             ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);

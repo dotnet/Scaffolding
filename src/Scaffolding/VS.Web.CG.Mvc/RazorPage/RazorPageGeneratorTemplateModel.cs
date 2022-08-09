@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -31,7 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         public IModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }
-        public bool NullableEnabled { get; set; } = false;
+        public string NullableEnabled { get; set; } 
 
     }
 }

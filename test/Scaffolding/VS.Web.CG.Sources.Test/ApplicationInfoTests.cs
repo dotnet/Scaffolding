@@ -14,7 +14,7 @@ namespace ConsoleApplication
         [Fact]
         public void ApplicationEnvironment_Test()
         {
-            _applicationInfo = new ApplicationInfo("TestApplication", Directory.GetCurrentDirectory(), null);
+            _applicationInfo = new ApplicationInfo("TestApplication", Directory.GetCurrentDirectory());
             Assert.Equal(Directory.GetCurrentDirectory(), _applicationInfo.ApplicationBasePath);
             Assert.Equal("TestApplication", _applicationInfo.ApplicationName);
         }

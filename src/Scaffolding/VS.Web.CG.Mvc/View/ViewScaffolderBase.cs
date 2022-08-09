@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
@@ -168,10 +167,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             bool isLayoutSelected = !viewGeneratorModel.PartialView &&
                 (viewGeneratorModel.UseDefaultLayout || !String.IsNullOrEmpty(viewGeneratorModel.LayoutPage));
 
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
             ViewGeneratorTemplateModel templateModel = new ViewGeneratorTemplateModel()
             {
                 ViewDataTypeName = modelTypeAndContextModel?.ModelType?.FullName,
@@ -183,7 +178,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 ReferenceScriptLibraries = viewGeneratorModel.ReferenceScriptLibraries,
                 ModelMetadata = modelTypeAndContextModel?.ContextProcessingResult?.ModelMetadata,
                 JQueryVersion = "1.10.2", //Todo,
-                NullableEnabled = "enable".Equals(ApplicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase)
+                NullableEnabled = _projectContext.Nullable
             };
 
             return templateModel;

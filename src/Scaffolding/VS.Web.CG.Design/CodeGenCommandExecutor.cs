@@ -74,8 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         {
             var applicationInfo = new ApplicationInfo(
                 projectInformation.ProjectName,
-                Path.GetDirectoryName(projectInformation.ProjectFullPath),
-                new RoslynWorkspaceHelper(projectInformation.ProjectFullPath));
+                Path.GetDirectoryName(projectInformation.ProjectFullPath));
             serviceProvider.Add<IProjectContext>(projectInformation);
             serviceProvider.Add<IApplicationInfo>(applicationInfo);
             serviceProvider.Add<ICodeGenAssemblyLoadContext>(new DefaultAssemblyLoadContext());

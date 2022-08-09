@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -62,12 +61,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (codeModifierConfig is null || !codeModifierConfig.Files.Any())
             {
                 return;
-            }
-
-            // Initialize Microsoft.Build assemblies
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
             }
 
             // Initialize CodeAnalysis.Project wrapper

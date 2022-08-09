@@ -48,6 +48,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           ProjectRuntimeConfigFileName="$(ProjectRuntimeConfigFileName)"
                           ProjectAssetsFile="$(ProjectAssetsFile)"
                           GeneratedImplicitNamespaceImportFile = "$(GeneratedImplicitNamespaceImportFile)"
+                          Nullable = "$(Nullable)"
     />
  </Target>
 </Project>

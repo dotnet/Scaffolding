@@ -34,8 +34,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             var id = AddProject(projectInformation, configuration);
             // Since we have resolved all references, we can directly use them as MetadataReferences.
             // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
-
-            //System.Diagnostics.Debugger.Launch();
             var projReferenceInformation = RoslynWorkspaceHelper.GetProjectReferenceInformation(projectInformation.ProjectReferences);
 
             if (projReferenceInformation != null && projReferenceInformation.Any())

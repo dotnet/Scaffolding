@@ -58,6 +58,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         }
 
         [Fact]
+        public void TestProjectContextNullableMissing()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupCodeGenerationProjectNullableDisabled(fileProvider, _outputHelper);
+                var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName2);
+
+                var projectContext = GetProjectContext(path, true);
+                //we know the project name is Test so test some basic properties.
+                Assert.NotNull(projectContext.Nullable);
+                Assert.Equal("disable", projectContext.Nullable);
+            }
+        }
+
+        [Fact]
         public void TestProjectContextNullableEnabled()
         {
             using (var fileProvider = new TemporaryFileProvider())

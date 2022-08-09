@@ -92,6 +92,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             RestoreAndBuild(fileProvider.Root, outputHelper);
         }
 
+        internal void SetupCodeGenerationProjectNullableMissing(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
+        {
+            fileProvider.Add("global.json", GlobalJsonText);
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net6.0"));
+
+            fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+
+            var rootProjectTxt = MsBuildProjectStrings.Net6NullableMissing;
+            fileProvider.Add(MsBuildProjectStrings.RootProjectName3, rootProjectTxt);
+            fileProvider.Add("Startup.cs", MsBuildProjectStrings.EmptyTestStartupText);
+            fileProvider.Add(MsBuildProjectStrings.DbContextInheritanceProgramName, MsBuildProjectStrings.DbContextInheritanceProjectProgramText);
+            fileProvider.Add(MsBuildProjectStrings.AppSettingsFileName, MsBuildProjectStrings.AppSettingsFileTxt);
+
+            RestoreAndBuild(fileProvider.Root, outputHelper);
+        }
+
         internal void SetupCodeGenerationProjectNullableEnabled(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
         {
             fileProvider.Add("global.json", GlobalJsonText);

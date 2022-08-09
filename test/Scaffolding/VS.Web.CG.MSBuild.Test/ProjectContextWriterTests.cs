@@ -51,7 +51,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName2);
 
                 var projectContext = GetProjectContext(path, true);
-                //we know the project name is Test so test some basic properties.
                 Assert.NotNull(projectContext.Nullable);
                 Assert.Equal("disable", projectContext.Nullable);
             }
@@ -62,13 +61,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
-                new MsBuildProjectSetupHelper().SetupCodeGenerationProjectNullableDisabled(fileProvider, _outputHelper);
-                var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName2);
+                new MsBuildProjectSetupHelper().SetupCodeGenerationProjectNullableMissing(fileProvider, _outputHelper);
+                var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName3);
 
                 var projectContext = GetProjectContext(path, true);
-                //we know the project name is Test so test some basic properties.
-                Assert.NotNull(projectContext.Nullable);
-                Assert.Equal("disable", projectContext.Nullable);
+                Assert.Null(projectContext.Nullable);
             }
         }
 
@@ -81,7 +78,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName3);
 
                 var projectContext = GetProjectContext(path, true);
-                //we know the project name is Test so test some basic properties.
                 Assert.NotNull(projectContext.Nullable);
                 Assert.Equal("enable", projectContext.Nullable);
             }

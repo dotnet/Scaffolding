@@ -74,5 +74,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
 
         /// <inheritdoc/>
         public string GeneratedImplicitNamespaceImportFile { get; set; }
+
+        public string Nullable { get; set; }
     }
 }

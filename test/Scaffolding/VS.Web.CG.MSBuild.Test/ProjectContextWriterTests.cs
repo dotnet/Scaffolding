@@ -42,6 +42,47 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
             }
         }
 
+        [Fact]
+        public void TestProjectContextNullableDisabled()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupCodeGenerationProjectNullableDisabled(fileProvider, _outputHelper);
+                var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName2);
+
+                var projectContext = GetProjectContext(path, true);
+                Assert.NotNull(projectContext.Nullable);
+                Assert.Equal("disable", projectContext.Nullable);
+            }
+        }
+
+        [Fact]
+        public void TestProjectContextNullableMissing()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupCodeGenerationProjectNullableMissing(fileProvider, _outputHelper);
+                var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName3);
+
+                var projectContext = GetProjectContext(path, true);
+                Assert.Null(projectContext.Nullable);
+            }
+        }
+
+        [Fact]
+        public void TestProjectContextNullableEnabled()
+        {
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupCodeGenerationProjectNullableEnabled(fileProvider, _outputHelper);
+                var path = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectName3);
+
+                var projectContext = GetProjectContext(path, true);
+                Assert.NotNull(projectContext.Nullable);
+                Assert.Equal("enable", projectContext.Nullable);
+            }
+        }
+
         [SkippableTheory]
         [InlineData("C:\\Users\\User\\.nuget\\packages\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\packages\\x.y.z\\1.2.3")]
         [InlineData("C:\\Users\\User\\.nuget\\", "X.Y.Z", "1.2.3", "C:\\Users\\User\\.nuget\\x.y.z\\1.2.3")]

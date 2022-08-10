@@ -83,6 +83,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
 
         //not required as it might not get a value (fails if required and value not present).
         public string GeneratedImplicitNamespaceImportFile { get; set; }
+
+        //not required as it might not get a value (fails if required and value not present).
+        public string Nullable { get; set; }
         #endregion
 
         public override bool Execute()
@@ -108,7 +111,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 TargetDirectory = this.TargetDirectory,
                 TargetFramework = this.TargetFramework,
                 TargetFrameworkMoniker = this.TargetFrameworkMoniker, 
-                GeneratedImplicitNamespaceImportFile = this.GeneratedImplicitNamespaceImportFile
+                GeneratedImplicitNamespaceImportFile = this.GeneratedImplicitNamespaceImportFile,
+                Nullable = this.Nullable
             };
 
             var projectReferences = msBuildContext.ProjectReferences;

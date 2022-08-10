@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -496,6 +497,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         internal static async Task<string> UpdateDocument(Document document)
         {
+            Debugger.Launch();
             var classFileTxt = await document.GetTextAsync();
 
             // Note: For files without .cs extension, document.Name is the full filepath

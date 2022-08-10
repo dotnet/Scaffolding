@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -91,10 +90,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var startupType = _modelTypesLocator.GetType(startupClassName).FirstOrDefault() ?? _modelTypesLocator.GetType("Startup").FirstOrDefault();
 
             ModelType dbContextSymbolInWebProject = null;
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
             //if there is no Startup.cs (minimal hosting app), this scaffolding scanerio is not supported.
             if (startupType == null)
             {
@@ -307,7 +302,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private async Task AddModelTypeToExistingDbContextIfNeeded(ModelType dbContextSymbol, IApplicationInfo appInfo)
         {
-            bool nullabledEnabled = "enable".Equals(appInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
             var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, nullabledEnabled);
             var projectCompilation = await _workspace.CurrentSolution.Projects
                 .First(project => project.AssemblyName == _projectContext.AssemblyName)
@@ -382,7 +377,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
-            bool nullabledEnabled = "enable".Equals(applicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
             bool useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_modelTypesLocator);
             var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType, nullabledEnabled);
             _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);
@@ -451,7 +446,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
-            bool nullabledEnabled = "enable".Equals(applicationInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase);
+            bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
             var dbContextTemplateModel = new NewDbContextTemplateModel(_dbContextFullTypeName, _modelTypeSymbol, programType, nullabledEnabled);
 
             _dbContextSyntaxTree = await _dbContextEditorServices.AddNewContext(dbContextTemplateModel);

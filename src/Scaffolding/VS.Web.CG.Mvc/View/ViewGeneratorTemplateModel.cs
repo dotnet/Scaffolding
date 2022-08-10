@@ -25,6 +25,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         public IModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }
-        public bool NullableEnabled { get; set; }
+        public string NullableEnabled { get; set; }
     }
 }

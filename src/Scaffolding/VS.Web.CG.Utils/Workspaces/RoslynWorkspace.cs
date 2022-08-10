@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
@@ -34,12 +33,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             var id = AddProject(projectInformation, configuration);
             // Since we have resolved all references, we can directly use them as MetadataReferences.
             // Trying to get ProjectReferences manually might lead to problems when the projects have circular dependency.
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
-            RoslynWorkspaceHelper roslynHelper = new RoslynWorkspaceHelper(projectInformation.ProjectFullPath);
-            var projReferenceInformation = roslynHelper.GetProjectReferenceInformation(projectInformation.ProjectReferences);
+            var projReferenceInformation = RoslynWorkspaceHelper.GetProjectReferenceInformation(projectInformation.ProjectReferences);
 
             if (projReferenceInformation != null && projReferenceInformation.Any())
             {

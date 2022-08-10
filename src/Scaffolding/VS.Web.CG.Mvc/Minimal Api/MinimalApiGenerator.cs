@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -75,11 +74,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 ModelTypesLocator,
                 areaName : string.Empty);
 
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
-
             if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
             {
                 EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, useSqlite: model.UseSqlite);
@@ -90,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 EndpointsName = model.EndpintsClassName,
                 EndpointsNamespace = namespaceName,
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata,
-                NullableEnabled = "enable".Equals(AppInfo?.WorkspaceHelper?.GetMsBuildProperty("Nullable"), StringComparison.OrdinalIgnoreCase),
+                NullableEnabled = "enable".Equals(ProjectContext?.Nullable, StringComparison.OrdinalIgnoreCase),
                 OpenAPI = model.OpenApi,
                 MethodName = $"Map{modelTypeAndContextModel.ModelType.Name}Endpoints",
                 UseSqlite = model.UseSqlite

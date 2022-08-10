@@ -129,5 +129,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         /// .cs file in obj folder generated at compile time with all default namespace imports in .NET 6+.
         /// </summary>
         string GeneratedImplicitNamespaceImportFile { get; }
+
+        string Nullable { get; }
     }
 }

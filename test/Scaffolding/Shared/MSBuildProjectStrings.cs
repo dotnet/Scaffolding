@@ -11,6 +11,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     internal class MsBuildProjectStrings
     {
         public const string RootProjectName = "Test.csproj";
+        public const string RootProjectName2 = "Test2.csproj";
+        public const string RootProjectName3 = "Test3.csproj";
+
         public const string RootProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
@@ -909,6 +912,37 @@ namespace Test
   </ItemGroup>
 </Project>
 ";
+        public const string Net6NullableEnabled = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
+";
+
+        public const string Net6NullableDisabled = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
+";
+
+        public const string Net6NullableMissing = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>";
+
         public const string BaseDbContextText = @"
 using Microsoft.EntityFrameworkCore;
 using Test.Models;
@@ -1134,7 +1168,8 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           ProjectDepsFileName=""$(ProjectDepsFileName)""
                           ProjectRuntimeConfigFileName=""$(ProjectRuntimeConfigFileName)""
                           ProjectAssetsFile=""$(ProjectAssetsFile)""
-                          GeneratedImplicitNamespaceImportFile = ""$(GeneratedImplicitNamespaceImportFile)""/>
+                          GeneratedImplicitNamespaceImportFile = ""$(GeneratedImplicitNamespaceImportFile)""
+                          Nullable=""$(Nullable)""/>
   </Target>
 </Project>
 ";

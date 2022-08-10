@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             _codeGenActionService = new Mock<ICodeGeneratorActionsService>();
             _serviceProvider = new Mock<IServiceProvider>();
             _logger = new ConsoleLogger();
-            _applicationInfo = new ApplicationInfo("TestApp", "..", null);
+            _applicationInfo = new ApplicationInfo("TestApp", "..");
         }
 
         [Fact]
@@ -38,8 +38,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 _applicationInfo,
                 _codeGenActionService.Object,
                 _serviceProvider.Object,
-                _logger
-                );
+                _logger);
 
             var model = GetModel();
             model.ControllerNamespace = "Invalid Namespace";

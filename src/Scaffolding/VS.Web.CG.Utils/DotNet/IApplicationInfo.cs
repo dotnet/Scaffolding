@@ -9,6 +9,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.DotNet
         string ApplicationBasePath { get; }
         string ApplicationName { get; }
         string ApplicationConfiguration { get; }
-        RoslynWorkspaceHelper WorkspaceHelper { get;  }
     }
 }

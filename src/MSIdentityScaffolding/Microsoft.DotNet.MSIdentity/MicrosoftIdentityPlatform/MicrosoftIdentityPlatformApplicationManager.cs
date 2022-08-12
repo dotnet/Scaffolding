@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -79,10 +80,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .AddAsync(servicePrincipal).ConfigureAwait(false);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (applicationParameters.IsB2C && applicationParameters.CallsDownstreamApi) // TODO need to have admin permissions for the downstream API
+            if (applicationParameters.IsB2C) // TODO need to have admin permissions for the downstream API
             {
+                var calledApiScopes = applicationParameters.CalledApiScopes;
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
-                    applicationParameters,
+                    calledApiScopes,
                     graphServiceClient,
                     application).ConfigureAwait(false);
 
@@ -200,6 +202,26 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
+
+            Debugger.Launch();
+            // B2C does not allow user consent, and therefore we need to explicity grant permissions
+            if (parameters.IsB2C) // TODO need to have admin permissions for the downstream API
+            {
+                needsUpdates = true;
+                var calledApiScopes = toolOptions.ApiScopes; // TODO bring this variable back.
+                calledApiScopes = "https://HalzelB2C2.onmicrosoft.com/2d6fecac-aec7-4ae7-95b0-b4643fa48754/access_as_user";
+                IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
+                    calledApiScopes,
+                    graphServiceClient,
+                    appUpdates).ConfigureAwait(false);
+
+                ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
+                await AddAdminConsentToApiPermissions(
+                    graphServiceClient,
+                    servicePrincipal!, // TODO error catch
+                    scopesPerResource);
+            }
+
             if (!needsUpdates)
             {
                 return new JsonResponse(commandName, State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
@@ -215,6 +237,34 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 return new JsonResponse(commandName, State.Fail, output: se.Error?.Message);
             }
+        }
+
+        private static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
+        {
+            var servicePrincipal = (await graphServiceClient.ServicePrincipals
+                                .Request()
+                                .Filter($"appId eq '{clientId}'")
+                                .GetAsync()).FirstOrDefault();
+            if (servicePrincipal is null)
+            {
+                // Create service principal, necessary for Web API applications
+                // and useful for Blazorwasm hosted applications. We create it always.
+                var sp = new ServicePrincipal
+                {
+                    AppId = clientId,
+                };
+
+                await graphServiceClient.ServicePrincipals
+                    .Request()
+                    .AddAsync(sp).ConfigureAwait(false);
+
+                servicePrincipal = (await graphServiceClient.ServicePrincipals
+                    .Request()
+                    .Filter($"appId eq '{clientId}'")
+                    .GetAsync()).FirstOrDefault();
+            }
+
+            return servicePrincipal;
         }
 
         /// <summary>
@@ -406,10 +456,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     }
                 };
 
-            await AddPermission(
-                graphServiceClient,
-                requiredResourceAccess,
-                resourcesAccessAndScopes.GroupBy(r => r.Resource).First()).ConfigureAwait(false);
+            //await AddPermission(
+            //    graphServiceClient,
+            //    requiredResourceAccess,
+            //    resourcesAccessAndScopes.GroupBy(r => r.Resource).First()).ConfigureAwait(false);
 
             Application applicationToUpdate = new Application
             {
@@ -570,13 +620,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="application"></param>
         /// <returns></returns>
         private async Task<IEnumerable<IGrouping<string, ResourceAndScope>>?> AddApiPermissions(
-            ApplicationParameters applicationParameters,
+            string? calledApiScopes,
             GraphServiceClient graphServiceClient,
             Application application)
         {
+            Debugger.Launch();
             // Case where the app calls a downstream API
-            List<RequiredResourceAccess> apiRequests = new List<RequiredResourceAccess>();
-            string? calledApiScopes = applicationParameters?.CalledApiScopes;
+            var apiRequests =  application.RequiredResourceAccess ?? new List<RequiredResourceAccess>();
+
             IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = null;
             if (!string.IsNullOrEmpty(calledApiScopes))
             {
@@ -589,9 +640,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 ).GroupBy(r => r.Resource)
                 .ToArray(); // We want to modify these elements to cache the service principal ID
 
-                foreach (var g in scopesPerResource)
+                foreach (var grouping in scopesPerResource)
                 {
-                    await AddPermission(graphServiceClient, apiRequests, g);
+                    var requiredResourceAccess = await AddPermission(graphServiceClient, grouping);
+                    apiRequests = apiRequests.Append(requiredResourceAccess);
                 }
             }
 
@@ -667,9 +719,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="apiRequests"></param>
         /// <param name="g"></param>
         /// <returns></returns>
-        private async Task AddPermission(
+        private async Task<RequiredResourceAccess> AddPermission(
             GraphServiceClient graphServiceClient,
-            List<RequiredResourceAccess> apiRequests,
             IGrouping<string, ResourceAndScope> g)
         {
             var spsWithScopes = await graphServiceClient.ServicePrincipals
@@ -714,7 +765,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                  }))
             };
 
-            apiRequests.Add(requiredResourceAccess);
+            return requiredResourceAccess;
         }
 
         /// <summary>

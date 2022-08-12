@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -448,6 +449,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (ProvisioningToolOptions.CodeUpdate)
             {
+                Debugger.Launch();
                 ConsoleLogger.LogMessage("=============================================");
                 ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
                 ConsoleLogger.LogMessage("=============================================\n");

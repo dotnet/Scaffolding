@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -198,6 +197,7 @@ namespace Microsoft.DotNet.MSIdentity
             projectSettings.ApplicationParameters.CalledApiScopes = !string.IsNullOrEmpty(provisioningToolOptions.HostedApiScopes) ? provisioningToolOptions.HostedApiScopes : projectSettings.ApplicationParameters.CalledApiScopes;
             projectSettings.ApplicationParameters.IsBlazorWasm = provisioningToolOptions.IsBlazorWasm;
             projectSettings.ApplicationParameters.WebRedirectUris.AddRange(ProvisioningToolOptions.RedirectUris);
+            projectSettings.ApplicationParameters.CallsDownstreamApi = provisioningToolOptions.CallsDownstreamApi || !string.IsNullOrEmpty(provisioningToolOptions.ApiScopes);
 
             // there can multiple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
@@ -287,6 +287,7 @@ namespace Microsoft.DotNet.MSIdentity
                 if (string.IsNullOrEmpty(applicationParameters.AppIdUri)) // Expose server API scopes
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                    // TODO test with B2C
                     applicationParameters.AppIdUri = await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.ClientId, applicationParameters.GraphEntityId);
                 }
 
@@ -449,7 +450,6 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (ProvisioningToolOptions.CodeUpdate)
             {
-                Debugger.Launch();
                 ConsoleLogger.LogMessage("=============================================");
                 ConsoleLogger.LogMessage(Resources.UpdatingProjectFiles);
                 ConsoleLogger.LogMessage("=============================================\n");

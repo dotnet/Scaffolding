@@ -116,7 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var nullabilityClause = nullableEnabled ? " = default!;" : "";
                     // Todo : Need pluralization for property name below.
                     // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
-                    var dbSetProperty = "public DbSet<" + modelType.FullName + ">" + safeModelName + " { get; set; }" + nullabilityClause + Environment.NewLine;
+                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + nullabilityClause + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                     var newNode = rootNode.InsertNodesAfter(lastNode,

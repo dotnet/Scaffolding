@@ -7,6 +7,6 @@ namespace ContextNamespace
         public MyContext() : base()
         {
         }
-        public DbSet<ModelNamespace.MyModel>? MyModel { get; set; }
+        public DbSet<ModelNamespace.MyModel> MyModel { get; set; } = default!;
     }
 }

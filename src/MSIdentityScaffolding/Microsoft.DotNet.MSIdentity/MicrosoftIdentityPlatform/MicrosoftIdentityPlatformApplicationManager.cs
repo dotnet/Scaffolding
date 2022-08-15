@@ -203,13 +203,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
 
-            Debugger.Launch();
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (parameters.IsB2C) // TODO need to have admin permissions for the downstream API
             {
                 needsUpdates = true;
                 var calledApiScopes = toolOptions.ApiScopes; // TODO bring this variable back.
-                calledApiScopes = "https://HalzelB2C2.onmicrosoft.com/2d6fecac-aec7-4ae7-95b0-b4643fa48754/access_as_user";
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                     calledApiScopes,
                     graphServiceClient,

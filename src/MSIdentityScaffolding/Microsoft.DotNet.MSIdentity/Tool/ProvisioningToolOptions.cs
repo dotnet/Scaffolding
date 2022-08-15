@@ -110,6 +110,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool Unregister { get; set; }
 
         /// <summary>
+        /// Scopes for the called downstream API.
+        /// </summary>
+        public string? ApiScopes { get; set; }
+
+        /// <summary>
         /// Scopes for the Blazor WASM hosted API.
         /// </summary>
         public string? HostedApiScopes { get; set; }

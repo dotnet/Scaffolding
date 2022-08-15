@@ -385,6 +385,15 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
+        private static Option ApiScopes() =>
+            new Option<string>(
+                aliases: new[] { "--api-scopes" },
+                description: "Scopes for the called downstream API, especially useful for B2C scenarios where permissions must be granted manually\n")
+            {
+                IsRequired = false
+            };
+
+
         private static Option HostedAppIdUriOption() =>
             new Option<string>(
                 aliases: new[] { "--hosted-app-id-uri" },

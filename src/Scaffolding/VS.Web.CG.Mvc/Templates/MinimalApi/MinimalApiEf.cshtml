@@ -20,12 +20,19 @@
     var findModel = $"{@entitySetName}.FindAsync({@primaryKeyName})";
     var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
+    string resultsExtension = Model.OpenAPI ? "TypedResults" : "Results";
+    string resultsNotFound = $"{resultsExtension}.NotFound()";
+    string resultsOkModel = $"{resultsExtension}.Ok(model)";
+    string resultsNoContent = $"{resultsExtension}.NoContent()";
+    string resultsOkModelVariable = $"{resultsExtension}.Ok({@Model.ModelVariable})";
+    string createdApiVar = string.Format("$\"/{0}/{{{1}.{2}}}\",{3}", @pluralModel, @Model.ModelVariable, @primaryKeyName, @Model.ModelVariable);
+    string resultsCreated = $"{resultsExtension}.Created(" + $"{@createdApiVar}" + ")";
 }
 using Microsoft.EntityFrameworkCore;
 @{
     foreach (var namespaceName in Model.RequiredNamespaces)
     {
-@:using @namespaceName;
+    @:using @namespaceName;
     }
 }
 namespace @Model.EndpointsNamespace;
@@ -34,114 +41,115 @@ public static class @endPointsClassName
 {
     public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-        routes.MapGet("@routePrefix", async (@dbContextName db) =>
+        var group = routes.MapGroup("@routePrefix");
+        group.MapGet("/", async (@dbContextName db) =>
         {
             return await db.@modelToList;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI)
+        {
         @:.WithTags(nameof(@modelName))
         @:.WithName("@getAllModels")
         @:.Produces<@modelList>(StatusCodes.Status200OK);
-    }
-    else
-    {
+        }
+        else
+        {
         @:.WithName("@getAllModels");
+        }
     }
-}
 
-        routes.MapGet("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        group.MapGet("/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
         {
             return await db.@findModel
                 is @modelName model
-                    ? Results.Ok(model)
-                    : Results.NotFound();
+                    ? @resultsOkModel
+                    : @resultsNotFound;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI)
+        {
         @:.WithTags(nameof(@modelName))
         @:.WithName("@getModelById")
         @:.Produces<@modelName>(StatusCodes.Status200OK)
         @:.Produces(StatusCodes.Status404NotFound);
-    }
-    else
-    {
+        }
+        else
+        {
         @:.WithName("@getModelById");
+        }
     }
-}
 
-        routes.MapPut("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
+        group.MapPut("/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
             var foundModel = await db.@findModel;
 
             if (foundModel is null)
             {
-                return Results.NotFound();
+                return @resultsNotFound;
             }
             //update model properties here
 
             await db.SaveChangesAsync();
 
-            return Results.NoContent();
+            return @resultsNoContent;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI)
+        {
         @:.WithTags(nameof(@modelName))
         @:.WithName("@updateModel")
         @:.Produces(StatusCodes.Status404NotFound)
         @:.Produces(StatusCodes.Status204NoContent);
-    }
-    else
-    {
+        }
+        else
+        {
         @:.WithName("@updateModel");
+        }
     }
-}
 
-        routes.MapPost("@routePrefix/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
+        group.MapPost("/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
         {
             db.@add;
             await db.SaveChangesAsync();
-            return Results.Created($"/@pluralModel/{@Model.ModelVariable.@primaryKeyName}", @Model.ModelVariable);
+            return @resultsCreated;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI)
+        {
         @:.WithTags(nameof(@modelName))
         @:.WithName("@createModel")
         @:.Produces<@modelName>(StatusCodes.Status201Created);
-    }
-    else
-    {
+        }
+        else
+        {
         @:.WithName("@createModel");
+        }
     }
-}
 
-        routes.MapDelete("@routePrefix/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        group.MapDelete("/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
         {
             if (await db.@findModel is @modelName @Model.ModelVariable)
             {
                 db.@remove;
                 await db.SaveChangesAsync();
-                return Results.Ok(@Model.ModelVariable);
+                return @resultsOkModelVariable;
             }
 
-            return Results.NotFound();
+            return @resultsNotFound;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI)
+        {
         @:.WithTags(nameof(@modelName))
         @:.WithName("@deleteModel")
         @:.Produces<@modelName>(StatusCodes.Status200OK)
         @:.Produces(StatusCodes.Status404NotFound);
-    }
-    else
-    {
+        }
+        else
+        {
         @:.WithName("@deleteModel");
+        }
     }
-}
     }
 }

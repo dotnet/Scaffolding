@@ -12,11 +12,13 @@
     string deleteModel = $"Delete{@modelName}";
     string createModel = $"Create{@modelName}";
     string updateModel = $"Update{@modelName}";
+    string resultsExtension = (Model.OpenAPI ? "TypedResults" : "Results") + ".NoContent()";
 }
  
-    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
+   public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-        routes.MapGet("@routePrefix", () =>
+        var group = routes.MapGroup("@routePrefix");
+        group.MapGet("/", () =>
         {
             return new [] { new @modelConstructor };
         })
@@ -33,7 +35,7 @@
     }
     }
 
-        routes.MapGet("@routePrefix/{id}", (int id) =>
+        group.MapGet("/{id}", (int id) =>
         {
             //return new @modelName { ID = id };
         })
@@ -50,9 +52,9 @@
     }
     }
 
-        routes.MapPut("@routePrefix/{id}", (int id, @modelName input) =>
+        group.MapPut("/{id}", (int id, @modelName input) =>
         {
-            return Results.NoContent();
+            return @resultsExtension;
         })
     @{
     if(Model.OpenAPI)
@@ -67,7 +69,7 @@
     }
     }
 
-        routes.MapPost("@routePrefix/", (@modelName model) =>
+        group.MapPost("/", (@modelName model) =>
         {
             //return Results.Created($"/@pluralModel/{model.ID}", model);
         })
@@ -84,7 +86,7 @@
     }
     }
 
-        routes.MapDelete("@routePrefix/{id}", (int id) =>
+        group.MapDelete("/{id}", (int id) =>
         {
             //return Results.Ok(new @modelName { ID = id });
         })

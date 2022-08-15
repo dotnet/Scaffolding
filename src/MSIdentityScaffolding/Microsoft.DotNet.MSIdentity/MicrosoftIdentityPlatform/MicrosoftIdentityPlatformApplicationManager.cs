@@ -100,7 +100,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 && createdApplication.Api != null
                 && (createdApplication.IdentifierUris == null || !createdApplication.IdentifierUris.Any()))
             {
-                await ExposeScopesForNewWebApi(graphServiceClient, createdApplication);
+                if (applicationParameters.IsB2C)
+                {
+                    await ExposeScopesForNewB2CWebApi(graphServiceClient, createdApplication, applicationParameters);
+                }
+                else
+                {
+                    await ExposeScopesForNewWebApi(graphServiceClient, createdApplication);
+                }
 
                 // Re-reading the app to be sure to have everything.
                 createdApplication = (await graphServiceClient.Applications
@@ -532,12 +539,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="graphEntityId"></param>
         /// <param name="scopes">existing scopes</param>
         /// <returns>Identifier URI for exposed scope</returns>
-        internal static async Task<string> ExposeScopes(GraphServiceClient graphServiceClient, string? appId, string? graphEntityId, List<PermissionScope>? scopes = null)
+        internal static async Task ExposeScopes(GraphServiceClient graphServiceClient, string? scopeIdentifier, string? graphEntityId, List<PermissionScope>? scopes = null)
         {
-            var scope = $"api://{appId}";
             var updatedApp = new Application
             {
-                IdentifierUris = new[] { scope }
+                IdentifierUris = new[] { scopeIdentifier }
             };
 
             scopes ??= new List<PermissionScope>();
@@ -558,8 +564,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             await graphServiceClient.Applications[graphEntityId]
                 .Request()
                 .UpdateAsync(updatedApp);
-
-            return scope;
         }
 
         /// <summary>
@@ -570,8 +574,25 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns></returns>
         internal static async Task ExposeScopesForNewWebApi(GraphServiceClient graphServiceClient, Application createdApplication)
         {
+            var scopeName = $"api://{createdApplication.Id}";
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
-            await ExposeScopes(graphServiceClient, createdApplication.AppId, createdApplication.Id, scopes);
+            await ExposeScopes(graphServiceClient, createdApplication.AppId, scopeName, scopes);
+        }
+
+        /// <summary>
+        /// Expose scopes for the B2C API.
+        /// </summary>
+        /// <param name="graphServiceClient"></param>
+        /// <param name="createdApplication"></param>
+        /// <returns></returns>
+        internal static async Task ExposeScopesForNewB2CWebApi(GraphServiceClient graphServiceClient, Application createdApplication, ApplicationParameters applicationParameters)
+        {
+            var b2cScopes = applicationParameters.CalledApiScopes;
+            if (!string.IsNullOrEmpty(b2cScopes))
+            {
+                var scopeId = b2cScopes[..b2cScopes.LastIndexOf('/')];
+                await ExposeScopes(graphServiceClient, scopeId, createdApplication.Id);
+            }
         }
 
         /// <summary>
@@ -641,7 +662,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // Microsoft Graph shortcut scopes (for instance "User.Read")
                 ? new ResourceAndScope("https://graph.microsoft.com", s)
                 // Proper AppIdUri/scope
-                : new ResourceAndScope(s.Substring(0, s.LastIndexOf('/')), s[(s.LastIndexOf('/') + 1)..])
+                : new ResourceAndScope(s[..s.LastIndexOf('/')], s[(s.LastIndexOf('/') + 1)..])
                 ).GroupBy(r => r.Resource)
                 .ToArray(); // We want to modify these elements to cache the service principal ID
 

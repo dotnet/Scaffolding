@@ -288,7 +288,8 @@ namespace Microsoft.DotNet.MSIdentity
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
                     // TODO test with B2C
-                    applicationParameters.AppIdUri = await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.ClientId, applicationParameters.GraphEntityId);
+                    applicationParameters.AppIdUri = $"api://{applicationParameters.ClientId}";
+                    await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.AppIdUri, applicationParameters.GraphEntityId);
                 }
 
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);

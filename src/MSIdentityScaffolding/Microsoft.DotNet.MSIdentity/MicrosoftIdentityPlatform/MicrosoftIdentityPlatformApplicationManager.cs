@@ -603,11 +603,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         Scope = string.Join(" ", resourceAndScopes.Select(r => r.Scope))
                     };
 
-                    // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9. 
-                    // We need to process the case where the developer is not a tenant admin
-                    await graphServiceClient.Oauth2PermissionGrants
+                    // TODO: check if the permissions are already there
+                    var existingPermissionGrants = (await graphServiceClient.Oauth2PermissionGrants
                         .Request()
-                        .AddAsync(oAuth2PermissionGrant);
+                        .GetAsync());
+                    if (!existingPermissionGrants.ToArray().Any(p => p.Equals(oAuth2PermissionGrant)))
+                    {
+                        // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9. 
+                        // We need to process the case where the developer is not a tenant admin
+                        await graphServiceClient.Oauth2PermissionGrants
+                            .Request()
+                            .AddAsync(oAuth2PermissionGrant);
+                    }
                 }
             }
         }

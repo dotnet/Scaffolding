@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption()
+                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption(), ApiScopesOption()
             };
 
         internal static Command CreateAppRegistrationCommand() =>
@@ -385,7 +385,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ApiScopes() =>
+        private static Option ApiScopesOption() =>
             new Option<string>(
                 aliases: new[] { "--api-scopes" },
                 description: "Scopes for the called downstream API, especially useful for B2C scenarios where permissions must be granted manually\n")

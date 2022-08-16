@@ -82,9 +82,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (applicationParameters.IsB2C) // TODO need to have admin permissions for the downstream API
             {
-                var calledApiScopes = applicationParameters.CalledApiScopes;
+                // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
+                string apiScopes = GetApiScopes(applicationParameters);
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
-                    calledApiScopes,
+                    apiScopes,
                     graphServiceClient,
                     application).ConfigureAwait(false);
 
@@ -142,6 +143,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return effectiveApplicationParameters;
         }
 
+        private static string GetApiScopes(ApplicationParameters applicationParameters)
+        {
+            var apiScopes = applicationParameters.CalledApiScopes ?? string.Empty;
+            if (!apiScopes.Contains("openid"))
+            {
+                apiScopes += " openid";
+            }
+            if (!apiScopes.Contains("offline_access"))
+            {
+                apiScopes += " offline_access";
+            }
+
+            return apiScopes.Trim();
+        }
+
         private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient)
         {
             Organization? tenant = null;
@@ -197,7 +213,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
-            // TODO: Add if it's B2C, acquire or create the SUSI Policy
+            
             var remoteApp = (await graphServiceClient.Applications.Request()
                 .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
@@ -209,8 +225,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (parameters.IsB2C) // TODO need to have admin permissions for the downstream API
+            if (parameters.IsB2C && parameters.CallsDownstreamApi) // TODO need to have admin permissions for the downstream API
             {
+                // TODO: Add if it's B2C, acquire or create the SUSI Policy
                 needsUpdates = true;
                 var calledApiScopes = toolOptions.ApiScopes; // TODO bring this variable back.
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
@@ -257,14 +274,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     AppId = clientId,
                 };
 
-                await graphServiceClient.ServicePrincipals
+                servicePrincipal = await graphServiceClient.ServicePrincipals
                     .Request()
-                    .AddAsync(sp).ConfigureAwait(false);
-
-                servicePrincipal = (await graphServiceClient.ServicePrincipals
-                    .Request()
-                    .Filter($"appId eq '{clientId}'")
-                    .GetAsync()).FirstOrDefault();
+                    .AddAsync(sp);
             }
 
             return servicePrincipal;
@@ -639,12 +651,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="graphServiceClient"></param>
         /// <param name="application"></param>
         /// <returns></returns>
-        private async Task<IEnumerable<IGrouping<string, ResourceAndScope>>?> AddApiPermissions(
+        private static async Task<IEnumerable<IGrouping<string, ResourceAndScope>>?> AddApiPermissions(
             string? calledApiScopes,
             GraphServiceClient graphServiceClient,
             Application application)
         {
-            Debugger.Launch();
             // Case where the app calls a downstream API
             var apiRequests =  application.RequiredResourceAccess ?? new List<RequiredResourceAccess>();
 
@@ -713,23 +724,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // Logout URI
             application.Web.LogoutUrl = applicationParameters.LogoutUrl;
-
-            // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
-            if (applicationParameters.IsB2C &&
-                (applicationParameters.IsWebApp.GetValueOrDefault() || applicationParameters.IsBlazorWasm))
-            {
-                applicationParameters.CalledApiScopes ??= string.Empty;
-                if (!applicationParameters.CalledApiScopes.Contains("openid"))
-                {
-                    applicationParameters.CalledApiScopes += " openid";
-                }
-                if (!applicationParameters.CalledApiScopes.Contains("offline_access"))
-                {
-                    applicationParameters.CalledApiScopes += " offline_access";
-                }
-
-                applicationParameters.CalledApiScopes = applicationParameters.CalledApiScopes.Trim();
-            }
         }
 
         /// <summary>
@@ -739,7 +733,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="apiRequests"></param>
         /// <param name="g"></param>
         /// <returns></returns>
-        private async Task<RequiredResourceAccess> AddPermission(
+        private static async Task<RequiredResourceAccess?> AddPermission(
             GraphServiceClient graphServiceClient,
             IGrouping<string, ResourceAndScope> g)
         {
@@ -761,7 +755,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (spWithScopes == null)
             {
-                throw new ArgumentException($"Service principal named {g.Key} not found.", nameof(g));
+                //throw new ArgumentException($"Service principal named {g.Key} not found.", nameof(g));
+                // TODO: Add to output: Warning could not find service principal
+                return null;
             }
 
             // Keep the service principal ID for later

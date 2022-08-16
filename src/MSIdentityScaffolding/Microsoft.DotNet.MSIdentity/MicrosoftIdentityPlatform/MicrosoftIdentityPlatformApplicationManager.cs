@@ -96,9 +96,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI, 
             // and therefore we need to do it after the app is created (updating the app)
-            if (applicationParameters.IsWebApi.GetValueOrDefault()
-                && createdApplication.Api != null
-                && (createdApplication.IdentifierUris == null || !createdApplication.IdentifierUris.Any()))
+            if (applicationParameters.IsWebApi.GetValueOrDefault() && createdApplication.Api != null)
             {
                 if (applicationParameters.IsB2C)
                 {
@@ -587,12 +585,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns></returns>
         internal static async Task ExposeScopesForNewB2CWebApi(GraphServiceClient graphServiceClient, Application createdApplication, ApplicationParameters applicationParameters)
         {
-            var b2cScopes = applicationParameters.CalledApiScopes;
-            if (!string.IsNullOrEmpty(b2cScopes))
-            {
-                var scopeId = b2cScopes[..b2cScopes.LastIndexOf('/')];
-                await ExposeScopes(graphServiceClient, scopeId, createdApplication.Id);
-            }
+            var b2cAppIdUri = $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}";
+            await ExposeScopes(graphServiceClient, b2cAppIdUri, createdApplication.Id);
         }
 
         /// <summary>

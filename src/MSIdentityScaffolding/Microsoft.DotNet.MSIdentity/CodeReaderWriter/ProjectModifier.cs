@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -44,6 +45,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <returns></returns>
         public async Task AddAuthCodeAsync()
         {
+            Debugger.Launch();
             if (string.IsNullOrEmpty(_toolOptions.ProjectFilePath))
             {
                 var csProjFiles = _files.Where(file => file.EndsWith(".csproj"));

@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             // Initialize CodeAnalysis.Project wrapper
-            CodeAnalysis.Project project = await CodeAnalysisHelper.LoadCodeAnalysisProjectAsync(_toolOptions.ProjectFilePath, _files);
+            CodeAnalysis.Project project = CodeAnalysisHelper.LoadCodeAnalysisProject(_toolOptions.ProjectFilePath, _files);
             if (project is null)
             {
                 return;
@@ -228,8 +228,8 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 file.FileName = await ProjectModifierHelper.GetStartupClass(project.Documents.ToList()) ?? file.FileName;
             }
 
-            var fileDoc = project.Documents.Where(d => d.Name.Equals(file.FileName)).FirstOrDefault();
-            if (fileDoc is null || string.IsNullOrEmpty(fileDoc.FilePath))
+            var fileDoc = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
+            if (fileDoc is null || string.IsNullOrEmpty(fileDoc.Name))
             {
                 return;
             }
@@ -246,7 +246,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (modifiedRoot != null)
             {
                 documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
-                await documentBuilder.WriteToClassFileAsync(fileDoc.FilePath);
+                await documentBuilder.WriteToClassFileAsync(fileDoc.Name);
                 _output.AppendLine($"Modified {file.FileName}"); // TODO strings.
             }
         }

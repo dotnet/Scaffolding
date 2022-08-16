@@ -110,6 +110,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     requiredNamespaces.Add(DbContextNamespace);
                 }
 
+                if (OpenAPI)
+                {
+                    requiredNamespaces.Add("Microsoft.AspNetCore.Http.HttpResults");
+                }
+
                 // Finally we remove the ControllerNamespace as it's not required.
                 requiredNamespaces.Remove(EndpointsNamespace);
                 return new HashSet<string>(requiredNamespaces);

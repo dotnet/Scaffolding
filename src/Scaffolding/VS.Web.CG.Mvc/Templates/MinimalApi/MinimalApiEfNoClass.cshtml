@@ -20,6 +20,8 @@
     var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
     string resultsExtension = Model.OpenAPI ? "TypedResults" : "Results";
+    string typedTaskWithNotFound = Model.OpenAPI ? $"Task<Results<Ok<{@modelName}>, NotFound>>" : "";
+    string typedTaskWithNoContent = Model.OpenAPI ? $"Task<Results<NotFound, NoContent>>" : "";
     string resultsNotFound = $"{resultsExtension}.NotFound()";
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
@@ -47,7 +49,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     }
 }
 
-        group.MapGet("/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
         {
             return await db.@findModel
                 is @modelName model
@@ -68,7 +70,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     }
 }
 
-        group.MapPut("/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
+        group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
             var foundModel = await db.@findModel;
 
@@ -115,7 +117,7 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     }
 }
 
-        group.MapDelete("/{id}", async (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
         {
             if (await db.@findModel is @modelName @Model.ModelVariable)
             {

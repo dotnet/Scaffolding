@@ -158,6 +158,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         usings.Add(templateModel.DbContextNamespace);
                     }
 
+                    if (templateModel.OpenAPI)
+                    {
+                        usings.Add("Microsoft.AspNetCore.Http.HttpResults");
+                    }
+
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray()};
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());

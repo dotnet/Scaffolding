@@ -309,7 +309,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-
         private static Option CodeUpdateOption() =>
             new Option<bool>(
                 aliases: new[] { "--code-update" },
@@ -393,7 +392,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-
         private static Option HostedAppIdUriOption() =>
             new Option<string>(
                 aliases: new[] { "--hosted-app-id-uri" },
@@ -410,6 +408,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             {
                 IsRequired = false
             };
+
         private static Option SusiPolicyIdOption() =>
             new Option<string>(
                 aliases: new[] { "--susi-policy-id" },
@@ -417,6 +416,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             {
                 IsRequired = false
             };
+
         private static Option TenantOption() =>
             new Option<string>(
                 aliases: new[] { "-t", "--tenant-id" },

@@ -22,11 +22,6 @@ variables:
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-AspNet-SDLValidation-Params
 
-resources:
-  containers:
-  - container: LinuxContainer
-    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
-
 stages:
 - stage: build
   displayName: Build
@@ -47,9 +42,9 @@ stages:
           # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
           # Will eventually change this to two BYOC pools.
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-            name: Hosted VS2017
+            name: NetCore1ESPool-Public
           ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCore1ESPool-Svc-Internal
+            name: NetCore1ESPool-Internal
             demands: ImageOverride -equals Build.windows.10.amd64.vs2017
 
         variables:
@@ -108,46 +103,50 @@ stages:
             $(_ValidateSdkArgs)
           displayName: Windows Build / Publish
 
-      - job: OSX
-        pool:
-          name: Hosted macOS
-        strategy:
-          matrix:
-            release_configuration:
-              _BuildConfig: Release
-            ${{ if eq(variables['System.TeamProject'], 'public') }}:
-              debug_configuration:
-                _BuildConfig: Debug
-        steps:
-        - checkout: self
-          clean: true
-        - script: eng/common/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-          name: Build
-          displayName: Build
-          condition: succeeded()
-          
-      - job: Linux
-        pool:
-          vmImage: ubuntu-18.04
-        container: LinuxContainer
-        strategy:
-          matrix:
-            release_configuration:
-              _BuildConfig: Release
-            ${{ if eq(variables['System.TeamProject'], 'public') }}:
-              debug_configuration:
-                _BuildConfig: Debug
-        steps:
-        - checkout: self
-          clean: true
-        - script: eng/common/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-          name: Build
-          displayName: Build
-          condition: succeeded()
+      - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        - job: OSX
+          pool:
+            vmImage: macOS-11
+          strategy:
+            matrix:
+              release_configuration:
+                _BuildConfig: Release
+              ${{ if eq(variables['System.TeamProject'], 'public') }}:
+                debug_configuration:
+                  _BuildConfig: Debug
+          steps:
+          - checkout: self
+            clean: true
+          - script: eng/common/cibuild.sh
+              --configuration $(_BuildConfig)
+              --prepareMachine
+            name: Build
+            displayName: Build
+            condition: succeeded()
+
+        - job: Linux
+          pool:
+            ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
+              vmImage: ubuntu-18.04
+            ${{ if and(eq(variables['System.TeamProject'], 'internal'), notin(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
+              name: NetCore1ESPool-Internal
+              demands: ImageOverride -equals Build.Ubuntu.1804.Amd64
+          strategy:
+            matrix:
+              release_configuration:
+                _BuildConfig: Release
+              ${{ if eq(variables['System.TeamProject'], 'public') }}:
+                debug_configuration:
+                  _BuildConfig: Debug
+          steps:
+          - checkout: self
+            clean: true
+          - script: eng/common/cibuild.sh
+              --configuration $(_BuildConfig)
+              --prepareMachine
+            name: Build
+            displayName: Build
+            condition: succeeded()
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml

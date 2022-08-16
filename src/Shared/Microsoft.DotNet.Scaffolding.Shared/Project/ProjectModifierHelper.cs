@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 
@@ -497,12 +495,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         internal static async Task<string> UpdateDocument(Document document)
         {
-            Debugger.Launch();
             var classFileTxt = await document.GetTextAsync();
-
-            // Note: For files without .cs extension, document.Name is the full filepath
-            var filePath = document.Name.EndsWith(".cs") ? document.FilePath : document.Name;
-            File.WriteAllText(filePath, classFileTxt.ToString(), new UTF8Encoding(false));
+            File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
 
             return $"Modified {document.Name}.\n"; // todo strings.
         }

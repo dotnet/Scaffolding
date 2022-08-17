@@ -74,18 +74,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 AppId = createdApplication.AppId,
             };
 
-            ServicePrincipal? createdServicePrincipal = await graphServiceClient.ServicePrincipals
+            await graphServiceClient.ServicePrincipals
                 .Request()
                 .AddAsync(servicePrincipal).ConfigureAwait(false);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (applicationParameters.IsB2C) 
             {
-                string apiScopes = GetApiScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
-                await AddDownstreamApiPermissions(applicationParameters, apiScopes, graphServiceClient, application);
+                string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
+                await AddDownstreamApiPermissions(createdApplication.AppId, scopes, graphServiceClient, application);
             }
 
-            // For web API, we need to know the appId of the created app to compute the Identifier URI, 
+            // For web API, we need to know the appId of the created app to compute the Identifier URI,
             // and therefore we need to do it after the app is created (updating the app)
             if (applicationParameters.IsWebApi.GetValueOrDefault() && createdApplication.Api != null)
             {
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return effectiveApplicationParameters;
         }
 
-        private static string GetApiScopes(ApplicationParameters applicationParameters)
+        private static string GetMsGraphScopes(ApplicationParameters applicationParameters)
         {
             var apiScopes = applicationParameters.CalledApiScopes ?? string.Empty;
             if (!apiScopes.Contains("openid"))
@@ -196,7 +196,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
-
             var remoteApp = (await graphServiceClient.Applications.Request()
                 .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
@@ -208,10 +207,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (parameters.IsB2C && parameters.CallsDownstreamApi) // TODO need to have admin permissions for the downstream API
+            if (parameters.IsB2C && parameters.CallsDownstreamApi)
             {
                 // TODO: Add if it's B2C, acquire or create the SUSI Policy
-                await AddDownstreamApiPermissions(parameters, toolOptions.ApiScopes, graphServiceClient, appUpdates);
+                await AddDownstreamApiPermissions(parameters.ClientId, toolOptions.ApiScopes, graphServiceClient, appUpdates);
                 needsUpdates = true;
             }
 
@@ -232,7 +231,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
         }
 
-        internal static async Task AddDownstreamApiPermissions(ApplicationParameters parameters, string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates)
+        internal static async Task AddDownstreamApiPermissions(string? clientId, string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates)
         {
             IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                 apiScopes,
@@ -240,10 +239,15 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 appUpdates).ConfigureAwait(false);
 
             // TODO need to have admin permissions for the downstream API
-            ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
+            ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, clientId);
+            if (servicePrincipal == null)
+            {
+                throw new ArgumentNullException(nameof(servicePrincipal));
+            }
+
             await AddAdminConsentToApiPermissions(
                 graphServiceClient,
-                servicePrincipal!, // TODO error catch
+                servicePrincipal,
                 scopesPerResource);
         }
 
@@ -253,6 +257,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                                 .Request()
                                 .Filter($"appId eq '{clientId}'")
                                 .GetAsync()).FirstOrDefault();
+
             if (servicePrincipal is null)
             {
                 // Create service principal, necessary for Web API applications
@@ -439,56 +444,55 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return needsUpdate;
         }
 
-        private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
-            GraphServiceClient graphServiceClient,
-            Application createdApplication,
-            ServicePrincipal? createdServicePrincipal,
-            bool isB2C)
-        {
-            if (createdServicePrincipal is null)
-            {
-                throw new ArgumentNullException(nameof(createdServicePrincipal));
-            }
+        //private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
+        //    GraphServiceClient graphServiceClient,
+        //    Application createdApplication,
+        //    ServicePrincipal? createdServicePrincipal,
+        //    bool isB2C)
+        //{
+        //    if (createdServicePrincipal is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(createdServicePrincipal));
+        //    }
 
-            var requiredResourceAccess = new List<RequiredResourceAccess>();
-            var resourcesAccessAndScopes = new List<ResourceAndScope>
-                {
-                    new ResourceAndScope($"api://{createdApplication.AppId}", DefaultProperties.ApiScopes)
-                    {
-                         ResourceServicePrincipalId = createdServicePrincipal.Id
-                    }
-                };
+        //    var requiredResourceAccess = new List<RequiredResourceAccess>();
+        //    var resourcesAccessAndScopes = new List<ResourceAndScope>
+        //        {
+        //            new ResourceAndScope($"api://{createdApplication.AppId}", DefaultProperties.ApiScopes)
+        //            {
+        //                 ResourceServicePrincipalId = createdServicePrincipal.Id
+        //            }
+        //        };
 
-            //await AddPermission(
-            //    graphServiceClient,
-            //    requiredResourceAccess,
-            //    resourcesAccessAndScopes.GroupBy(r => r.Resource).First()).ConfigureAwait(false);
+        //    await AddPermission(
+        //        graphServiceClient,
+        //        resourcesAccessAndScopes.GroupBy(r => r.Resource).First()).ConfigureAwait(false);
 
-            Application applicationToUpdate = new Application
-            {
-                RequiredResourceAccess = requiredResourceAccess
-            };
+        //    Application applicationToUpdate = new Application
+        //    {
+        //        RequiredResourceAccess = requiredResourceAccess
+        //    };
 
-            await graphServiceClient.Applications[createdApplication.Id]
-                .Request()
-                .UpdateAsync(applicationToUpdate).ConfigureAwait(false);
+        //    await graphServiceClient.Applications[createdApplication.Id]
+        //        .Request()
+        //        .UpdateAsync(applicationToUpdate).ConfigureAwait(false);
 
-            if (isB2C)
-            {
-                var oAuth2PermissionGrant = new OAuth2PermissionGrant
-                {
-                    ClientId = createdServicePrincipal.Id,
-                    ConsentType = "AllPrincipals",
-                    PrincipalId = null,
-                    ResourceId = createdServicePrincipal.Id,
-                    Scope = DefaultProperties.ApiScopes
-                };
+        //    if (isB2C)
+        //    {
+        //        var oAuth2PermissionGrant = new OAuth2PermissionGrant
+        //        {
+        //            ClientId = createdServicePrincipal.Id,
+        //            ConsentType = "AllPrincipals",
+        //            PrincipalId = null,
+        //            ResourceId = createdServicePrincipal.Id,
+        //            Scope = DefaultProperties.ApiScopes
+        //        };
 
-                await graphServiceClient.Oauth2PermissionGrants
-                    .Request()
-                    .AddAsync(oAuth2PermissionGrant).ConfigureAwait(false);
-            }
-        }
+        //        await graphServiceClient.Oauth2PermissionGrants
+        //            .Request()
+        //            .AddAsync(oAuth2PermissionGrant).ConfigureAwait(false);
+        //    }
+        //}
 
         /// <summary>
         /// Add a password credential to the app
@@ -574,7 +578,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
             var scopeName = applicationParameters.IsB2C ? $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}" : $"api://{createdApplication.Id}";
-            await ExposeScopes(graphServiceClient, scopeName, createdApplication.AppId, scopes);
+            await ExposeScopes(graphServiceClient, scopeName, createdApplication.Id, scopes);
         }
 
         /// <summary>
@@ -731,7 +735,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (spWithScopes == null)
             {
-                //throw new ArgumentException($"Service principal named {g.Key} not found.", nameof(g));
+                // Throw new ArgumentException($"Service principal named {g.Key} not found.", nameof(g));
                 // TODO: Add to output: Warning could not find service principal
                 return null;
             }
@@ -892,7 +896,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 TenantId = tenant.Id,
                 Domain = tenant.VerifiedDomains.FirstOrDefault(v => v.IsDefault.GetValueOrDefault())?.Name,
                 CallsMicrosoftGraph = application.RequiredResourceAccess.Any(r => r.ResourceAppId == MicrosoftGraphAppId) && !isB2C,
-                CallsDownstreamApi = application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
+                CallsDownstreamApi = originalApplicationParameters.CallsDownstreamApi || application.RequiredResourceAccess.Any(r => r.ResourceAppId != MicrosoftGraphAppId),
                 LogoutUrl = application.Web?.LogoutUrl,
                 GraphEntityId = application.Id,
 

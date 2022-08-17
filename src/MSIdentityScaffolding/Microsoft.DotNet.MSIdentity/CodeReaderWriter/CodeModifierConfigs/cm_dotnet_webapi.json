@@ -5,15 +5,6 @@
       "FileName": "Startup.cs",
       "Options": [ "NonMinimalApp" ],
       "Methods": {
-        "Configure": {
-          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
-          "CodeChanges": [
-            {
-              "InsertAfter": "IApplicationBuilder.UseRouting",
-              "Block": "IApplicationBuilder.UseAuthentication()"
-            }
-          ]
-        },
         "ConfigureServices": {
           "Parameters": [ "IServiceCollection" ],
           "CodeChanges": [
@@ -100,13 +91,6 @@
                 "NumberOfSpaces": 12,
                 "Newline": true
               }
-            },
-            {
-              "Block": "app.UseAuthentication()",
-              "InsertBefore": [ "app.UseAuthorization" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
             }
           ]
         }
@@ -138,20 +122,7 @@
           "Options": [ "DownstreamApi" ]
         }
       ],
-      "Methods": {
-        "Configure": {
-          "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
-          "CodeChanges": [
-            {
-              "InsertAfter": "IApplicationBuilder.UseRouting",
-              "Block": "IApplicationBuilder.UseAuthentication()",
-              "LeadingTrivia": {
-                "NumberOfSpaces": 12,
-                "Newline": true
-              }
-            }
-          ]
-        },
+      "Methods": {,
         "WeatherForecastController": {
           "Parameters": [ "ILogger<WeatherForecastController>" ],
           "AddParameters" : [ 

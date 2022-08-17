@@ -132,15 +132,8 @@
               }
             },
             {
-              "Block": "app.UseAuthentication()",
-              "InsertAfter": "app.UseRouting()",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
               "Block": "app.UseAuthorization()",
-              "InsertAfter": "app.UseAuthentication()",
+              "InsertAfter": "app.UseRouting()",
               "LeadingTrivia": {
                 "Newline": true
               }

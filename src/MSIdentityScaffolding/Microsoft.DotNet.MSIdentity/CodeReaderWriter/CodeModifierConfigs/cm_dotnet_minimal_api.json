@@ -76,15 +76,8 @@
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddAuthentication"
             },
             {
-              "Block": "app.UseAuthentication()",
-              "InsertAfter": "app.UseHttpsRedirection",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
               "Block": "app.UseAuthorization()",
-              "InsertAfter": "app.UseAuthentication"
+              "InsertAfter": "app.UseHttpsRedirection"
             },
             {
               "Block": "var scopeRequiredByApi = app.Configuration[\"AzureAd:Scopes\"]",

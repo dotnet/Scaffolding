@@ -9,10 +9,6 @@
           "Parameters": [ "IApplicationBuilder", "IWebHostEnvironment" ],
           "CodeChanges": [
             {
-              "InsertAfter": "IApplicationBuilder.UseRouting()",
-              "Block": "IApplicationBuilder.UseAuthentication()"
-            },
-            {
               "Parent": "IApplicationBuilder.UseEndpoints",
               "Parameter": "endpoints",
               "CodeChangeType": "Lambda",
@@ -160,13 +156,6 @@
               {
                 "Newline":true, 
                 "NumberOfSpaces": 4
-              }
-            },
-            {
-              "InsertAfter": "app.UseRouting",
-              "Block": "app.UseAuthentication()",
-              "LeadingTrivia": {
-                "Newline": true
               }
             },
             {

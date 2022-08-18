@@ -129,11 +129,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         private static string GetMsGraphScopes(ApplicationParameters applicationParameters)
         {
             var apiScopes = applicationParameters.CalledApiScopes ?? string.Empty;
-            if (!apiScopes.Contains("openid"))
+            if (!apiScopes.Contains("openid", StringComparison.OrdinalIgnoreCase))
             {
                 apiScopes += " openid";
             }
-            if (!apiScopes.Contains("offline_access"))
+            if (!apiScopes.Contains("offline_access", StringComparison.OrdinalIgnoreCase))
             {
                 apiScopes += " offline_access";
             }
@@ -443,56 +443,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             return needsUpdate;
         }
-
-        //private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
-        //    GraphServiceClient graphServiceClient,
-        //    Application createdApplication,
-        //    ServicePrincipal? createdServicePrincipal,
-        //    bool isB2C)
-        //{
-        //    if (createdServicePrincipal is null)
-        //    {
-        //        throw new ArgumentNullException(nameof(createdServicePrincipal));
-        //    }
-
-        //    var requiredResourceAccess = new List<RequiredResourceAccess>();
-        //    var resourcesAccessAndScopes = new List<ResourceAndScope>
-        //        {
-        //            new ResourceAndScope($"api://{createdApplication.AppId}", DefaultProperties.ApiScopes)
-        //            {
-        //                 ResourceServicePrincipalId = createdServicePrincipal.Id
-        //            }
-        //        };
-
-        //    await AddPermission(
-        //        graphServiceClient,
-        //        resourcesAccessAndScopes.GroupBy(r => r.Resource).First()).ConfigureAwait(false);
-
-        //    Application applicationToUpdate = new Application
-        //    {
-        //        RequiredResourceAccess = requiredResourceAccess
-        //    };
-
-        //    await graphServiceClient.Applications[createdApplication.Id]
-        //        .Request()
-        //        .UpdateAsync(applicationToUpdate).ConfigureAwait(false);
-
-        //    if (isB2C)
-        //    {
-        //        var oAuth2PermissionGrant = new OAuth2PermissionGrant
-        //        {
-        //            ClientId = createdServicePrincipal.Id,
-        //            ConsentType = "AllPrincipals",
-        //            PrincipalId = null,
-        //            ResourceId = createdServicePrincipal.Id,
-        //            Scope = DefaultProperties.ApiScopes
-        //        };
-
-        //        await graphServiceClient.Oauth2PermissionGrants
-        //            .Request()
-        //            .AddAsync(oAuth2PermissionGrant).ConfigureAwait(false);
-        //    }
-        //}
 
         /// <summary>
         /// Add a password credential to the app

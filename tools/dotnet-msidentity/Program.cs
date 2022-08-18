@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption()
+                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption(), ApiScopesOption()
             };
 
         internal static Command CreateAppRegistrationCommand() =>
@@ -309,7 +309,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-
         private static Option CodeUpdateOption() =>
             new Option<bool>(
                 aliases: new[] { "--code-update" },
@@ -385,6 +384,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
+        private static Option ApiScopesOption() =>
+            new Option<string>(
+                aliases: new[] { "--api-scopes" },
+                description: "Scopes for the called downstream API, especially useful for B2C scenarios where permissions must be granted manually\n")
+            {
+                IsRequired = false
+            };
+
         private static Option HostedAppIdUriOption() =>
             new Option<string>(
                 aliases: new[] { "--hosted-app-id-uri" },
@@ -401,6 +408,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             {
                 IsRequired = false
             };
+
         private static Option SusiPolicyIdOption() =>
             new Option<string>(
                 aliases: new[] { "--susi-policy-id" },
@@ -408,6 +416,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             {
                 IsRequired = false
             };
+
         private static Option TenantOption() =>
             new Option<string>(
                 aliases: new[] { "-t", "--tenant-id" },

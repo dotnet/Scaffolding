@@ -50,6 +50,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public bool IsBlazorWasm;
         public bool IsWebApi;
         public bool IsB2C;
+        public bool HasClientSecret;
 
         public string? ClientId;
         public string? Instance;
@@ -72,6 +73,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             IsBlazorWasm = applicationParameters.IsBlazorWasm;
             IsWebApi = applicationParameters.IsWebApi.GetValueOrDefault();
             IsB2C = applicationParameters.IsB2C;
+            HasClientSecret = applicationParameters.CallsDownstreamApi || applicationParameters.CallsMicrosoftGraph;
 
             Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : existingBlock?.GetValue(PropertyNames.Domain)?.ToString() ?? DefaultProperties.Domain;
             TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : existingBlock?.GetValue(PropertyNames.TenantId)?.ToString() ?? DefaultProperties.TenantId;
@@ -110,9 +112,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             TenantId = TenantId ?? DefaultProperties.TenantId,
             ClientId = ClientId ?? DefaultProperties.ClientId,
             CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath,
-            Scopes = Scopes ?? DefaultProperties.ApiScopes,
-            ClientSecret = ClientSecret ?? DefaultProperties.ClientSecret,
-            ClientCertificates = ClientCertificates ?? Array.Empty<string>()
+            Scopes = Scopes ?? DefaultProperties.ApiScopes
         };
 
         public dynamic B2CSettings => new
@@ -122,6 +122,12 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             ResetPasswordPolicyId = ResetPasswordPolicyId ?? DefaultProperties.ResetPasswordPolicyId,
             EditProfilePolicyId = EditProfilePolicyId ?? DefaultProperties.EditProfilePolicyId,
             EnablePiiLogging = true
+        };
+
+        public dynamic DownstreamApiSettings => new
+        {
+            ClientSecret = ClientSecret ?? DefaultProperties.ClientSecret,
+            ClientCertificates = ClientCertificates ?? Array.Empty<string>()
         };
 
         public JObject ToJObject()
@@ -136,6 +142,11 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             if (IsB2C)
             {
                 jObject.Merge(JObject.FromObject(B2CSettings));
+            }
+
+            if (HasClientSecret)
+            {
+                jObject.Merge(JObject.FromObject(DownstreamApiSettings));
             }
 
             return jObject;

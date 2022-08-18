@@ -197,6 +197,7 @@ namespace Microsoft.DotNet.MSIdentity
             projectSettings.ApplicationParameters.CalledApiScopes = !string.IsNullOrEmpty(provisioningToolOptions.HostedApiScopes) ? provisioningToolOptions.HostedApiScopes : projectSettings.ApplicationParameters.CalledApiScopes;
             projectSettings.ApplicationParameters.IsBlazorWasm = provisioningToolOptions.IsBlazorWasm;
             projectSettings.ApplicationParameters.WebRedirectUris.AddRange(ProvisioningToolOptions.RedirectUris);
+            projectSettings.ApplicationParameters.CallsDownstreamApi = provisioningToolOptions.CallsDownstreamApi || !string.IsNullOrEmpty(provisioningToolOptions.ApiScopes);
 
             // there can multiple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
@@ -286,7 +287,9 @@ namespace Microsoft.DotNet.MSIdentity
                 if (string.IsNullOrEmpty(applicationParameters.AppIdUri)) // Expose server API scopes
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                    applicationParameters.AppIdUri = await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.ClientId, applicationParameters.GraphEntityId);
+                    // TODO test with B2C
+                    applicationParameters.AppIdUri = $"api://{applicationParameters.ClientId}";
+                    await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.AppIdUri, applicationParameters.GraphEntityId);
                 }
 
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);

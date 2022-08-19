@@ -14,10 +14,11 @@
     string dbContextName = Model.ContextTypeName;
     var entitySetName = Model.ModelMetadata.EntitySetName;
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     var primaryKeyType = Model.ModelMetadata.PrimaryKeys[0].TypeName;
     var modelToList = $"{@entitySetName}.ToListAsync()";
-    var findModel = $"{@entitySetName}.FindAsync({@primaryKeyName})";
+    var findModel = $"{@entitySetName}.FindAsync({@primaryKeyNameLowerCase})";
     var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
     string resultsExtension = Model.OpenAPI ? "TypedResults" : "Results";
@@ -61,7 +62,7 @@ public static class @endPointsClassName
         }
     }
 
-        group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
             return await db.@findModel
                 is @modelName model
@@ -82,7 +83,7 @@ public static class @endPointsClassName
         }
     }
 
-        group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyName, @modelName @Model.ModelVariable, @dbContextName db) =>
+        group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
             var foundModel = await db.@findModel;
 
@@ -129,7 +130,7 @@ public static class @endPointsClassName
         }
     }
 
-        group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyName, @dbContextName db) =>
+        group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
             if (await db.@findModel is @modelName @Model.ModelVariable)
             {

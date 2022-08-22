@@ -28,7 +28,7 @@
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
     string resultsOkModelVariable = $"{resultsExtension}.Ok({@Model.ModelVariable})";
-    string createdApiVar = string.Format("$\"/{0}/{{{1}.{2}}}\",{3}", @pluralModel, @Model.ModelVariable, @primaryKeyName, @Model.ModelVariable);
+    string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", @routePrefix, @Model.ModelVariable, @primaryKeyName, @Model.ModelVariable);
     string resultsCreated = $"{resultsExtension}.Created(" + $"{@createdApiVar}" + ")";
 }
 using Microsoft.EntityFrameworkCore;

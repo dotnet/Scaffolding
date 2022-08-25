@@ -40,10 +40,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 DataContextClass = string.Empty
             };
-            Assert.Equal(MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: true), Constants.MinimalApiEfNoClassTemplate);
-            Assert.Equal(MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: false), Constants.MinimalApiEfTemplate);
-            Assert.Equal(MinimalApiGenerator.GetTemplateName(modelWithoutContext, existingEndpointsFile: true), Constants.MinimalApiNoClassTemplate);
-            Assert.Equal(MinimalApiGenerator.GetTemplateName(modelWithoutContext, existingEndpointsFile: false), Constants.MinimalApiTemplate);
+            Assert.Equal(Constants.MinimalApiEfNoClassTemplate, MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: true));
+            Assert.Equal(Constants.MinimalApiEfTemplate,MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: false));
+            Assert.Equal(Constants.MinimalApiNoClassTemplate, MinimalApiGenerator.GetTemplateName(modelWithoutContext, existingEndpointsFile: true));
+            Assert.Equal(Constants.MinimalApiTemplate, MinimalApiGenerator.GetTemplateName(modelWithoutContext, existingEndpointsFile: false));
         }
 
         [Fact]

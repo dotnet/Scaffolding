@@ -25,11 +25,6 @@
               "LeadingTrivia": {
                 "Newline": true
               }
-            },
-            {
-              "InsertAfter": "app.UseRouting();",
-              "Block": "app.UseAuthentication();",
-              "InsertBefore": [ "app.UseAuthorization();", "app.Run();" ] 
             }
           ]
         }

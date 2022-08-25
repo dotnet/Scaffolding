@@ -304,8 +304,8 @@ namespace Microsoft.DotNet.MSIdentity
                                         CommandName);
 
             output.Append(jsonResponse.Output);
-            var response = new JsonResponse(CommandName, jsonResponse.State, output: output.ToString());
 
+            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, jsonResponse.State, output: output.ToString()));
         }
 
         /// <summary>

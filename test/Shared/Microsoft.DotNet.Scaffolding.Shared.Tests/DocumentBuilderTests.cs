@@ -268,7 +268,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Document minimalProgramCsDoc = CreateDocument(MinimalProgramCsFile);
             var root = await minimalProgramCsDoc.GetSyntaxRootAsync() as CompilationUnitSyntax;
             var codeChanges = statementsToAdd.Select(s => new CodeSnippet { Block = s }).ToArray();
-            var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(root, codeChanges) as CompilationUnitSyntax;
+            var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(root, codeChanges, "filename") as CompilationUnitSyntax;
 
             foreach (var statementToAdd in statementsToAdd)
             {
@@ -278,7 +278,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
 
             var duplicates = duplicateStatements.Select(s => new CodeSnippet { Block = s }).ToArray();
-            var rootWithDuplicates = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, duplicates) as CompilationUnitSyntax;
+            var rootWithDuplicates = DocumentBuilder.ApplyChangesToMethod(modifiedRoot, duplicates, "filename") as CompilationUnitSyntax;
             Assert.Equal(rootWithDuplicates.Members.Count, modifiedRoot.Members.Count);
         }
 

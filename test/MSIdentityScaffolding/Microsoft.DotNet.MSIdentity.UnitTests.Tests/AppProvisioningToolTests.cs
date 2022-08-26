@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var expected = JObject.FromObject(new
             {
-                Authority = $"{DefaultProperties.Instance}{DefaultProperties.TenantId}",
+                Authority = $"{DefaultProperties.Instance}{DefaultProperties.Domain}",
                 DefaultProperties.ClientId,
                 DefaultProperties.ValidateAuthority
             });
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var expected = JObject.FromObject(new
             {
-                Authority = $"{DefaultProperties.Instance}{DefaultProperties.TenantId}/{DefaultProperties.SignUpSignInPolicyId}",
+                Authority = $"{DefaultProperties.Instance}{DefaultProperties.Domain}/{DefaultProperties.SignUpSignInPolicyId}",
                 DefaultProperties.ClientId,
                 ValidateAuthority = false
             });
@@ -532,7 +532,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var expected = JObject.FromObject(new
             {
                 ClientId = inputClientId,
-                Authority = $"{inputInstance}{inputTenantId}",
+                Authority = $"{inputInstance}{inputDomain}",
                 ValidateAuthority = true
             });
 
@@ -573,7 +573,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var expected = JObject.FromObject(new
             {
                 ClientId = inputClientId,
-                Authority = $"{inputInstance}{inputTenantId}/{existingSusi}",
+                Authority = $"{inputInstance}{inputDomain}/{existingSusi}",
                 ValidateAuthority = false
             });
 

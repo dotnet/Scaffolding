@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (createdSp is null)
             {
-                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: "Failed to get or create service principal")); // TODO string
+                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal));
                 return null;
             }
 
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             if (applicationParameters.IsB2C) 
             {
                 string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
-                await AddDownstreamApiPermissions(createdApplication.AppId, scopes, graphServiceClient, application, createdSp);
+                await AddDownstreamApiPermissions(scopes, graphServiceClient, application, createdSp);
             }
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI,
@@ -213,16 +213,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (parameters.IsB2C && parameters.CallsDownstreamApi)
+            if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 // TODO: Add if it's B2C, acquire or create the SUSI Policy
                 var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
                 if (servicePrincipal is null)
                 {
-                    return new JsonResponse(commandName, State.Fail, output: "Failed to get or create service principal");
+                    return new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal);
                 }
 
-                await AddDownstreamApiPermissions(parameters.ClientId, toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal);
+                await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal);
                 needsUpdates = true;
             }
 
@@ -243,7 +243,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
         }
 
-        internal static async Task AddDownstreamApiPermissions(string? clientId, string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates, ServicePrincipal servicePrincipal)
+        internal static async Task AddDownstreamApiPermissions(string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates, ServicePrincipal servicePrincipal)
         {
             IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                 apiScopes,
@@ -262,7 +262,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var servicePrincipal = (await graphServiceClient.ServicePrincipals
                                 .Request()
                                 .Filter($"appId eq '{clientId}'")
-                                .GetAsync()).FirstOrDefault();
+                                .GetAsync())?.FirstOrDefault();
 
             if (servicePrincipal is null)
             {
@@ -532,7 +532,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns></returns>
         internal static async Task ExposeWebApiScopes(GraphServiceClient graphServiceClient, Application createdApplication, ApplicationParameters applicationParameters)
         {
-            // TODO this needs to be fixed for Non B2C
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
             var scopeName = applicationParameters.IsB2C ? $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}" : $"api://{createdApplication.AppId}";
             await ExposeScopes(graphServiceClient, scopeName, createdApplication.Id, scopes);

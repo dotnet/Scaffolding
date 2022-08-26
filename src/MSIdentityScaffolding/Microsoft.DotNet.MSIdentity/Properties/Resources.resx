@@ -239,6 +239,9 @@
   <data name="FailedToCreateApp" xml:space="preserve">
     <value>Failed to create Azure AD/AD B2C app registration.</value>
   </data>
+  <data name="FailedToGetServicePrincipal" xml:space="preserve">
+    <value>Failed to get or create service principal.</value>
+  </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
     <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>
   </data>

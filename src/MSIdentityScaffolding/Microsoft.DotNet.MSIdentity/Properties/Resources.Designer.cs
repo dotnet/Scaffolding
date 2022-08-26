@@ -548,6 +548,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to get or create service principal..
+        /// </summary>
+        internal static string FailedToGetServicePrincipal {
+            get {
+                return ResourceManager.GetString("FailedToGetServicePrincipal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects(apps/service principals.
         /// </summary>
         internal static string FailedToRetrieveADObjectsError {

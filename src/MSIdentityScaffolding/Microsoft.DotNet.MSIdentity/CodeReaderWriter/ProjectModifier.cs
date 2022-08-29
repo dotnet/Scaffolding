@@ -175,9 +175,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     _output.Append(string.Format(Resources.ModifiedCodeFile, file.FileName));
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                _output.Append(string.Format(Resources.FailedToModifyCodeFile, file.FileName));
+                _output.Append(string.Format(Resources.FailedToModifyCodeFile, file.FileName, e.Message));
             }
         }
 

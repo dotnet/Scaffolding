@@ -566,7 +566,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to modify code file {0}..
+        ///   Looks up a localized string similar to Failed to modify code file {0}, {1} .
         /// </summary>
         internal static string FailedToModifyCodeFile {
             get {

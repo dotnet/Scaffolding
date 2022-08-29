@@ -247,8 +247,8 @@
     <value>Failed to get or create service principal.</value>
   </data>
   <data name="FailedToModifyCodeFile" xml:space="preserve">
-    <value>Failed to modify code file {0}.</value>
-    <comment>0 = File name</comment>
+    <value>Failed to modify code file {0}, {1} </value>
+    <comment>0 = File name, 1 = Exception message</comment>
   </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
     <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>

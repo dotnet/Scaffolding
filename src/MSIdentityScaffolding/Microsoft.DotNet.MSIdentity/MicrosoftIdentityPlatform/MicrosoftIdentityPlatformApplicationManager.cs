@@ -200,6 +200,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
+            StringBuilder output = new StringBuilder();
+
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()

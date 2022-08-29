@@ -254,6 +254,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added code file {0}.
+        /// </summary>
+        internal static string AddedCodeFile {
+            get {
+                return ResourceManager.GetString("AddedCodeFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added {0} to user secrets..
         /// </summary>
         internal static string AddingKeyToUserSecrets {
@@ -557,6 +566,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to modify code file {0}..
+        /// </summary>
+        internal static string FailedToModifyCodeFile {
+            get {
+                return ResourceManager.GetString("FailedToModifyCodeFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects(apps/service principals.
         /// </summary>
         internal static string FailedToRetrieveADObjectsError {
@@ -607,6 +625,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string MismatchedProjectTypeIdentifier {
             get {
                 return ResourceManager.GetString("MismatchedProjectTypeIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Modified code file {0}.
+        /// </summary>
+        internal static string ModifiedCodeFile {
+            get {
+                return ResourceManager.GetString("ModifiedCodeFile", resourceCulture);
             }
         }
         

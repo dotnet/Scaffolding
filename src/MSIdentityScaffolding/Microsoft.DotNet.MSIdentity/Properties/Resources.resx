@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddedCodeFile" xml:space="preserve">
+    <value>Added code file {0}</value>
+    <comment>0 = File name</comment>
+  </data>
   <data name="AddingKeyToUserSecrets" xml:space="preserve">
     <value>Added {0} to user secrets.</value>
   </data>
@@ -242,6 +246,10 @@
   <data name="FailedToGetServicePrincipal" xml:space="preserve">
     <value>Failed to get or create service principal.</value>
   </data>
+  <data name="FailedToModifyCodeFile" xml:space="preserve">
+    <value>Failed to modify code file {0}.</value>
+    <comment>0 = File name</comment>
+  </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
     <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>
   </data>
@@ -262,6 +270,10 @@
   <data name="MismatchedProjectTypeIdentifier" xml:space="preserve">
     <value>Config identifier: {0} does not match toolOptions identifier: {1}</value>
     <comment>0 = codeModifierConfig.Identifier, 1 = _toolOptions.ProjectTypeIdentifier</comment>
+  </data>
+  <data name="ModifiedCodeFile" xml:space="preserve">
+    <value>Modified code file {0}</value>
+    <comment>0 = File name</comment>
   </data>
   <data name="NoProjectDescriptionFound" xml:space="preserve">
     <value>No valid project description found with project type identifier "{0}"</value>

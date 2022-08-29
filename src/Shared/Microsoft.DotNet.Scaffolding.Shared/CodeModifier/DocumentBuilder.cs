@@ -135,7 +135,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var changedDocument = GetDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
             File.WriteAllText(filePath, classFileTxt.ToString());
-            _consoleLogger.LogMessage($"Modified {filePath}.\n");
         }
 
         internal static BaseMethodDeclarationSyntax AddMethodParameters(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)

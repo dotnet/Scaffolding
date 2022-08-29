@@ -85,6 +85,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             foreach (var file in filteredFiles)
             {
                 await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
+
             }
 
             _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString().TrimEnd()));
@@ -148,12 +149,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options, string identifier)
         {
-            // TODO catch exception, add to output and log everything for future bugs
             try
             {
                 if (!string.IsNullOrEmpty(file.AddFilePath))
                 {
                     AddFile(file, identifier);
+                    _output.AppendLine(string.Format(Resources.AddedCodeFile, file.AddFilePath));
                 }
                 else
                 {
@@ -170,11 +171,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             await ApplyTextReplacements(file, project, options);
                             break;
                     }
+                    
+                    _output.Append(string.Format(Resources.ModifiedCodeFile, file.FileName));
                 }
             }
-            catch (Exception _)
+            catch (Exception)
             {
-                _output.Append($"Error modifying code file {file.FileName}");
+                _output.Append(string.Format(Resources.FailedToModifyCodeFile, file.FileName));
             }
         }
 
@@ -201,8 +204,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
-                // TODO JsonResponse stringbuilder
-                _output.AppendLine($"Added {filePath}");
             }
         }
 
@@ -372,9 +373,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
             if (editedDocument != null)
             {
-                // replace the document
-                var output = await ProjectModifierHelper.UpdateDocument(editedDocument);
-                _output.AppendLine(output);
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
             }
         }
 
@@ -402,8 +401,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
-                var output = await ProjectModifierHelper.UpdateDocument(editedDocument);
-                _output.AppendLine(output);
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
             }
         }
     }

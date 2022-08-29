@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -16,6 +17,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     public class MicrosoftIdentityPlatformApplicationManager
     {
+        private StringBuilder _output = new StringBuilder();
+
         const string MicrosoftGraphAppId = "00000003-0000-0000-c000-000000000000";
         const string ScopeType = "Scope";
 
@@ -200,6 +203,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
+            StringBuilder output = new StringBuilder();
+
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
@@ -222,7 +227,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     return new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal);
                 }
 
-                await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal);
+                await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
                 needsUpdates = true;
             }
 
@@ -235,15 +240,17 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
-                return new JsonResponse(commandName, State.Success, output: string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
+                output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName));
+                return new JsonResponse(commandName, State.Success, output.ToString(), remoteApp.AppId);
             }
             catch (ServiceException se)
             {
-                return new JsonResponse(commandName, State.Fail, output: se.Error?.Message);
+                output.Append(se.Error?.Message);
+                return new JsonResponse(commandName, State.Fail, output.ToString());
             }
         }
 
-        internal static async Task AddDownstreamApiPermissions(string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates, ServicePrincipal servicePrincipal)
+        internal static async Task AddDownstreamApiPermissions(string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates, ServicePrincipal servicePrincipal, StringBuilder? output = null)
         {
             IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                 apiScopes,
@@ -254,7 +261,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             await AddAdminConsentToApiPermissions(
                 graphServiceClient,
                 servicePrincipal,
-                scopesPerResource);
+                scopesPerResource,
+                output);
         }
 
         private static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
@@ -546,7 +554,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         private static async Task AddAdminConsentToApiPermissions(
             GraphServiceClient graphServiceClient,
             ServicePrincipal servicePrincipal,
-            IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource)
+            IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource,
+            StringBuilder? output = null)
         {
             // Consent to the scopes
             if (scopesPerResource != null)
@@ -576,7 +585,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     }
                     catch (Microsoft.Graph.ServiceException ex)
                     {
-                        // Permission already exists
+                        output?.AppendLine(ex.Message);
                     }
                 }
             }

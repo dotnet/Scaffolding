@@ -18,6 +18,12 @@
    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("@routePrefix");
+    @{
+    if(Model.OpenAPI)
+    {
+        @:group.WithOpenApi();
+    }
+    }    
         group.MapGet("/", () =>
         {
             return new [] { new @modelConstructor };

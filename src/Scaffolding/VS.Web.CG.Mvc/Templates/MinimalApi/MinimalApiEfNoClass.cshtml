@@ -33,6 +33,12 @@
 public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("@routePrefix");
+    @{
+    if(Model.OpenAPI)
+    {
+        @:group.WithOpenApi();
+    }
+    }    
         group.MapGet("/", async (@dbContextName db) =>
         {
             return await db.@modelToList;

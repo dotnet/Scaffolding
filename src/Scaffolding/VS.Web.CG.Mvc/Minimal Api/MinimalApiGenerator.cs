@@ -161,6 +161,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     if (templateModel.OpenAPI)
                     {
                         usings.Add("Microsoft.AspNetCore.Http.HttpResults");
+                        usings.Add("Microsoft.AspNetCore.OpenApi");
                     }
 
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray()};

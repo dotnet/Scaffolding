@@ -113,6 +113,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 if (OpenAPI)
                 {
                     requiredNamespaces.Add("Microsoft.AspNetCore.Http.HttpResults");
+                    requiredNamespaces.Add("Microsoft.AspNetCore.OpenApi");
                 }
 
                 // Finally we remove the ControllerNamespace as it's not required.

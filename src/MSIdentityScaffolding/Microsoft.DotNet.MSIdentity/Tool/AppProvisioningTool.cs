@@ -287,7 +287,6 @@ namespace Microsoft.DotNet.MSIdentity
                 if (string.IsNullOrEmpty(applicationParameters.AppIdUri)) // Expose server API scopes
                 {
                     var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
-                    // TODO test with B2C
                     applicationParameters.AppIdUri = $"api://{applicationParameters.ClientId}";
                     await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.AppIdUri, applicationParameters.GraphEntityId);
                 }
@@ -304,8 +303,8 @@ namespace Microsoft.DotNet.MSIdentity
                                         CommandName);
 
             output.Append(jsonResponse.Output);
-            var response = new JsonResponse(CommandName, jsonResponse.State, output: output.ToString());
 
+            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, jsonResponse.State, output: output.ToString()));
         }
 
         /// <summary>

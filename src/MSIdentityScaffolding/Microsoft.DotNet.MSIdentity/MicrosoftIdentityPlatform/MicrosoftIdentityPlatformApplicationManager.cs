@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
@@ -16,12 +17,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     public class MicrosoftIdentityPlatformApplicationManager
     {
+        private StringBuilder _output = new StringBuilder();
         const string MicrosoftGraphAppId = "00000003-0000-0000-c000-000000000000";
         const string ScopeType = "Scope";
-
         private const string DefaultCallbackPath = "signin-oidc";
         private const string BlazorWasmCallbackPath = "authentication/login-callback";
-
         GraphServiceClient? _graphServiceClient;
 
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
@@ -74,15 +74,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 AppId = createdApplication.AppId,
             };
 
-            await graphServiceClient.ServicePrincipals
+            ServicePrincipal? createdSp = await graphServiceClient.ServicePrincipals
                 .Request()
-                .AddAsync(servicePrincipal).ConfigureAwait(false);
+                .AddAsync(servicePrincipal);
+
+            if (createdSp is null)
+            {
+                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal));
+                return null;
+            }
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (applicationParameters.IsB2C) 
             {
                 string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
-                await AddDownstreamApiPermissions(createdApplication.AppId, scopes, graphServiceClient, application);
+                await AddDownstreamApiPermissions(scopes, graphServiceClient, application, createdSp);
             }
 
             // For web API, we need to know the appId of the created app to compute the Identifier URI,
@@ -205,12 +211,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
-
+            StringBuilder output = new StringBuilder();
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (parameters.IsB2C && parameters.CallsDownstreamApi)
+            if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 // TODO: Add if it's B2C, acquire or create the SUSI Policy
-                await AddDownstreamApiPermissions(parameters.ClientId, toolOptions.ApiScopes, graphServiceClient, appUpdates);
+                var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
+                if (servicePrincipal is null)
+                {
+                    return new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal);
+                }
+
+                await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
                 needsUpdates = true;
             }
 
@@ -223,15 +235,17 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
-                return new JsonResponse(commandName, State.Success, output: string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
+                output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName));
+                return new JsonResponse(commandName, State.Success, output.ToString(), remoteApp.AppId);
             }
             catch (ServiceException se)
             {
-                return new JsonResponse(commandName, State.Fail, output: se.Error?.Message);
+                output.Append(se.Error?.Message);
+                return new JsonResponse(commandName, State.Fail, output.ToString());
             }
         }
 
-        internal static async Task AddDownstreamApiPermissions(string? clientId, string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates)
+        internal static async Task AddDownstreamApiPermissions(string? apiScopes, GraphServiceClient graphServiceClient, Application appUpdates, ServicePrincipal servicePrincipal, StringBuilder? output = null)
         {
             IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                 apiScopes,
@@ -239,16 +253,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 appUpdates).ConfigureAwait(false);
 
             // TODO need to have admin permissions for the downstream API
-            ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, clientId);
-            if (servicePrincipal == null)
-            {
-                throw new ArgumentNullException(nameof(servicePrincipal));
-            }
-
             await AddAdminConsentToApiPermissions(
                 graphServiceClient,
                 servicePrincipal,
-                scopesPerResource);
+                scopesPerResource,
+                output);
         }
 
         private static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
@@ -256,7 +265,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             var servicePrincipal = (await graphServiceClient.ServicePrincipals
                                 .Request()
                                 .Filter($"appId eq '{clientId}'")
-                                .GetAsync()).FirstOrDefault();
+                                .GetAsync())?.FirstOrDefault();
 
             if (servicePrincipal is null)
             {
@@ -527,7 +536,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal static async Task ExposeWebApiScopes(GraphServiceClient graphServiceClient, Application createdApplication, ApplicationParameters applicationParameters)
         {
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
-            var scopeName = applicationParameters.IsB2C ? $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}" : $"api://{createdApplication.Id}";
+            var scopeName = applicationParameters.IsB2C ? $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}" : $"api://{createdApplication.AppId}";
             await ExposeScopes(graphServiceClient, scopeName, createdApplication.Id, scopes);
         }
 
@@ -540,7 +549,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         private static async Task AddAdminConsentToApiPermissions(
             GraphServiceClient graphServiceClient,
             ServicePrincipal servicePrincipal,
-            IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource)
+            IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource,
+            StringBuilder? output = null)
         {
             // Consent to the scopes
             if (scopesPerResource != null)
@@ -558,17 +568,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         Scope = string.Join(" ", resourceAndScopes.Select(r => r.Scope))
                     };
 
-                    // TODO: check if the permissions are already there
-                    var existingPermissionGrants = (await graphServiceClient.Oauth2PermissionGrants
-                        .Request()
-                        .GetAsync());
-                    if (!existingPermissionGrants.ToArray().Any(p => p.Equals(oAuth2PermissionGrant)))
+                    // Check if permissions already exist, otherwise will throw exception
+
+                    try
                     {
                         // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9. 
                         // We need to process the case where the developer is not a tenant admin
                         await graphServiceClient.Oauth2PermissionGrants
                             .Request()
                             .AddAsync(oAuth2PermissionGrant);
+                    }
+                    catch (Microsoft.Graph.ServiceException ex)
+                    {
+                        output?.AppendLine(ex.Message);
                     }
                 }
             }

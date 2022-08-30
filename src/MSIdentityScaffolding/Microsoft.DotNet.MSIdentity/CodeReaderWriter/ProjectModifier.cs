@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
             }
 
-            _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString()));
+            _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString().TrimEnd()));
         }
 
         private CodeModifierConfig? GetCodeModifierConfig()
@@ -148,25 +148,35 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 
         private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options, string identifier)
         {
-            if (!string.IsNullOrEmpty(file.AddFilePath))
+            try
             {
-                AddFile(file, identifier);
-            }
-            else
-            {
-                switch (file.Extension)
+                if (!string.IsNullOrEmpty(file.AddFilePath))
                 {
-                    case "cs":
-                        await ModifyCsFile(file, project, options);
-                        break;
-                    case "cshtml":
-                        await ModifyCshtmlFile(file, project, options);
-                        break;
-                    case "razor":
-                    case "html":
-                        await ApplyTextReplacements(file, project, options);
-                        break;
+                    AddFile(file, identifier);
+                    _output.AppendLine(string.Format(Resources.AddedCodeFile, file.AddFilePath));
                 }
+                else
+                {
+                    switch (file.Extension)
+                    {
+                        case "cs":
+                            await ModifyCsFile(file, project, options);
+                            break;
+                        case "cshtml":
+                            await ModifyCshtmlFile(file, project, options);
+                            break;
+                        case "razor":
+                        case "html":
+                            await ApplyTextReplacements(file, project, options);
+                            break;
+                    }
+                    
+                    _output.Append(string.Format(Resources.ModifiedCodeFile, file.FileName));
+                }
+            }
+            catch (Exception e)
+            {
+                _output.Append(string.Format(Resources.FailedToModifyCodeFile, file.FileName, e.Message));
             }
         }
 
@@ -193,8 +203,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 Directory.CreateDirectory(fileDir);
                 File.WriteAllText(filePath, codeFileString);
-                // TODO JsonResponse stringbuilder
-                _output.AppendLine($"Added {filePath}");
             }
         }
 
@@ -247,7 +255,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             {
                 documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
                 await documentBuilder.WriteToClassFileAsync(fileDoc.Name);
-                _output.AppendLine($"Modified {file.FileName}"); // TODO strings.
             }
         }
 
@@ -258,7 +265,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="options"></param>
         /// <param name="file"></param>
         /// <returns>modified root if there are changes, else null</returns>
-        private static SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
+        private SyntaxNode? ModifyRoot(DocumentBuilder documentBuilder, CodeChangeOptions options, CodeFile file)
         {
             var root = documentBuilder.AddUsings(options);
             if (file.FileName.Equals("Program.cs") && file.Methods.TryGetValue("Global", out var globalChanges))
@@ -275,16 +282,15 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
                         .FirstOrDefault(n => Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
                     if (mainMethod != null
-                        && DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges) is BlockSyntax updatedBody)
+                        && DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges, file.FileName, _output) is BlockSyntax updatedBody)
                     {
                         var updatedMethod = mainMethod.WithBody(updatedBody);
                         return root?.ReplaceNode(mainMethod, updatedMethod);
                     }
-
                 }
                 else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
                 {
-                    return DocumentBuilder.ApplyChangesToMethod(root, filteredChanges);
+                    return DocumentBuilder.ApplyChangesToMethod(root, filteredChanges, file.FileName, _output);
                 }
             }
             else
@@ -305,7 +311,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     //add class attributes
                     modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
                     //add code snippets/changes.
-                    modifiedClassDeclarationSyntax = ModifyMethods(modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options);
+                    modifiedClassDeclarationSyntax = ModifyMethods(file.FileName, modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options, _output);
 
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
@@ -317,7 +323,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return root;
         }
 
-        private static ClassDeclarationSyntax ModifyMethods(ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options)
+        private static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options, StringBuilder output)
         {
             foreach ((string methodName, Method methodChanges) in methods)
             {
@@ -338,7 +344,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     methodChanges.CodeChanges = ProjectModifierHelper.UpdateVariables(methodChanges.CodeChanges, oldValue, newValue);
                 }
 
-                var updatedMethodNode = DocumentBuilder.GetModifiedMethod(methodNode, methodChanges, options);
+                var updatedMethodNode = DocumentBuilder.GetModifiedMethod(fileName, methodNode, methodChanges, options, output);
                 if (updatedMethodNode != null)
                 {
                     classNode = classNode.ReplaceNode(methodNode, updatedMethodNode);
@@ -366,9 +372,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
             if (editedDocument != null)
             {
-                //replace the document
-                var output = await ProjectModifierHelper.UpdateDocument(editedDocument);
-                _output.AppendLine(output);
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
             }
         }
 
@@ -396,8 +400,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
-                var output = await ProjectModifierHelper.UpdateDocument(editedDocument);
-                _output.AppendLine(output);
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
             }
         }
     }

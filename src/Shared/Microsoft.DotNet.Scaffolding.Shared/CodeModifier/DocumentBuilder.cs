@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
+using NuGet.Protocol;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {
@@ -32,9 +34,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             _docRoot = (CompilationUnitSyntax)_documentEditor.OriginalRoot ?? throw new ArgumentNullException(nameof(_documentEditor.OriginalRoot));
         }
 
-        internal static BaseMethodDeclarationSyntax GetModifiedMethod(BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options)
+        internal static BaseMethodDeclarationSyntax GetModifiedMethod(string fileName, BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options, StringBuilder output)
         {
-            method = AddCodeSnippetsToMethod(method, methodChanges, options);
+            method = AddCodeSnippetsToMethod(fileName, method, methodChanges, options, output);
             method = EditMethodReturnType(method, methodChanges, options);
             method = AddMethodParameters(method, methodChanges, options);
             return method;
@@ -133,7 +135,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var changedDocument = GetDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
             File.WriteAllText(filePath, classFileTxt.ToString());
-            _consoleLogger.LogMessage($"Modified {filePath}.\n");
         }
 
         internal static BaseMethodDeclarationSyntax AddMethodParameters(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
@@ -150,7 +151,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         }
 
         // Add all the different code snippet.
-        internal static BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+        internal static BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(string fileName, BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options, StringBuilder output)
         {
             var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(methodChanges.CodeChanges, options);
 
@@ -161,20 +162,31 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
             var blockSyntax = originalMethod.Body;
 
-            var modifiedMethod = ApplyChangesToMethod(blockSyntax, filteredChanges);
+            var modifiedMethod = ApplyChangesToMethod(blockSyntax, filteredChanges, fileName, output);
 
             return originalMethod.ReplaceNode(blockSyntax, modifiedMethod);
         }
 
-        internal static SyntaxNode ApplyChangesToMethod(SyntaxNode root, CodeSnippet[] filteredChanges)
+        internal static SyntaxNode ApplyChangesToMethod(SyntaxNode root, CodeSnippet[] filteredChanges, string fileName = null, StringBuilder output = null)
         {
+            bool changesMade = false;
             foreach (var change in filteredChanges)
             {
-                var update = ModifyMethod(root, change);
+                var update = ModifyMethod(root, change, output);
                 if (update != null)
                 {
+                    changesMade = true;
                     root = root.ReplaceNode(root, update);
                 }
+            }
+
+            if (!changesMade)
+            {
+                output?.AppendLine(value: $"No modifications made for file: {fileName}");
+            }
+            else
+            {
+                output?.AppendLine($"Modified {fileName}"); // TODO strings.
             }
 
             return root;
@@ -213,26 +225,33 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return snippets;
         }
 
-        internal static SyntaxNode ModifyMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
+        internal static SyntaxNode ModifyMethod(SyntaxNode originalMethod, CodeSnippet codeChange, StringBuilder output = null)
         {
-            SyntaxNode modifiedMethod;
-            switch (codeChange.CodeChangeType)
+            SyntaxNode modifiedMethod = null;
+            try
             {
-                case CodeChangeType.Lambda:
-                    {
-                        modifiedMethod = AddOrUpdateLambda(originalMethod, codeChange);
-                        break;
-                    }
-                case CodeChangeType.MemberAccess:
-                    {
-                        modifiedMethod = AddExpressionToParent(originalMethod, codeChange);
-                        break;
-                    }
-                default:
-                    {
-                        modifiedMethod = UpdateMethod(originalMethod, codeChange);
-                        break;
-                    }
+                switch (codeChange.CodeChangeType)
+                {
+                    case CodeChangeType.Lambda:
+                        {
+                            modifiedMethod = AddOrUpdateLambda(originalMethod, codeChange);
+                            break;
+                        }
+                    case CodeChangeType.MemberAccess:
+                        {
+                            modifiedMethod = AddExpressionToParent(originalMethod, codeChange);
+                            break;
+                        }
+                    default:
+                        {
+                            modifiedMethod = UpdateMethod(originalMethod, codeChange);
+                            break;
+                        }
+                }
+            }
+            catch
+            {
+                output?.Append(value: $"Error modifying method {originalMethod}\nCodeChange:{codeChange.ToJson()}");
             }
 
             return modifiedMethod != null ? originalMethod.ReplaceNode(originalMethod, modifiedMethod) : originalMethod;
@@ -241,6 +260,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal static SyntaxNode UpdateMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
         {
             var children = GetDescendantNodes(originalMethod);
+            if (children is null)
+            {
+                return originalMethod;
+            }
+
             //check for CodeChange.Block and CodeChange.CheckBlock for  block's are easy to check.
             if (ProjectModifierHelper.StatementExists(children, codeChange.Block) || (!string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock)))
             {
@@ -260,7 +284,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             {
                 updatedMethod = GetBlockStatement(originalMethod, codeChange);
             }
-
 
             return updatedMethod ?? originalMethod;
         }
@@ -429,9 +452,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return null;
             }
 
+            // TODO descendantNodes could be null
             var specifiedDescendant =
-                descendantNodes.FirstOrDefault(d => d != null && d.ToString().Contains(specifierStatement)) ??
-                descendantNodes.FirstOrDefault(d => d != null && d.ToString().Contains(ProjectModifierHelper.TrimStatement(specifierStatement)));
+                descendantNodes?.FirstOrDefault(d => d != null && d.ToString().Contains(specifierStatement)) ??
+                descendantNodes?.FirstOrDefault(d => d != null && d.ToString().Contains(ProjectModifierHelper.TrimStatement(specifierStatement)));
 
             return specifiedDescendant;
         }
@@ -492,17 +516,25 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         private static SyntaxNode AddOrUpdateLambda(SyntaxNode originalMethod, CodeSnippet change)
         {
-            var rootDescendants = GetDescendantNodes(originalMethod);
-            var parent = GetSpecifiedNode(change.Parent, rootDescendants);
+            var descendants = GetDescendantNodes(originalMethod);
+            if (descendants is null)
+            {
+                return originalMethod;
+            }
+
+            var parent = GetSpecifiedNode(change.Parent, descendants);
             if (parent is null)
             {
                 return originalMethod;
             }
 
             var children = GetDescendantNodes(parent);
+            if (children is null)
+            {
+                return originalMethod;
+            }
 
             var updatedParent = parent;
-
             // Check for existing lambda
             if (children.FirstOrDefault(
                 d => d.IsKind(SyntaxKind.ParenthesizedLambdaExpression)
@@ -535,7 +567,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         private static LambdaExpressionSyntax UpdateLambdaParameters(LambdaExpressionSyntax existingLambda, CodeSnippet change)
         {
-            var existingParameters = GetDescendantNodes(existingLambda).Where(n => n.IsKind(SyntaxKind.Parameter));
+            var existingParameters = GetDescendantNodes(existingLambda)?.Where(n => n.IsKind(SyntaxKind.Parameter));
+            if (existingParameters is null)
+            {
+                return existingLambda;
+            }
+
             if (ProjectModifierHelper.StatementExists(existingParameters, change.Parameter))
             {
                 return existingLambda;
@@ -644,13 +681,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal static SyntaxNode AddExpressionToParent(SyntaxNode originalMethod, CodeSnippet change)
         {
             // Determine the parent node onto which we are adding
-            var parent = GetSpecifiedNode(change.Parent, GetDescendantNodes(originalMethod));
+            var descendantNodes = GetDescendantNodes(originalMethod);
+            if (descendantNodes is null)
+            {
+                return originalMethod;
+            }
+
+            var parent = GetSpecifiedNode(change.Parent, descendantNodes);
             if (parent is null)
             {
                 return originalMethod;
             }
 
             var children = GetDescendantNodes(parent);
+            if (children is null)
+            {
+                return originalMethod;
+            }
+
             if (ProjectModifierHelper.StatementExists(children, change.Block))
             {
                 return originalMethod;
@@ -673,7 +721,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
             var modifiedExprNode = exprNode.WithExpression(newExpression);
 
-            if (modifiedExprNode == null)
+            if (modifiedExprNode is null)
             {
                 return originalMethod;
             }
@@ -695,7 +743,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return compilationUnit.Members;
             }
 
-            return root.DescendantNodes();
+            return root?.DescendantNodes();
         }
 
         // create UsingDirectiveSyntax[] using a string[] to add to the root of the class (root.Usings).

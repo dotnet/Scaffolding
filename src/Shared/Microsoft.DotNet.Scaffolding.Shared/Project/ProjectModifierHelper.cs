@@ -493,12 +493,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task<string> UpdateDocument(Document document)
+        internal static async Task UpdateDocument(Document document)
         {
             var classFileTxt = await document.GetTextAsync();
             File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
-
-            return $"Modified {document.Name}.\n"; // todo strings.
         }
 
         // Filter out CodeBlocks that are invalid using FilterOptions

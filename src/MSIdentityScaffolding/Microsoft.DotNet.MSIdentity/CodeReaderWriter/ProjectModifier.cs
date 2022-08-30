@@ -85,7 +85,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             foreach (var file in filteredFiles)
             {
                 await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
-
             }
 
             _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString().TrimEnd()));

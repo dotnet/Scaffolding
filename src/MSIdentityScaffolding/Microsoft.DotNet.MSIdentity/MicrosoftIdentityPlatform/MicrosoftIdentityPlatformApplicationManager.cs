@@ -18,13 +18,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
     public class MicrosoftIdentityPlatformApplicationManager
     {
         private StringBuilder _output = new StringBuilder();
-
         const string MicrosoftGraphAppId = "00000003-0000-0000-c000-000000000000";
         const string ScopeType = "Scope";
-
         private const string DefaultCallbackPath = "signin-oidc";
         private const string BlazorWasmCallbackPath = "authentication/login-callback";
-
         GraphServiceClient? _graphServiceClient;
 
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
@@ -203,8 +200,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
-            StringBuilder output = new StringBuilder();
-
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
@@ -216,7 +211,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
-
+            StringBuilder output = new StringBuilder();
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {

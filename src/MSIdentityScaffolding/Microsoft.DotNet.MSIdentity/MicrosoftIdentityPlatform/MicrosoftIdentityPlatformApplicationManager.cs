@@ -235,8 +235,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
-                output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName));
-                return new JsonResponse(commandName, State.Success, output.ToString(), remoteApp.AppId);
+                output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
+                return new JsonResponse(commandName, State.Success, output.ToString());
             }
             catch (ServiceException se)
             {

@@ -113,10 +113,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var lastNode = dbContextNode.ChildNodes().Last();
 
                     var safeModelName = GetSafeModelName(modelType.Name, dbContext.TypeSymbol);
-                    var nullablilitySign = nullableEnabled ? "? " : " ";
+                    var nullabilityClause = nullableEnabled ? " = default!;" : "";
                     // Todo : Need pluralization for property name below.
                     // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
-                    var dbSetProperty = "public DbSet<" + modelType.FullName + ">" + nullablilitySign + safeModelName + " { get; set; }" + Environment.NewLine;
+                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + nullabilityClause + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
 
                     var newNode = rootNode.InsertNodesAfter(lastNode,

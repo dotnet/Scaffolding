@@ -1,11 +1,10 @@
 #!/bin/bash
 
-VERSION=6.0.3
+VERSION=7.0.0-dev
 DEFAULT_NUPKG_PATH=~/.nuget/packages
 SRC_DIR=$(pwd)
 echo $SRC_DIR
 NUPKG=artifacts/packages/Debug/Shipping/
-
 #kill all dotnet procs
 pkill -f dotnet
 rm -rf artifacts

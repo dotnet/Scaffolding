@@ -79,6 +79,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, useSqlite: model.UseSqlite);
             }
 
+            if (model.OpenApi)
+            {
+                ValidateOpenApiDependencies(ProjectContext.PackageDependencies);
+            }
+
             var templateModel = new MinimalApiModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName, model.EndpintsClassName)
             {
                 EndpointsName = model.EndpintsClassName,
@@ -156,6 +161,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     {
                         usings.Add(Constants.MicrosoftEntityFrameworkCorePackageName);
                         usings.Add(templateModel.DbContextNamespace);
+                    }
+
+                    if (templateModel.OpenAPI)
+                    {
+                        usings.Add("Microsoft.AspNetCore.Http.HttpResults");
+                        usings.Add("Microsoft.AspNetCore.OpenApi");
                     }
 
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray()};
@@ -335,6 +346,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             return null;
         }
 
+        private void ValidateOpenApiDependencies(IEnumerable<DependencyDescription> packages)
+        {
+            var openApiDependencies = new HashSet<string>()
+            {
+                "Swashbuckle.AspNetCore",
+                "Microsoft.AspNetCore.OpenApi"
+            };
+
+            var missingPackages = openApiDependencies.Where(d => !packages.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
+            if (CalledFromCommandline && missingPackages.Any())
+            {
+                throw new InvalidOperationException(
+                    string.Format(MessageStrings.InstallPackagesForScaffoldingIdentity, string.Join(",", missingPackages)));
+            }
+        }
+        
         private string GetMinimalApiCodeModifierConfig()
         {
             string jsonText = string.Empty;

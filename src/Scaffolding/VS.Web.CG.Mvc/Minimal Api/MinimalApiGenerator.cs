@@ -149,12 +149,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     //Get class syntax node to add members to the class
                     var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                     //create CodeFile just to add usings
-
                     var usings = new List<string>();
                     //add usings for DbContext related actins.
                     if (!string.IsNullOrEmpty(templateModel.DbContextNamespace))
                     {
-                        usings.Add(Constants.MicrosoftEntityFrameworkCorePackageName);
                         usings.Add(templateModel.DbContextNamespace);
                     }
 
@@ -168,11 +166,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 
                     if (classNode != null && classNode is ClassDeclarationSyntax classDeclaration)
                     {
+                        SyntaxNode classParentSyntax = null;
+                        //if class is not static, create a new class in the same file
+                        if (!classDeclaration.Modifiers.Any(x => x.Text.Equals(SyntaxFactory.Token(SyntaxKind.StaticKeyword).Text)))
+                        {
+                            classParentSyntax = classDeclaration.Parent;
+                            classDeclaration = SyntaxFactory.ClassDeclaration($"{templateModel.ModelType.Name}Endpoints")
+                                .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
+                                .NormalizeWhitespace()
+                                .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.CarriageReturnLineFeed);  
+                        }
                         var modifiedClass = classDeclaration.AddMembers(
-                            SyntaxFactory.GlobalStatement(
-                                SyntaxFactory.ParseStatement(membersBlockText))
-                            .WithLeadingTrivia(SyntaxFactory.Tab));
-                        newRoot = newRoot.ReplaceNode(classNode, modifiedClass);
+                            SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(membersBlockText)).WithLeadingTrivia(SyntaxFactory.Tab));
+
+                        //modify class parent by adding class, classParentSyntax should be null if given class is static.
+                        if (classParentSyntax != null)
+                        {
+                            classParentSyntax = classParentSyntax.InsertNodesAfter(classNode.Parent.ChildNodes().Last(), new List<SyntaxNode>() { modifiedClass });
+                            newRoot = newRoot.ReplaceNode(classNode.Parent, classParentSyntax);
+                        }
+                        //modify given class
+                        else
+                        {
+                            newRoot = newRoot.ReplaceNode(classNode, modifiedClass);
+                        }
+                        
                         docEditor.ReplaceNode(docRoot, newRoot);
                         var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
                         var classFileTxt = classFileSourceTxt?.ToString();

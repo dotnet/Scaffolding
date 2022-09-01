@@ -311,7 +311,7 @@ routes.MapDelete(""/api/Car/{id}"", (int id) =>
 .WithName(""DeleteCar"");  
     }
 }";
-        public const string EndpointsEmptyClass = @"namespace MinimalApiTest { class Endpoints { } } ";
+        public const string EndpointsEmptyClass = @"namespace MinimalApiTest { static class Endpoints { } } ";
         public const string MinimalProgramcsFile = @"var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -417,8 +417,29 @@ namespace Library1.Models
     }
 }";
 
-// Strings for 3 layered project
-    public const string WebProjectTxt = @"
+        public const string CarWithoutNamespaceTxt = @"
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class Car
+{
+    public string ID { get; set; }
+    public string Name { get; set; }
+    public int ManufacturerID { get; set; }
+    public Manufacturer Manufacturer { get; set; }
+    [DataType(DataType.MultilineText)]
+    public string Notes { get; set; }
+}
+
+public class Manufacturer
+{
+    public int ID { get; set; }
+    public string Name { get; set; }
+    public virtual ICollection<Car> Cars { get; set; }
+}";
+
+        // Strings for 3 layered project
+        public const string WebProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 

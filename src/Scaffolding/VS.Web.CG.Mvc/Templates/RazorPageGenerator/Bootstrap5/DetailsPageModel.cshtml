@@ -46,7 +46,7 @@ namespace @Model.NamespaceName
         }
 
 @{
-    if (@Model.NullableEnabled)
+    if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
     {
       @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!; 
     }

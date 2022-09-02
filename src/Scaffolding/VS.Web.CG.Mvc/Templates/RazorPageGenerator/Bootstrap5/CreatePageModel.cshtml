@@ -50,7 +50,7 @@ namespace @Model.NamespaceName
         }
 
 @{
-    if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
         {
         @:[BindProperty]
         @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!;

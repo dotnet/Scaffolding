@@ -89,7 +89,7 @@ namespace @Model.ControllerNamespace
     }
     else
     {
-            if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+            if (@Model.NullableEnabled)
             {
               @:return _context.@entitySetName != null ? 
                         @:  View(await _context.@(entitySetName).ToListAsync()) :
@@ -261,7 +261,7 @@ namespace @Model.ControllerNamespace
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
     @{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if (@Model.NullableEnabled)
         {
           @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
         }

@@ -39,7 +39,7 @@ namespace @Model.ControllerNamespace
         public async Task<ActionResult<IEnumerable<@(Model.ModelTypeName)>>> Get@(entitySetName)()
         {
 @{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if (@Model.NullableEnabled)
         {
           @:if (_context.@(entitySetName) == null)
           @:{
@@ -55,7 +55,7 @@ namespace @Model.ControllerNamespace
         public async Task<ActionResult<@(Model.ModelTypeName)>> Get@(Model.ModelTypeName)(@primaryKeyShortTypeName id)
         {
 @{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if (@Model.NullableEnabled)
         {
           @:if (_context.@(entitySetName) == null)
           @:{
@@ -110,7 +110,7 @@ namespace @Model.ControllerNamespace
         public async Task<ActionResult<@(Model.ModelTypeName)>> Post@(Model.ModelTypeName)(@Model.ModelTypeName @Model.ModelVariable)
         {
 @{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if (@Model.NullableEnabled)
         {
           @:if (_context.@(entitySetName) == null)
           @:{
@@ -152,7 +152,7 @@ namespace @Model.ControllerNamespace
         public async Task<IActionResult> Delete@(Model.ModelTypeName)(@primaryKeyShortTypeName id)
         {
 @{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if (@Model.NullableEnabled)
         {
             @:if (_context.@(entitySetName) == null)
             @:{
@@ -175,7 +175,7 @@ namespace @Model.ControllerNamespace
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
 @{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
+        if (@Model.NullableEnabled)
         {
             @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
         }

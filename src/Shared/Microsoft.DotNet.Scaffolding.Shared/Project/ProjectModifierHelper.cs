@@ -62,16 +62,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             var programDocument = modelTypesLocator.GetAllDocuments().FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
             if (programDocument != null && await programDocument.GetSyntaxRootAsync() is CompilationUnitSyntax root)
             {
-                var fileScopedNamespaceNode = root.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
-                if (fileScopedNamespaceNode == null)
+                BaseNamespaceDeclarationSyntax namespaceNode = root.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
+                if (namespaceNode == null)
                 {
-                    var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                    var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();
-                    var mainMethod = classNode?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax
-                        && ((MethodDeclarationSyntax)n).Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
+                    namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+                } 
+                var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();
+                var mainMethod = classNode?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax syntax
+                    && syntax.Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
 
-                    return mainMethod == null;
+                if (mainMethod == null)
+                {
+                    mainMethod = namespaceNode?.ChildNodes().FirstOrDefault(
+                        n => n is MethodDeclarationSyntax syntax &&
+                             syntax.Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));
                 }
+
+                return mainMethod == null;
             }
 
             return true;

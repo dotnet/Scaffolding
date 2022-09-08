@@ -321,11 +321,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             foreach (var codeChange in filteredChanges)
             {
-                if (!useTopLevelsStatements)
-                {
-                    codeChange.LeadingTrivia = codeChange.LeadingTrivia ?? new Formatting();
-                    codeChange.LeadingTrivia.NumberOfSpaces += 12;
-                }
+                codeChange.LeadingTrivia = codeChange.LeadingTrivia ?? new Formatting();
                 codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite, codeChange?.LeadingTrivia?.NumberOfSpaces);
             }
 
@@ -362,11 +358,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
                 modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}Connection'");
-            }
-
-            if (stringToModify.Contains("{1}"))
-            {
-                modifiedString = modifiedString.Replace("{1}", new string(' ', spaces.GetValueOrDefault() + 4));
             }
 
             return modifiedString;

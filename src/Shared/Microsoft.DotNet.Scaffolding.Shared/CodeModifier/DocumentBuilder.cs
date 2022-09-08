@@ -194,12 +194,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         internal static MethodDeclarationSyntax GetMethodFromSyntaxRoot(CompilationUnitSyntax root, string methodIdentifier)
         {
-            var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+            BaseNamespaceDeclarationSyntax namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
+            if (namespaceNode == null)
+            {
+                namespaceNode = root.Members.OfType<FileScopedNamespaceDeclarationSyntax>()?.FirstOrDefault();
+            }
+            
             var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault() ??
                             root?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();  
             if (classNode?.ChildNodes().FirstOrDefault(
-                n => n is MethodDeclarationSyntax syntax &&
-                syntax.Identifier.ToString().Equals(methodIdentifier, StringComparison.OrdinalIgnoreCase)) is MethodDeclarationSyntax method)
+                    n => n is MethodDeclarationSyntax syntax &&
+                    syntax.Identifier.ToString().Equals(methodIdentifier, StringComparison.OrdinalIgnoreCase)) is MethodDeclarationSyntax method)
             {
                 return method;
             }

@@ -53,9 +53,11 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Fail, output: errorMsg));
                     return;
                 }
-
+                
                 _toolOptions.ProjectFilePath = csProjFiles.First();
             }
+            string csprojText = File.ReadAllText(_toolOptions.ProjectFilePath);
+            _toolOptions.ShortTfms = ProjectModifierHelper.ProcessCsprojFile(csprojText);
 
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
             if (codeModifierConfig is null || !codeModifierConfig.Files.Any())

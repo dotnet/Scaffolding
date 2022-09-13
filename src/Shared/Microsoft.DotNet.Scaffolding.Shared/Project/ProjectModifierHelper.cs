@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
@@ -82,6 +84,64 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Parses the csproj xml text and gets one or more TargetFrameworks for the project.
+        /// </summary>
+        /// <param name="csprojText">.csproj file as string</param>
+        /// <returns>string[] containing target frameworks of the project</returns>
+        internal static string[] ProcessCsprojFile(string csprojText)
+        {
+            List<string> processedTfms = new List<string>();
+            if (!string.IsNullOrEmpty(csprojText))
+            {
+                //use XDocument to get all csproj elements.
+                XDocument document = XDocument.Parse(csprojText);
+                var docNodes = document.Root?.Elements();
+                var allElements = docNodes?.SelectMany(x => x.Elements());
+                //add them to a dictionary for easy comparisons.
+                var csprojVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                if (allElements != null && allElements.Any())
+                {
+                    foreach (var elem in allElements)
+                    {
+                        //dont' add PackageReference(s) since they are useless for getting tfm properties.
+                        if (!elem.Name.LocalName.Equals("PackageReference", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //change the keys from TargetFramework to $(TargetFramework) and so forth for nested variable analysis.
+                            //eg. analysing <TargetFramework>$(X)</TargetFramework> and getting the value for $(X).
+                            //makes for a easy string comparison without using regex and splitting.
+                            csprojVariables.TryAdd(string.Format("$({0})", elem.Name.LocalName), elem.Value);
+                        }
+                    }
+                }
+
+                //if only one TargetFramework
+                if (csprojVariables.TryGetValue("$(TargetFramework)", out string tfmValue))
+                {
+                    string processedTfm = ProcessTfm(tfmValue.Trim(), csprojVariables);
+                    if (!string.IsNullOrEmpty(processedTfm) && ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(processedTfm, StringComparer.OrdinalIgnoreCase))
+                    {
+                        processedTfms.Add(processedTfm);
+                    }
+                }
+                //if multiple, split by ';' and add them all.
+                else if (csprojVariables.TryGetValue("$(TargetFrameworks)", out string tfms))
+                {
+                    string processedTfm = ProcessTfm(tfms.Trim(), csprojVariables);
+                    //tfms should be separated by ;
+                    var splitTfms = processedTfm.Split(";");
+                    foreach (var tfm in splitTfms)
+                    {
+                        if (!string.IsNullOrEmpty(tfm) && ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(tfm, StringComparer.OrdinalIgnoreCase))
+                        {
+                            processedTfms.Add(tfm);
+                        }
+                    }
+                }
+            }
+            return processedTfms.ToArray();
         }
 
         // Returns true when there is no Startup.cs or equivalent
@@ -521,6 +581,46 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 }
             }
             return filteredCodeBlocks.ToArray();
+        }
+
+        /// <summary>
+        /// Take the tfm value in the csproj and use the Dictionary of variables to find its true value.
+        /// </summary>
+        /// <param name="tfm">value for <TargetFramework/> or '<TargetFrameworks/> in the csproj file</param>
+        /// <param name="csprojVariables">dictionary with all csproj properties and values</param>
+        /// <returns></returns>
+        internal static string ProcessTfm(string tfm, Dictionary<string, string> csprojVariables)
+        {
+            if (string.IsNullOrEmpty(tfm))
+            {
+                return string.Empty;
+            }
+
+            bool tfmHasVars = true;
+            while (tfmHasVars)
+            {
+                //if the value is in the tfm dictionary (valid values), return it.
+                if (ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(tfm, StringComparer.OrdinalIgnoreCase))
+                {
+                    return tfm;
+                }
+                //if the value has a variable (key) in it, replace it with its value.
+                else if (tfm.Contains('$'))
+                {
+                    foreach (var key in csprojVariables.Keys)
+                    {
+                        if (tfm.Contains(key, StringComparison.OrdinalIgnoreCase) && csprojVariables.TryGetValue(key, out string val))
+                        {
+                            tfm = tfm.Replace(key, val);
+                        }
+                    }
+                }
+                else
+                {
+                    return tfm;
+                }
+            }
+            return tfm;
         }
     }
 }

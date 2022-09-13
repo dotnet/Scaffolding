@@ -497,6 +497,33 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         }
 
+        [Fact]
+        public void ProcessCsprojFile()
+        {
+            var net7Tfms = ProjectModifierHelper.ProcessCsprojFile(Net7Csproj);
+            var net7Tfms2 = ProjectModifierHelper.ProcessCsprojFile(Net7CsprojVariabledCsproj);
+            var net7Tfms3 = ProjectModifierHelper.ProcessCsprojFile(Net7CsprojVariabledCsproj2);
+            Assert.True(net7Tfms.Length == 1 && net7Tfms2.Length == 1 && net7Tfms3.Length == 1);
+            Assert.True(net7Tfms.First().Equals("net7.0") && net7Tfms2.First().Equals("net7.0") && net7Tfms3.First().Equals("net7.0"));
+
+            var emptyTfms = ProjectModifierHelper.ProcessCsprojFile(EmptyCsproj);
+            var emptyTfms2 = ProjectModifierHelper.ProcessCsprojFile(EmptyCsproj2);
+            Assert.True(emptyTfms.Length == 0 && emptyTfms2.Length == 0);
+
+            var invalidTfm = ProjectModifierHelper.ProcessCsprojFile(InvalidCsproj);
+            var invalidTfm2 = ProjectModifierHelper.ProcessCsprojFile(InvalidCsproj2);
+            var invalidTfm3 = ProjectModifierHelper.ProcessCsprojFile(InvalidCsproj3);
+            Assert.True(invalidTfm.Length == 0 && invalidTfm2.Length == 0 && invalidTfm3.Length == 0);
+
+            var multiTfm = ProjectModifierHelper.ProcessCsprojFile(MultiTfmCsproj);
+            var multiTfm2 = ProjectModifierHelper.ProcessCsprojFile(MultiTfmVariabledCsproj);
+            var multiTfm3 = ProjectModifierHelper.ProcessCsprojFile(MultiTfmVariabledCsproj2);
+            Assert.True(multiTfm.Length == 2 && net7Tfms2.Length == 1 && multiTfm3.Length == 3);
+            Assert.True(multiTfm.Contains("net6.0") && multiTfm.Contains("net7.0"));
+            Assert.True(multiTfm2.Contains("net6.0") && multiTfm2.Contains("net7.0"));
+            Assert.True(multiTfm3.Contains("net5.0") && multiTfm3.Contains("net6.0") && multiTfm3.Contains("net7.0"));
+        }
+
         private static readonly ModelType startupModel = new ModelType
         {
             Name = "Startup",

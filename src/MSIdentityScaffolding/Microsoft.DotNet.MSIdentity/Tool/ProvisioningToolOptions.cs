@@ -15,6 +15,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public string? ProjectFilePath { get; set; }
 
         /// <summary>
+        /// Short target framework from the given ProjectFilePath. List to allow multiple tfms.
+        /// eg. net6.0, net7.0 etc.
+        /// </summary>
+        public IList<string> ShortTfms { get; set; } = new List<string>();
+
+        /// <summary>
         /// Path to appsettings.json file
         /// </summary>   
         public string? AppSettingsFilePath { get; set; }

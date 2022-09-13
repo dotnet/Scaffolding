@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
             return string.Empty;
         }
 
-        private static Dictionary<string, string> ShortTfmDictionary = new Dictionary<string, string>()
+        internal static Dictionary<string, string> ShortTfmDictionary = new Dictionary<string, string>()
         {
             { ".NETCoreApp,Version=v3.1", "netcoreapp3.1" },
             { ".NETCoreApp,Version=v5.0", "net5.0" },

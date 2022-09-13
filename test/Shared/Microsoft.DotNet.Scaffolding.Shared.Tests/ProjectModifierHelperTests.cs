@@ -498,12 +498,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public void ProcessTfmTests()
-        {
-
-        }
-
-        [Fact]
         public void ProcessCsprojFile()
         {
             var net7Tfms = ProjectModifierHelper.ProcessCsprojFile(Net7Csproj);

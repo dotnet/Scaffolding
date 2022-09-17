@@ -89,6 +89,11 @@ namespace Microsoft.DotNet.MSIdentity
 
                 case Commands.UPDATE_PROJECT_COMMAND:
                     applicationParameters = await ReadMicrosoftIdentityApplication(tokenCredential, projectSettings.ApplicationParameters);
+                    if (applicationParameters.IsB2C)
+                    {
+                        GetOrCreateSignupSigninPolicyId(tokenCredential, applicationParameters);
+                    }
+
                     await UpdateProject(tokenCredential, applicationParameters, projectDescription);
                     return applicationParameters;
 
@@ -152,6 +157,25 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             return effectiveApplicationParameters;
+        }
+
+        /// <summary>
+        /// TODO: create a service principal with B2C scopes, check for an existing Sign-up sign-in policy, add if not exists
+        /// </summary>
+        /// <param name="tokenCredential"></param>
+        /// <param name="applicationParameters"></param>
+        private void GetOrCreateSignupSigninPolicyId(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        {
+            var susiPolicy = "b2c_susi_1";
+
+            // 0. Create a service principal with Identity.ReadWrite scopes in order to make sure there is an existing susipolicy
+
+            // 1. Check to see if there is an existing susipolicy
+            // if existing: susiPolicy = existing
+
+            // 2. Else, create a susipolicy
+
+            applicationParameters.SusiPolicy = susiPolicy;
         }
 
         /// <summary>

@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Core;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensions.Msal;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
@@ -19,17 +18,23 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         private const string RedirectUri = "http://localhost";
 #pragma warning restore S1075 // URIs should not be hardcoded
 
-        public MsalTokenCredential(string? tenantId, string? username, string instance = "https://login.microsoftonline.com")
+        public MsalTokenCredential(
+            string? tenantId,
+            string? username,
+            string instance = "https://login.microsoftonline.com",
+            string clientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46") 
         {
             TenantId = tenantId ?? "organizations"; // MSA-passthrough
             Username = username;
             Instance = instance;
+            ClientId = clientId;
         }
 
         private IPublicClientApplication? App { get; set; }
         private string? TenantId { get; set; }
-        private string Instance { get; set; }
         private string? Username { get; set; }
+        private string Instance { get; set; }
+        private string ClientId { get; set; }
 
         public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
         {
@@ -45,7 +50,6 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                 string cacheDir = Path.Combine(userProfile, @"AppData\Local\.IdentityService");
 
                 // TODO: what about the other platforms?
-                string clientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"; // TODO switch client ID if WAM
                 var storageProperties =
                      new StorageCreationPropertiesBuilder(
                          "msal.cache",
@@ -63,7 +67,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                      */
                      .Build();
 
-                App = PublicClientApplicationBuilder.Create(clientId)
+                App = PublicClientApplicationBuilder.Create(ClientId)
                   .WithRedirectUri(RedirectUri)
                   .Build();
 
@@ -79,6 +83,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             var app = await GetOrCreateApp();
             AuthenticationResult? result = null;
             var accounts = await app.GetAccountsAsync()!;
+
             IAccount? account;
 
             if (!string.IsNullOrEmpty(Username))

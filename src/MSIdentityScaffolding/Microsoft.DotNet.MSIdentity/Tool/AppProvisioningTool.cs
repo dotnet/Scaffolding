@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,7 @@ using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.MSIdentity
 {
@@ -91,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity
                     applicationParameters = await ReadMicrosoftIdentityApplication(tokenCredential, projectSettings.ApplicationParameters);
                     if (applicationParameters.IsB2C)
                     {
-                        GetOrCreateSignupSigninPolicyId(tokenCredential, applicationParameters);
+                        await MicrosoftIdentityPlatformApplicationManager.GetOrCreateSignupSigninPolicyIdAsync(tokenCredential, applicationParameters, ProvisioningToolOptions);
                     }
 
                     await UpdateProject(tokenCredential, applicationParameters, projectDescription);
@@ -157,25 +159,6 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             return effectiveApplicationParameters;
-        }
-
-        /// <summary>
-        /// TODO: create a service principal with B2C scopes, check for an existing Sign-up sign-in policy, add if not exists
-        /// </summary>
-        /// <param name="tokenCredential"></param>
-        /// <param name="applicationParameters"></param>
-        private void GetOrCreateSignupSigninPolicyId(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
-        {
-            var susiPolicy = "b2c_susi_1";
-
-            // 0. Create a service principal with Identity.ReadWrite scopes in order to make sure there is an existing susipolicy
-
-            // 1. Check to see if there is an existing susipolicy
-            // if existing: susiPolicy = existing
-
-            // 2. Else, create a susipolicy
-
-            applicationParameters.SusiPolicy = susiPolicy;
         }
 
         /// <summary>
@@ -377,7 +360,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             return clientApplicationParameters;
         }
-
+        
         /// <summary>
         /// 
         /// </summary>

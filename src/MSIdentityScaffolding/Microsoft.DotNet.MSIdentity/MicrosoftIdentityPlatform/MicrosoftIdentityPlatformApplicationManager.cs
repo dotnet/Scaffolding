@@ -1,17 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+extern alias GraphBeta;
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
+using Azure.Identity;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
+using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
+using static System.Net.WebRequestMethods;
+using MsGraphBeta = GraphBeta.Microsoft.Graph;
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
@@ -71,7 +78,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // and useful for Blazorwasm hosted applications. We create it always.
             ServicePrincipal servicePrincipal = new ServicePrincipal
             {
-                AppId = createdApplication.AppId,
+                AppId = createdApplication.AppId
             };
 
             ServicePrincipal? createdSp = await graphServiceClient.ServicePrincipals
@@ -143,6 +150,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 apiScopes += " offline_access";
             }
+            if (!apiScopes.Contains("IdentityUserFlow.ReadWrite.All", StringComparison.OrdinalIgnoreCase))
+            {
+                //TODO Test me
+                apiScopes += "IdentityUserFlow.ReadWrite.All"; // For configuring B2C susi policy
+            }
 
             return apiScopes.Trim();
         }
@@ -199,8 +211,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
-
-            StringBuilder output = new StringBuilder();
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -263,7 +273,69 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 output);
         }
 
-        private static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
+        /// <summary>
+        /// TODO: create a service principal with B2C scopes, check for an existing Sign-up sign-in policy, add if not exists
+        /// </summary>
+        /// <param name="tokenCredential"></param>
+        /// <param name="applicationParameters"></param>
+        internal async Task GetOrCreateSignupSigninPolicyIdAsync(TokenCredential tokenCredential, ApplicationParameters applicationParameters, ProvisioningToolOptions provisioningToolOptions)
+        {
+            Debugger.Launch();
+            // TODO: add "IdentityUserFlow.ReadWrite.All" to the app registration's permissions
+            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+
+            // 1. Get a client secret
+            var passwordCredential = new PasswordCredential
+            {
+                DisplayName = "Secret used for configuring SUSI Policy"
+            };
+
+            // TODO: What if there are too many passwords?
+            PasswordCredential returnedPasswordCredential = await graphServiceClient.Applications[$"{applicationParameters.GraphEntityId}"]
+                        .AddPassword(passwordCredential)
+                        .Request()
+                        .PostAsync();
+
+            var clientSecret = returnedPasswordCredential.SecretText;
+
+            ClientSecretCredential credential = new ClientSecretCredential(
+                applicationParameters.TenantId,
+                applicationParameters.ClientId,
+                clientSecret);
+
+            var initialScopes = new[] { "https://graph.microsoft.com/.default" };
+            var graphBeta = new MsGraphBeta.GraphServiceClient(new TokenCredentialAuthenticationProvider(credential, initialScopes));
+
+            // Check to see if there are any existing B2C Sign-up Sign-in Policies
+            var b2cUserFlows = await graphBeta.Identity.B2cUserFlows
+               .Request()
+               .GetAsync();
+
+            var defaultUserFlow = b2cUserFlows.FirstOrDefault(u => u.UserFlowType.Equals(UserFlowType.SignUpOrSignIn));
+            if (defaultUserFlow is null)
+            {
+                defaultUserFlow = new MsGraphBeta.B2cIdentityUserFlow()
+                {
+                    Id = "susi_1",
+                    UserFlowType = MsGraphBeta.UserFlowType.SignUpOrSignIn,
+                    UserFlowTypeVersion = 3
+                };
+
+                await graphBeta.Identity.B2cUserFlows
+                    .Request()
+                    .AddAsync(defaultUserFlow);
+            }
+
+            applicationParameters.SusiPolicy = defaultUserFlow?.Id ?? "b2c_susi_1"; // TODO check me
+
+            // Delete the created secret
+            await graphServiceClient.Applications[$"{applicationParameters.GraphEntityId}"]
+                   .RemovePassword(returnedPasswordCredential.KeyId.GetValueOrDefault())
+                   .Request()
+                   .PostAsync();
+        }
+
+        internal static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
         {
             var servicePrincipal = (await graphServiceClient.ServicePrincipals
                                 .Request()
@@ -789,10 +861,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         internal GraphServiceClient GetGraphServiceClient(TokenCredential tokenCredential)
         {
-            if (_graphServiceClient == null)
-            {
-                _graphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(tokenCredential));
-            }
+            _graphServiceClient ??= new GraphServiceClient(new TokenCredentialAuthenticationProvider(tokenCredential));
             return _graphServiceClient;
         }
 

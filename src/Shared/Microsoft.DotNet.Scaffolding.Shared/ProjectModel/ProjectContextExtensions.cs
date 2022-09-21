@@ -58,7 +58,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
                 TargetFramework = projectInformation.TargetFramework,
                 TargetFrameworkMoniker = projectInformation.TargetFrameworkMoniker,
                 GeneratedImplicitNamespaceImportFile = projectInformation.GeneratedImplicitNamespaceImportFile,
-                Nullable = projectInformation.Nullable
+                Nullable = projectInformation.Nullable,
+                ProjectReferenceInformation = projectInformation.ProjectReferenceInformation
             };
             return newProjectContext;
         }

@@ -29,6 +29,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         /// Items included in the project reference for compilation
         /// &lt;Compile Include="" /&gt;
         /// </summary>
-        public IEnumerable<string> CompilationItems { get; set; }
+        public List<string> CompilationItems { get; set; }
     }
 }

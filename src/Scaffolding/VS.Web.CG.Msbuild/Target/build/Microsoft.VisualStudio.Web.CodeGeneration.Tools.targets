@@ -17,6 +17,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <EvaluateProjectInfoForCodeGenerationDependsOn>
       $(EvaluateProjectInfoForCodeGenerationDependsOn);
       ResolveReferences;
+      ResolveProjectReferences;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
 

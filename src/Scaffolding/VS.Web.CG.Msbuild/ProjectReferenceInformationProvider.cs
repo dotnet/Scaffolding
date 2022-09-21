@@ -97,7 +97,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             {
                 ProjectName = name,
                 AssemblyName = assemblyName,
-                CompilationItems = compileItems,
+                CompilationItems = compileItems.ToList(),
                 FullPath = fullPath
             };
         }

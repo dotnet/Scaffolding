@@ -50,7 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             {
                 ProjectName = name,
                 AssemblyName = assemblyName,
-                CompilationItems = compileItems,
+                CompilationItems = compileItems.ToList(),
                 FullPath = fullPath
             };
         }

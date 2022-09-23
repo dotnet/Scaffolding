@@ -81,16 +81,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Directory.CreateDirectory(libraryPath);
             Directory.CreateDirectory(Path.Combine(projectPath, "toolAssets", "net6.0"));
 
-            fileProvider.Add($"{projectPath}\\TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
+            fileProvider.Add($"{projectPath}//TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, $"{projectPath}\\toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}\\{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net6ReferencingProjectText);
-            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}\\Program.cs", MsBuildProjectStrings.MinimalProgramcsFile);
-            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}\\{MsBuildProjectStrings.Library2ProjectName}", MsBuildProjectStrings.Net6Library);
-            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}\\Blog.cs", MsBuildProjectStrings.BlogModelText);
+            fileProvider.Copy(msbuildTaskDllPath, $"{projectPath}/toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net6ReferencingProjectText);
+            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}/Program.cs", MsBuildProjectStrings.MinimalProgramcsFile);
+            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/{MsBuildProjectStrings.Library2ProjectName}", MsBuildProjectStrings.Net6Library);
+            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/Blog.cs", MsBuildProjectStrings.BlogModelText);
 
-            RestoreAndBuild(fileProvider.Root, outputHelper, $"{MsBuildProjectStrings.RootProjectFolder}\\{MsBuildProjectStrings.RootProjectName}");
+            RestoreAndBuild(fileProvider.Root, outputHelper, $"{MsBuildProjectStrings.RootProjectFolder}/{MsBuildProjectStrings.RootProjectName}");
         }
 
         internal void SetupCodeGenerationProjectNullableDisabled(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)

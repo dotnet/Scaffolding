@@ -69,8 +69,28 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add("Startup.cs", MsBuildProjectStrings.EmptyTestStartupText);
             fileProvider.Add(MsBuildProjectStrings.DbContextInheritanceProgramName, MsBuildProjectStrings.DbContextInheritanceProjectProgramText);
             fileProvider.Add(MsBuildProjectStrings.AppSettingsFileName, MsBuildProjectStrings.AppSettingsFileTxt);
-
             RestoreAndBuild(fileProvider.Root, outputHelper);
+        }
+
+        internal void SetupReferencedCodeGenerationProject(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
+        {
+            fileProvider.Add("global.json", GlobalJsonText);
+            var projectPath = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectFolder);
+            var libraryPath = Path.Combine(fileProvider.Root, MsBuildProjectStrings.LibraryProjectFolder);
+            Directory.CreateDirectory(projectPath);
+            Directory.CreateDirectory(libraryPath);
+            Directory.CreateDirectory(Path.Combine(projectPath, "toolAssets", "net6.0"));
+
+            fileProvider.Add($"{projectPath}\\TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, $"{projectPath}\\toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}\\{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net6ReferencingProjectText);
+            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}\\Program.cs", MsBuildProjectStrings.MinimalProgramcsFile);
+            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}\\{MsBuildProjectStrings.Library2ProjectName}", MsBuildProjectStrings.Net6Library);
+            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}\\Blog.cs", MsBuildProjectStrings.BlogModelText);
+
+            RestoreAndBuild(fileProvider.Root, outputHelper, $"{MsBuildProjectStrings.RootProjectFolder}\\{MsBuildProjectStrings.RootProjectName}");
         }
 
         internal void SetupCodeGenerationProjectNullableDisabled(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
@@ -191,10 +211,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
         }
 
-        private void RestoreAndBuild(string path, ITestOutputHelper output)
+        private void RestoreAndBuild(string path, ITestOutputHelper output, string projectName = null)
         {
+            projectName = projectName ?? string.Empty;
             var result = Command.CreateDotNet("restore",
-                new string[] { })
+                new string[] { projectName })
                 .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
                 .InWorkingDirectory(path)
                 .OnErrorLine(l => output.WriteLine(l))
@@ -206,7 +227,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 throw new InvalidOperationException($"Restore failed with exit code: {result.ExitCode} :: Dotnet path: {DotNetMuxer.MuxerPathOrDefault()}");
             }
 
-            result = Command.CreateDotNet("build", new string[] { "-c", Configuration })
+            result = Command.CreateDotNet("build", new string[] { projectName, "-c", Configuration })
                 .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
                 .InWorkingDirectory(path)
                 .OnErrorLine(l => output.WriteLine(l))

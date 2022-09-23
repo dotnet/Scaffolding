@@ -10,7 +10,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class MsBuildProjectStrings
     {
+        public const string RootProjectFolder = "Test";
+        public const string LibraryProjectFolder = "Library";
         public const string RootProjectName = "Test.csproj";
+        public const string Library2ProjectName = "Library.csproj";
         public const string RootProjectName2 = "Test2.csproj";
         public const string RootProjectName3 = "Test3.csproj";
 
@@ -933,6 +936,40 @@ namespace Test
   </ItemGroup>
 </Project>
 ";
+
+        public const string Net6ReferencingProjectText = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
+  <PropertyGroup>
+    <RestoreSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+    </RestoreSources>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""6.0.9"" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include=""..\Library\Library.csproj"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net6Library = @"
+<Project Sdk=""Microsoft.NET.Sdk"">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
+";
+
         public const string Net6NullableEnabled = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
@@ -1160,6 +1197,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <EvaluateProjectInfoForCodeGenerationDependsOn>
       $(EvaluateProjectInfoForCodeGenerationDependsOn);
       ResolveReferences;
+      ResolveProjectReferences;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
   <PropertyGroup>

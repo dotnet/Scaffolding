@@ -106,7 +106,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.Contains(minimalApiModel.MethodName, programCsText);
         }
 
-        [SkippableFact]
+        [Fact]
         public void ValidateAndGetOutputPathTests()
         {
             Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));

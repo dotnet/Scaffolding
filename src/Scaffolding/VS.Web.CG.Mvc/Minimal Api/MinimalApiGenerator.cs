@@ -129,9 +129,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             string outputFileName = commandLineModel.EndpintsClassName + Constants.CodeFileExtension;
             string outputFolder = string.IsNullOrEmpty(commandLineModel.RelativeFolderPath)
                 ? AppInfo.ApplicationBasePath
-                : Path.Join(AppInfo.ApplicationBasePath, commandLineModel.RelativeFolderPath);
+                : Path.Combine(AppInfo.ApplicationBasePath, commandLineModel.RelativeFolderPath);
 
-            var outputPath = Path.Join(outputFolder, outputFileName);
+            var outputPath = Path.Combine(outputFolder, outputFileName);
             return outputPath;
         }
 

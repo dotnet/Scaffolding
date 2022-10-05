@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         {
             Mock<IApplicationInfo> _mockApp = new Mock<IApplicationInfo>();
             bool isWindows = OperatingSystem.IsWindows();
-            var applicationBasePath = Path.Combine("C:", "AppPath");
+            var applicationBasePath = "AppPath";
             _mockApp.Setup(app => app.ApplicationBasePath)
                 .Returns(applicationBasePath);
             var minimalApiGenerator = CreateMinimalApiGenerator();
@@ -130,15 +130,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             if (isWindows)
             {
-                Assert.Equal(@"C:\AppPath\Endpoints\Endpoint\testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
-                Assert.Equal(@"C:\AppPath\testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
+                Assert.Equal(@"AppPath\Endpoints\Endpoint\testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
+                Assert.Equal(@"AppPath\testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
             }
             else
             {
-                Assert.Equal(@"C:/AppPath/Endpoints/Endpoint/testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
-                Assert.Equal(@"C:/AppPath/testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
-            }
-            
+                Assert.Equal(@"AppPath/Endpoints/Endpoint/testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
+                Assert.Equal(@"AppPath/testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
+            }   
         }
 
         [Fact]
@@ -179,7 +178,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             var project = workspace.AddProject(projectInfo);
             appInfo.Setup(app => app.ApplicationBasePath)
-                .Returns(@"C:\AppPath");
+                .Returns(@"AppPath");
 
             projectContext.Setup(ctx => ctx.AssemblyName)
                 .Returns("TestAssembly");

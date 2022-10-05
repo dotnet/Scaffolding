@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption()
+                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption(), SusiPolicyIdOption()
             };
 
         internal static Command UpdateAppRegistrationCommand() =>

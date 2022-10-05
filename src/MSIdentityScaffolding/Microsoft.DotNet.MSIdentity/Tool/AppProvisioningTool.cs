@@ -216,6 +216,10 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 projectSettings.ApplicationParameters.AppIdUri = provisioningToolOptions.HostedAppIdUri;
             }
+            if (!string.IsNullOrEmpty(provisioningToolOptions.SusiPolicyId))
+            {
+                projectSettings.ApplicationParameters.SusiPolicy = provisioningToolOptions.SusiPolicyId;
+            }
 
             return projectSettings;
         }

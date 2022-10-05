@@ -40,7 +40,8 @@ namespace Microsoft.DotNet.MSIdentity.Project
                 }
             }
 
-            return null;
+            // If projectDescription cannot be inferred, default to Web App
+            return ProjectDescriptions.FirstOrDefault(p => string.Equals(ProjectTypes.WebApp, p.Identifier));
         }
 
         static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions
@@ -52,16 +53,10 @@ namespace Microsoft.DotNet.MSIdentity.Project
         {
             get
             {
-                if (_projectDescriptions == null)
-                {
-                    _projectDescriptions = AppProvisioningTool.Properties
+                _projectDescriptions ??= AppProvisioningTool.Properties
                         .Where(p => p.Name.StartsWith("dotnet") && p.PropertyType == typeof(byte[]))
                         .Select(p => GetProjectDescription(p))
                         .ToList();
-
-                    //  TODO: provide an extension mechanism to add such files outside the tool.
-                    //  In that case the validation would not be an exception? but would need to provide error messages
-                }
 
                 return _projectDescriptions;
             }

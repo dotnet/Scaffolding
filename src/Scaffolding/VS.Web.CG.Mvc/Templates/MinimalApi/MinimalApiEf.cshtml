@@ -97,8 +97,8 @@ public static class @endPointsClassName
             {
                 return @resultsNotFound;
             }
-            //update model properties here
-
+            
+            db.Update(@Model.ModelVariable);
             await db.SaveChangesAsync();
 
             return @resultsNoContent;

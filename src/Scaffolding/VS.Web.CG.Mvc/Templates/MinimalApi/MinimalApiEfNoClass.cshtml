@@ -85,8 +85,8 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
             {
                 return @resultsNotFound;
             }
-            //update model properties here
-
+            
+            db.Update(@Model.ModelVariable);
             await db.SaveChangesAsync();
 
             return @resultsNoContent;

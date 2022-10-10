@@ -92,6 +92,139 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString().TrimEnd()));
         }
 
+        internal static string GetCodeFileString(CodeFile file, string identifier) // todo make all code files strings
+        {
+            // Resource files cannot contain '-' (dash) or '.' (period)
+            var codeFilePropertyName = $"add_{identifier.Replace('-', '_')}_{file.FileName.Replace('.', '_')}";
+            var property = AppProvisioningTool.Properties.FirstOrDefault(
+                p => p.Name.Equals(codeFilePropertyName));
+
+            if (property is null)
+            {
+                throw new FormatException($"Resource property for {file.FileName} could not be found. ");
+            }
+
+            var codeFileString = property.GetValue(typeof(Resources))?.ToString();
+
+            if (string.IsNullOrEmpty(codeFileString))
+            {
+                throw new FormatException($"CodeFile string for {file.FileName} was empty.");
+            }
+
+            return codeFileString;
+        }
+
+        internal static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options, StringBuilder output)
+        {
+            foreach ((string methodName, Method methodChanges) in methods)
+            {
+                if (methodChanges == null)
+                {
+                    continue;
+                }
+
+                var methodNode = ProjectModifierHelper.GetOriginalMethod(classNode, methodName, methodChanges);
+                if (methodNode is null)
+                {
+                    continue;
+                }
+
+                var parameters = ProjectModifierHelper.VerifyParameters(methodChanges.Parameters, methodNode.ParameterList.Parameters.ToList());
+                foreach ((string oldValue, string newValue) in parameters)
+                {
+                    methodChanges.CodeChanges = ProjectModifierHelper.UpdateVariables(methodChanges.CodeChanges, oldValue, newValue);
+                }
+
+                var updatedMethodNode = DocumentBuilder.GetModifiedMethod(fileName, methodNode, methodChanges, options, output);
+                if (updatedMethodNode != null)
+                {
+                    classNode = classNode.ReplaceNode(methodNode, updatedMethodNode);
+                }
+            }
+
+            return classNode;
+        }
+
+        internal static async Task ModifyCshtmlFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
+        {
+            var fileDoc = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
+            if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
+            {
+                return;
+            }
+
+            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+            if (!filteredCodeChanges.Any())
+            {
+                return;
+            }
+
+            // add code snippets/changes.
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
+            if (editedDocument != null)
+            {
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
+            }
+        }
+
+        /// <summary>
+        /// Updates .razor and .html files via string replacement
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="project"></param>
+        /// <param name="toolOptions"></param>
+        /// <returns></returns>
+        internal static async Task ApplyTextReplacements(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
+        {
+            var document = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
+            if (document is null)
+            {
+                return;
+            }
+
+            var replacements = file.Replacements.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+            if (!replacements.Any())
+            {
+                return;
+            }
+
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
+            if (editedDocument != null)
+            {
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
+            }
+        }
+
+        internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
+        {
+            if (file.FileName.Equals("Startup.cs"))
+            {
+                // Startup class file name may be different
+                file.FileName = await ProjectModifierHelper.GetStartupClass(project.Documents.ToList()) ?? file.FileName;
+            }
+
+            var fileDoc = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
+            if (fileDoc is null || string.IsNullOrEmpty(fileDoc.Name))
+            {
+                return;
+            }
+
+            // get the file document to get the document root for editing.
+            DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
+            if (documentEditor is null)
+            {
+                return;
+            }
+
+            DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
+            var modifiedRoot = ModifyRoot(documentBuilder, options, file);
+            if (modifiedRoot != null)
+            {
+                documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
+                await documentBuilder.WriteToClassFileAsync(fileDoc.Name);
+            }
+        }
+
         private CodeModifierConfig? GetCodeModifierConfig()
         {
             if (string.IsNullOrEmpty(_toolOptions.ProjectType))
@@ -208,58 +341,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        internal static string GetCodeFileString(CodeFile file, string identifier) // todo make all code files strings
-        {
-            // Resource files cannot contain '-' (dash) or '.' (period)
-            var codeFilePropertyName = $"add_{identifier.Replace('-', '_')}_{file.FileName.Replace('.', '_')}";
-            var property = AppProvisioningTool.Properties.FirstOrDefault(
-                p => p.Name.Equals(codeFilePropertyName));
-
-            if (property is null)
-            {
-                throw new FormatException($"Resource property for {file.FileName} could not be found. ");
-            }
-
-            var codeFileString = property.GetValue(typeof(Resources))?.ToString();
-
-            if (string.IsNullOrEmpty(codeFileString))
-            {
-                throw new FormatException($"CodeFile string for {file.FileName} was empty.");
-            }
-
-            return codeFileString;
-        }
-
-        internal async Task ModifyCsFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
-        {
-            if (file.FileName.Equals("Startup.cs"))
-            {
-                // Startup class file name may be different
-                file.FileName = await ProjectModifierHelper.GetStartupClass(project.Documents.ToList()) ?? file.FileName;
-            }
-
-            var fileDoc = project.Documents.Where(d => d.Name.EndsWith(file.FileName)).FirstOrDefault();
-            if (fileDoc is null || string.IsNullOrEmpty(fileDoc.Name))
-            {
-                return;
-            }
-
-            // get the file document to get the document root for editing.
-            DocumentEditor documentEditor = await DocumentEditor.CreateAsync(fileDoc);
-            if (documentEditor is null)
-            {
-                return;
-            }
-
-            DocumentBuilder documentBuilder = new DocumentBuilder(documentEditor, file, _consoleLogger);
-            var modifiedRoot = ModifyRoot(documentBuilder, options, file);
-            if (modifiedRoot != null)
-            {
-                documentEditor.ReplaceNode(documentEditor.OriginalRoot, modifiedRoot);
-                await documentBuilder.WriteToClassFileAsync(fileDoc.Name);
-            }
-        }
-
         /// <summary>
         /// Modifies root if there any applicable changes
         /// </summary>
@@ -323,87 +404,6 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
 
             return root;
-        }
-
-        private static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options, StringBuilder output)
-        {
-            foreach ((string methodName, Method methodChanges) in methods)
-            {
-                if (methodChanges == null)
-                {
-                    continue;
-                }
-
-                var methodNode = ProjectModifierHelper.GetOriginalMethod(classNode, methodName, methodChanges);
-                if (methodNode is null)
-                {
-                    continue;
-                }
-
-                var parameters = ProjectModifierHelper.VerifyParameters(methodChanges.Parameters, methodNode.ParameterList.Parameters.ToList());
-                foreach ((string oldValue, string newValue) in parameters)
-                {
-                    methodChanges.CodeChanges = ProjectModifierHelper.UpdateVariables(methodChanges.CodeChanges, oldValue, newValue);
-                }
-
-                var updatedMethodNode = DocumentBuilder.GetModifiedMethod(fileName, methodNode, methodChanges, options, output);
-                if (updatedMethodNode != null)
-                {
-                    classNode = classNode.ReplaceNode(methodNode, updatedMethodNode);
-                }
-            }
-
-            return classNode;
-        }
-
-        internal async Task ModifyCshtmlFile(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
-        {
-            var fileDoc = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
-            if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
-            {
-                return;
-            }
-
-            var filteredCodeChanges = globalMethod.CodeChanges.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
-            if (!filteredCodeChanges.Any())
-            {
-                return;
-            }
-
-            // add code snippets/changes.
-            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
-            if (editedDocument != null)
-            {
-                await ProjectModifierHelper.UpdateDocument(editedDocument);
-            }
-        }
-
-        /// <summary>
-        /// Updates .razor and .html files via string replacement
-        /// </summary>
-        /// <param name="file"></param>
-        /// <param name="project"></param>
-        /// <param name="toolOptions"></param>
-        /// <returns></returns>
-        internal async Task ApplyTextReplacements(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions toolOptions)
-        {
-            var document = project.Documents.FirstOrDefault(d => d.Name.EndsWith(file.FileName));
-            if (document is null)
-            {
-                return;
-            }
-
-            var replacements = file.Replacements.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-            if (!replacements.Any())
-            {
-                return;
-            }
-
-            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
-            if (editedDocument != null)
-            {
-                await ProjectModifierHelper.UpdateDocument(editedDocument);
-            }
         }
     }
 }

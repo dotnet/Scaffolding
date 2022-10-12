@@ -26,13 +26,17 @@ public static class @endPointsClassName
 {
     public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("@routePrefix");
     @{
     if(Model.OpenAPI)
     {
-        @:group.WithOpenApi();
+        @:var group = routes.MapGroup("@routePrefix").WithTags(nameof(@modelName));
+    }
+    else
+    {
+        @:var group = routes.MapGroup("@routePrefix");
     }
     }    
+
         group.MapGet("/", () =>
         {
             return new [] { new @modelConstructor };
@@ -40,9 +44,8 @@ public static class @endPointsClassName
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
-        @:.WithName("@getAllModels")
-        @:.Produces<@modelArray>(StatusCodes.Status200OK);
+        @:.WithOpenApi()
+        @:.WithName("@getAllModels");
     }
     else
     {
@@ -57,9 +60,8 @@ public static class @endPointsClassName
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
-        @:.WithName("@getModelById")
-        @:.Produces<@modelName>(StatusCodes.Status200OK);
+        @:.WithOpenApi()
+        @:.WithName("@getModelById");
     }
     else
     {
@@ -74,9 +76,8 @@ public static class @endPointsClassName
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
-        @:.WithName("@updateModel")
-        @:.Produces(StatusCodes.Status204NoContent);
+        @:.WithOpenApi()
+        @:.WithName("@updateModel");
     }
     else
     {
@@ -91,9 +92,8 @@ public static class @endPointsClassName
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
-        @:.WithName("@createModel")
-        @:.Produces<@modelName>(StatusCodes.Status201Created);
+        @:.WithOpenApi()
+        @:.WithName("@createModel");
     }
     else
     {
@@ -108,9 +108,8 @@ public static class @endPointsClassName
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
-        @:.WithName("@deleteModel")
-        @:.Produces<@modelName>(StatusCodes.Status200OK);
+        @:.WithOpenApi()
+        @:.WithName("@deleteModel");
     }
     else
     {

@@ -78,7 +78,16 @@
 
         group.MapPost("/", (@modelName model) =>
         {
-            //return Results.Created($"/@pluralModel/{model.ID}", model);
+        @{
+        if(Model.OpenAPI)
+        {
+            @://return TypedResults.Created($"/@pluralModel/{model.ID}", model);
+        }
+        else
+        {
+            @://return Results.Created($"/@pluralModel/{model.ID}", model);
+        }
+        }
         })
     @{
     if(Model.OpenAPI)
@@ -94,7 +103,16 @@
 
         group.MapDelete("/{id}", (int id) =>
         {
-            //return Results.Ok(new @modelName { ID = id });
+        @{
+        if(Model.OpenAPI)
+        {
+            @://return TypedResults.Ok(new @modelName { ID = id });
+        }
+        else
+        {
+            @://return Results.Ok(new @modelName { ID = id });
+        }
+        }
         })
     @{
     if(Model.OpenAPI)

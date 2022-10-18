@@ -32,13 +32,17 @@
 }
 public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("@routePrefix");
-    @{
+@{
     if(Model.OpenAPI)
     {
-        @:group.WithOpenApi();
+        @:var group = routes.MapGroup("@routePrefix").WithTags(nameof(@modelName));
     }
-    }    
+    else
+    {
+        @:var group = routes.MapGroup("@routePrefix");
+    }
+}    
+
         group.MapGet("/", async (@dbContextName db) =>
         {
             return await db.@modelToList;
@@ -46,9 +50,8 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@getAllModels")
-        @:.Produces<@modelList>(StatusCodes.Status200OK);
+        @:.WithOpenApi();
     }
     else
     {
@@ -66,10 +69,8 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@getModelById")
-        @:.Produces<@modelName>(StatusCodes.Status200OK)
-        @:.Produces(StatusCodes.Status404NotFound);
+        @:.WithOpenApi();
     }
     else
     {
@@ -94,10 +95,8 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@updateModel")
-        @:.Produces(StatusCodes.Status404NotFound)
-        @:.Produces(StatusCodes.Status204NoContent);
+        @:.WithOpenApi();
     }
     else
     {
@@ -114,9 +113,8 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@createModel")
-        @:.Produces<@modelName>(StatusCodes.Status201Created);
+        @:.WithOpenApi();
     }
     else
     {
@@ -138,10 +136,8 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@deleteModel")
-        @:.Produces<@modelName>(StatusCodes.Status200OK)
-        @:.Produces(StatusCodes.Status404NotFound);
+        @:.WithOpenApi();
     }
     else
     {

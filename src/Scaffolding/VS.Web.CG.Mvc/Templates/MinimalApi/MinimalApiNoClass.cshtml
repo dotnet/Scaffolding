@@ -17,13 +17,17 @@
  
    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("@routePrefix");
-    @{
+@{
     if(Model.OpenAPI)
     {
-        @:group.WithOpenApi();
+        @:var group = routes.MapGroup("@routePrefix").WithTags(nameof(@modelName));
     }
-    }    
+    else
+    {
+        @:var group = routes.MapGroup("@routePrefix");
+    }
+}    
+
         group.MapGet("/", () =>
         {
             return new [] { new @modelConstructor };
@@ -31,9 +35,8 @@
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@getAllModels")
-        @:.Produces<@modelArray>(StatusCodes.Status200OK);
+        @:.WithOpenApi();
     }
     else
     {
@@ -48,9 +51,8 @@
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@getModelById")
-        @:.Produces<@modelName>(StatusCodes.Status200OK);
+        @:.WithOpenApi();
     }
     else
     {
@@ -65,9 +67,8 @@
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@updateModel")
-        @:.Produces(StatusCodes.Status204NoContent);
+        @:.WithOpenApi();
     }
     else
     {
@@ -77,14 +78,22 @@
 
         group.MapPost("/", (@modelName model) =>
         {
-            //return Results.Created($"/@pluralModel/{model.ID}", model);
+        @{
+        if(Model.OpenAPI)
+        {
+            @://return TypedResults.Created($"/@pluralModel/{model.ID}", model);
+        }
+        else
+        {
+            @://return Results.Created($"/@pluralModel/{model.ID}", model);
+        }
+        }
         })
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@createModel")
-        @:.Produces<@modelName>(StatusCodes.Status201Created);
+        @:.WithOpenApi();
     }
     else
     {
@@ -94,14 +103,22 @@
 
         group.MapDelete("/{id}", (int id) =>
         {
-            //return Results.Ok(new @modelName { ID = id });
+        @{
+        if(Model.OpenAPI)
+        {
+            @://return TypedResults.Ok(new @modelName { ID = id });
+        }
+        else
+        {
+            @://return Results.Ok(new @modelName { ID = id });
+        }
+        }
         })
     @{
     if(Model.OpenAPI)
     {
-        @:.WithTags(nameof(@modelName))
         @:.WithName("@deleteModel")
-        @:.Produces<@modelName>(StatusCodes.Status200OK);
+        @:.WithOpenApi();
     }
     else
     {

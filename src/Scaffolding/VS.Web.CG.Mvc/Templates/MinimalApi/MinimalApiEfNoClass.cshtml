@@ -30,9 +30,9 @@
     string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", @routePrefix, @Model.ModelVariable, @primaryKeyName, @Model.ModelVariable);
     string resultsCreated = $"{resultsExtension}.Created(" + $"{@createdApiVar}" + ")";
 }
-public static void @Model.MethodName (this IEndpointRouteBuilder routes)
+    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-@{
+    @{
     if(Model.OpenAPI)
     {
         @:var group = routes.MapGroup("@routePrefix").WithTags(nameof(@modelName));
@@ -47,17 +47,23 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
         {
             return await db.@modelToList;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI && Model.UseTypedResults)
+        {
         @:.WithName("@getAllModels")
         @:.WithOpenApi();
-    }
-    else
-    {
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@getAllModels")
+        @:.WithOpenApi()
+        @:.Produces<@modelList>(StatusCodes.Status200OK);
+        }
+        else
+        {
         @:.WithName("@getAllModels");
+        }
     }
-}
 
         group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
@@ -66,17 +72,24 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
                     ? @resultsOkModel
                     : @resultsNotFound;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI && Model.UseTypedResults)
+        {
         @:.WithName("@getModelById")
         @:.WithOpenApi();
-    }
-    else
-    {
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@getModelById")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
+        }
+        else
+        {
         @:.WithName("@getModelById");
+        }
     }
-}
 
         group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
@@ -92,17 +105,24 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 
             return @resultsNoContent;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI && Model.UseTypedResults)
+        {
         @:.WithName("@updateModel")
         @:.WithOpenApi();
-    }
-    else
-    {
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@updateModel")
+        @:.WithOpenApi()
+        @:.Produces(StatusCodes.Status404NotFound)
+        @:.Produces(StatusCodes.Status204NoContent);
+        }
+        else
+        {
         @:.WithName("@updateModel");
+        }
     }
-}
 
         group.MapPost("/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
         {
@@ -110,17 +130,23 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
             await db.SaveChangesAsync();
             return @resultsCreated;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI && Model.UseTypedResults)
+        {
         @:.WithName("@createModel")
         @:.WithOpenApi();
-    }
-    else
-    {
+        }
+        else if(Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@createModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
+        }
+        else
+        {
         @:.WithName("@createModel");
+        }
     }
-}
 
         group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
@@ -133,15 +159,22 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
 
             return @resultsNotFound;
         })
-@{
-    if(Model.OpenAPI)
-    {
+    @{
+        if(Model.OpenAPI && Model.UseTypedResults)
+        {
         @:.WithName("@deleteModel")
         @:.WithOpenApi();
-    }
-    else
-    {
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@deleteModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
+        }
+        else
+        {
         @:.WithName("@deleteModel");
+        }
     }
-}
     }

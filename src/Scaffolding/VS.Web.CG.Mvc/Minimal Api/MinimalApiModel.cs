@@ -45,6 +45,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         //Sqlite for sqlite and mac/linux scenarios.
         public bool UseSqlite { get; set; }
 
+        //Use TypedResults for minimal apis.
+        public bool UseTypedResults { get; set; }
+
         //Generated namespace for a Endpoints class/file. If using an existing file, does not apply.
         public string EndpointsNamespace { get; set; }
 

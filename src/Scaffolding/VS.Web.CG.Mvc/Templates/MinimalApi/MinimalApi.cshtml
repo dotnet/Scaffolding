@@ -26,7 +26,7 @@ public static class @endPointsClassName
 {
     public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-    @{
+@{
     if(Model.OpenAPI)
     {
         @:var group = routes.MapGroup("@routePrefix").WithTags(nameof(@modelName));
@@ -35,17 +35,23 @@ public static class @endPointsClassName
     {
         @:var group = routes.MapGroup("@routePrefix");
     }
-    }    
+}    
 
         group.MapGet("/", () =>
         {
             return new [] { new @modelConstructor };
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@getAllModels")
         @:.WithOpenApi();
+    }
+    else if(Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@getAllModels")
+        @:.WithOpenApi()
+        @:.Produces<@modelArray>(StatusCodes.Status200OK);
     }
     else
     {
@@ -58,10 +64,16 @@ public static class @endPointsClassName
             //return new @modelName { ID = id };
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@getModelById")
         @:.WithOpenApi();
+    }
+    else if(Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@getModelById")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK);
     }
     else
     {
@@ -74,10 +86,16 @@ public static class @endPointsClassName
             return @resultsExtension;
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@updateModel")
         @:.WithOpenApi();
+    }
+    else if (Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@updateModel")
+        @:.WithOpenApi()
+        @:.Produces(StatusCodes.Status204NoContent);
     }
     else
     {
@@ -99,10 +117,16 @@ public static class @endPointsClassName
         }
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@createModel")
         @:.WithOpenApi();
+    }
+    else if (Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@createModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
     }
     else
     {
@@ -124,10 +148,16 @@ public static class @endPointsClassName
         }
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@deleteModel")
         @:.WithOpenApi();
+    }
+    else if (Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@deleteModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK);
     }
     else
     {

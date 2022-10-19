@@ -83,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             {
                 ValidateOpenApiDependencies(ProjectContext.PackageDependencies);
             }
-
+            
             var templateModel = new MinimalApiModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName, model.EndpintsClassName)
             {
                 EndpointsName = model.EndpintsClassName,
@@ -92,7 +92,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 NullableEnabled = "enable".Equals(ProjectContext?.Nullable, StringComparison.OrdinalIgnoreCase),
                 OpenAPI = model.OpenApi,
                 MethodName = $"Map{modelTypeAndContextModel.ModelType.Name}Endpoints",
-                UseSqlite = model.UseSqlite
+                UseSqlite = model.UseSqlite,
+                UseTypedResults = !model.NoTypedResults
             };
 
             var endpointsModel = ModelTypesLocator.GetAllTypes().FirstOrDefault(t => t.Name.Equals(model.EndpintsClassName));

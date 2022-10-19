@@ -15,7 +15,7 @@
     string resultsExtension = (Model.OpenAPI ? "TypedResults" : "Results") + ".NoContent()";
 }
  
-   public static void @Model.MethodName (this IEndpointRouteBuilder routes)
+    public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
 @{
     if(Model.OpenAPI)
@@ -33,10 +33,16 @@
             return new [] { new @modelConstructor };
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@getAllModels")
         @:.WithOpenApi();
+    }
+    else if(Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@getAllModels")
+        @:.WithOpenApi()
+        @:.Produces<@modelArray>(StatusCodes.Status200OK);
     }
     else
     {
@@ -54,6 +60,12 @@
         @:.WithName("@getModelById")
         @:.WithOpenApi();
     }
+    else if(Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@getModelById")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK);
+    }
     else
     {
         @:.WithName("@getModelById");
@@ -65,10 +77,16 @@
             return @resultsExtension;
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@updateModel")
         @:.WithOpenApi();
+    }
+    else if (Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@updateModel")
+        @:.WithOpenApi()
+        @:.Produces(StatusCodes.Status204NoContent);
     }
     else
     {
@@ -90,10 +108,16 @@
         }
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@createModel")
         @:.WithOpenApi();
+    }
+    else if (Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@createModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
     }
     else
     {
@@ -115,10 +139,16 @@
         }
         })
     @{
-    if(Model.OpenAPI)
+    if(Model.OpenAPI && Model.UseTypedResults)
     {
         @:.WithName("@deleteModel")
         @:.WithOpenApi();
+    }
+    else if (Model.OpenAPI && !Model.UseTypedResults)
+    {
+        @:.WithName("@deleteModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK);
     }
     else
     {

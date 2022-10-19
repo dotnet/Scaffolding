@@ -21,9 +21,9 @@
     var findModel = $"{@entitySetName}.FindAsync({@primaryKeyNameLowerCase})";
     var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
-    string resultsExtension = Model.OpenAPI ? "TypedResults" : "Results";
-    string typedTaskWithNotFound = Model.OpenAPI ? $"Task<Results<Ok<{@modelName}>, NotFound>>" : "";
-    string typedTaskWithNoContent = Model.OpenAPI ? $"Task<Results<NotFound, NoContent>>" : "";
+    string resultsExtension = Model.OpenAPI ? (Model.UseTypedResults ? "TypedResults" : "Results") : "Results";
+    string typedTaskWithNotFound = Model.OpenAPI ?  (Model.UseTypedResults ? $"Task<Results<Ok<{@modelName}>, NotFound>>" : "") : "";
+    string typedTaskWithNoContent = Model.OpenAPI ? (Model.UseTypedResults ? $"Task<Results<NotFound, NoContent>>" : "") : "";
     string resultsNotFound = $"{resultsExtension}.NotFound()";
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
@@ -60,10 +60,16 @@ public static class @endPointsClassName
             return await db.@modelToList;
         })
     @{
-        if(Model.OpenAPI)
+        if(Model.OpenAPI && Model.UseTypedResults)
         {
         @:.WithName("@getAllModels")
         @:.WithOpenApi();
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@getAllModels")
+        @:.WithOpenApi()
+        @:.Produces<@modelList>(StatusCodes.Status200OK);
         }
         else
         {
@@ -79,10 +85,17 @@ public static class @endPointsClassName
                     : @resultsNotFound;
         })
     @{
-        if(Model.OpenAPI)
+        if(Model.OpenAPI && Model.UseTypedResults)
         {
         @:.WithName("@getModelById")
         @:.WithOpenApi();
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@getModelById")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
         }
         else
         {
@@ -105,10 +118,17 @@ public static class @endPointsClassName
             return @resultsNoContent;
         })
     @{
-        if(Model.OpenAPI)
+        if(Model.OpenAPI && Model.UseTypedResults)
         {
         @:.WithName("@updateModel")
         @:.WithOpenApi();
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@updateModel")
+        @:.WithOpenApi()
+        @:.Produces(StatusCodes.Status404NotFound)
+        @:.Produces(StatusCodes.Status204NoContent);
         }
         else
         {
@@ -123,10 +143,16 @@ public static class @endPointsClassName
             return @resultsCreated;
         })
     @{
-        if(Model.OpenAPI)
+        if(Model.OpenAPI && Model.UseTypedResults)
         {
         @:.WithName("@createModel")
         @:.WithOpenApi();
+        }
+        else if(Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@createModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status201Created);
         }
         else
         {
@@ -146,10 +172,17 @@ public static class @endPointsClassName
             return @resultsNotFound;
         })
     @{
-        if(Model.OpenAPI)
+        if(Model.OpenAPI && Model.UseTypedResults)
         {
         @:.WithName("@deleteModel")
         @:.WithOpenApi();
+        }
+        else if (Model.OpenAPI && !Model.UseTypedResults)
+        {
+        @:.WithName("@deleteModel")
+        @:.WithOpenApi()
+        @:.Produces<@modelName>(StatusCodes.Status200OK)
+        @:.Produces(StatusCodes.Status404NotFound);
         }
         else
         {

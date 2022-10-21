@@ -25,6 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
 
+        [Option(Name = "noTypedResults", ShortName = "ntr", Description = "Flag to not use TypedResults for minimal apis.")]
+        public bool NoTypedResults { get; set; }
+
         public MinimalApiGeneratorCommandLineModel()
         {
         }
@@ -37,6 +40,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             OpenApi = copyFrom.OpenApi;
             EndpointsNamespace = copyFrom.EndpointsNamespace;
             UseSqlite = copyFrom.UseSqlite;
+            NoTypedResults = copyFrom.NoTypedResults;
         }
 
         public MinimalApiGeneratorCommandLineModel Clone()

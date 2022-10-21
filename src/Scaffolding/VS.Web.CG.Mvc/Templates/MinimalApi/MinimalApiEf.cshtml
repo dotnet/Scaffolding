@@ -21,15 +21,16 @@
     var findModel = $"{@entitySetName}.FindAsync({@primaryKeyNameLowerCase})";
     var add = $"{@entitySetName}.Add({@Model.ModelVariable})";
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
-    string resultsExtension = Model.OpenAPI ? "TypedResults" : "Results";
-    string typedTaskWithNotFound = Model.OpenAPI ? $"Task<Results<Ok<{@modelName}>, NotFound>>" : "";
-    string typedTaskWithNoContent = Model.OpenAPI ? $"Task<Results<NotFound, NoContent>>" : "";
+    string resultsExtension = Model.UseTypedResults ? "TypedResults" : "Results";
+    string typedTaskWithNotFound = Model.UseTypedResults ? $"Task<Results<Ok<{@modelName}>, NotFound>>" : "";
+    string typedTaskWithNoContent = Model.UseTypedResults ? $"Task<Results<NotFound, NoContent>>" : "";
     string resultsNotFound = $"{resultsExtension}.NotFound()";
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
     string resultsOkModelVariable = $"{resultsExtension}.Ok({@Model.ModelVariable})";
     string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", @routePrefix, @Model.ModelVariable, @primaryKeyName, @Model.ModelVariable);
     string resultsCreated = $"{resultsExtension}.Created(" + $"{@createdApiVar}" + ")";
+    string builderExtensionSpaces = new string(' ', 8);
 }
 using Microsoft.EntityFrameworkCore;
 @{
@@ -44,7 +45,7 @@ public static class @endPointsClassName
 {
     public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
-    @{
+@{
     if(Model.OpenAPI)
     {
         @:var group = routes.MapGroup("@routePrefix").WithTags(nameof(@modelName));
@@ -59,17 +60,19 @@ public static class @endPointsClassName
         {
             return await db.@modelToList;
         })
-    @{
+@{
+        string builderExtensions = $".WithName(\"{@getAllModels}\")";
         if(Model.OpenAPI)
         {
-        @:.WithName("@getAllModels")
-        @:.WithOpenApi();
+            builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
         }
-        else
+        if (!Model.UseTypedResults)
         {
-        @:.WithName("@getAllModels");
+            builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelList}>(StatusCodes.Status200OK)";
         }
-    }
+
+        @:@builderExtensions;
+}
 
         group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
@@ -78,17 +81,19 @@ public static class @endPointsClassName
                     ? @resultsOkModel
                     : @resultsNotFound;
         })
-    @{
-        if(Model.OpenAPI)
-        {
-        @:.WithName("@getModelById")
-        @:.WithOpenApi();
-        }
-        else
-        {
-        @:.WithName("@getModelById");
-        }
+@{
+    builderExtensions = $".WithName(\"{@getModelById}\")";
+    if(Model.OpenAPI)
+    {
+        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
+    if (!Model.UseTypedResults)
+    {
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)"; 
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
+    }
+        @:@builderExtensions;
+}
 
         group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
@@ -104,17 +109,20 @@ public static class @endPointsClassName
 
             return @resultsNoContent;
         })
-    @{
+@{
+        builderExtensions = $".WithName(\"{@updateModel}\")";
         if(Model.OpenAPI)
         {
-        @:.WithName("@updateModel")
-        @:.WithOpenApi();
+            builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
         }
-        else
+        if (!Model.UseTypedResults)
         {
-        @:.WithName("@updateModel");
+            builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
+            builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status204NoContent)";
         }
-    }
+
+        @:@builderExtensions;
+}
 
         group.MapPost("/", async (@modelName @Model.ModelVariable, @dbContextName db) =>
         {
@@ -122,17 +130,18 @@ public static class @endPointsClassName
             await db.SaveChangesAsync();
             return @resultsCreated;
         })
-    @{
+@{
+        builderExtensions = $".WithName(\"{@createModel}\")";
         if(Model.OpenAPI)
         {
-        @:.WithName("@createModel")
-        @:.WithOpenApi();
+            builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
         }
-        else
+        if(!Model.UseTypedResults)
         {
-        @:.WithName("@createModel");
+            builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status201Created)";
         }
-    }
+        @:@builderExtensions;
+}
 
         group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
@@ -145,16 +154,18 @@ public static class @endPointsClassName
 
             return @resultsNotFound;
         })
-    @{
-        if(Model.OpenAPI)
-        {
-        @:.WithName("@deleteModel")
-        @:.WithOpenApi();
-        }
-        else
-        {
-        @:.WithName("@deleteModel");
-        }
+@{
+    builderExtensions = $".WithName(\"{@deleteModel}\")";
+    if(Model.OpenAPI)
+    {
+        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
+    if (!Model.UseTypedResults)
+    {
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
+    }
+        @:@builderExtensions;
+}
     }
 }

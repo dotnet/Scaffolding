@@ -21,3 +21,4 @@ call D:
 call cd  %SRC_DIR%/%NUPKG% 
 call dotnet tool install -g dotnet-aspnet-codegenerator --add-source %SRC_DIR%\%NUPKG% --version %VERSION%
 call cd %SRC_DIR%
+call taskkill /f /im dotnet.exe

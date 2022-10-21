@@ -12,7 +12,8 @@
     string deleteModel = $"Delete{@modelName}";
     string createModel = $"Create{@modelName}";
     string updateModel = $"Update{@modelName}";
-    string resultsExtension = (Model.OpenAPI ? "TypedResults" : "Results") + ".NoContent()";
+    string resultsExtension = (Model.UseTypedResults ? "TypedResults" : "Results") + ".NoContent()";
+    string builderExtensionSpaces = new string(' ', 8);
 }
 @{
     foreach (var namespaceName in Model.RequiredNamespaces)
@@ -41,72 +42,57 @@ public static class @endPointsClassName
         {
             return new [] { new @modelConstructor };
         })
-    @{
-    if(Model.OpenAPI && Model.UseTypedResults)
+@{
+    string builderExtensions = $".WithName(\"{@getAllModels}\")";
+    if(Model.OpenAPI)
     {
-        @:.WithName("@getAllModels")
-        @:.WithOpenApi();
+        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
-    else if(Model.OpenAPI && !Model.UseTypedResults)
+    if(!Model.UseTypedResults)
     {
-        @:.WithName("@getAllModels")
-        @:.WithOpenApi()
-        @:.Produces<@modelArray>(StatusCodes.Status200OK);
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelArray}>(StatusCodes.Status200OK)";
     }
-    else
-    {
-        @:.WithName("@getAllModels");
-    }
-    }
-
+        @:@builderExtensions;
+}
+        
         group.MapGet("/{id}", (int id) =>
         {
             //return new @modelName { ID = id };
         })
-    @{
-    if(Model.OpenAPI && Model.UseTypedResults)
+@{
+    builderExtensions = $".WithName(\"{@getModelById}\")";
+    if(Model.OpenAPI)
     {
-        @:.WithName("@getModelById")
-        @:.WithOpenApi();
+        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
-    else if(Model.OpenAPI && !Model.UseTypedResults)
+    if(!Model.UseTypedResults)
     {
-        @:.WithName("@getModelById")
-        @:.WithOpenApi()
-        @:.Produces<@modelName>(StatusCodes.Status200OK);
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
     }
-    else
-    {
-        @:.WithName("@getModelById");
-    }
-    }
+        @:@builderExtensions;
+}
 
         group.MapPut("/{id}", (int id, @modelName input) =>
         {
             return @resultsExtension;
         })
-    @{
-    if(Model.OpenAPI && Model.UseTypedResults)
+@{
+    builderExtensions = $".WithName(\"{@updateModel}\")";
+    if(Model.OpenAPI)
     {
-        @:.WithName("@updateModel")
-        @:.WithOpenApi();
+        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
-    else if (Model.OpenAPI && !Model.UseTypedResults)
+    if (!Model.UseTypedResults)
     {
-        @:.WithName("@updateModel")
-        @:.WithOpenApi()
-        @:.Produces(StatusCodes.Status204NoContent);
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status204NoContent)";
     }
-    else
-    {
-        @:.WithName("@updateModel");
-    }
-    }
+        @:@builderExtensions;
+}
 
         group.MapPost("/", (@modelName model) =>
         {
         @{
-        if(Model.OpenAPI)
+        if(!Model.UseTypedResults)
         {
             @://return TypedResults.Created($"/@pluralModel/{model.ID}", model);
         }
@@ -116,28 +102,23 @@ public static class @endPointsClassName
         }
         }
         })
-    @{
-    if(Model.OpenAPI && Model.UseTypedResults)
+@{
+    builderExtensions = $".WithName(\"{@createModel}\")";
+    if(Model.OpenAPI)
     {
-        @:.WithName("@createModel")
-        @:.WithOpenApi();
+    builderExtensions+= $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
-    else if (Model.OpenAPI && !Model.UseTypedResults)
+    if (!Model.UseTypedResults)
     {
-        @:.WithName("@createModel")
-        @:.WithOpenApi()
-        @:.Produces<@modelName>(StatusCodes.Status201Created);
+    builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status201Created)";
     }
-    else
-    {
-        @:.WithName("@createModel");
-    }
-    }
+        @:@builderExtensions;
+}
 
         group.MapDelete("/{id}", (int id) =>
         {
-        @{
-        if(Model.OpenAPI)
+@{
+        if(!Model.UseTypedResults)
         {
             @://return TypedResults.Ok(new @modelName { ID = id });
         }
@@ -145,24 +126,19 @@ public static class @endPointsClassName
         {
             @://return Results.Ok(new @modelName { ID = id });
         }
-        }
+}
         })
-    @{
-    if(Model.OpenAPI && Model.UseTypedResults)
+@{
+    builderExtensions = $".WithName(\"{@deleteModel}\")";
+    if(Model.OpenAPI)
     {
-        @:.WithName("@deleteModel")
-        @:.WithOpenApi();
+        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
     }
-    else if (Model.OpenAPI && !Model.UseTypedResults)
+    if (!Model.UseTypedResults)
     {
-        @:.WithName("@deleteModel")
-        @:.WithOpenApi()
-        @:.Produces<@modelName>(StatusCodes.Status200OK);
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
     }
-    else
-    {
-        @:.WithName("@deleteModel");  
-    }
+        @:@builderExtensions;  
     }
     }
 }

@@ -38,6 +38,6 @@ Unhandled exception. System.NullReferenceException: Object reference not set to 
 ### Include provider and version information
 
 Microsoft.VisualStudio.Web.CodeGeneration.Design/Microsoft.DotNet.MSIdentity version:
-Target framework: (e.g. .NET 5.0)
+Target framework: (e.g. .NET 6.0)
 Operating system:
-IDE: (e.g. Visual Studio 2019 16.3)
+IDE: (e.g. Visual Studio 2022 17.3.6)

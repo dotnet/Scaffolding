@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 _toolOptions.ProjectFilePath = csProjFiles.First();
             }
             string csprojText = File.ReadAllText(_toolOptions.ProjectFilePath);
-            _toolOptions.ShortTfms = ProjectModifierHelper.ProcessCsprojFile(csprojText);
+            _toolOptions.ShortTfms = ProjectModifierHelper.ProcessCsprojTfms(csprojText);
 
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
             if (codeModifierConfig is null || !codeModifierConfig.Files.Any())

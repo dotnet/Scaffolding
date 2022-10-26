@@ -16,7 +16,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
     {
         static string testAppPath = Path.Combine("..", "TestApps", "ModelTypesLocatorTestClassLibrary");
         private ITestOutputHelper _outputHelper;
+        private const string Net7CsprojVariabledCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>$(Var2)$(Var3)</Var1>
+    <Var2>net</Var2>
+    <Var3>7.0</Var3>
+    <TargetFramework>$(Var1)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
 
+</Project>
+";
         public ProjectContextWriterTests(ITestOutputHelper outputHelper)
         {
             _outputHelper = outputHelper;
@@ -138,6 +149,26 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);
                 Assert.Equal(expectedPath, ProjectContextHelper.GetPath(nugetPath, nameAndVersion));
             }
+        }
+
+        [Fact]
+        public void GetXmlKeyValueTests()
+        {
+            var tfmValue = ProjectContextHelper.GetXmlKeyValue("TargetFramework", Net7CsprojVariabledCsproj);
+            var var2Value = ProjectContextHelper.GetXmlKeyValue("Var2", Net7CsprojVariabledCsproj);
+            var nullableValue = ProjectContextHelper.GetXmlKeyValue("Nullable", Net7CsprojVariabledCsproj);
+            var implicitValue = ProjectContextHelper.GetXmlKeyValue("ImplicitUsings", Net7CsprojVariabledCsproj);
+            var invalidValue = ProjectContextHelper.GetXmlKeyValue("bleh", Net7CsprojVariabledCsproj);
+            var emptyValue = ProjectContextHelper.GetXmlKeyValue("", Net7CsprojVariabledCsproj);
+            var nullValue = ProjectContextHelper.GetXmlKeyValue(null, Net7CsprojVariabledCsproj);
+
+            Assert.Equal("$(Var1)", tfmValue, ignoreCase: true);
+            Assert.Equal("net", var2Value, ignoreCase: true);
+            Assert.Equal("enable", nullableValue, ignoreCase: true);
+            Assert.Equal("enable", implicitValue, ignoreCase: true);
+            Assert.Equal("", invalidValue, ignoreCase: true);
+            Assert.Equal("", emptyValue, ignoreCase: true);
+            Assert.Equal("", nullValue, ignoreCase: true);
         }
     }
 }

@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         /// </summary>
         /// <param name="csprojText">.csproj file as string</param>
         /// <returns>string[] containing target frameworks of the project</returns>
-        internal static string[] ProcessCsprojFile(string csprojText)
+        internal static string[] ProcessCsprojTfms(string csprojText)
         {
             List<string> processedTfms = new List<string>();
             if (!string.IsNullOrEmpty(csprojText))

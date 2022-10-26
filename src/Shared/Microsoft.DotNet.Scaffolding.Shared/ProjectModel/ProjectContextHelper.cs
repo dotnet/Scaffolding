@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         /// <summary>
         /// Returns the value given a key (aka a xml tag) from the given xml file
         /// </summary>
-        /// <param name="variableKey">variable key or tags in the csproj file</tag></param>
+        /// <param name="variableKey">variable key or tags in the csproj file</param>
         /// <param name="xmlText">xml file text (mostly used for parsing csproj file)</param>
         /// <returns>empty or value from the parsing the elements of the xml file.</returns>
         internal static string GetXmlKeyValue(string variableKey, string xmlText)

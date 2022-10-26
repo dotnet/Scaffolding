@@ -75,6 +75,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                         string projectAssetsFile = ProjectModelHelper.GetProjectAssetsFile(projectInformation);
                         //fix package dependencies sent from VS
                         projectInformation = projectInformation.AddPackageDependencies(projectAssetsFile);
+                        projectInformation = projectInformation.CheckNullableVariable();
                         var codeGenArgs = ToolCommandLineHelper.FilterExecutorArguments(args);
                         var isSimulationMode = ToolCommandLineHelper.IsSimulationMode(args);
                         CodeGenCommandExecutor executor = new CodeGenCommandExecutor(projectInformation,

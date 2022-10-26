@@ -232,7 +232,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 "Builder.Build()",
                 "nonExistentVariable.DoingStuff(string);",
                 "nonExistentVariable.DoingOtherStuff()",
-                "Builder.Boolean.ToString()" 
+                "Builder.Boolean.ToString()"
             };
 
             string[] correctlyFormattedStatements = new string[]
@@ -392,7 +392,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             StatementSyntax emptyBlock = SyntaxFactory.ParseStatement(
                 @"
-                {                   
+                {
                 }");
 
             BlockSyntax emptyBlockSyntax = SyntaxFactory.Block(emptyBlock);
@@ -439,7 +439,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 {
                     endpoints.MapRazorPages();
                     endpoints.MapControllers();
-                });    
+                });
                 }");
 
             BlockSyntax denseBlockSyntax = SyntaxFactory.Block(denseBlock);
@@ -495,6 +495,33 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 var globalStatement = SyntaxFactory.GlobalStatement(expression).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
                 Assert.False(ProjectModifierHelper.GlobalStatementExists(root, globalStatement));
             }
+        }
+
+        [Fact]
+        public void ProcessCsprojTfmsTest()
+        {
+            var net7Tfms = ProjectModifierHelper.ProcessCsprojTfms(Net7Csproj);
+            var net7Tfms2 = ProjectModifierHelper.ProcessCsprojTfms(Net7CsprojVariabledCsproj);
+            var net7Tfms3 = ProjectModifierHelper.ProcessCsprojTfms(Net7CsprojVariabledCsproj2);
+            Assert.True(net7Tfms.Length == 1 && net7Tfms2.Length == 1 && net7Tfms3.Length == 1);
+            Assert.True(net7Tfms.First().Equals("net7.0") && net7Tfms2.First().Equals("net7.0") && net7Tfms3.First().Equals("net7.0"));
+
+            var emptyTfms = ProjectModifierHelper.ProcessCsprojTfms(EmptyCsproj);
+            var emptyTfms2 = ProjectModifierHelper.ProcessCsprojTfms(EmptyCsproj2);
+            Assert.True(emptyTfms.Length == 0 && emptyTfms2.Length == 0);
+
+            var invalidTfm = ProjectModifierHelper.ProcessCsprojTfms(InvalidCsproj);
+            var invalidTfm2 = ProjectModifierHelper.ProcessCsprojTfms(InvalidCsproj2);
+            var invalidTfm3 = ProjectModifierHelper.ProcessCsprojTfms(InvalidCsproj3);
+            Assert.True(invalidTfm.Length == 0 && invalidTfm2.Length == 0 && invalidTfm3.Length == 0);
+
+            var multiTfm = ProjectModifierHelper.ProcessCsprojTfms(MultiTfmCsproj);
+            var multiTfm2 = ProjectModifierHelper.ProcessCsprojTfms(MultiTfmVariabledCsproj);
+            var multiTfm3 = ProjectModifierHelper.ProcessCsprojTfms(MultiTfmVariabledCsproj2);
+            Assert.True(multiTfm.Length == 2 && net7Tfms2.Length == 1 && multiTfm3.Length == 3);
+            Assert.True(multiTfm.Contains("net6.0") && multiTfm.Contains("net7.0"));
+            Assert.True(multiTfm2.Contains("net6.0") && multiTfm2.Contains("net7.0"));
+            Assert.True(multiTfm3.Contains("net5.0") && multiTfm3.Contains("net6.0") && multiTfm3.Contains("net7.0"));
         }
 
         private static readonly ModelType startupModel = new ModelType

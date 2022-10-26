@@ -57,6 +57,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 _toolOptions.ProjectFilePath = csProjFiles.First();
             }
 
+            string csprojText = File.ReadAllText(_toolOptions.ProjectFilePath);
+            _toolOptions.ShortTfms = ProjectModifierHelper.ProcessCsprojTfms(csprojText);
+
             CodeModifierConfig? codeModifierConfig = GetCodeModifierConfig();
             if (codeModifierConfig is null || !codeModifierConfig.Files.Any())
             {
@@ -171,7 +174,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         }
 
         /// <summary>
-        /// Determines if specified file exists, and if not then creates the 
+        /// Determines if specified file exists, and if not then creates the
         /// file based on template stored in AppProvisioningTool.Properties
         /// then adds file to the project
         /// </summary>

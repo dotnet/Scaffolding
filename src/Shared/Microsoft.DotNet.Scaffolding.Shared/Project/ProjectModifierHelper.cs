@@ -77,6 +77,64 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return true;
         }
 
+        /// <summary>
+        /// Parses the csproj xml text and gets one or more TargetFrameworks for the project.
+        /// </summary>
+        /// <param name="csprojText">.csproj file as string</param>
+        /// <returns>string[] containing target frameworks of the project</returns>
+        internal static string[] ProcessCsprojTfms(string csprojText)
+        {
+            List<string> processedTfms = new List<string>();
+            if (!string.IsNullOrEmpty(csprojText))
+            {
+                //use XDocument to get all csproj elements.
+                XDocument document = XDocument.Parse(csprojText);
+                var docNodes = document.Root?.Elements();
+                var allElements = docNodes?.SelectMany(x => x.Elements());
+                //add them to a dictionary for easy comparisons.
+                var csprojVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                if (allElements != null && allElements.Any())
+                {
+                    foreach (var elem in allElements)
+                    {
+                        //dont' add PackageReference(s) since they are useless for getting tfm properties.
+                        if (!elem.Name.LocalName.Equals("PackageReference", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //change the keys from TargetFramework to $(TargetFramework) and so forth for nested variable analysis.
+                            //eg. analysing <TargetFramework>$(X)</TargetFramework> and getting the value for $(X).
+                            //makes for a easy string comparison without using regex and splitting.
+                            csprojVariables.TryAdd(string.Format("$({0})", elem.Name.LocalName), elem.Value);
+                        }
+                    }
+                }
+
+                //if only one TargetFramework
+                if (csprojVariables.TryGetValue("$(TargetFramework)", out string tfmValue))
+                {
+                    string processedTfm = ProcessTfm(tfmValue.Trim(), csprojVariables);
+                    if (!string.IsNullOrEmpty(processedTfm) && ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(processedTfm, StringComparer.OrdinalIgnoreCase))
+                    {
+                        processedTfms.Add(processedTfm);
+                    }
+                }
+                //if multiple, split by ';' and add them all.
+                else if (csprojVariables.TryGetValue("$(TargetFrameworks)", out string tfms))
+                {
+                    string processedTfm = ProcessTfm(tfms.Trim(), csprojVariables);
+                    //tfms should be separated by ;
+                    var splitTfms = processedTfm.Split(";");
+                    foreach (var tfm in splitTfms)
+                    {
+                        if (!string.IsNullOrEmpty(tfm) && ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(tfm, StringComparer.OrdinalIgnoreCase))
+                        {
+                            processedTfms.Add(tfm);
+                        }
+                    }
+                }
+            }
+            return processedTfms.ToArray();
+        }
+
         // Returns true when there is no Startup.cs or equivalent
         internal static async Task<bool> IsMinimalApp(List<Document> documents)
         {
@@ -442,7 +500,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         /// <summary>
         /// Replaces text within document or appends text to the end of the document
-        /// depending on whether change.ReplaceSnippet is set 
+        /// depending on whether change.ReplaceSnippet is set
         /// </summary>
         /// <param name="fileDoc"></param>
         /// <param name="codeChanges"></param>

@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
                     .Dependencies
                     .Any(dep => dep.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
         }
+
         public static IProjectContext AddPackageDependencies(this IProjectContext projectInformation, string projectAssetsFile)
         {
             //get project assets file
@@ -62,6 +63,31 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
                 ProjectReferenceInformation = projectInformation.ProjectReferenceInformation
             };
             return newProjectContext;
+        }
+
+        /// <summary>
+        /// Given an IProjectContext, check if IProjectContext.Nullable is set, if it is, no changes necessary.
+        /// If not already there, set using ProjectContextHelper.GetXmlKeyValue (parsing the csproj xml file).
+        /// </summary>
+        /// <param name="context">IProjectContext which has csproj path, and the Nullable variable to set.</param>
+        /// <returns>modified IProjectContext with the Nullable property set or the same IProjectContext as passed.</returns>
+        public static IProjectContext CheckNullableVariable(this IProjectContext context)
+        {
+            //if nullable is not empty, return current IProjectContext as is.
+            if (context != null && string.IsNullOrEmpty(context.Nullable))
+            {
+                string csprojText = System.IO.File.ReadAllText(context.ProjectFullPath);
+                string nullableVarValue = ProjectContextHelper.GetXmlKeyValue("nullable", csprojText);
+                if (!string.IsNullOrEmpty(nullableVarValue))
+                {
+                    if (context is CommonProjectContext newProjectContext)
+                    {
+                        newProjectContext.Nullable = nullableVarValue;
+                        return newProjectContext;
+                    }
+                }
+            }
+            return context;
         }
 
     }

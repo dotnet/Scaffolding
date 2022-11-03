@@ -120,6 +120,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{CA1DAC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.Shared.Tests", "test\Shared\Microsoft.DotNet.Scaffolding.Shared.Tests\Microsoft.DotNet.Scaffolding.Shared.Tests.csproj", "{A4C14F41-7EBC-40C2-93DF-B131B713AB8D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eng", "eng", "{18FF51C6-CF55-42AA-AEB1-1A21A43003BE}"
+	ProjectSection(SolutionItems) = preProject
+		eng\Versions.MSIdentity.props = eng\Versions.MSIdentity.props
+		eng\Versions.props = eng\Versions.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_x86|Any CPU = debug_x86|Any CPU

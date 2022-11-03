@@ -57,14 +57,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         internal void SetupEmptyCodeGenerationProject(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
         {
             fileProvider.Add("global.json", GlobalJsonText);
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net6.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net7.0"));
 
             fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net7.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
 
-            var rootProjectTxt = MsBuildProjectStrings.SimpleNet60ProjectText;
+            var rootProjectTxt = MsBuildProjectStrings.SimpleNet70ProjectText2;
             fileProvider.Add(MsBuildProjectStrings.RootProjectName, rootProjectTxt);
             fileProvider.Add("Startup.cs", MsBuildProjectStrings.EmptyTestStartupText);
             fileProvider.Add(MsBuildProjectStrings.DbContextInheritanceProgramName, MsBuildProjectStrings.DbContextInheritanceProjectProgramText);
@@ -79,15 +79,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var libraryPath = Path.Combine(fileProvider.Root, MsBuildProjectStrings.LibraryProjectFolder);
             Directory.CreateDirectory(projectPath);
             Directory.CreateDirectory(libraryPath);
-            Directory.CreateDirectory(Path.Combine(projectPath, "toolAssets", "net6.0"));
+            Directory.CreateDirectory(Path.Combine(projectPath, "toolAssets", "net7.0"));
 
             fileProvider.Add($"{projectPath}//TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, $"{projectPath}/toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net6ReferencingProjectText);
+            fileProvider.Copy(msbuildTaskDllPath, $"{projectPath}/toolAssets/net7.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net7ReferencingProjectText);
             fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}/Program.cs", MsBuildProjectStrings.MinimalProgramcsFile);
-            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/{MsBuildProjectStrings.Library2ProjectName}", MsBuildProjectStrings.Net6Library);
+            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/{MsBuildProjectStrings.Library2ProjectName}", MsBuildProjectStrings.Net7Library);
             fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/Blog.cs", MsBuildProjectStrings.BlogModelText);
 
             RestoreAndBuild(fileProvider.Root, outputHelper, $"{MsBuildProjectStrings.RootProjectFolder}/{MsBuildProjectStrings.RootProjectName}");
@@ -96,12 +96,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         internal void SetupCodeGenerationProjectNullableDisabled(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
         {
             fileProvider.Add("global.json", GlobalJsonText);
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net6.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net7.0"));
 
             fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net7.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
 
             var rootProjectTxt = MsBuildProjectStrings.Net6NullableDisabled;
             fileProvider.Add(MsBuildProjectStrings.RootProjectName2, rootProjectTxt);
@@ -115,12 +115,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         internal void SetupCodeGenerationProjectNullableMissing(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
         {
             fileProvider.Add("global.json", GlobalJsonText);
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net6.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net7.0"));
 
             fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net7.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
 
             var rootProjectTxt = MsBuildProjectStrings.Net6NullableMissing;
             fileProvider.Add(MsBuildProjectStrings.RootProjectName3, rootProjectTxt);
@@ -134,12 +134,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         internal void SetupCodeGenerationProjectNullableEnabled(TemporaryFileProvider fileProvider, ITestOutputHelper outputHelper)
         {
             fileProvider.Add("global.json", GlobalJsonText);
-            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net6.0"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net7.0"));
 
             fileProvider.Add($"TestCodeGeneration.targets", MsBuildProjectStrings.ProjectContextWriterMsbuildHelperText);
 
             var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
-            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net6.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net7.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
 
             var rootProjectTxt = MsBuildProjectStrings.Net6NullableEnabled;
             fileProvider.Add(MsBuildProjectStrings.RootProjectName3, rootProjectTxt);

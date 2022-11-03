@@ -895,9 +895,9 @@ namespace Test
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      C:\Users\decho\Scaffolding\artifacts\packages\Debug\Shipping;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
@@ -905,7 +905,7 @@ namespace Test
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-dev"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-rtm.22528.4"" />
     <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""7.0.0-preview.1.22076.6"">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -918,39 +918,39 @@ namespace Test
   </ItemGroup>
 </Project>
 ";
-        public const string SimpleNet60ProjectText = @"
+        public const string SimpleNet70ProjectText2 = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
     <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""6.0.0-rc.2.21511.1"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-rtm.22528.4"" />
   </ItemGroup>
 </Project>
 ";
 
-        public const string Net6ReferencingProjectText = @"
+        public const string Net7ReferencingProjectText = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""6.0.9"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-rtm.22528.4"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library\Library.csproj"" />
@@ -963,6 +963,17 @@ namespace Test
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
+";
+        public const string Net7Library = @"
+<Project Sdk=""Microsoft.NET.Sdk"">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -1201,7 +1212,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
   <PropertyGroup>
-    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net6.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net7.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
   </PropertyGroup>
 
   <UsingTask TaskName=""ProjectContextWriter""

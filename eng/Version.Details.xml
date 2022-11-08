@@ -6,4 +6,82 @@
       <Sha>27f2df0aed469840fd47da3319d1b29e19e81e3c</Sha>
     </Dependency>
   </ToolsetDependencies>
+  <ProductDependencies>
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="">
+      <Uri>https://github.com/dotnet/efcore</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="">
+      <Uri>https://github.com/dotnet/efcore</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="">
+      <Uri>https://github.com/dotnet/efcore</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Logging" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha />
+    </Dependency>
+  </ProductDependencies>
 </Dependencies>

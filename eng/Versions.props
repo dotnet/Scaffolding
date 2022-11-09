@@ -21,8 +21,8 @@
     </MicrosoftExtensionsDependencyInjectionPackageVersion>
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     </MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <MicrosoftExtensionsIdentityStoresPackageVersion>
-    </MicrosoftExtensionsIdentityStoresPackageVersion>
+    <!-- Microsoft.Extensions.Identity.Stores -->
+    <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.0-alpha.1.22558.5</MicrosoftExtensionsIdentityStoresPackageVersion>
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     </MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
@@ -33,8 +33,8 @@
     </MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>
     </MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
-    </MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <!-- Microsoft.Extensions.FileProviders.Embedded -->
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0-alpha.1.22558.5</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>
     </MicrosoftExtensionsLoggingConsolePackageVersion>
     <MicrosoftExtensionsLoggingDebugPackageVersion>
@@ -43,12 +43,12 @@
     </MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     </MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    </MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    </MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>
-    </MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22558.5</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22558.5</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <!-- Microsoft.AspNetCore.Identity.UI -->
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.0-alpha.1.22558.5</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>7.0.0</VersionPrefix>
@@ -91,14 +91,6 @@
     <MicrosoftAspNetCoreServerIISIntegrationPackageVersion>6.0.0</MicrosoftAspNetCoreServerIISIntegrationPackageVersion>
     <!-- Microsoft.ApplicationInsights.AspNetCore -->
     <MicrosoftApplicationInsightsAspNetCorePackageVersion>2.18.0</MicrosoftApplicationInsightsAspNetCorePackageVersion>
-    <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22557.5</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22557.5</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftAspNetCoreIdentityUIPackageVersion>
-    <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>7.0.0-rtm.22511.7</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
     <MicrosoftAspNetCorePackageVersion>6.0.0</MicrosoftAspNetCorePackageVersion>
@@ -124,8 +116,6 @@
     <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <!--Microsoft.Extensions.DependencyMoel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsDependencyModelPackageVersion>
-    <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>7.0.0-rtm.22511.7</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->

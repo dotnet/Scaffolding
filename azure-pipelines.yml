@@ -40,6 +40,7 @@ stages:
       codeSign: true
       jobs:
       - job: Windows_NT
+        timeoutInMinutes: 120
         pool:
           # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
           # Will eventually change this to two BYOC pools.
@@ -107,6 +108,7 @@ stages:
 
       - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
         - job: OSX
+          timeoutInMinutes: 120
           pool:
             vmImage: macOS-11
           strategy:
@@ -127,6 +129,7 @@ stages:
             condition: succeeded()
 
         - job: Linux
+          timeoutInMinutes: 120
           pool:
             ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
               vmImage: ubuntu-18.04

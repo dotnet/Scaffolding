@@ -17,20 +17,31 @@
     <MicrosoftEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22560.1</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>8.0.0-alpha.1.22560.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
     <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.0-alpha.1.22558.5</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Abstractions -->
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
     <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Json -->
     <MicrosoftExtensionsConfigurationJsonPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Secrets -->
     <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <!-- Microsoft.Extensions.DependencyModel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0-alpha.1.22558.5</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <!-- Microsoft.Extensions.Logging.Debug -->
     <MicrosoftExtensionsLoggingDebugPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <!-- Microsoft.Extensions.Logging -->
     <MicrosoftExtensionsLoggingPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsLoggingPackageVersion>
+    <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>8.0.0-alpha.1.22559.2</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
     <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22558.5</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
@@ -67,10 +78,6 @@
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
-    <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsDependencyInjectionPackageVersion>
-    <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NuGetPackagingVersion>6.3.1</NuGetPackagingVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -96,24 +103,6 @@
     <MicrosoftAspNetCoreStaticFilesPackageVersion>6.0.0</MicrosoftAspNetCoreStaticFilesPackageVersion>
     <!-- Microsoft.DotNet.ProjectModel -->
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
-    <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
-    <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
-    <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsConfigurationJsonPackageVersion>
-    <!-- Microsoft.Extensions.Configuration.UserSecrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
-    <!--Microsoft.Extensions.DependencyMoel -->
-    <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsDependencyModelPackageVersion>
-    <!-- Microsoft.Extensions.Logging.Console -->
-    <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <!-- Microsoft.Extensions.Logging.Debug -->
-    <MicrosoftExtensionsLoggingDebugPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsLoggingDebugPackageVersion>
-    <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsLoggingPackageVersion>
-    <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>8.0.0-alpha.1.22557.5</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.NET.Sdk.Razor -->
     <MicrosoftNETSdkRazorPackageVersion>5.0.0-preview.6.20312.15</MicrosoftNETSdkRazorPackageVersion>
     <!-- Microsoft.NET.Test.Sdk-->

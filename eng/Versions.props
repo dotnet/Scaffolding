@@ -21,8 +21,7 @@
     </MicrosoftExtensionsDependencyInjectionPackageVersion>
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     </MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <MicrosoftExtensionsIdentityStoresPackageVersion>
-    </MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>7.0.1</MicrosoftExtensionsIdentityStoresPackageVersion>
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     </MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
@@ -33,8 +32,7 @@
     </MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>
     </MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
-    </MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>7.0.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>
     </MicrosoftExtensionsLoggingConsolePackageVersion>
     <MicrosoftExtensionsLoggingDebugPackageVersion>
@@ -43,12 +41,9 @@
     </MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     </MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    </MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    </MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>
-    </MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>7.0.1</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>7.0.1</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>7.0.1</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>7.0.0</VersionPrefix>

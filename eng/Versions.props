@@ -33,7 +33,7 @@
     </MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>
     </MicrosoftExtensionsDependencyModelPackageVersion>
-     <!-- Microsoft.Extensions.FileProviders.Embedded -->
+    <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>7.0.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>
     </MicrosoftExtensionsLoggingConsolePackageVersion>

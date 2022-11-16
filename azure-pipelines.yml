@@ -43,7 +43,7 @@ stages:
       codeSign: true
       jobs:
       - job: Windows_NT
-        timeoutInMinutes: 180
+        timeoutInMinutes: 120
         pool:
           # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
           # Will eventually change this to two BYOC pools.

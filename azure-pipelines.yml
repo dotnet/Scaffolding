@@ -40,14 +40,16 @@ stages:
       codeSign: true
       jobs:
       - job: Windows_NT
+        timeoutInMinutes: 180
         pool:
           # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
           # Will eventually change this to two BYOC pools.
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCore-Svc-Public
+            name: NetCore-Public
+            demands: ImageOverride -equals 1es-windows-2019-open
           ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCore1ESPool-Svc-Internal
-            demands: ImageOverride -equals Build.windows.10.amd64.vs2017
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals 1es-windows-2019
 
         variables:
         - _Script: eng\common\cibuild.cmd
@@ -107,6 +109,7 @@ stages:
 
       - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
         - job: OSX
+          timeoutInMinutes: 120
           pool:
             vmImage: macOS-11
           strategy:
@@ -127,11 +130,12 @@ stages:
             condition: succeeded()
 
         - job: Linux
+          timeoutInMinutes: 120
           pool:
             ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
               vmImage: ubuntu-18.04
             ${{ if and(eq(variables['System.TeamProject'], 'internal'), notin(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
-              name: NetCore1ESPool-Svc-Internal
+              name: NetCore1ESPool-Internal
               demands: ImageOverride -equals Build.Ubuntu.1804.Amd64
           strategy:
             matrix:

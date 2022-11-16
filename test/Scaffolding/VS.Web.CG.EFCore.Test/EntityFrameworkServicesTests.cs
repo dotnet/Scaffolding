@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -52,16 +54,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 Edited = true
             };
 
-            dbContextMock.Setup(db => db.EditStartupForNewContext(It.IsAny<ModelType>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                useSqlite,
-                false))
+            dbContextMock.Setup(db => db.EditStartupForNewContext(It.IsAny<ModelType>(), It.IsAny<IDictionary<string, string>>()))
                 .Returns(editSyntaxTreeResult);
 
             var connectionStringsWriter = new Mock<IConnectionStringsWriter>();
-            connectionStringsWriter.Setup(c => c.AddConnectionString(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+            connectionStringsWriter.Setup(c => c.AddConnectionString(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
 
             var filesLocator = new FilesLocator();
             var compilationService = new RoslynCompilationService(_appInfo, _loader, _projectContext);

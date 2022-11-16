@@ -303,7 +303,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private async Task AddModelTypeToExistingDbContextIfNeeded(ModelType dbContextSymbol, IApplicationInfo appInfo)
         {
             bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
-            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, nullabledEnabled);
+            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, new Dictionary<string, string> { { "nullableEnabled", nullabledEnabled.ToString()} });
             var projectCompilation = await _workspace.CurrentSolution.Projects
                 .First(project => project.AssemblyName == _projectContext.AssemblyName)
                 .GetCompilationAsync();
@@ -385,13 +385,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (programType != null)
             {
-                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(
-                    programType,
-                    dbContextTemplateModel.DbContextTypeName,
-                    dbContextTemplateModel.DbContextNamespace,
-                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
-                    _useSqlite,
-                    useTopLevelsStatements);
+                var parameters = new Dictionary<string, string>
+                {
+                    { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTemplateModel.DbContextTypeName },
+                    { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
+                    { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
+                    { "useSqlite", _useSqlite.ToString() },
+                    { "useTopLevelStatements", useTopLevelsStatements.ToString() }
+                };
+
+                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(programType, parameters);
             }
 
             if (!_programEditResult.Edited)
@@ -454,12 +457,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             bool useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_modelTypesLocator);
             if (startupType != null)
             {
-                _startupEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType,
-                    dbContextTemplateModel.DbContextTypeName,
-                    dbContextTemplateModel.DbContextNamespace,
-                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
-                    _useSqlite,
-                    useTopLevelsStatements);
+                var parameters = new Dictionary<string, string>
+                {
+                    { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTemplateModel.DbContextTypeName },
+                    { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
+                    { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
+                    { "useSqlite", _useSqlite.ToString() },
+                    { "useTopLevelStatements", useTopLevelsStatements.ToString() }
+                };
+
+                _startupEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType, parameters);
             }
 
             if (!_startupEditResult.Edited)

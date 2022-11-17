@@ -288,7 +288,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 JQueryVersion = "1.10.2", //Todo
                 BootstrapVersion = razorGeneratorModel.BootstrapVersion,
                 ContentVersion = DetermineContentVersion(razorGeneratorModel),
-                UseSqlite = razorGeneratorModel.UseSqlite,
+                DatabaseType = razorGeneratorModel.DatabaseType,
                 NullableEnabled = _projectContext.Nullable
             };
 

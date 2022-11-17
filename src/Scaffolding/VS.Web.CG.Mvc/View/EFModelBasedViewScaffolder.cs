@@ -45,6 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
         public override async Task GenerateCode(ViewGeneratorModel viewGeneratorModel)
         {
+            System.Diagnostics.Debugger.Launch();
             if (viewGeneratorModel == null)
             {
                 throw new ArgumentNullException(nameof(viewGeneratorModel));
@@ -65,7 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             if (!string.IsNullOrEmpty(_projectContext.TargetFrameworkMoniker))
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.UseSqlite);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.DatabaseType);
             }
             
 

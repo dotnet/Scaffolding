@@ -25,6 +25,10 @@
     {
       "Name": "-namespace|--endpointsNamespace",
       "Description": "Specify the name of the namespace to use for the generated Endpoints file"
+    },
+    {
+      "Name" : "databaseType",
+      "Description": "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
     }
   ],
   "Options": []

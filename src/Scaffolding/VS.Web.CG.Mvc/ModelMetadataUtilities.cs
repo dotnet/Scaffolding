@@ -50,14 +50,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 dbContextFullName,
                 model,
                 areaName,
-                commandLineModel.UseSqlite);
+                commandLineModel.DatabaseType);
 
             return new ModelTypeAndContextModel()
             {
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
                 ContextProcessingResult = modelMetadata,
-                UseSqlite = commandLineModel.UseSqlite
+                DatabaseType = commandLineModel.DatabaseType
             };
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     dbContextFullName,
                     model,
                     areaName,
-                    useSqlite: commandLineModel.UseSqlite);
+                    databaseType: commandLineModel.DatabaseType);
             }
 
             return new ModelTypeAndContextModel()
@@ -96,7 +96,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
                 ContextProcessingResult = modelMetadata,
-                UseSqlite = false
+                DatabaseType = commandLineModel.DatabaseType
             };
         }
     }

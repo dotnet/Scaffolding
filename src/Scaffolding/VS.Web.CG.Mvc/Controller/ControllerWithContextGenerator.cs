@@ -57,12 +57,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         public override async Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
         {
-            Contract.Assert(!String.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
+            Contract.Assert(!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.UseSqlite);
+                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.DatabaseType);
             }
             
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);

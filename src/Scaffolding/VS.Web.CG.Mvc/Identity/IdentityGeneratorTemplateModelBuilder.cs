@@ -119,7 +119,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 ? _projectContext.RootNamespace
                 : _commandlineModel.RootNamespace;
 
-            ValidateRequiredDependencies(_commandlineModel.UseSqlite);
+            ValidateRequiredDependencies();
 
             var defaultDbContextNamespace = $"{RootNamespace}.Areas.Identity.Data";
 
@@ -196,7 +196,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = DbContextNamespace,
                 UserClass = UserClass,
                 UserClassNamespace = UserClassNamespace,
-                UseSQLite = _commandlineModel.UseSqlite,
+                DatabaseType = _commandlineModel.DatabaseType,
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,
@@ -747,7 +747,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private void ValidateRequiredDependencies(bool useSqlite)
+        private void ValidateRequiredDependencies()
         {
             var dependencies = new HashSet<string>()
             {
@@ -759,11 +759,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var isEFDesignPackagePresent = _projectContext
                 .PackageDependencies
                 .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
-
-            if (!useSqlite)
-            {
-                dependencies.Add("Microsoft.EntityFrameworkCore.SqlServer");
-            }
 
             var missingPackages = dependencies.Where(d => !_projectContext.PackageDependencies.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
             if (CalledFromCommandline && missingPackages.Any())

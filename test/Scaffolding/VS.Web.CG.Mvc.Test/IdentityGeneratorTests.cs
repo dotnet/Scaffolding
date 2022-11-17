@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 {
                     for (int i = 0; i < unModifiedStrings.Count; i++)
                     {
-                        string editResult = IdentityGenerator.EditIdentityStrings(unModifiedStrings[i], dbContext, identityUser, false, 0);
+                        string editResult = IdentityGenerator.EditIdentityStrings(unModifiedStrings[i], dbContext, identityUser, DotNet.Scaffolding.Shared.DbType.SqlServer, 0);
                         Assert.Contains(editResult, modifiedStrings);
                     }
                 }

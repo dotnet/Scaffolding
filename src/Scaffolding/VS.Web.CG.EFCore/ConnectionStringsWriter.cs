@@ -13,16 +13,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class ConnectionStringsWriter : IConnectionStringsWriter
     {
-        private const string SQLConnectionStringFormat = "Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true";
-        private const string SQLiteConnectionStringFormat = "Data Source={0}.db";
-        private const string CosmosDbConnectionStringFormat = "AccountEndpoint={0};AccountKey={1}";
-        private IDictionary<string, string> ConnectionStringsDict = new Dictionary<string, string>
-        {
-            { EfConstants.SqlServer, SQLConnectionStringFormat },
-            { EfConstants.SQLite, SQLiteConnectionStringFormat },
-            { EfConstants.CosmosDb, CosmosDbConnectionStringFormat }
-        };
-
         private IApplicationInfo _applicationInfo;
         private IFileSystem _fileSystem;
 
@@ -41,10 +31,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public void AddConnectionString(string connectionStringName, string dataBaseName, bool useSqlite)
         {
-            AddConnectionString(connectionStringName, dataBaseName, useSqlite ? EfConstants.SQLite : EfConstants.SqlServer);
+            AddConnectionString(connectionStringName, dataBaseName, useSqlite ? DbType.SQLite : DbType.SqlServer);
         }
 
-        public void AddConnectionString(string connectionStringName, string databaseName, string databaseType)
+        public void AddConnectionString(string connectionStringName, string databaseName, DbType databaseType)
         {
             var appSettingsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "appsettings.json");
             JObject content;
@@ -70,12 +60,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (content[connectionStringNodeName][connectionStringName] == null)
             {
+                if (EfConstants.ConnectionStringsDict.TryGetValue(databaseType, out var connectionString))
+                {
+                    if (!databaseType.Equals(DbType.CosmosDb))
+                    {
+                        connectionString = string.Format(connectionString, databaseName);
+                    }
 
-                var connectionString = string.Format(
-                    useSqlite ? SQLiteConnectionStringFormat : SQLConnectionStringFormat,
-                    databaseName);
-                writeContent = true;
-                content[connectionStringNodeName][connectionStringName] = connectionString;
+                    writeContent = true;
+                    content[connectionStringNodeName][connectionStringName] = connectionString;
+                }
             }
 
             // Json.Net loses comments so the above code if requires any changes loses

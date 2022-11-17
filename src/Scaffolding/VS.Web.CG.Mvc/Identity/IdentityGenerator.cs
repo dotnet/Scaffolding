@@ -183,6 +183,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task GenerateCode(IdentityGeneratorCommandLineModel commandlineModel)
         {
+            System.Diagnostics.Debugger.Launch();
             if (commandlineModel == null)
             {
                 throw new ArgumentNullException(nameof(commandlineModel));
@@ -222,7 +223,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     templateModel.DbContextClass,
                     templateModel.UserClass,
                     templateModel.DbContextNamespace,
-                    templateModel.UseSQLite);
+                    templateModel.DatabaseType);
             }
 
             await AddTemplateFiles(templateModel);
@@ -253,14 +254,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         /// <param name="dbContextClassName">For injecting the DbContext class in statements.</param>
         /// <param name="identityUserClassName">For injecting the IdentityUser class in statements.</param>
         /// <param name="dbContextNamespace">For injecting the namespace for DbContext class in statements.</param>
-        /// <param name="useSqlite">To opt between injecting UseSqlite or UseSqlServer</param>
+        /// <param name="databaseType">"Database type to use : DbType.SqlServer or DbType.SQLite"</param>
         /// <returns></returns>
         internal async Task EditProgramCsForIdentity(
             IModelTypesLocator modelTypesLocator,
             string dbContextClassName,
             string identityUserClassName,
             string dbContextNamespace,
-            bool useSqlite = false)
+            DbType databaseType)
         {
             var jsonText = GetIdentityCodeModifierConfig();
             CodeModifierConfig identityProgramFileConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
@@ -289,7 +290,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
                     }
 
-                    filteredChanges = ApplyIdentityChanges(filteredChanges, dbContextClassName, identityUserClassName, useSqlite, useTopLevelsStatements);
+                    filteredChanges = ApplyIdentityChanges(filteredChanges, dbContextClassName, identityUserClassName, databaseType, useTopLevelsStatements);
 
                     if (useTopLevelsStatements)
                     {
@@ -317,18 +318,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private CodeSnippet[] ApplyIdentityChanges(CodeSnippet[] filteredChanges, string dbContextClassName, string identityUserClassName, bool useSqlite, bool useTopLevelsStatements)
+        private CodeSnippet[] ApplyIdentityChanges(CodeSnippet[] filteredChanges, string dbContextClassName, string identityUserClassName, DbType databaseType, bool useTopLevelsStatements)
         {
             foreach (var codeChange in filteredChanges)
             {
                 codeChange.LeadingTrivia = codeChange.LeadingTrivia ?? new Formatting();
-                codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, useSqlite, codeChange?.LeadingTrivia?.NumberOfSpaces);
+                codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, databaseType, codeChange?.LeadingTrivia?.NumberOfSpaces);
             }
 
             return filteredChanges;
         }
 
-        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, bool isSqlite, int? spaces)
+        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, DbType databaseType, int? spaces)
         {
             if (string.IsNullOrEmpty(stringToModify))
             {
@@ -351,8 +352,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (stringToModify.Contains(OptionsUseConnectionString))
             {
                 modifiedString = modifiedString.Replace("options.{0}",
-                    isSqlite ?  $"options.{UseSqlite}" :
-                                $"options.{UseSqlServer}");
+                    databaseType.Equals(DbType.SQLite) ?  $"options.{UseSqlite}" : $"options.{UseSqlServer}");
             }
             if (stringToModify.Contains(GetConnectionString))
             {
@@ -430,8 +430,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 _connectionStringsWriter.AddConnectionString(
                     connectionStringName: $"{templateModel.DbContextClass}Connection",
-                    dataBaseName: templateModel.ApplicationName,
-                    useSqlite: templateModel.UseSQLite);
+                    databaseName: templateModel.ApplicationName,
+                    templateModel.DatabaseType.Equals(DbType.SQLite) ? DbType.SQLite : DbType.SqlServer);
             }
         }
 

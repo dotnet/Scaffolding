@@ -4,58 +4,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     internal static class EFValidationUtil
     {
-        const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-        const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-        const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
-
-        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, bool useSqlite)
+        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, DbType dataContextType)
         {
             var isEFDesignPackagePresent = dependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
+                .Any(package => package.Name.Equals(EfConstants.EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
             if (!isEFDesignPackagePresent)
             {
                 throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfDesignPackageName}"));
+                    string.Format(MessageStrings.InstallEfPackages, $"{EfConstants.EfDesignPackageName}"));
             }
-            if (useSqlite)
+            if (EfConstants.EfPackagesDict.TryGetValue(dataContextType, out var dbTypePackageName))
             {
-                ValidateSqliteDependency(dependencies);
-            }
-            else
-            {
-                ValidateSqlServerDependency(dependencies);
-            }
-            
-        }
-
-        internal static void ValidateSqlServerDependency(IEnumerable<DependencyDescription> dependencies)
-        { 
-            var isSqlServerPackagePresent = dependencies
-                .Any(package => package.Name.Equals(SqlServerPackageName, StringComparison.OrdinalIgnoreCase));
-            
-            if (!isSqlServerPackagePresent) 
-            {
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallSqlPackage, $"{SqlServerPackageName}."));
+                ValidateDependency(dbTypePackageName, dependencies);
             }
         }
 
-        internal static void ValidateSqliteDependency(IEnumerable<DependencyDescription> dependencies)
+        internal static void ValidateDependency(string packageName, IEnumerable<DependencyDescription> dependencies)
         {
-            var isSqlServerPackagePresent = dependencies
-                .Any(package => package.Name.Equals(SqlitePackageName, StringComparison.OrdinalIgnoreCase));
+            var isPackagePresent = dependencies
+                .Any(package => package.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
 
-            if (!isSqlServerPackagePresent)
+            if (!isPackagePresent)
             {
                 throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallSqlPackage, $"{SqlitePackageName}."));
+                    string.Format(MessageStrings.InstallSqlPackage, $"{packageName}."));
             }
         }
     }

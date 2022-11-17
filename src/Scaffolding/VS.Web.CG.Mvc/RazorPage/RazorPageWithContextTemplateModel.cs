@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 {
@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             DbContextNamespace = classNameModel.NamespaceName;
         }
 
-        public bool UseSqlite { get; set; }
+        public DbType DatabaseType { get; set; }
         
         public string ViewDataTypeName { get; set; }
 

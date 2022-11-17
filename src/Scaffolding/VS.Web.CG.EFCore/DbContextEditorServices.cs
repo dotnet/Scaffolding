@@ -137,7 +137,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTypeName },
                 { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextNamespace },
                 { "dataBaseName", dataBaseName},
-                { "useSqlite", useSqlite.ToString() },
+                { "databaseType", useSqlite ? EfConstants.SQLite : EfConstants.SqlServer },
                 { "useTopLevelStatements", useTopLevelStatements.ToString() }
             };
 
@@ -153,7 +153,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <param name="dbContextTypeName"></param>
         /// <param name="dataBaseName"></param>
         /// <param name="dataContextTypeString"></param>
-        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, string dataContextTypeString)
+        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, DbType dataContextTypeString)
         {
             //get leading trivia. there should be atleast one member var statementLeadingTrivia = classSyntax.ChildNodes()
             var statementLeadingTrivia = rootNode.ChildNodes().First()?.GetLeadingTrivia().ToString();
@@ -167,6 +167,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             //create syntax expression that adds DbContext
             //added InvalidOperationExceptino if Configuration.GetConnectionString returns null.
+            string thang = string.Format(
+                textToAddAtEnd,
+                string.Format("{0}.Services", builderIdentifierString),
+                dbContextTypeName,
+                string.Format("{0}.Configuration", builderIdentifierString),
+                string.Format(" ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")", dbContextTypeName));
+        
+            Console.WriteLine(thang);
             var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
                     string.Format("{0}.Services", builderIdentifierString),
                     dbContextTypeName,
@@ -199,23 +207,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return "builder";
         }
         
-        private string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, string databaseType)
+        private string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbType databaseType)
         {
             string textToAddAtEnd = string.Empty;
             string additionalNewline = Environment.NewLine;
             string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
-            if (databaseType.Equals(EfConstants.SQLite, StringComparison.OrdinalIgnoreCase))
+            if (databaseType.Equals(DbType.SQLite))
             {
                 textToAddAtEnd =
                     leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                     statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
             }
-            else if (databaseType.Equals(EfConstants.SqlServer, StringComparison.OrdinalIgnoreCase))
+            else if (databaseType.Equals(DbType.SqlServer))
             {
                 textToAddAtEnd =
                     leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                     statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+            }
+            else if (databaseType.Equals(DbType.CosmosDb))
+            {
+                textToAddAtEnd =
+                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"), \"DATABASE_NAME\"));" + Environment.NewLine;
             }
             return textToAddAtEnd;
         }
@@ -373,8 +387,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 //get all params
                 parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextTypeName), out var dbContextTypeName);
                 parameters.TryGetValue("dataBaseName", out var dataBaseName);
-                parameters.TryGetValue("dataContextType", out var dataContextTypeString);
-                dataContextTypeString = dataContextTypeString ?? EfConstants.SqlServer;
+                parameters.TryGetValue("databaseType", out var dataContextTypeString);
+                DbType dataContextType = DbType.SqlServer;
+                if (Enum.TryParse(typeof(DbType), dataContextTypeString, ignoreCase:true, out var dataContextTypeObj))
+                {
+                    dataContextType = (DbType)dataContextTypeObj;
+                }
                 parameters.TryGetValue("useTopLevelStatements", out var useTopLevelStatementsString);
                 var useTopLevelStatements = useTopLevelStatementsString.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
                 parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextNamespace), out var dbContextNamespace);
@@ -401,8 +419,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
                     if (servicesParam != null)
                     {
-                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, statementLeadingTrivia, dataContextTypeString);
-                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, dataContextTypeString);
+                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, statementLeadingTrivia, dataContextType);
+                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, dataContextType);
                         if (configServicesMethod.Body.Statements.Any())
                         {
                             textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
@@ -442,11 +460,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     if (!useTopLevelStatements)
                     {
                         MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
-                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, dbContextNamespace, dataContextTypeString);
+                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, dbContextNamespace, dataContextType);
                     }
                     else if (useTopLevelStatements)
                     {
-                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, dbContextNamespace, dataContextTypeString);
+                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, dbContextNamespace, dataContextType);
                     }
 
                     if (statementLeadingTrivia != null && dbContextExpression != null)

@@ -1,4 +1,6 @@
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
+using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 {
@@ -22,8 +24,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         [Option(Name = "endpointsNamespace", ShortName = "namespace", Description = "Specify the name of the namespace to use for the generated controller")]
         public string EndpointsNamespace { get; set; }
 
+        [Obsolete("Use databaseType or dbType to configure database type instead")]
         [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
+
+        [Option(Name = "databaseType", ShortName = "dbType", Description = "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        public DbType DatabaseType { get; set; } = DbType.SqlServer;
 
         [Option(Name = "noTypedResults", ShortName = "ntr", Description = "Flag to not use TypedResults for minimal apis.")]
         public bool NoTypedResults { get; set; }
@@ -39,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             RelativeFolderPath = copyFrom.RelativeFolderPath;
             OpenApi = copyFrom.OpenApi;
             EndpointsNamespace = copyFrom.EndpointsNamespace;
-            UseSqlite = copyFrom.UseSqlite;
+            DatabaseType = copyFrom.DatabaseType;
             NoTypedResults = copyFrom.NoTypedResults;
         }
 

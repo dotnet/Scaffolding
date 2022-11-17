@@ -2348,19 +2348,19 @@
         },
         {
           "Kind": "Method",
-          "Name": "get_UseSQLite",
+          "Name": "get_DatabaseType",
           "Parameters": [],
-          "ReturnType": "System.Boolean",
+          "ReturnType": "System.String",
           "Visibility": "Public",
           "GenericParameter": []
         },
         {
           "Kind": "Method",
-          "Name": "set_UseSQLite",
+          "Name": "set_DatabaseType",
           "Parameters": [
             {
               "Name": "value",
-              "Type": "System.Boolean"
+              "Type": "System.String"
             }
           ],
           "ReturnType": "System.Void",

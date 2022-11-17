@@ -150,7 +150,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             DbContextEditorServices testObj = GetTestObject();
             var syntaxTree = CSharpSyntaxTree.ParseText(MinimalProgramCsFile);
             var root = await syntaxTree.GetRootAsync();
-            var dbContextExpression = testObj.GetAddDbContextStatement(root, "DbContextName", "DatabaseName", EfConstants.SqlServer);
+            var dbContextExpression = testObj.GetAddDbContextStatement(root, "DbContextName", "DatabaseName", DbType.SqlServer);
             var correctDbContextString = "builder.Services.AddDbContext<DbContextName>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(\"DbContextName\") ?? throw new InvalidOperationException(\"Connection string 'DbContextName' not found.\")));";
 
             var trimmedDbContextString = ProjectModifierHelper.TrimStatement(dbContextExpression.ToString());

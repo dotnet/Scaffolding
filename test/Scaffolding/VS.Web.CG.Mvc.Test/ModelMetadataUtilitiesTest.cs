@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
@@ -114,7 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, DbType.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -136,7 +137,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbType.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -216,7 +217,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, DbType.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -249,7 +250,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbType.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act

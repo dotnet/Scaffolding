@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
+using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -7,12 +9,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namesapce to use for generating identity code." )]
         public string RootNamespace { get; set; }
 
-        [Option(Name = "useSqLite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
+        [Obsolete("Use databaseType or dbType to configure database type instead")]
+        [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
+
+        [Option(Name = "databaseType", ShortName = "dbType", Description = "Database type to use. Options include 'sqlserver' (default), 'sqlite'.")]
+        public DbType DatabaseType { get; set; } = DbType.SqlServer;
 
         [Option(Name = "dbContext", ShortName = "dc", Description = "Name of the DbContext to use, or generate (if it does not exist).")]
         public string DbContext { get; set; }
-
         [Option(Name = "userClass", ShortName = "u", Description = "Name of the User class to generate.")]
         public string UserClass { get; set; }
 

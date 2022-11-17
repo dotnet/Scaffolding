@@ -24,9 +24,9 @@
       "Description": "Name of the User class to generate."
     },
     {
-      "Name": "useSqLite",
-      "ShortName": "sqlite",
-      "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
+      "Name" : "databaseType",
+      "ShortName" : "dbType",
+      "Description": "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
     },
     {
       "Name": "force",

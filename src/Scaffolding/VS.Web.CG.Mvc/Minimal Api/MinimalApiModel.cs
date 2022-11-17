@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
@@ -37,6 +38,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 
         //Endpoints class name
         public string EndpointsName { get; set; }
+        //Database type eg. SQL Server, SQLite, Cosmos DB, Postgres and more later.
+        public DbType DatabaseType { get; set; }
         public bool NullableEnabled { get; set; }
 
         //If CRUD endpoints support Open API

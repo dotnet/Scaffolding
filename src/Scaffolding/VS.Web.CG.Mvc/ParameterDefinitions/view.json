@@ -58,9 +58,9 @@
             "Description": "Generate a partial view, other layout options (-l and -udl) are ignored if this is specified"
         },
         {
-            "Name" : "useSqlite",
-            "ShortName" : "sqlite",
-            "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
+            "Name" : "databaseType",
+            "ShortName" : "dbType",
+            "Description": "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
         }
     ]
 }

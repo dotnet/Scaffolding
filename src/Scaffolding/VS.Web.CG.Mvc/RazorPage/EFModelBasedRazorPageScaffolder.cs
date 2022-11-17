@@ -56,6 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         public override async Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel)
         {
+            System.Diagnostics.Debugger.Launch();
             if (razorGeneratorModel == null)
             {
                 throw new ArgumentNullException(nameof(razorGeneratorModel));
@@ -81,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.UseSqlite);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.DatabaseType);
             }
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
@@ -139,7 +140,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.UseSqlite);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.DatabaseType);
             }
             
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(

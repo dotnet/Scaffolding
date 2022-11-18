@@ -43,7 +43,7 @@ stages:
       codeSign: true
       jobs:
       - job: Windows_NT
-        timeoutInMinutes: 120
+        timeoutInMinutes: 180
         pool:
           # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
           # Will eventually change this to two BYOC pools.
@@ -111,7 +111,7 @@ stages:
           displayName: Windows Build / Publish
 
       - job: OSX
-        timeoutInMinutes: 120
+        timeoutInMinutes: 180
         pool:
           vmImage: macOS-11
         strategy:
@@ -132,7 +132,7 @@ stages:
           condition: succeeded()
           
       - job: Linux
-        timeoutInMinutes: 120
+        timeoutInMinutes: 180
         pool:
           vmImage: ubuntu-18.04
         container: LinuxContainer

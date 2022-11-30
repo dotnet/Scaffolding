@@ -673,7 +673,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             // Create lambda expression with parameter and block (add leading newline to block for formatting)
             var newLambdaExpression = SyntaxFactory.SimpleLambdaExpression(
                 parameter,
-                block.WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, parentLeadingWhiteSpace));
+                block.WithLeadingTrivia(parentLeadingWhiteSpace));
 
             // Add lambda to parent block's argument list
             var argument = SyntaxFactory.Argument(newLambdaExpression);

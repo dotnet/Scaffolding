@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         public GraphServiceClient GraphServiceClient { get; set; }
-        public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set;}
+        public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set; }
         private MsalTokenCredential TokenCredential { get; set; }
 
         public MsAADTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
@@ -35,10 +35,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         public async Task<ApplicationParameters?> Run()
         {
-            string outputJsonString = string.Empty;    
+            string outputJsonString = string.Empty;
             if (TokenCredential != null && GraphServiceClient != null)
             {
-                switch(CommandName)
+                switch (CommandName)
                 {
                     //--list-aad-apps
                     case Commands.LIST_AAD_APPS_COMMAND:
@@ -63,14 +63,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             return null;
         }
 
-        private async Task<List<DirectoryObject>> GetGraphObjects()
+        private async Task<List<DirectoryObject>?> GetGraphObjects()
         {
             List<DirectoryObject> graphObjectsList = new List<DirectoryObject>();
             try
             {
                 var graphObjects = await GraphServiceClient.Me.OwnedObjects
-                .Request()
-                .GetAsync();
+                    .Request()
+                    .GetAsync();
 
                 if (graphObjects != null)
                 {
@@ -96,6 +96,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                         {
                             nextPage = null;
                             ConsoleLogger.LogMessage(Resources.FailedToRetrieveADObjectsError, LogMessageType.Error);
+                            return null;
                         }
                     }
                 }
@@ -103,6 +104,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             catch (ServiceException)
             {
                 ConsoleLogger.LogMessage(Resources.FailedToRetrieveADObjectsError, LogMessageType.Error);
+                return null;
             }
 
             return graphObjectsList;
@@ -112,46 +114,48 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         {
             string outputJsonString = string.Empty;
             var graphObjectsList = await GetGraphObjects();
-            IList<Application> applicationList = new List<Application>();
-            if (graphObjectsList != null && graphObjectsList.Any())
+            if (graphObjectsList is null)
             {
-                foreach (var graphObj in graphObjectsList)
+                return new JsonResponse(CommandName, State.Fail, Resources.FailedToRetrieveADObjectsError).ToJsonString();
+            }
+
+            IList<Application> applicationList = new List<Application>();
+            foreach (var graphObj in graphObjectsList)
+            {
+                if (graphObj is Application app)
                 {
-                    if (graphObj is Application app)
+                    applicationList.Add(app);
+                }
+            }
+
+            if (applicationList.Any())
+            {
+                Organization? tenant = await GetTenant(GraphServiceClient);
+                if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (Application app in applicationList)
                     {
-                        applicationList.Add(app);
+                        app.AdditionalData.Add("IsB2C", true);
                     }
                 }
 
-                if (applicationList.Any())
+                //order list by created date.
+                applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
+
+                if (ProvisioningToolOptions.Json)
                 {
-                    Organization? tenant = await GetTenant(GraphServiceClient);
-                    if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+                    JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, applicationList);
+                    outputJsonString = jsonResponse.ToJsonString();
+                }
+                else
+                {
+                    Console.Write(
+                        "--------------------------------------------------------------\n" +
+                        "Application Name\t\t\t\tApplication ID\n" +
+                        "--------------------------------------------------------------\n\n");
+                    foreach (var app in applicationList)
                     {
-                        foreach (Application app in applicationList)
-                        {
-                            app.AdditionalData.Add("IsB2C", true);
-                        }
-                    }
-
-                    //order list by created date.
-                    applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
-
-                    if (ProvisioningToolOptions.Json)
-                    {
-                        JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, applicationList);
-                        outputJsonString = jsonResponse.ToJsonString();
-                    }
-                    else
-                    {
-                        Console.Write(
-                            "--------------------------------------------------------------\n" +
-                            "Application Name\t\t\t\tApplication ID\n" +
-                            "--------------------------------------------------------------\n\n");
-                        foreach (var app in applicationList)
-                        {
-                            Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
-                        }
+                        Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
                     }
                 }
             }
@@ -161,7 +165,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient)
         {
-            Organization? tenant = null;
+            Organization? tenant;
             try
             {
                 tenant = (await graphServiceClient.Organization
@@ -170,23 +174,25 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             }
             catch (ServiceException ex)
             {
+                string? errorMessage;
                 if (ex.InnerException != null)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
+                    errorMessage = ex.InnerException.Message;
                 }
                 else
                 {
                     if (ex.Message.Contains("User was not found") || ex.Message.Contains("not found in tenant"))
                     {
-                        Console.WriteLine("User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.");
+                        errorMessage = "User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.";
                     }
                     else
                     {
-                        Console.WriteLine(ex.Message);
+                        errorMessage = ex.Message;
                     }
                 }
 
-                Environment.Exit(1);
+                Console.WriteLine(errorMessage);
+                return null;
             }
 
             return tenant;
@@ -275,13 +281,13 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, tenantList);
                 outputJsonString = jsonResponse.ToJsonString();
             }
-            else 
+            else
             {
                 Console.Write(
-                    "--------------------------------------------------------------------------------------------------------------------------------\n" + 
+                    "--------------------------------------------------------------------------------------------------------------------------------\n" +
                     "Display Name\t\t\tDefault Domain\t\t\t\tTenant Type\tTenant Id\n" +
                     "--------------------------------------------------------------------------------------------------------------------------------\n\n");
-                foreach(var tenant in tenantList)
+                foreach (var tenant in tenantList)
                 {
                     Console.WriteLine($"{(tenant.DisplayName ?? string.Empty).PadRight(16)}\t\t{(tenant.DefaultDomain ?? string.Empty).PadRight(20)}\t\t{(tenant.TenantType ?? string.Empty).PadRight(10)}\t{(tenant.TenantId ?? string.Empty)}");
                 }

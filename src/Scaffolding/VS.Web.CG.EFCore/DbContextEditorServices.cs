@@ -213,24 +213,36 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             string additionalNewline = Environment.NewLine;
             string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
-            if (databaseType.Equals(DbType.SQLite))
+            switch (databaseType)
             {
-                textToAddAtEnd =
-                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                case DbType.SQLite: 
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                    break;
+            
+                case DbType.SqlServer:
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                    break;
+                
+                case DbType.CosmosDb:
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"), \"DATABASE_NAME\"));" + Environment.NewLine;
+                    break;
+                
+                case DbType.Postgres:
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseNpgsql({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                    break;
+
+                default:
+                    break;
             }
-            else if (databaseType.Equals(DbType.SqlServer))
-            {
-                textToAddAtEnd =
-                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
-            }
-            else if (databaseType.Equals(DbType.CosmosDb))
-            {
-                textToAddAtEnd =
-                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"), \"DATABASE_NAME\"));" + Environment.NewLine;
-            }
+
             return textToAddAtEnd;
         }
 

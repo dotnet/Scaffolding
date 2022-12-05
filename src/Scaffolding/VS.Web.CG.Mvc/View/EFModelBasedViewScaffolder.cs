@@ -18,7 +18,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
     {
         private IEntityFrameworkService _entityFrameworkService;
         private IModelTypesLocator _modelTypesLocator;
-
+        private IFileSystem _fileSystem;
+        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
+        
         public EFModelBasedViewScaffolder(
             IProjectContext projectContext,
             IApplicationInfo applicationInfo,
@@ -26,26 +28,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
-            ILogger logger) 
+            ILogger logger,
+            IFileSystem fileSystem) 
             : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
-            if (modelTypesLocator == null)
-            {
-                throw new ArgumentNullException(nameof(modelTypesLocator));
-            }
-
-            if (entityFrameworkService == null)
-            {
-                throw new ArgumentNullException(nameof(entityFrameworkService));
-            }
-
-            _modelTypesLocator = modelTypesLocator;
-            _entityFrameworkService = entityFrameworkService;
+            _modelTypesLocator = modelTypesLocator ?? throw new ArgumentNullException(nameof(modelTypesLocator));
+            _entityFrameworkService = entityFrameworkService ?? throw new ArgumentNullException(nameof(entityFrameworkService));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
         public override async Task GenerateCode(ViewGeneratorModel viewGeneratorModel)
         {
-            System.Diagnostics.Debugger.Launch();
             if (viewGeneratorModel == null)
             {
                 throw new ArgumentNullException(nameof(viewGeneratorModel));
@@ -63,8 +56,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
-
-            if (!string.IsNullOrEmpty(_projectContext.TargetFrameworkMoniker))
+            if (!string.IsNullOrEmpty(_projectContext.TargetFrameworkMoniker) && CalledFromCommandline)
             {
                 EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.DatabaseType);
             }

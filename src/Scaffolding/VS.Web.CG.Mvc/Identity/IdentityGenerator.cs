@@ -183,7 +183,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         public async Task GenerateCode(IdentityGeneratorCommandLineModel commandlineModel)
         {
-            System.Diagnostics.Debugger.Launch();
             if (commandlineModel == null)
             {
                 throw new ArgumentNullException(nameof(commandlineModel));

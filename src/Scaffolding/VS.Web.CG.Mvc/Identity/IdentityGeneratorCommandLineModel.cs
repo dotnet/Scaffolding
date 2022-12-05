@@ -1,6 +1,6 @@
+using System;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
-using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -18,6 +18,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         [Option(Name = "dbContext", ShortName = "dc", Description = "Name of the DbContext to use, or generate (if it does not exist).")]
         public string DbContext { get; set; }
+
         [Option(Name = "userClass", ShortName = "u", Description = "Name of the User class to generate.")]
         public string UserClass { get; set; }
 

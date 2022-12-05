@@ -56,7 +56,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
         public override async Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel)
         {
-            System.Diagnostics.Debugger.Launch();
             if (razorGeneratorModel == null)
             {
                 throw new ArgumentNullException(nameof(razorGeneratorModel));

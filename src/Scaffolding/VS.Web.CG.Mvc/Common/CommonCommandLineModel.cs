@@ -44,7 +44,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         public abstract CommonCommandLineModel Clone();
 
-        protected CommonCommandLineModel() {}
+        protected CommonCommandLineModel()
+        {
+        }
 
         protected CommonCommandLineModel(CommonCommandLineModel copyFrom)
         {

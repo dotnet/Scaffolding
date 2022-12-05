@@ -22,7 +22,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         public async Task GenerateCode(CommandLineGeneratorModel model)
         {
-            System.Diagnostics.Debugger.Launch();
             if (model == null)
             {
                 throw new ArgumentNullException(nameof(model));

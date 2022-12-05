@@ -1,6 +1,6 @@
+using System;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
-using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 {

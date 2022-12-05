@@ -1,16 +1,18 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.DotNet.Scaffolding.Shared.Project;
 using System;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public interface IEntityFrameworkService
     {
-        /// <summary>
+        [Obsolete]
+        Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName, string areaName, bool useSqlite);
+         /// <summary>
         /// Gets the EF metadata for given context and model.
         /// Method takes in full type name of context and if there is no context with that name,
         /// attempts to create one. When creating a context, the method also tries to modify Startup
@@ -25,10 +27,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <param name="dbContextFullTypeName">Full name (including namespace) of the context class.</param>
         /// <param name="modelTypeName">Model type for which the EF metadata has to be returned.</param>
         /// <param name="areaName">Name of the area on which scaffolding is being run. Used for generating path for new DbContext.</param>
-        /// <param name="useSqlite">flag for using sqlite instead of sqlserver </param>
+        /// <param name="databaseType">enum DbType (default DbType.SqlServer) </param>
         /// <returns>Returns <see cref="ContextProcessingResult"/>.</returns>
-        [Obsolete]
-        Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName, string areaName, bool useSqlite);
         Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName, string areaName, DbType databaseType);
     }
 }

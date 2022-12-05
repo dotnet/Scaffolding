@@ -133,6 +133,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 ModelMetadata = processor.ModelMetadata
             };
         }
-
     }
 }

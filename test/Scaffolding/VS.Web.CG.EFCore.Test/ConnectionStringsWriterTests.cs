@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
@@ -34,17 +35,30 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var fs = new MockFileSystem();
             var testObj = GetTestObject(fs);
 
-            //Act
+            //Act, test obsolete AddConnectionString
             testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid", false);
-
+            //test SqlServer
+            testObj.AddConnectionString("MyDbContext2", "MyDbContext-SqlServerDb", DbType.SqlServer);
+            //test SqlServer
+            testObj.AddConnectionString("MyDbContext3", "MyDbContext-SqliteDb", DbType.SQLite);
+            //test SqlServer
+            testObj.AddConnectionString("MyDbContext4", "MyDbContext-CosmosDb", DbType.CosmosDb);
+            //test SqlServer
+            testObj.AddConnectionString("MyDbContext5", "MyDbContext-PostgresDb", DbType.Postgres);
             //Assert
             string expected = @"{
   ""ConnectionStrings"": {
-    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
+    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true"",
+    ""MyDbContext2"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-SqlServerDb;Trusted_Connection=True;MultipleActiveResultSets=true"",
+    ""MyDbContext3"": ""Data Source=MyDbContext-SqliteDb.db"",
+    ""MyDbContext4"": ""AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="",
+    ""MyDbContext5"": ""server=localhost;username=postgres;database=MyDbContext-PostgresDb""
   }
 }";
+
             var appSettingsPath = Path.Combine(AppBase, "appsettings.json"); 
             fs.FileExists(appSettingsPath);
+            var appsettingsstring = fs.ReadAllText(appSettingsPath);
             Assert.Equal(expected, fs.ReadAllText(appSettingsPath), ignoreCase: false, ignoreLineEndingDifferences: true);
         }
 

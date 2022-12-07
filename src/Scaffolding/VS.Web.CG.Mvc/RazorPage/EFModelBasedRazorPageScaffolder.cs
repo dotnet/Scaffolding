@@ -81,13 +81,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.DatabaseType);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.DatabaseProvider);
             }
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
+                _logger,
                 string.Empty);
 
             TemplateModel = GetRazorPageWithContextTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
@@ -139,13 +140,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.DatabaseType);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.DatabaseProvider);
             }
             
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorPageGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
+                _logger,
                 string.Empty);
 
             TemplateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);

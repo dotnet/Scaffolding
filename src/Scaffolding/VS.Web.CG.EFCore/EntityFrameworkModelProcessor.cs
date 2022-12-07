@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,6 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using System.Collections;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -27,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         private const string MySqlException = nameof(MySqlException);
         private const string NewDbContextFolderName = "Data";
-        private DbType _databaseType;
+        private DbProvider _databaseProvider;
         private string _dbContextFullTypeName;
         private ModelType _modelTypeSymbol;
         private string _areaName;
@@ -50,7 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             string dbContextFullTypeName,
             ModelType modelTypeSymbol,
             string areaName,
-            DbType databaseType,
+            DbProvider databaseProvider,
             ICodeGenAssemblyLoadContext loader,
             IDbContextEditorServices dbContextEditorServices,
             IModelTypesLocator modelTypesLocator,
@@ -76,8 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _applicationInfo = applicationInfo;
             _fileSystem = fileSystem;
             _workspace = workspace;
-            _databaseType = databaseType;
-
+            _databaseProvider = databaseProvider;
             _assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
         }
 
@@ -101,7 +98,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 
                 if (!dbContextSymbols.Any())
                 {
-                    //add nullable properties
                     await GenerateNewDbContextAndRegisterProgramFile(programType, _applicationInfo);
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
@@ -371,10 +367,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            if (_databaseType.Equals(DbType.SqlServer))
-            {
-                ValidateEFSqlServerDependency();
-            }
+            // Validate for necessary ef packages (based on database type)
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
             bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
@@ -390,7 +385,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTemplateModel.DbContextTypeName },
                     { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
                     { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
-                    { "databaseType", _databaseType.ToString() },
+                    { "databaseProvider", _databaseProvider.ToString() },
                     { "useTopLevelStatements", useTopLevelsStatements.ToString() }
                 };
 
@@ -443,10 +438,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            if (_databaseType.Equals(DbType.SqlServer))
-            {
-                ValidateEFSqlServerDependency();
-            }
+            // Validate for necessary ef packages (based on database type)
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
 
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
@@ -463,7 +456,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTemplateModel.DbContextTypeName },
                     { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
                     { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
-                    { "databaseType", _databaseType.ToString() },
+                    { "databaseProvider", _databaseProvider.ToString() },
                     { "useTopLevelStatements", useTopLevelsStatements.ToString() }
                 };
 
@@ -580,14 +573,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     }
                 }
                 throw ex.Unwrap(_logger);
-            }
-        }
-
-        private void ValidateEFSqlServerDependency()
-        {
-            if (_projectContext.GetPackage(EFSqlServerPackageName) == null && CalledFromCommandline)
-            {
-                throw new InvalidOperationException(MessageStrings.EFSqlServerPackageNotAvailable);
             }
         }
 

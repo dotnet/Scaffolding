@@ -67,16 +67,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         public async Task GenerateCode(MinimalApiGeneratorCommandLineModel model)
         {
             var namespaceName = NameSpaceUtilities.GetSafeNameSpaceFromPath(model.RelativeFolderPath, AppInfo.ApplicationName);
+
             //get model and dbcontext
             var modelTypeAndContextModel = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
                 model,
                 EntityFrameworkService,
                 ModelTypesLocator,
+                Logger,
                 areaName : string.Empty);
 
             if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, model.DatabaseType);
+                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, model.DatabaseProvider);
             }
 
             if (model.OpenApi)
@@ -92,7 +94,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 NullableEnabled = "enable".Equals(ProjectContext?.Nullable, StringComparison.OrdinalIgnoreCase),
                 OpenAPI = model.OpenApi,
                 MethodName = $"Map{modelTypeAndContextModel.ModelType.Name}Endpoints",
-                DatabaseType = model.DatabaseType,
+                DatabaseProvider = model.DatabaseProvider,
                 UseTypedResults = !model.NoTypedResults
             };
 

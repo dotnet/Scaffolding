@@ -14,6 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         public string DbContextFullName { get; set; }
 
-        public DbType DatabaseType { get; set; }
+        public DbProvider DatabaseProvider { get; set; }
     }
 }

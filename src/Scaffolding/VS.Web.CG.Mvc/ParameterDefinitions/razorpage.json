@@ -62,10 +62,10 @@
             "ShortName": "npm",
             "Description": "Switch to not generate a PageModel class for Empty template"
         },
-        {
-            "Name" : "databaseType",
-            "ShortName" : "dbType",
-            "Description": "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
-        }
+      {
+        "Name": "databaseProvider",
+        "ShortName": "dbProvider",
+        "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
+      }
     ]
 }

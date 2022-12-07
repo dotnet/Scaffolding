@@ -9,6 +9,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
     {
         [Obsolete]
         void AddConnectionString(string connectionStringName, string dataBaseName, bool useSqlite);
-        void AddConnectionString(string connectionStringName, string databaseName, DbType databaseType);
+        void AddConnectionString(string connectionStringName, string databaseName, DbProvider databaseProvider);
     }
 }

@@ -69,11 +69,11 @@
             "Name": "controllerNamespace",
             "ShortName": "namespace",
             "Description": "Specify the name of the namespace to use for the generated controller"
-        }, 
-        {
-            "Name" : "databaseType",
-            "ShortName" : "dbType",
-            "Description": "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
-        }
+        },
+      {
+        "Name": "databaseProvider",
+        "ShortName": "dbProvider",
+        "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
+      }
     ]
 }

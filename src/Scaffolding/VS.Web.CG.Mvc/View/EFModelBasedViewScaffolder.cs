@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
             if (!string.IsNullOrEmpty(_projectContext.TargetFrameworkMoniker) && CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.DatabaseType);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.DatabaseProvider);
             }
             
 
@@ -66,6 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 viewGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
+                _logger,
                 string.Empty);
  
             await GenerateView(viewGeneratorModel, modelTypeAndContextModel, outputPath);

@@ -62,7 +62,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.DatabaseType);
+                EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.DatabaseProvider);
             }
             
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
@@ -72,6 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 controllerGeneratorModel,
                 EntityFrameworkService,
                 ModelTypesLocator,
+                Logger,
                 _areaName);
 
             if (string.IsNullOrEmpty(controllerGeneratorModel.ControllerName))

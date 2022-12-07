@@ -12,7 +12,6 @@ using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -37,60 +36,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             IFileSystem fileSystem,
             ILogger logger)
         {
-            if (commandlineModel == null)
-            {
-                throw new ArgumentNullException(nameof(commandlineModel));
-            }
-
-            if (applicationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(applicationInfo));
-            }
-
-            if (projectContext == null)
-            {
-                throw new ArgumentNullException(nameof(projectContext));
-            }
-
-            if (workspace == null)
-            {
-                throw new ArgumentNullException(nameof(workspace));
-            }
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
-            }
-
-            if (fileSystem == null)
-            {
-                throw new ArgumentNullException(nameof(fileSystem));
-            }
-
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
-            _commandlineModel = commandlineModel;
-            _applicationInfo = applicationInfo;
-            _projectContext = projectContext;
-            _workspace = workspace;
-            _loader = loader;
-            _fileSystem = fileSystem;
-            _logger = logger;
+            _commandlineModel = commandlineModel ?? throw new ArgumentNullException(nameof(commandlineModel));
+            _applicationInfo = applicationInfo ?? throw new ArgumentNullException(nameof(applicationInfo));
+            _projectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _loader = loader ?? throw new ArgumentNullException(nameof(loader)); ;
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         internal bool IsFilesSpecified => !string.IsNullOrEmpty(_commandlineModel.Files);
         internal bool IsExcludeSpecificed => !string.IsNullOrEmpty(_commandlineModel.ExcludeFiles);
         internal bool IsDbContextSpecified => !string.IsNullOrEmpty(_commandlineModel.DbContext);
         internal bool IsUsingExistingDbContext { get; set; }
-
-        private Type _userType;
-
         internal string UserClass { get; private set; }
         internal string UserClassNamespace { get; private set; }
 
+        private Type _userType;
         internal Type UserType 
         {
             get
@@ -104,7 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 UserClassNamespace = _userType?.Namespace;
             }
         }
-
+        internal DbProvider DatabaseProvider { get; set; }
         internal string DbContextClass { get; private set; }
         internal string DbContextNamespace { get; private set; }
         internal string RootNamespace { get; private set; }
@@ -133,6 +95,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     DbContextClass = GetClassNameFromTypeName(_commandlineModel.DbContext);
                     DbContextNamespace = GetNamespaceFromTypeName(_commandlineModel.DbContext)
                         ?? defaultDbContextNamespace;
+                    DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(_commandlineModel.DatabaseProviderString, _logger);
                 }
                 else
                 {
@@ -149,6 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 // --dbContext paramter was not specified. So we need to generate one using convention.
                 DbContextClass = GetDefaultDbContextName();
                 DbContextNamespace = defaultDbContextNamespace;
+                DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(_commandlineModel.DatabaseProviderString, _logger);
             }
 
             // if an existing user class was determined from the DbContext, don't try to get it from here.
@@ -196,7 +160,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = DbContextNamespace,
                 UserClass = UserClass,
                 UserClassNamespace = UserClassNamespace,
-                DatabaseType = _commandlineModel.DatabaseType,
+                DatabaseProvider = _commandlineModel.DatabaseProvider,
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,
@@ -666,9 +630,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var usersProperty = existingDbContext.GetProperties()
                 .FirstOrDefault(p => p.Name == "Users");
 
-            if (usersProperty == null 
-                || !usersProperty.PropertyType.IsGenericType
-                || usersProperty.PropertyType.GetGenericArguments().Count() != 1)
+            if (usersProperty == null ||
+                !usersProperty.PropertyType.IsGenericType ||
+                usersProperty.PropertyType.GetGenericArguments().Count() != 1)
             {
                 // The IdentityDbContext has DbSet<UserType> Users property.
                 // The only case this would happen is if the user hides the inherited property.
@@ -696,8 +660,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     _loader,
                     _logger);
 
-                if (_reflectedTypesProvider.GetCompilationErrors() != null
-                    && _reflectedTypesProvider.GetCompilationErrors().Any())
+                if (_reflectedTypesProvider.GetCompilationErrors() != null &&
+                    _reflectedTypesProvider.GetCompilationErrors().Any())
                 {
                     // Failed to build the project.
                     throw new InvalidOperationException(
@@ -726,6 +690,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(string.Format(MessageStrings.InvalidDbContextClassName, model.DbContext));
             }
 
+            if (!string.IsNullOrEmpty(model.DatabaseProviderString) && !EfConstants.IdentityDbProviders.Contains(model.DatabaseProviderString, StringComparer.OrdinalIgnoreCase))
+            {
+                string dbList = $"'{string.Join("', ", EfConstants.IdentityDbProviders.ToArray(), 0, EfConstants.IdentityDbProviders.Count - 1)}' and '{EfConstants.IdentityDbProviders.LastOrDefault()}'";
+                errorStrings.Add(string.Format(MessageStrings.InvalidDatabaseProvider, model.DatabaseProviderString));
+                errorStrings.Add($"Supported database providers include : {dbList}");
+            }
             if (!string.IsNullOrEmpty(model.RootNamespace) && !RoslynUtilities.IsValidNamespace(model.RootNamespace))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidNamespaceName, model.RootNamespace));

@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             DbContextNamespace = classNameModel.NamespaceName;
         }
 
-        public DbType DatabaseType { get; set; }
+        public DbProvider DatabaseProvider { get; set; }
         
         public string ViewDataTypeName { get; set; }
 

@@ -2,17 +2,17 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
 {
-    public enum DbType
+    public enum DbProvider
     {
         SqlServer, SQLite, CosmosDb, Postgres
     }
 
     public static class EfConstants
     {
-        public static string SqlServer = DbType.SqlServer.ToString();
-        public static string SQLite = DbType.SQLite.ToString();
-        public static string CosmosDb = DbType.CosmosDb.ToString();
-        public static string Postgres = DbType.Postgres.ToString();
+        public static string SqlServer = DbProvider.SqlServer.ToString();
+        public static string SQLite = DbProvider.SQLite.ToString();
+        public static string CosmosDb = DbProvider.CosmosDb.ToString();
+        public static string Postgres = DbProvider.Postgres.ToString();
         public const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
@@ -22,23 +22,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         public const string SQLiteConnectionStringFormat = "Data Source={0}.db";
         public const string CosmosDbConnectionStringFormat = "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
         public const string PostgresConnectionStringFormat = "server=localhost;username=postgres;database={0}";
-        public static readonly IDictionary<DbType, string> ConnectionStringsDict = new Dictionary<DbType, string>
+        public static readonly IDictionary<DbProvider, string> ConnectionStringsDict = new Dictionary<DbProvider, string>
         {
-            { DbType.SqlServer, SQLConnectionStringFormat },
-            { DbType.SQLite, SQLiteConnectionStringFormat },
-            { DbType.CosmosDb, CosmosDbConnectionStringFormat },
-            { DbType.Postgres, PostgresConnectionStringFormat }
+            { DbProvider.SqlServer, SQLConnectionStringFormat },
+            { DbProvider.SQLite, SQLiteConnectionStringFormat },
+            { DbProvider.CosmosDb, CosmosDbConnectionStringFormat },
+            { DbProvider.Postgres, PostgresConnectionStringFormat }
         };
 
-        public static readonly IDictionary<DbType, string> EfPackagesDict = new Dictionary<DbType, string>
+        public static readonly IDictionary<DbProvider, string> EfPackagesDict = new Dictionary<DbProvider, string>
         {
-            { DbType.SqlServer, SqlServerPackageName },
-            { DbType.SQLite, SqlitePackageName },
-            { DbType.CosmosDb, CosmosPakcageName },
-            { DbType.Postgres, PostgresPackageName }
+            { DbProvider.SqlServer, SqlServerPackageName },
+            { DbProvider.SQLite, SqlitePackageName },
+            { DbProvider.CosmosDb, CosmosPakcageName },
+            { DbProvider.Postgres, PostgresPackageName }
         };
 
-        public static readonly IList<string> IdentityDbTypes = new List<string> { EfConstants.SqlServer, EfConstants.SQLite };
-        public static readonly IList<string> AllDbTypes = new List<string> { EfConstants.SqlServer, EfConstants.SQLite, EfConstants.CosmosDb, EfConstants.Postgres };
+        public static readonly IList<string> IdentityDbProviders = new List<string> { SqlServer, SQLite };
+        public static readonly IList<string> AllDbProviders = new List<string> { SqlServer, SQLite, CosmosDb, Postgres };
     }
 }

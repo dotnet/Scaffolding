@@ -258,4 +258,7 @@
   <data name="InvalidClassName" xml:space="preserve">
     <value>The class name '{0}' is not valid.</value>
   </data>
+  <data name="InvalidDatabaseType" xml:space="preserve">
+    <value>Invalid database type '{0}'</value>
+  </data>
 </root>

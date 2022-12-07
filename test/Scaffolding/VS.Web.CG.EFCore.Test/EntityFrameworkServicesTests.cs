@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 .Returns(editSyntaxTreeResult);
 
             var connectionStringsWriter = new Mock<IConnectionStringsWriter>();
-            connectionStringsWriter.Setup(c => c.AddConnectionString(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DbType>()));
+            connectionStringsWriter.Setup(c => c.AddConnectionString(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DbProvider>()));
 
             var filesLocator = new FilesLocator();
             var compilationService = new RoslynCompilationService(_appInfo, _loader, _projectContext);

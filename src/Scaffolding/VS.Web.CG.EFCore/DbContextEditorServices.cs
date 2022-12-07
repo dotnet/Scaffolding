@@ -137,7 +137,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTypeName },
                 { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextNamespace },
                 { "dataBaseName", dataBaseName},
-                { "databaseType", useSqlite ? EfConstants.SQLite : EfConstants.SqlServer },
+                { "databaseProvider", useSqlite ? EfConstants.SQLite : EfConstants.SqlServer },
                 { "useTopLevelStatements", useTopLevelStatements.ToString() }
             };
 
@@ -153,7 +153,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <param name="dbContextTypeName"></param>
         /// <param name="dataBaseName"></param>
         /// <param name="dataContextTypeString"></param>
-        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, DbType dataContextTypeString)
+        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, DbProvider dataContextTypeString)
         {
             //get leading trivia. there should be atleast one member var statementLeadingTrivia = classSyntax.ChildNodes()
             var statementLeadingTrivia = rootNode.ChildNodes().First()?.GetLeadingTrivia().ToString();
@@ -207,33 +207,33 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return "builder";
         }
         
-        private string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbType databaseType)
+        private string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider)
         {
             string textToAddAtEnd = string.Empty;
             string additionalNewline = Environment.NewLine;
             string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
-            switch (databaseType)
+            switch (databaseProvider)
             {
-                case DbType.SQLite: 
+                case DbProvider.SQLite: 
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
             
-                case DbType.SqlServer:
+                case DbProvider.SqlServer:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
                 
-                case DbType.CosmosDb:
+                case DbProvider.CosmosDb:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"), \"DATABASE_NAME\"));" + Environment.NewLine;
                     break;
                 
-                case DbType.Postgres:
+                case DbProvider.Postgres:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseNpgsql({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
@@ -399,11 +399,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 //get all params
                 parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextTypeName), out var dbContextTypeName);
                 parameters.TryGetValue("dataBaseName", out var dataBaseName);
-                parameters.TryGetValue("databaseType", out var dataContextTypeString);
-                DbType dataContextType = DbType.SqlServer;
-                if (Enum.TryParse(typeof(DbType), dataContextTypeString, ignoreCase:true, out var dataContextTypeObj))
+                parameters.TryGetValue("databaseProvider", out var dataContextTypeString);
+                DbProvider dataContextType = DbProvider.SqlServer;
+                if (Enum.TryParse(typeof(DbProvider), dataContextTypeString, ignoreCase:true, out var dataContextTypeObj))
                 {
-                    dataContextType = (DbType)dataContextTypeObj;
+                    dataContextType = (DbProvider)dataContextTypeObj;
                 }
                 parameters.TryGetValue("useTopLevelStatements", out var useTopLevelStatementsString);
                 var useTopLevelStatements = useTopLevelStatementsString.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);

@@ -115,6 +115,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To scaffold controllers and views using models, install Entity Framework core packages and try again: {0}.
+        /// </summary>
+        internal static string InstallEfPackages {
+            get {
+                return ResourceManager.GetString("InstallEfPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To scaffold, install the following Entity Framework core packages and try again: {0}.
+        /// </summary>
+        internal static string InstallSqlPackage {
+            get {
+                return ResourceManager.GetString("InstallSqlPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid FileSystemChange message..
         /// </summary>
         internal static string InvalidFileSystemChangeMessage {

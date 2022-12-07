@@ -27,15 +27,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 throw new ArgumentNullException(nameof(model));
             }
 
-            if (Enum.TryParse(typeof(DbType), model.DatabaseTypeString, ignoreCase: true, out var databaseType))
-            {
-                model.DatabaseType = (DbType)databaseType;
-            }
-            else
-            {
-                throw new ArgumentNullException("bad database type");
-            }
-
             ControllerGeneratorBase generator = null;
 
             if (string.IsNullOrEmpty(model.ModelClass))

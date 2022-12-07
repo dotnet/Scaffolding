@@ -29,10 +29,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public void AddConnectionString(string connectionStringName, string dataBaseName, bool useSqlite)
         {
-            AddConnectionString(connectionStringName, dataBaseName, useSqlite ? DbType.SQLite : DbType.SqlServer);
+            AddConnectionString(connectionStringName, dataBaseName, useSqlite ? DbProvider.SQLite : DbProvider.SqlServer);
         }
 
-        public void AddConnectionString(string connectionStringName, string databaseName, DbType databaseType)
+        public void AddConnectionString(string connectionStringName, string databaseName, DbProvider databaseProvider)
         {
             var appSettingsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "appsettings.json");
             JObject content;
@@ -58,9 +58,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (content[connectionStringNodeName][connectionStringName] == null)
             {
-                if (EfConstants.ConnectionStringsDict.TryGetValue(databaseType, out var connectionString))
+                if (EfConstants.ConnectionStringsDict.TryGetValue(databaseProvider, out var connectionString))
                 {
-                    if (!databaseType.Equals(DbType.CosmosDb))
+                    if (!databaseProvider.Equals(DbProvider.CosmosDb))
                     {
                         connectionString = string.Format(connectionString, databaseName);
                     }

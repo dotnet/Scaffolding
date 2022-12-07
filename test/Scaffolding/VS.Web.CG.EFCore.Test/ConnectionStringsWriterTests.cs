@@ -38,13 +38,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             //Act, test obsolete AddConnectionString
             testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid", false);
             //test SqlServer
-            testObj.AddConnectionString("MyDbContext2", "MyDbContext-SqlServerDb", DbType.SqlServer);
+            testObj.AddConnectionString("MyDbContext2", "MyDbContext-SqlServerDb", DbProvider.SqlServer);
             //test SqlServer
-            testObj.AddConnectionString("MyDbContext3", "MyDbContext-SqliteDb", DbType.SQLite);
+            testObj.AddConnectionString("MyDbContext3", "MyDbContext-SqliteDb", DbProvider.SQLite);
             //test SqlServer
-            testObj.AddConnectionString("MyDbContext4", "MyDbContext-CosmosDb", DbType.CosmosDb);
+            testObj.AddConnectionString("MyDbContext4", "MyDbContext-CosmosDb", DbProvider.CosmosDb);
             //test SqlServer
-            testObj.AddConnectionString("MyDbContext5", "MyDbContext-PostgresDb", DbType.Postgres);
+            testObj.AddConnectionString("MyDbContext5", "MyDbContext-PostgresDb", DbProvider.Postgres);
             //Assert
             string expected = @"{
   ""ConnectionStrings"": {

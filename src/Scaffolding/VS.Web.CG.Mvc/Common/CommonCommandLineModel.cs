@@ -16,13 +16,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]
         public string DataContextClass { get; set; }
 
-        [Obsolete("Use databaseType or dbType to configure database type instead")]
+        [Obsolete("Use databaseProvider or dbProvider to configure database type instead")]
         [Option(Name = "useSqlite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
 
-        [Option(Name = "databaseType", ShortName = "dbType", Description = "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
-        public string DatabaseTypeString { get; set; } = EfConstants.SqlServer;
-        public DbType DatabaseType { get; set; } 
+        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        public string DatabaseProviderString { get; set; }
+        public DbProvider DatabaseProvider { get; set; } 
 
         [Option(Name = "referenceScriptLibraries", ShortName = "scripts", Description = "Switch to specify whether to reference script libraries in the generated views")]
         public bool ReferenceScriptLibraries { get; set; }
@@ -58,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Force = copyFrom.Force;
             RelativeFolderPath = copyFrom.RelativeFolderPath;
             ControllerNamespace = copyFrom.ControllerNamespace;
-            DatabaseType = copyFrom.DatabaseType;
+            DatabaseProvider = copyFrom.DatabaseProvider;
         }
     }
 }

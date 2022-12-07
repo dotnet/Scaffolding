@@ -13,7 +13,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string UserClassNamespace { get; set; }
         public string DbContextClass { get; set; }
         public string DbContextNamespace { get; set; }
-        public DbType DatabaseType { get; set; }
+        public DbProvider DatabaseProvider { get; set; }
         public bool IsUsingExistingDbContext { get; set; }
         public bool IsGenerateCustomUser { get; set; }
         public IdentityGeneratorFile[] FilesToGenerate { get; set; }

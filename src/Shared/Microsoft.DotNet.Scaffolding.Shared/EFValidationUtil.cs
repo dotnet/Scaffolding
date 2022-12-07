@@ -4,14 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
+namespace Microsoft.DotNet.Scaffolding.Shared
 {
     internal static class EFValidationUtil
     {
-        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, DbType dataContextType)
+        internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, DbProvider dataContextType)
         {
             var isEFDesignPackagePresent = dependencies
                 .Any(package => package.Name.Equals(EfConstants.EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
@@ -21,9 +20,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallEfPackages, $"{EfConstants.EfDesignPackageName}"));
             }
-            if (EfConstants.EfPackagesDict.TryGetValue(dataContextType, out var dbTypePackageName))
+            if (EfConstants.EfPackagesDict.TryGetValue(dataContextType, out var dbProviderPackageName))
             {
-                ValidateDependency(dbTypePackageName, dependencies);
+                ValidateDependency(dbProviderPackageName, dependencies);
             }
         }
 

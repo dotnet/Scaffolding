@@ -2348,7 +2348,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "get_DatabaseType",
+          "Name": "get_DatabaseProvider",
           "Parameters": [],
           "ReturnType": "System.String",
           "Visibility": "Public",
@@ -2356,7 +2356,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "set_DatabaseType",
+          "Name": "set_DatabaseProvider",
           "Parameters": [
             {
               "Name": "value",

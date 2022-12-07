@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         //Endpoints class name
         public string EndpointsName { get; set; }
         //Database type eg. SQL Server, SQLite, Cosmos DB, Postgres and more later.
-        public DbType DatabaseType { get; set; }
+        public DbProvider DatabaseProvider { get; set; }
         public bool NullableEnabled { get; set; }
 
         //If CRUD endpoints support Open API

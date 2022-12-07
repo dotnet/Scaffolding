@@ -513,7 +513,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
 
             DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, dbContextType);
-            Console.WriteLine($"Database provider \"{dbContextInstance.Database.ProviderName}\" detected!\n");
+            Console.WriteLine($"\nDatabase provider \"{dbContextInstance.Database.ProviderName}\" detected!\n");
             if (dbContextInstance == null)
             {
                 throw new InvalidOperationException(string.Format(

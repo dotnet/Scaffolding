@@ -108,12 +108,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         {
             if (string.IsNullOrEmpty(databaseProviderString))
             {
-                logger.LogMessage("No database type found. Using 'SqlServer' by default for new DbContext creation!", LogMessageLevel.Information);
+                logger.LogMessage("No database provider found. Using 'SqlServer' by default for new DbContext creation!", LogMessageLevel.Information);
                 return DbProvider.SqlServer;
             }
             else if (Enum.TryParse(databaseProviderString, ignoreCase: true, out DbProvider dbProvider))
             {
-                logger.LogMessage($"Creating new DbContext with database type '{databaseProviderString}'!", LogMessageLevel.Information);
                 return dbProvider;
             }
             else

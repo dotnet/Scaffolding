@@ -103,7 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType, bool nullableEnabled)
         {
-            return AddModelToContext(dbContext, modelType, new Dictionary<string, string>() { { nameof(nullableEnabled), nullableEnabled.ToString() } });
+            return AddModelToContext(dbContext, modelType, new Dictionary<string, string>() { { nameof(nullableEnabled), nullableEnabled.ToString() }});
         }
 
         private string GetSafeModelName(string name, ITypeSymbol dbContext)
@@ -147,8 +147,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <summary>
         /// Get the StatementSyntax that adds the db context to the WebApplicationBuilder.
         /// </summary>
-        /// <param name="rootNode">Using the base class to allow this var to be either CompilationUnitSyntax or a MethodBodySyntax
-        ///                         To get the WebApplicationBuilder variable name
+        /// <param name="rootNode">Using the base class to allow this var to be either CompilationUnitSyntax or a MethodBodySynta To get the WebApplicationBuilder variable name
         /// </param>
         /// <param name="dbContextTypeName"></param>
         /// <param name="dataBaseName"></param>
@@ -206,8 +205,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             return "builder";
         }
-        
-        private string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider)
+
+        internal string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider)
         {
             string textToAddAtEnd = string.Empty;
             string additionalNewline = Environment.NewLine;
@@ -242,7 +241,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 default:
                     break;
             }
-
             return textToAddAtEnd;
         }
 

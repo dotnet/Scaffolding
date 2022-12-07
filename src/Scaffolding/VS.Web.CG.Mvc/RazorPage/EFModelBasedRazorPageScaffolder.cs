@@ -77,6 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.PageModelFlagNotSupported);
             }
 
+            razorGeneratorModel.ValidateCommandline(_logger);
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
             if (CalledFromCommandline)

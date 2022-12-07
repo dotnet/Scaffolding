@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 throw new ArgumentException(MessageStrings.TemplateNameRequired);
             }
-
+            viewGeneratorModel.ValidateCommandline(_logger);
             ModelTypeAndContextModel modelTypeAndContextModel = null;
             var outputPath = ValidateAndGetOutputPath(viewGeneratorModel, outputFileName: viewGeneratorModel.ViewName + Constants.ViewExtension);
             if (!string.IsNullOrEmpty(_projectContext.TargetFrameworkMoniker) && CalledFromCommandline)

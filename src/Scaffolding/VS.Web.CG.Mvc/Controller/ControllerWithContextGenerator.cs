@@ -59,7 +59,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         {
             Contract.Assert(!string.IsNullOrEmpty(controllerGeneratorModel.ModelClass));
             ValidateNameSpaceName(controllerGeneratorModel);
-
+            controllerGeneratorModel.ValidateCommandline(Logger);
             if (CalledFromCommandline)
             {
                 EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.DatabaseProvider);

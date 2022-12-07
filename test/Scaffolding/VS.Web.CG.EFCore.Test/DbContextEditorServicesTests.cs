@@ -1,6 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -158,6 +158,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.Equal(trimmedCorrectDbContextString, trimmedDbContextString);
         }
 
+        [Theory]
+        [MemberData(nameof(AddDbContextStringData))]
+        public void AddDbContextStringTests(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider, string expected)
+        {
+            DbContextEditorServices.
+        }
 
         private DbContextEditorServices GetTestObject(MockFileSystem fs = null)
         {
@@ -172,6 +178,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 fs != null ? fs : new MockFileSystem());
         }
 
+        public static IEnumerable<object[]> AddDbContextStringData =>
+            new []
+            {
+                new object[] {true, string.Empty, DbProvider.SqlServer, "string"}
+            };
         private static readonly string AppBase = "AppBase";
     }
 }

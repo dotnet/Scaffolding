@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             var graphObjectsList = await GetGraphObjects();
             if (graphObjectsList is null)
             {
-                return new JsonResponse(CommandName, State.Fail, Resources.FailedToRetrieveADObjectsError).ToJsonString();
+                return new JsonResponse(CommandName, State.Fail, output: Resources.FailedToRetrieveADObjectsError).ToJsonString();
             }
 
             IList<Application> applicationList = new List<Application>();
@@ -141,22 +141,21 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
                 //order list by created date.
                 applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
+            }
 
-                if (ProvisioningToolOptions.Json)
+            if (ProvisioningToolOptions.Json)
+            {
+                outputJsonString = new JsonResponse(CommandName, State.Success, applicationList).ToJsonString();
+            }
+            else
+            {
+                Console.Write(
+                    "--------------------------------------------------------------\n" +
+                    "Application Name\t\t\t\tApplication ID\n" +
+                    "--------------------------------------------------------------\n\n");
+                foreach (var app in applicationList)
                 {
-                    JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, applicationList);
-                    outputJsonString = jsonResponse.ToJsonString();
-                }
-                else
-                {
-                    Console.Write(
-                        "--------------------------------------------------------------\n" +
-                        "Application Name\t\t\t\tApplication ID\n" +
-                        "--------------------------------------------------------------\n\n");
-                    foreach (var app in applicationList)
-                    {
-                        Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
-                    }
+                    Console.WriteLine($"{app.DisplayName.PadRight(35)}\t\t{app.AppId}");
                 }
             }
 

@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     public class MicrosoftIdentityPlatformApplicationManager
     {
-        private StringBuilder _output = new StringBuilder();
+        private readonly StringBuilder _output = new StringBuilder();
         const string MicrosoftGraphAppId = "00000003-0000-0000-c000-000000000000";
         const string ScopeType = "Scope";
         private const string DefaultCallbackPath = "signin-oidc";

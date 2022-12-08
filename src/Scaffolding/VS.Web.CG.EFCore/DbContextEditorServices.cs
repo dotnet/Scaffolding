@@ -166,14 +166,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             //create syntax expression that adds DbContext
             //added InvalidOperationExceptino if Configuration.GetConnectionString returns null.
-            string thang = string.Format(
-                textToAddAtEnd,
-                string.Format("{0}.Services", builderIdentifierString),
-                dbContextTypeName,
-                string.Format("{0}.Configuration", builderIdentifierString),
-                string.Format(" ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")", dbContextTypeName));
-        
-            Console.WriteLine(thang);
             var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
                     string.Format("{0}.Services", builderIdentifierString),
                     dbContextTypeName,

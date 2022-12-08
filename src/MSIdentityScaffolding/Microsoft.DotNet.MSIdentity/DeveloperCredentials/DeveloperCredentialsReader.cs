@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                         return credential;
 #endif
             TokenCredential tokenCredential = new MsalTokenCredential(
-                consoleLogger,
                 currentApplicationTenantId,
-                username);
+                username,
+                consoleLogger);
             return tokenCredential;
         }
     }

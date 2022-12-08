@@ -8,7 +8,6 @@ using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
-using Microsoft.Identity.Client;
 using Moq;
 using Xunit;
 
@@ -100,8 +99,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             Assert.Equal(1, apps.Count);
             var additionalData = apps.First()?.AdditionalData;
             Assert.NotNull(additionalData);
-            Assert.True(additionalData.ContainsKey("isB2C"));
-            additionalData.TryGetValue("isB2C", out var isB2C);
+            Assert.True(additionalData.ContainsKey("IsB2C"));
+            additionalData.TryGetValue("IsB2C", out var isB2C);
             Assert.True((bool)isB2C);
         }
     }

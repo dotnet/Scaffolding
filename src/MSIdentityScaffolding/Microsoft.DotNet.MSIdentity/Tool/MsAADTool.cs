@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             ProvisioningToolOptions = provisioningToolOptions;
             CommandName = commandName;
             ConsoleLogger = new ConsoleLogger(ProvisioningToolOptions.Json);
-            TokenCredential = new MsalTokenCredential(ConsoleLogger, ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username);
+            TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username, ConsoleLogger);
             GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
             GraphObjectRetriever = new GraphObjectRetriever(GraphServiceClient, ConsoleLogger);

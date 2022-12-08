@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,15 +22,14 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         private readonly IConsoleLogger _consoleLogger;
 
         public MsalTokenCredential(
-            IConsoleLogger consoleLogger,
             string? tenantId,
             string? username,
-            string instance = "https://login.microsoftonline.com")
+            IConsoleLogger consoleLogger)
         {
             _consoleLogger = consoleLogger;
             TenantId = tenantId ?? "organizations"; // MSA-passthrough
             Username = username;
-            Instance = instance;
+            Instance = "https://login.microsoftonline.com";
         }
 
         private IPublicClientApplication? App { get; set; }

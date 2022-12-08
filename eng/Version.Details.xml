@@ -7,17 +7,17 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="8.0.0-alpha.1.22608.2">
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="8.0.0-alpha.1.22608.3">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>d67fa2b15de9c681de5bb4b4e8ff0ebd3d2b47be</Sha>
+      <Sha>cc1e54ab683dc6a2838b4a205618dc23755bb223</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore" Version="8.0.0-alpha.1.22608.2">
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="8.0.0-alpha.1.22608.3">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>d67fa2b15de9c681de5bb4b4e8ff0ebd3d2b47be</Sha>
+      <Sha>cc1e54ab683dc6a2838b4a205618dc23755bb223</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-alpha.1.22608.2">
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-alpha.1.22608.3">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>d67fa2b15de9c681de5bb4b4e8ff0ebd3d2b47be</Sha>
+      <Sha>cc1e54ab683dc6a2838b4a205618dc23755bb223</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="8.0.0-alpha.1.22605.1">
       <Uri>https://github.com/dotnet/runtime</Uri>

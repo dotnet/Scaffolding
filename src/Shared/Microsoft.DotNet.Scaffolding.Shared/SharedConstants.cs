@@ -4,7 +4,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
 {
     public enum DbProvider
     {
-        SqlServer, SQLite, CosmosDb, Postgres
+        SqlServer, SQLite, CosmosDb, Postgres, Existing
     }
 
     public static class EfConstants

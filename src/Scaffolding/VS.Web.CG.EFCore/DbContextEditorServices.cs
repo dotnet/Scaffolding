@@ -398,6 +398,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 parameters.TryGetValue("useTopLevelStatements", out var useTopLevelStatementsString);
                 var useTopLevelStatements = useTopLevelStatementsString.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
                 parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextNamespace), out var dbContextNamespace);
+                parameters.TryGetValue("dataBaseName", out var databaseName);
                 Contract.Assert(!string.IsNullOrEmpty(dbContextTypeName));
                 Contract.Assert(!string.IsNullOrEmpty(dataBaseName));
 
@@ -422,7 +423,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     if (servicesParam != null)
                     {
                         string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, statementLeadingTrivia, dataContextType);
-                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, dataContextType);
+                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, databaseName, dataContextType);
                         if (configServicesMethod.Body.Statements.Any())
                         {
                             textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
@@ -462,11 +463,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     if (!useTopLevelStatements)
                     {
                         MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
-                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, dbContextNamespace, dataContextType);
+                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, databaseName, dataContextType);
                     }
                     else if (useTopLevelStatements)
                     {
-                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, dbContextNamespace, dataContextType);
+                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, databaseName, dataContextType);
                     }
 
                     if (statementLeadingTrivia != null && dbContextExpression != null)

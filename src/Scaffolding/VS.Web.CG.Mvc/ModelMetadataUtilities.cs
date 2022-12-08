@@ -46,7 +46,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
 
-            commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
+            if (dataContext == null)
+            {
+                commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
+            }
 
             var modelMetadata = await entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
@@ -76,7 +79,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             ModelType dataContext = null;
             var dbContextFullName = string.Empty;
-            commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
             ContextProcessingResult modelMetadata  = new ContextProcessingResult()
             {
                 ContextProcessingStatus = ContextProcessingStatus.MissingContext,
@@ -87,7 +89,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
                 dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
-                commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
+                if (dataContext == null)
+                {
+                    commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
+                }
+                
                 modelMetadata = await entityFrameworkService.GetModelMetadata(
                     dbContextFullName,
                     model,
@@ -118,7 +124,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             else
             {
                 string dbList = $"'{string.Join("', ", EfConstants.AllDbProviders.ToArray(), 0, EfConstants.AllDbProviders.Count - 1)} and '{EfConstants.AllDbProviders.LastOrDefault()}'";
-                throw new InvalidOperationException($"Invalid database type '{databaseProviderString}'.\nSupported database providers include : {dbList}");
+                throw new InvalidOperationException($"Invalid database provider '{databaseProviderString}'.\nSupported database providers include : {dbList}");
             }
         }
     }

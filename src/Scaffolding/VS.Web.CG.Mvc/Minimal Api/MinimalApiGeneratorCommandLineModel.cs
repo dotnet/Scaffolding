@@ -68,6 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 #pragma warning disable CS0618 // Type or member is obsolete
             if (model.UseSqlite)
             {
+#pragma warning restore CS0618 // Type or member is obsolete
                 //instead of throwing an error, letting the devs know that its obsolete. 
                 logger.LogMessage("--useSqlite|-sqlite option is obsolete now. Use --databaseProvider|-dbProvider instead in the future.", LogMessageLevel.Information);
                 //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
@@ -77,7 +78,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     model.DatabaseProviderString = EfConstants.SQLite;
                 }
             }
-#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

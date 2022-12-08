@@ -160,9 +160,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         [Theory]
         [MemberData(nameof(AddDbContextStringData))]
-        public void AddDbContextStringTests(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider, string expected)
+        public void AddDbContextStringTests(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider, string optionsExpected)
         {
-            DbContextEditorServices.
+            string dbContextString = GetTestObject().AddDbContextString(minimalHostingTemplate, statementLeadingTrivia, databaseProvider);
+            Assert.True(dbContextString.Contains(optionsExpected, StringComparison.OrdinalIgnoreCase));
         }
 
         private DbContextEditorServices GetTestObject(MockFileSystem fs = null)
@@ -181,7 +182,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         public static IEnumerable<object[]> AddDbContextStringData =>
             new []
             {
-                new object[] {true, string.Empty, DbProvider.SqlServer, "string"}
+                new object[] { true, string.Empty, DbProvider.SqlServer, "options.UseSqlServer" },
+                new object[] { false, string.Empty, DbProvider.SqlServer, "options.UseSqlServer" },
+                new object[] { true, string.Empty, DbProvider.SQLite, "options.UseSqlite" },
+                new object[] { false, string.Empty, DbProvider.SQLite, "options.UseSqlite" },
+                new object[] { true, string.Empty, DbProvider.CosmosDb, "options.UseCosmos" },
+                new object[] { false, string.Empty, DbProvider.CosmosDb, "options.UseCosmos" },
+                new object[] { true, string.Empty, DbProvider.Postgres, "options.UseNpgsql" },
+                new object[] { false, string.Empty, DbProvider.Postgres, "options.UseNpgsql" },
+                new object[] { true, null, DbProvider.SqlServer, "options.UseSqlServer" },
+                new object[] { true, null, null, string.Empty }
             };
         private static readonly string AppBase = "AppBase";
     }

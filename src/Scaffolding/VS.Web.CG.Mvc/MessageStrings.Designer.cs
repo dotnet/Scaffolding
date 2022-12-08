@@ -241,6 +241,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid database provider &apos;{0}&apos; found..
+        /// </summary>
+        internal static string InvalidDatabaseProvider {
+            get {
+                return ResourceManager.GetString("InvalidDatabaseProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid database type &apos;{0}&apos;.
         /// </summary>
         internal static string InvalidDatabaseType {

@@ -267,4 +267,7 @@
   <data name="SqliteObsoleteOption" xml:space="preserve">
     <value>--useSqlite|-sqlite option is obsolete now. Use --databaseProvider|-dbProvider instead in the future.</value>
   </data>
+  <data name="InvalidDatabaseProvider" xml:space="preserve">
+    <value>Invalid database provider '{0}' found.</value>
+  </data>
 </root>

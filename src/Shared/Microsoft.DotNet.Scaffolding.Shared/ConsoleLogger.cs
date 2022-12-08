@@ -60,8 +60,10 @@ namespace Microsoft.DotNet.MSIdentity.Shared
                     {
                         LogMessage(jsonMessage.Output, LogMessageType.Error);
                     }
-
-                    LogMessage(jsonMessage.Output);
+                    else
+                    {
+                        LogMessage(jsonMessage.Output);
+                    }
                 }
             }
         }

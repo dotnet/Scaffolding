@@ -74,7 +74,8 @@ namespace Microsoft.DotNet.MSIdentity
             // Get developer credentials
             TokenCredential tokenCredential = GetTokenCredential(
                 ProvisioningToolOptions,
-                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
+                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain,
+                ConsoleLogger);
 
             ApplicationParameters applicationParameters;
             switch (CommandName)
@@ -230,12 +231,13 @@ namespace Microsoft.DotNet.MSIdentity
         /// <param name="provisioningToolOptions"></param>
         /// <param name="currentApplicationTenantId"></param>
         /// <returns></returns>
-        internal static TokenCredential GetTokenCredential(ProvisioningToolOptions provisioningToolOptions, string? currentApplicationTenantId)
+        internal static TokenCredential GetTokenCredential(ProvisioningToolOptions provisioningToolOptions, string? currentApplicationTenantId, IConsoleLogger consoleLogger)
         {
             DeveloperCredentialsReader developerCredentialsReader = new DeveloperCredentialsReader();
             return developerCredentialsReader.GetDeveloperCredentials(
                 provisioningToolOptions.Username,
-                currentApplicationTenantId ?? provisioningToolOptions.TenantId);
+                currentApplicationTenantId ?? provisioningToolOptions.TenantId,
+                consoleLogger);
         }
 
         /// <summary>

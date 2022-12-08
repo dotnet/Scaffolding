@@ -261,4 +261,10 @@
   <data name="InvalidDatabaseType" xml:space="preserve">
     <value>Invalid database type '{0}'</value>
   </data>
+  <data name="NoDbProviderFound" xml:space="preserve">
+    <value>No database provider found. Using 'SqlServer' by default for new DbContext creation!</value>
+  </data>
+  <data name="SqliteObsoleteOption" xml:space="preserve">
+    <value>--useSqlite|-sqlite option is obsolete now. Use --databaseProvider|-dbProvider instead in the future.</value>
+  </data>
 </root>

@@ -695,7 +695,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
 #pragma warning restore CS0618 // Type or member is obsolete
                 //instead of throwing an error, letting the devs know that its obsolete. 
-                _logger.LogMessage("--useSqlite|-sqlite option is obsolete now. Use --databaseProvider|-dbProvider instead in the future.", LogMessageLevel.Information);
+                _logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
                 //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
                 if (string.IsNullOrEmpty(model.DatabaseProviderString))
                 {

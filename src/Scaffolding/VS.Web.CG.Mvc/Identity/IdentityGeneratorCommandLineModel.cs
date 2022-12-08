@@ -9,11 +9,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namesapce to use for generating identity code." )]
         public string RootNamespace { get; set; }
 
-        [Obsolete("Use databaseProvider or dbProvider to configure database type instead")]
+        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
         [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
 
-        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
         public string DatabaseProviderString { get; set; }
         public DbProvider DatabaseProvider { get; set; }
 

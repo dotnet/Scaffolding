@@ -24,11 +24,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         [Option(Name = "endpointsNamespace", ShortName = "namespace", Description = "Specify the name of the namespace to use for the generated controller")]
         public string EndpointsNamespace { get; set; }
 
-        [Obsolete("Use databaseProvider or dbProvider to configure database type instead")]
+        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
         [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
 
-        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database type to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
         public string DatabaseProviderString { get; set; } 
         public DbProvider DatabaseProvider { get; set; }
 
@@ -70,7 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             {
 #pragma warning restore CS0618 // Type or member is obsolete
                 //instead of throwing an error, letting the devs know that its obsolete. 
-                logger.LogMessage("--useSqlite|-sqlite option is obsolete now. Use --databaseProvider|-dbProvider instead in the future.", LogMessageLevel.Information);
+                logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
                 //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
                 if (string.IsNullOrEmpty(model.DatabaseProviderString))
                 {

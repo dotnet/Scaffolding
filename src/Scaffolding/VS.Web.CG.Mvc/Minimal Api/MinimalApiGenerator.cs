@@ -68,7 +68,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         {
             model.ValidateCommandline(Logger);
             var namespaceName = NameSpaceUtilities.GetSafeNameSpaceFromPath(model.RelativeFolderPath, AppInfo.ApplicationName);
-
             //get model and dbcontext
             var modelTypeAndContextModel = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
                 model,

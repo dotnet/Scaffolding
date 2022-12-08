@@ -160,7 +160,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 DbContextNamespace = DbContextNamespace,
                 UserClass = UserClass,
                 UserClassNamespace = UserClassNamespace,
-                DatabaseProvider = _commandlineModel.DatabaseProvider,
+                DatabaseProvider = DatabaseProvider,
                 IsUsingExistingDbContext = IsUsingExistingDbContext,
                 Namespace = RootNamespace,
                 IsGenerateCustomUser = IsGenerateCustomUser,
@@ -710,6 +710,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(string.Format(MessageStrings.InvalidDatabaseProvider, model.DatabaseProviderString));
                 errorStrings.Add($"Supported database providers include : {dbList}");
             }
+            
             if (!string.IsNullOrEmpty(model.RootNamespace) && !RoslynUtilities.IsValidNamespace(model.RootNamespace))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidNamespaceName, model.RootNamespace));

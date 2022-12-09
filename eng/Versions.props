@@ -70,11 +70,11 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>17.3.2 </MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildLocatorPackageVersion>1.4.1</MicrosoftBuildLocatorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>4.4.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
     <MicrosoftCodeAnalysisRazorPackageVersion>6.0.0</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.4.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
@@ -144,14 +144,13 @@
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
     <AzureIdentityVersion>1.5.0</AzureIdentityVersion>
-    <CodeAnalysisVersion>4.0.0</CodeAnalysisVersion>
+    <CodeAnalysisVersion>4.4.0</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>3.1.20</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.20</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>4.5.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.3.1</NuGetProjectModelVersion>
-    <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
     <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>

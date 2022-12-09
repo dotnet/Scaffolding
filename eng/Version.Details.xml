@@ -19,11 +19,11 @@
       <Uri>https://github.com/dotnet/efcore</Uri>
       <Sha>bf20e32fa8d0888f7d531a25c146284285d980a3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="">
+    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
@@ -31,23 +31,23 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>b9e4f660e6137756de9905b2b3463a9ea6e2de12</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="">
+    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="">
+    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="">
+    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="">
+    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
@@ -55,19 +55,19 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>b9e4f660e6137756de9905b2b3463a9ea6e2de12</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="">
+    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="">
+    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging" Version="">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="">
+    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>

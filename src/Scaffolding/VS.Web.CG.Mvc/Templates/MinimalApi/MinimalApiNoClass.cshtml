@@ -85,11 +85,11 @@
         @{
         if(!Model.UseTypedResults)
         {
-            @://return TypedResults.Created($"/@pluralModel/{model.ID}", model);
+            @://return Results.Created($"/@pluralModel/{model.ID}", model);
         }
         else
         {
-            @://return Results.Created($"/@pluralModel/{model.ID}", model);
+            @://return TypedResults.Created($"/@pluralModel/{model.ID}", model);
         }
         }
         })
@@ -111,11 +111,11 @@
 @{
         if(!Model.UseTypedResults)
         {
-            @://return TypedResults.Ok(new @modelName { ID = id });
+            @://return Results.Ok(new @modelName { ID = id });
         }
         else
         {
-            @://return Results.Ok(new @modelName { ID = id });
+            @://return TypedResults.Ok(new @modelName { ID = id });
         }
 }
         })

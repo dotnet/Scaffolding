@@ -51,7 +51,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.13</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>6.0.12</VersionPrefix>
+    <VersionPrefix>6.0.11</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--

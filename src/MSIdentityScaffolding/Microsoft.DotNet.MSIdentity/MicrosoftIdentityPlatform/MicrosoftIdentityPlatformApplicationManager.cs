@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (createdSp is null)
             {
-                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal));
+                consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal, commandName);
                 return null;
             }
 
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // log json console message inside this method since we need the Microsoft.Graph.Application
             if (createdApplication is null)
             {
-                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToCreateApp));
+                consoleLogger.LogFailure(Resources.FailedToCreateApp, commandName);
                 return null;
             }
 

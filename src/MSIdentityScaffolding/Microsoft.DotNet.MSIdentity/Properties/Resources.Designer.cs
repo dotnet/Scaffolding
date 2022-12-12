@@ -575,6 +575,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to provision Client Application.
+        /// </summary>
+        internal static string FailedToProvisionClientApp {
+            get {
+                return ResourceManager.GetString("FailedToProvisionClientApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects(apps/service principals.
         /// </summary>
         internal static string FailedToRetrieveADObjectsError {
@@ -598,6 +607,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string FailedToUpdateAppNull {
             get {
                 return ResourceManager.GetString("FailedToUpdateAppNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update client app program.cs file.
+        /// </summary>
+        internal static string FailedToUpdateClientAppCode {
+            get {
+                return ResourceManager.GetString("FailedToUpdateClientAppCode", resourceCulture);
             }
         }
         

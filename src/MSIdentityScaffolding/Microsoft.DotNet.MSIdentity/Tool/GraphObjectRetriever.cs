@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                         catch (ServiceException)
                         {
                             nextPage = null;
-                            _consoleLogger.LogMessage(Resources.FailedToRetrieveADObjectsError, LogMessageType.Error);
+                            _consoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
                             return null;
                         }
                     }
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             }
             catch (ServiceException)
             {
-                _consoleLogger.LogMessage(Resources.FailedToRetrieveADObjectsError, LogMessageType.Error);
+                _consoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
                 return null;
             }
 
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                     }
                 }
 
-                _consoleLogger.LogJsonMessage(new JsonResponse(null, State.Fail, output:errorMessage));
+                _consoleLogger.LogFailure(errorMessage);
                 return null;
             }
 

@@ -105,7 +105,8 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             {
                 if (account == null && !string.IsNullOrEmpty(Username))
                 {
-                    LogError($"No valid tokens found in the cache.\n" +
+                    _consoleLogger.LogFailure(
+                        $"No valid tokens found in the cache.\n" +
                         $"Please sign-in to Visual Studio with this account: {Username}.\n\n" +
                         $"After signing-in, re-run the tool.");
                 }
@@ -119,26 +120,22 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             {
                 if (ex.Message.Contains("AADSTS70002")) // "The client does not exist or is not enabled for consumers"
                 {
-                    LogError("An Azure AD tenant, and a user in that tenant, " +
+                    _consoleLogger.LogFailure(
+                        "An Azure AD tenant, and a user in that tenant, " +
                         "needs to be created for this account before an application can be created. " +
                         "See https://aka.ms/ms-identity-app/create-a-tenant. ");
                     Environment.Exit(1); // we want to exit here because this is probably an MSA without an AAD tenant.
                 }
 
-                LogError("Error encountered with sign-in. See error message for details:\n{ex.Message}");
+                _consoleLogger.LogFailure($"Error encountered with sign-in. See error message for details:\n{ex.Message}");
                 Environment.Exit(1); // we want to exit here. Re-sign in will not resolve the issue.
             }
             catch (Exception ex)
             {
-                LogError($"Error encountered with sign-in. See error message for details:\n{ex.Message}");
+                _consoleLogger.LogFailure($"Error encountered with sign-in. See error message for details:\n{ex.Message}");
                 Environment.Exit(1);
             }
             return new AccessToken(result.AccessToken, result.ExpiresOn);
-        }
-
-        private void LogError(string message)
-        {
-            _consoleLogger.LogJsonMessage(new JsonResponse(null, State.Fail, output: message));
         }
     }
 }

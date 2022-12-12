@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (projectDescription == null)
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMessage));
+                ConsoleLogger.LogFailure(errorMessage, CommandName);
                 Environment.Exit(1);
             }
 
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMsg));
+            ConsoleLogger.LogFailure(errorMsg, CommandName);
             return false;
         }
 
@@ -298,6 +298,12 @@ namespace Microsoft.DotNet.MSIdentity
                 }
 
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);
+                if (clientApplicationParameters is null)
+                {
+                    ConsoleLogger.LogFailure("Failed to provision Blazor Wasm hosted scenario");
+                    Environment.Exit(1);
+                }
+
                 ProvisioningToolOptions.BlazorWasmClientAppId = clientApplicationParameters.ClientId;
                 output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, clientApplicationParameters.ApplicationDisplayName, clientApplicationParameters.ClientId));
             }
@@ -319,7 +325,7 @@ namespace Microsoft.DotNet.MSIdentity
         /// <param name="serverApplicationParameters"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        private async Task<ApplicationParameters> ConfigureBlazorWasmHostedClientAsync(ApplicationParameters serverApplicationParameters)
+        private async Task<ApplicationParameters?> ConfigureBlazorWasmHostedClientAsync(ApplicationParameters serverApplicationParameters)
         {
             // Processes the Blazorwasm client
             var clientToolOptions = ProvisioningToolOptions.Clone();
@@ -339,10 +345,8 @@ namespace Microsoft.DotNet.MSIdentity
             var clientApplicationParameters = await provisionClientAppRegistration.Run();
             if (clientApplicationParameters == null)
             {
-                var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
-                throw exception;
+                ConsoleLogger.LogFailure(Resources.FailedToProvisionClientApp, CommandName);
+                return null;
             }
 
             // Update program.cs file
@@ -351,10 +355,8 @@ namespace Microsoft.DotNet.MSIdentity
             clientApplicationParameters = await updateCode.Run();
             if (clientApplicationParameters == null)
             {
-                var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
-                throw exception;
+                ConsoleLogger.LogFailure(Resources.FailedToUpdateClientAppCode, CommandName);
+                return null;
             }
 
             return clientApplicationParameters;

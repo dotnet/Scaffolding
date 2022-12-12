@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             var graphObjectsList = await GraphObjectRetriever.GetGraphObjects();
             if (graphObjectsList is null)
             {
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: Resources.FailedToRetrieveADObjectsError));
+                ConsoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError, CommandName);
                 Environment.Exit(1);
             }
 

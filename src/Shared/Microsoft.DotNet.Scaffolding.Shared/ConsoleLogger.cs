@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
     internal class ConsoleLogger : IConsoleLogger
     {
         private readonly bool _jsonOutput;
-        private bool _silent;
+        private readonly bool _silent;
 
         public ConsoleLogger(bool jsonOutput = false, bool silent = false)
         {
@@ -60,8 +60,10 @@ namespace Microsoft.DotNet.MSIdentity.Shared
                     {
                         LogMessage(jsonMessage.Output, LogMessageType.Error);
                     }
-
-                    LogMessage(jsonMessage.Output);
+                    else
+                    {
+                        LogMessage(jsonMessage.Output);
+                    }
                 }
             }
         }
@@ -71,6 +73,21 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             if (!_silent && !_jsonOutput)
             {
                 LogMessage(message, LogMessageType.Information, removeNewLine);
+            }
+        }
+
+        public void LogFailure(string failureMessage, string commandName = null)
+        {
+            if (!_silent)
+            {
+                if (_jsonOutput)
+                {
+                    LogJsonMessage(new JsonResponse(commandName, State.Fail, output: failureMessage));
+                }
+                else
+                {
+                    LogMessage(failureMessage, LogMessageType.Error);
+                }
             }
         }
     }

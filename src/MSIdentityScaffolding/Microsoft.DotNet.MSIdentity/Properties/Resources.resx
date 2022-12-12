@@ -250,6 +250,9 @@
     <value>Failed to modify code file {0}, {1} </value>
     <comment>0 = File name, 1 = Exception message</comment>
   </data>
+  <data name="FailedToProvisionClientApp" xml:space="preserve">
+    <value>Failed to provision Client Application</value>
+  </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
     <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>
   </data>
@@ -260,6 +263,9 @@
   <data name="FailedToUpdateAppNull" xml:space="preserve">
     <value>Failed to update Azure AD app, null {0}</value>
     <comment>0 = null object</comment>
+  </data>
+  <data name="FailedToUpdateClientAppCode" xml:space="preserve">
+    <value>Failed to update client app program.cs file</value>
   </data>
   <data name="InitializeUserSecrets" xml:space="preserve">
     <value>Initializing User Secrets . . .</value>

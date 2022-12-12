@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Azure.Core;
@@ -31,7 +31,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         public async Task AuthenticateRequestAsync(HttpRequestMessage request)
         {
             // Try with the Shared token cache credentials
-
             TokenRequestContext context = new TokenRequestContext(_initialScopes.ToArray());
             AccessToken token = await _tokenCredentials.GetTokenAsync(context, CancellationToken.None);
 

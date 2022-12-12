@@ -7,17 +7,17 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="7.0.2">
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="7.0.1">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>bf20e32fa8d0888f7d531a25c146284285d980a3</Sha>
+      <Sha>09261bb997c0d82e121cd348d2e43f2b37a65848</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore" Version="7.0.2">
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="7.0.1">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>bf20e32fa8d0888f7d531a25c146284285d980a3</Sha>
+      <Sha>09261bb997c0d82e121cd348d2e43f2b37a65848</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.2">
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>bf20e32fa8d0888f7d531a25c146284285d980a3</Sha>
+      <Sha>09261bb997c0d82e121cd348d2e43f2b37a65848</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>

@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Threading.Tasks;
 
@@ -13,8 +11,32 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     {
         public static async Task<int> Main(string[] args)
         {
+            System.Diagnostics.Debugger.Launch();
             var rootCommand = MsIdentityCommand();
-
+            //new BinderBase for System.Commandline update, new way to bind handlers to commands.
+            var provisioningToolBinder = new ProvisioningToolOptionsBinder(
+                JsonOption,
+                EnableIdTokenOption,
+                EnableAccessToken,
+                CallsGraphOption,
+                CallsDownstreamApiOption,
+                UpdateUserSecretsOption,
+                ConfigUpdateOption,
+                CodeUpdateOption,
+                PackagesUpdateOption,
+                ClientIdOption,
+                AppDisplayName,
+                ProjectType,
+                ClientSecretOption,
+                RedirectUriOption,
+                ProjectFilePathOption,
+                ClientProjectOption,
+                ApiScopesOption,
+                HostedAppIdUriOption,
+                ApiClientIdOption,
+                SusiPolicyIdOption,
+                TenantOption,
+                UsernameOption);
             //internal commands
             var listAadAppsCommand = ListAADAppsCommand();
             var listServicePrincipalsCommand = ListServicePrincipalsCommand();
@@ -35,16 +57,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             updateProjectCommand.IsHidden = true;
             createClientSecretCommand.IsHidden = true;
 
-            listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListApps);
-            listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListServicePrincipals);
-            listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleListTenants);
-            registerApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleRegisterApplication);
-            unregisterApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUnregisterApplication);
-            createAppRegistration.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleCreateAppRegistration);
-            updateAppRegistrationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateApplication);
-            updateProjectCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleUpdateProject);
-            createClientSecretCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(HandleClientSecrets);
-
             //add all commands to root command.
             rootCommand.AddCommand(listAadAppsCommand);
             rootCommand.AddCommand(listServicePrincipalsCommand);
@@ -62,6 +74,15 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 args = new string[] { "-h" };
             }
 
+            listAadAppsCommand.SetHandler(HandleListApps, provisioningToolBinder);
+            listServicePrincipalsCommand.SetHandler(HandleListServicePrincipals, provisioningToolBinder);
+            listTenantsCommand.SetHandler(HandleListTenants, provisioningToolBinder);
+            registerApplicationCommand.SetHandler(HandleRegisterApplication, provisioningToolBinder);
+            unregisterApplicationCommand.SetHandler(HandleUnregisterApplication, provisioningToolBinder);
+            updateAppRegistrationCommand.SetHandler(HandleUpdateApplication, provisioningToolBinder);
+            updateProjectCommand.SetHandler(HandleUpdateProject, provisioningToolBinder);
+            createClientSecretCommand.SetHandler(HandleClientSecrets, provisioningToolBinder);
+            createAppRegistration.SetHandler(HandleCreateAppRegistration, provisioningToolBinder);
             var commandLineBuilder = new CommandLineBuilder(rootCommand);
             commandLineBuilder.UseDefaults();
 
@@ -179,7 +200,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.LIST_AAD_APPS_COMMAND,
                 description: "Lists AAD Applications for a given tenant/username.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption()
+                TenantOption, UsernameOption, JsonOption
             };
 
         internal static Command ListServicePrincipalsCommand() =>
@@ -187,7 +208,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.LIST_SERVICE_PRINCIPALS_COMMAND,
                 description: "Lists AAD Service Principals.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption()
+                TenantOption, UsernameOption, JsonOption
             };
 
         internal static Command ListTenantsCommand() =>
@@ -195,7 +216,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.LIST_TENANTS_COMMAND,
                 description: "Lists AAD and AAD B2C tenants for a given user.\n")
             {
-                UsernameOption(), JsonOption()
+                UsernameOption, JsonOption
             };
 
         internal static Command CreateClientSecretCommand() =>
@@ -203,7 +224,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.ADD_CLIENT_SECRET,
                 description: "Create client secret for an Azure AD or AD B2C app registration.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ProjectFilePathOption(), UpdateUserSecretsOption()
+                TenantOption, UsernameOption, JsonOption, ClientIdOption, ProjectFilePathOption, UpdateUserSecretsOption
             };
 
         internal static Command RegisterApplicationCommand() =>
@@ -212,7 +233,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Register an Azure AD or Azure AD B2C app registration in Azure and update the project." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), HostedAppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectFilePathOption()
+                TenantOption, UsernameOption, JsonOption, ClientIdOption, ClientSecretOption, HostedAppIdUriOption, ApiClientIdOption, SusiPolicyIdOption, ProjectFilePathOption
             };
 
         internal static Command UpdateProjectCommand() =>
@@ -223,7 +244,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption(), SusiPolicyIdOption()
+                TenantOption, UsernameOption, ClientIdOption, JsonOption, ProjectFilePathOption, ConfigUpdateOption, CodeUpdateOption, PackagesUpdateOption, CallsGraphOption, CallsDownstreamApiOption, UpdateUserSecretsOption, RedirectUriOption, SusiPolicyIdOption
             };
 
         internal static Command UpdateAppRegistrationCommand() =>
@@ -231,7 +252,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption(), ApiScopesOption()
+                TenantOption, UsernameOption, JsonOption, HostedAppIdUriOption, ClientIdOption, RedirectUriOption, EnableIdTokenOption, EnableAccessToken, ClientProjectOption, ApiScopesOption
             };
 
         internal static Command CreateAppRegistrationCommand() =>
@@ -239,7 +260,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 name: Commands.CREATE_APP_REGISTRATION_COMMAND,
                 description: "Create an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppDisplayName(), ProjectFilePathOption(), ProjectType(), ClientProjectOption()
+                TenantOption, UsernameOption, JsonOption, AppDisplayName, ProjectFilePathOption, ProjectType, ClientProjectOption
             };
 
         internal static Command UnregisterApplicationCommand() =>
@@ -249,10 +270,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Unregister an Azure AD or Azure AD B2C app registration in Azure." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ProjectFilePathOption(), ClientIdOption()
+                TenantOption, UsernameOption, JsonOption, HostedAppIdUriOption, ProjectFilePathOption, ClientIdOption
             };
 
-        private static Option JsonOption() =>
+        private static Option<bool> JsonOption =>
             new Option<bool>(
                 aliases: new[] { "-j", "--json" },
                 description: "Format output in JSON instead of text.\n")
@@ -260,7 +281,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option EnableIdTokenOption() =>
+        private static Option<bool> EnableIdTokenOption =>
             new Option<bool>(
                 aliases: new[] { "--enable-id-token" },
                 description: "Enable id token.\n")
@@ -268,7 +289,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option EnableAccessToken() =>
+        private static Option<bool> EnableAccessToken =>
             new Option<bool>(
                 aliases: new[] { "--enable-access-token" },
                 description: "Enable access token.\n")
@@ -276,7 +297,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option CallsGraphOption() =>
+        private static Option<bool> CallsGraphOption =>
             new Option<bool>(
                 aliases: new[] { "--calls-graph" },
                 description: "App registration calls microsoft graph.\n")
@@ -284,7 +305,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option CallsDownstreamApiOption() =>
+        private static Option<bool> CallsDownstreamApiOption =>
             new Option<bool>(
                 aliases: new[] { "--calls-downstream-api" },
                 description: "App registration calls downstream api.\n")
@@ -292,7 +313,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option UpdateUserSecretsOption() =>
+        private static Option<bool> UpdateUserSecretsOption =>
             new Option<bool>(
                 aliases: new[] { "--update-user-secrets" },
                 description: "Add secrets to user secrets.json file." +
@@ -301,7 +322,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ConfigUpdateOption() =>
+        private static Option<bool> ConfigUpdateOption =>
             new Option<bool>(
                 aliases: new[] { "--config-update" },
                 description: "Allow config changes for dotnet app to work with Azure AD/AD B2C app.")
@@ -309,7 +330,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option CodeUpdateOption() =>
+        private static Option<bool> CodeUpdateOption =>
             new Option<bool>(
                 aliases: new[] { "--code-update" },
                 description: "Allow Startup.cs and other code changes for dotnet app to work with Azure AD/AD B2C app (setup authentication).")
@@ -317,7 +338,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option PackagesUpdateOption() =>
+        private static Option<bool> PackagesUpdateOption =>
             new Option<bool>(
                 aliases: new[] { "--packages-update" },
                 description: "Allow package updates for dotnet app to work with Azure AD/AD B2C app (setup authentication).")
@@ -325,7 +346,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ClientIdOption() =>
+        private static Option<string> ClientIdOption =>
             new Option<string>(
                 aliases: new[] { "--client-id" },
                 description: "Client ID of an existing app registration to use." +
@@ -335,7 +356,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option AppDisplayName() =>
+        private static Option<string> AppDisplayName =>
             new Option<string>(
                 aliases: new[] { "--app-display-name" },
                 description: "App display name for Azure AD/AD B2C app registration creation.\n")
@@ -343,7 +364,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ProjectType() =>
+        private static Option<string> ProjectType =>
             new Option<string>(
                 aliases: new[] { "--project-type" },
                 description: "Project type for which to register the azure ad app registration." +
@@ -352,7 +373,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ClientSecretOption() =>
+        private static Option<string> ClientSecretOption =>
             new Option<string>(
                 aliases: new[] { "--client-secret" },
                 description: "Value for the client secret, which also can be referred to as application password.\n")
@@ -360,7 +381,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option RedirectUriOption() =>
+        private static Option<IList<string>> RedirectUriOption =>
             new Option<IList<string>>(
                 aliases: new[] { "--redirect-uris" },
                 description: "Add redirect URIs (web) for the app.\n\t- You can pass in multiple values for this parameter separated by a space.\n")
@@ -368,7 +389,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ProjectFilePathOption() =>
+        private static Option<string> ProjectFilePathOption =>
             new Option<string>(
                 aliases: new[] { "-p", "--project-file-path" },
                 description: "Path to the project file (.csproj file) to be used. If not provided, the project file in the current working directory will be used.\n")
@@ -376,7 +397,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ClientProjectOption() =>
+        private static Option<string> ClientProjectOption =>
             new Option<string>(
                 aliases: new[] { "--client-project" },
                 description: "Path to the project file (.csproj file) for a hosted Blazor WASM client. If provided, implies that project is Blazor WASM Hosted\n")
@@ -384,7 +405,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ApiScopesOption() =>
+        private static Option<string> ApiScopesOption =>
             new Option<string>(
                 aliases: new[] { "--api-scopes" },
                 description: "Scopes for the called downstream API, especially useful for B2C scenarios where permissions must be granted manually\n")
@@ -392,7 +413,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option HostedAppIdUriOption() =>
+        private static Option<string> HostedAppIdUriOption =>
             new Option<string>(
                 aliases: new[] { "--hosted-app-id-uri" },
                 description: "The App ID Uri for the Blazor WebAssembly hosted API. This parameter will only be used for Blazor WebAssembly hosted applications.\n")
@@ -400,7 +421,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option ApiClientIdOption() =>
+        private static Option<string> ApiClientIdOption =>
             new Option<string>(
                 aliases: new[] { "--api-client-id" },
                 description: "Client ID of the Blazor WebAssembly hosted web API." +
@@ -409,7 +430,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option SusiPolicyIdOption() =>
+        private static Option<string> SusiPolicyIdOption =>
             new Option<string>(
                 aliases: new[] { "--susi-policy-id" },
                 description: "Sign-up/Sign-in policy required for configurating a B2C application from code that was created for Azure AD.\n")
@@ -417,7 +438,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option TenantOption() =>
+        private static Option<string> TenantOption =>
             new Option<string>(
                 aliases: new[] { "-t", "--tenant-id" },
                 description: "Azure AD or Azure AD B2C tenant in which to create or update the app registration.\n - If specified, the app registration will be created in given tenant.\n - If not provided, the app registration will be created in yuor home tenant.\n")
@@ -425,7 +446,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option UsernameOption() =>
+        private static Option<string> UsernameOption =>
             new Option<string>(
                 aliases: new[] { "-u", "--username" },
                 description: "Username to use to connect to the Azure AD or Azure AD B2C tenant." +

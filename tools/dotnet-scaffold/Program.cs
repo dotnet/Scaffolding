@@ -1,6 +1,5 @@
 using System;
 using System.CommandLine;
-using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.MSIdentity.Tool;
@@ -61,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
             updateProjectCommand.IsHidden = true;
             createClientSecretCommand.IsHidden = true;
 
-            listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListApps);
+           /* listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListApps);
             listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListServicePrincipals);
             listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListTenants);
             registerApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleRegisterApplication);
@@ -69,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
             createAppRegistration.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleCreateAppRegistration);
             updateAppRegistrationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUpdateApplication);
             updateProjectCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUpdateProject);
-            createClientSecretCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleClientSecrets);
+            createClientSecretCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleClientSecrets);*/
             rootCommand.AddCommand(listAadAppsCommand);
             rootCommand.AddCommand(listServicePrincipalsCommand);
             rootCommand.AddCommand(listTenantsCommand);
@@ -137,7 +136,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Option ConfigurationOption() =>
             new Option<string>(
                 aliases: new[] { "-c", "--configuration" },
-                getDefaultValue: () => "Debug",
+                defaultValueFactory: () => "Debug",
                 description: "Defines the build configuration. The default value is Debug.")
             {
                 IsRequired = false

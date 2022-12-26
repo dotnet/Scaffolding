@@ -18,31 +18,31 @@
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>8.0.0-alpha.1.22623.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
     <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.0-alpha.1.22622.3</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Secrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <!-- Microsoft.Extensions.DependencyModel -->
-    <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0-alpha.1.22622.3</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
-    <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
-    <MicrosoftExtensionsLoggingDebugPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsLoggingDebugPackageVersion>
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsLoggingPackageVersion>
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>8.0.0-alpha.1.22618.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>8.0.0-alpha.1.22625.2</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
     <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.0-alpha.1.22622.3</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->

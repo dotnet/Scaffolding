@@ -306,7 +306,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                             break;
                     }
                     
-                    _output.Append(string.Format(Resources.ModifiedCodeFile, file.FileName));
+                    _output.AppendLine(string.Format(Resources.ModifiedCodeFile, file.FileName));
                 }
             }
             catch (Exception e)

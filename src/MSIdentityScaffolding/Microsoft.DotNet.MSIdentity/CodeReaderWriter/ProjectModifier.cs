@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 if (csProjFiles.Count() != 1)
                 {
                     var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
-                    _consoleLogger.LogFailure(errorMsg, Commands.UPDATE_PROJECT_COMMAND);
+                    _consoleLogger.LogFailure(errorMsg);
                     return;
                 }
                 
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
             }
 
-            _consoleLogger.LogJsonMessage(new JsonResponse(Commands.UPDATE_PROJECT_COMMAND, State.Success, output: _output.ToString().TrimEnd()));
+            _consoleLogger.LogJsonMessage(State.Success, output: _output.ToString().TrimEnd());
         }
 
         internal static string GetCodeFileString(CodeFile file, string identifier) // todo make all code files strings

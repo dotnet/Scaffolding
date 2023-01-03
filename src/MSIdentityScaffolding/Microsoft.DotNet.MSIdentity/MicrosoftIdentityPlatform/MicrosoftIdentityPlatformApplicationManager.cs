@@ -27,8 +27,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
-            IConsoleLogger consoleLogger,
-            string commandName)
+            IConsoleLogger consoleLogger)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
@@ -80,7 +79,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (createdSp is null)
             {
-                consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal, commandName);
+                consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal);
                 return null;
             }
 
@@ -107,7 +106,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // log json console message inside this method since we need the Microsoft.Graph.Application
             if (createdApplication is null)
             {
-                consoleLogger.LogFailure(Resources.FailedToCreateApp, commandName);
+                consoleLogger.LogFailure(Resources.FailedToCreateApp);
                 return null;
             }
 
@@ -128,7 +127,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     consoleLogger);
             }
 
-            consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Success, createdApplication));
+            consoleLogger.LogJsonMessage(State.Success, content: createdApplication);
             return effectiveApplicationParameters;
         }
 
@@ -189,15 +188,17 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="toolOptions"></param>
         /// <param name="commandName"></param>
         /// <returns></returns>
-        internal async Task<JsonResponse> UpdateApplication(
+        internal async Task UpdateApplication(
             TokenCredential tokenCredential,
             ApplicationParameters? parameters,
             ProvisioningToolOptions toolOptions,
-            string commandName)
+            IConsoleLogger consoleLogger,
+            StringBuilder? output = null)
         {
             if (parameters is null)
             {
-                return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
+                consoleLogger.LogFailure(string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
+                return;
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
@@ -207,11 +208,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (remoteApp is null)
             {
-                return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.NotFound, parameters.ClientId));
+                consoleLogger.LogFailure(string.Format(Resources.NotFound, parameters.ClientId));
+                return;
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
-            StringBuilder output = new StringBuilder();
+            output ??= new StringBuilder();
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
@@ -219,7 +221,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
                 if (servicePrincipal is null)
                 {
-                    return new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal);
+                    consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal);
+                    return;
                 }
 
                 await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
@@ -228,7 +231,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (!needsUpdates)
             {
-                return new JsonResponse(commandName, State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
+                consoleLogger.LogJsonMessage(State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
+                return;
             }
 
             try
@@ -236,12 +240,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
                 output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
-                return new JsonResponse(commandName, State.Success, output.ToString());
+                consoleLogger.LogJsonMessage(State.Success, output: output.ToString());
             }
             catch (ServiceException se)
             {
                 output.Append(se.Error?.Message);
-                return new JsonResponse(commandName, State.Fail, output.ToString());
+                consoleLogger.LogFailure(output.ToString());
             }
         }
 

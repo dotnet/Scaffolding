@@ -8,8 +8,11 @@ namespace Microsoft.DotNet.MSIdentity.Shared
         private readonly bool _jsonOutput;
         private readonly bool _silent;
 
-        public ConsoleLogger(bool jsonOutput = false, bool silent = false)
+        private string CommandName { get; }
+
+        public ConsoleLogger(string commandName = null, bool jsonOutput = false, bool silent = false)
         {
+            CommandName = commandName;
             _jsonOutput = jsonOutput;
             _silent = silent;
             Console.OutputEncoding = Encoding.UTF8;
@@ -46,23 +49,24 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             }
         }
 
-        public void LogJsonMessage(JsonResponse jsonMessage)
+        public void LogJsonMessage(string state = null, object content = null, string output = null)
         {
             if (!_silent)
             {
                 if (_jsonOutput)
                 {
+                    var jsonMessage = new JsonResponse(CommandName, state, content, output);
                     Console.WriteLine(jsonMessage.ToJsonString());
                 }
                 else
                 {
-                    if (jsonMessage.State == State.Fail)
+                    if (state == State.Fail)
                     {
-                        LogMessage(jsonMessage.Output, LogMessageType.Error);
+                        LogMessage(output, LogMessageType.Error);
                     }
                     else
                     {
-                        LogMessage(jsonMessage.Output);
+                        LogMessage(output);
                     }
                 }
             }
@@ -76,13 +80,13 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             }
         }
 
-        public void LogFailure(string failureMessage, string commandName = null)
+        public void LogFailure(string failureMessage)
         {
             if (!_silent)
             {
                 if (_jsonOutput)
                 {
-                    LogJsonMessage(new JsonResponse(commandName, State.Fail, output: failureMessage));
+                    LogJsonMessage(State.Fail, output: failureMessage);
                 }
                 else
                 {

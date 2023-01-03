@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         {
             ProvisioningToolOptions = provisioningToolOptions;
             CommandName = commandName;
-            ConsoleLogger = new ConsoleLogger(ProvisioningToolOptions.Json);
+            ConsoleLogger = new ConsoleLogger(CommandName, ProvisioningToolOptions.Json);
             TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username, ConsoleLogger);
             GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             var graphObjectsList = await GraphObjectRetriever.GetGraphObjects();
             if (graphObjectsList is null)
             {
-                ConsoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError, CommandName);
+                ConsoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
                 Environment.Exit(1);
             }
 

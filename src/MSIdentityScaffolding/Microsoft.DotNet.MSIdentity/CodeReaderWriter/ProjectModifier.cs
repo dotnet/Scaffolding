@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 {
                     var errorMsg = string.Format(Resources.ProjectPathError, _toolOptions.ProjectFilePath);
                     _consoleLogger.LogFailure(errorMsg);
-                    return;
+                    Environment.Exit(1);
                 }
                 
                 _toolOptions.ProjectFilePath = csProjFiles.First();

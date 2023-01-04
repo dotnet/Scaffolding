@@ -343,7 +343,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 ConsoleLogger.LogFailure(Resources.FailedToProvisionClientApp);
-                return null;
+                Environment.Exit(1);
             }
 
             // Update program.cs file
@@ -353,7 +353,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (clientApplicationParameters == null)
             {
                 ConsoleLogger.LogFailure(Resources.FailedToUpdateClientAppCode);
-                return null;
+                Environment.Exit(1);
             }
 
             return clientApplicationParameters;
@@ -477,6 +477,7 @@ namespace Microsoft.DotNet.MSIdentity
             if (string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
                 ConsoleLogger.LogFailure(Resources.FailedClientSecret);
+                Environment.Exit(1);
             }
             else
             {
@@ -503,11 +504,13 @@ namespace Microsoft.DotNet.MSIdentity
                     {
                         output = string.Format(Resources.FailedClientSecretWithApp, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId);
                         ConsoleLogger.LogFailure(output);
+                        Environment.Exit(1);
                     }
                 }
                 catch (ServiceException se)
                 {
                     ConsoleLogger.LogFailure(se.Error?.Code);
+                    Environment.Exit(1);
                 }
             }
         }
@@ -530,6 +533,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
                 ConsoleLogger.LogFailure(outputMessage);
+                Environment.Exit(1);
             }
         }
 

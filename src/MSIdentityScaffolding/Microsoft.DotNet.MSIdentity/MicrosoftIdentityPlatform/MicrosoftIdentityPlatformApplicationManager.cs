@@ -11,6 +11,7 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.Graph;
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
@@ -68,20 +69,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             // Create service principal, necessary for Web API applications
             // and useful for Blazorwasm hosted applications. We create it always.
-            ServicePrincipal servicePrincipal = new ServicePrincipal
-            {
-                AppId = createdApplication.AppId,
-            };
-
-            ServicePrincipal? createdSp = await graphServiceClient.ServicePrincipals
-                .Request()
-                .AddAsync(servicePrincipal);
-
-            if (createdSp is null)
-            {
-                consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal);
-                return null;
-            }
+            var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication.AppId, consoleLogger);
 
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (applicationParameters.IsB2C) 
@@ -107,7 +95,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             if (createdApplication is null)
             {
                 consoleLogger.LogFailure(Resources.FailedToCreateApp);
-                return null;
+                Environment.Exit(1);
             }
 
             if (applicationParameters.IsB2C)
@@ -198,7 +186,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             if (parameters is null)
             {
                 consoleLogger.LogFailure(string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
-                return;
+                Environment.Exit(1);
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
@@ -209,7 +197,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             if (remoteApp is null)
             {
                 consoleLogger.LogFailure(string.Format(Resources.NotFound, parameters.ClientId));
-                return;
+                Environment.Exit(1);
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
@@ -218,12 +206,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 // TODO: Add if it's B2C, acquire or create the SUSI Policy
-                var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
-                if (servicePrincipal is null)
-                {
-                    consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal);
-                    return;
-                }
+                var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
 
                 await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
                 needsUpdates = true;
@@ -246,6 +229,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 output.Append(se.Error?.Message);
                 consoleLogger.LogFailure(output.ToString());
+                Environment.Exit(1);
             }
         }
 
@@ -264,7 +248,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 output);
         }
 
-        private static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
+        private static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
         {
             var servicePrincipal = (await graphServiceClient.ServicePrincipals
                                 .Request()
@@ -283,6 +267,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 servicePrincipal = await graphServiceClient.ServicePrincipals
                     .Request()
                     .AddAsync(sp);
+            }
+
+            if (servicePrincipal is null)
+            {
+                consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal);
+                Environment.Exit(1);
             }
 
             return servicePrincipal;

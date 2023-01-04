@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -66,7 +67,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                         {
                             nextPage = null;
                             _consoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
-                            return null;
+                            Environment.Exit(1);
                         }
                     }
                 }
@@ -74,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             catch (ServiceException)
             {
                 _consoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
-                return null;
+                Environment.Exit(1);
             }
 
             return graphObjectsList;
@@ -88,6 +89,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 tenant = (await _graphServiceClient.Organization
                     .Request()
                     .GetAsync()).FirstOrDefault();
+
+                return tenant;
             }
             catch (ServiceException ex)
             {
@@ -111,8 +114,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 _consoleLogger.LogFailure(errorMessage);
                 return null;
             }
-
-            return tenant;
         }
     }
 }

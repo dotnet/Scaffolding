@@ -108,8 +108,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
             if (applicationList.Any())
             {
-                Organization? tenant = await GraphObjectRetriever.GetTenant();
-                if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+                var tenant = await GraphObjectRetriever.GetTenant();
+                if (tenant is null)
+                {
+                    Environment.Exit(1);
+                }
+                if (tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
                 {
                     foreach (var app in applicationList)
                     {

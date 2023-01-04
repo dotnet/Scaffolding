@@ -575,7 +575,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to provision Client Application.
+        ///   Looks up a localized string similar to Failed to provision Client Application for Blazor WASM hosted project.
         /// </summary>
         internal static string FailedToProvisionClientApp {
             get {
@@ -611,7 +611,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to update client app program.cs file.
+        ///   Looks up a localized string similar to Failed to update client app program.cs file for Blazor WASM hosted project.
         /// </summary>
         internal static string FailedToUpdateClientAppCode {
             get {

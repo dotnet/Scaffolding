@@ -109,6 +109,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                         $"No valid tokens found in the cache.\n" +
                         $"Please sign-in to Visual Studio with this account: {Username}.\n\n" +
                         $"After signing-in, re-run the tool.");
+                    Environment.Exit(1);
                 }
                 result = await app.AcquireTokenInteractive(requestContext.Scopes)
                     .WithAccount(account)
@@ -120,21 +121,30 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             {
                 if (ex.Message.Contains("AADSTS70002")) // "The client does not exist or is not enabled for consumers"
                 {
+                    // We want to exit here because this is probably an MSA without an AAD tenant.
                     _consoleLogger.LogFailure(
                         "An Azure AD tenant, and a user in that tenant, " +
                         "needs to be created for this account before an application can be created. " +
                         "See https://aka.ms/ms-identity-app/create-a-tenant. ");
-                    Environment.Exit(1); // we want to exit here because this is probably an MSA without an AAD tenant.
+                    Environment.Exit(1);
                 }
 
+                // we want to exit here. Re-sign in will not resolve the issue.
                 _consoleLogger.LogFailure($"Error encountered with sign-in. See error message for details:\n{ex.Message}");
-                Environment.Exit(1); // we want to exit here. Re-sign in will not resolve the issue.
+                Environment.Exit(1);
             }
             catch (Exception ex)
             {
                 _consoleLogger.LogFailure($"Error encountered with sign-in. See error message for details:\n{ex.Message}");
                 Environment.Exit(1);
             }
+
+            if (result is null)
+            {
+                _consoleLogger.LogFailure($"Failed to acquire a token");
+                Environment.Exit(1);
+            }
+
             return new AccessToken(result.AccessToken, result.ExpiresOn);
         }
     }

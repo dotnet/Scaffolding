@@ -82,16 +82,13 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public void LogFailure(string failureMessage)
         {
-            if (!_silent)
+            if (_jsonOutput)
             {
-                if (_jsonOutput)
-                {
-                    LogJsonMessage(State.Fail, output: failureMessage);
-                }
-                else
-                {
-                    LogMessage(failureMessage, LogMessageType.Error);
-                }
+                LogJsonMessage(State.Fail, output: failureMessage);
+            }
+            else
+            {
+                LogMessage(failureMessage, LogMessageType.Error);
             }
         }
     }

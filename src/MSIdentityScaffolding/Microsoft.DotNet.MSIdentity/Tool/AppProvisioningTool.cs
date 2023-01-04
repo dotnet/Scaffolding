@@ -18,6 +18,7 @@ using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
+using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -251,12 +252,10 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters? resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger);
             if (resultAppParameters is null || string.IsNullOrEmpty(resultAppParameters.ClientId))
             {
-                string failMessage = Resources.FailedToCreateApp;
-                ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
-                return null;
+                ConsoleLogger.LogFailure(Resources.FailedToCreateApp);
+                Environment.Exit(1);
             }
 
-            ConsoleLogger.LogMessage(string.Format(Resources.CreatedAppRegistration, resultAppParameters.ApplicationDisplayName, resultAppParameters.ClientId));
             return resultAppParameters;
         }
 

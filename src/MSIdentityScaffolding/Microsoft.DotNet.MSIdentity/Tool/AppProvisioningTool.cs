@@ -51,20 +51,16 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            if (!ValidateProjectPath())
-            {
-                Environment.Exit(1);
-            }
+            ValidateProjectPath();
 
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(ProvisioningToolOptions.ProjectTypeIdentifier);
             if (projectDescription == null)
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
-                ConsoleLogger.LogFailure(errorMessage);
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(errorMessage);
             }
 
-            ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription.Identifier));
+            ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription!.Identifier));
             ProvisioningToolOptions.ProjectType ??= projectDescription.Identifier?.Replace("dotnet-", "");
 
             ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
@@ -157,14 +153,15 @@ namespace Microsoft.DotNet.MSIdentity
         }
 
         /// <summary>
-        /// Ensures that ProjectPath is updated if ProjectFilePath argument exists
+        /// Ensures that ProjectPath is updated if ProjectFilePath argument exists,
+        /// logs failure and exits if ProjectFilePath cannot be determined
         /// </summary>
-        /// <returns>true if valid else false</returns>
-        private bool ValidateProjectPath()
+        /// <returns></returns>
+        private void ValidateProjectPath()
         {
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
-                return true;
+                return;
             }
 
             if (System.IO.File.Exists(ProvisioningToolOptions.ProjectFilePath)
@@ -175,12 +172,11 @@ namespace Microsoft.DotNet.MSIdentity
                     ProvisioningToolOptions.ProjectPath = projectPath;
                 }
 
-                return true;
+                return;
             }
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
-            ConsoleLogger.LogFailure(errorMsg);
-            return false;
+            ConsoleLogger.LogFailureAndExit(errorMsg);
         }
 
         private ProjectAuthenticationSettings InferApplicationParameters(
@@ -252,8 +248,7 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters? resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger);
             if (resultAppParameters is null || string.IsNullOrEmpty(resultAppParameters.ClientId))
             {
-                ConsoleLogger.LogFailure(Resources.FailedToCreateApp);
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
             }
 
             return resultAppParameters;
@@ -270,12 +265,8 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters applicationParameters)
         {
             var currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters, ConsoleLogger);
-            if (currentApplicationParameters is null)
-            {
-                Environment.Exit(1);
-            }
 
-            return currentApplicationParameters;
+            return currentApplicationParameters!;
         }
 
         /// <summary>
@@ -299,8 +290,8 @@ namespace Microsoft.DotNet.MSIdentity
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);
                 if (clientApplicationParameters is null)
                 {
-                    ConsoleLogger.LogFailure("Failed to provision Blazor Wasm hosted scenario");
-                    Environment.Exit(1);
+                    ConsoleLogger.LogFailureAndExit("Failed to provision Blazor Wasm hosted scenario"); // TODO string
+                    return;
                 }
 
                 ProvisioningToolOptions.BlazorWasmClientAppId = clientApplicationParameters.ClientId;
@@ -341,18 +332,16 @@ namespace Microsoft.DotNet.MSIdentity
             var clientApplicationParameters = await provisionClientAppRegistration.Run();
             if (clientApplicationParameters == null)
             {
-                ConsoleLogger.LogFailure(Resources.FailedToProvisionClientApp);
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(Resources.FailedToProvisionClientApp);
             }
 
             // Update program.cs file
-            clientToolOptions.ClientId = clientApplicationParameters.ClientId;
+            clientToolOptions.ClientId = clientApplicationParameters!.ClientId;
             var updateCode = new AppProvisioningTool(Commands.UPDATE_PROJECT_COMMAND, clientToolOptions, silent: true);
             clientApplicationParameters = await updateCode.Run();
             if (clientApplicationParameters == null)
             {
-                ConsoleLogger.LogFailure(Resources.FailedToUpdateClientAppCode);
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(Resources.FailedToUpdateClientAppCode);
             }
 
             return clientApplicationParameters;
@@ -475,8 +464,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
-                ConsoleLogger.LogFailure(Resources.FailedClientSecret);
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(Resources.FailedClientSecret);
             }
             else
             {
@@ -502,14 +490,12 @@ namespace Microsoft.DotNet.MSIdentity
                     else
                     {
                         output = string.Format(Resources.FailedClientSecretWithApp, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId);
-                        ConsoleLogger.LogFailure(output);
-                        Environment.Exit(1);
+                        ConsoleLogger.LogFailureAndExit(output);
                     }
                 }
                 catch (ServiceException se)
                 {
-                    ConsoleLogger.LogFailure(se.Error?.Code);
-                    Environment.Exit(1);
+                    ConsoleLogger.LogFailureAndExit(se.Error?.Code);
                 }
             }
         }
@@ -531,8 +517,7 @@ namespace Microsoft.DotNet.MSIdentity
             else
             {
                 string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
-                ConsoleLogger.LogFailure(outputMessage);
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(outputMessage);
             }
         }
 

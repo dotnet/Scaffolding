@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
                 // Get the tenant
-                Organization? tenant = await GetTenant(graphServiceClient);
+                Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
                 if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
                 {
                     applicationParameters.IsB2C = true;
@@ -96,13 +96,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // log json console message inside this method since we need the Microsoft.Graph.Application
                 if (createdApplication is null)
                 {
-                    consoleLogger.LogFailure(Resources.FailedToCreateApp);
-                    Environment.Exit(1);
+                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
+                    return null;
                 }
 
                 if (applicationParameters.IsB2C)
                 {
-                    createdApplication.AdditionalData.Add("IsB2C", true);
+                    createdApplication!.AdditionalData.Add("IsB2C", true);
                 }
 
                 ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             catch (Exception ex)
             {
                 var errorMessage = string.IsNullOrEmpty(ex.Message) ? ex.ToString() : ex.Message;
-                consoleLogger.LogFailure(errorMessage);
+                consoleLogger.LogFailureAndExit(errorMessage);
                 return null;
             }
         }
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return apiScopes.Trim();
         }
 
-        private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient)
+        private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient, IConsoleLogger consoleLogger)
         {
             Organization? tenant = null;
             try
@@ -158,21 +158,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 if (ex.InnerException != null)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
+                    consoleLogger.LogFailureAndExit(ex.InnerException.Message);
                 }
                 else
                 {
                     if (ex.Message.Contains("User was not found") || ex.Message.Contains("not found in tenant"))
                     {
-                        Console.WriteLine("User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.");
+                        consoleLogger.LogFailureAndExit("User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.");
                     }
                     else
                     {
-                        Console.WriteLine(ex.Message);
+                        consoleLogger.LogFailureAndExit(ex.Message);
                     }
                 }
-
-                Environment.Exit(1);
             }
 
             return tenant;
@@ -196,19 +194,18 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             if (parameters is null)
             {
-                consoleLogger.LogFailure(string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
-                Environment.Exit(1);
+                consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
-                .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
+                .Filter($"appId eq '{parameters!.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
             if (remoteApp is null)
             {
-                consoleLogger.LogFailure(string.Format(Resources.NotFound, parameters.ClientId));
-                Environment.Exit(1);
+                consoleLogger.LogFailureAndExit(string.Format(Resources.NotFound, parameters.ClientId));
+                return;
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
@@ -239,8 +236,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             catch (ServiceException se)
             {
                 output.Append(se.Error?.Message);
-                consoleLogger.LogFailure(output.ToString());
-                Environment.Exit(1);
+                consoleLogger.LogFailureAndExit(output.ToString());
             }
         }
 
@@ -282,11 +278,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (servicePrincipal is null)
             {
-                consoleLogger.LogFailure(Resources.FailedToGetServicePrincipal);
-                Environment.Exit(1);
+                consoleLogger.LogFailureAndExit(Resources.FailedToGetServicePrincipal);
             }
 
-            return servicePrincipal;
+            return servicePrincipal!;
         }
 
         /// <summary>
@@ -815,7 +810,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
-            Organization? tenant = await GetTenant(graphServiceClient);
+            Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
             var application = await GetApplication(tokenCredential, applicationParameters);
             if (application is null)
             {
@@ -828,6 +823,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 tenant!,
                 application,
                 applicationParameters);
+
+            if (effectiveApplicationParameters is null)
+            {
+                consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveApplicationParameters);
+            }
 
             return effectiveApplicationParameters;
         }

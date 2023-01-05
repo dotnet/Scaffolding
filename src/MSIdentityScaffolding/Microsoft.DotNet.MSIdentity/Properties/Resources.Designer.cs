@@ -548,6 +548,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to acquire a token..
+        /// </summary>
+        internal static string FailedToAcquireToken {
+            get {
+                return ResourceManager.GetString("FailedToAcquireToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to create Azure AD/AD B2C app registration..
         /// </summary>
         internal static string FailedToCreateApp {
@@ -589,6 +598,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string FailedToRetrieveADObjectsError {
             get {
                 return ResourceManager.GetString("FailedToRetrieveADObjectsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to retrieve application parameters..
+        /// </summary>
+        internal static string FailedToRetrieveApplicationParameters {
+            get {
+                return ResourceManager.GetString("FailedToRetrieveApplicationParameters", resourceCulture);
             }
         }
         
@@ -719,6 +737,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static string ResourceFileParseError {
             get {
                 return ResourceManager.GetString("ResourceFileParseError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error encountered with sign-in. See error message for details:.
+        /// </summary>
+        internal static string SignInError {
+            get {
+                return ResourceManager.GetString("SignInError", resourceCulture);
             }
         }
         

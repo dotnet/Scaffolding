@@ -66,16 +66,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                         catch (ServiceException)
                         {
                             nextPage = null;
-                            _consoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
-                            Environment.Exit(1);
+                            _consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
                         }
                     }
                 }
             }
             catch (ServiceException)
             {
-                _consoleLogger.LogFailure(Resources.FailedToRetrieveADObjectsError);
-                Environment.Exit(1);
+                _consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
             }
 
             return graphObjectsList;
@@ -111,7 +109,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                     }
                 }
 
-                _consoleLogger.LogFailure(errorMessage);
+                _consoleLogger.LogFailureAndExit(errorMessage);
                 return null;
             }
         }

@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public ConsoleLogger(string commandName = null, bool jsonOutput = false, bool silent = false)
         {
-            CommandName = commandName;
+            CommandName = commandName ?? string.Empty;
             _jsonOutput = jsonOutput;
             _silent = silent;
             Console.OutputEncoding = Encoding.UTF8;
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             }
         }
 
-        public void LogFailure(string failureMessage)
+        public void LogFailureAndExit(string failureMessage)
         {
             if (_jsonOutput)
             {
@@ -90,6 +90,8 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             {
                 LogMessage(failureMessage, LogMessageType.Error);
             }
+
+            Environment.Exit(1);
         }
     }
 }

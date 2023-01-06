@@ -6,10 +6,13 @@ namespace Microsoft.DotNet.MSIdentity.Shared
     internal class ConsoleLogger : IConsoleLogger
     {
         private readonly bool _jsonOutput;
-        private bool _silent;
+        private readonly bool _silent;
 
-        public ConsoleLogger(bool jsonOutput = false, bool silent = false)
+        private string CommandName { get; }
+
+        public ConsoleLogger(string commandName = null, bool jsonOutput = false, bool silent = false)
         {
+            CommandName = commandName ?? string.Empty;
             _jsonOutput = jsonOutput;
             _silent = silent;
             Console.OutputEncoding = Encoding.UTF8;
@@ -46,22 +49,25 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             }
         }
 
-        public void LogJsonMessage(JsonResponse jsonMessage)
+        public void LogJsonMessage(string state = null, object content = null, string output = null)
         {
             if (!_silent)
             {
                 if (_jsonOutput)
                 {
+                    var jsonMessage = new JsonResponse(CommandName, state, content, output);
                     Console.WriteLine(jsonMessage.ToJsonString());
                 }
                 else
                 {
-                    if (jsonMessage.State == State.Fail)
+                    if (state == State.Fail)
                     {
-                        LogMessage(jsonMessage.Output, LogMessageType.Error);
+                        LogMessage(output, LogMessageType.Error);
                     }
-
-                    LogMessage(jsonMessage.Output);
+                    else
+                    {
+                        LogMessage(output);
+                    }
                 }
             }
         }
@@ -72,6 +78,20 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             {
                 LogMessage(message, LogMessageType.Information, removeNewLine);
             }
+        }
+
+        public void LogFailureAndExit(string failureMessage)
+        {
+            if (_jsonOutput)
+            {
+                LogJsonMessage(State.Fail, output: failureMessage);
+            }
+            else
+            {
+                LogMessage(failureMessage, LogMessageType.Error);
+            }
+
+            Environment.Exit(1);
         }
     }
 }

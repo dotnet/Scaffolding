@@ -18,6 +18,7 @@ using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph;
+using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -45,25 +46,21 @@ namespace Microsoft.DotNet.MSIdentity
         {
             CommandName = commandName;
             ProvisioningToolOptions = provisioningToolOptions;
-            ConsoleLogger = new ConsoleLogger(ProvisioningToolOptions.Json, silent);
+            ConsoleLogger = new ConsoleLogger(CommandName, ProvisioningToolOptions.Json, silent);
         }
 
         public async Task<ApplicationParameters?> Run()
         {
-            if (!ValidateProjectPath())
-            {
-                Environment.Exit(1);
-            }
+            ValidateProjectPath();
 
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(ProvisioningToolOptions.ProjectTypeIdentifier);
             if (projectDescription == null)
             {
                 var errorMessage = string.Format(Resources.NoProjectDescriptionFound, ProvisioningToolOptions.ProjectTypeIdentifier);
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMessage));
-                Environment.Exit(1);
+                ConsoleLogger.LogFailureAndExit(errorMessage);
             }
 
-            ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription.Identifier));
+            ConsoleLogger.LogMessage(string.Format(Resources.DetectedProjectType, projectDescription!.Identifier));
             ProvisioningToolOptions.ProjectType ??= projectDescription.Identifier?.Replace("dotnet-", "");
 
             ProjectAuthenticationSettings projectSettings = InferApplicationParameters(
@@ -74,7 +71,8 @@ namespace Microsoft.DotNet.MSIdentity
             // Get developer credentials
             TokenCredential tokenCredential = GetTokenCredential(
                 ProvisioningToolOptions,
-                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
+                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain,
+                ConsoleLogger);
 
             ApplicationParameters applicationParameters;
             switch (CommandName)
@@ -155,14 +153,15 @@ namespace Microsoft.DotNet.MSIdentity
         }
 
         /// <summary>
-        /// Ensures that ProjectPath is updated if ProjectFilePath argument exists
+        /// Ensures that ProjectPath is updated if ProjectFilePath argument exists,
+        /// logs failure and exits if ProjectFilePath cannot be determined
         /// </summary>
-        /// <returns>true if valid else false</returns>
-        private bool ValidateProjectPath()
+        /// <returns></returns>
+        private void ValidateProjectPath()
         {
             if (string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath))
             {
-                return true;
+                return;
             }
 
             if (System.IO.File.Exists(ProvisioningToolOptions.ProjectFilePath)
@@ -173,12 +172,11 @@ namespace Microsoft.DotNet.MSIdentity
                     ProvisioningToolOptions.ProjectPath = projectPath;
                 }
 
-                return true;
+                return;
             }
 
             var errorMsg = string.Format(Resources.ProjectPathError, ProvisioningToolOptions.ProjectFilePath);
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: errorMsg));
-            return false;
+            ConsoleLogger.LogFailureAndExit(errorMsg);
         }
 
         private ProjectAuthenticationSettings InferApplicationParameters(
@@ -230,12 +228,13 @@ namespace Microsoft.DotNet.MSIdentity
         /// <param name="provisioningToolOptions"></param>
         /// <param name="currentApplicationTenantId"></param>
         /// <returns></returns>
-        internal static TokenCredential GetTokenCredential(ProvisioningToolOptions provisioningToolOptions, string? currentApplicationTenantId)
+        internal static TokenCredential GetTokenCredential(ProvisioningToolOptions provisioningToolOptions, string? currentApplicationTenantId, IConsoleLogger consoleLogger)
         {
             DeveloperCredentialsReader developerCredentialsReader = new DeveloperCredentialsReader();
             return developerCredentialsReader.GetDeveloperCredentials(
                 provisioningToolOptions.Username,
-                currentApplicationTenantId ?? provisioningToolOptions.TenantId);
+                currentApplicationTenantId ?? provisioningToolOptions.TenantId,
+                consoleLogger);
         }
 
         /// <summary>
@@ -246,15 +245,12 @@ namespace Microsoft.DotNet.MSIdentity
         /// <returns></returns>
         private async Task<ApplicationParameters?> CreateAppRegistration(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            ApplicationParameters? resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
+            ApplicationParameters? resultAppParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger);
             if (resultAppParameters is null || string.IsNullOrEmpty(resultAppParameters.ClientId))
             {
-                string failMessage = Resources.FailedToCreateApp;
-                ConsoleLogger.LogMessage(failMessage, LogMessageType.Error);
-                return null;
+                ConsoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
             }
 
-            ConsoleLogger.LogMessage(string.Format(Resources.CreatedAppRegistration, resultAppParameters.ApplicationDisplayName, resultAppParameters.ClientId));
             return resultAppParameters;
         }
 
@@ -269,12 +265,8 @@ namespace Microsoft.DotNet.MSIdentity
             ApplicationParameters applicationParameters)
         {
             var currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.ReadApplication(tokenCredential, applicationParameters, ConsoleLogger);
-            if (currentApplicationParameters is null)
-            {
-                Environment.Exit(1);
-            }
 
-            return currentApplicationParameters;
+            return currentApplicationParameters!;
         }
 
         /// <summary>
@@ -296,19 +288,22 @@ namespace Microsoft.DotNet.MSIdentity
                 }
 
                 var clientApplicationParameters = await ConfigureBlazorWasmHostedClientAsync(serverApplicationParameters: applicationParameters);
+                if (clientApplicationParameters is null)
+                {
+                    ConsoleLogger.LogFailureAndExit("Failed to provision Blazor Wasm hosted scenario"); // TODO string
+                    return;
+                }
+
                 ProvisioningToolOptions.BlazorWasmClientAppId = clientApplicationParameters.ClientId;
                 output.AppendLine(string.Format(Resources.ConfiguredBlazorWasmClient, clientApplicationParameters.ApplicationDisplayName, clientApplicationParameters.ClientId));
             }
 
-            var jsonResponse = await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
+            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(
                                         tokenCredential,
                                         applicationParameters,
                                         ProvisioningToolOptions,
-                                        CommandName);
-
-            output.Append(jsonResponse.Output);
-
-            ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, jsonResponse.State, output: output.ToString()));
+                                        ConsoleLogger,
+                                        output);
         }
 
         /// <summary>
@@ -317,7 +312,7 @@ namespace Microsoft.DotNet.MSIdentity
         /// <param name="serverApplicationParameters"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        private async Task<ApplicationParameters> ConfigureBlazorWasmHostedClientAsync(ApplicationParameters serverApplicationParameters)
+        private async Task<ApplicationParameters?> ConfigureBlazorWasmHostedClientAsync(ApplicationParameters serverApplicationParameters)
         {
             // Processes the Blazorwasm client
             var clientToolOptions = ProvisioningToolOptions.Clone();
@@ -337,22 +332,16 @@ namespace Microsoft.DotNet.MSIdentity
             var clientApplicationParameters = await provisionClientAppRegistration.Run();
             if (clientApplicationParameters == null)
             {
-                var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
-                throw exception;
+                ConsoleLogger.LogFailureAndExit(Resources.FailedToProvisionClientApp);
             }
 
             // Update program.cs file
-            clientToolOptions.ClientId = clientApplicationParameters.ClientId;
+            clientToolOptions.ClientId = clientApplicationParameters!.ClientId;
             var updateCode = new AppProvisioningTool(Commands.UPDATE_PROJECT_COMMAND, clientToolOptions, silent: true);
             clientApplicationParameters = await updateCode.Run();
             if (clientApplicationParameters == null)
             {
-                var exception = new ArgumentNullException(nameof(clientApplicationParameters));
-
-                ConsoleLogger.LogJsonMessage(new JsonResponse(CommandName, State.Fail, output: exception.Message));
-                throw exception;
+                ConsoleLogger.LogFailureAndExit(Resources.FailedToUpdateClientAppCode);
             }
 
             return clientApplicationParameters;
@@ -472,12 +461,10 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task AddClientSecret(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             string? output;
-            JsonResponse jsonResponse = new JsonResponse(CommandName);
 
             if (string.IsNullOrEmpty(applicationParameters.GraphEntityId))
             {
-                jsonResponse.State = State.Fail;
-                jsonResponse.Output = Resources.FailedClientSecret;
+                ConsoleLogger.LogFailureAndExit(Resources.FailedClientSecret);
             }
             else
             {
@@ -498,25 +485,18 @@ namespace Microsoft.DotNet.MSIdentity
 
                     if (!string.IsNullOrEmpty(password))
                     {
-                        output = string.Format(Resources.ClientSecret, password);
-                        jsonResponse.State = State.Success;
-                        jsonResponse.Content = new KeyValuePair<string, string>("ClientSecret", password);
+                        ConsoleLogger.LogJsonMessage(State.Success, content: new KeyValuePair<string, string>("ClientSecret", password));
                     }
                     else
                     {
                         output = string.Format(Resources.FailedClientSecretWithApp, applicationParameters.ApplicationDisplayName, applicationParameters.ClientId);
-                        jsonResponse.State = State.Fail;
-                        jsonResponse.Content = "TODO Empty password";
+                        ConsoleLogger.LogFailureAndExit(output);
                     }
                 }
                 catch (ServiceException se)
                 {
-                    output = se.Error?.ToString();
-                    jsonResponse.State = State.Fail;
-                    jsonResponse.Output = se.Error?.Code; // TODO refactor
+                    ConsoleLogger.LogFailureAndExit(se.Error?.Code);
                 }
-
-                ConsoleLogger.LogJsonMessage(jsonResponse);
             }
         }
 
@@ -529,20 +509,15 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task UnregisterApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             bool unregisterSuccess = await MicrosoftIdentityPlatformApplicationManager.UnregisterAsync(tokenCredential, applicationParameters);
-            JsonResponse jsonResponse = new JsonResponse(CommandName);
             if (unregisterSuccess)
             {
                 string outputMessage = $"Unregistered the Azure AD w/ client id = {applicationParameters.ClientId}\n";
-                jsonResponse.State = State.Success;
-                jsonResponse.Output = outputMessage;
-                ConsoleLogger.LogJsonMessage(jsonResponse);
+                ConsoleLogger.LogJsonMessage(State.Success, output: outputMessage);
             }
             else
             {
                 string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
-                jsonResponse.State = State.Fail;
-                jsonResponse.Output = outputMessage;
-                ConsoleLogger.LogJsonMessage(jsonResponse);
+                ConsoleLogger.LogFailureAndExit(outputMessage);
             }
         }
 
@@ -615,7 +590,7 @@ namespace Microsoft.DotNet.MSIdentity
         private async Task WriteApplicationRegistration(Summary summary, ApplicationParameters reconcialedApplicationParameters, TokenCredential tokenCredential)
         {
             summary.changes.Add(new Change($"Writing the project AppId = {reconcialedApplicationParameters.ClientId}"));
-            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(tokenCredential, reconcialedApplicationParameters, ProvisioningToolOptions, CommandName);
+            await MicrosoftIdentityPlatformApplicationManager.UpdateApplication(tokenCredential, reconcialedApplicationParameters, ProvisioningToolOptions, ConsoleLogger);
         }
 
         /// <summary>
@@ -677,7 +652,7 @@ namespace Microsoft.DotNet.MSIdentity
 
             if (currentApplicationParameters == null && !ProvisioningToolOptions.Unregister)
             {
-                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger, CommandName);
+                currentApplicationParameters = await MicrosoftIdentityPlatformApplicationManager.CreateNewAppAsync(tokenCredential, applicationParameters, ConsoleLogger);
                 if (currentApplicationParameters != null)
                 {
                     ConsoleLogger.LogMessage($"Created app {currentApplicationParameters.ApplicationDisplayName} - {currentApplicationParameters.ClientId}. ");

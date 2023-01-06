@@ -1,13 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Binding;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
+    /// <summary>
+    /// ProvisioningToolOptionsBinder to setup handlers for dotnet-msidentity commnds.
+    /// Used in Microsoft.DotNet.MSIdentity.Tool.Program in SetHandler calls.
+    /// </summary>
     internal class ProvisioningToolOptionsBinder : BinderBase<ProvisioningToolOptions>
     {
         private readonly Option<bool> _jsonOption;
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         protected override ProvisioningToolOptions GetBoundValue(BindingContext bindingContext)
         {
-            var redirectUriList = bindingContext.ParseResult.GetValue(_redirectUriOption) ?? new List<string>();
+            IList<string> redirectUriList = bindingContext.ParseResult.GetValue(_redirectUriOption) ?? new List<string>();
             return new ProvisioningToolOptions
             {
 

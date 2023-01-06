@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     {
         public static async Task<int> Main(string[] args)
         {
-            System.Diagnostics.Debugger.Launch();
             var rootCommand = MsIdentityCommand();
             //new BinderBase for System.Commandline update, new way to bind handlers to commands.
             var provisioningToolBinder = new ProvisioningToolOptionsBinder(
@@ -37,6 +36,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 SusiPolicyIdOption,
                 TenantOption,
                 UsernameOption);
+
             //internal commands
             var listAadAppsCommand = ListAADAppsCommand();
             var listServicePrincipalsCommand = ListServicePrincipalsCommand();
@@ -264,7 +264,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             };
 
         internal static Command UnregisterApplicationCommand() =>
-            new Command(
+            new(
                 name: Commands.UNREGISTER_APPLICATION_COMMAND,
 
                 description: "Unregister an Azure AD or Azure AD B2C app registration in Azure." +
@@ -273,48 +273,48 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption, UsernameOption, JsonOption, HostedAppIdUriOption, ProjectFilePathOption, ClientIdOption
             };
 
-        private static Option<bool> JsonOption =>
-            new Option<bool>(
+        internal static Option<bool> JsonOption { get; } =
+            new(
                 aliases: new[] { "-j", "--json" },
                 description: "Format output in JSON instead of text.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> EnableIdTokenOption =>
-            new Option<bool>(
+        internal static Option<bool> EnableIdTokenOption { get; } =
+            new(
                 aliases: new[] { "--enable-id-token" },
                 description: "Enable id token.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> EnableAccessToken =>
-            new Option<bool>(
+        internal static Option<bool> EnableAccessToken { get; } =
+            new(
                 aliases: new[] { "--enable-access-token" },
                 description: "Enable access token.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> CallsGraphOption =>
-            new Option<bool>(
+        internal static Option<bool> CallsGraphOption { get; } =
+            new(
                 aliases: new[] { "--calls-graph" },
                 description: "App registration calls microsoft graph.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> CallsDownstreamApiOption =>
-            new Option<bool>(
+        internal static Option<bool> CallsDownstreamApiOption { get; } =
+            new(
                 aliases: new[] { "--calls-downstream-api" },
                 description: "App registration calls downstream api.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> UpdateUserSecretsOption =>
-            new Option<bool>(
+        internal static Option<bool> UpdateUserSecretsOption { get; } =
+            new(
                 aliases: new[] { "--update-user-secrets" },
                 description: "Add secrets to user secrets.json file." +
                              "\n\t- Using dotnet-user-secrets to init and set user secrets.\n")
@@ -322,32 +322,32 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option<bool> ConfigUpdateOption =>
-            new Option<bool>(
+        internal static Option<bool> ConfigUpdateOption { get; } =
+            new(
                 aliases: new[] { "--config-update" },
                 description: "Allow config changes for dotnet app to work with Azure AD/AD B2C app.")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> CodeUpdateOption =>
-            new Option<bool>(
+        internal static Option<bool> CodeUpdateOption { get; } =
+            new(
                 aliases: new[] { "--code-update" },
                 description: "Allow Startup.cs and other code changes for dotnet app to work with Azure AD/AD B2C app (setup authentication).")
             {
                 IsRequired = false
             };
 
-        private static Option<bool> PackagesUpdateOption =>
-            new Option<bool>(
+        internal static Option<bool> PackagesUpdateOption { get; } =
+            new(
                 aliases: new[] { "--packages-update" },
                 description: "Allow package updates for dotnet app to work with Azure AD/AD B2C app (setup authentication).")
             {
                 IsRequired = false
             };
 
-        private static Option<string> ClientIdOption =>
-            new Option<string>(
+        internal static Option<string> ClientIdOption { get; } =
+            new(
                 aliases: new[] { "--client-id" },
                 description: "Client ID of an existing app registration to use." +
                              "\n\tConfigure project to use an existing Azure app registration instead of creating a new one. The app registration will be updated if needed." +
@@ -356,16 +356,16 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option<string> AppDisplayName =>
-            new Option<string>(
+        internal static Option<string> AppDisplayName { get; } =
+            new(
                 aliases: new[] { "--app-display-name" },
                 description: "App display name for Azure AD/AD B2C app registration creation.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> ProjectType =>
-            new Option<string>(
+        internal static Option<string> ProjectType { get; } =
+            new(
                 aliases: new[] { "--project-type" },
                 description: "Project type for which to register the azure ad app registration." +
                              "\n\tFor eg., 'webapp', 'webapi', 'blazorwasm-hosted', 'blazorwasm'\n")
@@ -373,56 +373,57 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option<string> ClientSecretOption =>
-            new Option<string>(
+        internal static Option<string> ClientSecretOption { get; } =
+            new(
                 aliases: new[] { "--client-secret" },
                 description: "Value for the client secret, which also can be referred to as application password.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<IList<string>> RedirectUriOption =>
-            new Option<IList<string>>(
+        internal static Option<IList<string>> RedirectUriOption { get; } =
+            new(
                 aliases: new[] { "--redirect-uris" },
                 description: "Add redirect URIs (web) for the app.\n\t- You can pass in multiple values for this parameter separated by a space.\n")
             {
-                IsRequired = false
+                IsRequired = false,
+                AllowMultipleArgumentsPerToken = true
             };
 
-        private static Option<string> ProjectFilePathOption =>
-            new Option<string>(
+        internal static Option<string> ProjectFilePathOption { get; } =
+            new(
                 aliases: new[] { "-p", "--project-file-path" },
                 description: "Path to the project file (.csproj file) to be used. If not provided, the project file in the current working directory will be used.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> ClientProjectOption =>
-            new Option<string>(
+        internal static Option<string> ClientProjectOption { get; } =
+            new(
                 aliases: new[] { "--client-project" },
                 description: "Path to the project file (.csproj file) for a hosted Blazor WASM client. If provided, implies that project is Blazor WASM Hosted\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> ApiScopesOption =>
-            new Option<string>(
+        internal static Option<string> ApiScopesOption { get; } =
+            new(
                 aliases: new[] { "--api-scopes" },
                 description: "Scopes for the called downstream API, especially useful for B2C scenarios where permissions must be granted manually\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> HostedAppIdUriOption =>
-            new Option<string>(
+        internal static Option<string> HostedAppIdUriOption { get; } =
+            new(
                 aliases: new[] { "--hosted-app-id-uri" },
                 description: "The App ID Uri for the Blazor WebAssembly hosted API. This parameter will only be used for Blazor WebAssembly hosted applications.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> ApiClientIdOption =>
-            new Option<string>(
+        internal static Option<string> ApiClientIdOption { get; } =
+            new(
                 aliases: new[] { "--api-client-id" },
                 description: "Client ID of the Blazor WebAssembly hosted web API." +
                              "\nThis parameter is only used for Blazor WebAssembly hosted applications, where you only want to configure the project.\n")
@@ -430,24 +431,24 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        private static Option<string> SusiPolicyIdOption =>
-            new Option<string>(
+        internal static Option<string> SusiPolicyIdOption { get; } =
+            new(
                 aliases: new[] { "--susi-policy-id" },
                 description: "Sign-up/Sign-in policy required for configurating a B2C application from code that was created for Azure AD.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> TenantOption =>
-            new Option<string>(
+        internal static Option<string> TenantOption { get; } =
+            new(
                 aliases: new[] { "-t", "--tenant-id" },
                 description: "Azure AD or Azure AD B2C tenant in which to create or update the app registration.\n - If specified, the app registration will be created in given tenant.\n - If not provided, the app registration will be created in yuor home tenant.\n")
             {
                 IsRequired = false
             };
 
-        private static Option<string> UsernameOption =>
-            new Option<string>(
+        internal static Option<string> UsernameOption { get; } =
+            new(
                 aliases: new[] { "-u", "--username" },
                 description: "Username to use to connect to the Azure AD or Azure AD B2C tenant." +
                             "\n- It's only needed if you are signed-in to Visual Studio, or Azure CLI with several identities." +

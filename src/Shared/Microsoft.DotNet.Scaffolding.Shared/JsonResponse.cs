@@ -1,4 +1,3 @@
-using System;
 using System.Text.Json;
 
 namespace Microsoft.DotNet.MSIdentity.Shared
@@ -12,9 +11,9 @@ namespace Microsoft.DotNet.MSIdentity.Shared
 
         public JsonResponse(string command, string state = null, object content = null, string output = null)
         {
+            Command = command;
             State = state;
             Content = content;
-            Command = command ?? throw new ArgumentNullException(nameof(command));
             Output = output;
         }
 

@@ -51,7 +51,7 @@ namespace @Model.NamespaceName
 
         public async Task<IActionResult> OnGetAsync(@primaryKeyNullableTypeName id)
         {
-            if (id == null || _context.@(entitySetName) == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -103,16 +103,7 @@ namespace @Model.NamespaceName
 
         private bool @(Model.ModelTypeName)Exists(@primaryKeyShortTypeName id)
         {
-@{
-        if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
-        {
-          @:return (_context.@(entitySetName)?.Any(e => e.@primaryKeyName == id)).GetValueOrDefault();
-        }
-        else 
-        {
-          @:return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
-        }
-}
+            return _context.@(entitySetName).Any(e => e.@primaryKeyName == id);
         }
     }
 }

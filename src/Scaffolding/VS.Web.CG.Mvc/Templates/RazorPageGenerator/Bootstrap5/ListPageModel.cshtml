@@ -47,10 +47,7 @@ namespace @Model.NamespaceName
 
         public async Task OnGetAsync()
         {
-            if (_context.@(entitySetName) != null)
-            {
-                @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).ToListAsync();
-            }
+            @Model.ViewDataTypeShortName = await _context.@(entitySetName)@(inlineIncludes).ToListAsync();
         }
     }
 }

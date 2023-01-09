@@ -45,20 +45,11 @@ namespace @Model.NamespaceName
             _context = context;
         }
 
-@{
-    if ("enable".Equals(@Model.NullableEnabled, StringComparison.OrdinalIgnoreCase))
-    {
-      @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!; 
-    }
-    else 
-    {
-      @:public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; }
-    }
-}
+        public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(@primaryKeyNullableTypeName id)
         {
-            if (id == null || _context.@(entitySetName) == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -68,7 +59,7 @@ namespace @Model.NamespaceName
             {
                 return NotFound();
             }
-            else 
+            else
             {
                 @Model.ViewDataTypeShortName = @viewDataTypeShortNameLowerCase;
             }

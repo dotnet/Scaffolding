@@ -103,6 +103,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, bool useSqlite)
         {
+            return await GetModelMetadata(dbContextFullTypeName, modelTypeSymbol, areaName, useSqlite ? DbProvider.SQLite : DbProvider.SqlServer);
+        }
+
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider)
+        {
             if (string.IsNullOrEmpty(dbContextFullTypeName))
             {
                 throw new ArgumentException(nameof(dbContextFullTypeName));
@@ -111,7 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var processor = new EntityFrameworkModelProcessor(dbContextFullTypeName,
                 modelTypeSymbol,
                 areaName,
-                useSqlite,
+                databaseProvider,
                 _loader,
                 _dbContextEditorServices,
                 _modelTypesLocator,

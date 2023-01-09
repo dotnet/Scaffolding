@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,6 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using System.Collections;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -27,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private const string EFSqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         private const string MySqlException = nameof(MySqlException);
         private const string NewDbContextFolderName = "Data";
-        private bool _useSqlite;
+        private DbProvider _databaseProvider;
         private string _dbContextFullTypeName;
         private ModelType _modelTypeSymbol;
         private string _areaName;
@@ -50,7 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             string dbContextFullTypeName,
             ModelType modelTypeSymbol,
             string areaName,
-            bool useSqlite,
+            DbProvider databaseProvider,
             ICodeGenAssemblyLoadContext loader,
             IDbContextEditorServices dbContextEditorServices,
             IModelTypesLocator modelTypesLocator,
@@ -76,8 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _applicationInfo = applicationInfo;
             _fileSystem = fileSystem;
             _workspace = workspace;
-            _useSqlite = useSqlite;
-
+            _databaseProvider = databaseProvider;
             _assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
         }
 
@@ -101,7 +98,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 
                 if (!dbContextSymbols.Any())
                 {
-                    //add nullable properties
                     await GenerateNewDbContextAndRegisterProgramFile(programType, _applicationInfo);
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
@@ -303,7 +299,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private async Task AddModelTypeToExistingDbContextIfNeeded(ModelType dbContextSymbol, IApplicationInfo appInfo)
         {
             bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
-            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, nullabledEnabled);
+            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, new Dictionary<string, string> { { "nullableEnabled", nullabledEnabled.ToString()} });
             var projectCompilation = await _workspace.CurrentSolution.Projects
                 .First(project => project.AssemblyName == _projectContext.AssemblyName)
                 .GetCompilationAsync();
@@ -371,10 +367,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            if (!_useSqlite)
-            {
-                ValidateEFSqlServerDependency();
-            }
+            // Validate for necessary ef packages (based on database type)
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
             bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
@@ -385,13 +380,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
             if (programType != null)
             {
-                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(
-                    programType,
-                    dbContextTemplateModel.DbContextTypeName,
-                    dbContextTemplateModel.DbContextNamespace,
-                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
-                    _useSqlite,
-                    useTopLevelsStatements);
+                var parameters = new Dictionary<string, string>
+                {
+                    { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTemplateModel.DbContextTypeName },
+                    { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
+                    { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
+                    { "databaseProvider", _databaseProvider.ToString() },
+                    { "useTopLevelStatements", useTopLevelsStatements.ToString() }
+                };
+
+                _programEditResult = _dbContextEditorServices.EditStartupForNewContext(programType, parameters);
             }
 
             if (!_programEditResult.Edited)
@@ -440,10 +438,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            if (!_useSqlite)
-            {
-                ValidateEFSqlServerDependency();
-            }
+            // Validate for necessary ef packages (based on database type)
+            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
             bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
@@ -454,12 +451,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             bool useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_modelTypesLocator);
             if (startupType != null)
             {
-                _startupEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType,
-                    dbContextTemplateModel.DbContextTypeName,
-                    dbContextTemplateModel.DbContextNamespace,
-                    dataBaseName: dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString(),
-                    _useSqlite,
-                    useTopLevelsStatements);
+                var parameters = new Dictionary<string, string>
+                {
+                    { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTemplateModel.DbContextTypeName },
+                    { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
+                    { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
+                    { "databaseProvider", _databaseProvider.ToString() },
+                    { "useTopLevelStatements", useTopLevelsStatements.ToString() }
+                };
+
+                _startupEditResult = _dbContextEditorServices.EditStartupForNewContext(startupType, parameters);
             }
 
             if (!_startupEditResult.Edited)
@@ -512,7 +513,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
 
             DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, dbContextType);
-
+            Console.WriteLine($"\nUsing database provider '{dbContextInstance.Database.ProviderName}'!\n");
             if (dbContextInstance == null)
             {
                 throw new InvalidOperationException(string.Format(
@@ -572,14 +573,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     }
                 }
                 throw ex.Unwrap(_logger);
-            }
-        }
-
-        private void ValidateEFSqlServerDependency()
-        {
-            if (_projectContext.GetPackage(EFSqlServerPackageName) == null && CalledFromCommandline)
-            {
-                throw new InvalidOperationException(MessageStrings.EFSqlServerPackageNotAvailable);
             }
         }
 

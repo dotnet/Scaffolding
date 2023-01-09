@@ -241,6 +241,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid database provider &apos;{0}&apos; found..
+        /// </summary>
+        internal static string InvalidDatabaseProvider {
+            get {
+                return ResourceManager.GetString("InvalidDatabaseProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid database type &apos;{0}&apos;.
+        /// </summary>
+        internal static string InvalidDatabaseType {
+            get {
+                return ResourceManager.GetString("InvalidDatabaseType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Value of --dbContext &apos;{0}&apos; is not a valid class name..
         /// </summary>
         internal static string InvalidDbContextClassName {
@@ -340,6 +358,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No database provider found. Using &apos;SqlServer&apos; by default for new DbContext creation!.
+        /// </summary>
+        internal static string NoDbProviderFound {
+            get {
+                return ResourceManager.GetString("NoDbProviderFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder..
         /// </summary>
         internal static string OutDirOptionDesc {
@@ -408,6 +435,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc {
         internal static string ScriptsOptionDesc {
             get {
                 return ResourceManager.GetString("ScriptsOptionDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to --useSqlite|-sqlite option is obsolete now. Use --databaseProvider|-dbProvider instead in the future..
+        /// </summary>
+        internal static string SqliteObsoleteOption {
+            get {
+                return ResourceManager.GetString("SqliteObsoleteOption", resourceCulture);
             }
         }
         

@@ -77,17 +77,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
                 throw new ArgumentException(MessageStrings.PageModelFlagNotSupported);
             }
 
+            razorGeneratorModel.ValidateCommandline(_logger);
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.UseSqlite);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorGeneratorModel.DatabaseProvider);
             }
 
             ModelTypeAndContextModel modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
+                _logger,
                 string.Empty);
 
             TemplateModel = GetRazorPageWithContextTemplateModel(razorGeneratorModel, modelTypeAndContextModel);
@@ -139,13 +141,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             if (CalledFromCommandline)
             {
-                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.UseSqlite);
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.DatabaseProvider);
             }
             
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorPageGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
+                _logger,
                 string.Empty);
 
             TemplateModel = GetRazorPageWithContextTemplateModel(razorPageGeneratorModel, modelTypeAndContextModel);

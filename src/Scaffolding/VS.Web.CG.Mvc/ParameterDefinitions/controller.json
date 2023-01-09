@@ -69,11 +69,11 @@
             "Name": "controllerNamespace",
             "ShortName": "namespace",
             "Description": "Specify the name of the namespace to use for the generated controller"
-        }, 
-        {
-            "Name" : "useSqlite",
-            "ShortName" : "sqlite",
-            "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
-        }
+        },
+      {
+        "Name": "databaseProvider",
+        "ShortName": "dbProvider",
+        "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
+      }
     ]
 }

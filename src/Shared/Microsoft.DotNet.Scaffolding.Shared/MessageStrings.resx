@@ -135,6 +135,12 @@
   <data name="EndFileSystemChangeToken" xml:space="preserve">
     <value>:::End FileSystemChange:::</value>
   </data>
+  <data name="InstallEfPackages" xml:space="preserve">
+    <value>To scaffold controllers and views using models, install Entity Framework core packages and try again: {0}</value>
+  </data>
+  <data name="InstallSqlPackage" xml:space="preserve">
+    <value>To scaffold, install the following Entity Framework core packages and try again: {0}</value>
+  </data>
   <data name="InvalidFileSystemChangeMessage" xml:space="preserve">
     <value>Invalid FileSystemChange message.</value>
   </data>

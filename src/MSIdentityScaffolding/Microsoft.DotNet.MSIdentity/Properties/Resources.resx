@@ -159,6 +159,9 @@
   <data name="AuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>
   </data>
+  <data name="ClientDoesNotExist" xml:space="preserve">
+    <value>An Azure AD tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant.</value>
+  </data>
   <data name="ClientSecret" xml:space="preserve">
     <value>Client secret - {0}.</value>
   </data>

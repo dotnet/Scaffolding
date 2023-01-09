@@ -299,6 +299,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An Azure AD tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant..
+        /// </summary>
+        internal static string ClientDoesNotExist {
+            get {
+                return ResourceManager.GetString("ClientDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Client secret - {0}..
         /// </summary>
         internal static string ClientSecret {

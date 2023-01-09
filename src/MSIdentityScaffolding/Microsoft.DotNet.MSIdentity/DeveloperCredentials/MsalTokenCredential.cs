@@ -84,65 +84,106 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
         {
             var app = await GetOrCreateApp();
-            AuthenticationResult? result = null;
             var accounts = await app.GetAccountsAsync()!;
-            IAccount? account;
+            IAccount? account = string.IsNullOrEmpty(Username)
+                ? accounts.FirstOrDefault()
+                : accounts.FirstOrDefault(account => string.Equals(account.Username, Username, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(Username))
+            AuthenticationResult? result = account is null
+                ? await GetAuthenticationWithoutAccount(requestContext.Scopes, app, cancellationToken)
+                : await GetAuthenticationWithAccount(requestContext.Scopes, app, account, cancellationToken);
+
+            if (result is null || result.AccessToken is null)
             {
-                account = accounts.FirstOrDefault(account => account.Username == Username);
+                _consoleLogger.LogFailureAndExit(Resources.FailedToAcquireToken);
             }
-            else
-            {
-                account = accounts.FirstOrDefault();
-            }
+
+            // Note: In the future, the token type *could* be POP instead of Bearer
+            return new AccessToken(result!.AccessToken!, result.ExpiresOn); 
+        }
+
+        private async Task<AuthenticationResult?> GetAuthenticationWithAccount(string[] scopes, IPublicClientApplication app, IAccount? account, CancellationToken cancellationToken)
+        {
+            AuthenticationResult? result = null;
             try
             {
-                result = await app.AcquireTokenSilent(requestContext.Scopes, account)
+                result = await app.AcquireTokenSilent(scopes, account)
                     .WithAuthority(Instance, TenantId)
                     .ExecuteAsync(cancellationToken);
             }
             catch (MsalUiRequiredException ex)
             {
-                if (account == null && !string.IsNullOrEmpty(Username))
+                try
                 {
-                    _consoleLogger.LogFailureAndExit(
-                        $"No valid tokens found in the cache.\n" +
-                        $"Please sign-in to Visual Studio with this account: {Username}.\n\n" +
-                        $"After signing-in, re-run the tool.");
+                    result = await app.AcquireTokenInteractive(scopes)
+                        .WithAccount(account)
+                        .WithClaims(ex.Claims)
+                        .WithAuthority(Instance, TenantId)
+                        .WithUseEmbeddedWebView(false)
+                        .ExecuteAsync(cancellationToken);
                 }
-                result = await app.AcquireTokenInteractive(requestContext.Scopes)
-                    .WithAccount(account)
-                    .WithClaims(ex.Claims)
-                    .WithAuthority(Instance, TenantId)
-                    .ExecuteAsync(cancellationToken);
+                catch (Exception e)
+                {
+                    _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
+                }
             }
             catch (MsalServiceException ex)
             {
                 // AAD error codes: https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
-                if (ex.Message.Contains("AADSTS70002")) // "The client does not exist or is not enabled for consumers"
-                {
-                    // We want to exit here because this is probably an MSA without an AAD tenant.
-                    _consoleLogger.LogFailureAndExit(
-                        "An Azure AD tenant, and a user in that tenant, " +
-                        "needs to be created for this account before an application can be created. " +
-                        "See https://aka.ms/ms-identity-app/create-a-tenant. ");
-                }
+                var errorMessage = ex.Message.Contains("AADSTS70002") // "The client does not exist or is not enabled for consumers"
+                    ? Resources.ClientDoesNotExist 
+                    : string.Join(Environment.NewLine, Resources.SignInError, ex.Message);
 
                 // we want to exit here. Re-sign in will not resolve the issue.
-                _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, ex.Message));
+                _consoleLogger.LogFailureAndExit(errorMessage);
             }
             catch (Exception ex)
             {
                 _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, ex.Message));
             }
 
-            if (result is null)
+            return result;
+        }
+
+        /// <summary>
+        /// If there are no matching accounts in the msal cache, we need to make a call to AcquireTokenInteractive in order to populate the cache.
+        /// </summary>
+        /// <param name="requestContext"></param>
+        /// <param name="app"></param>
+        /// <param name="result"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<AuthenticationResult?> GetAuthenticationWithoutAccount(string[] scopes, IPublicClientApplication app, CancellationToken cancellationToken)
+        {
+            AuthenticationResult? result = null;
+            try
             {
-                _consoleLogger.LogFailureAndExit(Resources.FailedToAcquireToken);
+                result = await app.AcquireTokenInteractive(scopes)
+                   .WithAuthority(Instance, TenantId)
+                   .WithUseEmbeddedWebView(false)
+                   .ExecuteAsync(cancellationToken);
+            }
+            catch (MsalUiRequiredException ex) // Need to get Claims, hence the nested try/catch
+            {
+                try
+                {
+                    result = await app.AcquireTokenInteractive(scopes)
+                        .WithClaims(ex.Claims)
+                        .WithAuthority(Instance, TenantId)
+                        .WithUseEmbeddedWebView(false)
+                        .ExecuteAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
+                }
+            }
+            catch (Exception e)
+            {
+                _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
             }
 
-            return new AccessToken(result!.AccessToken, result.ExpiresOn);
+            return result;
         }
     }
 }

@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 
             AuthenticationResult? result = account is null
                 ? await GetAuthenticationWithoutAccount(requestContext.Scopes, app, cancellationToken)
-                : await GetAuthenticationWithAccount(requestContext, app, account, cancellationToken);
+                : await GetAuthenticationWithAccount(requestContext.Scopes, app, account, cancellationToken);
 
             if (result is null || result.AccessToken is null)
             {
@@ -102,12 +102,12 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             return new AccessToken(result!.AccessToken!, result.ExpiresOn); 
         }
 
-        private async Task<AuthenticationResult?> GetAuthenticationWithAccount(TokenRequestContext requestContext, IPublicClientApplication app, IAccount? account, CancellationToken cancellationToken)
+        private async Task<AuthenticationResult?> GetAuthenticationWithAccount(string[] scopes, IPublicClientApplication app, IAccount? account, CancellationToken cancellationToken)
         {
             AuthenticationResult? result = null;
             try
             {
-                result = await app.AcquireTokenSilent(requestContext.Scopes, account)
+                result = await app.AcquireTokenSilent(scopes, account)
                     .WithAuthority(Instance, TenantId)
                     .ExecuteAsync(cancellationToken);
             }
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             {
                 try
                 {
-                    result = await app.AcquireTokenInteractive(requestContext.Scopes)
+                    result = await app.AcquireTokenInteractive(scopes)
                         .WithAccount(account)
                         .WithClaims(ex.Claims)
                         .WithAuthority(Instance, TenantId)

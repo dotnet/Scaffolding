@@ -1,9 +1,8 @@
 using System;
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.MSIdentity.Tool;
+using MsIdentity = Microsoft.DotNet.MSIdentity.Tool.Program;
 
 namespace Microsoft.DotNet.Tools.Scaffold
 {
@@ -15,8 +14,8 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private const string IDENTITY_COMMAND = "--identity";
         private const string RAZORPAGE_COMMAND = "--razorpage";
         private const string VIEW_COMMAND = "--view";
-        /* 
-        dotnet scaffold [generator] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build] 
+        /*
+        dotnet scaffold [generator] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build]
 
         This commands supports the following generators :
             Area
@@ -27,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
 
         e.g: dotnet scaffold area <AreaNameToGenerate>
              dotnet scaffold identity
-             dotnet scaffold razorpage 
+             dotnet scaffold razorpage
 
         */
 
@@ -41,18 +40,43 @@ namespace Microsoft.DotNet.Tools.Scaffold
             rootCommand.AddCommand(ScaffoldViewCommand());
             rootCommand.AddCommand(ScaffoldIdentityCommand());
             //msidentity commands
+            //new BinderBase for System.Commandline update, new way to bind handlers to commands.
+            var provisioningToolBinder = new ProvisioningToolOptionsBinder(
+                MsIdentity.JsonOption,
+                MsIdentity.EnableIdTokenOption,
+                MsIdentity.EnableAccessToken,
+                MsIdentity.CallsGraphOption,
+                MsIdentity.CallsDownstreamApiOption,
+                MsIdentity.UpdateUserSecretsOption,
+                MsIdentity.ConfigUpdateOption,
+                MsIdentity.CodeUpdateOption,
+                MsIdentity.PackagesUpdateOption,
+                MsIdentity.ClientIdOption,
+                MsIdentity.AppDisplayName,
+                MsIdentity.ProjectType,
+                MsIdentity.ClientSecretOption,
+                MsIdentity.RedirectUriOption,
+                MsIdentity.ProjectFilePathOption,
+                MsIdentity.ClientProjectOption,
+                MsIdentity.ApiScopesOption,
+                MsIdentity.HostedAppIdUriOption,
+                MsIdentity.ApiClientIdOption,
+                MsIdentity.SusiPolicyIdOption,
+                MsIdentity.TenantOption,
+                MsIdentity.UsernameOption);
+
             //internal commands
-            var listAadAppsCommand = MSIdentity.Tool.Program.ListAADAppsCommand();
-            var listServicePrincipalsCommand = MSIdentity.Tool.Program.ListServicePrincipalsCommand();
-            var listTenantsCommand = MSIdentity.Tool.Program.ListTenantsCommand();
-            var createClientSecretCommand = MSIdentity.Tool.Program.CreateClientSecretCommand();
+            var listAadAppsCommand = MsIdentity.ListAADAppsCommand();
+            var listServicePrincipalsCommand = MsIdentity.ListServicePrincipalsCommand();
+            var listTenantsCommand = MsIdentity.ListTenantsCommand();
+            var createClientSecretCommand = MsIdentity.CreateClientSecretCommand();
 
             //exposed commands
-            var registerApplicationCommand = MSIdentity.Tool.Program.RegisterApplicationCommand();
-            var unregisterApplicationCommand = MSIdentity.Tool.Program.UnregisterApplicationCommand();
-            var updateAppRegistrationCommand = MSIdentity.Tool.Program.UpdateAppRegistrationCommand();
-            var updateProjectCommand = MSIdentity.Tool.Program.UpdateProjectCommand();
-            var createAppRegistration = MSIdentity.Tool.Program.CreateAppRegistrationCommand();
+            var registerApplicationCommand = MsIdentity.RegisterApplicationCommand();
+            var unregisterApplicationCommand = MsIdentity.UnregisterApplicationCommand();
+            var updateAppRegistrationCommand = MsIdentity.UpdateAppRegistrationCommand();
+            var updateProjectCommand = MsIdentity.UpdateProjectCommand();
+            var createAppRegistration = MsIdentity.CreateAppRegistrationCommand();
 
             //hide internal commands.
             listAadAppsCommand.IsHidden = true;
@@ -61,15 +85,16 @@ namespace Microsoft.DotNet.Tools.Scaffold
             updateProjectCommand.IsHidden = true;
             createClientSecretCommand.IsHidden = true;
 
-            listAadAppsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListApps);
-            listServicePrincipalsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListServicePrincipals);
-            listTenantsCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleListTenants);
-            registerApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleRegisterApplication);
-            unregisterApplicationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUnregisterApplication);
-            createAppRegistration.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleCreateAppRegistration);
-            updateAppRegistrationCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUpdateApplication);
-            updateProjectCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleUpdateProject);
-            createClientSecretCommand.Handler = CommandHandler.Create<ProvisioningToolOptions>(MSIdentity.Tool.Program.HandleClientSecrets);
+            listAadAppsCommand.SetHandler(MsIdentity.HandleListApps, provisioningToolBinder);
+            listServicePrincipalsCommand.SetHandler(MsIdentity.HandleListServicePrincipals, provisioningToolBinder);
+            listTenantsCommand.SetHandler(MsIdentity.HandleListTenants, provisioningToolBinder);
+            registerApplicationCommand.SetHandler(MsIdentity.HandleRegisterApplication, provisioningToolBinder);
+            unregisterApplicationCommand.SetHandler(MsIdentity.HandleUnregisterApplication, provisioningToolBinder);
+            updateAppRegistrationCommand.SetHandler(MsIdentity.HandleUpdateApplication, provisioningToolBinder);
+            updateProjectCommand.SetHandler(MsIdentity.HandleUpdateProject, provisioningToolBinder);
+            createClientSecretCommand.SetHandler(MsIdentity.HandleClientSecrets, provisioningToolBinder);
+            createAppRegistration.SetHandler(MsIdentity.HandleCreateAppRegistration, provisioningToolBinder);
+
             rootCommand.AddCommand(listAadAppsCommand);
             rootCommand.AddCommand(listServicePrincipalsCommand);
             rootCommand.AddCommand(listTenantsCommand);
@@ -137,7 +162,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private static Option ConfigurationOption() =>
             new Option<string>(
                 aliases: new[] { "-c", "--configuration" },
-                getDefaultValue: () => "Debug",
+                defaultValueFactory: () => "Debug",
                 description: "Defines the build configuration. The default value is Debug.")
             {
                 IsRequired = false
@@ -452,7 +477,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 description: "Scaffolds Identity")
             {
                 // Options
-                DBContextOption(), FilesListOption(), ListFilesOption(), UserClassOption(), UseSQLliteOption(), OverwriteFilesOption(), UseDefaultUIOption(), CustomLayoutOption(), 
+                DBContextOption(), FilesListOption(), ListFilesOption(), UserClassOption(), UseSQLliteOption(), OverwriteFilesOption(), UseDefaultUIOption(), CustomLayoutOption(),
                 GenerateLayoutOption(), BootStrapVersionOption()
             };
     }

@@ -1,14 +1,17 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test;
@@ -71,7 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var modelType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyModel").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
-            var result = testObj.AddModelToContext(contextType, modelType, nullableEnabled: false);
+            var result = testObj.AddModelToContext(contextType, modelType, new Dictionary<string, string>() { { "nullableEnabled", bool.FalseString } });
 
             Assert.True(result.Edited);
 
@@ -100,7 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var modelType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyModel").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
 
-            var result = testObj.AddModelToContext(contextType, modelType, nullableEnabled: true);
+            var result = testObj.AddModelToContext(contextType, modelType, new Dictionary<string, string>() { { "nullableEnabled", bool.TrueString } });
 
             Assert.True(result.Edited);
             Assert.Equal(afterDbContextText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);
@@ -147,7 +150,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             DbContextEditorServices testObj = GetTestObject();
             var syntaxTree = CSharpSyntaxTree.ParseText(MinimalProgramCsFile);
             var root = await syntaxTree.GetRootAsync();
-            var dbContextExpression = testObj.GetAddDbContextStatement(root, "DbContextName", "DatabaseName", useSqlite: false);
+            var dbContextExpression = testObj.GetAddDbContextStatement(root, "DbContextName", "DatabaseName", DbProvider.SqlServer);
             var correctDbContextString = "builder.Services.AddDbContext<DbContextName>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(\"DbContextName\") ?? throw new InvalidOperationException(\"Connection string 'DbContextName' not found.\")));";
 
             var trimmedDbContextString = ProjectModifierHelper.TrimStatement(dbContextExpression.ToString());
@@ -155,6 +158,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.Equal(trimmedCorrectDbContextString, trimmedDbContextString);
         }
 
+        [Theory]
+        [MemberData(nameof(AddDbContextStringData))]
+        public void AddDbContextStringTests(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider, string optionsExpected)
+        {
+            string dbContextString = GetTestObject().AddDbContextString(minimalHostingTemplate, statementLeadingTrivia, databaseProvider);
+            Assert.True(dbContextString.Contains(optionsExpected, StringComparison.OrdinalIgnoreCase));
+        }
 
         private DbContextEditorServices GetTestObject(MockFileSystem fs = null)
         {
@@ -169,6 +179,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 fs != null ? fs : new MockFileSystem());
         }
 
+        public static IEnumerable<object[]> AddDbContextStringData =>
+            new []
+            {
+                new object[] { true, string.Empty, DbProvider.SqlServer, "options.UseSqlServer" },
+                new object[] { false, string.Empty, DbProvider.SqlServer, "options.UseSqlServer" },
+                new object[] { true, string.Empty, DbProvider.SQLite, "options.UseSqlite" },
+                new object[] { false, string.Empty, DbProvider.SQLite, "options.UseSqlite" },
+                new object[] { true, string.Empty, DbProvider.CosmosDb, "options.UseCosmos" },
+                new object[] { false, string.Empty, DbProvider.CosmosDb, "options.UseCosmos" },
+                new object[] { true, string.Empty, DbProvider.Postgres, "options.UseNpgsql" },
+                new object[] { false, string.Empty, DbProvider.Postgres, "options.UseNpgsql" },
+                new object[] { true, null, DbProvider.SqlServer, "options.UseSqlServer" },
+                new object[] { true, null, null, string.Empty }
+            };
         private static readonly string AppBase = "AppBase";
     }
 }

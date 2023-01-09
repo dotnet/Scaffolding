@@ -11,9 +11,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualBasic;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Newtonsoft.Json.Linq;
@@ -101,45 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType, bool nullableEnabled)
         {
-            if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
-            {
-                // Todo : Consider using DeclaringSyntaxtReference 
-                var sourceLocation = dbContext.TypeSymbol.Locations.Where(l => l.IsInSource).FirstOrDefault();
-                if (sourceLocation != null)
-                {
-                    var syntaxTree = sourceLocation.SourceTree;
-                    var rootNode = syntaxTree.GetRoot();
-                    var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
-                    var lastNode = dbContextNode.ChildNodes().Last();
-
-                    var safeModelName = GetSafeModelName(modelType.Name, dbContext.TypeSymbol);
-                    var nullabilityClause = nullableEnabled ? " = default!;" : "";
-                    // Todo : Need pluralization for property name below.
-                    // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
-                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + nullabilityClause + Environment.NewLine;
-                    var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
-
-                    var newNode = rootNode.InsertNodesAfter(lastNode,
-                            propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
-
-                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.EntityFrameworkCore", newNode as CompilationUnitSyntax); //DbSet namespace
-                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, newNode as CompilationUnitSyntax);
-
-                    var modifiedTree = syntaxTree.WithRootAndOptions(newNode, syntaxTree.Options);
-
-                    return new EditSyntaxTreeResult()
-                    {
-                        Edited = true,
-                        OldTree = syntaxTree,
-                        NewTree = modifiedTree
-                    };
-                }
-            }
-
-            return new EditSyntaxTreeResult()
-            {
-                Edited = false
-            };
+            return AddModelToContext(dbContext, modelType, new Dictionary<string, string>() { { nameof(nullableEnabled), nullableEnabled.ToString() }});
         }
 
         private string GetSafeModelName(string name, ITypeSymbol dbContext)
@@ -165,147 +129,35 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             bool useTopLevelStatements)
         {
             Contract.Assert(startUp != null && startUp.TypeSymbol != null);
-            Contract.Assert(!String.IsNullOrEmpty(dbContextTypeName));
-            Contract.Assert(!String.IsNullOrEmpty(dataBaseName));
+            Contract.Assert(!string.IsNullOrEmpty(dbContextTypeName));
+            Contract.Assert(!string.IsNullOrEmpty(dataBaseName));
 
-            var declarationReference = startUp.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
-            if (declarationReference != null)
+            var parameters = new Dictionary<string, string>
             {
-                var sourceTree = declarationReference.SyntaxTree;
-                var rootNode = sourceTree.GetRoot();
-
-                var startUpClassNode = rootNode.FindNode(declarationReference.Span);
-
-                var configRootProperty = TryGetIConfigurationRootProperty(startUp.TypeSymbol);
-                //if using Startup.cs, the ConfigureServices method should exist. 
-                if (startUpClassNode.ChildNodes()
-                    .FirstOrDefault(n =>
-                        n is MethodDeclarationSyntax syntax &&
-                        syntax.Identifier.ToString() == ConfigureServices)
-                            is MethodDeclarationSyntax configServicesMethod && configRootProperty != null)
-                {
-                    var servicesParam = configServicesMethod.ParameterList.Parameters
-                        .FirstOrDefault(p => p.Type.ToString().Equals(IServiceCollection));
-                        
-                    var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
-                    if (servicesParam != null)
-                    {
-                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, useSqlite, statementLeadingTrivia);
-                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
-                        if (configServicesMethod.Body.Statements.Any())
-                        {
-                            textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
-                        }
-
-                        //string.Empty instead of InvalidOperationException for legacy scenarios.
-                        var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
-                            servicesParam.Identifier,
-                            dbContextTypeName,
-                            configRootProperty.Name,
-                            string.Empty));
-
-                        MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
-
-                        var newRoot = rootNode.ReplaceNode(configServicesMethod, newConfigServicesMethod);
-
-                        var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
-                        foreach (var namespaceName in namespacesToAdd)
-                        {
-                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
-                        }
-
-                        return new EditSyntaxTreeResult()
-                        {
-                            Edited = true,
-                            OldTree = sourceTree,
-                            NewTree = sourceTree.WithRootAndOptions(newRoot, sourceTree.Options)
-                        };
-                    }
-                }
-                //minimal hosting scenario
-                else
-                {
-                    var statementLeadingTrivia = string.Empty;
-                    StatementSyntax dbContextExpression = null;
-                    var compilationSyntax = rootNode as CompilationUnitSyntax;
-                    if (!useTopLevelStatements)
-                    {
-                        MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
-                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, dbContextNamespace, useSqlite);
-                    }
-                    else if(useTopLevelStatements)
-                    {
-                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, dbContextNamespace, useSqlite);
-                    }
-
-                    if (statementLeadingTrivia != null && dbContextExpression != null)
-                    {
-                        var newRoot = compilationSyntax;
-                        //add additional namespaces
-                        var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
-                        foreach (var namespaceName in namespacesToAdd)
-                        {
-                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot);
-                        }
-                        if (!useTopLevelStatements)
-                        {
-                            MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
-                            var modifiedBlock = methodSyntax.Body;
-                            var statementToInsertAround = methodSyntax.Body.ChildNodes().Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
-                            if (statementToInsertAround == null)
-                            {
-                                statementToInsertAround = methodSyntax.Body.ChildNodes().Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault();
-                                modifiedBlock = methodSyntax.Body.InsertNodesAfter(statementToInsertAround, new List<StatementSyntax>() { dbContextExpression });
-                            }
-                            else
-                            {
-                                modifiedBlock = methodSyntax.Body.InsertNodesBefore(statementToInsertAround, new List<StatementSyntax>() { dbContextExpression });
-                            }
-                            var modifiedMethod = methodSyntax.WithBody(modifiedBlock);
-                            newRoot = newRoot.ReplaceNode(methodSyntax, modifiedMethod);
-                        }
-                        else
-                        {
-                            var statementToInsertAfter = newRoot.Members.Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
-                            if (statementToInsertAfter == null)
-                            {
-                                statementToInsertAfter = newRoot.Members.Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault();
-                            }
-
-                            newRoot = newRoot.InsertNodesAfter(statementToInsertAfter, new List<GlobalStatementSyntax>() { SyntaxFactory.GlobalStatement(dbContextExpression) });
-                        }
-                       
-                        return new EditSyntaxTreeResult()
-                        {
-                            Edited = true,
-                            OldTree = sourceTree,
-                            NewTree = sourceTree.WithRootAndOptions(newRoot, sourceTree.Options)
-                        };
-                    }
-                }
-            }
-
-            return new EditSyntaxTreeResult()
-            {
-                Edited = false
+                { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTypeName },
+                { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextNamespace },
+                { "dataBaseName", dataBaseName},
+                { "databaseProvider", useSqlite ? EfConstants.SQLite : EfConstants.SqlServer },
+                { "useTopLevelStatements", useTopLevelStatements.ToString() }
             };
+
+            return EditStartupForNewContext(startUp, parameters);
         }
 
         /// <summary>
         /// Get the StatementSyntax that adds the db context to the WebApplicationBuilder.
         /// </summary>
-        /// <param name="rootNode">Using the base class to allow this var to be either CompilationUnitSyntax or a MethodBodySyntax
-        ///                         To get the WebApplicationBuilder variable name
+        /// <param name="rootNode">Using the base class to allow this var to be either CompilationUnitSyntax or a MethodBodySynta To get the WebApplicationBuilder variable name
         /// </param>
         /// <param name="dbContextTypeName"></param>
         /// <param name="dataBaseName"></param>
-        /// <param name="useSqlite"></param>
-        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, bool useSqlite)
+        /// <param name="dataContextTypeString"></param>
+        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, DbProvider dataContextTypeString)
         {
             //get leading trivia. there should be atleast one member var statementLeadingTrivia = classSyntax.ChildNodes()
             var statementLeadingTrivia = rootNode.ChildNodes().First()?.GetLeadingTrivia().ToString();
-            string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, useSqlite, statementLeadingTrivia);
-            _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, useSqlite: useSqlite);
+            string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, statementLeadingTrivia, dataContextTypeString);
+            _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, dataContextTypeString);
             textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
 
             //get builder identifier string, should exist
@@ -345,24 +197,41 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             return "builder";
         }
-        
-        private string AddDbContextString(bool minimalHostingTemplate, bool useSqlite, string statementLeadingTrivia)
+
+        internal string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider)
         {
-            string textToAddAtEnd;
+            string textToAddAtEnd = string.Empty;
             string additionalNewline = Environment.NewLine;
             string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
-            if (useSqlite)
+            switch (databaseProvider)
             {
-                textToAddAtEnd =
-                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
-            }
-            else
-            {
-                textToAddAtEnd =
-                    leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                    statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                case DbProvider.SQLite: 
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                    break;
+            
+                case DbProvider.SqlServer:
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                    break;
+                
+                case DbProvider.CosmosDb:
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"), \"DATABASE_NAME\"));" + Environment.NewLine;
+                    break;
+                
+                case DbProvider.Postgres:
+                    textToAddAtEnd =
+                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseNpgsql({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
+                    break;
+
+                default:
+                    break;
             }
             return textToAddAtEnd;
         }
@@ -465,6 +334,193 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
 
             return false;
+        }
+
+        public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType, IDictionary<string, string> parameters)
+        {
+            if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
+            {
+                // Todo : Consider using DeclaringSyntaxtReference 
+                var sourceLocation = dbContext.TypeSymbol.Locations.Where(l => l.IsInSource).FirstOrDefault();
+                if (sourceLocation != null)
+                {
+                    var syntaxTree = sourceLocation.SourceTree;
+                    var rootNode = syntaxTree.GetRoot();
+                    var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
+                    var lastNode = dbContextNode.ChildNodes().Last();
+
+                    var safeModelName = GetSafeModelName(modelType.Name, dbContext.TypeSymbol);
+                    parameters.TryGetValue("nullableEnabled", out var nullableEnabled);
+                    var nullableEnabledBool = string.IsNullOrEmpty(nullableEnabled) ? true : nullableEnabled.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
+                    var nullabilityClause = nullableEnabledBool ? " = default!;" : "";
+                    // Todo : Need pluralization for property name below.
+                    // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
+                    var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + nullabilityClause + Environment.NewLine;
+                    var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
+
+                    var newNode = rootNode.InsertNodesAfter(lastNode,
+                            propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
+
+                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.EntityFrameworkCore", newNode as CompilationUnitSyntax); //DbSet namespace
+                    newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, newNode as CompilationUnitSyntax);
+
+                    var modifiedTree = syntaxTree.WithRootAndOptions(newNode, syntaxTree.Options);
+
+                    return new EditSyntaxTreeResult()
+                    {
+                        Edited = true,
+                        OldTree = syntaxTree,
+                        NewTree = modifiedTree
+                    };
+                }
+            }
+
+            return new EditSyntaxTreeResult()
+            {
+                Edited = false
+            };
+        }
+
+        public EditSyntaxTreeResult EditStartupForNewContext(ModelType startUp, IDictionary<string, string> parameters)
+        {
+            var declarationReference = startUp.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+            if (declarationReference != null)
+            {
+                //get all params
+                parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextTypeName), out var dbContextTypeName);
+                parameters.TryGetValue("dataBaseName", out var dataBaseName);
+                parameters.TryGetValue("databaseProvider", out var dataContextTypeString);
+                DbProvider dataContextType = DbProvider.SqlServer;
+                if (Enum.TryParse(typeof(DbProvider), dataContextTypeString, ignoreCase:true, out var dataContextTypeObj))
+                {
+                    dataContextType = (DbProvider)dataContextTypeObj;
+                }
+                parameters.TryGetValue("useTopLevelStatements", out var useTopLevelStatementsString);
+                var useTopLevelStatements = useTopLevelStatementsString.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
+                parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextNamespace), out var dbContextNamespace);
+                parameters.TryGetValue("dataBaseName", out var databaseName);
+                Contract.Assert(!string.IsNullOrEmpty(dbContextTypeName));
+                Contract.Assert(!string.IsNullOrEmpty(dataBaseName));
+
+                //continue if got the prerequistite variables
+                var sourceTree = declarationReference.SyntaxTree;
+                var rootNode = sourceTree.GetRoot();
+
+                var startUpClassNode = rootNode.FindNode(declarationReference.Span);
+
+                var configRootProperty = TryGetIConfigurationRootProperty(startUp.TypeSymbol);
+                //if using Startup.cs, the ConfigureServices method should exist. 
+                if (startUpClassNode.ChildNodes()
+                    .FirstOrDefault(n =>
+                        n is MethodDeclarationSyntax syntax &&
+                        syntax.Identifier.ToString() == ConfigureServices)
+                            is MethodDeclarationSyntax configServicesMethod && configRootProperty != null)
+                {
+                    var servicesParam = configServicesMethod.ParameterList.Parameters
+                        .FirstOrDefault(p => p.Type.ToString().Equals(IServiceCollection));
+
+                    var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
+                    if (servicesParam != null)
+                    {
+                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, statementLeadingTrivia, dataContextType);
+                        _connectionStringsWriter.AddConnectionString(dbContextTypeName, databaseName, dataContextType);
+                        if (configServicesMethod.Body.Statements.Any())
+                        {
+                            textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
+                        }
+
+                        //string.Empty instead of InvalidOperationException for legacy scenarios.
+                        var expression = SyntaxFactory.ParseStatement(string.Format(textToAddAtEnd,
+                            servicesParam.Identifier,
+                            dbContextTypeName,
+                            configRootProperty.Name,
+                            string.Empty));
+
+                        MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
+
+                        var newRoot = rootNode.ReplaceNode(configServicesMethod, newConfigServicesMethod);
+
+                        var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
+                        foreach (var namespaceName in namespacesToAdd)
+                        {
+                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot as CompilationUnitSyntax);
+                        }
+
+                        return new EditSyntaxTreeResult()
+                        {
+                            Edited = true,
+                            OldTree = sourceTree,
+                            NewTree = sourceTree.WithRootAndOptions(newRoot, sourceTree.Options)
+                        };
+                    }
+                }
+                //minimal hosting scenario
+                else
+                {
+                    var statementLeadingTrivia = string.Empty;
+                    StatementSyntax dbContextExpression = null;
+                    var compilationSyntax = rootNode as CompilationUnitSyntax;
+                    if (!useTopLevelStatements)
+                    {
+                        MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
+                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, databaseName, dataContextType);
+                    }
+                    else if (useTopLevelStatements)
+                    {
+                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, databaseName, dataContextType);
+                    }
+
+                    if (statementLeadingTrivia != null && dbContextExpression != null)
+                    {
+                        var newRoot = compilationSyntax;
+                        //add additional namespaces
+                        var namespacesToAdd = new[] { "Microsoft.EntityFrameworkCore", "Microsoft.Extensions.DependencyInjection", dbContextNamespace };
+                        foreach (var namespaceName in namespacesToAdd)
+                        {
+                            newRoot = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(namespaceName, newRoot);
+                        }
+                        if (!useTopLevelStatements)
+                        {
+                            MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
+                            var modifiedBlock = methodSyntax.Body;
+                            var statementToInsertAround = methodSyntax.Body.ChildNodes().Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
+                            if (statementToInsertAround == null)
+                            {
+                                statementToInsertAround = methodSyntax.Body.ChildNodes().Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault();
+                                modifiedBlock = methodSyntax.Body.InsertNodesAfter(statementToInsertAround, new List<StatementSyntax>() { dbContextExpression });
+                            }
+                            else
+                            {
+                                modifiedBlock = methodSyntax.Body.InsertNodesBefore(statementToInsertAround, new List<StatementSyntax>() { dbContextExpression });
+                            }
+                            var modifiedMethod = methodSyntax.WithBody(modifiedBlock);
+                            newRoot = newRoot.ReplaceNode(methodSyntax, modifiedMethod);
+                        }
+                        else
+                        {
+                            var statementToInsertAfter = newRoot.Members.Where(st => st.ToString().Contains(AddRazorPages)).FirstOrDefault();
+                            if (statementToInsertAfter == null)
+                            {
+                                statementToInsertAfter = newRoot.Members.Where(st => st.ToString().Contains(CreateBuilder)).FirstOrDefault();
+                            }
+
+                            newRoot = newRoot.InsertNodesAfter(statementToInsertAfter, new List<GlobalStatementSyntax>() { SyntaxFactory.GlobalStatement(dbContextExpression) });
+                        }
+
+                        return new EditSyntaxTreeResult()
+                        {
+                            Edited = true,
+                            OldTree = sourceTree,
+                            NewTree = sourceTree.WithRootAndOptions(newRoot, sourceTree.Options)
+                        };
+                    }
+                }
+            }
+
+            return new EditSyntaxTreeResult()
+            {
+                Edited = false
+            };
         }
 
         private IEnumerable<string> TemplateFolders

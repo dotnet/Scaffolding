@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         private CommonCommandLineModel model;
         private Mock<IModelTypesLocator> modelTypesLocator;
         private Mock<IModelTypesLocator> modelTypesLocatorWithoutContext;
+        private Mock<ILogger> logger;
 
         public ModelMetadataUtilitiesTest()
         {
@@ -28,6 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             modelTypesLocator = new Mock<IModelTypesLocator>();
             modelTypesLocatorWithoutContext = new Mock<IModelTypesLocator>();
             codeModelService = new Mock<ICodeModelService>();
+            logger= new Mock<ILogger>();
         }
 
         [Fact]
@@ -114,7 +117,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, DbProvider.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -122,6 +125,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                     model,
                     efService.Object,
                     modelTypesLocator.Object,
+                    logger.Object,
                     string.Empty);
 
             //Assert
@@ -136,7 +140,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbProvider.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -144,6 +148,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                     model,
                     efService.Object,
                     modelTypesLocator.Object,
+                    logger.Object,
                     string.Empty);
 
             //Assert
@@ -155,7 +160,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         [Fact]
         public async void TestGetModelEFMetadataMinimalAsync()
         {
-
             var modelTypes = new List<ModelType>();
             var dataContextTypes = new List<ModelType>();
             //Arrange
@@ -182,6 +186,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                     minimalApiModelWithContext,
                     efService.Object,
                     modelTypesLocator.Object,
+                    logger.Object,
                     areaName: string.Empty));
 
             Exception exWithoutContext = await Assert.ThrowsAsync<ArgumentException>(
@@ -189,6 +194,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                     minimalApiModelWithoutContext,
                     efService.Object,
                     modelTypesLocatorWithoutContext.Object,
+                    logger.Object,
                     areaName: string.Empty));
 
             Assert.Equal("A type with the name SampleModel does not exist", ex.Message);
@@ -216,7 +222,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, DbProvider.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -224,12 +230,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                     minimalApiModelWithContext,
                     efService.Object,
                     modelTypesLocator.Object,
+                    logger.Object,
                     string.Empty);
 
             var resultWithoutContext = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
                 minimalApiModelWithoutContext,
                 efService.Object,
                 modelTypesLocatorWithoutContext.Object,
+                logger.Object,
                 string.Empty);
 
             //Assert scenario with DbContext
@@ -249,15 +257,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, false))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbProvider.SqlServer))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
             result = await ModelMetadataUtilities.GetModelEFMetadataMinimalAsync(
-                    minimalApiModelWithContext,
-                    efService.Object,
-                    modelTypesLocator.Object,
-                    string.Empty);
+                minimalApiModelWithContext,
+                efService.Object,
+                modelTypesLocator.Object,
+                logger.Object,
+                string.Empty);
 
             //Assert
             Assert.Equal(contextProcessingResult.ContextProcessingStatus, result.ContextProcessingResult.ContextProcessingStatus);

@@ -27,8 +27,13 @@
       "Description": "Specify the name of the namespace to use for the generated Endpoints file"
     },
     {
-      "Name" : "databaseProvider",
+      "Name": "databaseProvider",
       "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
+    },
+    {
+      "Name": "useSqLite",
+      "ShortName": "sqlite",
+      "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
     }
   ],
   "Options": []

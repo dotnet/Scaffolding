@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Azure.Core;
+using Microsoft.DotNet.MSIdentity.Shared;
 
 namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
     public class DeveloperCredentialsReader
     {
-        public TokenCredential GetDeveloperCredentials(string? username, string? currentApplicationTenantId)
+        public TokenCredential GetDeveloperCredentials(string? username, string? currentApplicationTenantId, IConsoleLogger consoleLogger)
         {
 #if AzureSDK
             * Tried but does not work if another tenant than the home tenant id is specified
@@ -28,7 +29,8 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 #endif
             TokenCredential tokenCredential = new MsalTokenCredential(
                 currentApplicationTenantId,
-                username);
+                username,
+                consoleLogger);
             return tokenCredential;
         }
     }

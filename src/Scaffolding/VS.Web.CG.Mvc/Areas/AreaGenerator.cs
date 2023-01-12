@@ -32,30 +32,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas
             IModelTypesLocator modelTypesLocator,
             ILogger logger)
         {
-            if(serviceProvider == null)
-            {
-                throw new ArgumentNullException(nameof(serviceProvider));
-            }
-
-            if(applicationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(applicationInfo));
-            }
-
-            if(logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
-            if(modelTypesLocator == null)
-            {
-                throw new ArgumentNullException(nameof(modelTypesLocator));
-            }
-
-            _serviceProvider = serviceProvider;
-            _logger = logger;
-            _appInfo = applicationInfo;
-            _modelTypesLocator = modelTypesLocator;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _appInfo = applicationInfo ?? throw new ArgumentNullException(nameof(applicationInfo));
+            _modelTypesLocator = modelTypesLocator ?? throw new ArgumentNullException(nameof(modelTypesLocator));
         }
 
         public async Task GenerateCode(AreaGeneratorCommandLine model)

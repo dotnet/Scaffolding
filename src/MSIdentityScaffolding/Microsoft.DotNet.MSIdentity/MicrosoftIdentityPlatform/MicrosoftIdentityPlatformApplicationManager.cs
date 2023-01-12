@@ -11,13 +11,14 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.Graph;
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
     public class MicrosoftIdentityPlatformApplicationManager
     {
-        private StringBuilder _output = new StringBuilder();
+        private readonly StringBuilder _output = new StringBuilder();
         const string MicrosoftGraphAppId = "00000003-0000-0000-c000-000000000000";
         const string ScopeType = "Scope";
         private const string DefaultCallbackPath = "signin-oidc";
@@ -27,109 +28,106 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
-            IConsoleLogger consoleLogger,
-            string commandName)
+            IConsoleLogger consoleLogger)
         {
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+            try
+            {
+                var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
-            // Get the tenant
-            Organization? tenant = await GetTenant(graphServiceClient);
-            if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
-            {
-                applicationParameters.IsB2C = true;
-            }
-            // Create the app.
-            Application application = new Application()
-            {
-                DisplayName = applicationParameters.ApplicationDisplayName,
-                SignInAudience = AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(applicationParameters.SignInAudience!),
-                Description = applicationParameters.Description
-            };
-
-            if (applicationParameters.IsWebApi.GetValueOrDefault())
-            {
-                application.Api = new ApiApplication()
+                // Get the tenant
+                Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
+                if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
                 {
-                    RequestedAccessTokenVersion = 2,
+                    applicationParameters.IsB2C = true;
+                }
+                // Create the app.
+                Application application = new Application()
+                {
+                    DisplayName = applicationParameters.ApplicationDisplayName,
+                    SignInAudience = AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(applicationParameters.SignInAudience!),
+                    Description = applicationParameters.Description
                 };
-            }
 
-            if (applicationParameters.IsWebApp.GetValueOrDefault())
-            {
-                AddWebAppPlatform(application, applicationParameters);
-            }
-            else if (applicationParameters.IsBlazorWasm)
-            {
-                AddSpaPlatform(application, applicationParameters.WebRedirectUris);
-            }
+                if (applicationParameters.IsWebApi.GetValueOrDefault())
+                {
+                    application.Api = new ApiApplication()
+                    {
+                        RequestedAccessTokenVersion = 2,
+                    };
+                }
 
-            var createdApplication = await graphServiceClient.Applications
-                .Request()
-                .AddAsync(application);
+                if (applicationParameters.IsWebApp.GetValueOrDefault())
+                {
+                    AddWebAppPlatform(application, applicationParameters);
+                }
+                else if (applicationParameters.IsBlazorWasm)
+                {
+                    AddSpaPlatform(application, applicationParameters.WebRedirectUris);
+                }
 
-            // Create service principal, necessary for Web API applications
-            // and useful for Blazorwasm hosted applications. We create it always.
-            ServicePrincipal servicePrincipal = new ServicePrincipal
-            {
-                AppId = createdApplication.AppId,
-            };
-
-            ServicePrincipal? createdSp = await graphServiceClient.ServicePrincipals
-                .Request()
-                .AddAsync(servicePrincipal);
-
-            if (createdSp is null)
-            {
-                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal));
-                return null;
-            }
-
-            // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (applicationParameters.IsB2C) 
-            {
-                string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
-                await AddDownstreamApiPermissions(scopes, graphServiceClient, application, createdSp);
-            }
-
-            // For web API, we need to know the appId of the created app to compute the Identifier URI,
-            // and therefore we need to do it after the app is created (updating the app)
-            if (applicationParameters.IsWebApi.GetValueOrDefault() && createdApplication.Api != null)
-            {
-                await ExposeWebApiScopes(graphServiceClient, createdApplication, applicationParameters);
-
-                // Re-reading the app to be sure to have everything.
-                createdApplication = (await graphServiceClient.Applications
+                var createdApplication = await graphServiceClient.Applications
                     .Request()
-                    .Filter($"appId eq '{createdApplication.AppId}'")
-                    .GetAsync()).FirstOrDefault();
-            }
+                    .AddAsync(application);
 
-            // log json console message inside this method since we need the Microsoft.Graph.Application
-            if (createdApplication is null)
+                // Create service principal, necessary for Web API applications
+                // and useful for Blazorwasm hosted applications. We create it always.
+                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication.AppId, consoleLogger);
+
+                // B2C does not allow user consent, and therefore we need to explicity grant permissions
+                if (applicationParameters.IsB2C)
+                {
+                    string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
+                    await AddDownstreamApiPermissions(scopes, graphServiceClient, application, createdSp);
+                }
+
+                // For web API, we need to know the appId of the created app to compute the Identifier URI,
+                // and therefore we need to do it after the app is created (updating the app)
+                if (applicationParameters.IsWebApi.GetValueOrDefault() && createdApplication.Api != null)
+                {
+                    await ExposeWebApiScopes(graphServiceClient, createdApplication, applicationParameters);
+
+                    // Re-reading the app to be sure to have everything.
+                    createdApplication = (await graphServiceClient.Applications
+                        .Request()
+                        .Filter($"appId eq '{createdApplication.AppId}'")
+                        .GetAsync()).FirstOrDefault();
+                }
+
+                // log json console message inside this method since we need the Microsoft.Graph.Application
+                if (createdApplication is null)
+                {
+                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
+                    return null;
+                }
+
+                if (applicationParameters.IsB2C)
+                {
+                    createdApplication!.AdditionalData.Add("IsB2C", true);
+                }
+
+                ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
+
+                // Add password credentials
+                if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
+                {
+                    await AddPasswordCredentialsAsync(
+                        graphServiceClient,
+                        createdApplication.Id,
+                        effectiveApplicationParameters,
+                        consoleLogger);
+                }
+
+                var output = string.Format(Resources.CreatedAppRegistration, effectiveApplicationParameters.ApplicationDisplayName, effectiveApplicationParameters.ClientId);
+                consoleLogger.LogJsonMessage(State.Success, content: createdApplication, output: output);
+
+                return effectiveApplicationParameters;
+            }
+            catch (Exception ex)
             {
-                consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Fail, output: Resources.FailedToCreateApp));
+                var errorMessage = string.IsNullOrEmpty(ex.Message) ? ex.ToString() : ex.Message;
+                consoleLogger.LogFailureAndExit(errorMessage);
                 return null;
             }
-
-            if (applicationParameters.IsB2C)
-            {
-                createdApplication.AdditionalData.Add("IsB2C", true);
-            }
-
-            ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
-
-            // Add password credentials
-            if (applicationParameters.CallsMicrosoftGraph || applicationParameters.CallsDownstreamApi)
-            {
-                await AddPasswordCredentialsAsync(
-                    graphServiceClient,
-                    createdApplication.Id,
-                    effectiveApplicationParameters,
-                    consoleLogger);
-            }
-
-            consoleLogger.LogJsonMessage(new JsonResponse(commandName, State.Success, createdApplication));
-            return effectiveApplicationParameters;
         }
 
         private static string GetMsGraphScopes(ApplicationParameters applicationParameters)
@@ -147,7 +145,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return apiScopes.Trim();
         }
 
-        private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient)
+        private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient, IConsoleLogger consoleLogger)
         {
             Organization? tenant = null;
             try
@@ -160,21 +158,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             {
                 if (ex.InnerException != null)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
+                    consoleLogger.LogFailureAndExit(ex.InnerException.Message);
                 }
                 else
                 {
                     if (ex.Message.Contains("User was not found") || ex.Message.Contains("not found in tenant"))
                     {
-                        Console.WriteLine("User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.");
+                        consoleLogger.LogFailureAndExit("User was not found.\nUse both --tenant-id <tenant> --username <username@tenant>.\nAnd re-run the tool.");
                     }
                     else
                     {
-                        Console.WriteLine(ex.Message);
+                        consoleLogger.LogFailureAndExit(ex.Message);
                     }
                 }
-
-                Environment.Exit(1);
             }
 
             return tenant;
@@ -189,38 +185,36 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <param name="toolOptions"></param>
         /// <param name="commandName"></param>
         /// <returns></returns>
-        internal async Task<JsonResponse> UpdateApplication(
+        internal async Task UpdateApplication(
             TokenCredential tokenCredential,
             ApplicationParameters? parameters,
             ProvisioningToolOptions toolOptions,
-            string commandName)
+            IConsoleLogger consoleLogger,
+            StringBuilder? output = null)
         {
             if (parameters is null)
             {
-                return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
+                consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
-                .Filter($"appId eq '{parameters.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
+                .Filter($"appId eq '{parameters!.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
 
             if (remoteApp is null)
             {
-                return new JsonResponse(commandName, State.Fail, output: string.Format(Resources.NotFound, parameters.ClientId));
+                consoleLogger.LogFailureAndExit(string.Format(Resources.NotFound, parameters.ClientId));
+                return;
             }
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
-            StringBuilder output = new StringBuilder();
+            output ??= new StringBuilder();
             // B2C does not allow user consent, and therefore we need to explicity grant permissions
             if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 // TODO: Add if it's B2C, acquire or create the SUSI Policy
-                var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId);
-                if (servicePrincipal is null)
-                {
-                    return new JsonResponse(commandName, State.Fail, output: Resources.FailedToGetServicePrincipal);
-                }
+                var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
 
                 await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
                 needsUpdates = true;
@@ -228,7 +222,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (!needsUpdates)
             {
-                return new JsonResponse(commandName, State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
+                consoleLogger.LogJsonMessage(State.Success, output: string.Format(Resources.NoUpdateNecessary, remoteApp.DisplayName, remoteApp.AppId));
+                return;
             }
 
             try
@@ -236,12 +231,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // TODO: update other fields, see https://github.com/jmprieur/app-provisonning-tool/issues/10
                 var updatedApp = await graphServiceClient.Applications[remoteApp.Id].Request().UpdateAsync(appUpdates);
                 output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
-                return new JsonResponse(commandName, State.Success, output.ToString());
+                consoleLogger.LogJsonMessage(State.Success, output: output.ToString());
             }
             catch (ServiceException se)
             {
                 output.Append(se.Error?.Message);
-                return new JsonResponse(commandName, State.Fail, output.ToString());
+                consoleLogger.LogFailureAndExit(output.ToString());
             }
         }
 
@@ -260,7 +255,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 output);
         }
 
-        private static async Task<ServicePrincipal?> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId)
+        private static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
         {
             var servicePrincipal = (await graphServiceClient.ServicePrincipals
                                 .Request()
@@ -281,7 +276,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     .AddAsync(sp);
             }
 
-            return servicePrincipal;
+            if (servicePrincipal is null)
+            {
+                consoleLogger.LogFailureAndExit(Resources.FailedToGetServicePrincipal);
+            }
+
+            return servicePrincipal!;
         }
 
         /// <summary>
@@ -810,7 +810,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
-            Organization? tenant = await GetTenant(graphServiceClient);
+            Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
             var application = await GetApplication(tokenCredential, applicationParameters);
             if (application is null)
             {
@@ -823,6 +823,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 tenant!,
                 application,
                 applicationParameters);
+
+            if (effectiveApplicationParameters is null)
+            {
+                consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveApplicationParameters);
+            }
 
             return effectiveApplicationParameters;
         }

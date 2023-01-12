@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
@@ -15,8 +16,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]
         public string DataContextClass { get; set; }
 
-        [Option(Name = "useSqlite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
+        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
+        [Option(Name = "useSqLite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
+
+        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        public string DatabaseProviderString { get; set; }
+        public DbProvider DatabaseProvider { get; set; }
 
         [Option(Name = "referenceScriptLibraries", ShortName = "scripts", Description = "Switch to specify whether to reference script libraries in the generated views")]
         public bool ReferenceScriptLibraries { get; set; }
@@ -52,7 +58,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Force = copyFrom.Force;
             RelativeFolderPath = copyFrom.RelativeFolderPath;
             ControllerNamespace = copyFrom.ControllerNamespace;
-            UseSqlite = copyFrom.UseSqlite;
+            DatabaseProvider = copyFrom.DatabaseProvider;
+        }
+    }
+
+    public static class CommonCommandLineModelExtensions
+    {
+        public static void ValidateCommandline(this CommonCommandLineModel model, ILogger logger)
+        {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (model.UseSqlite)
+            {
+#pragma warning restore CS0618 // Type or member is obsolete
+                //instead of throwing an error, letting the devs know that its obsolete.
+                logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
+                //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
+                if (string.IsNullOrEmpty(model.DatabaseProviderString))
+                {
+                    model.DatabaseProvider = DbProvider.SQLite;
+                    model.DatabaseProviderString = EfConstants.SQLite;
+                }
+            }
         }
     }
 }

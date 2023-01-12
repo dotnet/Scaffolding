@@ -2,12 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 
@@ -36,6 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             CommonCommandLineModel commandLineModel, 
             IEntityFrameworkService entityFrameworkService, 
             IModelTypesLocator modelTypesLocator,
+            ILogger logger,
             string areaName)
         {
             ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
@@ -46,18 +46,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
 
+            if (dataContext == null)
+            {
+                commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
+            }
+
             var modelMetadata = await entityFrameworkService.GetModelMetadata(
                 dbContextFullName,
                 model,
                 areaName,
-                commandLineModel.UseSqlite);
+                commandLineModel.DatabaseProvider);
 
             return new ModelTypeAndContextModel()
             {
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
                 ContextProcessingResult = modelMetadata,
-                UseSqlite = commandLineModel.UseSqlite
+                DatabaseProvider = commandLineModel.DatabaseProvider
             };
         }
 
@@ -65,6 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             MinimalApiGeneratorCommandLineModel commandLineModel,
             IEntityFrameworkService entityFrameworkService,
             IModelTypesLocator modelTypesLocator,
+            ILogger logger,
             string areaName)
         {
             ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
@@ -83,12 +89,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
                 dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
-
+                if (dataContext == null)
+                {
+                    commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
+                }
+                
                 modelMetadata = await entityFrameworkService.GetModelMetadata(
                     dbContextFullName,
                     model,
                     areaName,
-                    useSqlite: commandLineModel.UseSqlite);
+                    databaseProvider: commandLineModel.DatabaseProvider);
             }
 
             return new ModelTypeAndContextModel()
@@ -96,8 +106,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
                 ContextProcessingResult = modelMetadata,
-                UseSqlite = false
+                DatabaseProvider = commandLineModel.DatabaseProvider
             };
+        }
+
+        internal static DbProvider ValidateDatabaseProvider(string databaseProviderString, ILogger logger)
+        {
+            if (string.IsNullOrEmpty(databaseProviderString))
+            {
+                logger.LogMessage(MessageStrings.NoDbProviderFound, LogMessageLevel.Information);
+                return DbProvider.SqlServer;
+            }
+            else if (Enum.TryParse(databaseProviderString, ignoreCase: true, out DbProvider dbProvider))
+            {
+                return dbProvider;
+            }
+            else
+            {
+                string dbList = $"'{string.Join("', ", EfConstants.AllDbProviders.ToArray(), 0, EfConstants.AllDbProviders.Count - 1)} and '{EfConstants.AllDbProviders.LastOrDefault()}'";
+                throw new InvalidOperationException($"Invalid database provider '{databaseProviderString}'.\nSupported database providers include : {dbList}");
+            }
         }
     }
 }

@@ -159,6 +159,9 @@
   <data name="AuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>
   </data>
+  <data name="ClientDoesNotExist" xml:space="preserve">
+    <value>An Azure AD tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant.</value>
+  </data>
   <data name="ClientSecret" xml:space="preserve">
     <value>Client secret - {0}.</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="FailedClientSecretWithApp" xml:space="preserve">
     <value>Failed to add client secret for Azure AD app : {0}({1})</value>
   </data>
+  <data name="FailedToAcquireToken" xml:space="preserve">
+    <value>Failed to acquire a token.</value>
+  </data>
   <data name="FailedToCreateApp" xml:space="preserve">
     <value>Failed to create Azure AD/AD B2C app registration.</value>
   </data>
@@ -250,8 +256,14 @@
     <value>Failed to modify code file {0}, {1} </value>
     <comment>0 = File name, 1 = Exception message</comment>
   </data>
+  <data name="FailedToProvisionClientApp" xml:space="preserve">
+    <value>Failed to provision Client Application for Blazor WASM hosted project</value>
+  </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
     <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>
+  </data>
+  <data name="FailedToRetrieveApplicationParameters" xml:space="preserve">
+    <value>Failed to retrieve application parameters.</value>
   </data>
   <data name="FailedToUpdateApp" xml:space="preserve">
     <value>Failed to update Azure AD app registration {0} ({1})</value>
@@ -260,6 +272,9 @@
   <data name="FailedToUpdateAppNull" xml:space="preserve">
     <value>Failed to update Azure AD app, null {0}</value>
     <comment>0 = null object</comment>
+  </data>
+  <data name="FailedToUpdateClientAppCode" xml:space="preserve">
+    <value>Failed to update client app program.cs file for Blazor WASM hosted project</value>
   </data>
   <data name="InitializeUserSecrets" xml:space="preserve">
     <value>Initializing User Secrets . . .</value>
@@ -300,6 +315,9 @@
   <data name="ResourceFileParseError" xml:space="preserve">
     <value>Resource file {0} could not be parsed.</value>
     <comment>0 = CodeModifierConfigPropertyInfo.Name</comment>
+  </data>
+  <data name="SignInError" xml:space="preserve">
+    <value>Error encountered with sign-in. See error message for details:</value>
   </data>
   <data name="Success" xml:space="preserve">
     <value>SUCCESS</value>

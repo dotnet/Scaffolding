@@ -1,15 +1,16 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Core;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensions.Msal;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
+using Microsoft.DotNet.MSIdentity.Properties;
+using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
@@ -19,11 +20,17 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         private const string RedirectUri = "http://localhost";
 #pragma warning restore S1075 // URIs should not be hardcoded
 
-        public MsalTokenCredential(string? tenantId, string? username, string instance = "https://login.microsoftonline.com")
+        private readonly IConsoleLogger _consoleLogger;
+
+        public MsalTokenCredential(
+            string? tenantId,
+            string? username,
+            IConsoleLogger consoleLogger)
         {
+            _consoleLogger = consoleLogger;
             TenantId = tenantId ?? "organizations"; // MSA-passthrough
             Username = username;
-            Instance = instance;
+            Instance = "https://login.microsoftonline.com";
         }
 
         private IPublicClientApplication? App { get; set; }
@@ -77,56 +84,106 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
         {
             var app = await GetOrCreateApp();
-            AuthenticationResult? result = null;
             var accounts = await app.GetAccountsAsync()!;
-            IAccount? account;
+            IAccount? account = string.IsNullOrEmpty(Username)
+                ? accounts.FirstOrDefault()
+                : accounts.FirstOrDefault(account => string.Equals(account.Username, Username, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(Username))
+            AuthenticationResult? result = account is null
+                ? await GetAuthenticationWithoutAccount(requestContext.Scopes, app, cancellationToken)
+                : await GetAuthenticationWithAccount(requestContext.Scopes, app, account, cancellationToken);
+
+            if (result is null || result.AccessToken is null)
             {
-                account = accounts.FirstOrDefault(account => account.Username == Username);
+                _consoleLogger.LogFailureAndExit(Resources.FailedToAcquireToken);
             }
-            else
-            {
-                account = accounts.FirstOrDefault();
-            }
+
+            // Note: In the future, the token type *could* be POP instead of Bearer
+            return new AccessToken(result!.AccessToken!, result.ExpiresOn); 
+        }
+
+        private async Task<AuthenticationResult?> GetAuthenticationWithAccount(string[] scopes, IPublicClientApplication app, IAccount? account, CancellationToken cancellationToken)
+        {
+            AuthenticationResult? result = null;
             try
             {
-                result = await app.AcquireTokenSilent(requestContext.Scopes, account)
+                result = await app.AcquireTokenSilent(scopes, account)
                     .WithAuthority(Instance, TenantId)
                     .ExecuteAsync(cancellationToken);
             }
             catch (MsalUiRequiredException ex)
             {
-                if (account == null && !string.IsNullOrEmpty(Username))
+                try
                 {
-                    Console.WriteLine($"No valid tokens found in the cache.\nPlease sign-in to Visual Studio with this account:\n\n{Username}.\n\nAfter signing-in, re-run the tool.\n");
+                    result = await app.AcquireTokenInteractive(scopes)
+                        .WithAccount(account)
+                        .WithClaims(ex.Claims)
+                        .WithAuthority(Instance, TenantId)
+                        .WithUseEmbeddedWebView(false)
+                        .ExecuteAsync(cancellationToken);
                 }
-                result = await app.AcquireTokenInteractive(requestContext.Scopes)
-                    .WithAccount(account)
-                    .WithClaims(ex.Claims)
-                    .WithAuthority(Instance, TenantId)
-                    .ExecuteAsync(cancellationToken);
+                catch (Exception e)
+                {
+                    _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
+                }
             }
             catch (MsalServiceException ex)
             {
-                if (ex.Message.Contains("AADSTS70002")) // "The client does not exist or is not enabled for consumers"
-                {
-                    Console.WriteLine("An Azure AD tenant, and a user in that tenant, " +
-                        "needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant. ");
-                    Environment.Exit(1); // we want to exit here because this is probably an MSA without an AAD tenant.
-                }
+                // AAD error codes: https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
+                var errorMessage = ex.Message.Contains("AADSTS70002") // "The client does not exist or is not enabled for consumers"
+                    ? Resources.ClientDoesNotExist 
+                    : string.Join(Environment.NewLine, Resources.SignInError, ex.Message);
 
-                Console.WriteLine("Error encountered with sign-in. See error message for details:\n{0} ",
-                    ex.Message);
-                Environment.Exit(1); // we want to exit here. Re-sign in will not resolve the issue.
+                // we want to exit here. Re-sign in will not resolve the issue.
+                _consoleLogger.LogFailureAndExit(errorMessage);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error encountered with sign-in. See error message for details:\n{0} ",
-                    ex.Message);
-                Environment.Exit(1);
+                _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, ex.Message));
             }
-            return new AccessToken(result.AccessToken, result.ExpiresOn);
+
+            return result;
+        }
+
+        /// <summary>
+        /// If there are no matching accounts in the msal cache, we need to make a call to AcquireTokenInteractive in order to populate the cache.
+        /// </summary>
+        /// <param name="requestContext"></param>
+        /// <param name="app"></param>
+        /// <param name="result"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<AuthenticationResult?> GetAuthenticationWithoutAccount(string[] scopes, IPublicClientApplication app, CancellationToken cancellationToken)
+        {
+            AuthenticationResult? result = null;
+            try
+            {
+                result = await app.AcquireTokenInteractive(scopes)
+                   .WithAuthority(Instance, TenantId)
+                   .WithUseEmbeddedWebView(false)
+                   .ExecuteAsync(cancellationToken);
+            }
+            catch (MsalUiRequiredException ex) // Need to get Claims, hence the nested try/catch
+            {
+                try
+                {
+                    result = await app.AcquireTokenInteractive(scopes)
+                        .WithClaims(ex.Claims)
+                        .WithAuthority(Instance, TenantId)
+                        .WithUseEmbeddedWebView(false)
+                        .ExecuteAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
+                }
+            }
+            catch (Exception e)
+            {
+                _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
+            }
+
+            return result;
         }
     }
 }

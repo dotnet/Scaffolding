@@ -20,6 +20,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Option(Name = "useSqLite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
 
+        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
+        [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
+        public bool UseSqlite2 { get; set; }
+
         [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
         public string DatabaseProviderString { get; set; }
         public DbProvider DatabaseProvider { get; set; }
@@ -72,7 +76,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            if (model.UseSqlite)
+            if (model.UseSqlite || model.UseSqlite2)
             {
 #pragma warning restore CS0618 // Type or member is obsolete
                 //instead of throwing an error, letting the devs know that its obsolete.

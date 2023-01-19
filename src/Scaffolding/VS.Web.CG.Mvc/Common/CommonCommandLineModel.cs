@@ -1,9 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
-using System;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -22,7 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         //adding UseSqlite2 for backwards compat. for VS Mac scenarios (casing issue).
         [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
+        [Option(Name = "useSqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite2 { get; set; }
 
         [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]

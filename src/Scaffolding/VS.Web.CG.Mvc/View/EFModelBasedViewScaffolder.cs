@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
@@ -20,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         private IModelTypesLocator _modelTypesLocator;
         private IFileSystem _fileSystem;
         private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
-        
+
         public EFModelBasedViewScaffolder(
             IProjectContext projectContext,
             IApplicationInfo applicationInfo,
@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger,
-            IFileSystem fileSystem) 
+            IFileSystem fileSystem)
             : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
             _modelTypesLocator = modelTypesLocator ?? throw new ArgumentNullException(nameof(modelTypesLocator));
@@ -60,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.DatabaseProvider);
             }
-            
+
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 viewGeneratorModel,
@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 _modelTypesLocator,
                 _logger,
                 string.Empty);
- 
+
             await GenerateView(viewGeneratorModel, modelTypeAndContextModel, outputPath);
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)

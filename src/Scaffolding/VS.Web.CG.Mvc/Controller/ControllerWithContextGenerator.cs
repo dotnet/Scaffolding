@@ -64,7 +64,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
             {
                 EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, controllerGeneratorModel.DatabaseProvider);
             }
-            
+
             string outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
             _areaName = GetAreaName(ApplicationInfo.ApplicationBasePath, outputPath);
 
@@ -101,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)
             {
-                throw new Exception(string.Format("{0} {1}" ,MessageStrings.ScaffoldingSuccessful_unregistered,
+                throw new Exception(string.Format("{0} {1}", MessageStrings.ScaffoldingSuccessful_unregistered,
                     MessageStrings.Scaffolding_additionalSteps));
             }
         }

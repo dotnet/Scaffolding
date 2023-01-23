@@ -10,13 +10,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -44,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private EditSyntaxTreeResult _programEditResult;
         private IFileSystem _fileSystem;
 
-        public EntityFrameworkModelProcessor (
+        public EntityFrameworkModelProcessor(
             string dbContextFullTypeName,
             ModelType modelTypeSymbol,
             string areaName,
@@ -95,7 +95,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, "Program"));
                 }
-                
+
                 if (!dbContextSymbols.Any())
                 {
                     await GenerateNewDbContextAndRegisterProgramFile(programType, _applicationInfo);
@@ -224,8 +224,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         }
 
 
-        public ContextProcessingStatus ContextProcessingStatus { get; private set;}
-        public ModelMetadata ModelMetadata { get; private set;}
+        public ContextProcessingStatus ContextProcessingStatus { get; private set; }
+        public ModelMetadata ModelMetadata { get; private set; }
 
         /// <summary>
         /// Writes the DbContext to disk using the given Roslyn SyntaxTree.
@@ -270,9 +270,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     return c;
                 });
 
-            var dbContextType = _reflectedTypesProvider.GetReflectedType(_dbContextFullTypeName, lookInDependencies:true);
+            var dbContextType = _reflectedTypesProvider.GetReflectedType(_dbContextFullTypeName, lookInDependencies: true);
 
-            if (_reflectedTypesProvider.GetCompilationErrors() != null 
+            if (_reflectedTypesProvider.GetCompilationErrors() != null
                 && _reflectedTypesProvider.GetCompilationErrors().Any())
             {
                 throw new InvalidOperationException(string.Format(
@@ -299,7 +299,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private async Task AddModelTypeToExistingDbContextIfNeeded(ModelType dbContextSymbol, IApplicationInfo appInfo)
         {
             bool nullabledEnabled = "enable".Equals(_projectContext.Nullable, StringComparison.OrdinalIgnoreCase);
-            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, new Dictionary<string, string> { { "nullableEnabled", nullabledEnabled.ToString()} });
+            var addResult = _dbContextEditorServices.AddModelToContext(dbContextSymbol, _modelTypeSymbol, new Dictionary<string, string> { { "nullableEnabled", nullabledEnabled.ToString() } });
             var projectCompilation = await _workspace.CurrentSolution.Projects
                 .First(project => project.AssemblyName == _projectContext.AssemblyName)
                 .GetCompilationAsync();
@@ -368,7 +368,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             };
 
             // Validate for necessary ef packages (based on database type)
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+            if (CalledFromCommandline)
+            {
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+            }
 
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
@@ -438,8 +441,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 Edited = false
             };
 
-            // Validate for necessary ef packages (based on database type)
-            EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+            if (CalledFromCommandline)
+            {
+                // Validate for necessary ef packages (based on database type)
+                EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, _databaseProvider);
+            }
 
             // Create a new Context
             _logger.LogMessage(string.Format(MessageStrings.GeneratingDbContext, _dbContextFullTypeName));
@@ -526,7 +532,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 entityType = dbContextInstance.Model.FindEntityType(modelType);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // We got an exception from the DbContext while finding the entityType.
                 // The error here is useful to the user for taking corrective actions.

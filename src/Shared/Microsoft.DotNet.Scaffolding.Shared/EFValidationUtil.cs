@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
                 throw new InvalidOperationException(
                     string.Format(MessageStrings.InstallEfPackages, $"{EfConstants.EfDesignPackageName}"));
             }
+
             if (EfConstants.EfPackagesDict.TryGetValue(dataContextType, out var dbProviderPackageName))
             {
                 ValidateDependency(dbProviderPackageName, dependencies);

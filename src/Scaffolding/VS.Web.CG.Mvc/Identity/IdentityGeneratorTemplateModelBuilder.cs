@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         internal string UserClassNamespace { get; private set; }
 
         private Type _userType;
-        internal Type UserType 
+        internal Type UserType
         {
             get
             {
@@ -182,7 +182,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             }
-            else if(!string.IsNullOrEmpty(_commandlineModel.ExcludeFiles))
+            else if (!string.IsNullOrEmpty(_commandlineModel.ExcludeFiles))
             {
                 string contentVersion;
                 if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
@@ -208,7 +208,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
                 }
-                
+
                 //get files to overwrite
                 NamedFiles = allFiles.Except(excludedFiles);
             }
@@ -448,12 +448,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private void ValidateIndividualFileOptions() 
+        private void ValidateIndividualFileOptions()
         {
             //Both options should not be selected. Users should either scaffold a particular set of files OR exclude a particular set of files.
-            if(IsFilesSpecified && IsExcludeSpecificed)
+            if (IsFilesSpecified && IsExcludeSpecificed)
             {
-                throw new InvalidOperationException(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--excludeFiles"));
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidOptionCombination, "--files", "--excludeFiles"));
             }
         }
         private void ValidateDefaultUIOption()
@@ -462,12 +462,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (IsFilesSpecified)
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--useDefaultUI"));
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination, "--files", "--useDefaultUI"));
             }
 
-            if(IsExcludeSpecificed)
+            if (IsExcludeSpecificed)
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--excludeFiles", "--useDefaultUI"));
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination, "--excludeFiles", "--useDefaultUI"));
             }
 
             if (IsUsingExistingDbContext)
@@ -533,7 +533,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private string GetClassNameFromTypeName(string dbContext)
         {
-            return dbContext.Split(new char[] {'.'}, StringSplitOptions.RemoveEmptyEntries).Last();
+            return dbContext.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last();
         }
 
         private void ValidateExistingDbContext(Type existingDbContext)
@@ -669,7 +669,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                             Environment.NewLine,
                             string.Join(Environment.NewLine, _reflectedTypesProvider.GetCompilationErrors())));
                 }
-              
+
             }
             //get all types and return the one with the same name. There should be no duplicates so only one should match.
             return _reflectedTypesProvider.GetAllTypesInProject().FirstOrDefault(
@@ -691,7 +691,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            if (model.UseSqlite)
+            if (model.UseSqlite || model.UseSqlite2)
             {
 #pragma warning restore CS0618 // Type or member is obsolete
                 //instead of throwing an error, letting the devs know that its obsolete. 
@@ -710,7 +710,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(string.Format(MessageStrings.InvalidDatabaseProvider, model.DatabaseProviderString));
                 errorStrings.Add($"Supported database providers include : {dbList}");
             }
-            
+
             if (!string.IsNullOrEmpty(model.RootNamespace) && !RoslynUtilities.IsValidNamespace(model.RootNamespace))
             {
                 errorStrings.Add(string.Format(MessageStrings.InvalidNamespaceName, model.RootNamespace));
@@ -718,7 +718,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (!string.IsNullOrEmpty(model.Layout) && model.GenerateLayout)
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--layout", "--generateLayout"));
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination, "--layout", "--generateLayout"));
             }
 
             if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion.Trim(' ', '\n')))

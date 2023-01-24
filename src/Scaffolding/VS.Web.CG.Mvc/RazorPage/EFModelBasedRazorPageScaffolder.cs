@@ -137,13 +137,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             }
 
             ModelTypeAndContextModel modelTypeAndContextModel = null;
+            razorPageGeneratorModel.ValidateCommandline(_logger);
             string outputPath = ValidateAndGetOutputPath(razorPageGeneratorModel, string.Empty);
 
             if (CalledFromCommandline)
             {
                 EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, razorPageGeneratorModel.DatabaseProvider);
             }
-            
+
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 razorPageGeneratorModel,
                 _entityFrameworkService,

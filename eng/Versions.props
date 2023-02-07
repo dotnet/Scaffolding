@@ -12,11 +12,11 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Ref packages from darc subscriptions-->
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>8.0.0-alpha.1.23069.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>8.0.0-preview.2.23107.3</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
-    <MicrosoftEntityFrameworkCorePackageVersion>8.0.0-alpha.1.23069.1</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>8.0.0-preview.2.23107.3</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>8.0.0-alpha.1.23069.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>8.0.0-preview.2.23107.3</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>8.0.0-preview.2.23105.4</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
@@ -118,7 +118,6 @@
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <SystemPrivateUriVersion>4.3.2</SystemPrivateUriVersion>
     <SystemSecurityCryptographyX509CertificatesVersion>4.3.0</SystemSecurityCryptographyX509CertificatesVersion>
-    <SystemConfigurationConfigurationManager>6.0.0</SystemConfigurationConfigurationManager>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>

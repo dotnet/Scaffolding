@@ -1,7 +1,7 @@
 ﻿@{
-    if (ViewData.TryGetValue("ParentLayout", out var parentLayout))
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
     {
-        Layout = (string)parentLayout;
+        Layout = parentLayout.ToString();
     }
     else
     {

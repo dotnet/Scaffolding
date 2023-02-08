@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
@@ -38,7 +39,18 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             { DbProvider.Postgres, PostgresPackageName }
         };
 
-        public static readonly IList<string> IdentityDbProviders = new List<string> { SqlServer, SQLite };
-        public static readonly IList<string> AllDbProviders = new List<string> { SqlServer, SQLite, CosmosDb, Postgres };
+        public static readonly IDictionary<string, DbProvider> IdentityDbProviders = new Dictionary<string, DbProvider>(StringComparer.OrdinalIgnoreCase)
+        {
+            { SqlServer, DbProvider.SqlServer },
+            { SQLite, DbProvider.SQLite }
+        };
+
+        public static readonly IDictionary<string, DbProvider> AllDbProviders = new Dictionary<string, DbProvider>(StringComparer.OrdinalIgnoreCase)
+        {
+            { SqlServer, DbProvider.SqlServer },
+            { SQLite, DbProvider.SQLite },
+            { CosmosDb, DbProvider.CosmosDb },
+            { Postgres, DbProvider.Postgres }
+        };
     }
 }

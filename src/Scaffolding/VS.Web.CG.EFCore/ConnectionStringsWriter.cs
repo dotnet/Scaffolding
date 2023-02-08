@@ -60,11 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 if (EfConstants.ConnectionStringsDict.TryGetValue(databaseProvider, out var connectionString))
                 {
-                    if (!databaseProvider.Equals(DbProvider.CosmosDb))
-                    {
-                        connectionString = string.Format(connectionString, databaseName);
-                    }
-
+                    connectionString = string.Format(connectionString, databaseName);
                     writeContent = true;
                     content[connectionStringNodeName][connectionStringName] = connectionString;
                 }

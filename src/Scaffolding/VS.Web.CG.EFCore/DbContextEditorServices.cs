@@ -15,7 +15,6 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.VisualBasic;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Newtonsoft.Json.Linq;
@@ -46,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             IFilesLocator filesLocator,
             ITemplating templatingService,
             IConnectionStringsWriter connectionStringsWriter)
-            : this (projectContext, applicationInfo, filesLocator, templatingService, connectionStringsWriter, DefaultFileSystem.Instance)
+            : this(projectContext, applicationInfo, filesLocator, templatingService, connectionStringsWriter, DefaultFileSystem.Instance)
         {
         }
 
@@ -103,7 +102,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public EditSyntaxTreeResult AddModelToContext(ModelType dbContext, ModelType modelType, bool nullableEnabled)
         {
-            return AddModelToContext(dbContext, modelType, new Dictionary<string, string>() { { nameof(nullableEnabled), nullableEnabled.ToString() }});
+            return AddModelToContext(dbContext, modelType, new Dictionary<string, string>() { { nameof(nullableEnabled), nullableEnabled.ToString() } });
         }
 
         private string GetSafeModelName(string name, ITypeSymbol dbContext)
@@ -206,24 +205,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
             switch (databaseProvider)
             {
-                case DbProvider.SQLite: 
+                case DbProvider.SQLite:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
-            
+
                 case DbProvider.SqlServer:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
-                
+
                 case DbProvider.CosmosDb:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
-                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"), \"DATABASE_NAME\"));" + Environment.NewLine;
+                        statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"){3}, \"DATABASE_NAME\"));" + Environment.NewLine;
                     break;
-                
+
                 case DbProvider.Postgres:
                     textToAddAtEnd =
                         leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
@@ -248,7 +247,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 if (namedType != null &&
                     namedType.ContainingAssembly.Name == "Microsoft.Extensions.Configuration.Abstractions" &&
                     namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Extensions.Configuration" &&
-                    namedType.Name == "IConfiguration") 
+                    namedType.Name == "IConfiguration")
                 {
                     return pSymbol;
                 }
@@ -289,7 +288,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     string.Format("Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true",
                         dataBaseName);
             }
-            
+
             // Json.Net loses comments so the above code if requires any changes loses
             // comments in the file. The writeContent bool is for saving
             // a specific case without losing comments - when no changes are needed.
@@ -340,7 +339,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         {
             if (!IsModelPropertyExists(dbContext.TypeSymbol, modelType.FullName))
             {
-                // Todo : Consider using DeclaringSyntaxtReference 
+                // Todo : Consider using DeclaringSyntaxtReference
                 var sourceLocation = dbContext.TypeSymbol.Locations.Where(l => l.IsInSource).FirstOrDefault();
                 if (sourceLocation != null)
                 {
@@ -391,7 +390,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 parameters.TryGetValue("dataBaseName", out var dataBaseName);
                 parameters.TryGetValue("databaseProvider", out var dataContextTypeString);
                 DbProvider dataContextType = DbProvider.SqlServer;
-                if (Enum.TryParse(typeof(DbProvider), dataContextTypeString, ignoreCase:true, out var dataContextTypeObj))
+                if (Enum.TryParse(typeof(DbProvider), dataContextTypeString, ignoreCase: true, out var dataContextTypeObj))
                 {
                     dataContextType = (DbProvider)dataContextTypeObj;
                 }
@@ -409,7 +408,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 var startUpClassNode = rootNode.FindNode(declarationReference.Span);
 
                 var configRootProperty = TryGetIConfigurationRootProperty(startUp.TypeSymbol);
-                //if using Startup.cs, the ConfigureServices method should exist. 
+                //if using Startup.cs, the ConfigureServices method should exist.
                 if (startUpClassNode.ChildNodes()
                     .FirstOrDefault(n =>
                         n is MethodDeclarationSyntax syntax &&

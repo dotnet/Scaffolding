@@ -744,13 +744,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var dependencies = new HashSet<string>()
             {
                 "Microsoft.AspNetCore.Identity.UI",
-                "Microsoft.EntityFrameworkCore.Design"
+                EfConstants.EfToolsPackageName
             };
-
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-            var isEFDesignPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
             var missingPackages = dependencies.Where(d => !_projectContext.PackageDependencies.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
             if (CalledFromCommandline && missingPackages.Any())

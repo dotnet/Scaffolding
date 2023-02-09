@@ -13,6 +13,7 @@
     string updateModel = $"Update{@modelName}";
     string dbContextName = Model.ContextTypeName;
     var entitySetName = Model.ModelMetadata.EntitySetName;
+    var entityProperties = Model.ModelMetadata.Properties;
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
     var primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
@@ -26,6 +27,7 @@
     string typedTaskWithNoContent = Model.UseTypedResults ? $"Task<Results<NotFound, NoContent>>" : "";
     string resultsNotFound = $"{resultsExtension}.NotFound()";
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
+    string resultsOkEmpty = $"{resultsExtension}.Ok()";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
     string resultsOkModelVariable = $"{resultsExtension}.Ok({@Model.ModelVariable})";
     string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", @routePrefix, @Model.ModelVariable, @primaryKeyName, @Model.ModelVariable);
@@ -76,7 +78,8 @@ public static class @endPointsClassName
 
         group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
-            return await db.@findModel
+            return await db.@findModel.AsNoTracking()
+                .FirstOrDefaultAsync(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
                 is @modelName model
                     ? @resultsOkModel
                     : @resultsNotFound;
@@ -97,6 +100,23 @@ public static class @endPointsClassName
 
         group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
+            var affected = await db.@entitySetName
+                .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(t => t.Title, todo.Title)
+@{
+    //should be atleast one property (primary key)
+    foreach(var modelProperty in entityProperties)
+    {
+        string modelPropertyName = modelProperty.PropertyName;
+        string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName}";
+                  @:.SetProperty(@setPropertyString)
+    }
+}
+                    .SetProperty(t => t.IsComplete, todo.IsComplete)
+                );
+
+            return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
             var foundModel = await db.@findModel;
 
             if (foundModel is null)
@@ -145,14 +165,11 @@ public static class @endPointsClassName
 
         group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
-            if (await db.@findModel is @modelName @Model.ModelVariable)
-            {
-                db.@remove;
-                await db.SaveChangesAsync();
-                return @resultsOkModelVariable;
-            }
+            var affected = await db.@entitySetName
+                .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
+                .ExecuteDeleteAsync();
 
-            return @resultsNotFound;
+            return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
         })
 @{
     builderExtensions = $".WithName(\"{@deleteModel}\")";

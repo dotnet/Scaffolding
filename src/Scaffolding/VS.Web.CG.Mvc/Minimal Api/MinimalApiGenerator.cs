@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         private IModelTypesLocator ModelTypesLocator { get; set; }
         private IFileSystem FileSystem { get; set; }
         private IProjectContext ProjectContext { get; set; }
-        private IEntityFrameworkService EntityFrameworkService { get; set;}
+        private IEntityFrameworkService EntityFrameworkService { get; set; }
         private ICodeGeneratorActionsService CodeGeneratorActionsService { get; set; }
         private Workspace Workspace { get; set; }
         private ConsoleLogger ConsoleLogger { get; set; }
@@ -66,6 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         /// <returns></returns>
         public async Task GenerateCode(MinimalApiGeneratorCommandLineModel model)
         {
+            System.Diagnostics.Debugger.Launch();
             model.ValidateCommandline(Logger);
             var namespaceName = NameSpaceUtilities.GetSafeNameSpaceFromPath(model.RelativeFolderPath, AppInfo.ApplicationName);
             //get model and dbcontext
@@ -74,7 +75,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 EntityFrameworkService,
                 ModelTypesLocator,
                 Logger,
-                areaName : string.Empty);
+                areaName: string.Empty);
+
+            var allpops = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata.Properties;
 
             if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
             {
@@ -85,7 +88,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             {
                 ValidateOpenApiDependencies(ProjectContext.PackageDependencies);
             }
-            
+
             var templateModel = new MinimalApiModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName, model.EndpintsClassName)
             {
                 EndpointsName = model.EndpintsClassName,
@@ -116,7 +119,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 }
             }
             //execute CodeGeneratorActionsService.AddFileFromTemplateAsync to add endpoints file.
-            else 
+            else
             {
                 //Add endpoints file with endpoints class since it does not exist.
                 ValidateModel(model);
@@ -178,7 +181,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     {
                         usings.Add("Microsoft.AspNetCore.Http.HttpResults");
                     }
-                    var endpointsCodeFile = new CodeFile { Usings = usings.ToArray()};
+                    var endpointsCodeFile = new CodeFile { Usings = usings.ToArray() };
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                     var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
@@ -196,7 +199,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                             classDeclaration = SyntaxFactory.ClassDeclaration($"{templateModel.ModelType.Name}Endpoints")
                                 .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
                                 .NormalizeWhitespace()
-                                .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.CarriageReturnLineFeed);  
+                                .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.CarriageReturnLineFeed);
                         }
                         var modifiedClass = classDeclaration.AddMembers(
                             SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(membersBlockText)).WithLeadingTrivia(SyntaxFactory.Tab));
@@ -212,7 +215,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         {
                             newRoot = newRoot.ReplaceNode(classNode, modifiedClass);
                         }
-                        
+
                         docEditor.ReplaceNode(docRoot, newRoot);
                         var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
                         var classFileTxt = classFileSourceTxt?.ToString();
@@ -323,7 +326,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                             newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
                         }
                     }
-                                        
+
                     if (templateModel.OpenAPI)
                     {
                         var builderVariable = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
@@ -336,7 +339,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                             {
                                 filteredChanges = DocumentBuilder.AddLeadingTriviaSpaces(filteredChanges, spaces: 12);
                                 var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
-                                { 
+                                {
                                     var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, filteredChanges);
                                     newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
                                 }
@@ -390,7 +393,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     string.Format(MessageStrings.InstallPackagesForScaffoldingIdentity, string.Join(",", missingPackages)));
             }
         }
-        
+
         private string GetMinimalApiCodeModifierConfig()
         {
             string jsonText = string.Empty;

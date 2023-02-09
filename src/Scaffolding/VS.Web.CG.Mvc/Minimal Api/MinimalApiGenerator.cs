@@ -76,8 +76,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 Logger,
                 areaName: string.Empty);
 
-            var allpops = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata.Properties;
-
             if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
             {
                 EFValidationUtil.ValidateEFDependencies(ProjectContext.PackageDependencies, model.DatabaseProvider);

@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         public static string SQLite = DbProvider.SQLite.ToString();
         public static string CosmosDb = DbProvider.CosmosDb.ToString();
         public static string Postgres = DbProvider.Postgres.ToString();
-        public const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
+        public const string EfToolsPackageName = "Microsoft.EntityFrameworkCore.Tools";
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";

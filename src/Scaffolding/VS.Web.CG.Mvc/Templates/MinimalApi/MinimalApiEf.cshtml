@@ -13,6 +13,7 @@
     string updateModel = $"Update{@modelName}";
     string dbContextName = Model.ContextTypeName;
     var entitySetName = Model.ModelMetadata.EntitySetName;
+    var entitySetNoTracking = $"{entitySetName}.AsNoTracking()";
     var entityProperties = Model.ModelMetadata.Properties;
     var primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
@@ -24,7 +25,7 @@
     var remove = $"{@entitySetName}.Remove({@Model.ModelVariable})";
     string resultsExtension = Model.UseTypedResults ? "TypedResults" : "Results";
     string typedTaskWithNotFound = Model.UseTypedResults ? $"Task<Results<Ok<{@modelName}>, NotFound>>" : "";
-    string typedTaskWithNoContent = Model.UseTypedResults ? $"Task<Results<NotFound, NoContent>>" : "";
+    string typedTaskOkNotFound = Model.UseTypedResults ? $"Task<Results<Ok, NotFound>>" : "";
     string resultsNotFound = $"{resultsExtension}.NotFound()";
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsOkEmpty = $"{resultsExtension}.Ok()";
@@ -78,7 +79,7 @@ public static class @endPointsClassName
 
         group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
-            return await db.@findModel.AsNoTracking()
+            return await db.@entitySetNoTracking
                 .FirstOrDefaultAsync(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
                 is @modelName model
                     ? @resultsOkModel
@@ -98,36 +99,23 @@ public static class @endPointsClassName
         @:@builderExtensions;
 }
 
-        group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+        group.MapPut("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         {
             var affected = await db.@entitySetName
                 .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(t => t.Title, todo.Title)
 @{
     //should be atleast one property (primary key)
     foreach(var modelProperty in entityProperties)
     {
         string modelPropertyName = modelProperty.PropertyName;
-        string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName}";
-                  @:.SetProperty(@setPropertyString)
+        string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName})";
+                  @:@setPropertyString
     }
 }
-                    .SetProperty(t => t.IsComplete, todo.IsComplete)
                 );
 
             return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
-            var foundModel = await db.@findModel;
-
-            if (foundModel is null)
-            {
-                return @resultsNotFound;
-            }
-            
-            db.Update(@Model.ModelVariable);
-            await db.SaveChangesAsync();
-
-            return @resultsNoContent;
         })
 @{
         builderExtensions = $".WithName(\"{@updateModel}\")";
@@ -163,7 +151,7 @@ public static class @endPointsClassName
         @:@builderExtensions;
 }
 
-        group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        group.MapDelete("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
             var affected = await db.@entitySetName
                 .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)

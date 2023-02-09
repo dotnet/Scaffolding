@@ -66,7 +66,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         /// <returns></returns>
         public async Task GenerateCode(MinimalApiGeneratorCommandLineModel model)
         {
-            System.Diagnostics.Debugger.Launch();
             model.ValidateCommandline(Logger);
             var namespaceName = NameSpaceUtilities.GetSafeNameSpaceFromPath(model.RelativeFolderPath, AppInfo.ApplicationName);
             //get model and dbcontext

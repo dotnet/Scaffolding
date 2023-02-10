@@ -57,7 +57,7 @@ public static class @endPointsClassName
     {
         @:var group = routes.MapGroup("@routePrefix");
     }
-}    
+}
 
         group.MapGet("/", async (@dbContextName db) =>
         {
@@ -93,7 +93,7 @@ public static class @endPointsClassName
     }
     if (!Model.UseTypedResults)
     {
-        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)"; 
+        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
         builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
     }
         @:@builderExtensions;

@@ -15,8 +15,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public string? ProjectFilePath { get; set; }
 
         /// <summary>
+        /// Short target framework from the given ProjectFilePath. List to allow multiple tfms.
+        /// eg. net6.0, net7.0 etc.
+        /// </summary>
+        public IList<string> ShortTfms { get; set; } = new List<string>();
+
+        /// <summary>
         /// Path to appsettings.json file
-        /// </summary>   
+        /// </summary>
         public string? AppSettingsFilePath { get; set; }
 
         ///<summary>
@@ -45,14 +51,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public string LanguageOrFramework { get; set; } = "dotnet";
 
         /// <summary>
-        /// Type of project. 
+        /// Type of project.
         /// For instance web app, web API, blazorwasm-hosted, ...
         /// </summary>
         public string? ProjectType { get; set; }
 
         /// <summary>
         /// Identifier of a project type. This is the concatenation of the framework
-        /// and the project type. This is the identifier of the extension describing 
+        /// and the project type. This is the identifier of the extension describing
         /// the authentication pieces of the project.
         /// </summary>
         public string ProjectTypeIdentifier
@@ -110,6 +116,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool Unregister { get; set; }
 
         /// <summary>
+        /// Scopes for the called downstream API.
+        /// </summary>
+        public string? ApiScopes { get; set; }
+
+        /// <summary>
         /// Scopes for the Blazor WASM hosted API.
         /// </summary>
         public string? HostedApiScopes { get; set; }
@@ -140,12 +151,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public bool Json { get; set; } = false;
 
         /// <summary>
-        /// Make config changes to appsettings.json 
+        /// Make config changes to appsettings.json
         /// </summary>
         public bool ConfigUpdate { get; set; } = false;
 
         /// <summary>
-        /// Make changes to Startup.cs 
+        /// Make changes to Startup.cs
         /// </summary>
         public bool CodeUpdate { get; set; } = false;
 
@@ -221,7 +232,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     {
         /// <summary>
         /// Identifier of a project type. This is the concatenation of the framework
-        /// and the project type. This is the identifier of the extension describing 
+        /// and the project type. This is the identifier of the extension describing
         /// the authentication pieces of the project
         /// </summary>
         public static string GetProjectTypeIdentifier(this ProvisioningToolOptions provisioningToolOptions)

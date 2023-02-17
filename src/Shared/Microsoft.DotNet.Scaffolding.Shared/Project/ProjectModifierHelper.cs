@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {
@@ -574,6 +576,46 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 }
             }
             return filteredCodeBlocks.ToArray();
+        }
+
+        /// <summary>
+        /// Take the tfm value in the csproj and use the Dictionary of variables to find its true value.
+        /// </summary>
+        /// <param name="tfm">value for <TargetFramework/> or '<TargetFrameworks/> in the csproj file</param>
+        /// <param name="csprojVariables">dictionary with all csproj properties and values</param>
+        /// <returns></returns>
+        internal static string ProcessTfm(string tfm, Dictionary<string, string> csprojVariables)
+        {
+            if (string.IsNullOrEmpty(tfm))
+            {
+                return string.Empty;
+            }
+
+            bool tfmHasVars = true;
+            while (tfmHasVars)
+            {
+                //if the value is in the tfm dictionary (valid values), return it.
+                if (ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(tfm, StringComparer.OrdinalIgnoreCase))
+                {
+                    return tfm;
+                }
+                //if the value has a variable (key) in it, replace it with its value.
+                else if (tfm.Contains('$'))
+                {
+                    foreach (var key in csprojVariables.Keys)
+                    {
+                        if (tfm.Contains(key, StringComparison.OrdinalIgnoreCase) && csprojVariables.TryGetValue(key, out string val))
+                        {
+                            tfm = tfm.Replace(key, val);
+                        }
+                    }
+                }
+                else
+                {
+                    return tfm;
+                }
+            }
+            return tfm;
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
@@ -171,6 +172,33 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             }
 
             return packageDependencies;
+        }
+
+        /// <summary>
+        /// Returns the value given a key (aka a xml tag) from the given xml file
+        /// </summary>
+        /// <param name="variableKey">variable key or tags in the csproj file</param>
+        /// <param name="xmlText">xml file text (mostly used for parsing csproj file)</param>
+        /// <returns>empty or value from the parsing the elements of the xml file.</returns>
+        internal static string GetXmlKeyValue(string variableKey, string xmlText)
+        {
+            string variableValue = string.Empty;
+            if (!string.IsNullOrEmpty(xmlText) && !string.IsNullOrEmpty(variableKey))
+            {
+                //use XDocument to get all csproj elements.
+                XDocument document = XDocument.Parse(xmlText);
+                var docNodes = document.Root?.Elements();
+                var allElements = docNodes?.SelectMany(x => x.Elements());
+                if (allElements != null && allElements.Any())
+                {
+                    var varValueElement = allElements.FirstOrDefault(e => e.Name.LocalName.Equals(variableKey, StringComparison.OrdinalIgnoreCase));
+                    if (varValueElement != null)
+                    {
+                        variableValue = varValueElement.Value;
+                    }
+                }
+            }
+            return variableValue;
         }
     }
 }

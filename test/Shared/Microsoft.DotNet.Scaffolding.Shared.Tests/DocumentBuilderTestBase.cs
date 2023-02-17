@@ -118,6 +118,111 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             return paramList;
         }
 
+        protected const string Net7Csproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+
+        protected const string Net7CsprojVariabledCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>$(Var2)$(Var3)</Var1>
+    <Var2>net</Var2>
+    <Var3>7.0</Var3>
+    <TargetFramework>$(Var1)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+
+        protected const string Net7CsprojVariabledCsproj2 = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>net7.0</Var1>
+    <TargetFramework>$(Var1)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
+";
+
+        protected const string MultiTfmCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+
+        protected const string EmptyCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+</Project>
+";
+        protected const string EmptyCsproj2 = @"";
+
+        protected const string MultiTfmVariabledCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>$(Var2);$(Var3)</Var1>
+    <Var2>net7.0</Var2>
+    <Nullable>enable</Nullable>
+    <Var3>net6.0</Var3>
+    <TargetFrameworks>$(Var1)</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+        protected const string MultiTfmVariabledCsproj2 = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>$(Var2)$(Var3)</Var1>
+    <Var2>net</Var2>
+    <Var3>7.0</Var3>
+    <Nullable>enable</Nullable>
+    <Var4>net6.0</Var4>
+    <TargetFrameworks>$(Var1);$(Var4);net5.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+        protected const string InvalidCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>net69.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+        protected const string InvalidCsproj2 = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>$(Var2);$(Var3)</Var1>
+    <Var2>net77.0</Var2>
+    <Nullable>enable</Nullable>
+    <Var3>net69.0</Var3>
+    <TargetFrameworks>$(Var1)</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
+        protected const string InvalidCsproj3 = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <Var1>net77.0</Var1>
+    <TargetFramework>$(Var1)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
+";
+
         protected const string FullDocument = @"
             using System;
             using System.Duplicate;

@@ -89,6 +89,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     model.DatabaseProviderString = EfConstants.SQLite;
                 }
             }
+            else
+            {
+                if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
+                {
+                    model.DatabaseProvider = dbProvider;
+                }
+            }
         }
     }
 }

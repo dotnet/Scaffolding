@@ -15,7 +15,7 @@
     string resultsExtension = (Model.UseTypedResults ? "TypedResults" : "Results") + ".NoContent()";
     string builderExtensionSpaces = new string(' ', 8);
 }
- 
+
     public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
 @{
@@ -27,7 +27,7 @@
     {
         @:var group = routes.MapGroup("@routePrefix");
     }
-}    
+}
 
         group.MapGet("/", () =>
         {
@@ -45,7 +45,7 @@
     }
         @:@builderExtensions;
 }
-        
+
         group.MapGet("/{id}", (int id) =>
         {
             //return new @modelName { ID = id };
@@ -129,6 +129,6 @@
     {
         builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
     }
-        @:@builderExtensions;  
+        @:@builderExtensions;
     }
     }

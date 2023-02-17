@@ -13,12 +13,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         internal static void ValidateEFDependencies(IEnumerable<DependencyDescription> dependencies, DbProvider dataContextType)
         {
             var isEFDesignPackagePresent = dependencies
-                .Any(package => package.Name.Equals(EfConstants.EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
+                .Any(package => package.Name.Equals(EfConstants.EfToolsPackageName, StringComparison.OrdinalIgnoreCase));
 
             if (!isEFDesignPackagePresent)
             {
                 throw new InvalidOperationException(
-                    string.Format(MessageStrings.InstallEfPackages, $"{EfConstants.EfDesignPackageName}"));
+                    string.Format(MessageStrings.InstallEfPackages, $"{EfConstants.EfToolsPackageName}"));
             }
 
             if (EfConstants.EfPackagesDict.TryGetValue(dataContextType, out var dbProviderPackageName))

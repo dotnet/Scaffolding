@@ -36,7 +36,7 @@ public static class @endPointsClassName
     {
         @:var group = routes.MapGroup("@routePrefix");
     }
-}    
+}
 
         group.MapGet("/", () =>
         {
@@ -54,7 +54,7 @@ public static class @endPointsClassName
     }
         @:@builderExtensions;
 }
-        
+
         group.MapGet("/{id}", (int id) =>
         {
             //return new @modelName { ID = id };
@@ -138,7 +138,7 @@ public static class @endPointsClassName
     {
         builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
     }
-        @:@builderExtensions;  
+        @:@builderExtensions;
     }
     }
 }

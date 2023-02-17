@@ -703,8 +703,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     model.DatabaseProviderString = EfConstants.SQLite;
                 }
             }
+            else
+            {
+                if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
+                {
+                    model.DatabaseProvider = dbProvider;
+                }
+            }
 
-            if (!string.IsNullOrEmpty(model.DatabaseProviderString) && !EfConstants.IdentityDbProviders.Contains(model.DatabaseProviderString, StringComparer.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(model.DatabaseProviderString) && !EfConstants.IdentityDbProviders.Keys.Contains(model.DatabaseProviderString, StringComparer.OrdinalIgnoreCase))
             {
                 string dbList = $"'{string.Join("', ", EfConstants.IdentityDbProviders.ToArray(), 0, EfConstants.IdentityDbProviders.Count - 1)}' and '{EfConstants.IdentityDbProviders.LastOrDefault()}'";
                 errorStrings.Add(string.Format(MessageStrings.InvalidDatabaseProvider, model.DatabaseProviderString));
@@ -737,13 +744,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var dependencies = new HashSet<string>()
             {
                 "Microsoft.AspNetCore.Identity.UI",
-                "Microsoft.EntityFrameworkCore.Design"
+                EfConstants.EfToolsPackageName
             };
-
-            const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
-            var isEFDesignPackagePresent = _projectContext
-                .PackageDependencies
-                .Any(package => package.Name.Equals(EfDesignPackageName, StringComparison.OrdinalIgnoreCase));
 
             var missingPackages = dependencies.Where(d => !_projectContext.PackageDependencies.Any(p => p.Name.Equals(d, StringComparison.OrdinalIgnoreCase)));
             if (CalledFromCommandline && missingPackages.Any())

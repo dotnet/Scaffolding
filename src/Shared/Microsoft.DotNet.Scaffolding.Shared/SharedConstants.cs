@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
@@ -13,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         public static string SQLite = DbProvider.SQLite.ToString();
         public static string CosmosDb = DbProvider.CosmosDb.ToString();
         public static string Postgres = DbProvider.Postgres.ToString();
-        public const string EfDesignPackageName = "Microsoft.EntityFrameworkCore.Design";
+        public const string EfToolsPackageName = "Microsoft.EntityFrameworkCore.Tools";
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
@@ -38,7 +39,18 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             { DbProvider.Postgres, PostgresPackageName }
         };
 
-        public static readonly IList<string> IdentityDbProviders = new List<string> { SqlServer, SQLite };
-        public static readonly IList<string> AllDbProviders = new List<string> { SqlServer, SQLite, CosmosDb, Postgres };
+        public static readonly IDictionary<string, DbProvider> IdentityDbProviders = new Dictionary<string, DbProvider>(StringComparer.OrdinalIgnoreCase)
+        {
+            { SqlServer, DbProvider.SqlServer },
+            { SQLite, DbProvider.SQLite }
+        };
+
+        public static readonly IDictionary<string, DbProvider> AllDbProviders = new Dictionary<string, DbProvider>(StringComparer.OrdinalIgnoreCase)
+        {
+            { SqlServer, DbProvider.SqlServer },
+            { SQLite, DbProvider.SQLite },
+            { CosmosDb, DbProvider.CosmosDb },
+            { Postgres, DbProvider.Postgres }
+        };
     }
 }

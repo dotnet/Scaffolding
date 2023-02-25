@@ -154,6 +154,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         //TODO throw exception
                         return;
                     }
+                   
                     //Get class syntax node to add members to the class
                     var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                     //create CodeFile just to add usings
@@ -178,14 +179,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     {
                         usings.Add("Microsoft.AspNetCore.Http.HttpResults");
                     }
+
+                    System.Diagnostics.Debugger.Launch();
+                    
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray() };
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                     var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
                     //get namespace node just for the namespace name.
-                    var namespaceSyntax = classNode.Parent.DescendantNodes().FirstOrDefault(node => node is NamespaceDeclarationSyntax nsDeclarationSyntax || node is FileScopedNamespaceDeclarationSyntax fsDeclarationSyntax);
+                    var namespaceSyntax = newRoot.DescendantNodes().FirstOrDefault(node => node is NamespaceDeclarationSyntax nsDeclarationSyntax || node is FileScopedNamespaceDeclarationSyntax fsDeclarationSyntax);
                     templateModel.EndpointsNamespace = string.IsNullOrEmpty(namespaceSyntax?.ToString()) ? templateModel.EndpointsNamespace : namespaceSyntax?.ToString();
-
+                    //if a normal ClassDeclarationSyntax, add static method to this class
                     if (classNode != null && classNode is ClassDeclarationSyntax classDeclaration)
                     {
                         SyntaxNode classParentSyntax = null;
@@ -198,6 +202,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                                 .NormalizeWhitespace()
                                 .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.CarriageReturnLineFeed);
                         }
+
                         var modifiedClass = classDeclaration.AddMembers(
                             SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(membersBlockText)).WithLeadingTrivia(SyntaxFactory.Tab));
 
@@ -214,6 +219,42 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         }
 
                         docEditor.ReplaceNode(docRoot, newRoot);
+                        var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
+                        var classFileTxt = classFileSourceTxt?.ToString();
+                        if (!string.IsNullOrEmpty(classFileTxt))
+                        {
+                            //write to endpoints class path.
+                            FileSystem.WriteAllText(endPointsDocument.FilePath, classFileTxt);
+                            //add app.Map statement to Program.cs
+                            await ModifyProgramCs(templateModel);
+                        }
+                    }
+                    //check if its a minimal class with no class declarations
+                    //have to add the static class in addtion to the 
+                    else
+                    {
+                        //should be FileScopedNamespaceDeclarationSyntax as a normal NamespaceDeclarationSyntax would have had a ClassDeclarationSyntax
+                        if (namespaceSyntax == null)
+                        {
+                            Logger.LogMessage("wtf bro, bullshit");
+                            //throw exception
+                        }
+
+                        //create a ClassDeclarationSyntax, add the static endpoints method to the class
+                        var newClassDeclaration = SyntaxFactory.ClassDeclaration($"{templateModel.ModelType.Name}Endpoints")
+                                .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
+                                .NormalizeWhitespace()
+                                .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.CarriageReturnLineFeed);
+                        newClassDeclaration = newClassDeclaration.AddMembers(
+                            SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(membersBlockText)).WithLeadingTrivia(SyntaxFactory.Tab));
+                        //add members at the end of the namespace node.
+                        Logger.LogMessage("do you thang 22");
+                        var newNamespaceNode = namespaceSyntax.InsertNodesAfter(namespaceSyntax.ChildNodes().Last(), new List<SyntaxNode>() { newClassDeclaration });
+                        //replace namespace node in newRoot
+                        newRoot = newRoot.ReplaceNode(namespaceSyntax, newNamespaceNode);
+                        //replace docRoot with newRoot
+                        docEditor.ReplaceNode(docRoot, newRoot);
+                        //write text to file
                         var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
                         var classFileTxt = classFileSourceTxt?.ToString();
                         if (!string.IsNullOrEmpty(classFileTxt))

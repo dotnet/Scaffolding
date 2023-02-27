@@ -154,7 +154,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         //TODO throw exception
                         return;
                     }
-                   
+
                     //Get class syntax node to add members to the class
                     var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
                     //create CodeFile just to add usings
@@ -181,7 +181,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     }
 
                     System.Diagnostics.Debugger.Launch();
-                    
+
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray() };
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
@@ -233,12 +233,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     //have to add the static class in addtion to the 
                     else
                     {
-                        //should be FileScopedNamespaceDeclarationSyntax as a normal NamespaceDeclarationSyntax would have had a ClassDeclarationSyntax
-                        if (namespaceSyntax == null)
-                        {
-                            Logger.LogMessage("wtf bro, bullshit");
-                            //throw exception
-                        }
 
                         //create a ClassDeclarationSyntax, add the static endpoints method to the class
                         var newClassDeclaration = SyntaxFactory.ClassDeclaration($"{templateModel.ModelType.Name}Endpoints")
@@ -248,10 +242,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         newClassDeclaration = newClassDeclaration.AddMembers(
                             SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(membersBlockText)).WithLeadingTrivia(SyntaxFactory.Tab));
                         //add members at the end of the namespace node.
-                        Logger.LogMessage("do you thang 22");
-                        var newNamespaceNode = namespaceSyntax.InsertNodesAfter(namespaceSyntax.ChildNodes().Last(), new List<SyntaxNode>() { newClassDeclaration });
                         //replace namespace node in newRoot
-                        newRoot = newRoot.ReplaceNode(namespaceSyntax, newNamespaceNode);
+                        newRoot = newRoot.InsertNodesAfter(newRoot.ChildNodes().Last(), new List<SyntaxNode> { newClassDeclaration });
                         //replace docRoot with newRoot
                         docEditor.ReplaceNode(docRoot, newRoot);
                         //write text to file

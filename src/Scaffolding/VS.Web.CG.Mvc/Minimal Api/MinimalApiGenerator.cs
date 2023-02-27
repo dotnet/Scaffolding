@@ -180,15 +180,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         usings.Add("Microsoft.AspNetCore.Http.HttpResults");
                     }
 
-                    System.Diagnostics.Debugger.Launch();
-
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray() };
                     var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                     var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
                     //get namespace node just for the namespace name.
-                    var namespaceSyntax = newRoot.DescendantNodes().FirstOrDefault(node => node is NamespaceDeclarationSyntax nsDeclarationSyntax || node is FileScopedNamespaceDeclarationSyntax fsDeclarationSyntax);
+                    var namespaceSyntax = classNode?.Parent?.DescendantNodes().FirstOrDefault(node => node is NamespaceDeclarationSyntax nsDeclarationSyntax || node is FileScopedNamespaceDeclarationSyntax fsDeclarationSyntax);
                     templateModel.EndpointsNamespace = string.IsNullOrEmpty(namespaceSyntax?.ToString()) ? templateModel.EndpointsNamespace : namespaceSyntax?.ToString();
+
                     //if a normal ClassDeclarationSyntax, add static method to this class
                     if (classNode != null && classNode is ClassDeclarationSyntax classDeclaration)
                     {
@@ -217,23 +216,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         {
                             newRoot = newRoot.ReplaceNode(classNode, modifiedClass);
                         }
-
-                        docEditor.ReplaceNode(docRoot, newRoot);
-                        var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
-                        var classFileTxt = classFileSourceTxt?.ToString();
-                        if (!string.IsNullOrEmpty(classFileTxt))
-                        {
-                            //write to endpoints class path.
-                            FileSystem.WriteAllText(endPointsDocument.FilePath, classFileTxt);
-                            //add app.Map statement to Program.cs
-                            await ModifyProgramCs(templateModel);
-                        }
                     }
-                    //check if its a minimal class with no class declarations
-                    //have to add the static class in addtion to the 
+                    //check if its a minimal class with no class declarations (using top level statements)
                     else
                     {
-
                         //create a ClassDeclarationSyntax, add the static endpoints method to the class
                         var newClassDeclaration = SyntaxFactory.ClassDeclaration($"{templateModel.ModelType.Name}Endpoints")
                                 .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
@@ -244,18 +230,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                         //add members at the end of the namespace node.
                         //replace namespace node in newRoot
                         newRoot = newRoot.InsertNodesAfter(newRoot.ChildNodes().Last(), new List<SyntaxNode> { newClassDeclaration });
-                        //replace docRoot with newRoot
-                        docEditor.ReplaceNode(docRoot, newRoot);
-                        //write text to file
-                        var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
-                        var classFileTxt = classFileSourceTxt?.ToString();
-                        if (!string.IsNullOrEmpty(classFileTxt))
-                        {
-                            //write to endpoints class path.
-                            FileSystem.WriteAllText(endPointsDocument.FilePath, classFileTxt);
-                            //add app.Map statement to Program.cs
-                            await ModifyProgramCs(templateModel);
-                        }
+                    }
+
+                    docEditor.ReplaceNode(docRoot, newRoot);
+                    var classFileSourceTxt = await docEditor.GetChangedDocument()?.GetTextAsync();
+                    var classFileTxt = classFileSourceTxt?.ToString();
+                    if (!string.IsNullOrEmpty(classFileTxt))
+                    {
+                        //write to endpoints class path.
+                        FileSystem.WriteAllText(endPointsDocument.FilePath, classFileTxt);
+                        //add app.Map statement to Program.cs
+                        await ModifyProgramCs(templateModel);
                     }
                 }
             }

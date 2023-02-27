@@ -71,7 +71,7 @@ jobs:
     ${{ if and(eq(parameters.poolName, ''), eq(parameters.agentOs, 'macOS')) }}:
       vmImage: macOS-11
     ${{ if and(eq(parameters.poolName, ''), eq(parameters.agentOs, 'Linux')) }}:
-      vmImage: ubuntu-20.04
+      vmImage: ubuntu-22.04
     ${{ if and(eq(parameters.poolName, ''), eq(parameters.agentOs, 'Windows')) }}:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         name: NetCore-Svc-Public

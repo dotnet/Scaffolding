@@ -56,11 +56,11 @@
         string builderExtensions = $".WithName(\"{@getAllModels}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelList}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelList}>(StatusCodes.Status200OK)";
         }
 
         @:@builderExtensions;
@@ -78,12 +78,12 @@
     builderExtensions = $".WithName(\"{@getModelById}\")";
     if(Model.OpenAPI)
     {
-        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
+        builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
     }
     if (!Model.UseTypedResults)
     {
-        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
-        builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
+        builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
+        builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
     }
         @:@builderExtensions;
 }
@@ -110,12 +110,12 @@
         builderExtensions = $".WithName(\"{@updateModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
-            builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status204NoContent)";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status204NoContent)";
         }
 
         @:@builderExtensions;
@@ -131,11 +131,11 @@
         builderExtensions = $".WithName(\"{@createModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status201Created)";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status201Created)";
         }
         @:@builderExtensions;
 }
@@ -152,12 +152,12 @@
     builderExtensions = $".WithName(\"{@deleteModel}\")";
     if(Model.OpenAPI)
     {
-        builderExtensions += $"\n{builderExtensionSpaces}.WithOpenApi()";
+        builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
     }
     if (!Model.UseTypedResults)
     {
-        builderExtensions += $"\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
-        builderExtensions += $"\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
+        builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
+        builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
     }
         @:@builderExtensions;
 }

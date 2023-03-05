@@ -51,7 +51,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.0-preview.3.23126.2</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>8.0.0</VersionPrefix>
+    <VersionPrefix>8.0.1</VersionPrefix>
     <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
     <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>

@@ -78,7 +78,7 @@ public static class @endPointsClassName
             {
                 return Results.NotFound();
             }
-            
+
             db.Update(@Model.ModelVariable);
 
             await db.SaveChangesAsync();

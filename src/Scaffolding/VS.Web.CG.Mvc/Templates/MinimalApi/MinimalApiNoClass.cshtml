@@ -13,7 +13,7 @@
     string createModel = $"Create{@modelName}";
     string updateModel = $"Update{@modelName}";
 }
- 
+
     public static void @Model.MethodName (this IEndpointRouteBuilder routes)
     {
         routes.MapGet("@routePrefix", () =>
@@ -92,7 +92,7 @@
     }
     else
     {
-        @:.WithName("@deleteModel");  
+        @:.WithName("@deleteModel");
     }
     }
     }

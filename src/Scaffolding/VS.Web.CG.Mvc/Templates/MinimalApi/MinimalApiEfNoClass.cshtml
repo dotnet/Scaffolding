@@ -68,13 +68,13 @@ public static void @Model.MethodName (this IEndpointRouteBuilder routes)
             {
                 return Results.NotFound();
             }
-            
+
             db.Update(@Model.ModelVariable);
 
             await db.SaveChangesAsync();
 
             return Results.NoContent();
-        })   
+        })
     @{
     if(Model.OpenAPI)
     {

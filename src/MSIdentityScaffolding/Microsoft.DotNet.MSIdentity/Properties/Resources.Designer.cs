@@ -254,6 +254,28 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to @using System.Security.Principal
+        ///
+        ///&lt;ul class=&quot;navbar-nav&quot;&gt;
+        ///@if (User.Identity?.IsAuthenticated == true)
+        ///{
+        ///        &lt;span class=&quot;navbar-text text-dark&quot;&gt;Hello @User.Identity?.Name!&lt;/span&gt;
+        ///        &lt;li class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link text-dark&quot; asp-area=&quot;MicrosoftIdentity&quot; asp-controller=&quot;Account&quot; asp-action=&quot;SignOut&quot;&gt;Sign out&lt;/a&gt;
+        ///        &lt;/li&gt;
+        ///}
+        ///else
+        ///{
+        ///        &lt;li class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link text-dark&quot; asp-area=&quot;MicrosoftIdentity&quot; asp-controller=&quot;Account&quot; asp-ac [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string add_dotnet_webapp_mvc_LoginPartial_cshtml {
+            get {
+                return ResourceManager.GetString("add_dotnet_webapp-mvc_LoginPartial_cshtml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added code file {0}.
         /// </summary>
         internal static string AddedCodeFile {
@@ -387,6 +409,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cm_dotnet_webapp_mvc {
+            get {
+                object obj = ResourceManager.GetObject("cm_dotnet_webapp_mvc", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error parsing Code Modifier Config for project type {0}, exception: {1}.
         /// </summary>
         internal static string CodeModifierConfigParsingError {
@@ -498,6 +530,16 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         internal static byte[] dotnet_webapp {
             get {
                 object obj = ResourceManager.GetObject("dotnet_webapp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] dotnet_webapp_mvc {
+            get {
+                object obj = ResourceManager.GetObject("dotnet_webapp_mvc", resourceCulture);
                 return ((byte[])(obj));
             }
         }

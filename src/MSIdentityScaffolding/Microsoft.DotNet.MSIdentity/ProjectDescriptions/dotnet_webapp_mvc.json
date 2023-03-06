@@ -1,23 +1,19 @@
 {
-  "Identifier": "dotnet-webapp",
+  "Identifier": "dotnet-webapp-mvc",
   "ProjectRelativeFolder": "",
   "BasedOnProjectDescription": "dotnet-web",
   "MatchesForProjectType": [
     {
-      "FolderRelativePath": "Pages",
-      "FileRelativePath": "Index.cshtml",
-      "Sets": "IsWebApp"
-    }
-  ],
-  "ConfigurationProperties": [
+      "FileRelativePath": "Program.cs",
+      "MatchAny": [ "AddControllersWithViews" ]
+    },
     {
-      "FileRelativePath": "Startup.cs",
-      "Properties": [
-        {
-          "MatchAny": [ ".AddAzureAD", ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebAppAuthentication" ],
-          "Sets": "HasAuthentication"
-        }
-      ]
+      "FolderRelativePath": "Models",
+      "Sets": "IsWebApp"
+    },
+    {
+      "FolderRelativePath": "Views",
+      "Sets": "IsWebApp"
     }
   ],
   "BasePackages": [

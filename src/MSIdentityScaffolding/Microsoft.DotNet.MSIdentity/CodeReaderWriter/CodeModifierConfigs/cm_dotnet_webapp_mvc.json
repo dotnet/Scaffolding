@@ -1,0 +1,167 @@
+{
+  "Identifier": "dotnet-webapp-mvc",
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Options": [
+        "MinimalApp"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "Block": "var initialScopes = WebApplication.CreateBuilder.Configuration[\"DownstreamApi:Scopes\"]?.Split(' ') ?? WebApplication.CreateBuilder.Configuration[\"MicrosoftGraph:Scopes\"]?.Split(' ')",
+              "Options": [
+                "DownstreamApi",
+                "MicrosoftGraph"
+              ],
+              "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddAuthentication",
+                "WebApplication.CreateBuilder.Services.AddRazorPages"
+              ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+              "InsertBefore": [
+                "WebApplication.CreateBuilder.Services.AddControllersWithViews"
+              ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))",
+              "Parent": "WebApplication.CreateBuilder.Services.AddAuthentication",
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "MultiLineBlock": [
+                "var policy = new AuthorizationPolicyBuilder()",
+                "\t.RequireAuthenticatedUser()",
+                "\t.Build()"
+              ],
+              "Parent": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
+              "CodeChangeType": "Lambda",
+              "Parameter": "options",
+              "LeadingTrivia": {
+                "NumberOfSpaces": 4,
+                "Newline": true
+              }
+            },
+            {
+              "Block": "options.Filters.Add(new AuthorizeFilter(policy))",
+              "Parent": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
+              "CodeChangeType": "Lambda",
+              "Parameter": "options",
+              "LeadingTrivia": {
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "Block": "EnableTokenAcquisitionToCallDownstreamApi(initialScopes)",
+              "Parent": "AddMicrosoftIdentityWebApp",
+              "CodeChangeType": "MemberAccess",
+              "Options": [
+                "MicrosoftGraph",
+                "DownstreamApi"
+              ],
+              "LeadingTrivia": {
+                "NumberOfSpaces": 8,
+                "Newline": true
+              }
+            },
+            {
+              "MultiLineBlock": [
+                "AddMicrosoftGraph(builder.Configuration.GetSection(\"MicrosoftGraph\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [
+                "MicrosoftGraph"
+              ],
+              "LeadingTrivia": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "MultiLineBlock": [
+                "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "            .AddInMemoryTokenCaches()"
+              ],
+              "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
+              "CodeChangeType": "MemberAccess",
+              "Options": [
+                "DownstreamApi"
+              ],
+              "LeadingTrivia": {
+                "NumberOfSpaces": 12,
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WebApplication.CreateBuilder.Services.AddRazorPages()",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllersWithViews"
+            },
+            {
+              "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages",
+              "CodeChangeType": "MemberAccess",
+              "Block": "AddMicrosoftIdentityUI()",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "InsertAfter": "app.MapControllerRoute",
+              "Block": "app.MapRazorPages()"
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "Microsoft.AspNetCore.Authorization",
+        "Microsoft.AspNetCore.Mvc.Authorization",
+        "Microsoft.Identity.Web",
+        "Microsoft.Identity.Web.UI"
+      ]
+    },
+    {
+      "FileName": "_Layout.cshtml",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "MultiLineBlock": [
+                "</ul>",
+                "                <partial name=\"_LoginPartial\" />",
+                "                </div>"
+              ],
+              "ReplaceSnippet": [
+                "</ul>",
+                "                </div>"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "LoginPartial.cshtml",
+      "AddFilePath": "Views/Shared/_LoginPartial.cshtml"
+    },
+    {
+      "FileName": "HomeController.cs"
+    }
+  ]
+}

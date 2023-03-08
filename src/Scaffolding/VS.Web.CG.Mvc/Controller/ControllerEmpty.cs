@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)
         {
-            return generatorModel.IsRestController ? Constants.ApiEmptyControllerTemplate : Constants.MvcEmptyControllerTemplate;
+            throw new NotImplementedException("Switched to using 'dotnet new', not shipping these templates anymore.");
         }
 
         public override Task Generate(CommandLineGeneratorModel controllerGeneratorModel)

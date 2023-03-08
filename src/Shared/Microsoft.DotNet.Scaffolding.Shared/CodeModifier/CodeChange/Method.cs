@@ -1,5 +1,3 @@
-using System;
-
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
 {
     public class Method
@@ -8,5 +6,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public CodeBlock [] AddParameters { get; set; }
         public CodeBlock EditType { get; set; }
         public CodeSnippet[] CodeChanges { get; set; }
+        public CodeBlock[] Attributes { get; set; }
     }
 }

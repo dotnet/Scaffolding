@@ -1,0 +1,70 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Cli.Utils;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
+{
+    public class ControllerEmpty : MvcController
+    {
+        public ControllerEmpty(
+            IProjectContext projectContext,
+            IApplicationInfo applicationInfo,
+            ICodeGeneratorActionsService codeGeneratorActionsService,
+            IServiceProvider serviceProvider,
+            ILogger logger)
+            : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
+        {
+        }
+
+        protected override string GetTemplateName(CommandLineGeneratorModel generatorModel)
+        {
+            return generatorModel.IsRestController ? Constants.ApiEmptyControllerTemplate : Constants.MvcEmptyControllerTemplate;
+        }
+
+        public override Task Generate(CommandLineGeneratorModel controllerGeneratorModel)
+        {
+            var outputPath = ValidateAndGetOutputPath(controllerGeneratorModel);
+            //item name in `dotnet new` for api controller or mvc controller (empty with or without actions)
+            var controllerTypeName = controllerGeneratorModel.IsRestController ? "apicontroller" : "mvccontroller";
+            var actionsParameter = controllerGeneratorModel.GenerateReadWriteActions ? "--actions" : string.Empty;
+            //arguments for `dotnet new page`
+            var additionalArgs = new List<string>()
+            {
+                controllerTypeName,
+                "--name",
+                controllerGeneratorModel.ControllerName,
+                "--output",
+                Path.GetDirectoryName(outputPath),
+                "--force",
+                controllerGeneratorModel.Force.ToString(),
+                actionsParameter,
+            };
+
+            if (!string.IsNullOrEmpty(controllerGeneratorModel.ControllerNamespace))
+            {
+                additionalArgs.Add("--namespace");
+                additionalArgs.Add(controllerGeneratorModel.ControllerNamespace);
+            }
+
+            DotnetCommands.ExecuteDotnetNew(ProjectContext.ProjectFullPath, additionalArgs, Logger);
+            return Task.CompletedTask;
+        }
+
+        protected override string GetRequiredNameError
+        {
+            get
+            {
+                return MessageStrings.EmptyControllerNameRequired;
+            }
+        }
+    }
+}

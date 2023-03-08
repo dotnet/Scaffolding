@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   
   <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
 
@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Cli.Utils\*.cs" />
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\MsIdentity\*.cs" />
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\MessageStrings.Designer.cs" />
     <Compile Include="..\Shared\*.cs">
       <Link>Shared\%(FileName)</Link>
     </Compile>

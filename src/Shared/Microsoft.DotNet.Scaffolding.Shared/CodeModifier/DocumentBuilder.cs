@@ -36,9 +36,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         internal static BaseMethodDeclarationSyntax GetModifiedMethod(string fileName, BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options, StringBuilder output)
         {
+            method = ModifyMethodAttributes(method, methodChanges, options);
             method = AddCodeSnippetsToMethod(fileName, method, methodChanges, options, output);
             method = EditMethodReturnType(method, methodChanges, options);
             method = AddMethodParameters(method, methodChanges, options);
+            return method;
+        }
+
+        private static BaseMethodDeclarationSyntax ModifyMethodAttributes(BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options)
+        {
+            if (methodChanges.Attributes != null && methodChanges.Attributes.Any())
+            {
+                var attributes = ProjectModifierHelper.FilterCodeBlocks(methodChanges.Attributes, options);
+                var methodAttributes = CreateAttributeList(attributes, method.AttributeLists, method.GetLeadingTrivia());
+
+                method = method.WithAttributeLists(methodAttributes);
+            }
+
             return method;
         }
 
@@ -153,6 +167,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         // Add all the different code snippet.
         internal static BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(string fileName, BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options, StringBuilder output)
         {
+            if (methodChanges.CodeChanges == null || !methodChanges.CodeChanges.Any())
+            {
+                return originalMethod;
+            }
+
             var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(methodChanges.CodeChanges, options);
 
             if (!filteredChanges.Any())

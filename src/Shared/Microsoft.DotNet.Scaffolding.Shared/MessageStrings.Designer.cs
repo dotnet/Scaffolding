@@ -79,6 +79,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added {0} to user secrets..
+        /// </summary>
+        internal static string AddingKeyToUserSecrets {
+            get {
+                return ResourceManager.GetString("AddingKeyToUserSecrets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding package {0} . . ..
+        /// </summary>
+        internal static string AddingPackage {
+            get {
+                return ResourceManager.GetString("AddingPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contents: {0}.
         /// </summary>
         internal static string ContentsMessage {
@@ -97,6 +115,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while running dotnet-user-secrets init.
+        /// </summary>
+        internal static string DotnetUserSecretsError {
+            get {
+                return ResourceManager.GetString("DotnetUserSecretsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit File: &apos;{0}&apos;.
         /// </summary>
         internal static string EditFileMessage {
@@ -111,6 +138,51 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         internal static string EndFileSystemChangeToken {
             get {
                 return ResourceManager.GetString("EndFileSystemChangeToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Executing `dotnet new`....
+        /// </summary>
+        internal static string ExecuteDotnetNew {
+            get {
+                return ResourceManager.GetString("ExecuteDotnetNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FAILED\n\n.
+        /// </summary>
+        internal static string Failed {
+            get {
+                return ResourceManager.GetString("Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add package {0}.
+        /// </summary>
+        internal static string FailedAddPackage {
+            get {
+                return ResourceManager.GetString("FailedAddPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed executing `dotnet new`.
+        /// </summary>
+        internal static string FailedDotnetNew {
+            get {
+                return ResourceManager.GetString("FailedDotnetNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initializing User Secrets . . ..
+        /// </summary>
+        internal static string InitializeUserSecrets {
+            get {
+                return ResourceManager.GetString("InitializeUserSecrets", resourceCulture);
             }
         }
         
@@ -174,6 +246,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         internal static string StartFileSystemChangeToken {
             get {
                 return ResourceManager.GetString("StartFileSystemChangeToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success!.
+        /// </summary>
+        internal static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
             }
         }
     }

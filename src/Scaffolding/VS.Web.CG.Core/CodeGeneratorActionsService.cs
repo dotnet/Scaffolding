@@ -77,7 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             _logger.LogMessage($"Rendering template { templatePath }\n", LogMessageLevel.Trace);
             var templateContent = _fileSystem.ReadAllText(templatePath);
             
-            var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
+            var templateResult = await _templatingService.RunTemplateAsync(templatePath, templateContent, templateModel);
 
             if (templateResult.ProcessingException != null)
             {

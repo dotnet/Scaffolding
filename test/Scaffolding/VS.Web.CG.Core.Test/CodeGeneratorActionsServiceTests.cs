@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             mockFilesLocator.Setup(fl => fl.GetFilePath(templateName, It.IsAny<IEnumerable<string>>()))
                 .Returns(templatePath);
             mockFileSystem.WriteAllText(templatePath, templateContent);
-            mockTemplating.Setup(templating => templating.RunTemplateAsync(templateContent, null))
+            mockTemplating.Setup(templating => templating.RunTemplateAsync(templatePath, templateContent, null))
                 .Returns(Task.FromResult(new TemplateResult()
                 {
                     ProcessingException = processingException
@@ -79,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             mockFilesLocator.Setup(fl => fl.GetFilePath(templateName, It.IsAny<IEnumerable<string>>()))
                 .Returns(templatePath);
             mockFileSystem.WriteAllText(templatePath, templateContent);
-            mockTemplating.Setup(templating => templating.RunTemplateAsync(templateContent, null))
+            mockTemplating.Setup(templating => templating.RunTemplateAsync(templatePath, templateContent, null))
                 .Returns(Task.FromResult(new TemplateResult()
                 {
                     ProcessingException = null,

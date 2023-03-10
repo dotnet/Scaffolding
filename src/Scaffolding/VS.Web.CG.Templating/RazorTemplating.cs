@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             _compilationService = compilationService;
         }
 
-        public async Task<TemplateResult> RunTemplateAsync(string content,
+        public async Task<TemplateResult> RunTemplateAsync(string path, string content,
             dynamic templateModel)
         {
             // Don't care about the RazorProject as we already have the content of the .cshtml file 
@@ -52,7 +52,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
 ");
             });
 
-            var templateItem = new TemplateRazorProjectItem(content);
+            var templateItem = new TemplateRazorProjectItem(path, content);
             var codeDocument = projectEngine.Process(templateItem);
             var generatorResults = codeDocument.GetCSharpDocument();
 

@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Cli.Utils;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
@@ -25,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         {
         }
 
-        public override async Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel)
+        public override Task GenerateCode(RazorPageGeneratorModel razorGeneratorModel)
         {
             if (razorGeneratorModel == null)
             {
@@ -46,7 +48,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
 
             var outputPath = ValidateAndGetOutputPath(razorGeneratorModel, outputFileName: razorGeneratorModel.RazorPageName + Constants.ViewExtension);
 
-            await GenerateView(razorGeneratorModel, null, outputPath);
+            //arguments for `dotnet new page`
+            var additionalArgs = new List<string>()
+            {
+                "page",
+                "--name",
+                razorGeneratorModel.RazorPageName,
+                "--output",
+                Path.GetDirectoryName(outputPath),
+                "--force",
+                razorGeneratorModel.Force.ToString(),
+                "--no-pagemodel",
+                razorGeneratorModel.NoPageModel.ToString(),
+            };
+
+            if (!string.IsNullOrEmpty(razorGeneratorModel.NamespaceName))
+            {
+                additionalArgs.Add("--namespace");
+                additionalArgs.Add(razorGeneratorModel.NamespaceName);
+            }
+
+            DotnetCommands.ExecuteDotnetNew(_projectContext.ProjectFullPath, additionalArgs, _logger);
+            return Task.CompletedTask;
         }
 
         protected override IEnumerable<RequiredFileEntity> GetRequiredFiles(RazorPageGeneratorModel razorGeneratorModel)

@@ -209,7 +209,8 @@
         }
       ],
       "Methods": {
-        "OnGet":{
+        "OnGet":
+        {
           "EditType" : {
            "Block": "async Task",
            "Options": ["MicrosoftGraph", "DownstreamApi"]

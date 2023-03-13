@@ -3,10 +3,9 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
@@ -31,14 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
             if (string.IsNullOrEmpty(model.ModelClass))
             {
-                if (model.GenerateReadWriteActions)
-                {
-                    generator = GetGenerator<MvcControllerWithReadWriteActionGenerator>();
-                }
-                else
-                {
-                    generator = GetGenerator<MvcControllerEmpty>(); //This need to handle the WebAPI Empty as well...
-                }
+                generator = GetGenerator<ControllerEmpty>(); //This need to handle the WebAPI Empty as well...
             }
             else
             {

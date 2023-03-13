@@ -152,6 +152,9 @@
   <data name="add_dotnet_blazorwasm_UserProfile_razor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeFiles\Blazor\wasm\UserProfile.razor.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="add_dotnet_webapp-mvc_LoginPartial_cshtml" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeFiles\WebApp\_LoginPartial.cshtml.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
   <data name="AppNotFound" xml:space="preserve">
     <value>Couldn't find app {0} in tenant {1}</value>
     <comment>0 = EffectiveClientId, 1 = EffectiveTenantId</comment>
@@ -185,6 +188,9 @@
   </data>
   <data name="cm_dotnet_webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cm_dotnet_webapp_mvc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CodeReaderWriter\CodeModifierConfigs\cm_dotnet_webapp_mvc.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="CodeModifierConfigParsingError" xml:space="preserve">
     <value>Error parsing Code Modifier Config for project type {0}, exception: {1}</value>
@@ -226,6 +232,9 @@
   </data>
   <data name="dotnet_webapp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ProjectDescriptions\dotnet_webapp.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="dotnet_webapp_mvc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ProjectDescriptions\dotnet_webapp_mvc.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="ExposingScopes" xml:space="preserve">
     <value>Exposing API scopes for Server App Registration "{0}" ({1})</value>

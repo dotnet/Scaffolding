@@ -441,7 +441,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return nodes.Any(n => StatementExists(n, statement));
         }
 
-        internal static bool StatementExists(SyntaxNode node, string statement) => node.ToString().Contains(statement.Trim(), StringComparison.Ordinal);
+        internal static bool StatementExists(SyntaxNode node, string statement)
+        {
+            var existingBlock = TrimStatement(node.ToString());
+            var statementToCheck = TrimStatement(statement);
+
+            return existingBlock.Contains(statementToCheck);
+        }
 
         // Filter out CodeSnippets that are invalid using FilterOptions
         internal static CodeSnippet[] FilterCodeSnippets(CodeSnippet[] codeSnippets, CodeChangeOptions options) => codeSnippets.Where(cs => FilterOptions(cs.Options, options)).ToArray();

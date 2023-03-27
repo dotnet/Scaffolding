@@ -41,11 +41,7 @@
               }
             },
             {
-              "MultiLineBlock": [
-                "var policy = new AuthorizationPolicyBuilder()",
-                "\t.RequireAuthenticatedUser()",
-                "\t.Build()"
-              ],
+              "Block": "var policy = new AuthorizationPolicyBuilder()\r\n        .RequireAuthenticatedUser()\r\n        .Build()",
               "Parent": "WebApplication.CreateBuilder.Services.AddControllersWithViews",
               "CodeChangeType": "Lambda",
               "Parameter": "options",

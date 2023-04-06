@@ -29,7 +29,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.16</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>6.0.13</VersionPrefix>
+    <VersionPrefix>6.0.14</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--

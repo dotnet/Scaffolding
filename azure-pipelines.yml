@@ -17,7 +17,7 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
-
+ - template: /eng/common/templates/variables/pool-providers.yml
   # used for post-build phases, internal builds only
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-AspNet-SDLValidation-Params
@@ -43,10 +43,10 @@ stages:
           # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
           # Will eventually change this to two BYOC pools.
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCore-Public
+            name: $(DncEngPublicBuildPool)
             demands: ImageOverride -equals 1es-windows-2019-open
           ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCore1ESPool-Internal
+            name: $(DncEngInternalBuildPool)
             demands: ImageOverride -equals 1es-windows-2019
 
         variables:
@@ -99,7 +99,7 @@ stages:
           clean: true
         # Use utility script to run script command dependent on agent OS.
         - script: $(_Script)
-            -configuration $(_BuildConfig) 
+            -configuration $(_BuildConfig)
             -prepareMachine
             $(_InternalBuildArgs)
             $(_ValidateSdkArgs)
@@ -131,10 +131,10 @@ stages:
           timeoutInMinutes: 180
           pool:
             ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
-              vmImage: ubuntu-18.04
+              vmImage: ubuntu-22.04
             ${{ if and(eq(variables['System.TeamProject'], 'internal'), notin(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
-              name: NetCore1ESPool-Internal
-              demands: ImageOverride -equals Build.Ubuntu.1804.Amd64
+              name: $(DncEngInternalBuildPool)
+              demands: ImageOverride -equals Build.Ubuntu.2204.Amd64
           strategy:
             matrix:
               release_configuration:

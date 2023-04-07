@@ -1,12 +1,12 @@
 {
   "tools": {
-    "dotnet": "7.0.104"
+    "dotnet": "8.0.0-preview.2"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23164.3"
+    "Microsoft.DotNet.Arcade.Sdk": "8.0.0-beta.23207.1"
   },
   "sdk": {
-    "version": "7.0.104",
+    "version": "8.0.0-preview.2",
     "allowPrerelease": true
   }
 }

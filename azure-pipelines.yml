@@ -18,6 +18,7 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - template: /eng/common/templates/variables/pool-providers.yml
+
   # used for post-build phases, internal builds only
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-AspNet-SDLValidation-Params

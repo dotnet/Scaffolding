@@ -104,7 +104,7 @@ stages:
           clean: true
         # Use utility script to run script command dependent on agent OS.
         - script: $(_Script)
-            -configuration $(_BuildConfig) 
+            -configuration $(_BuildConfig)
             -prepareMachine
             $(_InternalBuildArgs)
             $(_ValidateSdkArgs)
@@ -130,11 +130,11 @@ stages:
           name: Build
           displayName: Build
           condition: succeeded()
-          
+
       - job: Linux
         timeoutInMinutes: 180
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-22.04
         container: LinuxContainer
         strategy:
           matrix:

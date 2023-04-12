@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
             }
 
             // If projectDescription cannot be inferred, default to Web App
-            return ProjectDescriptions.FirstOrDefault(p => string.Equals(ProjectTypes.WebApp, p.Identifier));
+            return ProjectDescriptions.FirstOrDefault(p => string.Equals($"{ProjectTypeIdPrefix}{ProjectTypes.WebApp}", p.Identifier));
         }
 
         static readonly JsonSerializerOptions serializerOptionsWithComments = new JsonSerializerOptions

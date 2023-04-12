@@ -4,6 +4,10 @@
   "BasedOnProjectDescription": "dotnet-web",
   "MatchesForProjectType": [
     {
+      "FileRelativePath": "Startup.cs",
+      "MatchAny": [ ".AddAzureAD", ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebAppAuthentication", "Microsoft.Owin" ]
+    },
+    {
       "FolderRelativePath": "Pages",
       "FileRelativePath": "Index.cshtml",
       "Sets": "IsWebApp"

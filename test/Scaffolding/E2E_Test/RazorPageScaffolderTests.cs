@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "3" };
 
         public RazorPageScaffolderTests(ITestOutputHelper output)
-            :base (output)
+            : base(output)
         {
 
         }
@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                             Path.Combine("RazorPages", "EmptyPage.txt"),
                             Path.Combine("RazorPages", "EmptyPageCs.txt")
                         },
-                        new string[] 
+                        new string[]
                         {
                             "EmptyPage.cshtml",
                             "EmptyPage.cshtml.cs"
@@ -104,7 +104,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj") }
+                var invocationArgs = new[] { "-p", Path.Combine(TestProjectPath, "Test.csproj") }
                     .Concat(args)
                     .ToArray();
 
@@ -127,7 +127,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjectsWithDbContextInDependency(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj") }
+                var invocationArgs = new[] { "-p", Path.Combine(TestProjectPath, "Test.csproj") }
                     .Concat(PAGE_WITH_DATACONTEXT_IN_DEPENDENCY)
                     .ToArray();
 

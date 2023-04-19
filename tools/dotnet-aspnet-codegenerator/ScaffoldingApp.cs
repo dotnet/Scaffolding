@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
-    internal class ScaffoldingApp: CommandLineApplication
+    internal class ScaffoldingApp : CommandLineApplication
     {
         private const string APPNAME = "aspnet-codegenerator";
         private static readonly string paramDefinitionFilePath = Path.Combine("Generators", "ParameterDefinitions");
@@ -26,7 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             GeneratorArgument = this.Argument("generator", Resources.GeneratorArgumentDesc);
             ProjectPath = this.Option("-p|--project", Resources.ProjectPathOptionDesc, CommandOptionType.SingleValue);
             PackagesPath = this.Option("-n|--nuget-package-dir", "", CommandOptionType.SingleValue);
-            AppConfiguration =this.Option("-c|--configuration", Resources.ConfigurationOptionDesc, CommandOptionType.SingleValue);
+            AppConfiguration = this.Option("-c|--configuration", Resources.ConfigurationOptionDesc, CommandOptionType.SingleValue);
             Framework = this.Option("-tfm|--target-framework", Resources.TargetFrameworkOptionDesc, CommandOptionType.SingleValue);
             BuildBasePath = this.Option("-b|--build-base-path", "", CommandOptionType.SingleValue);
             NoBuild = this.Option("--no-build", "", CommandOptionType.NoValue);
@@ -44,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         public CommandArgument GeneratorArgument { get; }
 
 
-        public override string GetHelpText(string commandName=null)
+        public override string GetHelpText(string commandName = null)
         {
             string helpText = base.GetHelpText(commandName);
             StringBuilder sb = new StringBuilder(helpText);
@@ -101,8 +101,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             sb.AppendLine(Resources.AvailableGeneratorsHeader);
             var maxLenGeneratorName = paramDefinitionsCache.Max(p => p.Key.Length);
-            var formatStr = "  {0,-"+maxLenGeneratorName+"}: {1}";
-            foreach(var paramDef in paramDefinitionsCache.Values)
+            var formatStr = "  {0,-" + maxLenGeneratorName + "}: {1}";
+            foreach (var paramDef in paramDefinitionsCache.Values)
             {
                 sb.AppendLine(string.Format(formatStr, paramDef.Alias, paramDef.Description));
             }
@@ -110,7 +110,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return sb.ToString();
         }
 
-        private static string BuildHelpForGenerator( ParamDefinition generatorParamDef)
+        private static string BuildHelpForGenerator(ParamDefinition generatorParamDef)
         {
             StringBuilder sb = new StringBuilder();
             if (generatorParamDef.Arguments != null && generatorParamDef.Arguments.Any())
@@ -118,7 +118,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 sb.AppendLine();
                 sb.AppendLine(Resources.GeneratorArgsHeader);
                 var maxLenArgument = generatorParamDef.Arguments.Max(a => a.Name.Length);
-                var formatStr = "  {0,-"+maxLenArgument+"} : {1}";
+                var formatStr = "  {0,-" + maxLenArgument + "} : {1}";
                 foreach (var arg in generatorParamDef.Arguments)
                 {
                     sb.AppendLine(string.Format(formatStr, arg.Name, arg.Description));
@@ -130,17 +130,17 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 sb.AppendLine();
                 sb.AppendLine(Resources.GeneratorOptionsHeader);
                 var maxLenOption = generatorParamDef.Options.Max(o => o.Name.Length + o.ShortName.Length) + 4;
-                var formatStr = "  {0,-"+maxLenOption+"} : {1}";
-                
+                var formatStr = "  {0,-" + maxLenOption + "} : {1}";
+
                 foreach (var opt in generatorParamDef.Options)
                 {
                     if (string.IsNullOrEmpty(opt.ShortName))
                     {
-                        sb.AppendLine(string.Format(formatStr, "--"+opt.Name, opt.Description));
+                        sb.AppendLine(string.Format(formatStr, "--" + opt.Name, opt.Description));
                     }
                     else
                     {
-                        sb.AppendLine(string.Format(formatStr, "--"+opt.Name+"|-"+opt.ShortName, opt.Description));
+                        sb.AppendLine(string.Format(formatStr, "--" + opt.Name + "|-" + opt.ShortName, opt.Description));
                     }
                 }
             }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 foreach (Replacement r in replacementsInFile.OrderByDescending(r => r.Index))
                 {
                     string? replaceBy = ComputeReplacement(r.ReplaceBy, reconciledApplicationParameters, consoleLogger);
-                    if (replaceBy != null && replaceBy!=r.ReplaceFrom)
+                    if (replaceBy != null && replaceBy != r.ReplaceFrom)
                     {
                         int index = fileContent.IndexOf(r.ReplaceFrom /*, r.Index*/);
                         if (index != -1)
@@ -65,9 +66,9 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         {
             var errors = new List<string>();
             var output = new List<string>();
-            
+
             IList<string> arguments = new List<string>();
-            
+
             //if project path is present, use it for dotnet user-secrets
             if (!string.IsNullOrEmpty(projectPath))
             {
@@ -84,7 +85,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))
                 .Execute();
-            
+
             if (result.ExitCode != 0)
             {
                 consoleLogger.LogMessage(Resources.Failed, LogMessageType.Error, removeNewLine: true);
@@ -171,14 +172,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))
                 .Execute();
-            
+
             if (result.ExitCode != 0)
             {
                 throw new Exception($"Error while running dotnet-user-secrets set {key} {value}");
             }
-            else 
+            else
             {
-                string consoleOutput = string.Format(Resources.AddingKeyToUserSecrets, key);    
+                string consoleOutput = string.Format(Resources.AddingKeyToUserSecrets, key);
                 consoleLogger.LogMessage($"\n{consoleOutput}\n");
             }
         }
@@ -186,7 +187,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         private static string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters, IConsoleLogger consoleLogger)
         {
             string? replacement = replaceBy;
-            switch(replaceBy)
+            switch (replaceBy)
             {
                 case "Application.ClientSecret":
                     string? password = reconciledApplicationParameters.PasswordCredentials.LastOrDefault();
@@ -240,7 +241,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         replacement +=
                             "\n                options.ProviderOptions.DefaultAccessTokenScopes.Add(\"User.Read\");";
 
-                    }                    
+                    }
                     break;
                 case "Application.CalledApiScopes":
                     replacement = reconciledApplicationParameters.CalledApiScopes
@@ -255,7 +256,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                         && !string.IsNullOrEmpty(reconciledApplicationParameters.Domain)
                         && reconciledApplicationParameters.Domain.EndsWith(".onmicrosoft.com"))
                     {
-                        replacement = "https://"+reconciledApplicationParameters.Domain.Replace(".onmicrosoft.com", ".b2clogin.com")
+                        replacement = "https://" + reconciledApplicationParameters.Domain.Replace(".onmicrosoft.com", ".b2clogin.com")
                             .Replace("aadB2CInstance", reconciledApplicationParameters.Domain1);
                     }
                     else

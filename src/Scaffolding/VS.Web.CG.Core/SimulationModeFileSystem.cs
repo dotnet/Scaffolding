@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -141,9 +141,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
         }
-#endregion
+        #endregion
 
-#region Directory Operations
+        #region Directory Operations
         public void CreateDirectory(string path)
         {
             if (!DirectoryExists(path))
@@ -169,7 +169,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 }
 
                 var deletedParents = FileSystemChanges.Where(f => path.StartsWith(f.FullPath) && f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory);
-                foreach(var deletedParent in deletedParents)
+                foreach (var deletedParent in deletedParents)
                 {
                     FileSystemChangeTracker.RemoveChange(deletedParent);
                 }
@@ -187,7 +187,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             return (Directory.Exists(path) && !(fileSystemChange.FileSystemChangeType == FileSystemChangeType.RemoveDirectory))
                 || (fileSystemChange.FileSystemChangeType == FileSystemChangeType.AddDirectory);
-                
+
         }
 
         public void RemoveDirectory(string path, bool recursive)
@@ -200,7 +200,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var change = FileSystemChanges.FirstOrDefault(f => f.FullPath.Equals(path, PathComparisonType));
 
             var subDirectoryChanges = FileSystemChanges.Where(f => f.FullPath.StartsWith(path, PathComparisonType));
-            if (!recursive) {
+            if (!recursive)
+            {
                 if (change != null && change.FileSystemChangeType == FileSystemChangeType.AddDirectory)
                 {
                     if (subDirectoryChanges.Any())
@@ -229,13 +230,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 else
                 {
                     var files = EnumerateFiles(path, "*", SearchOption.AllDirectories);
-                    foreach(var file in files)
+                    foreach (var file in files)
                     {
                         DeleteFile(file);
                     }
 
                     var subDirs = EnumerateDirectories(path, "*", SearchOption.AllDirectories);
-                    foreach(var subDir in subDirs)
+                    foreach (var subDir in subDirs)
                     {
                         RemoveDirectory(subDir, false);
                     }
@@ -246,7 +247,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
         private IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            if(!DirectoryExists(path))
+            if (!DirectoryExists(path))
             {
                 throw new IOException(string.Format(MessageStrings.PathNotFound, path));
             }
@@ -258,7 +259,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             IEnumerable<FileSystemChangeInformation> changedDirs = GetChangesFromDirectory(
                 path,
                 searchOption,
-                f=>(f.FileSystemChangeType == FileSystemChangeType.AddDirectory || f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory));
+                f => (f.FileSystemChangeType == FileSystemChangeType.AddDirectory || f.FileSystemChangeType == FileSystemChangeType.RemoveDirectory));
 
             List<string> enumeratedDirs = new List<string>(dirsOnDisk);
 
@@ -312,7 +313,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             return enumeratedFiles;
         }
-#endregion
+        #endregion
 
         private IEnumerable<FileSystemChangeInformation> GetChangesFromDirectory(
             string path,

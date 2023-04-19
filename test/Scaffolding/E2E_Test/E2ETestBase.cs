@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,11 +15,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 {
     public class E2ETestBase
     {
-        #if RELEASE
+#if RELEASE
         public const string Configuration = "Release";
-        #else
+#else
         public const string Configuration = "Debug";
-        #endif
+#endif
 
         public const string E2ESkipReason = "Disabling E2E test";
         public const string codegeneratorToolName = "aspnet-codegenerator";
@@ -43,7 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
             Output.WriteLine($"Executing {muxerPath} {string.Join(" ", invocationArgs)}");
 
-            var exitCode = Command.Create(muxerPath, invocationArgs.Concat(new [] {"--no-build"}))
+            var exitCode = Command.Create(muxerPath, invocationArgs.Concat(new[] { "--no-build" }))
                 .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
                 .OnOutputLine(l => Output.WriteLine(l))
                 .OnErrorLine(l => Output.WriteLine(l))

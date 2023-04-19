@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -21,11 +21,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         /// <param name="type">Type of the dependency. <see cref="DependencyType"/></param>
         /// <param name="resolved">Indicates whether this dependency is resolved on disk or not.</param>
         public DependencyDescription(
-            string name, 
-            string version, 
-            string path, 
-            string targetFramework, 
-            DependencyType type, 
+            string name,
+            string version,
+            string path,
+            string targetFramework,
+            DependencyType type,
             bool resolved)
         {
             if (string.IsNullOrEmpty(name))

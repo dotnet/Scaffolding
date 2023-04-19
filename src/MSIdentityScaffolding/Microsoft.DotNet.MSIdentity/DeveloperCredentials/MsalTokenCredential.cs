@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             }
 
             // Note: In the future, the token type *could* be POP instead of Bearer
-            return new AccessToken(result!.AccessToken!, result.ExpiresOn); 
+            return new AccessToken(result!.AccessToken!, result.ExpiresOn);
         }
 
         private async Task<AuthenticationResult?> GetAuthenticationWithAccount(string[] scopes, IPublicClientApplication app, IAccount? account, CancellationToken cancellationToken)
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             {
                 // AAD error codes: https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
                 var errorMessage = ex.Message.Contains("AADSTS70002") // "The client does not exist or is not enabled for consumers"
-                    ? Resources.ClientDoesNotExist 
+                    ? Resources.ClientDoesNotExist
                     : string.Join(Environment.NewLine, Resources.SignInError, ex.Message);
 
                 // we want to exit here. Re-sign in will not resolve the issue.

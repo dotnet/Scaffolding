@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -42,12 +42,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
             _output = output;
         }
 
-        [Theory (Skip="Could not determine a valid location to Msbuild")]
+        [Theory(Skip = "Could not determine a valid location to Msbuild")]
         [InlineData("Root/Root.csproj", ".", "../Library1/Library1.csproj")]
         [InlineData("src/Root/Root.csproj", ".", "../../Library1/Library1.csproj")]
         public void TestGetProjectReferenceInformation(string rootProjectPath, string libraryDirectoryPath, string relativePathToLibrary)
         {
-            using(var temporaryFileProvider = new TemporaryFileProvider())
+            using (var temporaryFileProvider = new TemporaryFileProvider())
             {
                 rootProjectPath = Path.Combine(temporaryFileProvider.Root, rootProjectPath);
                 Directory.CreateDirectory(Path.Combine(
@@ -69,7 +69,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test
                     temporaryFileProvider);
                 var projectReferenceInformation = ProjectReferenceInformationProvider.GetProjectReferenceInformation(
                     rootProjectPath,
-                    new string[] {relativePathToLibrary});
+                    new string[] { relativePathToLibrary });
 
                 Assert.NotNull(projectReferenceInformation);
             }

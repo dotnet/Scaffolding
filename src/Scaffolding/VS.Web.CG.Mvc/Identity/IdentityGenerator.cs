@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -105,7 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             // For non-default bootstrap versions, the content is packaged under "Identity_Versioned\[Version_Identifier]\*"
             // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
-            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal) || 
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal) ||
                 string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap4, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
@@ -215,7 +215,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     templateModel.FilesToGenerate = templateModel.FilesToGenerate.Where((source, index) => index != hostingStartupIndex).ToArray();
                 }
-                
+
                 //edit Program.cs in minimal hosting scenario
                 await EditProgramCsForIdentity(
                     new ModelTypesLocator(_workspace),
@@ -351,7 +351,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (stringToModify.Contains(OptionsUseConnectionString))
             {
                 modifiedString = modifiedString.Replace("options.{0}",
-                    databaseProvider.Equals(DbProvider.SQLite) ?  $"options.{UseSqlite}" : $"options.{UseSqlServer}");
+                    databaseProvider.Equals(DbProvider.SQLite) ? $"options.{UseSqlite}" : $"options.{UseSqlServer}");
             }
             if (stringToModify.Contains(GetConnectionString))
             {

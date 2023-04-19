@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         {
             _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
         }
-        
+
         public IEnumerable<ModelType> GetAllTypes()
         {
             return _projectWorkspace.CurrentSolution.Projects
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         public IEnumerable<Document> GetAllDocuments()
         {
             var documents = new List<Document>();
-            var allDocuments =  _projectWorkspace.CurrentSolution.Projects
+            var allDocuments = _projectWorkspace.CurrentSolution.Projects
                 .Select(project => project.Documents);
             foreach (var documentList in allDocuments)
             {
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 {
                     return false;
                 }
-                
+
                 //Check for namespace to be the same.
                 var isNamespaceEqual = (Object.ReferenceEquals(x.ContainingNamespace, y.ContainingNamespace)
                         || ((x.ContainingNamespace != null && y.ContainingNamespace != null)
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
             public int GetHashCode(ITypeSymbol obj)
             {
-                if(Object.ReferenceEquals(obj, null))
+                if (Object.ReferenceEquals(obj, null))
                 {
                     return 0;
                 }

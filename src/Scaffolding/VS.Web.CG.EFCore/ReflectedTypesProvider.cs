@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -11,7 +11,7 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore 
+namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class ReflectedTypesProvider
     {
@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
              ICodeGenAssemblyLoadContext loader,
              ILogger logger)
         {
-            if (compilation ==null)
+            if (compilation == null)
             {
                 throw new ArgumentNullException(nameof(compilation));
             }
@@ -98,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public Type GetReflectedType(string modelType, bool lookInDependencies)
         {
-            if(string.IsNullOrEmpty(modelType))
+            if (string.IsNullOrEmpty(modelType))
             {
                 throw new ArgumentNullException(nameof(modelType));
             }
@@ -141,7 +141,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
                         continue;
                     }
-                    
+
                 }
             }
 
@@ -164,12 +164,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 return null;
             }
 
-            if(string.IsNullOrEmpty(modelTypeName))
+            if (string.IsNullOrEmpty(modelTypeName))
             {
                 throw new ArgumentNullException(nameof(modelTypeName));
             }
 
-            if(assembly == null)
+            if (assembly == null)
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
@@ -205,7 +205,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
                         continue;
                     }
-                    
+
                 }
             }
 

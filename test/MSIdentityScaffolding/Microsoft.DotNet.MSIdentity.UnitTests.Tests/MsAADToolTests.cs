@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -20,11 +23,11 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 "{  \"id\":\"/tenants/AAAAAA-bbbbbb-CCCCCC-dddd-EEEEEEEE\",\"tenantId\":\"AAAAAA-bbbbbb-CCCCCC-dddd-EEEEEEEE\",\"countryCode\":\"US\",\"displayName\":\"NET AAD App\",\"domains\":[\"netaadapp.onmicrosoft.com\"],\"tenantCategory\":\"Home\",\"defaultDomain\":\"netaadapp.onmicrosoft.com\",\"tenantType\":\"AAD\"}," +
                 "{  \"id\":\"/tenants/EEEEEE-dddddd-CCCCCC-bbbb-AAAAAAAA\",\"tenantId\":\"EEEEEE-dddddd-CCCCCC-bbbb-AAAAAAAA\",\"countryCode\":\"US\",\"displayName\":\"NET AAD B2C App\",\"domains\":[\"netaadb2capp.onmicrosoft.com\"],\"tenantCategory\":\"Home\",\"defaultDomain\":\"netaadb2capp.onmicrosoft.com\",\"tenantType\":\"AAD B2C\"}]}";
 
-        public static ProvisioningToolOptions ToolOptions 
+        public static ProvisioningToolOptions ToolOptions
         {
-            get 
+            get
             {
-                return new ProvisioningToolOptions 
+                return new ProvisioningToolOptions
                 {
                     TenantId = "abcdefg",
                     Username = "testUser",

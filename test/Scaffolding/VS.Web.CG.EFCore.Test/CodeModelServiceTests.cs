@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -50,29 +50,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             return rootContext;
         }
 
-        [Fact(Skip="test fail")]
+        [Fact(Skip = "test fail")]
         public async void TestGetModelMetadata_WithoutDbContext()
         {
-           using (var fileProvider = new TemporaryFileProvider())
-           {
-               SetupProjects(fileProvider);
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                SetupProjects(fileProvider);
 
-               var appName = MsBuildProjectStrings.RootProjectName;
-               var path = Path.Combine(fileProvider.Root, "Root", appName);
-               var CodeModelService = GetCodeModelService(path, appName);
-               var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
-               var metadata = await CodeModelService.GetModelMetadata(modelType);
-               Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-               Assert.False(metadata.ModelMetadata.Navigations.Any());
-               Assert.False(metadata.ModelMetadata.Properties.Any());
+                var appName = MsBuildProjectStrings.RootProjectName;
+                var path = Path.Combine(fileProvider.Root, "Root", appName);
+                var CodeModelService = GetCodeModelService(path, appName);
+                var modelType = _modelTypesLocator.GetType("ModelWithMatchingShortName").First();
+                var metadata = await CodeModelService.GetModelMetadata(modelType);
+                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
+                Assert.False(metadata.ModelMetadata.Navigations.Any());
+                Assert.False(metadata.ModelMetadata.Properties.Any());
 
-               modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
-               metadata = await CodeModelService.GetModelMetadata(modelType);
-               Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
-               Assert.False(metadata.ModelMetadata.Navigations.Any());
-               Assert.False(metadata.ModelMetadata.PrimaryKeys.Any());
-               Assert.Equal(4, metadata.ModelMetadata.Properties.Length);
-           }
+                modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
+                metadata = await CodeModelService.GetModelMetadata(modelType);
+                Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
+                Assert.False(metadata.ModelMetadata.Navigations.Any());
+                Assert.False(metadata.ModelMetadata.PrimaryKeys.Any());
+                Assert.Equal(4, metadata.ModelMetadata.Properties.Length);
+            }
         }
 
         private void SetupProjects(TemporaryFileProvider fileProvider)

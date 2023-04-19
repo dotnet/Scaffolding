@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -24,8 +24,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             loadContext = new DefaultAssemblyLoadContext();
             _outputHelper = outputHelper;
         }
-        
-        [Fact (Skip="Rewrite this for msbuild")]
+
+        [Fact(Skip = "Rewrite this for msbuild")]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
             // TODO Use Msbuild Project here.
@@ -63,7 +63,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Assert.True(result.ErrorMessages.Any());
         }
 
-        [Fact(Skip="test fail")]
+        [Fact(Skip = "test fail")]
         public void CommonUtilities_TestGetAssemblyFromCompilation_MsBuild()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -73,7 +73,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 var path = Path.Combine(fileProvider.Root, "Root", MsBuildProjectStrings.RootProjectName);
 
                 var projectContext = GetProjectContext(path, true);
-                
+
                 var references = projectContext.CompilationAssemblies.SelectMany(c => c.GetMetadataReference());
                 var code = @"using System;
                             namespace Sample { 

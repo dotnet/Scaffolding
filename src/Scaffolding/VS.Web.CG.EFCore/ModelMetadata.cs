@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Linq;
@@ -69,7 +69,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <returns></returns>
         private IPropertyMetadata[] GetSortedProperties(IEntityType entityType)
         {
-            if(entityType == null)
+            if (entityType == null)
             {
                 throw new ArgumentNullException(nameof(entityType));
             }
@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 .Where(p => !p.IsShadowProperty())
                 .Select(p => p.ToPropertyMetadata(DbContexType));
 
-            foreach(var p in entityProperties)
+            foreach (var p in entityProperties)
             {
                 properties.Add(p.PropertyName, p);
             }
@@ -88,9 +88,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             var reflectedProperties = entityType.ClrType.GetProperties();
             var sortedProperties = new IPropertyMetadata[entityProperties.Count()];
             int i = 0;
-            foreach(var r in reflectedProperties)
+            foreach (var r in reflectedProperties)
             {
-                if(properties.ContainsKey(r.Name))
+                if (properties.ContainsKey(r.Name))
                 {
                     sortedProperties[i++] = properties[r.Name];
                 }

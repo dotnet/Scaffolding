@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -168,8 +168,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
             filesToGenerate.Add(IdentityHostingStartup);
-            
-            
+
+
             filesToGenerate.Add(ReadMe);
 
             return filesToGenerate.Distinct(new IdentityGeneratorFileComparer()).ToArray();
@@ -193,12 +193,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (fileSystem == null)
             {
-              throw new ArgumentNullException(nameof(fileSystem));
+                throw new ArgumentNullException(nameof(fileSystem));
             }
 
             if (string.IsNullOrEmpty(rootPath))
             {
-              throw new ArgumentException(nameof(rootPath));
+                throw new ArgumentException(nameof(rootPath));
             }
 
             var requiredViewImports = new List<IdentityGeneratorFile>();
@@ -280,7 +280,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 peerFiles.Add(layoutPeerViewStart);
             }
-            
+
             layoutPeerFiles = peerFiles;
             return true;
         }

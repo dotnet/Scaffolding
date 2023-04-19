@@ -1,15 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -33,10 +29,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 .Select(p => p.Name)
                 .ToArray();
 
-            // The default for the display property is the primary key of the navigation. 
+            // The default for the display property is the primary key of the navigation.
             DisplayPropertyName = PrimaryKeyNames[0];
 
-            // If there is a non nullable string property in the navigation's target type, we use that instead. 
+            // If there is a non nullable string property in the navigation's target type, we use that instead.
             var displayPropertyCandidate = navigation
                 .TargetEntityType
                 .GetProperties()

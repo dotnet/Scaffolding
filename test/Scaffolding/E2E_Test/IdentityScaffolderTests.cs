@@ -1,10 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.Internal;
 using Xunit;
 using Xunit.Abstractions;
@@ -41,12 +40,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
                 Scaffold(args, TestProjectPath);
 
-                foreach(var file in IdentityGeneratorFilesConfig.Templates)
+                foreach (var file in IdentityGeneratorFilesConfig.Templates)
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Template file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
 
-                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles(IdentityGeneratorFilesConfig.LayoutFileDisposition.Generate))
+                foreach (var file in IdentityGeneratorFilesConfig.StaticFiles(IdentityGeneratorFilesConfig.LayoutFileDisposition.Generate))
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Static file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
@@ -78,12 +77,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
                 Scaffold(args, TestProjectPath);
 
-                foreach(var file in IdentityGeneratorFilesConfig.Templates)
+                foreach (var file in IdentityGeneratorFilesConfig.Templates)
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Template file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }
 
-                foreach(var file in IdentityGeneratorFilesConfig.StaticFiles(IdentityGeneratorFilesConfig.LayoutFileDisposition.Generate))
+                foreach (var file in IdentityGeneratorFilesConfig.StaticFiles(IdentityGeneratorFilesConfig.LayoutFileDisposition.Generate))
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Static file does not exist: '{Path.Combine(TestProjectPath, file)}'");
                 }

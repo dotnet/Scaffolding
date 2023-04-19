@@ -1,11 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Internal
 {
@@ -14,21 +12,21 @@ namespace Microsoft.Extensions.Internal
         /// <summary>
         /// Undo the processing which took place to create string[] args in Main,
         /// so that the next process will receive the same string[] args
-        /// 
+        ///
         /// See here for more info:
         /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
-        { 
+        {
             return string.Join(" ", EscapeArgArray(args));
         }
 
         /// <summary>
         /// Undo the processing which took place to create string[] args in Main,
         /// so that the next process will receive the same string[] args
-        /// 
+        ///
         /// See here for more info:
         /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
         /// </summary>
@@ -96,7 +94,7 @@ namespace Microsoft.Extensions.Internal
                     sb.Append(arg[i]);
                 }
             }
-            
+
             if (needsQuotes) sb.Append("\"");
 
             return sb.ToString();

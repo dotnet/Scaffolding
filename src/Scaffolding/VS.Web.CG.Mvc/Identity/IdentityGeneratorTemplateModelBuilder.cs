@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -610,7 +610,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 // So have to use StartsWith instead of comparing names.
                 // 1. IdentityDbContext
                 // 2. IdentityDbContext <TUser, TRole, TKey>
-                // 3. IdentityDbContext <TUser, TRole, string> 
+                // 3. IdentityDbContext <TUser, TRole, string>
                 // 4. IdentityDbContext<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken> etc.
                 if (parentType.Name.StartsWith("IdentityDbContext")
                     && parentType.Namespace == "Microsoft.AspNetCore.Identity.EntityFrameworkCore"
@@ -694,7 +694,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (model.UseSqlite || model.UseSqlite2)
             {
 #pragma warning restore CS0618 // Type or member is obsolete
-                //instead of throwing an error, letting the devs know that its obsolete. 
+                //instead of throwing an error, letting the devs know that its obsolete.
                 _logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
                 //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
                 if (string.IsNullOrEmpty(model.DatabaseProviderString))

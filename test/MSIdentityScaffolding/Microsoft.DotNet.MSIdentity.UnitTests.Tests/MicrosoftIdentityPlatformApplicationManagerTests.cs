@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,7 +90,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var clientId = "id";
             var permissionId = "permissionId";
 
-            var originalApp = new Graph.Application {
+            var originalApp = new Graph.Application
+            {
                 Api = new Graph.ApiApplication
                 {
                     PreAuthorizedApplications = new List<PreAuthorizedApplication>

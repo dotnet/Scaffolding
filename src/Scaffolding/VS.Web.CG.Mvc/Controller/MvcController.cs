@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
     /// <summary>
-    /// MvcController class provides basic functionality for scaffolding an MVC controller. 
+    /// MvcController class provides basic functionality for scaffolding an MVC controller.
     /// The specific type of controller (Empty, Controller with read write actions etc, need to provide the template names to be used for scaffolding.
     /// </summary>
     public abstract class MvcController : ControllerGeneratorBase
@@ -57,6 +57,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
                 return MessageStrings.ControllerNameRequired;
             }
         }
-        
+
     }
 }

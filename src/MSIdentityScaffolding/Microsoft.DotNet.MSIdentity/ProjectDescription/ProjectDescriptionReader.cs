@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
         {
             if (!string.IsNullOrEmpty(projectTypeId) && !projectTypeId.Equals(ProjectTypeIdPrefix))
             {
-               return ProjectDescriptions.FirstOrDefault(p => string.Equals(projectTypeId, p.Identifier));
+                return ProjectDescriptions.FirstOrDefault(p => string.Equals(projectTypeId, p.Identifier));
             }
 
             // TODO: could be both a Web app and WEB API.
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
             if (projectDescription == null)
             {
-                throw new FormatException($"Resource file { propertyInfo.Name } could not be parsed. ");
+                throw new FormatException($"Resource file {propertyInfo.Name} could not be parsed. ");
             }
             if (!projectDescription.IsValid())
             {

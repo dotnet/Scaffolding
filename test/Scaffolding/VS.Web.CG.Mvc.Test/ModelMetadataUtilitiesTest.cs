@@ -1,13 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 using Moq;
@@ -30,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             modelTypesLocator = new Mock<IModelTypesLocator>();
             modelTypesLocatorWithoutContext = new Mock<IModelTypesLocator>();
             codeModelService = new Mock<ICodeModelService>();
-            logger= new Mock<ILogger>();
+            logger = new Mock<ILogger>();
         }
 
         [Fact]

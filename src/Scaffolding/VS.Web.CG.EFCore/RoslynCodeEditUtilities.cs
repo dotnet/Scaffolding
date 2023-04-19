@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <summary>
         /// Adds a using directive if one doesn't already exist at the top of file
         /// after existing using directives.
-        /// 
+        ///
         /// Does not handle the scenarios where usings are defined within an inner node of
         /// given root node, ex, if the root node is CompilationUnit and usings are defined
         /// within a Namespace Declaration instead of top of the file, the new using is

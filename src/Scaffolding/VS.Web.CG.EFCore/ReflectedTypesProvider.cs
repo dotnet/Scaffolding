@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +11,7 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore 
+namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class ReflectedTypesProvider
     {
@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
              ICodeGenAssemblyLoadContext loader,
              ILogger logger)
         {
-            if (compilation ==null)
+            if (compilation == null)
             {
                 throw new ArgumentNullException(nameof(compilation));
             }
@@ -53,7 +53,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private CompilationResult GetCompilationResult(Compilation compilation)
         {
-            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream.  
+            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream.
             // On desktop if the assembly name is different, MVC fails to load the assembly as it is not found on disk.
 
             var newAssemblyName = Path.GetFileNameWithoutExtension(compilation.AssemblyName);
@@ -98,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public Type GetReflectedType(string modelType, bool lookInDependencies)
         {
-            if(string.IsNullOrEmpty(modelType))
+            if (string.IsNullOrEmpty(modelType))
             {
                 throw new ArgumentNullException(nameof(modelType));
             }
@@ -136,12 +136,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     }
                     catch (Exception ex)
                     {
-                        // This is a best effort approach. If we cannot load an assembly for any reason, 
+                        // This is a best effort approach. If we cannot load an assembly for any reason,
                         // just ignore it and look for the type in the next one.
                         _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
                         continue;
                     }
-                    
+
                 }
             }
 
@@ -153,7 +153,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return _compilationResult?.ErrorMessages;
         }
 
-        // Look for the model type in the current project. 
+        // Look for the model type in the current project.
         // If its not found in the current project, look in the dependencies.
         private Type GetTypeFromAssembly(string modelTypeName, Assembly assembly, bool lookInDependencies)
         {
@@ -164,12 +164,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 return null;
             }
 
-            if(string.IsNullOrEmpty(modelTypeName))
+            if (string.IsNullOrEmpty(modelTypeName))
             {
                 throw new ArgumentNullException(nameof(modelTypeName));
             }
 
-            if(assembly == null)
+            if (assembly == null)
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
@@ -200,12 +200,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     }
                     catch (Exception ex)
                     {
-                        // This is a best effort approach. If we cannot load an assembly for any reason, 
+                        // This is a best effort approach. If we cannot load an assembly for any reason,
                         // just ignore it and look for the type in the next one.
                         _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
                         continue;
                     }
-                    
+
                 }
             }
 

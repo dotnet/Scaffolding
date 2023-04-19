@@ -1,11 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
-using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Messaging

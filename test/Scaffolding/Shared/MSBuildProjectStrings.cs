@@ -1,10 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-using System;
-using System.IO;
-using System.Text;
-using System.Xml;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -26,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -65,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 </Project>
 ";
 
-public const string RootProjectTxtWithoutEF = @"
+        public const string RootProjectTxtWithoutEF = @"
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
@@ -74,7 +69,7 @@ public const string RootProjectTxtWithoutEF = @"
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -117,7 +112,7 @@ public const string RootProjectTxtWithoutEF = @"
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -206,7 +201,7 @@ namespace WebApplication1
 }
 ";
 
-public const string StartupTxtWithoutEf = @"using System;
+        public const string StartupTxtWithoutEf = @"using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -311,7 +306,7 @@ routes.MapDelete(""/api/Car/{id}"", (int id) =>
 {
     //return Results.Ok(new Car { ID = id });
 })
-.WithName(""DeleteCar"");  
+.WithName(""DeleteCar"");
     }
 }";
         public const string EndpointsEmptyClass = @"namespace MinimalApiTest { static class Endpoints { } } ";
@@ -350,7 +345,7 @@ app.Run();
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -451,7 +446,7 @@ public class Manufacturer
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -498,7 +493,7 @@ public class Manufacturer
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -587,7 +582,7 @@ namespace WebApplication1
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -634,7 +629,7 @@ namespace DAL
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -694,7 +689,7 @@ namespace Test.Data
 }
 ";
 
-      public const string TestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        public const string TestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************
 Target: EvaluateProjectInfoForCodeGeneration
@@ -823,7 +818,7 @@ namespace Test.Data
 }
 ";
 
-// Strings for model property defined in db context base class
+        // Strings for model property defined in db context base class
         public const string DbContextInheritanceProgramName = "Program.cs";
         public const string DbContextInheritanceProjectProgramText = @"using System;
 using Microsoft.AspNetCore;
@@ -847,7 +842,7 @@ namespace Test
 }
 ";
 
-    public const string DbContextInheritanceProjectTxt = @"
+        public const string DbContextInheritanceProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
@@ -856,7 +851,7 @@ namespace Test
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
@@ -1136,7 +1131,7 @@ namespace Test.Models
     }
 }
 ";
-      public const string DbContextInheritanceTestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        public const string DbContextInheritanceTestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************
 Target: EvaluateProjectInfoForCodeGeneration
@@ -1194,7 +1189,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
 </Project>
 ";
 
- public const string ProjectContextWriterMsbuildHelperText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        public const string ProjectContextWriterMsbuildHelperText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************
 Target: EvaluateProjectInfoForCodeGeneration

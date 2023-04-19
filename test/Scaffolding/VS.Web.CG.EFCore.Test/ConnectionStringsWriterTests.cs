@@ -1,17 +1,10 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test;
-using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
 using Moq;
 using Xunit;
@@ -56,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   }
 }";
 
-            var appSettingsPath = Path.Combine(AppBase, "appsettings.json"); 
+            var appSettingsPath = Path.Combine(AppBase, "appsettings.json");
             fs.FileExists(appSettingsPath);
             var appsettingsstring = fs.ReadAllText(appSettingsPath);
             Assert.Equal(expected, fs.ReadAllText(appSettingsPath), ignoreCase: false, ignoreLineEndingDifferences: true);

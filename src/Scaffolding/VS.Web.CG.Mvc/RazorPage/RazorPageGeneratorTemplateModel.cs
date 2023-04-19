@@ -1,9 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 // TODO: determine exactly what is needed here. Initially, this is a copy of ViewGeneratorTemplateModel
@@ -31,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         public IModelMetadata ModelMetadata { get; set; }
 
         public string JQueryVersion { get; set; }
-        public string NullableEnabled { get; set; } 
+        public string NullableEnabled { get; set; }
 
     }
 }

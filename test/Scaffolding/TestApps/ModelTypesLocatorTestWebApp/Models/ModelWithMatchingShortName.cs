@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ModelTypesLocatorTestWebApp.Models
+﻿namespace ModelTypesLocatorTestWebApp.Models
 {
     public class ModelWithMatchingShortName
     {

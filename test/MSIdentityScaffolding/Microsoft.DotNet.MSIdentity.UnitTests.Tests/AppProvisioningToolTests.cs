@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Newtonsoft.Json.Linq;
@@ -273,13 +276,13 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             var expected = JObject.FromObject(new
-                {
-                    Domain = inputDomain,
-                    TenantId = inputTenantId,
-                    ClientId = inputClientId,
-                    Instance = inputInstance,
-                    CallbackPath = inputCallbackPath
-                });
+            {
+                Domain = inputDomain,
+                TenantId = inputTenantId,
+                ClientId = inputClientId,
+                Instance = inputInstance,
+                CallbackPath = inputCallbackPath
+            });
 
             (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
             Assert.True(JToken.DeepEquals(expected, modifications));
@@ -328,7 +331,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ResetPasswordPolicyId = DefaultProperties.ResetPasswordPolicyId,
                 EditProfilePolicyId = DefaultProperties.EditProfilePolicyId,
                 EnablePiiLogging = true
-        });
+            });
 
             (bool needsUpdate, JObject modifications) = AppSettingsModifier.GetModifiedAzureAdBlock(appSettings, parameters);
 

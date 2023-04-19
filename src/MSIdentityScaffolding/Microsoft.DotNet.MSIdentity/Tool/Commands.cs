@@ -1,6 +1,9 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
-    public class Commands 
+    public class Commands
     {
         public const string LIST_AAD_APPS_COMMAND = "--list-aad-apps";
         public const string LIST_SERVICE_PRINCIPALS_COMMAND = "--list-service-principals";

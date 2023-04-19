@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 
@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
         public string BootstrapVersion { get; set; }
-  
+
         public CommandLineGeneratorModel()
         {
         }

@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Azure.Core;
 using System;
 using System.Net.Http;
@@ -48,7 +51,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                         response.EnsureSuccessStatusCode();
                         if (response.IsSuccessStatusCode)
                         {
-                            content =  await response.Content.ReadAsStringAsync();
+                            content = await response.Content.ReadAsStringAsync();
                         }
                     });
                 await task;

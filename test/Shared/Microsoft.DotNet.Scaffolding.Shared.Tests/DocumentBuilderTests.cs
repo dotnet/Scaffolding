@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,7 +64,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { new string[] { "System", "System.Duplicate"} })]
+        [InlineData(new object[] { new string[] { "System", "System.Duplicate" } })]
         public async Task AddUsingsTestDuplicate(string[] usings)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
@@ -88,7 +91,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false","" , null } })]
+        [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public string Name { get; set; }", "bool IsProperty { get; set; } = false", "", null } })]
         public async Task AddPropertiesTests(string[] properties)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
@@ -238,7 +241,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         [Theory]
         [InlineData(new object[] { new string[] { "static readonly string[] scopeRequiredByApi = new string[] { \"access_as_user\" }", "public int Id { get; set; } " },
                                    new string[] { "public string Name { get; set; }", "bool IsProperty { get; set; } = false", "", null } })]
-        public async Task PropertyExistsTests(string [] existingProperties, string[] nonExistingProperties)
+        public async Task PropertyExistsTests(string[] existingProperties, string[] nonExistingProperties)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
 
@@ -336,7 +339,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
             Assert.True(snippetNullTriviaWithAddition.LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
             Assert.True(snippetWithTriviaWithAddition.LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
-            Assert.True(snippetNoSpaceTriviaWithAddition.LeadingTrivia.NumberOfSpaces ==  whitespaceBeingAdded);
+            Assert.True(snippetNoSpaceTriviaWithAddition.LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
             Assert.True(snippetFourSpaceTriviaWithAddition.LeadingTrivia.NumberOfSpaces == 4 + whitespaceBeingAdded);
 
             var formattedCodeSnippets = DocumentBuilder.AddLeadingTriviaSpaces(snippets, whitespaceBeingAdded);

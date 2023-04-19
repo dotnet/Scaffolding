@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -242,7 +242,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             {
                 NamespaceName = namespaceName,
                 NoPageModel = razorGeneratorModel.NoPageModel,
-                PageModelClassName = razorGeneratorModel.RazorPageName+"Model",
+                PageModelClassName = razorGeneratorModel.RazorPageName + "Model",
                 RazorPageName = razorGeneratorModel.RazorPageName,
                 LayoutPageFile = razorGeneratorModel.LayoutPage,
                 IsLayoutPageSelected = isLayoutSelected,

@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -184,7 +187,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         {
             var namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
             var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault() ??
-                            root?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();  
+                            root?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();
             if (classNode?.ChildNodes().FirstOrDefault(
                 n => n is MethodDeclarationSyntax syntax &&
                 syntax.Identifier.ToString().Equals(methodIdentifier, StringComparison.OrdinalIgnoreCase)) is MethodDeclarationSyntax method)
@@ -203,7 +206,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
         internal static CodeSnippet[] AddLeadingTriviaSpaces(CodeSnippet[] snippets, int spaces)
         {
-            for(int i = 0; i < snippets.Length; i++)
+            for (int i = 0; i < snippets.Length; i++)
             {
                 var snippet = snippets[i];
                 snippet = AddLeadingTriviaSpaces(snippet, spaces);

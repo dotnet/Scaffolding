@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -44,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             IFilesLocator filesLocator,
             ITemplating templatingService,
             IConnectionStringsWriter connectionStringsWriter)
-            : this (projectContext, applicationInfo, filesLocator, templatingService, connectionStringsWriter, DefaultFileSystem.Instance)
+            : this(projectContext, applicationInfo, filesLocator, templatingService, connectionStringsWriter, DefaultFileSystem.Instance)
         {
         }
 
@@ -186,7 +186,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     var servicesParam = configServicesMethod.ParameterList.Parameters
                         .FirstOrDefault(p => p.Type.ToString().Equals(IServiceCollection));
-                        
+
                     var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
                     if (servicesParam != null)
                     {
@@ -233,7 +233,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
                         dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, dbContextNamespace, useSqlite);
                     }
-                    else if(useTopLevelStatements)
+                    else if (useTopLevelStatements)
                     {
                         dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, dbContextNamespace, useSqlite);
                     }
@@ -274,7 +274,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                             newRoot = newRoot.InsertNodesAfter(statementToInsertAfter, new List<GlobalStatementSyntax>() { SyntaxFactory.GlobalStatement(dbContextExpression) });
                         }
-                       
+
                         return new EditSyntaxTreeResult()
                         {
                             Edited = true,
@@ -345,7 +345,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             return "builder";
         }
-        
+
         private string AddDbContextString(bool minimalHostingTemplate, bool useSqlite, string statementLeadingTrivia)
         {
             string textToAddAtEnd;
@@ -379,7 +379,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 if (namedType != null &&
                     namedType.ContainingAssembly.Name == "Microsoft.Extensions.Configuration.Abstractions" &&
                     namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Extensions.Configuration" &&
-                    namedType.Name == "IConfiguration") 
+                    namedType.Name == "IConfiguration")
                 {
                     return pSymbol;
                 }
@@ -420,7 +420,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     string.Format("Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true",
                         dataBaseName);
             }
-            
+
             // Json.Net loses comments so the above code if requires any changes loses
             // comments in the file. The writeContent bool is for saving
             // a specific case without losing comments - when no changes are needed.

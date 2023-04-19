@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -32,22 +35,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Areas
             IModelTypesLocator modelTypesLocator,
             ILogger logger)
         {
-            if(serviceProvider == null)
+            if (serviceProvider == null)
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            if(applicationInfo == null)
+            if (applicationInfo == null)
             {
                 throw new ArgumentNullException(nameof(applicationInfo));
             }
 
-            if(logger == null)
+            if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            if(modelTypesLocator == null)
+            if (modelTypesLocator == null)
             {
                 throw new ArgumentNullException(nameof(modelTypesLocator));
             }

@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 
@@ -6,7 +9,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
     public class RazorPageWithContextTemplateModel2 : RazorPageWithContextTemplateModel
     {
         public RazorPageWithContextTemplateModel2(ModelType modelType, string dbContextFullTypeName)
-            :base(modelType, dbContextFullTypeName)
+            : base(modelType, dbContextFullTypeName)
         {
         }
 

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]
         public string DataContextClass { get; set; }
 
-        [Option(Name = "useSqlite", ShortName ="sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
+        [Option(Name = "useSqlite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
         public bool UseSqlite { get; set; }
 
         [Option(Name = "referenceScriptLibraries", ShortName = "scripts", Description = "Switch to specify whether to reference script libraries in the generated views")]

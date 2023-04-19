@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Moq;
 using System;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -126,7 +129,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 ModelClass = "testModel2",
                 EndpintsClassName = "testClass2",
             };
-                
+
             Assert.Equal(@"C:\AppPath\Endpoints\Endpoint\testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
             Assert.Equal(@"C:\AppPath\testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
         }

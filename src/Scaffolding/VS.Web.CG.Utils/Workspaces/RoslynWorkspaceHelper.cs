@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,19 +18,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             if (projectReferenceStrings != null && projectReferenceStrings.Any())
             {
                 foreach (string projectReferenceString in projectReferenceStrings)
-                try
-                {
-                    var currentProject = new Project(Path.GetFullPath(projectReferenceString));
-                    if (currentProject != null)
+                    try
                     {
-                        projectReferenceInformation.Add(GetProjectInformation(currentProject));
+                        var currentProject = new Project(Path.GetFullPath(projectReferenceString));
+                        if (currentProject != null)
+                        {
+                            projectReferenceInformation.Add(GetProjectInformation(currentProject));
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Could not load information for project { projectReferenceString }", ex);
-                }
-            } 
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Could not load information for project {projectReferenceString}", ex);
+                    }
+            }
             return projectReferenceInformation;
         }
 

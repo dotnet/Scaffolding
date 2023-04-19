@@ -1,4 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// <returns></returns>
         public static string CreateEscapedIdentifier(string identifier)
         {
-            if(identifier == null)
+            if (identifier == null)
             {
                 throw new ArgumentNullException(nameof(identifier));
             }

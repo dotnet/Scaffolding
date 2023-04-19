@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller

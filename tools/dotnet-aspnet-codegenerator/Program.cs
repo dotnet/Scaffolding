@@ -1,16 +1,16 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.ProjectModel;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {
@@ -309,7 +309,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 path = Path.GetDirectoryName(path);
             } while (path != null);
 
-            throw new DirectoryNotFoundException(string.Format(Resources .TargetDirectoryNotFound, build));
+            throw new DirectoryNotFoundException(string.Format(Resources.TargetDirectoryNotFound, build));
         }
 
         private int Build(ILogger logger, string projectPath, string configuration, string shortFramework, string buildBasePath)

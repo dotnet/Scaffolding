@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -350,7 +351,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             if (stringToModify.Contains(OptionsUseConnectionString))
             {
                 modifiedString = modifiedString.Replace("options.{0}",
-                    databaseProvider.Equals(DbProvider.SQLite) ?  $"options.{UseSqlite}" : $"options.{UseSqlServer}");
+                    databaseProvider.Equals(DbProvider.SQLite) ? $"options.{UseSqlite}" : $"options.{UseSqlServer}");
             }
             if (stringToModify.Contains(GetConnectionString))
             {

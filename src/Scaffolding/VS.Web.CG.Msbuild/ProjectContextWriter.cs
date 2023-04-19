@@ -1,8 +1,8 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -117,7 +117,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
             var projectReferences = msBuildContext.ProjectReferences;
             var projReferenceInformation = GetProjectDependency(projectReferences, msBuildContext.ProjectFullPath);
             msBuildContext.ProjectReferenceInformation = projReferenceInformation;
-            using(var streamWriter = new StreamWriter(File.Create(OutputFile)))
+            using (var streamWriter = new StreamWriter(File.Create(OutputFile)))
             {
                 var json = JsonSerializer.Serialize(msBuildContext);
                 streamWriter.Write(json);

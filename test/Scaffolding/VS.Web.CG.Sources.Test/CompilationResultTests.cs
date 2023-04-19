@@ -1,9 +1,9 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Moq;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 
             Assembly assembly = Assembly.GetEntryAssembly();
 
-            var result =  CompilationResult.FromAssembly(assembly);
+            var result = CompilationResult.FromAssembly(assembly);
 
             Assert.True(result.Success);
         }

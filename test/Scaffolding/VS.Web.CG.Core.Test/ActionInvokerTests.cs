@@ -1,8 +1,8 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -49,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             Assert.True(invokedModel.BoolProperty);
         }
 
-                [Fact]
+        [Fact]
         public void ActionInvoker_Throws_With_Inner_Exception()
         {
             //Arrange
@@ -82,7 +82,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
 
             //Assert
             Assert.Equal(NOT_IMPLEMENTED_MESSAGE, ex.InnerException.Message);
-         }
+        }
 
         private class CodeGeneratorSample
         {

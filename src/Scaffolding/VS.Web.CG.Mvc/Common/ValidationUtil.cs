@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 throw new ArgumentException(string.Format(MessageStrings.ProvideValidArgument, argumentName));
             }
 
-            if(modelTypesLocator == null)
+            if (modelTypesLocator == null)
             {
                 throw new ArgumentNullException(nameof(modelTypesLocator));
             }

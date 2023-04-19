@@ -1,9 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-
-using System;
-using System.IO;
-using System.Text;
-using System.Xml;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -64,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 </Project>
 ";
 
-public const string RootProjectTxtWithoutEF = @"
+        public const string RootProjectTxtWithoutEF = @"
 <Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
@@ -205,7 +201,7 @@ namespace WebApplication1
 }
 ";
 
-public const string StartupTxtWithoutEf = @"using System;
+        public const string StartupTxtWithoutEf = @"using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -693,7 +689,7 @@ namespace Test.Data
 }
 ";
 
-      public const string TestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        public const string TestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************
 Target: EvaluateProjectInfoForCodeGeneration
@@ -822,7 +818,7 @@ namespace Test.Data
 }
 ";
 
-// Strings for model property defined in db context base class
+        // Strings for model property defined in db context base class
         public const string DbContextInheritanceProgramName = "Program.cs";
         public const string DbContextInheritanceProjectProgramText = @"using System;
 using Microsoft.AspNetCore;
@@ -846,7 +842,7 @@ namespace Test
 }
 ";
 
-    public const string DbContextInheritanceProjectTxt = @"
+        public const string DbContextInheritanceProjectTxt = @"
 <Project Sdk=""Microsoft.NET.Sdk.Web"">
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
 
@@ -1135,7 +1131,7 @@ namespace Test.Models
     }
 }
 ";
-      public const string DbContextInheritanceTestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        public const string DbContextInheritanceTestCodeGenerationTargetFileText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************
 Target: EvaluateProjectInfoForCodeGeneration
@@ -1193,7 +1189,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
 </Project>
 ";
 
- public const string ProjectContextWriterMsbuildHelperText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        public const string ProjectContextWriterMsbuildHelperText = @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 <!--
 **********************************************************************************
 Target: EvaluateProjectInfoForCodeGeneration

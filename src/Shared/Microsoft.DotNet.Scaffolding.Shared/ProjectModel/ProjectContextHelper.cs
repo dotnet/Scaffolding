@@ -1,4 +1,15 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+/* Unmerged change from project 'Microsoft.DotNet.Scaffolding.Shared (net8.0)'
+Before:
 // Copyright (c) .NET Foundation. All rights reserved.
+After:
+// Copyright (c) .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+*/
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,7 +19,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
 {

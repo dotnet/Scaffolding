@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Microsoft.Extensions.Internal
         private bool _running = false;
         private Action<string> _stdErrorHandler;
         private Action<string> _stdOutHandler;
-        private static readonly ConsoleLogger _logger = new ConsoleLogger ();
+        private static readonly ConsoleLogger _logger = new ConsoleLogger();
 
         internal static Command CreateDotNet(string commandName, IEnumerable<string> args)
         {
@@ -66,15 +67,15 @@ namespace Microsoft.Extensions.Internal
 
         public override string ToString()
         {
-            var psi = _process .StartInfo;
-            return $"{ psi .FileName } { psi .Arguments }";
+            var psi = _process.StartInfo;
+            return $"{psi.FileName} {psi.Arguments}";
         }
 
         public CommandResult Execute()
         {
             ThrowIfRunning();
             Command._logger.LogMessage(
-                $"Executing external command:\n{ this }\n", LogMessageLevel.Trace
+                $"Executing external command:\n{this}\n", LogMessageLevel.Trace
             );
             _running = true;
             _process.EnableRaisingEvents = true;

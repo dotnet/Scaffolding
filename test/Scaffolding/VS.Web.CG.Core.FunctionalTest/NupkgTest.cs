@@ -1,11 +1,10 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Net;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
@@ -16,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
         private string tfm31 = "lib/netcoreapp3.1";
 
         //TODO Test needs rework. We can't rely on "NUGET_PACKAGES" and those specific versions of packages existing without installing. Should work with the latest release package and newly built local package.
-        [Fact(Skip="Test needs rework")]
+        [Fact(Skip = "Test needs rework")]
         public void CheckFolderStructure()
         {
 

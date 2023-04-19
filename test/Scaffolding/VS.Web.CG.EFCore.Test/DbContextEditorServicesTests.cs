@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test;
@@ -179,7 +179,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         }
 
         public static IEnumerable<object[]> AddDbContextStringData =>
-            new []
+            new[]
             {
                 new object[] { true, string.Empty, DbProvider.SqlServer, "options.UseSqlServer" },
                 new object[] { false, string.Empty, DbProvider.SqlServer, "options.UseSqlServer" },

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// </summary>
         public static string GetSafeNameSpaceName(string namespaceName)
         {
-            if(namespaceName == null)
+            if (namespaceName == null)
             {
                 throw new ArgumentNullException(nameof(namespaceName));
             }
@@ -60,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// </summary>
         public static string GetSafeNameSpaceFromPath(string path, string namespacePrefix = null)
         {
-            if(path == null)
+            if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             var namespaceName = path.Replace(Path.DirectorySeparatorChar, '.');
             if (!string.IsNullOrEmpty(namespacePrefix))
             {
-                namespaceName = namespacePrefix +"." + namespaceName;
+                namespaceName = namespacePrefix + "." + namespaceName;
             }
 
             return GetSafeNameSpaceName(namespaceName);

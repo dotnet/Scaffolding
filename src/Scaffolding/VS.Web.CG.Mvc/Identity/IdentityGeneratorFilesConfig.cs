@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -192,12 +193,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (fileSystem == null)
             {
-              throw new ArgumentNullException(nameof(fileSystem));
+                throw new ArgumentNullException(nameof(fileSystem));
             }
 
             if (string.IsNullOrEmpty(rootPath))
             {
-              throw new ArgumentException(nameof(rootPath));
+                throw new ArgumentException(nameof(rootPath));
             }
 
             var requiredViewImports = new List<IdentityGeneratorFile>();

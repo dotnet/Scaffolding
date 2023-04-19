@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics.Contracts;
@@ -78,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             ModelType dataContext = null;
             var dbContextFullName = string.Empty;
-            ContextProcessingResult modelMetadata  = new ContextProcessingResult()
+            ContextProcessingResult modelMetadata = new ContextProcessingResult()
             {
                 ContextProcessingStatus = ContextProcessingStatus.MissingContext,
                 ModelMetadata = null

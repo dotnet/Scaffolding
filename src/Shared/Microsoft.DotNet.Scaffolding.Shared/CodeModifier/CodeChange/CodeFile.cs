@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
@@ -17,15 +20,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange
         public string[] Options { get; set; }
     }
 
-    public class CodeBlock 
+    public class CodeBlock
     {
-        public string Block { get ; set; }
+        public string Block { get; set; }
         public string[] Options { get; set; }
     }
 
     public class Formatting
     {
-        public bool Newline { get ; set; }
+        public bool Newline { get; set; }
         public int NumberOfSpaces { get; set; }
         public bool Semicolon { get; set; }
     }

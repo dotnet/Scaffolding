@@ -1,14 +1,14 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
 using Moq;
 using Xunit;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
 {
@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 generator.Generate(model);
                 Assert.True(false, "Expected an exception");
             }
-            catch(InvalidOperationException ex)
+            catch (InvalidOperationException ex)
             {
                 Assert.Equal("The namespace name 'Invalid Namespace' is not valid.", ex.Message);
                 return;

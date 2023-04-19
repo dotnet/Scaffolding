@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.DotNet.Scaffolding.Shared
 {
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         /// <summary>
         /// A new directory is added.
         /// </summary>
-        public const string AddDirectory ="add_directory";
+        public const string AddDirectory = "add_directory";
 
         /// <summary>
         /// A directory existing on disk is removed.

@@ -1,7 +1,7 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             new MsBuildProjectSetupHelper().SetupProjects(fileProvider, _output);
         }
 
-        [Fact (Skip = "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
+        [Fact(Skip = "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
         public async void TestGetModelMetadata_WithDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())

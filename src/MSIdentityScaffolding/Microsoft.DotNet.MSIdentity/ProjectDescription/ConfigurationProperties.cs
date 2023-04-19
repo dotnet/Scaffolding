@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
 using System.IO;
@@ -9,10 +9,10 @@ namespace Microsoft.DotNet.MSIdentity.Project
 {
     public class ConfigurationProperties
     {
-        public string? FileRelativePath 
+        public string? FileRelativePath
         {
             get { return _fileRelativePath?.Replace("\\", Path.DirectorySeparatorChar.ToString(CultureInfo.InvariantCulture)); }
-            set { _fileRelativePath = value; } 
+            set { _fileRelativePath = value; }
         }
         private string? _fileRelativePath;
 
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.MSIdentity.Project
 
         public bool IsValid()
         {
-            bool valid = !string.IsNullOrEmpty(FileRelativePath) 
+            bool valid = !string.IsNullOrEmpty(FileRelativePath)
                 && !Properties.Any(p => !p.IsValid());
             return valid;
         }

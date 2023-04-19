@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -68,7 +71,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 if (namespaceNode == null)
                 {
                     namespaceNode = root.Members.OfType<NamespaceDeclarationSyntax>()?.FirstOrDefault();
-                } 
+                }
                 var classNode = namespaceNode?.Members.OfType<ClassDeclarationSyntax>()?.FirstOrDefault();
                 var mainMethod = classNode?.ChildNodes().FirstOrDefault(n => n is MethodDeclarationSyntax syntax
                     && syntax.Identifier.ToString().Equals(Main, StringComparison.OrdinalIgnoreCase));

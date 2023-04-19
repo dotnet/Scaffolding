@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
 
         public void AddFolders(IEnumerable<string> folders)
         {
-            foreach(var folder in folders)
+            foreach (var folder in folders)
             {
                 CreateDirectory(folder);
             }
@@ -90,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
         public void RemoveDirectory(string path, bool removeIfNotEmpty)
         {
             if (!removeIfNotEmpty
-                && (_folders.Any(f =>f.StartsWith(path) && !f.Equals(path))
+                && (_folders.Any(f => f.StartsWith(path) && !f.Equals(path))
                     || _files.Keys.Any(f => f.StartsWith(path))))
             {
                 throw new IOException($"Directory not empty: {path}");
@@ -99,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
             _folders.RemoveWhere(folder => folder.StartsWith(path));
 
             var subFiles = _files.Keys.Where(f => f.StartsWith(path));
-            foreach(var subFile in subFiles)
+            foreach (var subFile in subFiles)
             {
                 _files.Remove(subFile);
             }

@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TestModels;
-using Microsoft.EntityFrameworkCore;
-using Xunit;
 using System;
+using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TestModels;
+using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
 {

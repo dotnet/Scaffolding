@@ -1,10 +1,10 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,11 +15,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     {
         private static string[] EMPTY_CONTROLLER_ARGS = new string[] { "-c", Configuration, "controller", "--controllerName", "EmptyController" };
         private static string[] EMPTY_CONTROLLER_WITH_RELATIVE_PATH = new string[] { "-c", Configuration, "controller", "--controllerName", "EmptyController", "--relativeFolderPath", "Controllers" };
-        private static string[] READ_WRITE_CONTROLLER = new string[] { "-c", Configuration, "controller",  "--controllerName", "ActionsController", "--readWriteActions" };
+        private static string[] READ_WRITE_CONTROLLER = new string[] { "-c", Configuration, "controller", "--controllerName", "ActionsController", "--readWriteActions" };
 
 
         public MvcControllerTest(ITestOutputHelper output)
-            :base(output)
+            : base(output)
         {
 
         }
@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             {
                 new MsBuildProjectSetupHelper().SetupProjects(fileProvider, Output);
                 TestProjectPath = Path.Combine(fileProvider.Root, "Root");
-                var invocationArgs = new [] {"-p", Path.Combine(TestProjectPath, "Test.csproj")}.Concat(args).ToArray();
+                var invocationArgs = new[] { "-p", Path.Combine(TestProjectPath, "Test.csproj") }.Concat(args).ToArray();
                 Scaffold(invocationArgs, TestProjectPath);
 
                 generatedFilePath = Path.Combine(TestProjectPath, generatedFilePath);

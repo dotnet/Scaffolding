@@ -1,21 +1,21 @@
-using Moq;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Xunit;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
-using System.Runtime.InteropServices;
-using System.IO;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
+using Moq;
+using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
@@ -42,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 DataContextClass = string.Empty
             };
             Assert.Equal(Constants.MinimalApiEfNoClassTemplate, MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: true));
-            Assert.Equal(Constants.MinimalApiEfTemplate,MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: false));
+            Assert.Equal(Constants.MinimalApiEfTemplate, MinimalApiGenerator.GetTemplateName(modelWithContext, existingEndpointsFile: false));
             Assert.Equal(Constants.MinimalApiNoClassTemplate, MinimalApiGenerator.GetTemplateName(modelWithoutContext, existingEndpointsFile: true));
             Assert.Equal(Constants.MinimalApiTemplate, MinimalApiGenerator.GetTemplateName(modelWithoutContext, existingEndpointsFile: false));
         }
@@ -137,7 +137,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 Assert.Equal(@"AppPath/Endpoints/Endpoint/testClass.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandline));
                 Assert.Equal(@"AppPath/testClass2.cs", minimalApiGenerator.ValidateAndGetOutputPath(minimalCommandlineWithoutRelativePath));
-            }   
+            }
         }
 
         [Fact]

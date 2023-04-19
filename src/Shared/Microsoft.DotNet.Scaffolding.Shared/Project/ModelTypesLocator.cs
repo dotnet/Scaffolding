@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         public IEnumerable<Document> GetAllDocuments()
         {
             var documents = new List<Document>();
-            var allDocuments =  _projectWorkspace.CurrentSolution.Projects
+            var allDocuments = _projectWorkspace.CurrentSolution.Projects
                 .Select(project => project.Documents);
             foreach (var documentList in allDocuments)
             {
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
             public int GetHashCode(ITypeSymbol obj)
             {
-                if(Object.ReferenceEquals(obj, null))
+                if (Object.ReferenceEquals(obj, null))
                 {
                     return 0;
                 }

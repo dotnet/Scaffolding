@@ -1,4 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         public CodeModelMetadata(Type model)
         {
-            if(model == null)
+            if (model == null)
             {
                 throw new ArgumentNullException(nameof(model));
             }
@@ -78,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         {
             get
             {
-                if(_properties == null)
+                if (_properties == null)
                 {
                     _properties = GetBindableProperties(_model);
                 }
@@ -94,12 +95,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private bool IsBindable(PropertyInfo propertyInfo)
         {
-            if(propertyInfo == null)
+            if (propertyInfo == null)
             {
                 return false;
             }
 
-            if(TypeUtilities.IsTypePrimitive(propertyInfo.PropertyType) || bindableNonPrimitiveTypes.Any(bindable => bindable == propertyInfo.PropertyType))
+            if (TypeUtilities.IsTypePrimitive(propertyInfo.PropertyType) || bindableNonPrimitiveTypes.Any(bindable => bindable == propertyInfo.PropertyType))
             {
                 return true;
             }

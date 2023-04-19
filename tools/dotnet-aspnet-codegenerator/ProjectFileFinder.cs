@@ -1,4 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -28,7 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 var projectJson = Path.Combine(_initialPath, "project.json");
 
                 if ((File.Exists(projectJson) && csprojFiles.Any())
-                    ||csprojFiles.Count() > 1)
+                    || csprojFiles.Count() > 1)
                 {
                     throw new Exception($"Multiple Project files found in the directory {_initialPath}. Please provide full path to the file to use.");
                 }

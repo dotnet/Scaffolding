@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Xunit;
@@ -8,7 +9,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
     //This is more of an integration test.
     public class RazorTemplatingTests
     {
-        [Fact (Skip = "Disabling test on CI")]
+        [Fact(Skip = "Disabling test on CI")]
         public async void RunTemplateAsync_Generates_Text_For_Template_With_A_Model()
         {
             //Arrange

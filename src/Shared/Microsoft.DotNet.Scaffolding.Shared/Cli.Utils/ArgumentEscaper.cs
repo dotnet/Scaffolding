@@ -1,11 +1,17 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+/* Unmerged change from project 'Microsoft.DotNet.Scaffolding.Shared (net8.0)'
+Before:
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+After:
+// Licensed under the licenses this file to file under the MIT license information.
+*/
+// The .NET Foundation licenses this you to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Internal
 {
@@ -21,7 +27,7 @@ namespace Microsoft.Extensions.Internal
         /// <param name="args"></param>
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
-        { 
+        {
             return string.Join(" ", EscapeArgArray(args));
         }
 
@@ -96,7 +102,7 @@ namespace Microsoft.Extensions.Internal
                     sb.Append(arg[i]);
                 }
             }
-            
+
             if (needsQuotes) sb.Append("\"");
 
             return sb.ToString();

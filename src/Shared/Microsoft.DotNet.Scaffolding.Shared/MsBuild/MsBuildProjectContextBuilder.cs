@@ -1,10 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Extensions.Internal;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.Extensions.Internal;
 using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.ProjectModel
@@ -15,7 +16,7 @@ namespace Microsoft.Extensions.ProjectModel
         private string _targetLocation;
         private string _configuration;
 
-        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation, string configuration="Debug")
+        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation, string configuration = "Debug")
         {
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -73,7 +74,7 @@ namespace Microsoft.Extensions.ProjectModel
             var errorMsg = $"Failed to get Project Context for {_projectPath}.";
             if (errors != null)
             {
-                errorMsg += $"{Environment.NewLine} { string.Join(Environment.NewLine, errors)} ";
+                errorMsg += $"{Environment.NewLine} {string.Join(Environment.NewLine, errors)} ";
             }
 
             return new InvalidOperationException(errorMsg);

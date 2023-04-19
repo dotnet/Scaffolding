@@ -1,4 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 
@@ -107,7 +108,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         /// <summary>
         /// NuGet dependencies of the project.
         /// </summary>
-        IEnumerable<DependencyDescription> PackageDependencies { get;}
+        IEnumerable<DependencyDescription> PackageDependencies { get; }
 
         /// <summary>
         /// Assemblies required for compilation of the project.

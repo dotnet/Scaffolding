@@ -1,13 +1,12 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.Extensions.ProjectModel;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             _projectSetupHelper = new MsBuildProjectSetupHelper();
         }
 
-        [Fact (Skip = "Disable tests on CI that need to load assemblies")]
+        [Fact(Skip = "Disable tests on CI that need to load assemblies")]
         public void TestGetReflectedType()
         {
             using (var fileProvider = new TemporaryFileProvider())
@@ -61,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
             }
         }
 
-        [Fact(Skip="test fail")]
+        [Fact(Skip = "test fail")]
         public void TestGetReflectedType_FailedCompilation()
         {
             using (var fileProvider = new TemporaryFileProvider())

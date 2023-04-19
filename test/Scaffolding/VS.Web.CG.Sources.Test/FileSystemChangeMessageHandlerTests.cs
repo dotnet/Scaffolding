@@ -1,7 +1,7 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
-using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test

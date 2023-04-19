@@ -1,15 +1,14 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Reflection;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
 {
-    public class TypeUtilities 
+    public class TypeUtilities
     {
         public static bool IsTypePrimitive(Type type)  => IsInteger(type) || IsNonIntegerPrimitive(type);
-        
+
         private static bool IsNonIntegerPrimitive(Type type)
         {
             type = Nullable.GetUnderlyingType(type) ?? type;
@@ -25,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
                    || (type == typeof(TimeSpan))
                    || type.GetTypeInfo().IsEnum;
         }
-        private static bool IsInteger(Type type) 
+        private static bool IsInteger(Type type)
         {
             type = Nullable.GetUnderlyingType(type) ?? type;
             return (type == typeof(int))
@@ -50,4 +49,4 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             return true;
         }
     }
-} 
+}

@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.IO;
@@ -32,7 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
         public async Task<TemplateResult> RunTemplateAsync(string content,
             dynamic templateModel)
         {
-            // Don't care about the RazorProject as we already have the content of the .cshtml file 
+            // Don't care about the RazorProject as we already have the content of the .cshtml file
             // and don't need to deal with imports.
             var fileSystem = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
             var projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, fileSystem, (builder) =>

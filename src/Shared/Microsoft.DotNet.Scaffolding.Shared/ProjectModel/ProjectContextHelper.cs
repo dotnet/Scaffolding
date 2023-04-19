@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -135,7 +134,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
                 var path = packageFolderPath.EnumerateObject().Any() ? packageFolderPath.EnumerateObject().First().Name : string.Empty;
                 if (!string.IsNullOrEmpty(fullName) && !string.IsNullOrEmpty(path) && package.Value.TryGetProperty(TypeProperty, out var type))
                 {
-                    //fullName is in the format {Package Name}/{Version} for example "System.Text.MoreText/2.1.1" Split into tuple. 
+                    //fullName is in the format {Package Name}/{Version} for example "System.Text.MoreText/2.1.1" Split into tuple.
                     Tuple<string, string> nameAndVersion = GetName(fullName);
                     if (nameAndVersion != null)
                     {

@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -29,8 +28,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         internal bool SkipImportTarget { get; set; }
 
         private string _codeGenerationTargetsLocation;
-        internal string CodeGenerationTargetsLocation 
-        { 
+        internal string CodeGenerationTargetsLocation
+        {
             get
             {
                 if (string.IsNullOrEmpty(_codeGenerationTargetsLocation))
@@ -47,8 +46,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         }
 
         private ILogger _logger;
-        internal ILogger Logger 
-        { 
+        internal ILogger Logger
+        {
             get
             {
                 if (_logger == null)
@@ -117,7 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     isShowHelp = ToolCommandLineHelper.IsHelpArgument(args)
                                                 || app.GeneratorArgument == null
                                                 || string.IsNullOrEmpty(app.GeneratorArgument.Value);
-                    
+
                     ProjectFileFinder projectFileFinder = new ProjectFileFinder(project);
 
                     if (isShowHelp)
@@ -325,8 +324,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
             if (buildResult.Result.ExitCode != 0)
             {
-                //Build failed. 
-                // Stop the process here. 
+                //Build failed.
+                // Stop the process here.
                 logger.LogMessage(Resources.BuildFailed);
                 logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
                 logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);

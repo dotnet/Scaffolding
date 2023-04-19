@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             loadContext = new DefaultAssemblyLoadContext();
             _outputHelper = outputHelper;
         }
-        
+
         [Fact (Skip="Rewrite this for msbuild")]
         public void CommonUtilities_TestGetAssemblyFromCompilation()
         {
@@ -32,10 +31,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var projectContext = GetProjectContext(testAppPath, false);
             IEnumerable<MetadataReference> references = projectContext.CompilationAssemblies.SelectMany(c => c.GetMetadataReference());
             string code = @"using System;
-                            namespace Sample { 
-                                public class SampleClass 
+                            namespace Sample {
+                                public class SampleClass
                                 {
-                                } 
+                                }
                             }";
 
             Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), references);
@@ -50,10 +49,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         {
 
             string code = @"using System;
-                            namespace Sample { 
-                                public class SampleClass 
+                            namespace Sample {
+                                public class SampleClass
                                 {
-                                } 
+                                }
                             }";
 
             Compilation compilation = GetCompilation(code, Path.GetRandomFileName(), null);
@@ -73,13 +72,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 var path = Path.Combine(fileProvider.Root, "Root", MsBuildProjectStrings.RootProjectName);
 
                 var projectContext = GetProjectContext(path, true);
-                
+
                 var references = projectContext.CompilationAssemblies.SelectMany(c => c.GetMetadataReference());
                 var code = @"using System;
-                            namespace Sample { 
-                                public class SampleClass 
+                            namespace Sample {
+                                public class SampleClass
                                 {
-                                } 
+                                }
                             }";
 
                 var compilation = GetCompilation(code, Path.GetRandomFileName(), references);

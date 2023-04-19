@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -187,7 +186,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             return (Directory.Exists(path) && !(fileSystemChange.FileSystemChangeType == FileSystemChangeType.RemoveDirectory))
                 || (fileSystemChange.FileSystemChangeType == FileSystemChangeType.AddDirectory);
-                
+
         }
 
         public void RemoveDirectory(string path, bool recursive)

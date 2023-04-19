@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -39,7 +38,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                             Path.Combine("RazorPages", "EmptyPage.txt"),
                             Path.Combine("RazorPages", "EmptyPageCs.txt")
                         },
-                        new string[] 
+                        new string[]
                         {
                             "EmptyPage.cshtml",
                             "EmptyPage.cshtml.cs"

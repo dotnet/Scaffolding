@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 
@@ -82,7 +81,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         /// The full path of the project output.
         /// </summary>
         string AssemblyFullPath { get; }
-        
+
         /// <summary>
         /// Full path to deps.json file of the built project.
         /// </summary>

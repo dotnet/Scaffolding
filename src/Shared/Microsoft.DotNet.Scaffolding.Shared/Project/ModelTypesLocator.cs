@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         {
             _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
         }
-        
+
         public IEnumerable<ModelType> GetAllTypes()
         {
             return _projectWorkspace.CurrentSolution.Projects
@@ -75,7 +74,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 {
                     return false;
                 }
-                
+
                 //Check for namespace to be the same.
                 var isNamespaceEqual = (Object.ReferenceEquals(x.ContainingNamespace, y.ContainingNamespace)
                         || ((x.ContainingNamespace != null && y.ContainingNamespace != null)

@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.IO;
@@ -11,7 +10,7 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore 
+namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class ReflectedTypesProvider
     {
@@ -53,7 +52,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
         private CompilationResult GetCompilationResult(Compilation compilation)
         {
-            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream.  
+            // Need these #ifdefs as coreclr needs the assembly name to be different to be loaded from stream.
             // On desktop if the assembly name is different, MVC fails to load the assembly as it is not found on disk.
 
             var newAssemblyName = Path.GetFileNameWithoutExtension(compilation.AssemblyName);
@@ -136,12 +135,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     }
                     catch (Exception ex)
                     {
-                        // This is a best effort approach. If we cannot load an assembly for any reason, 
+                        // This is a best effort approach. If we cannot load an assembly for any reason,
                         // just ignore it and look for the type in the next one.
                         _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
                         continue;
                     }
-                    
+
                 }
             }
 
@@ -153,7 +152,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return _compilationResult?.ErrorMessages;
         }
 
-        // Look for the model type in the current project. 
+        // Look for the model type in the current project.
         // If its not found in the current project, look in the dependencies.
         private Type GetTypeFromAssembly(string modelTypeName, Assembly assembly, bool lookInDependencies)
         {
@@ -200,12 +199,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     }
                     catch (Exception ex)
                     {
-                        // This is a best effort approach. If we cannot load an assembly for any reason, 
+                        // This is a best effort approach. If we cannot load an assembly for any reason,
                         // just ignore it and look for the type in the next one.
                         _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
                         continue;
                     }
-                    
+
                 }
             }
 

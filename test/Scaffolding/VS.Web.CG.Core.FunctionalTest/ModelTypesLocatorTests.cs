@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -18,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             var locator = GetModelTypesLocator();
             //Act
             var types = locator.GetType("ModelTypesLocatorTestWebApp.Models.ModelWithMatchingShortName");
-            
+
             //Assert
             Assert.Single(types);
             var type = types.First();

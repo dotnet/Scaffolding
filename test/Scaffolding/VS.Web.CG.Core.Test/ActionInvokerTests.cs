@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Reflection;
@@ -23,7 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                 methodCalled = true;
                 invokedModel = model;
             });
-            
+
             var serviceProviderMock = new Mock<IServiceProvider>();
             var generatorMock = new Mock<CodeGeneratorDescriptor>(typeof(CodeGeneratorSample).GetTypeInfo(),
                 serviceProviderMock.Object);
@@ -59,7 +58,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             {
                 throw new NotImplementedException(NOT_IMPLEMENTED_MESSAGE);
             });
-            
+
             var serviceProviderMock = new Mock<IServiceProvider>();
             var generatorMock = new Mock<CodeGeneratorDescriptor>(typeof(CodeGeneratorSample).GetTypeInfo(),
                 serviceProviderMock.Object);

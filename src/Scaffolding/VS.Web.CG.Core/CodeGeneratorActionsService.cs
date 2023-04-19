@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -76,7 +75,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             Debug.Assert(_fileSystem.FileExists(templatePath));
             _logger.LogMessage($"Rendering template { templatePath }\n", LogMessageLevel.Trace);
             var templateContent = _fileSystem.ReadAllText(templatePath);
-            
+
             var templateResult = await _templatingService.RunTemplateAsync(templateContent, templateModel);
 
             if (templateResult.ProcessingException != null)

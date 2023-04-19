@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -52,7 +51,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 Assert.Equal("The namespace name 'Invalid Namespace' is not valid.", ex.Message);
                 return;
             }
-            
+
         }
 
         [Fact]
@@ -88,5 +87,5 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         }
     }
 
-    
+
 }

@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -38,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             Path.Combine("Areas", "Identity", "Pages", "Account", "ResetPassword.cshtml.cs"),
             Path.Combine("Areas", "Identity", "Pages", "Account", "ResetPasswordConfirmation.cshtml.cs"),
             Path.Combine("Areas", "Identity", "Pages", "Account", "Logout.cshtml.cs"),
-            
+
             // Accounts/Manage
             Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_ViewImports.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "ChangePassword.cshtml.cs"),
@@ -106,7 +105,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             // Accounts/Manage
             Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_Layout.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "_StatusMessage.cshtml"),
-            
+
 
             Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "ChangePassword.cshtml"),
             Path.Combine("Areas", "Identity", "Pages", "Account", "Manage", "DeletePersonalData.cshtml"),

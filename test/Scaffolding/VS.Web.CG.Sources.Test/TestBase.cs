@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using Microsoft.Extensions.ProjectModel;
@@ -15,7 +14,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
             {
                 /**
                  * To Make this work, the test project needs to take a dependency on
-                 * 'Microsoft.VisualStudio.Web.CodeGeneration.Tools' package. That way when NuGet restores 
+                 * 'Microsoft.VisualStudio.Web.CodeGeneration.Tools' package. That way when NuGet restores
                  * the project, it will include the targets in the project automatically.
                  */
                 var codeGenerationTargetLocation = "Dummy";

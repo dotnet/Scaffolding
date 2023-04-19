@@ -1,5 +1,4 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -131,7 +130,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 sb.AppendLine(Resources.GeneratorOptionsHeader);
                 var maxLenOption = generatorParamDef.Options.Max(o => o.Name.Length + o.ShortName.Length) + 4;
                 var formatStr = "  {0,-"+maxLenOption+"} : {1}";
-                
+
                 foreach (var opt in generatorParamDef.Options)
                 {
                     if (string.IsNullOrEmpty(opt.ShortName))

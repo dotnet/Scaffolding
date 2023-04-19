@@ -1,17 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-/* Unmerged change from project 'Microsoft.DotNet.MSIdentity (net8.0)'
-Before:
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-After:
-// Copyright (c) Microsoft Corporation.NET Foundation under one or more agreements.
-// The .NET Foundation under the MIT License.
-*/
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you licenses this file to you under the MIT license.
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -583,7 +572,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                     try
                     {
-                        // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9. 
+                        // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9.
                         // We need to process the case where the developer is not a tenant admin
                         await graphServiceClient.Oauth2PermissionGrants
                             .Request()

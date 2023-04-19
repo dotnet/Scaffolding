@@ -1,14 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-/* Unmerged change from project 'Microsoft.DotNet.Scaffolding.Shared (net8.0)'
-Before:
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-After:
-// Licensed under the licenses this file to file under the MIT license information.
-*/
-// The .NET Foundation licenses this you to you under the MIT license.
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,7 +12,7 @@ namespace Microsoft.Extensions.Internal
         /// <summary>
         /// Undo the processing which took place to create string[] args in Main,
         /// so that the next process will receive the same string[] args
-        /// 
+        ///
         /// See here for more info:
         /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
         /// </summary>
@@ -34,7 +26,7 @@ namespace Microsoft.Extensions.Internal
         /// <summary>
         /// Undo the processing which took place to create string[] args in Main,
         /// so that the next process will receive the same string[] args
-        /// 
+        ///
         /// See here for more info:
         /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
         /// </summary>

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -29,8 +29,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         internal bool SkipImportTarget { get; set; }
 
         private string _codeGenerationTargetsLocation;
-        internal string CodeGenerationTargetsLocation 
-        { 
+        internal string CodeGenerationTargetsLocation
+        {
             get
             {
                 if (string.IsNullOrEmpty(_codeGenerationTargetsLocation))
@@ -47,8 +47,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
         }
 
         private ILogger _logger;
-        internal ILogger Logger 
-        { 
+        internal ILogger Logger
+        {
             get
             {
                 if (_logger == null)
@@ -117,7 +117,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     isShowHelp = ToolCommandLineHelper.IsHelpArgument(args)
                                                 || app.GeneratorArgument == null
                                                 || string.IsNullOrEmpty(app.GeneratorArgument.Value);
-                    
+
                     ProjectFileFinder projectFileFinder = new ProjectFileFinder(project);
 
                     if (isShowHelp)
@@ -310,7 +310,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 path = Path.GetDirectoryName(path);
             } while (path != null);
 
-            throw new DirectoryNotFoundException(string.Format(Resources .TargetDirectoryNotFound, build));
+            throw new DirectoryNotFoundException(string.Format(Resources.TargetDirectoryNotFound, build));
         }
 
         private int Build(ILogger logger, string projectPath, string configuration, string shortFramework, string buildBasePath)

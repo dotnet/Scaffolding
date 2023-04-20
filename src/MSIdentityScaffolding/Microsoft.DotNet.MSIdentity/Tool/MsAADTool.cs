@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         public GraphServiceClient GraphServiceClient { get; set; }
-        public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set;}
+        public IAzureManagementAuthenticationProvider AzureManagementAPI { get; set; }
         private MsalTokenCredential TokenCredential { get; set; }
 
         public MsAADTool(string commandName, ProvisioningToolOptions provisioningToolOptions)
@@ -35,10 +36,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         public async Task<ApplicationParameters?> Run()
         {
-            string outputJsonString = string.Empty;    
+            string outputJsonString = string.Empty;
             if (TokenCredential != null && GraphServiceClient != null)
             {
-                switch(CommandName)
+                switch (CommandName)
                 {
                     //--list-aad-apps
                     case Commands.LIST_AAD_APPS_COMMAND:
@@ -232,13 +233,13 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 JsonResponse jsonResponse = new JsonResponse(CommandName, State.Success, tenantList);
                 outputJsonString = jsonResponse.ToJsonString();
             }
-            else 
+            else
             {
                 Console.Write(
-                    "--------------------------------------------------------------------------------------------------------------------------------\n" + 
+                    "--------------------------------------------------------------------------------------------------------------------------------\n" +
                     "Display Name\t\t\tDefault Domain\t\t\t\tTenant Type\tTenant Id\n" +
                     "--------------------------------------------------------------------------------------------------------------------------------\n\n");
-                foreach(var tenant in tenantList)
+                foreach (var tenant in tenantList)
                 {
                     Console.WriteLine($"{(tenant.DisplayName ?? string.Empty).PadRight(16)}\t\t{(tenant.DefaultDomain ?? string.Empty).PadRight(20)}\t\t{(tenant.TenantType ?? string.Empty).PadRight(10)}\t{(tenant.TenantId ?? string.Empty)}");
                 }

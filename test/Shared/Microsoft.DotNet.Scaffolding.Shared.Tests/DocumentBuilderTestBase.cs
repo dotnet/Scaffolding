@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -58,7 +61,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             var projectName = string.IsNullOrEmpty(projectPath) ? TestProjectName : Path.GetFileName(projectPath);
 
             string fileNamePrefix = DefaultFilePathPrefix;
-            string fileExt =  CSharpDefaultFileExt;
+            string fileExt = CSharpDefaultFileExt;
 
             var projectId = ProjectId.CreateNewId(debugName: projectName);
 

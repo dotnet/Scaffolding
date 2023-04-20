@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -60,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 
             OnProjectAdded(projectInfo);
 
-            foreach(var file in referenceInfo.CompilationItems)
+            foreach (var file in referenceInfo.CompilationItems)
             {
                 var filePath = Path.IsPathRooted(file)
                     ? file
@@ -98,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                 AddSourceFile(projectInfo, namespaceImportsFilePath);
             }
             // manually add the ImplicitImports.cs file.
-            else 
+            else
             {
                 var namespaceImportsFilePath = $"{context?.TargetDirectory?.Replace("\\bin\\", "\\obj\\")}\\{context?.ProjectName}.GlobalUsings.g.cs";
                 if (!string.IsNullOrEmpty(namespaceImportsFilePath))
@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 
         private void AddSourceFile(PInfo projectInfo, string file)
         {
-            if(!File.Exists(file))
+            if (!File.Exists(file))
             {
                 return;
             }

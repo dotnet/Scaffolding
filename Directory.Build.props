@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Copyright>$(CopyrightMicrosoft)</Copyright>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>
     <DebugType>pdbonly</DebugType>
@@ -20,7 +20,7 @@
 
   <PropertyGroup Label="Package and Assembly Metadata">
     <Product>Microsoft ASP.NET Core</Product>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Private.Uri" Version="$(SystemPrivateUriVersion)" />

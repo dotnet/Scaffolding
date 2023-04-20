@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -91,7 +91,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         internal string UserClass { get; private set; }
         internal string UserClassNamespace { get; private set; }
 
-        internal Type UserType 
+        internal Type UserType
         {
             get
             {
@@ -218,7 +218,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             }
-            else if(!string.IsNullOrEmpty(_commandlineModel.ExcludeFiles))
+            else if (!string.IsNullOrEmpty(_commandlineModel.ExcludeFiles))
             {
                 string contentVersion;
                 if (templateModel is IdentityGeneratorTemplateModel2 templateModel2)
@@ -244,7 +244,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
                 }
-                
+
                 //get files to overwrite
                 NamedFiles = allFiles.Except(excludedFiles);
             }
@@ -484,12 +484,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        private void ValidateIndividualFileOptions() 
+        private void ValidateIndividualFileOptions()
         {
             //Both options should not be selected. Users should either scaffold a particular set of files OR exclude a particular set of files.
-            if(IsFilesSpecified && IsExcludeSpecificed)
+            if (IsFilesSpecified && IsExcludeSpecificed)
             {
-                throw new InvalidOperationException(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--excludeFiles"));
+                throw new InvalidOperationException(string.Format(MessageStrings.InvalidOptionCombination, "--files", "--excludeFiles"));
             }
         }
         private void ValidateDefaultUIOption()
@@ -498,12 +498,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (IsFilesSpecified)
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--files", "--useDefaultUI"));
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination, "--files", "--useDefaultUI"));
             }
 
-            if(IsExcludeSpecificed)
+            if (IsExcludeSpecificed)
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--excludeFiles", "--useDefaultUI"));
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination, "--excludeFiles", "--useDefaultUI"));
             }
 
             if (IsUsingExistingDbContext)
@@ -569,7 +569,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private string GetClassNameFromTypeName(string dbContext)
         {
-            return dbContext.Split(new char[] {'.'}, StringSplitOptions.RemoveEmptyEntries).Last();
+            return dbContext.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last();
         }
 
         private void ValidateExistingDbContext(Type existingDbContext)
@@ -666,7 +666,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var usersProperty = existingDbContext.GetProperties()
                 .FirstOrDefault(p => p.Name == "Users");
 
-            if (usersProperty == null 
+            if (usersProperty == null
                 || !usersProperty.PropertyType.IsGenericType
                 || usersProperty.PropertyType.GetGenericArguments().Count() != 1)
             {
@@ -705,7 +705,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                             Environment.NewLine,
                             string.Join(Environment.NewLine, _reflectedTypesProvider.GetCompilationErrors())));
                 }
-              
+
             }
             //get all types and return the one with the same name. There should be no duplicates so only one should match.
             return _reflectedTypesProvider.GetAllTypesInProject().FirstOrDefault(
@@ -733,7 +733,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             if (!string.IsNullOrEmpty(model.Layout) && model.GenerateLayout)
             {
-                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination,"--layout", "--generateLayout"));
+                errorStrings.Add(string.Format(MessageStrings.InvalidOptionCombination, "--layout", "--generateLayout"));
             }
 
             if (!string.IsNullOrEmpty(model.BootstrapVersion) && !IdentityGenerator.ValidBootstrapVersions.Contains(model.BootstrapVersion.Trim(' ', '\n')))

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             IEntityFrameworkService entityFrameworkService,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
-            ILogger logger) 
+            ILogger logger)
             : base(projectContext, applicationInfo, codeGeneratorActionsService, serviceProvider, logger)
         {
             if (modelTypesLocator == null)
@@ -67,14 +67,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 EFValidationUtil.ValidateEFDependencies(_projectContext.PackageDependencies, viewGeneratorModel.UseSqlite);
             }
-            
+
 
             modelTypeAndContextModel = await ModelMetadataUtilities.ValidateModelAndGetEFMetadata(
                 viewGeneratorModel,
                 _entityFrameworkService,
                 _modelTypesLocator,
                 string.Empty);
- 
+
             await GenerateView(viewGeneratorModel, modelTypeAndContextModel, outputPath);
 
             if (modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus == ContextProcessingStatus.ContextAddedButRequiresConfig)

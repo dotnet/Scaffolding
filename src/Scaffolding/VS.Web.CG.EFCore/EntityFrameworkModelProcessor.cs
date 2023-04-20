@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private EditSyntaxTreeResult _programEditResult;
         private IFileSystem _fileSystem;
 
-        public EntityFrameworkModelProcessor (
+        public EntityFrameworkModelProcessor(
             string dbContextFullTypeName,
             ModelType modelTypeSymbol,
             string areaName,
@@ -98,7 +98,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     throw new InvalidOperationException(string.Format(MessageStrings.ModelTypeNotFound, "Program"));
                 }
-                
+
                 if (!dbContextSymbols.Any())
                 {
                     //add nullable properties
@@ -228,8 +228,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         }
 
 
-        public ContextProcessingStatus ContextProcessingStatus { get; private set;}
-        public ModelMetadata ModelMetadata { get; private set;}
+        public ContextProcessingStatus ContextProcessingStatus { get; private set; }
+        public ModelMetadata ModelMetadata { get; private set; }
 
         /// <summary>
         /// Writes the DbContext to disk using the given Roslyn SyntaxTree.
@@ -274,9 +274,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     return c;
                 });
 
-            var dbContextType = _reflectedTypesProvider.GetReflectedType(_dbContextFullTypeName, lookInDependencies:true);
+            var dbContextType = _reflectedTypesProvider.GetReflectedType(_dbContextFullTypeName, lookInDependencies: true);
 
-            if (_reflectedTypesProvider.GetCompilationErrors() != null 
+            if (_reflectedTypesProvider.GetCompilationErrors() != null
                 && _reflectedTypesProvider.GetCompilationErrors().Any())
             {
                 throw new InvalidOperationException(string.Format(
@@ -525,7 +525,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             {
                 entityType = dbContextInstance.Model.FindEntityType(modelType);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // We got an exception from the DbContext while finding the entityType.
                 // The error here is useful to the user for taking corrective actions.

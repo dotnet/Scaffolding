@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// Application project path
         /// <summary>
         public string? ProjectPath { get; set; }
-        
+
         /// <summary>
         /// Tenant in which the application is created.
         /// </summary>
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// Is authenticated with Azure AD B2C (set by reflection).
         /// </summary>
         public bool IsB2C { get; set; }
-        
+
         /// <summary>
         /// Sign-up/sign-in policy in the case of B2C.
         /// </summary>

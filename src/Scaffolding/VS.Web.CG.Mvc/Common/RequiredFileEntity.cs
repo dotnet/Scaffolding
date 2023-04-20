@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             TemplateName = templateName;
             OutputPath = outputPath;
         }
-        
+
         public RequiredFileEntity(string outputPath, string templateName, IEnumerable<string> altPaths)
             : this(outputPath, templateName)
         {
@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// Name of the template file.
         /// </summary>
         public string TemplateName { get; private set; }
-        
+
         /// <summary>
         /// Path Relative to the .csproj file
         /// </summary>

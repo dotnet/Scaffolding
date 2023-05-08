@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Humanizer;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
@@ -14,6 +15,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         public string FullName { get; set; }
 
+        public string PluralName => Name?.Pluralize(inputIsKnownToBeSingular: false);
         // Violating the principle that ModelType should be decoupled from Roslyn's API.
         // I had to do this for editing DbContext scenarios but I need to figure out if there
         // is a better way.

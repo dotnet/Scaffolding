@@ -235,6 +235,7 @@ namespace Microsoft.DotNet.MSIdentity
             return developerCredentialsReader.GetDeveloperCredentials(
                 provisioningToolOptions.Username,
                 currentApplicationTenantId ?? provisioningToolOptions.TenantId,
+                provisioningToolOptions.Instance,
                 consoleLogger);
         }
 

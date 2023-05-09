@@ -66,7 +66,8 @@ namespace Microsoft.DotNet.Tools.Scaffold
                 MsIdentity.ApiClientIdOption,
                 MsIdentity.SusiPolicyIdOption,
                 MsIdentity.TenantOption,
-                MsIdentity.UsernameOption);
+                MsIdentity.UsernameOption,
+                MsIdentity.InstanceOption);
 
             //internal commands
             var listAadAppsCommand = MsIdentity.ListAADAppsCommand();

@@ -65,17 +65,17 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                                 nextPage = null;
                             }
                         }
-                        catch (ServiceException)
+                        catch (ServiceException se)
                         {
                             nextPage = null;
-                            _consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
+                            _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
                         }
                     }
                 }
             }
-            catch (ServiceException)
+            catch (ServiceException se)
             {
-                _consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
+                _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
             }
 
             return graphObjectsList;

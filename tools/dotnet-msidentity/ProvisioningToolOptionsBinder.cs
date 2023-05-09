@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         private readonly Option<string> _susiPolicyIdOption;
         private readonly Option<string> _tenantOption;
         private readonly Option<string> _usernameOption;
+        private readonly Option<string> _instanceOption;
 
         public ProvisioningToolOptionsBinder(
             Option<bool> jsonOption,
@@ -58,7 +59,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             Option<string> apiClientIdOption,
             Option<string> susiPolicyIdOption,
             Option<string> tenantOption,
-            Option<string> usernameOption)
+            Option<string> usernameOption,
+            Option<string> instanceOption)
         {
             _jsonOption = jsonOption;
             _enableIdTokenOption = enableIdTokenOption;
@@ -82,6 +84,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             _susiPolicyIdOption = susiPolicyIdOption;
             _tenantOption = tenantOption;
             _usernameOption = usernameOption;
+            _instanceOption = instanceOption;
         }
 
         protected override ProvisioningToolOptions GetBoundValue(BindingContext bindingContext)
@@ -89,7 +92,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             IList<string> redirectUriList = bindingContext.ParseResult.GetValue(_redirectUriOption) ?? new List<string>();
             return new ProvisioningToolOptions
             {
-
                 HostedApiScopes = bindingContext.ParseResult.GetValue(_hostedAppIdUriOption),
                 CallsDownstreamApi = bindingContext.ParseResult.GetValue(_callsDownstreamApiOption),
                 UpdateUserSecrets = bindingContext.ParseResult.GetValue(_updateUserSecretsOption),
@@ -112,7 +114,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 CodeUpdate = bindingContext.ParseResult.GetValue(_codeUpdateOption),
                 PackagesUpdate = bindingContext.ParseResult.GetValue(_packagesUpdateOption),
                 ApiScopes = bindingContext.ParseResult.GetValue(_apiScopesOption),
-                ClientProject = bindingContext.ParseResult.GetValue(_clientProjectOption)
+                ClientProject = bindingContext.ParseResult.GetValue(_clientProjectOption),
+                Instance = bindingContext.ParseResult.GetValue(_instanceOption)
             };
         }
     }

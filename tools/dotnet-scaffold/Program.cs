@@ -44,6 +44,32 @@ namespace Microsoft.DotNet.Tools.Scaffold
             rootCommand.AddCommand(ScaffoldViewCommand());
             rootCommand.AddCommand(ScaffoldIdentityCommand());
             //msidentity commands
+            //new BinderBase for System.Commandline update, new way to bind handlers to commands.
+            var provisioningToolBinder = new ProvisioningToolOptionsBinder(
+                MsIdentity.JsonOption,
+                MsIdentity.EnableIdTokenOption,
+                MsIdentity.EnableAccessToken,
+                MsIdentity.CallsGraphOption,
+                MsIdentity.CallsDownstreamApiOption,
+                MsIdentity.UpdateUserSecretsOption,
+                MsIdentity.ConfigUpdateOption,
+                MsIdentity.CodeUpdateOption,
+                MsIdentity.PackagesUpdateOption,
+                MsIdentity.ClientIdOption,
+                MsIdentity.AppDisplayName,
+                MsIdentity.ProjectType,
+                MsIdentity.ClientSecretOption,
+                MsIdentity.RedirectUriOption,
+                MsIdentity.ProjectFilePathOption,
+                MsIdentity.ClientProjectOption,
+                MsIdentity.ApiScopesOption,
+                MsIdentity.HostedAppIdUriOption,
+                MsIdentity.ApiClientIdOption,
+                MsIdentity.SusiPolicyIdOption,
+                MsIdentity.TenantOption,
+                MsIdentity.UsernameOption,
+                MsIdentity.InstanceOption);
+
             //internal commands
             var listAadAppsCommand = MSIdentity.Tool.Program.ListAADAppsCommand();
             var listServicePrincipalsCommand = MSIdentity.Tool.Program.ListServicePrincipalsCommand();

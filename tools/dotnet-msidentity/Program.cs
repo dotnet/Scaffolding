@@ -15,6 +15,31 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public static async Task<int> Main(string[] args)
         {
             var rootCommand = MsIdentityCommand();
+            //new BinderBase for System.Commandline update, new way to bind handlers to commands.
+            var provisioningToolBinder = new ProvisioningToolOptionsBinder(
+                JsonOption,
+                EnableIdTokenOption,
+                EnableAccessToken,
+                CallsGraphOption,
+                CallsDownstreamApiOption,
+                UpdateUserSecretsOption,
+                ConfigUpdateOption,
+                CodeUpdateOption,
+                PackagesUpdateOption,
+                ClientIdOption,
+                AppDisplayName,
+                ProjectType,
+                ClientSecretOption,
+                RedirectUriOption,
+                ProjectFilePathOption,
+                ClientProjectOption,
+                ApiScopesOption,
+                HostedAppIdUriOption,
+                ApiClientIdOption,
+                SusiPolicyIdOption,
+                TenantOption,
+                UsernameOption,
+                InstanceOption);
 
             //internal commands
             var listAadAppsCommand = ListAADAppsCommand();
@@ -170,29 +195,29 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         }
 
         internal static RootCommand MsIdentityCommand() =>
-            new RootCommand(
+            new(
                 description: "Creates or updates an Azure AD / Azure AD B2C application, and updates the project, using your developer credentials (from Visual Studio, Azure CLI, Azure RM PowerShell, VS Code).\n")
             {
             };
 
         internal static Command ListAADAppsCommand() =>
-            new Command(
+            new(
                 name: Commands.LIST_AAD_APPS_COMMAND,
                 description: "Lists AAD Applications for a given tenant/username.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption
             };
 
         internal static Command ListServicePrincipalsCommand() =>
-            new Command(
+            new(
                 name: Commands.LIST_SERVICE_PRINCIPALS_COMMAND,
                 description: "Lists AAD Service Principals.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption
             };
 
         internal static Command ListTenantsCommand() =>
-            new Command(
+            new(
                 name: Commands.LIST_TENANTS_COMMAND,
                 description: "Lists AAD and AAD B2C tenants for a given user.\n")
             {
@@ -200,47 +225,47 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             };
 
         internal static Command CreateClientSecretCommand() =>
-            new Command(
+            new(
                 name: Commands.ADD_CLIENT_SECRET,
                 description: "Create client secret for an Azure AD or AD B2C app registration.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ProjectFilePathOption(), UpdateUserSecretsOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption, ClientIdOption, ProjectFilePathOption, UpdateUserSecretsOption
             };
 
         internal static Command RegisterApplicationCommand() =>
-            new Command(
+            new(
                 name: Commands.REGISTER_APPLICATIION_COMMAND,
                 description: "Register an Azure AD or Azure AD B2C app registration in Azure and update the project." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), ClientIdOption(), ClientSecretOption(), HostedAppIdUriOption(), ApiClientIdOption(), SusiPolicyIdOption(), ProjectFilePathOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption, ClientIdOption, ClientSecretOption, HostedAppIdUriOption, ApiClientIdOption, SusiPolicyIdOption, ProjectFilePathOption
             };
 
         internal static Command UpdateProjectCommand() =>
-            new Command(
+            new(
                 name: Commands.UPDATE_PROJECT_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure and the project." +
                              "\n\t- Updates the appsettings.json file." +
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption(), UsernameOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption(), SusiPolicyIdOption()
+                TenantOption, UsernameOption, InstanceOption, ClientIdOption, JsonOption, ProjectFilePathOption, ConfigUpdateOption, CodeUpdateOption, PackagesUpdateOption, CallsGraphOption, CallsDownstreamApiOption, UpdateUserSecretsOption, RedirectUriOption, SusiPolicyIdOption
             };
 
         internal static Command UpdateAppRegistrationCommand() =>
-            new Command(
+            new(
                 name: Commands.UPDATE_APP_REGISTRATION_COMMAND,
                 description: "Update an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ClientIdOption(), RedirectUriOption(), EnableIdTokenOption(), EnableAccessToken(), ClientProjectOption(), ApiScopesOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption, HostedAppIdUriOption, ClientIdOption, RedirectUriOption, EnableIdTokenOption, EnableAccessToken, ClientProjectOption, ApiScopesOption
             };
 
         internal static Command CreateAppRegistrationCommand() =>
-            new Command(
+            new(
                 name: Commands.CREATE_APP_REGISTRATION_COMMAND,
                 description: "Create an Azure AD/AD B2C app registration in Azure.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), AppDisplayName(), ProjectFilePathOption(), ProjectType(), ClientProjectOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption, AppDisplayName, ProjectFilePathOption, ProjectType, ClientProjectOption
             };
 
         internal static Command UnregisterApplicationCommand() =>
@@ -250,7 +275,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Unregister an Azure AD or Azure AD B2C app registration in Azure." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption(), UsernameOption(), JsonOption(), HostedAppIdUriOption(), ProjectFilePathOption(), ClientIdOption()
+                TenantOption, UsernameOption, InstanceOption, JsonOption, HostedAppIdUriOption, ProjectFilePathOption, ClientIdOption
             };
 
         private static Option JsonOption() =>
@@ -432,6 +457,15 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Username to use to connect to the Azure AD or Azure AD B2C tenant." +
                             "\n- It's only needed if you are signed-in to Visual Studio, or Azure CLI with several identities." +
                             "\n- In that case, the username parameter is used to determine which identity to use to create the app registration in the tenant.\n")
+            {
+                IsRequired = false
+            };
+
+        internal static Option<string> InstanceOption { get; } =
+            new(
+                aliases: new[] { "-i", "--instance" },
+                description: "Instance where the Azure AD or Azure AD B2C tenant is located.\n" +
+                "If not specified, will default to https://login.microsoftonline.com/")
             {
                 IsRequired = false
             };

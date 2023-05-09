@@ -644,7 +644,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects(apps/service principals.
+        ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects (apps/service principals), exception: {0}.
         /// </summary>
         internal static string FailedToRetrieveADObjectsError {
             get {

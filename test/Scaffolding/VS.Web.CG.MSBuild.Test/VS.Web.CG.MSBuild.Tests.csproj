@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
+
   <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />
 
   <PropertyGroup>
@@ -24,9 +24,10 @@
       <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
     </Compile>
   </ItemGroup>
- 
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
+    <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingVersion)" />
   </ItemGroup>
 </Project>

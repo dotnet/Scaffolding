@@ -890,7 +890,7 @@ namespace Test
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -900,13 +900,13 @@ namespace Test
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-rtm.22528.4"" />
-    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""7.0.0-preview.1.22076.6"">
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.6""/>
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""7.0.5""/>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include = ""Microsoft.EntityFrameworkCore.SqlServer"" Version=""7.0.0-preview.1.22076.6"" />
-    <PackageReference Include = ""Microsoft.EntityFrameworkCore.Tools"" Version=""7.0.0-preview.1.22076.6"">
+    <PackageReference Include = ""Microsoft.EntityFrameworkCore.SqlServer"" Version=""7.0.5""/>
+    <PackageReference Include = ""Microsoft.EntityFrameworkCore.Tools"" Version=""7.0.5"">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -918,7 +918,7 @@ namespace Test
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
     <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
@@ -927,7 +927,7 @@ namespace Test
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-rtm.22528.4"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.6"" />
   </ItemGroup>
 </Project>
 ";
@@ -937,7 +937,7 @@ namespace Test
   <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" />
   <PropertyGroup>
     <RestoreSources>
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -945,7 +945,7 @@ namespace Test
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.0-rtm.22528.4"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""7.0.6"" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library\Library.csproj"" />

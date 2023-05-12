@@ -60,6 +60,7 @@
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NuGetPackagingVersion>6.3.1</NuGetPackagingVersion>
+    <HumanizerPackageVersion>2.14.1</HumanizerPackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
     <!-- Microsoft.AspNetCore.Server.Kestrel -->

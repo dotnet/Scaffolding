@@ -269,7 +269,8 @@
     <value>Failed to provision Client Application for Blazor WASM hosted project</value>
   </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
-    <value>Failed to retrieve all Azure AD/AD B2C objects(apps/service principals</value>
+    <value>Failed to retrieve all Azure AD/AD B2C objects (apps/service principals), exception: {0}</value>
+    <comment>0 = error message</comment>
   </data>
   <data name="FailedToRetrieveApplicationParameters" xml:space="preserve">
     <value>Failed to retrieve application parameters.</value>

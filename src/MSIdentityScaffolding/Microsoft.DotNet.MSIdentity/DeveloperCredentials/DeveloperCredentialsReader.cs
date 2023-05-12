@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
     public class DeveloperCredentialsReader
     {
-        public TokenCredential GetDeveloperCredentials(string? username, string? currentApplicationTenantId, IConsoleLogger consoleLogger)
+        public TokenCredential GetDeveloperCredentials(string? username, string? currentApplicationTenantId, string? instance, IConsoleLogger consoleLogger)
         {
 #if AzureSDK
             * Tried but does not work if another tenant than the home tenant id is specified
@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             TokenCredential tokenCredential = new MsalTokenCredential(
                 currentApplicationTenantId,
                 username,
+                instance,
                 consoleLogger);
             return tokenCredential;
         }

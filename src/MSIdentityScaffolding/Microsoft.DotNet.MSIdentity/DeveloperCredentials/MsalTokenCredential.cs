@@ -25,12 +25,13 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         public MsalTokenCredential(
             string? tenantId,
             string? username,
+            string? instance,
             IConsoleLogger consoleLogger)
         {
             _consoleLogger = consoleLogger;
             TenantId = tenantId ?? "organizations"; // MSA-passthrough
             Username = username;
-            Instance = "https://login.microsoftonline.com";
+            Instance = instance ?? "https://login.microsoftonline.com"; // default instance
         }
 
         private IPublicClientApplication? App { get; set; }
@@ -71,6 +72,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                      .Build();
 
                 App = PublicClientApplicationBuilder.Create(clientId)
+                  .WithAuthority(Instance, TenantId)
                   .WithRedirectUri(RedirectUri)
                   .Build();
 

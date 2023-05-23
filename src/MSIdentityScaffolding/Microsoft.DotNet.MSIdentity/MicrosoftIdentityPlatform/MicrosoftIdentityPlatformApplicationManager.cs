@@ -36,10 +36,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 // Get the tenant
                 Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
-                if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+                if (tenant != null)
                 {
-                    applicationParameters.IsB2C = true;
+                    applicationParameters.IsB2C = tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase);
+                    applicationParameters.IsCiam = tenant.TenantType.Equals("CIAM", StringComparison.OrdinalIgnoreCase);
                 }
+
                 // Create the app.
                 Application application = new Application()
                 {
@@ -73,7 +75,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // and useful for Blazorwasm hosted applications. We create it always.
                 var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication.AppId, consoleLogger);
 
-                // B2C does not allow user consent, and therefore we need to explicitly grant permissions
+                // B2C & CIAM do not allow user consent, and therefore we need to explicitly grant permissions
                 if (applicationParameters.IsB2C || applicationParameters.IsCiam)
                 {
                     string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
@@ -210,6 +212,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
             output ??= new StringBuilder();
+
+            if (parameters.IsCiam)
+            {
+                // TODO need to add app registration to the user flow or create one
+                // https://learn.microsoft.com/en-us/graph/api/identitycontainer-list-authenticationeventsflows?view=graph-rest-beta
+                // https://graph.microsoft.com/beta/identity/authenticationEventsFlows
+            }
+
             // B2C does not allow user consent, and therefore we need to explicitly grant permissions
             if ((parameters.IsCiam || parameters.IsB2C) && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
@@ -569,7 +579,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     };
 
                     // Check if permissions already exist, otherwise will throw exception
-
                     try
                     {
                         // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9.

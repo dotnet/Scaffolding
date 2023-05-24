@@ -36,10 +36,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 // Get the tenant
                 Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
-                if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+                if (tenant != null)
                 {
-                    applicationParameters.IsB2C = true;
+                    applicationParameters.IsB2C = tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase);
+                    applicationParameters.IsCiam = tenant.TenantType.Equals("CIAM", StringComparison.OrdinalIgnoreCase);
                 }
+
                 // Create the app.
                 Application application = new Application()
                 {
@@ -73,8 +75,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 // and useful for Blazorwasm hosted applications. We create it always.
                 var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication.AppId, consoleLogger);
 
-                // B2C does not allow user consent, and therefore we need to explicity grant permissions
-                if (applicationParameters.IsB2C)
+                // B2C & CIAM do not allow user consent, and therefore we need to explicitly grant permissions
+                if (applicationParameters.IsB2C || applicationParameters.IsCiam)
                 {
                     string scopes = GetMsGraphScopes(applicationParameters); // Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C.
                     await AddDownstreamApiPermissions(scopes, graphServiceClient, application, createdSp);
@@ -210,8 +212,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
             output ??= new StringBuilder();
-            // B2C does not allow user consent, and therefore we need to explicity grant permissions
-            if (parameters.IsB2C && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
+
+            if (parameters.IsCiam)
+            {
+                // TODO need to add app registration to the user flow or create one
+                // https://learn.microsoft.com/en-us/graph/api/identitycontainer-list-authenticationeventsflows?view=graph-rest-beta
+                // https://graph.microsoft.com/beta/identity/authenticationEventsFlows
+            }
+
+            // B2C does not allow user consent, and therefore we need to explicitly grant permissions
+            if ((parameters.IsCiam || parameters.IsB2C) && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 // TODO: Add if it's B2C, acquire or create the SUSI Policy
                 var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
@@ -569,7 +579,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     };
 
                     // Check if permissions already exist, otherwise will throw exception
-
                     try
                     {
                         // TODO: See https://github.com/jmprieur/app-provisonning-tool/issues/9.
@@ -709,8 +718,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
 
             IEnumerable<string> scopes = g.Select(r => r.Scope.ToLower(CultureInfo.InvariantCulture));
-            var permissionScopes = spWithScopes.Oauth2PermissionScopes
+            var permissionScopes = spWithScopes.Oauth2PermissionScopes?
                 .Where(s => scopes.Contains(s.Value.ToLower(CultureInfo.InvariantCulture)));
+
+            if (permissionScopes is null)
+            {
+                return null;
+            }
 
             RequiredResourceAccess requiredResourceAccess = new RequiredResourceAccess
             {
@@ -811,6 +825,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             var graphServiceClient = GetGraphServiceClient(tokenCredential);
             Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
+
             var application = await GetApplication(tokenCredential, applicationParameters);
             if (application is null)
             {
@@ -848,6 +863,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             Application application,
             ApplicationParameters originalApplicationParameters)
         {
+            bool isCiam = (tenant.TenantType == "CIAM");
             bool isB2C = (tenant.TenantType == "AAD B2C");
             var effectiveApplicationParameters = new ApplicationParameters
             {
@@ -856,6 +872,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 EffectiveClientId = application.AppId,
                 IsAAD = !isB2C,
                 IsB2C = isB2C,
+                IsCiam = isCiam,
                 HasAuthentication = true,
                 IsWebApi = originalApplicationParameters.IsWebApi.GetValueOrDefault()
                 || application.Api?.Oauth2PermissionScopes?.Any() is true

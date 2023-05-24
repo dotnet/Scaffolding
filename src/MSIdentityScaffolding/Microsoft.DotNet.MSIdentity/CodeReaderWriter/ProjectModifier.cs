@@ -88,26 +88,21 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var filteredFiles = codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, options));
             foreach (var file in filteredFiles)
             {
-                await HandleCodeFileAsync(file, project, options, codeModifierConfig.Identifier);
+                await HandleCodeFileAsync(file, project, options);
             }
 
             _consoleLogger.LogJsonMessage(State.Success, output: _output.ToString().TrimEnd());
         }
 
-        internal static string GetCodeFileString(CodeFile file, string identifier) // todo make all code files strings
+        internal static string GetCodeFileString(CodeFile file)
         {
             // Resource files cannot contain '-' (dash) or '.' (period)
-            var codeFilePropertyName = $"add_{identifier.Replace('-', '_')}_{file.FileName.Replace('.', '_')}";
+            var codeFilePropertyName = $"add_{file.FileName.Replace('.', '_')}";
             var property = AppProvisioningTool.Properties.FirstOrDefault(
-                p => p.Name.Equals(codeFilePropertyName));
-
-            if (property is null)
-            {
-                throw new FormatException($"Resource property for {file.FileName} could not be found. ");
-            }
+                p => p.Name.Equals(codeFilePropertyName))
+                ?? throw new FormatException($"Resource property for {file.FileName} could not be found. ");
 
             var codeFileString = property.GetValue(typeof(Resources))?.ToString();
-
             if (string.IsNullOrEmpty(codeFileString))
             {
                 throw new FormatException($"CodeFile string for {file.FileName} was empty.");
@@ -116,7 +111,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return codeFileString;
         }
 
-        internal static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, DocumentBuilder documentBuilder, Dictionary<string, Method> methods, CodeChangeOptions options, StringBuilder output)
+        internal static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, Dictionary<string, Method> methods, CodeChangeOptions options, StringBuilder output)
         {
             foreach ((string methodName, Method methodChanges) in methods)
             {
@@ -283,13 +278,13 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options, string identifier)
+        private async Task HandleCodeFileAsync(CodeFile file, CodeAnalysis.Project project, CodeChangeOptions options)
         {
             try
             {
                 if (!string.IsNullOrEmpty(file.AddFilePath))
                 {
-                    AddFile(file, identifier);
+                    AddFile(file);
                     _output.AppendLine(string.Format(Resources.AddedCodeFile, file.AddFilePath));
                 }
                 else
@@ -325,7 +320,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         /// <param name="file"></param>
         /// <param name="identifier"></param>
         /// <exception cref="FormatException"></exception>
-        private void AddFile(CodeFile file, string identifier)
+        private void AddFile(CodeFile file)
         {
             var filePath = Path.Combine(_toolOptions.ProjectPath, file.AddFilePath);
             if (File.Exists(filePath))
@@ -333,7 +328,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                 return; // File exists, don't need to create
             }
 
-            var codeFileString = GetCodeFileString(file, identifier);
+            var codeFileString = GetCodeFileString(file);
 
             var fileDir = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(fileDir))
@@ -396,7 +391,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     //add class attributes
                     modifiedClassDeclarationSyntax = documentBuilder.AddClassAttributes(modifiedClassDeclarationSyntax, options);
                     //add code snippets/changes.
-                    modifiedClassDeclarationSyntax = ModifyMethods(file.FileName, modifiedClassDeclarationSyntax, documentBuilder, file.Methods, options, _output);
+                    modifiedClassDeclarationSyntax = ModifyMethods(file.FileName, modifiedClassDeclarationSyntax, file.Methods, options, _output);
 
                     //replace class node with all the updates.
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.

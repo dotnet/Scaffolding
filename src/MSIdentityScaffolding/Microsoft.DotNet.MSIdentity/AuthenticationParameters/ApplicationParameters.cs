@@ -88,6 +88,11 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public bool IsB2C { get; set; }
 
         /// <summary>
+        /// Is authenticated with CIAM.
+        /// </summary>
+        public bool IsCiam { get; set; }
+
+        /// <summary>
         /// Sign-up/sign-in policy in the case of B2C.
         /// </summary>
         /// <remarks>This is for the blazorwasm hosted template and more a workaround

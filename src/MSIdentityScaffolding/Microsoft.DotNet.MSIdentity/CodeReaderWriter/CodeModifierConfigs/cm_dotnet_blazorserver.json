@@ -250,7 +250,7 @@
       ]
     },
     {
-      "FileName": "LoginDisplay.razor",
+      "FileName": "blazorserver_LoginDisplay.razor",
       "AddFilePath": "Shared/LoginDisplay.razor"
     },
     {

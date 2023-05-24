@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
     // https://github.com/dotnet/aspnetcore/blob/6bc4b79f4ee7af00edcbb435e5ee4c1de349a110/src/ProjectTemplates/Web.ProjectTemplates/content/StarterWeb-CSharp/appsettings.json
     public static class DefaultProperties
     {
+        public const string Authority = "https://qualified.domain.name/";
         public const string Domain = "qualified.domain.name";
         public const string TenantId = "22222222-2222-2222-2222-222222222222";
         public const string ClientId = "11111111-1111-1111-11111111111111111";
@@ -53,6 +54,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public bool IsBlazorWasm;
         public bool IsWebApi;
         public bool IsB2C;
+        public bool IsCIAM;
         public bool HasClientSecret;
 
         public string? ClientId;
@@ -76,9 +78,15 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             IsBlazorWasm = applicationParameters.IsBlazorWasm;
             IsWebApi = applicationParameters.IsWebApi.GetValueOrDefault();
             IsB2C = applicationParameters.IsB2C;
+            IsCIAM = applicationParameters.IsCiam;
             HasClientSecret = applicationParameters.CallsDownstreamApi || applicationParameters.CallsMicrosoftGraph;
 
             Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : existingBlock?.GetValue(PropertyNames.Domain)?.ToString() ?? DefaultProperties.Domain;
+            if (IsCIAM)
+            {
+                Domain = Domain.Replace("onmicrosoft.com", "ciamlogin.com");
+            }
+
             TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : existingBlock?.GetValue(PropertyNames.TenantId)?.ToString() ?? DefaultProperties.TenantId;
             ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : existingBlock?.GetValue(PropertyNames.ClientId)?.ToString() ?? DefaultProperties.ClientId;
             Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
@@ -86,8 +94,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
                 ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : null);
             SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : existingBlock?.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString() ?? DefaultProperties.SignUpSignInPolicyId;
-            // TODO determine the SusiPolicy from the graph beta
-            Authority = IsB2C ? $"{Instance}{Domain}/{SignUpSignInPolicyId}" : $"{Instance}{Domain}";
+            Authority = IsCIAM ? $"https://{Domain}/" : IsB2C ? $"{Instance}{Domain}/{SignUpSignInPolicyId}" : $"{Instance}{Domain}"; 
             ClientSecret = existingBlock?.GetValue(PropertyNames.ClientSecret)?.ToString() ?? DefaultProperties.ClientSecret;
             ClientCertificates = existingBlock?.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
         }
@@ -97,6 +104,15 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             ClientId,
             Authority,
             ValidateAuthority = !IsB2C
+        };
+
+        public dynamic CIAMSettings => new
+        {
+            Authority = Authority ?? DefaultProperties.Authority,
+            ClientId = ClientId ?? DefaultProperties.ClientId,
+            ClientSecret = ClientSecret ?? DefaultProperties.ClientSecret,
+            ClientCertificates = ClientCertificates ?? Array.Empty<string>(),
+            CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath
         };
 
         public dynamic WebAppSettings => new
@@ -138,6 +154,11 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             if (IsBlazorWasm)
             {
                 return JObject.FromObject(BlazorSettings);
+            }
+
+            if (IsCIAM)
+            {
+                return JObject.FromObject(CIAMSettings);
             }
 
             var jObject = IsWebApi ? JObject.FromObject(WebApiSettings) : JObject.FromObject(WebAppSettings);

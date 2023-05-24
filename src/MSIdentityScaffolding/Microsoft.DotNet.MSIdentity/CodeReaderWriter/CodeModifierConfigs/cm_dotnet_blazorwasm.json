@@ -193,7 +193,7 @@
       "AddFilePath": "Pages/Authentication.razor"
     },
     {
-      "FileName": "LoginDisplay.razor",
+      "FileName": "blazorwasm_LoginDisplay.razor",
       "AddFilePath": "Shared/LoginDisplay.razor"
     },
     {

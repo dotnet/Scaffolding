@@ -61,6 +61,63 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to @page &quot;/authentication/{action}&quot;
+        ///@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+        ///&lt;RemoteAuthenticatorView Action=&quot;@Action&quot; /&gt;
+        ///
+        ///@code{
+        ///    [Parameter] public string? Action { get; set; }
+        ///}
+        ///.
+        /// </summary>
+        internal static string add_Authentication_razor {
+            get {
+                return ResourceManager.GetString("add_Authentication_razor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;AuthorizeView&gt;
+        ///    &lt;Authorized&gt;
+        ///        Hello, @context.User.Identity?.Name!
+        ///        &lt;a href=&quot;MicrosoftIdentity/Account/SignOut&quot;&gt;Log out&lt;/a&gt;
+        ///    &lt;/Authorized&gt;
+        ///    &lt;NotAuthorized&gt;
+        ///        &lt;a href=&quot;MicrosoftIdentity/Account/SignIn&quot;&gt;Log in&lt;/a&gt;
+        ///    &lt;/NotAuthorized&gt;
+        ///&lt;/AuthorizeView&gt;
+        ///.
+        /// </summary>
+        internal static string add_blazorserver_LoginDisplay_razor {
+            get {
+                return ResourceManager.GetString("add_blazorserver_LoginDisplay_razor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to @using Microsoft.AspNetCore.Components.Authorization
+        ///@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+        ///
+        ///@inject NavigationManager Navigation
+        ///@inject SignOutSessionStateManager SignOutManager
+        ///
+        ///&lt;AuthorizeView&gt;
+        ///    &lt;Authorized&gt;
+        ///        Hello, @context.User.Identity?.Name!
+        ///        &lt;button class=&quot;nav-link btn btn-link&quot; @onclick=&quot;BeginLogout&quot;&gt;Log out&lt;/button&gt;
+        ///    &lt;/Authorized&gt;
+        ///    &lt;NotAuthorized&gt;
+        ///        &lt;a href=&quot;authentication/login&quot;&gt;Log in&lt;/a&gt;
+        ///    &lt;/NotAuthorized&gt;
+        ///&lt;/AuthorizeView&gt;        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string add_blazorwasm_LoginDisplay_razor {
+            get {
+                return ResourceManager.GetString("add_blazorwasm_LoginDisplay_razor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to @page &quot;/callwebapi&quot;
         ///
         ///@using Microsoft.Identity.Web
@@ -88,27 +145,73 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         ///
         ///    protected override async Task OnInitia [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string add_dotnet_blazorserver_CallWebApi_razor {
+        internal static string add_CallWebApi_razor {
             get {
-                return ResourceManager.GetString("add_dotnet_blazorserver_CallWebApi_razor", resourceCulture);
+                return ResourceManager.GetString("add_CallWebApi_razor", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;AuthorizeView&gt;
-        ///    &lt;Authorized&gt;
-        ///        Hello, @context.User.Identity?.Name!
-        ///        &lt;a href=&quot;MicrosoftIdentity/Account/SignOut&quot;&gt;Log out&lt;/a&gt;
-        ///    &lt;/Authorized&gt;
-        ///    &lt;NotAuthorized&gt;
-        ///        &lt;a href=&quot;MicrosoftIdentity/Account/SignIn&quot;&gt;Log in&lt;/a&gt;
-        ///    &lt;/NotAuthorized&gt;
-        ///&lt;/AuthorizeView&gt;
+        ///   Looks up a localized string similar to using System;
+        ///using System.Net.Http;
+        ///using System.Net.Http.Headers;
+        ///using System.Threading;
+        ///using System.Threading.Tasks;
+        ///using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+        ///using Microsoft.Authentication.WebAssembly.Msal.Models;
+        ///using Microsoft.Extensions.DependencyInjection;
+        ///using Microsoft.Graph;
+        ///
+        ////// &lt;summary&gt;
+        ////// Adds services and implements methods to use Microsoft Graph SDK.
+        ////// &lt;/summary&gt;
+        ///internal static class GraphClientExtensions
+        ///{
+        ///    /// &lt;summary&gt;
+        ///    /// Extension  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string add_GraphClientExtensions_cs {
+            get {
+                return ResourceManager.GetString("add_GraphClientExtensions_cs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to @using System.Security.Principal
+        ///
+        ///&lt;ul class=&quot;navbar-nav&quot;&gt;
+        ///@if (User.Identity?.IsAuthenticated == true)
+        ///{
+        ///        &lt;span class=&quot;navbar-text text-dark&quot;&gt;Hello @User.Identity?.Name!&lt;/span&gt;
+        ///        &lt;li class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link text-dark&quot; asp-area=&quot;MicrosoftIdentity&quot; asp-controller=&quot;Account&quot; asp-action=&quot;SignOut&quot;&gt;Sign out&lt;/a&gt;
+        ///        &lt;/li&gt;
+        ///}
+        ///else
+        ///{
+        ///        &lt;li class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link text-dark&quot; asp-area=&quot;MicrosoftIdentity&quot; asp-controller=&quot;Account&quot; asp-ac [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string add_LoginPartial_cshtml {
+            get {
+                return ResourceManager.GetString("add_LoginPartial_cshtml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to @inject NavigationManager Navigation
+        ///
+        ///@code {
+        ///    protected override void OnInitialized()
+        ///    {
+        ///        Navigation.NavigateTo($&quot;authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}&quot;);
+        ///    }
+        ///}
         ///.
         /// </summary>
-        internal static string add_dotnet_blazorserver_LoginDisplay_razor {
+        internal static string add_RedirectToLogin_razor {
             get {
-                return ResourceManager.GetString("add_dotnet_blazorserver_LoginDisplay_razor", resourceCulture);
+                return ResourceManager.GetString("add_RedirectToLogin_razor", resourceCulture);
             }
         }
         
@@ -135,90 +238,9 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         ///            &lt;th&gt;Property&lt;/th&gt;
         ///          [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string add_dotnet_blazorserver_ShowProfile_razor {
+        internal static string add_ShowProfile_razor {
             get {
-                return ResourceManager.GetString("add_dotnet_blazorserver_ShowProfile_razor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to @page &quot;/authentication/{action}&quot;
-        ///@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-        ///&lt;RemoteAuthenticatorView Action=&quot;@Action&quot; /&gt;
-        ///
-        ///@code{
-        ///    [Parameter] public string? Action { get; set; }
-        ///}
-        ///.
-        /// </summary>
-        internal static string add_dotnet_blazorwasm_Authentication_razor {
-            get {
-                return ResourceManager.GetString("add_dotnet_blazorwasm_Authentication_razor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to using System;
-        ///using System.Net.Http;
-        ///using System.Net.Http.Headers;
-        ///using System.Threading;
-        ///using System.Threading.Tasks;
-        ///using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-        ///using Microsoft.Authentication.WebAssembly.Msal.Models;
-        ///using Microsoft.Extensions.DependencyInjection;
-        ///using Microsoft.Graph;
-        ///
-        ////// &lt;summary&gt;
-        ////// Adds services and implements methods to use Microsoft Graph SDK.
-        ////// &lt;/summary&gt;
-        ///internal static class GraphClientExtensions
-        ///{
-        ///    /// &lt;summary&gt;
-        ///    /// Extension  [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string add_dotnet_blazorwasm_GraphClientExtensions_cs {
-            get {
-                return ResourceManager.GetString("add_dotnet_blazorwasm_GraphClientExtensions_cs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to @using Microsoft.AspNetCore.Components.Authorization
-        ///@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-        ///
-        ///@inject NavigationManager Navigation
-        ///@inject SignOutSessionStateManager SignOutManager
-        ///
-        ///&lt;AuthorizeView&gt;
-        ///    &lt;Authorized&gt;
-        ///        Hello, @context.User.Identity?.Name!
-        ///        &lt;button class=&quot;nav-link btn btn-link&quot; @onclick=&quot;BeginLogout&quot;&gt;Log out&lt;/button&gt;
-        ///    &lt;/Authorized&gt;
-        ///    &lt;NotAuthorized&gt;
-        ///        &lt;a href=&quot;authentication/login&quot;&gt;Log in&lt;/a&gt;
-        ///    &lt;/NotAuthorized&gt;
-        ///&lt;/AuthorizeView&gt;        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string add_dotnet_blazorwasm_LoginDisplay_razor {
-            get {
-                return ResourceManager.GetString("add_dotnet_blazorwasm_LoginDisplay_razor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to @inject NavigationManager Navigation
-        ///
-        ///@code {
-        ///    protected override void OnInitialized()
-        ///    {
-        ///        Navigation.NavigateTo($&quot;authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}&quot;);
-        ///    }
-        ///}
-        ///.
-        /// </summary>
-        internal static string add_dotnet_blazorwasm_RedirectToLogin_razor {
-            get {
-                return ResourceManager.GetString("add_dotnet_blazorwasm_RedirectToLogin_razor", resourceCulture);
+                return ResourceManager.GetString("add_ShowProfile_razor", resourceCulture);
             }
         }
         
@@ -247,31 +269,9 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         ///            &lt;td&gt; DisplayName &lt;/td&gt;
         ///            &lt;td&gt; @user.DisplayNa [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string add_dotnet_blazorwasm_UserProfile_razor {
+        internal static string add_UserProfile_razor {
             get {
-                return ResourceManager.GetString("add_dotnet_blazorwasm_UserProfile_razor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to @using System.Security.Principal
-        ///
-        ///&lt;ul class=&quot;navbar-nav&quot;&gt;
-        ///@if (User.Identity?.IsAuthenticated == true)
-        ///{
-        ///        &lt;span class=&quot;navbar-text text-dark&quot;&gt;Hello @User.Identity?.Name!&lt;/span&gt;
-        ///        &lt;li class=&quot;nav-item&quot;&gt;
-        ///            &lt;a class=&quot;nav-link text-dark&quot; asp-area=&quot;MicrosoftIdentity&quot; asp-controller=&quot;Account&quot; asp-action=&quot;SignOut&quot;&gt;Sign out&lt;/a&gt;
-        ///        &lt;/li&gt;
-        ///}
-        ///else
-        ///{
-        ///        &lt;li class=&quot;nav-item&quot;&gt;
-        ///            &lt;a class=&quot;nav-link text-dark&quot; asp-area=&quot;MicrosoftIdentity&quot; asp-controller=&quot;Account&quot; asp-ac [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string add_dotnet_webapp_mvc_LoginPartial_cshtml {
-            get {
-                return ResourceManager.GetString("add_dotnet_webapp-mvc_LoginPartial_cshtml", resourceCulture);
+                return ResourceManager.GetString("add_UserProfile_razor", resourceCulture);
             }
         }
         

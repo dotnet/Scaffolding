@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             ProvisioningToolOptions = provisioningToolOptions;
             CommandName = commandName;
             ConsoleLogger = new ConsoleLogger(CommandName, ProvisioningToolOptions.Json);
-            TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username, ConsoleLogger);
+            TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username, ProvisioningToolOptions.Instance, ConsoleLogger);
             GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
             GraphObjectRetriever = new GraphObjectRetriever(GraphServiceClient, ConsoleLogger);
@@ -91,13 +91,9 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
         internal async Task<IList<Application>> GetApplicationsAsync()
         {
-            var graphObjectsList = await GraphObjectRetriever.GetGraphObjects();
-            if (graphObjectsList is null)
-            {
-                ConsoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
-            }
-
             IList<Application> applicationList = new List<Application>();
+
+            var graphObjectsList = await GraphObjectRetriever.GetGraphObjects(); // Will exit early if call fails
             foreach (var graphObj in graphObjectsList!)
             {
                 if (graphObj is Application app)

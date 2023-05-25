@@ -4,7 +4,7 @@
     string routePrefix = "/api/" + modelName;
     string endPointsClassName = Model.EndpointsName;
     string methodName = $"Map{@modelName}Endpoints";
-    string pluralModel = $"{@modelName}s";
+    string pluralModel = Model.ModelType.PluralName;
     string getAllModels = $"GetAll{@pluralModel}";
     string getModelById = $"Get{@modelName}ById";
     string deleteModel = $"Delete{@modelName}";

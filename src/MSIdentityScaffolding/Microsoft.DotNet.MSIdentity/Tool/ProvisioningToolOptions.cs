@@ -102,6 +102,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public string? TenantId { get; set; }
 
         /// <summary>
+        /// URL that indicates a directory that MSAL can request tokens from.
+        /// e.g. https://login.microsoftonline.com/, https://login.microsoftonline.us/
+        /// </summary>
+        public string? Instance { get; set; }
+
+        /// <summary>
         /// Required for the creation of a B2C application.
         /// Represents the sign-up/sign-in user flow.
         /// </summary>

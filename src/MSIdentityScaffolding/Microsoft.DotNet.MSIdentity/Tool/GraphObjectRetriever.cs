@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -66,17 +65,17 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                                 nextPage = null;
                             }
                         }
-                        catch (ServiceException)
+                        catch (ServiceException se)
                         {
                             nextPage = null;
-                            _consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
+                            _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
                         }
                     }
                 }
             }
-            catch (ServiceException)
+            catch (ServiceException se)
             {
-                _consoleLogger.LogFailureAndExit(Resources.FailedToRetrieveADObjectsError);
+                _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
             }
 
             return graphObjectsList;

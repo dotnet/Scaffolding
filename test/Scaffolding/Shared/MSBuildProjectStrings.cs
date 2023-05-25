@@ -23,7 +23,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -71,7 +71,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -114,7 +114,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
     <ProjectName>TestProject</ProjectName>
@@ -308,7 +308,7 @@ routes.MapDelete(""/api/Car/{id}"", (int id) =>
 {
     //return Results.Ok(new Car { ID = id });
 })
-.WithName(""DeleteCar"");  
+.WithName(""DeleteCar"");
     }
 }";
         public const string EndpointsEmptyClass = @"namespace MinimalApiTest { static class Endpoints { } } ";
@@ -347,7 +347,7 @@ app.Run();
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -448,7 +448,7 @@ public class Manufacturer
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -495,7 +495,7 @@ public class Manufacturer
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -584,7 +584,7 @@ namespace WebApplication1
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <RootNamespace>Microsoft.Library</RootNamespace>
     <ProjectName>Library1</ProjectName>
@@ -631,7 +631,7 @@ namespace DAL
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.TestProject</RootNamespace>
@@ -853,7 +853,7 @@ namespace Test
       https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/3.0.100-rc2-014277/nuget/v3/index.json;
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
-      
+
     </RestoreSources>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
@@ -907,8 +907,8 @@ namespace Test
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include = ""Microsoft.EntityFrameworkCore.SqlServer"" Version=""7.0.0-preview.1.22076.6"" />
-    <PackageReference Include = ""Microsoft.EntityFrameworkCore.Tools"" Version=""7.0.0-preview.1.22076.6"">
+    <PackageReference Include = ""Microsoft.EntityFrameworkCore.SqlServer"" Version=""7.0.5""/>
+    <PackageReference Include = ""Microsoft.EntityFrameworkCore.Tools"" Version=""7.0.5"">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

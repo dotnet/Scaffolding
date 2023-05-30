@@ -140,15 +140,14 @@
               "LeadingTrivia": {
                 "Newline": true
               }
-            },     
+            },
             {
               "CodeChangeType": "Lambda",
               "Parent": "WebApplication.CreateBuilder.Services.AddAuthorization",
               "Block": "options.FallbackPolicy = options.DefaultPolicy",
               "Parameter": "options",
-              "LeadingTrivia":
-              {
-                "Newline":true,
+              "LeadingTrivia": {
+                "Newline": true,
                 "NumberOfSpaces": 4
               }
             },
@@ -156,9 +155,8 @@
               "Parent": "WebApplication.CreateBuilder.Services.AddRazorPages",
               "CodeChangeType": "MemberAccess",
               "Block": "AddMicrosoftIdentityUI()",
-              "LeadingTrivia":
-              {
-                "Newline":true, 
+              "LeadingTrivia": {
+                "Newline": true,
                 "NumberOfSpaces": 4
               }
             },
@@ -187,10 +185,10 @@
     },
     {
       "FileName": "Index.cshtml.cs",
-      "Options" :  [ "MicrosoftGraph", "DownstreamApi" ],
+      "Options": [ "MicrosoftGraph", "DownstreamApi" ],
       "ClassProperties": [
         {
-          "Block" : "private readonly GraphServiceClient _graphServiceClient",
+          "Block": "private readonly GraphServiceClient _graphServiceClient",
           "Options": [ "MicrosoftGraph" ]
         },
         {
@@ -209,11 +207,10 @@
         }
       ],
       "Methods": {
-        "OnGet":
-        {
-          "EditType" : {
-           "Block": "async Task",
-           "Options": ["MicrosoftGraph", "DownstreamApi"]
+        "OnGet": {
+          "EditType": {
+            "Block": "async Task",
+            "Options": [ "MicrosoftGraph", "DownstreamApi" ]
           },
           "CodeChanges": [
             {
@@ -221,21 +218,21 @@
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
-              "Options" : [ "MicrosoftGraph"]
+              "Options": [ "MicrosoftGraph" ]
             },
             {
               "Block": "ViewData[\"GraphApiResult\"] = user.DisplayName;",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
-              "Options" : [ "MicrosoftGraph"]
+              "Options": [ "MicrosoftGraph" ]
             },
             {
-              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
+              "Block": "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
-              "Options" : [ "DownstreamApi"]
+              "Options": [ "DownstreamApi" ]
             },
             {
               "Block": "\n\n            if (response.StatusCode == System.Net.HttpStatusCode.OK)\n            {\n                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                ViewData[\"ApiResult\"] = apiResult;\n            }\n            else\n            {\n                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);\n                throw new HttpRequestException($\"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}\");\n            }",
@@ -243,16 +240,16 @@
             }
           ]
         },
-        "IndexModel" : {
-          "Parameters" : [ "ILogger<IndexModel>" ],
-          "AddParameters" : [ 
+        "IndexModel": {
+          "Parameters": [ "ILogger<IndexModel>" ],
+          "AddParameters": [
             {
-              "Block":"GraphServiceClient graphServiceClient",
-              "Options": [ "MicrosoftGraph"]
+              "Block": "GraphServiceClient graphServiceClient",
+              "Options": [ "MicrosoftGraph" ]
             },
             {
-              "Block":"IDownstreamWebApi downstreamWebApi",
-              "Options": [ "DownstreamApi"]
+              "Block": "IDownstreamWebApi downstreamWebApi",
+              "Options": [ "DownstreamApi" ]
             }
           ],
           "CodeChanges": [
@@ -273,7 +270,7 @@
           ]
         }
       },
-      "Usings" : [
+      "Usings": [
         "Microsoft.Identity.Web",
         "System.Net"
       ],
@@ -301,6 +298,30 @@
           ]
         }
       }
+    },
+    {
+      "FileName": "_Layout.cshtml",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "MultiLineBlock": [
+                "</ul>",
+                "                <partial name=\"_LoginPartial\" />",
+                "                </div>"
+              ],
+              "ReplaceSnippet": [
+                "</ul>",
+                "                </div>"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "LoginPartial.cshtml",
+      "AddFilePath": "Pages/Shared/_LoginPartial.cshtml"
     }
   ]
 }

@@ -94,7 +94,7 @@
                 "Sets": "CallsMicrosoftGraph"
             },
             {
-                "MatchAny": [ ".EnableTokenAcquisitionToCallDownstreamApi", ".AddDownstreamWebApi" ],
+                "MatchAny": [ ".EnableTokenAcquisitionToCallDownstreamApi", ".AddDownstreamlApi" ],
                 "Sets": "CallsDownstreamApi"
             },
             {

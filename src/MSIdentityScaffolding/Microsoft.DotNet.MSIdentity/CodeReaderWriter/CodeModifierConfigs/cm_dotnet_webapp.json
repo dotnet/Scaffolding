@@ -123,7 +123,7 @@
             },
             {
               "MultiLineBlock": [
-                "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -192,7 +192,7 @@
           "Options": [ "MicrosoftGraph" ]
         },
         {
-          "Block": "private readonly IDownstreamWebApi _downstreamWebApi",
+          "Block": "private readonly IDownstreamApi _downstreamApi",
           "Options": [ "DownstreamApi" ]
         }
       ],
@@ -228,7 +228,7 @@
               "Options": [ "MicrosoftGraph" ]
             },
             {
-              "Block": "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
+              "Block": "using var response = await _downstreamApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false);",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
@@ -261,7 +261,7 @@
               }
             },
             {
-              "Block": "_downstreamWebApi = downstreamWebApi;",
+              "Block": "_downstreamApi = downstreamApi;",
               "Options": [ "DownstreamApi" ],
               "LeadingTrivia": {
                 "NumberOfSpaces": 12

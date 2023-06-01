@@ -23,7 +23,7 @@
         {
           "MatchAny": [
             ".EnableTokenAcquisitionToCallDownstreamApi",
-            ".AddDownstreamWebApi"
+            ".AddDownstreamApi"
           ],
           "Sets": "CallsDownstreamApi"
         },

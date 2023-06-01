@@ -90,7 +90,7 @@
             },
             {
               "MultiLineBlock": [
-                "AddDownstreamWebApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamApi(\"DownstreamApi\", WebApplication.CreateBuilder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -134,7 +134,7 @@
           "Options": [ "MicrosoftGraph" ]
         },
         {
-          "Block": "private readonly IDownstreamWebApi _downstreamWebApi",
+          "Block": "private readonly IDownstreamApi _downstreamApi",
           "Options": [ "DownstreamApi" ]
         }
       ],
@@ -173,7 +173,7 @@
               }
             },
             {
-              "Block": "_downstreamWebApi = downstreamWebApi",
+              "Block": "_downstreamApi = downstreamApi",
               "Options": [ "DownstreamApi" ],
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
@@ -198,14 +198,14 @@
             },
             {
               "Prepend": true,
-              "Block" : "using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
+              "Block" : "using var response = await _downstreamApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
               "Options" : [ "DownstreamApi"]
             },
             {
-              "InsertAfter": "await _downstreamWebApi.CallWebApiForUserAsync",
+              "InsertAfter": "await _downstreamApi.CallWebApiForUserAsync",
               "MultiLineBlock": [
                 "",
                 "            if (response.StatusCode == System.Net.HttpStatusCode.OK)",

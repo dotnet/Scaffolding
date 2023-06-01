@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         {
             var inputParameters = JObject.FromObject(new ApiSettingsBlock
             {
-                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes,
+                Scopes = new string[] { string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes },
                 BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
             });
 

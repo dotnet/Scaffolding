@@ -246,7 +246,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption, UsernameOption, InstanceOption, ClientIdOption, JsonOption, ProjectFilePathOption, ConfigUpdateOption, CodeUpdateOption, PackagesUpdateOption, CallsGraphOption, CallsDownstreamApiOption, UpdateUserSecretsOption, RedirectUriOption, SusiPolicyIdOption
+                TenantOption, UsernameOption, InstanceOption, ClientIdOption, JsonOption, ProjectFilePathOption, ConfigUpdateOption, CodeUpdateOption, PackagesUpdateOption, CallsGraphOption, CallsDownstreamApiOption, UpdateUserSecretsOption, RedirectUriOption, SusiPolicyIdOption, CalledApiUrlOption, ApiScopesOption
             };
 
         internal static Command UpdateAppRegistrationCommand() =>
@@ -412,6 +412,14 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             new(
                 aliases: new[] { "--api-scopes" },
                 description: "Scopes for the called downstream API, especially useful for B2C scenarios where permissions must be granted manually\n")
+            {
+                IsRequired = false
+            };
+
+        internal static Option<string> CalledApiUrlOption { get; } =
+            new(
+                aliases: new[] { "--called-api-url" },
+                description: "URL of the called downstream API\n")
             {
                 IsRequired = false
             };

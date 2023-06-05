@@ -106,8 +106,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (_provisioningToolOptions.CallsDownstreamApi)
             {
+                var scopes = _provisioningToolOptions.ApiScopes ?? DefaultProperties.ApiScopes;
+                var baseUrl = _provisioningToolOptions.CalledApiUrl ?? DefaultProperties.MicrosoftGraphBaseUrl;
                 // update DownstreamAPI Block
-                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, DefaultProperties.ApiScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, scopes, baseUrl);
                 if (updatedDownstreamApiBlock != null)
                 {
                     changesMade = true;

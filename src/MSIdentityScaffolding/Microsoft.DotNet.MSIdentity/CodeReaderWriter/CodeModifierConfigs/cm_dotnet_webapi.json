@@ -160,7 +160,7 @@
               "Options": [ "MicrosoftGraph"]
             },
             {
-              "Block":"IDownstreamWebApi downstreamWebApi",
+              "Block":"IDownstreamApi downstreamApi",
               "Options": [ "DownstreamApi"]
             }
           ],
@@ -247,6 +247,10 @@
         },
         {
           "Block": "Microsoft.Identity.Web",
+          "Options": [ "DownstreamApi" ]
+        },
+        {
+          "Block": "Microsoft.Identity.Web.DownstreamApi",
           "Options": [ "DownstreamApi" ]
         }
       ]

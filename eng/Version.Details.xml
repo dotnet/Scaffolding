@@ -19,57 +19,57 @@
       <Uri>https://github.com/dotnet/efcore</Uri>
       <Sha>729f882cd9eb4a122845d9f72ae782c23d8f388e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="8.0.0-preview.6.23307.3">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>110522a9160f910447e759e2048edc33f8eb9266</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0-preview.6.23307.3">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>110522a9160f910447e759e2048edc33f8eb9266</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0-preview.5.23279.2">
+    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0-preview.6.23304.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>93da0c966f9bc537dd77fbe2cbeb0bec4ff6a48b</Sha>
+      <Sha>2bf8f1aa83e192a307d5846424880cd61bec1a4f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0-preview.6.23307.3">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>

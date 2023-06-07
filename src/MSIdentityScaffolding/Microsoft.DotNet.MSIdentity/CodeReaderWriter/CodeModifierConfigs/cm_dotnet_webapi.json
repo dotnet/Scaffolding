@@ -198,14 +198,14 @@
             },
             {
               "Prepend": true,
-              "Block" : "using var response = await _downstreamApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
+              "Block" : "using var response = await _downstreamApi.CallApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
               "LeadingTrivia": {
                 "NumberOfSpaces": 12
               },
               "Options" : [ "DownstreamApi"]
             },
             {
-              "InsertAfter": "await _downstreamApi.CallWebApiForUserAsync",
+              "InsertAfter": "await _downstreamApi.CallApiForUserAsync",
               "MultiLineBlock": [
                 "",
                 "            if (response.StatusCode == System.Net.HttpStatusCode.OK)",
@@ -250,7 +250,7 @@
           "Options": [ "DownstreamApi" ]
         },
         {
-          "Block": "Microsoft.Identity.Web.DownstreamApi",
+          "Block": "Microsoft.Identity.Abstractions",
           "Options": [ "DownstreamApi" ]
         }
       ]

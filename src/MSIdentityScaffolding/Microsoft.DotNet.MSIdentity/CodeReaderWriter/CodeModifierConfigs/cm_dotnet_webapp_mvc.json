@@ -256,7 +256,7 @@
             },
             {
               "Options": [ "DownstreamApi" ],
-              "Block": "            using var response = await _downstreamApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
+              "Block": "            using var response = await _downstreamApi.CallApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
               "Prepend": true,
               "NumberOfSpaces": 12
             }
@@ -283,7 +283,7 @@
           "Options": [ "DownstreamApi", "MicrosoftGraph" ]
         },
         {
-          "Block": "Microsoft.Identity.Web.DownstreamApi",
+          "Block": "Microsoft.Identity.Abstractions",
           "Options": [ "DownstreamApi" ]
         }
       ]

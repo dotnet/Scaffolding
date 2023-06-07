@@ -102,10 +102,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     return null;
                 }
 
-                if (applicationParameters.IsB2C)
-                {
-                    createdApplication!.AdditionalData.Add("IsB2C", true);
-                }
+                createdApplication!.AdditionalData.Add("IsB2C", applicationParameters.IsB2C);
+                createdApplication!.AdditionalData.Add("IsCIAM", applicationParameters.IsCiam);
 
                 ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
 
@@ -132,6 +130,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
         }
 
+        /// <summary>
+        /// Explicit usage of MicrosoftGraph openid and offline_access in the case of Azure AD B2C, CIAM.
+        /// </summary>
+        /// <param name="applicationParameters"></param>
+        /// <returns></returns>
         private static string GetMsGraphScopes(ApplicationParameters applicationParameters)
         {
             var apiScopes = applicationParameters.CalledApiScopes ?? string.Empty;
@@ -213,19 +216,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
             output ??= new StringBuilder();
 
-            if (parameters.IsCiam)
+            ServicePrincipal? servicePrincipal = null;
+            // B2C & CIAM do not allow user consent, and therefore we need to explicitly grant permissions
+            if (parameters.IsB2C || parameters.IsCiam) // TODO Test DownstreamAPI, Test B2C
             {
-                // TODO need to add app registration to the user flow or create one
-                // https://learn.microsoft.com/en-us/graph/api/identitycontainer-list-authenticationeventsflows?view=graph-rest-beta
-                // https://graph.microsoft.com/beta/identity/authenticationEventsFlows
+                servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
+                string scopes = GetMsGraphScopes(parameters);
+                await AddDownstreamApiPermissions(scopes, graphServiceClient, appUpdates, servicePrincipal, output);
+                needsUpdates = true;
             }
 
-            // B2C does not allow user consent, and therefore we need to explicitly grant permissions
-            if ((parameters.IsCiam || parameters.IsB2C) && parameters.CallsDownstreamApi && !string.IsNullOrEmpty(toolOptions.ApiScopes))
+            if (!string.IsNullOrEmpty(toolOptions.ApiScopes)) // TODO Test DownstreamAPI, Test B2C
             {
-                // TODO: Add if it's B2C, acquire or create the SUSI Policy
-                var servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
-
+                servicePrincipal ??= await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
                 await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
                 needsUpdates = true;
             }
@@ -257,7 +260,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 graphServiceClient,
                 appUpdates).ConfigureAwait(false);
 
-            // TODO need to have admin permissions for the downstream API
             await AddAdminConsentToApiPermissions(
                 graphServiceClient,
                 servicePrincipal,

@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 SusiPolicyIdOption,
                 TenantOption,
                 UsernameOption,
-                InstanceOption);
+                InstanceOption,
+                CalledApiUrlOption);
 
             //internal commands
             var listAadAppsCommand = ListAADAppsCommand();

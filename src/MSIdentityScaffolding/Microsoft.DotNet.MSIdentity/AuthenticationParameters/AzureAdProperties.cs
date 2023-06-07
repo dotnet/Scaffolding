@@ -175,6 +175,12 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
     public class ApiSettingsBlock
     {
         public string? BaseUrl;
+        public string? Scopes;
+    }
+
+    public class DownstreamApiSettingsBlock
+    {
+        public string? BaseUrl;
         public string[]? Scopes;
     }
 }

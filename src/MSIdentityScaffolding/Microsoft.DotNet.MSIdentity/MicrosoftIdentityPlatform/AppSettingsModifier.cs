@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 var scopes = _provisioningToolOptions.ApiScopes ?? DefaultProperties.ApiScopes;
                 var baseUrl = _provisioningToolOptions.CalledApiUrl ?? DefaultProperties.MicrosoftGraphBaseUrl;
                 // update DownstreamAPI Block
-                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, scopes, baseUrl);
+                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, scopes, baseUrl, isDownstreamApi:true);
                 if (updatedDownstreamApiBlock != null)
                 {
                     changesMade = true;
@@ -170,13 +170,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return false;
         }
 
-        internal static JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
+        internal static JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl, bool isDownstreamApi = false)
         {
-            var inputParameters = JObject.FromObject(new ApiSettingsBlock
-            {
-                Scopes = new string[] { string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes },
-                BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
-            });
+            var inputParameters = isDownstreamApi
+                ? JObject.FromObject(new DownstreamApiSettingsBlock
+                {
+                    Scopes = new string[] { string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes },
+                    BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
+                })
+                : JObject.FromObject(new ApiSettingsBlock
+                {
+                    Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes,
+                    BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
+                });
 
             if (appSettings.TryGetValue(key, out var apiToken))
             {

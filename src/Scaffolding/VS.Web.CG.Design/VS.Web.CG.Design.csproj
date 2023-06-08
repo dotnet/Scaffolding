@@ -23,6 +23,6 @@
       <Pack>true</Pack>
       <PackagePath>lib\net7.0\</PackagePath>
     </Content>
-    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="$(RepoRoot)\src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

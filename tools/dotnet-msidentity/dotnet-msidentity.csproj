@@ -50,7 +50,6 @@
     <Compile Remove="ProjectDescriptions\**" />
     <EmbeddedResource Remove="ProjectDescriptions\**" />
     <None Remove="ProjectDescriptions\**" />
-    <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>

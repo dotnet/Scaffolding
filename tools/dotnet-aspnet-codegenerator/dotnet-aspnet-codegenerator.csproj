@@ -10,6 +10,7 @@
     <PackAsTool>true</PackAsTool>
     <PackAsToolShimRuntimeIdentifiers>win-x64;win-x86</PackAsToolShimRuntimeIdentifiers>
     <PackageTags>dotnet;aspnet-codegenerator</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <!-- workaround for https://github.com/dotnet/sdk/issues/2698 -->
@@ -34,6 +35,7 @@
     <None Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Msbuild\Target\build\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="build\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Msbuild\Target\buildMultiTargeting\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" CopyToPublishDirectory="Always" Link="buildMultiTargeting\microsoft.visualstudio.web.codegeneration.tools.targets" />
     <None Include="$(ArtifactsBinDir)\VS.Web.CG.Msbuild\$(Configuration)\net7.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" CopyToPublishDirectory="Always" Link="toolassets\net7.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll" />  
+    <None Include="$(RepoRoot)\src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup> 
 
   <ItemGroup>

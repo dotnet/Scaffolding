@@ -10,6 +10,7 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   
   <ItemGroup>
@@ -22,5 +23,6 @@
       <Pack>true</Pack>
       <PackagePath>lib\net7.0\</PackagePath>
     </Content>
+    <None Include="$(RepoRoot)\src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

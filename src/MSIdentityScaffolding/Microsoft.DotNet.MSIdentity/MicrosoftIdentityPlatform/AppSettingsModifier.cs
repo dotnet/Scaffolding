@@ -172,27 +172,32 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
         internal static JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl, bool isDownstreamApi = false)
         {
-            var inputParameters = isDownstreamApi
-                ? JObject.FromObject(new DownstreamApiSettingsBlock
+            JObject inputParameters;
+            if (isDownstreamApi)
+            {
+                inputParameters = JObject.FromObject(new DownstreamApiSettingsBlock
                 {
                     Scopes = new string[] { string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes },
                     BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
-                })
-                : JObject.FromObject(new ApiSettingsBlock
+                });
+            }
+            else
+            {
+                inputParameters = JObject.FromObject(new ApiSettingsBlock
                 {
                     Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes,
                     BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
                 });
-
-            if (appSettings.TryGetValue(key, out var apiToken))
-            {
-                // block exists
-                var existingBlock = JObject.FromObject(apiToken);
-                return ModifyAppSettingsObject(existingBlock, inputParameters) ? existingBlock : null;
             }
 
-            // block does not exist, create a new one
-            return inputParameters;
+            if (!appSettings.TryGetValue(key, out var apiToken))
+            {
+                return inputParameters; // block does not exist, create a new one
+            }
+
+            // modify existing block
+            var existingBlock = JObject.FromObject(apiToken);
+            return ModifyAppSettingsObject(existingBlock, inputParameters) ? existingBlock : null;
         }
 
         internal static bool ModifyAppSettingsObject(JObject existingSettings, JObject inputProperties)

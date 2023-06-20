@@ -27,9 +27,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="7.0.8">
+    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="7.0.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>8804a1a835821e811e5532edb3716242f481b5d2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -51,9 +51,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.8">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>8804a1a835821e811e5532edb3716242f481b5d2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Logging.Console" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -71,17 +71,17 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.8">
+    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>8804a1a835821e811e5532edb3716242f481b5d2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.8">
+    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>8804a1a835821e811e5532edb3716242f481b5d2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="7.0.8">
+    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="7.0.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>8804a1a835821e811e5532edb3716242f481b5d2</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>

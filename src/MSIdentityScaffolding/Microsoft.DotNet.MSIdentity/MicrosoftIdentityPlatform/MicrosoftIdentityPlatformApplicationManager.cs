@@ -591,7 +591,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     }
                     catch (Microsoft.Graph.ServiceException ex)
                     {
-                        output?.AppendLine(ex.Message);
+                        if (ex.Message.Contains("Permission entry already exists"))
+                        {
+                            output?.AppendLine(string.Format(Resources.PermissionExists, g.Key));
+                        }
+                        else
+                        {
+                            output?.AppendLine(ex.Message);
+                        }
                     }
                 }
             }

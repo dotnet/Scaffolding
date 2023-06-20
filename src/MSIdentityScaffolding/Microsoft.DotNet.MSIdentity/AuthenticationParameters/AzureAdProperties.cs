@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
             CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : existingBlock?.GetValue(PropertyNames.CallbackPath)?.ToString() ?? DefaultProperties.CallbackPath;
             Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
-                ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : null);
+                ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : string.Empty);
             SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : existingBlock?.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString() ?? DefaultProperties.SignUpSignInPolicyId;
             Authority = IsCIAM ? $"https://{Domain}/" : IsB2C ? $"{Instance}{Domain}/{SignUpSignInPolicyId}" : $"{Instance}{Domain}"; 
             ClientSecret = existingBlock?.GetValue(PropertyNames.ClientSecret)?.ToString() ?? DefaultProperties.ClientSecret;
@@ -126,11 +126,6 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 
         public dynamic WebApiSettings => new
         {
-            Instance = Instance ?? DefaultProperties.Instance,
-            Domain = Domain ?? DefaultProperties.Domain,
-            TenantId = TenantId ?? DefaultProperties.TenantId,
-            ClientId = ClientId ?? DefaultProperties.ClientId,
-            CallbackPath = CallbackPath ?? DefaultProperties.CallbackPath,
             Scopes = Scopes ?? DefaultProperties.ApiScopes
         };
 
@@ -156,12 +151,12 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
                 return JObject.FromObject(BlazorSettings);
             }
 
-            if (IsCIAM)
-            {
-                return JObject.FromObject(CIAMSettings);
-            }
+            var jObject = IsCIAM ? JObject.FromObject(CIAMSettings) : JObject.FromObject(WebAppSettings);
 
-            var jObject = IsWebApi ? JObject.FromObject(WebApiSettings) : JObject.FromObject(WebAppSettings);
+            if (IsWebApi)
+            {
+                jObject.Merge(JObject.FromObject(WebApiSettings));
+            }
 
             if (IsB2C)
             {
@@ -181,5 +176,11 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
     {
         public string? BaseUrl;
         public string? Scopes;
+    }
+
+    public class DownstreamApiSettingsBlock
+    {
+        public string? BaseUrl;
+        public string[]? Scopes;
     }
 }

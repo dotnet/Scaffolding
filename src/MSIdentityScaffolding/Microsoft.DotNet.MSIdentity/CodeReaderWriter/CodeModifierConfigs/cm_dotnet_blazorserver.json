@@ -98,7 +98,7 @@
                 "DownstreamApi"
               ],
               "MultiLineBlock": [
-                "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "LeadingTrivia": {

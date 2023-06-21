@@ -36,15 +36,14 @@
     <RepositoryUrl>https://github.com/dotnet/MSIdentityScaffolding/blob</RepositoryUrl>
     <PackageReleaseNotes>The release notes are available at https://github.com/dotnet/MSIdentityScaffolding/releases and the wiki at https://github.com/dotnet/MSIdentityScaffolding/wiki </PackageReleaseNotes>
     <PackageTags>Microsoft Identity Scaffolding;Microsoft identity platform;Microsoft.Identity.Web;.NET;ASP.NET Core;Web App;Web API;B2C;Azure Active Directory;AAD;Identity;Authentication;Authorization;Application registration;app registration</PackageTags>
-
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+    <None Include="$(RepoRoot)\tools\dotnet-msidentity\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
+  
 
   <ItemGroup>
     <Compile Remove="ProjectDescriptions\**" />

@@ -42,8 +42,7 @@
   <ItemGroup>
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
     <None Include="$(RepoRoot)\tools\dotnet-msidentity\README.md" Pack="true" PackagePath="\"/>
-  </ItemGroup>
-  
+  </ItemGroup> 
 
   <ItemGroup>
     <Compile Remove="ProjectDescriptions\**" />

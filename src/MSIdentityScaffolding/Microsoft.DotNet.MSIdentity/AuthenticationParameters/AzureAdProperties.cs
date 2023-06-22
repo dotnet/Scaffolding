@@ -82,11 +82,6 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             HasClientSecret = applicationParameters.CallsDownstreamApi || applicationParameters.CallsMicrosoftGraph;
 
             Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : existingBlock?.GetValue(PropertyNames.Domain)?.ToString() ?? DefaultProperties.Domain;
-            if (IsCIAM)
-            {
-                Domain = Domain.Replace("onmicrosoft.com", "ciamlogin.com");
-            }
-
             TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : existingBlock?.GetValue(PropertyNames.TenantId)?.ToString() ?? DefaultProperties.TenantId;
             ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : existingBlock?.GetValue(PropertyNames.ClientId)?.ToString() ?? DefaultProperties.ClientId;
             Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
@@ -94,7 +89,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
                 ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : null);
             SignUpSignInPolicyId = !string.IsNullOrEmpty(applicationParameters.SusiPolicy) ? applicationParameters.SusiPolicy : existingBlock?.GetValue(PropertyNames.SignUpSignInPolicyId)?.ToString() ?? DefaultProperties.SignUpSignInPolicyId;
-            Authority = IsCIAM ? $"https://{Domain}/" : IsB2C ? $"{Instance}{Domain}/{SignUpSignInPolicyId}" : $"{Instance}{Domain}"; 
+            Authority = IsCIAM ? $"https://{Domain.Replace("onmicrosoft.com", "ciamlogin.com")}" : IsB2C ? $"{Instance}{Domain}/{SignUpSignInPolicyId}" : $"{Instance}{Domain}"; 
             ClientSecret = existingBlock?.GetValue(PropertyNames.ClientSecret)?.ToString() ?? DefaultProperties.ClientSecret;
             ClientCertificates = existingBlock?.GetValue(PropertyNames.ClientCertificates)?.ToObject<string[]>();
         }
@@ -102,7 +97,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public dynamic BlazorSettings => new
         {
             ClientId,
-            Authority,
+            Authority = IsCIAM ? $"{Authority}/{Domain}" : Authority,
             ValidateAuthority = !IsB2C
         };
 

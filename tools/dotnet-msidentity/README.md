@@ -145,45 +145,45 @@ Given existing code which is not yet configured:
 
 Note that in the following samples, you can always have your templates add a call to Microsoft graph [--calls-graph], or to a downstream API [--called-api-url URI --called-api-scopes scopes]. This is now shown here to keep things simple.
 
+- Creates a new app in your home tenant and updates code
 ```
 dotnet new webapp --auth SingleOrg
 dotnet msidentity --register-application
 ```
-- Creates a new app in your home tenant and updates code
 
+- Creates a new app in a different tenant and updates code
 ```
 dotnet new webapp --auth SingleOrg
 dotnet msidentity --register-app --tenant-id testprovisionningtool.onmicrosoft.com
 ```
-- Creates a new app in a different tenant and updates code
 
+- Creates a new app using a different identity and updates code
 ```
 dotnet new webapp --auth SingleOrg
 dotnet msidentity --register-app --username username@domain.com
 ```
-- Creates a new app using a different identity and updates code
 
  ### Registering a new AzureAD B2C app and configuring the code using your dev credentials
 
 Note that in the following samples, you can always have your templates add a call to Microsoft graph [--calls-graph], or to a downstream API [--called-api-url URI --called-api-scopes scopes]. This is now shown here to keep things simple.
 
+- Creates a new Azure AD B2C app and updates code which was initially meant to be for Azure AD.
 ```
 dotnet new webapp --auth SingleOrg
 dotnet msidentity --register-app --tenant-id fabrikamb2c.onmicrosoft.com --susi-policy-id b2c_1_susi
 ```
-- Creates a new Azure AD B2C app and updates code which was initially meant to be for Azure AD.
 
+- Creates a new Azure AD B2C app and updates code
 ```
 dotnet new webapp --auth IndividualB2C
 dotnet msidentity --register-app --tenant-id fabrikamb2c.onmicrosoft.com
 ```
-- Creates a new Azure AD B2C app and updates code
 
+- Creates a new app Azure AD B2C app using a different identity and updates code
 ```
 dotnet new webapp --auth IndividualB2C
 dotnet msidentity --register-app --tenant-id fabrikamb2c.onmicrosoft.com  --username username@domain.com
 ```
-- Creates a new app Azure AD B2C app using a different identity and updates code
 
 
  ### Configuring code from an existing application

@@ -434,7 +434,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // In the case of Blazor WASM and B2C, Access Tokens and Id Tokens must both be true.
             if ((toolOptions.IsBlazorWasm || isB2C)
                 && (currentSettings.EnableAccessTokenIssuance is false
-                || currentSettings.EnableAccessTokenIssuance is false))
+                || currentSettings.EnableIdTokenIssuance is false))
             {
                 app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance = true;
                 app.Web.ImplicitGrantSettings.EnableIdTokenIssuance = true;
@@ -542,7 +542,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal static async Task ExposeWebApiScopes(GraphServiceClient graphServiceClient, Application createdApplication, ApplicationParameters applicationParameters)
         {
             var scopes = createdApplication.Api.Oauth2PermissionScopes?.ToList() ?? new List<PermissionScope>();
-            var scopeName = applicationParameters.IsB2C ? $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}" : $"api://{createdApplication.AppId}";
+            var scopeName = (applicationParameters.IsB2C || applicationParameters.IsCiam)
+                ? $"https://{createdApplication.PublisherDomain}/{createdApplication.AppId}"
+                : $"api://{createdApplication.AppId}";
             await ExposeScopes(graphServiceClient, scopeName, createdApplication.Id, scopes);
         }
 
@@ -903,9 +905,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             // TODO: introduce the Instance?
             effectiveApplicationParameters.Authority = isB2C
                  ? $"https://{effectiveApplicationParameters.Domain1}.b2clogin.com/{effectiveApplicationParameters.Domain}/{effectiveApplicationParameters.SusiPolicy}/"
+                 : isCiam ? $"https://{effectiveApplicationParameters.Domain1}.ciamlogin.com/{effectiveApplicationParameters.Domain}"
                  : $"https://login.microsoftonline.com/{effectiveApplicationParameters.TenantId ?? effectiveApplicationParameters.Domain}/";
             effectiveApplicationParameters.Instance = isB2C
                 ? $"https://{effectiveApplicationParameters.Domain1}.b2clogin.com/"
+                : isCiam ? $"https://{effectiveApplicationParameters.Domain1}.ciamlogin.com/"
                 : originalApplicationParameters.Instance;
 
             effectiveApplicationParameters.PasswordCredentials.AddRange(application.PasswordCredentials.Select(p => p.Hint + "******************"));

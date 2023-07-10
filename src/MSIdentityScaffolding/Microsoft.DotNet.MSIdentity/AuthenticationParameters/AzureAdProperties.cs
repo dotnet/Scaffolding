@@ -107,7 +107,9 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
 
         public dynamic CIAMSettings => new
         {
-            Authority = Authority ?? DefaultProperties.Authority,
+            Authority = IsWebApi
+            ? $"{Authority ?? DefaultProperties.Authority}/{Domain ?? DefaultProperties.Domain}"
+            : Authority ?? DefaultProperties.Authority,
             ClientId = ClientId ?? DefaultProperties.ClientId,
             ClientSecret = ClientSecret ?? DefaultProperties.ClientSecret,
             ClientCertificates = ClientCertificates ?? Array.Empty<string>(),

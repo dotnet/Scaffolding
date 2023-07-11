@@ -89,7 +89,7 @@
             },
             {
               "MultiLineBlock": [
-                "AddDownstreamWebApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
+                "AddDownstreamApi(\"DownstreamApi\",builder.Configuration.GetSection(\"DownstreamApi\"))",
                 "            .AddInMemoryTokenCaches()"
               ],
               "Parent": "EnableTokenAcquisitionToCallDownstreamApi",
@@ -170,7 +170,7 @@
           ]
         },
         {
-          "Block": "private readonly IDownstreamWebApi _downstreamWebApi",
+          "Block": "private readonly IDownstreamApi _downstreamApi",
           "Options": [
             "DownstreamApi"
           ]
@@ -189,7 +189,7 @@
               ]
             },
             {
-              "Block": "IDownstreamWebApi downstreamWebApi",
+              "Block": "IDownstreamApi downstreamApi",
               "Options": [
                 "DownstreamApi"
               ]
@@ -206,7 +206,7 @@
               }
             },
             {
-              "Block": "_downstreamWebApi = downstreamWebApi;",
+              "Block": "_downstreamApi = downstreamApi;",
               "Options": [
                 "DownstreamApi"
               ],
@@ -256,7 +256,7 @@
             },
             {
               "Options": [ "DownstreamApi" ],
-              "Block": "            using var response = await _downstreamWebApi.CallWebApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
+              "Block": "            using var response = await _downstreamApi.CallApiForUserAsync(\"DownstreamApi\").ConfigureAwait(false)",
               "Prepend": true,
               "NumberOfSpaces": 12
             }
@@ -280,7 +280,11 @@
         },
         {
           "Block": "Microsoft.Identity.Web",
-          "Options": ["DownstreamApi", "MicrosoftGraph"]
+          "Options": [ "DownstreamApi", "MicrosoftGraph" ]
+        },
+        {
+          "Block": "Microsoft.Identity.Abstractions",
+          "Options": [ "DownstreamApi" ]
         }
       ]
     },

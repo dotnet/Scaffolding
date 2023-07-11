@@ -892,7 +892,7 @@ namespace Test
     <RestoreSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
@@ -920,7 +920,7 @@ namespace Test
     <RestoreSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Microsoft.Test</RootNamespace>
     <ProjectName>Test</ProjectName>
     <NoWarn>NU1605</NoWarn>
@@ -939,7 +939,7 @@ namespace Test
     <RestoreSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
     </RestoreSources>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -968,7 +968,7 @@ namespace Test
 <Project Sdk=""Microsoft.NET.Sdk"">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -1207,7 +1207,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
   <PropertyGroup>
-    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net7.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
+    <EvaluateProjectInfoForCodeGenerationAssemblyPath>$(MSBuildThisFileDirectory)\toolAssets\net8.0\Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll</EvaluateProjectInfoForCodeGenerationAssemblyPath>
   </PropertyGroup>
 
   <UsingTask TaskName=""ProjectContextWriter""

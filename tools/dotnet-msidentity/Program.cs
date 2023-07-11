@@ -15,32 +15,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public static async Task<int> Main(string[] args)
         {
             var rootCommand = MsIdentityCommand();
-            //new BinderBase for System.Commandline update, new way to bind handlers to commands.
-            var provisioningToolBinder = new ProvisioningToolOptionsBinder(
-                JsonOption,
-                EnableIdTokenOption,
-                EnableAccessToken,
-                CallsGraphOption,
-                CallsDownstreamApiOption,
-                UpdateUserSecretsOption,
-                ConfigUpdateOption,
-                CodeUpdateOption,
-                PackagesUpdateOption,
-                ClientIdOption,
-                AppDisplayName,
-                ProjectType,
-                ClientSecretOption,
-                RedirectUriOption,
-                ProjectFilePathOption,
-                ClientProjectOption,
-                ApiScopesOption,
-                HostedAppIdUriOption,
-                ApiClientIdOption,
-                SusiPolicyIdOption,
-                TenantOption,
-                UsernameOption,
-                InstanceOption,
-                CalledApiUrlOption);
 
             //internal commands
             var listAadAppsCommand = ListAADAppsCommand();
@@ -250,7 +224,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                              "\n\t- Updates the Startup.cs file." +
                              "\n\t- Updates the user secrets.\n")
             {
-                TenantOption, UsernameOption, InstanceOption, ClientIdOption, JsonOption, ProjectFilePathOption, ConfigUpdateOption, CodeUpdateOption, PackagesUpdateOption, CallsGraphOption, CallsDownstreamApiOption, UpdateUserSecretsOption, RedirectUriOption, SusiPolicyIdOption, CalledApiUrlOption, ApiScopesOption
+                TenantOption(), UsernameOption(), InstanceOption(), ClientIdOption(), JsonOption(), ProjectFilePathOption(), ConfigUpdateOption(), CodeUpdateOption(), PackagesUpdateOption(), CallsGraphOption(), CallsDownstreamApiOption(), UpdateUserSecretsOption(), RedirectUriOption(), SusiPolicyIdOption(), CalledApiUrlOption(), ApiScopesOption()
             };
 
         internal static Command UpdateAppRegistrationCommand() =>
@@ -419,7 +393,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        internal static Option<string> CalledApiUrlOption { get; } =
+        internal static Option<string> CalledApiUrlOption() =>
             new(
                 aliases: new[] { "--called-api-url" },
                 description: "URL of the called downstream API\n")
@@ -427,7 +401,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 IsRequired = false
             };
 
-        internal static Option<string> HostedAppIdUriOption { get; } =
+        internal static Option HostedAppIdUriOption() =>
             new(
                 aliases: new[] { "--hosted-app-id-uri" },
                 description: "The App ID Uri for the Blazor WebAssembly hosted API. This parameter will only be used for Blazor WebAssembly hosted applications.\n")

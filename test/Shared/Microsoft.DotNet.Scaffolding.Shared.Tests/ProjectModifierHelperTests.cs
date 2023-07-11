@@ -503,11 +503,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         [Fact]
         public void ProcessCsprojTfmsTest()
         {
-            var net7Tfms = ProjectModifierHelper.ProcessCsprojTfms(Net7Csproj);
-            var net7Tfms2 = ProjectModifierHelper.ProcessCsprojTfms(Net7CsprojVariabledCsproj);
-            var net7Tfms3 = ProjectModifierHelper.ProcessCsprojTfms(Net7CsprojVariabledCsproj2);
-            Assert.True(net7Tfms.Length == 1 && net7Tfms2.Length == 1 && net7Tfms3.Length == 1);
-            Assert.True(net7Tfms.First().Equals("net7.0") && net7Tfms2.First().Equals("net7.0") && net7Tfms3.First().Equals("net7.0"));
+            var net8Tfms = ProjectModifierHelper.ProcessCsprojTfms(Net7Csproj);
+            var net8Tfms2 = ProjectModifierHelper.ProcessCsprojTfms(Net7CsprojVariabledCsproj);
+            var net8Tfms3 = ProjectModifierHelper.ProcessCsprojTfms(Net7CsprojVariabledCsproj2);
+            Assert.True(net8Tfms.Length == 1 && net8Tfms2.Length == 1 && net8Tfms3.Length == 1);
+            Assert.True(net8Tfms.First().Equals("net8.0") && net8Tfms2.First().Equals("net8.0") && net8Tfms3.First().Equals("net8.0"));
 
             var emptyTfms = ProjectModifierHelper.ProcessCsprojTfms(EmptyCsproj);
             var emptyTfms2 = ProjectModifierHelper.ProcessCsprojTfms(EmptyCsproj2);
@@ -521,10 +521,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             var multiTfm = ProjectModifierHelper.ProcessCsprojTfms(MultiTfmCsproj);
             var multiTfm2 = ProjectModifierHelper.ProcessCsprojTfms(MultiTfmVariabledCsproj);
             var multiTfm3 = ProjectModifierHelper.ProcessCsprojTfms(MultiTfmVariabledCsproj2);
-            Assert.True(multiTfm.Length == 2 && net7Tfms2.Length == 1 && multiTfm3.Length == 3);
-            Assert.True(multiTfm.Contains("net6.0") && multiTfm.Contains("net7.0"));
-            Assert.True(multiTfm2.Contains("net6.0") && multiTfm2.Contains("net7.0"));
-            Assert.True(multiTfm3.Contains("net5.0") && multiTfm3.Contains("net6.0") && multiTfm3.Contains("net7.0"));
+            Assert.True(multiTfm.Length == 2 && net8Tfms2.Length == 1 && multiTfm3.Length == 3);
+            Assert.True(multiTfm.Contains("net6.0") && multiTfm.Contains("net8.0"));
+            Assert.True(multiTfm2.Contains("net6.0") && multiTfm2.Contains("net8.0"));
+            Assert.True(multiTfm3.Contains("net5.0") && multiTfm3.Contains("net6.0") && multiTfm3.Contains("net8.0"));
         }
 
         private static readonly ModelType startupModel = new ModelType

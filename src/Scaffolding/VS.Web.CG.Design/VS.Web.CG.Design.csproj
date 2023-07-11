@@ -6,7 +6,7 @@
 
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -21,7 +21,7 @@
                       $(OutputPath)$(AssemblyName).xml;"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
-      <PackagePath>lib\net7.0\</PackagePath>
+      <PackagePath>lib\net8.0\</PackagePath>
     </Content>
     <None Include="$(RepoRoot)\src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>

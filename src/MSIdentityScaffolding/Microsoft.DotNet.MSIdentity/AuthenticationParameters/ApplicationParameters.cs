@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         {
             get
             {
-                return Domain?.Replace(".onmicrosoft.com", string.Empty);
+                return Domain?.Replace(".onmicrosoft.com", string.Empty); // TODO test me, sometimes might not be .onmicrosoft.com
             }
         }
 
@@ -61,6 +61,8 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// Gets or sets the Azure Active Directory instance, e.g. "https://login.microsoftonline.com".
         /// </summary>
         public string? Instance { get; set; }
+
+        public bool IsGovernmentCloud { get; set; }
 
         /// <summary>
         /// Client ID of the application.

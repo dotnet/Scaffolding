@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
@@ -200,7 +201,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// </summary>
         public string? BlazorWasmClientAppId { get; internal set; }
 
-        public bool IsGovernmentCloud => string.Equals(Instance, "https://login.microsoftonline.us/", StringComparison.OrdinalIgnoreCase);
+        public bool IsGovernmentCloud => string.Equals(Instance, DefaultProperties.GovernmentCloudInstance, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Clones the options

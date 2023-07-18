@@ -622,7 +622,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 string[] scopes = calledApiScopes.Split(' ', '\t', StringSplitOptions.RemoveEmptyEntries);
                 scopesPerResource = scopes.Select(s => (!s.Contains('/'))
                 // Microsoft Graph shortcut scopes (for instance "User.Read")
-                ? new ResourceAndScope("https://graph.microsoft.com", s) // TODO government endpoint?
+                ? new ResourceAndScope("https://graph.microsoft.com", s)
                 // Proper AppIdUri/scope
                 : new ResourceAndScope(s[..s.LastIndexOf('/')], s[(s.LastIndexOf('/') + 1)..])
                 ).GroupBy(r => r.Resource)
@@ -700,7 +700,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 .GetAsync();
 
             // Special case for B2C where the service principal does not contain the graph URL :(
-            if (!spsWithScopes.Any() && g.Key == "https://graph.microsoft.com") // TODO government endpoint?
+            if (!spsWithScopes.Any() && g.Key == "https://graph.microsoft.com")
             {
                 spsWithScopes = await graphServiceClient.ServicePrincipals
                                 .Request()

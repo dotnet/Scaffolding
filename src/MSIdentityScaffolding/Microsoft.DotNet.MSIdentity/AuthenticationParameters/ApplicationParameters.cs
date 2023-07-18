@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         {
             get
             {
-                return Domain?.Replace(".onmicrosoft.com", string.Empty); // TODO test me, sometimes might not be .onmicrosoft.com
+                return Domain?.Replace(".onmicrosoft.com", string.Empty);
             }
         }
 

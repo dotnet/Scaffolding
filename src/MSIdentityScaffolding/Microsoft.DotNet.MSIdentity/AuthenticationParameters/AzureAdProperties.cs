@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string TenantId = "22222222-2222-2222-2222-222222222222";
         public const string ClientId = "11111111-1111-1111-11111111111111111";
         public const string Instance = "https://login.microsoftonline.com/";
+        public const string GovernmentCloudInstance = "https://login.microsoftonline.us/";
         public const string CallbackPath = "/signin-oidc";
         public const string ClientSecret = "Client secret from app-registration. Check user secrets/azure portal.";
         public const bool ValidateAuthority = true;
@@ -45,6 +46,8 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         public const string SignedOutCallbackPath = "/signout/B2C_1_susi";
 
         public const string MicrosoftGraphBaseUrl = "https://graph.microsoft.com/v1.0";
+        public const string MicrosoftGraphGovernmentBaseUrl = "https://graph.microsoft.us/v1.0";
+
         public const string MicrosoftGraphScopes = "user.read";
         public const string ApiScopes = "access_as_user";
     }
@@ -84,7 +87,8 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
             Domain = !string.IsNullOrEmpty(applicationParameters.Domain) ? applicationParameters.Domain : existingBlock?.GetValue(PropertyNames.Domain)?.ToString() ?? DefaultProperties.Domain;
             TenantId = !string.IsNullOrEmpty(applicationParameters.TenantId) ? applicationParameters.TenantId : existingBlock?.GetValue(PropertyNames.TenantId)?.ToString() ?? DefaultProperties.TenantId;
             ClientId = !string.IsNullOrEmpty(applicationParameters.ClientId) ? applicationParameters.ClientId : existingBlock?.GetValue(PropertyNames.ClientId)?.ToString() ?? DefaultProperties.ClientId;
-            Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString() ?? DefaultProperties.Instance;
+            Instance = !string.IsNullOrEmpty(applicationParameters.Instance) ? applicationParameters.Instance : existingBlock?.GetValue(PropertyNames.Instance)?.ToString()
+                ?? (applicationParameters.IsGovernmentCloud ? DefaultProperties.GovernmentCloudInstance : DefaultProperties.Instance);
             CallbackPath = !string.IsNullOrEmpty(applicationParameters.CallbackPath) ? applicationParameters.CallbackPath : existingBlock?.GetValue(PropertyNames.CallbackPath)?.ToString() ?? DefaultProperties.CallbackPath;
             Scopes = !string.IsNullOrEmpty(applicationParameters.CalledApiScopes) ? applicationParameters.CalledApiScopes : existingBlock?.GetValue(PropertyNames.Scopes)?.ToString()
                 ?? (applicationParameters.CallsDownstreamApi ? DefaultProperties.ApiScopes : applicationParameters.CallsMicrosoftGraph ? DefaultProperties.MicrosoftGraphScopes : string.Empty);

@@ -62,6 +62,8 @@ namespace Microsoft.DotNet.MSIdentity.AuthenticationParameters
         /// </summary>
         public string? Instance { get; set; }
 
+        public bool IsGovernmentCloud { get; set; }
+
         /// <summary>
         /// Client ID of the application.
         /// </summary>

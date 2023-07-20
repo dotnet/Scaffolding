@@ -96,7 +96,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsGraph)
             {
                 // update MicrosoftGraph Block
-                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.MicrosoftGraphScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var baseUrl = applicationParameters.IsGovernmentCloud ? DefaultProperties.MicrosoftGraphGovernmentBaseUrl : DefaultProperties.MicrosoftGraphBaseUrl;
+                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.MicrosoftGraphScopes, baseUrl);
                 if (microsoftGraphBlock != null)
                 {
                     changesMade = true;
@@ -106,6 +107,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (_provisioningToolOptions.CallsDownstreamApi)
             {
+                var scopes = _provisioningToolOptions.ApiScopes ?? DefaultProperties.ApiScopes;
+                var baseUrl = _provisioningToolOptions.CalledApiUrl ?? (applicationParameters.IsGovernmentCloud ? DefaultProperties.MicrosoftGraphGovernmentBaseUrl : DefaultProperties.MicrosoftGraphBaseUrl);
                 // update DownstreamAPI Block
                 var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, DefaultProperties.ApiScopes, DefaultProperties.MicrosoftGraphBaseUrl);
                 if (updatedDownstreamApiBlock != null)

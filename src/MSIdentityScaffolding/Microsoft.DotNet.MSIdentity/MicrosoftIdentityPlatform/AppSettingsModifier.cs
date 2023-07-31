@@ -96,7 +96,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             if (_provisioningToolOptions.CallsGraph)
             {
                 // update MicrosoftGraph Block
-                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.MicrosoftGraphScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var baseUrl = applicationParameters.IsGovernmentCloud ? DefaultProperties.MicrosoftGraphGovernmentBaseUrl : DefaultProperties.MicrosoftGraphBaseUrl;
+                var microsoftGraphBlock = GetApiBlock(appSettings, MicrosoftGraph, DefaultProperties.MicrosoftGraphScopes, baseUrl);
                 if (microsoftGraphBlock != null)
                 {
                     changesMade = true;
@@ -106,8 +107,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (_provisioningToolOptions.CallsDownstreamApi)
             {
+                var scopes = _provisioningToolOptions.ApiScopes ?? DefaultProperties.ApiScopes;
+                var baseUrl = _provisioningToolOptions.CalledApiUrl ?? (applicationParameters.IsGovernmentCloud ? DefaultProperties.MicrosoftGraphGovernmentBaseUrl : DefaultProperties.MicrosoftGraphBaseUrl);
+
                 // update DownstreamAPI Block
-                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, DefaultProperties.ApiScopes, DefaultProperties.MicrosoftGraphBaseUrl);
+                var updatedDownstreamApiBlock = GetApiBlock(appSettings, DownstreamApi, scopes, baseUrl, isDownstreamApi:true);
                 if (updatedDownstreamApiBlock != null)
                 {
                     changesMade = true;
@@ -168,23 +172,34 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             return false;
         }
 
-        internal static JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl)
+        internal static JObject? GetApiBlock(JObject appSettings, string key, string? scopes, string? baseUrl, bool isDownstreamApi = false)
         {
-            var inputParameters = JObject.FromObject(new ApiSettingsBlock
+            JObject inputParameters;
+            if (isDownstreamApi)
             {
-                Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes,
-                BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
-            });
-
-            if (appSettings.TryGetValue(key, out var apiToken))
+                inputParameters = JObject.FromObject(new DownstreamApiSettingsBlock
+                {
+                    Scopes = new string[] { string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes },
+                    BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
+                });
+            }
+            else
             {
-                // block exists
-                var existingBlock = JObject.FromObject(apiToken);
-                return ModifyAppSettingsObject(existingBlock, inputParameters) ? existingBlock : null;
+                inputParameters = JObject.FromObject(new ApiSettingsBlock
+                {
+                    Scopes = string.IsNullOrEmpty(scopes) ? DefaultProperties.MicrosoftGraphScopes : scopes,
+                    BaseUrl = string.IsNullOrEmpty(baseUrl) ? DefaultProperties.MicrosoftGraphBaseUrl : baseUrl
+                });
             }
 
-            // block does not exist, create a new one
-            return inputParameters;
+            if (!appSettings.TryGetValue(key, out var apiToken))
+            {
+                return inputParameters; // block does not exist, create a new one
+            }
+
+            // modify existing block
+            var existingBlock = JObject.FromObject(apiToken);
+            return ModifyAppSettingsObject(existingBlock, inputParameters) ? existingBlock : null;
         }
 
         internal static bool ModifyAppSettingsObject(JObject existingSettings, JObject inputProperties)

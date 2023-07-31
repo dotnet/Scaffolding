@@ -315,6 +315,10 @@
     <value>Azure AD app {0} ({1}) did not require any remote updates</value>
     <comment>0 = Display Name, 1 = App Id</comment>
   </data>
+  <data name="PermissionExists" xml:space="preserve">
+    <value>Permission already exists for resource {0}</value>
+    <comment>{0} = Resource Name</comment>
+  </data>
   <data name="Policies" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Policies.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>

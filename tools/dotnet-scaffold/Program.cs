@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
             rootCommand.AddCommand(ScaffoldRazorPageCommand());
             rootCommand.AddCommand(ScaffoldViewCommand());
             rootCommand.AddCommand(ScaffoldIdentityCommand());
-            //msidentity commands
+
             //internal commands
             var listAadAppsCommand = MSIdentity.Tool.Program.ListAADAppsCommand();
             var listServicePrincipalsCommand = MSIdentity.Tool.Program.ListServicePrincipalsCommand();

@@ -36,6 +36,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         private readonly Option<string> _tenantOption;
         private readonly Option<string> _usernameOption;
         private readonly Option<string> _instanceOption;
+        private readonly Option<string> _calledApiUrlOption;
 
         public ProvisioningToolOptionsBinder(
             Option<bool> jsonOption,
@@ -60,7 +61,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             Option<string> susiPolicyIdOption,
             Option<string> tenantOption,
             Option<string> usernameOption,
-            Option<string> instanceOption)
+            Option<string> instanceOption,
+            Option<string> calledApiUrlOption)
         {
             _jsonOption = jsonOption;
             _enableIdTokenOption = enableIdTokenOption;
@@ -85,6 +87,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             _tenantOption = tenantOption;
             _usernameOption = usernameOption;
             _instanceOption = instanceOption;
+            _calledApiUrlOption = calledApiUrlOption;
         }
 
         protected override ProvisioningToolOptions GetBoundValue(BindingContext bindingContext)
@@ -115,7 +118,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 PackagesUpdate = bindingContext.ParseResult.GetValue(_packagesUpdateOption),
                 ApiScopes = bindingContext.ParseResult.GetValue(_apiScopesOption),
                 ClientProject = bindingContext.ParseResult.GetValue(_clientProjectOption),
-                Instance = bindingContext.ParseResult.GetValue(_instanceOption)
+                Instance = bindingContext.ParseResult.GetValue(_instanceOption),
+                CalledApiUrl = bindingContext.ParseResult.GetValue(_calledApiUrlOption)
             };
         }
     }

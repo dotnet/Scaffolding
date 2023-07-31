@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
         protected const string Net7Csproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
   <PropertyGroup>
     <Var1>$(Var2)$(Var3)</Var1>
     <Var2>net</Var2>
-    <Var3>7.0</Var3>
+    <Var3>8.0</Var3>
     <TargetFramework>$(Var1)</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
         protected const string Net7CsprojVariabledCsproj2 = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <Var1>net7.0</Var1>
+    <Var1>net8.0</Var1>
     <TargetFramework>$(Var1)</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         protected const string MultiTfmCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         protected const string MultiTfmVariabledCsproj = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
     <Var1>$(Var2);$(Var3)</Var1>
-    <Var2>net7.0</Var2>
+    <Var2>net8.0</Var2>
     <Nullable>enable</Nullable>
     <Var3>net6.0</Var3>
     <TargetFrameworks>$(Var1)</TargetFrameworks>
@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
   <PropertyGroup>
     <Var1>$(Var2)$(Var3)</Var1>
     <Var2>net</Var2>
-    <Var3>7.0</Var3>
+    <Var3>8.0</Var3>
     <Nullable>enable</Nullable>
     <Var4>net6.0</Var4>
     <TargetFrameworks>$(Var1);$(Var4);net5.0</TargetFrameworks>

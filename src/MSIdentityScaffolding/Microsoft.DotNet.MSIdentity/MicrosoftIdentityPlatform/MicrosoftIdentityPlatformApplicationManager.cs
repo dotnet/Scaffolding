@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             try
             {
-                var graphServiceClient = GetGraphServiceClient(tokenCredential);
+                var graphServiceClient = GetGraphServiceClient(tokenCredential, applicationParameters);
 
                 // Get the tenant
                 Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
@@ -192,17 +192,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         /// <returns></returns>
         internal async Task UpdateApplication(
             TokenCredential tokenCredential,
-            ApplicationParameters? parameters,
+            ApplicationParameters parameters,
             ProvisioningToolOptions toolOptions,
             IConsoleLogger consoleLogger,
             StringBuilder? output = null)
         {
-            if (parameters is null)
-            {
-                consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToUpdateAppNull, nameof(ApplicationParameters)));
-            }
-
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+            var graphServiceClient = GetGraphServiceClient(tokenCredential, parameters);
 
             var remoteApp = (await graphServiceClient.Applications.Request()
                 .Filter($"appId eq '{parameters!.ClientId}'").GetAsync()).FirstOrDefault(app => app.AppId.Equals(parameters.ClientId));
@@ -218,7 +213,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             ServicePrincipal? servicePrincipal = null;
             // B2C & CIAM do not allow user consent, and therefore we need to explicitly grant permissions
-            if (parameters.IsB2C || parameters.IsCiam) // TODO Test DownstreamAPI, Test B2C
+
+            if (parameters.IsB2C || parameters.IsCiam)
             {
                 servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
                 string scopes = GetMsGraphScopes(parameters);
@@ -226,7 +222,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 needsUpdates = true;
             }
 
-            if (!string.IsNullOrEmpty(toolOptions.ApiScopes)) // TODO Test DownstreamAPI, Test B2C
+            if (!string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 servicePrincipal ??= await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
                 await AddDownstreamApiPermissions(toolOptions.ApiScopes, graphServiceClient, appUpdates, servicePrincipal, output);
@@ -782,7 +778,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         internal async Task<bool> UnregisterAsync(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             bool unregisterSuccess = false;
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+            var graphServiceClient = GetGraphServiceClient(tokenCredential, applicationParameters);
 
             var readApplication = (await graphServiceClient.Applications
                .Request()
@@ -808,12 +804,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return unregisterSuccess;
         }
 
-        internal GraphServiceClient GetGraphServiceClient(TokenCredential tokenCredential)
+        internal GraphServiceClient GetGraphServiceClient(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            if (_graphServiceClient == null)
-            {
-                _graphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(tokenCredential));
-            }
+            _graphServiceClient ??= applicationParameters.IsGovernmentCloud
+                ? new GraphServiceClient("https://graph.microsoft.us/v1.0", new TokenCredentialAuthenticationProvider(tokenCredential, new string[] { "https://graph.microsoft.us/.default" }))
+                : new GraphServiceClient(new TokenCredentialAuthenticationProvider(tokenCredential));
+
             return _graphServiceClient;
         }
 
@@ -834,7 +830,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 return null;
             }
 
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+            var graphServiceClient = GetGraphServiceClient(tokenCredential, applicationParameters);
             Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
 
             var application = await GetApplication(tokenCredential, applicationParameters);
@@ -860,7 +856,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
         public async Task<Application?> GetApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            var graphServiceClient = GetGraphServiceClient(tokenCredential);
+            var graphServiceClient = GetGraphServiceClient(tokenCredential, applicationParameters);
             var apps = await graphServiceClient.Applications
                 .Request()
                 .Filter($"appId eq '{applicationParameters.ClientId}'")
@@ -903,7 +899,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 TargetFramework = originalApplicationParameters.TargetFramework,
                 MsalAuthenticationOptions = originalApplicationParameters.MsalAuthenticationOptions,
                 CalledApiScopes = originalApplicationParameters.CalledApiScopes,
-                AppIdUri = originalApplicationParameters.AppIdUri
+                AppIdUri = originalApplicationParameters.AppIdUri,
+                Instance = originalApplicationParameters.Instance,
+                IsGovernmentCloud = originalApplicationParameters.IsGovernmentCloud
             };
 
             if (application.Api != null && application.IdentifierUris.Any())

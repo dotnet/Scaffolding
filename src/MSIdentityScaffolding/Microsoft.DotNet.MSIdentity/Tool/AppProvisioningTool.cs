@@ -197,6 +197,8 @@ namespace Microsoft.DotNet.MSIdentity
             projectSettings.ApplicationParameters.IsBlazorWasm = provisioningToolOptions.IsBlazorWasm;
             projectSettings.ApplicationParameters.WebRedirectUris.AddRange(ProvisioningToolOptions.RedirectUris);
             projectSettings.ApplicationParameters.CallsDownstreamApi = provisioningToolOptions.CallsDownstreamApi || !string.IsNullOrEmpty(provisioningToolOptions.ApiScopes);
+            projectSettings.ApplicationParameters.Instance = provisioningToolOptions.Instance;
+            projectSettings.ApplicationParameters.IsGovernmentCloud = provisioningToolOptions.IsGovernmentCloud;
 
             // there can multiple project types
             if (!string.IsNullOrEmpty(provisioningToolOptions.ProjectType))
@@ -284,7 +286,7 @@ namespace Microsoft.DotNet.MSIdentity
             {
                 if (string.IsNullOrEmpty(applicationParameters.AppIdUri)) // Expose server API scopes
                 {
-                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential, applicationParameters);
                     applicationParameters.AppIdUri = $"api://{applicationParameters.ClientId}";
                     await MicrosoftIdentityPlatformApplicationManager.ExposeScopes(graphServiceClient, applicationParameters.AppIdUri, applicationParameters.GraphEntityId);
                 }
@@ -376,7 +378,7 @@ namespace Microsoft.DotNet.MSIdentity
                 // Add ClientSecret if the app wants to call graph/a downstream api.
                 if (ProvisioningToolOptions.CallsGraph || ProvisioningToolOptions.CallsDownstreamApi)
                 {
-                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                    var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential, applicationParameters);
                     // need ClientId and Microsoft.Graph.Application.Id(GraphEntityId)
                     if (graphServiceClient != null && !string.IsNullOrEmpty(applicationParameters.ClientId) && !string.IsNullOrEmpty(applicationParameters.GraphEntityId))
                     {
@@ -470,7 +472,7 @@ namespace Microsoft.DotNet.MSIdentity
             }
             else
             {
-                var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential);
+                var graphServiceClient = MicrosoftIdentityPlatformApplicationManager.GetGraphServiceClient(tokenCredential, applicationParameters);
                 try
                 {
                     string? password = await MicrosoftIdentityPlatformApplicationManager.AddPasswordCredentialsAsync(

@@ -25,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             ShortTypeName = otherEntityType.ClrType.GetTypeInfo().Name;
             PrimaryKeyNames = navigation.ForeignKey.PrincipalKey.Properties.Select(pk => pk.Name).ToArray();
             ForeignKeyPropertyNames = navigation.ForeignKey.Properties
-                .Where(p => p.DeclaringEntityType == navigation.DeclaringEntityType)
+                .Where(p => p.DeclaringType == navigation.DeclaringType)
                 .Select(p => p.Name)
                 .ToArray();
 

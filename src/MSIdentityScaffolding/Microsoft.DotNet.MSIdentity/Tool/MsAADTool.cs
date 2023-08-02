@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
-using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.Graph;
 
@@ -31,7 +30,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             CommandName = commandName;
             ConsoleLogger = new ConsoleLogger(CommandName, ProvisioningToolOptions.Json);
             TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username, ProvisioningToolOptions.Instance, ConsoleLogger);
-            GraphServiceClient = new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
+            GraphServiceClient = ProvisioningToolOptions.IsGovernmentCloud
+                ? new GraphServiceClient("https://graph.microsoft.us/v1.0", new TokenCredentialAuthenticationProvider(TokenCredential, new string[] { "https://graph.microsoft.us/.default" }))
+                : new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
+
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
             GraphObjectRetriever = new GraphObjectRetriever(GraphServiceClient, ConsoleLogger);
         }
@@ -105,12 +107,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             if (applicationList.Any())
             {
                 var tenant = await GraphObjectRetriever.GetTenant();
-                if (tenant != null && tenant.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase))
+                var isB2C = tenant?.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase);
+                var isCIAM = tenant?.TenantType.Equals("CIAM", StringComparison.OrdinalIgnoreCase);
+                foreach (var app in applicationList)
                 {
-                    foreach (var app in applicationList)
-                    {
-                        app.AdditionalData.Add("IsB2C", true);
-                    }
+                    app.AdditionalData.Add("IsB2C", isB2C);
+                    app.AdditionalData.Add("IsCIAM", isCIAM);
                 }
 
                 //order list by created date.

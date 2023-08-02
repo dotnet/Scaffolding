@@ -1,8 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
@@ -198,6 +200,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         /// App registration ID associated with the Blazor WASM hosted client, Used for the Blazor WASM hosted server API in order to pre-authorize the client app
         /// </summary>
         public string? BlazorWasmClientAppId { get; internal set; }
+
+        public bool IsGovernmentCloud => string.Equals(Instance, DefaultProperties.GovernmentCloudInstance, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Clones the options

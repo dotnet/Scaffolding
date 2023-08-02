@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.23313.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.23361.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>59ac824080b9807fd91dbc8a6d2b4447e74874ab</Sha>
+      <Sha>cae11bc40b691f546d788f7ab37f7eaf0e24ded8</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>43a25d8cb002d172df70e9bbaf222d718d8a253c</Sha>
+      <Sha>3577954ec725d552ed4e09b23f34064d0daf5863</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore" Version="7.0.8">
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="7.0.10">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>43a25d8cb002d172df70e9bbaf222d718d8a253c</Sha>
+      <Sha>3577954ec725d552ed4e09b23f34064d0daf5863</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8">
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.10">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>43a25d8cb002d172df70e9bbaf222d718d8a253c</Sha>
+      <Sha>3577954ec725d552ed4e09b23f34064d0daf5863</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>

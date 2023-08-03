@@ -47,7 +47,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>7.0.8</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>7.0.8</VersionPrefix>
+    <VersionPrefix>7.0.9</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
@@ -78,7 +78,7 @@
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>7.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
-    <NuGetPackagingVersion>6.3.1</NuGetPackagingVersion>
+    <NuGetPackagingVersion>6.6.1</NuGetPackagingVersion>
     <HumanizerPackageVersion>2.14.1</HumanizerPackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
@@ -141,7 +141,7 @@
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>4.54.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
-    <NuGetProjectModelVersion>6.3.1</NuGetProjectModelVersion>
+    <NuGetProjectModelVersion>6.6.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>

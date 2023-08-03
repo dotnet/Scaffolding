@@ -150,14 +150,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             RestoreAndBuild(fileProvider.Root, outputHelper);
         }
 
-        public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output, bool fullFramework = false)
+        public void SetupProjects(TemporaryFileProvider fileProvider, ITestOutputHelper output)
         {
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
             Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "netstandard2.0"));
             fileProvider.Add("global.json", GlobalJsonText);
 
-            var rootProjectTxt = fullFramework ? MsBuildProjectStrings.RootNet45ProjectTxt : MsBuildProjectStrings.RootProjectTxt;
+            var rootProjectTxt = MsBuildProjectStrings.RootProjectTxt;
             fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", rootProjectTxt);
             fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
 

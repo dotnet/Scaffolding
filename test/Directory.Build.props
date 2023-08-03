@@ -11,7 +11,6 @@
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitExtensibilityExecutionPackageVersion)" />
     <PackageReference Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
 </Project>

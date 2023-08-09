@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
-    <!-- Restore this package as part of build so it's available for test projects -->
   </ItemGroup>
 
   <ItemGroup>

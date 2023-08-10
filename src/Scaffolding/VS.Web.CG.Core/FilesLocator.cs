@@ -27,42 +27,42 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             string fileName,
             IEnumerable<string> searchPaths)
         {
-            if (fileName == null)
+            if (string.IsNullOrEmpty(fileName))
             {
                 throw new ArgumentNullException(nameof(fileName));
             }
 
-            if (searchPaths == null)
+            if (searchPaths?.Any() is bool any && any)
             {
-                throw new ArgumentNullException(nameof(searchPaths));
-            }
-
-            foreach (var searchPath in searchPaths)
-            {
-                if (_fileSystem.DirectoryExists(searchPath))
+                foreach (var searchPath in searchPaths)
                 {
-                    var matchingFiles = _fileSystem.EnumerateFiles(searchPath,
-                        searchPattern: fileName,
-                        searchOption: SearchOption.AllDirectories).ToList();
+                    if (_fileSystem.DirectoryExists(searchPath))
+                    {
+                        var matchingFiles = _fileSystem.EnumerateFiles(searchPath,
+                            searchPattern: fileName,
+                            searchOption: SearchOption.AllDirectories).ToList();
 
-                    if (matchingFiles.Count > 1)
-                    {
-                        throw new InvalidOperationException(string.Format(
-                            MessageStrings.MultipleFilesFound,
-                            fileName,
-                            searchPath));
-                    }
-                    if (matchingFiles.Count == 1)
-                    {
-                        return matchingFiles.Single();
+                        if (matchingFiles.Count > 1)
+                        {
+                            throw new InvalidOperationException(string.Format(
+                                MessageStrings.MultipleFilesFound,
+                                fileName,
+                                searchPath));
+                        }
+                        if (matchingFiles.Count == 1)
+                        {
+                            return matchingFiles.Single();
+                        }
                     }
                 }
+
+                throw new InvalidOperationException(string.Format(
+                    MessageStrings.FileNotFoundInFolders,
+                    fileName,
+                    string.Join(";", searchPaths)));
             }
 
-            throw new InvalidOperationException(string.Format(
-                MessageStrings.FileNotFoundInFolders,
-                fileName,
-                string.Join(";", searchPaths)));
+           throw new ArgumentNullException(nameof(searchPaths));
         }
     }
 }

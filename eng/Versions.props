@@ -12,17 +12,17 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Ref packages from darc subscriptions-->
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>8.0.0-preview.6.23315.1</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>8.0.0-preview.7.23375.4</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
-    <MicrosoftEntityFrameworkCorePackageVersion>8.0.0-preview.6.23315.1</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>8.0.0-preview.7.23375.4</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>8.0.0-preview.6.23315.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>8.0.0-preview.7.23375.4</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>8.0.0-rc.1.23414.1</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>8.0.0-rc.1.23414.1</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.0-preview.6.23317.1</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.0-preview.7.23375.9</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>8.0.0-rc.1.23414.1</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
@@ -34,7 +34,7 @@
     <!-- Microsoft.Extensions.DependencyModel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-rc.1.23414.1</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0-preview.6.23317.1</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0-preview.7.23375.9</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0-rc.1.23414.1</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
@@ -44,18 +44,18 @@
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>8.0.0-rc.1.23414.1</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.0-preview.6.23317.1</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.0-preview.7.23375.9</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>8.0.0-preview.6.23317.1</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>8.0.0-preview.7.23375.9</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.0-preview.6.23317.1</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.0-preview.7.23375.9</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
-  <PropertyGroup>
+ <PropertyGroup>
     <VersionPrefix>8.0.0</VersionPrefix>
-    <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>7</PreReleaseVersionIteration>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
-    <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
+    <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">false</IsServicingBuild>
     <!--
         When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
     -->
@@ -66,16 +66,16 @@
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.11</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
-    <MicrosoftBuildPackageVersion>17.3.2 </MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>17.6.3 </MicrosoftBuildPackageVersion>
     <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCorePackageVersion>17.3.2 </MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>17.6.3 </MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildLocatorPackageVersion>1.4.1</MicrosoftBuildLocatorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
-    <MicrosoftCodeAnalysisCSharpPackageVersion>4.4.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>4.5.0</MicrosoftCodeAnalysisCSharpPackageVersion>
     <!-- Microsoft.CodeAnalysis.Razor -->
     <MicrosoftCodeAnalysisRazorPackageVersion>6.0.11</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.4.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.5.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
@@ -104,16 +104,10 @@
     <MicrosoftAspNetCoreStaticFilesPackageVersion>6.0.0</MicrosoftAspNetCoreStaticFilesPackageVersion>
     <!-- Microsoft.DotNet.ProjectModel -->
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
-    <!-- Microsoft.NET.Sdk.Razor -->
-    <MicrosoftNETSdkRazorPackageVersion>5.0.0-preview.6.20312.15</MicrosoftNETSdkRazorPackageVersion>
-    <!-- Microsoft.NET.Test.Sdk-->
-    <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
     <MoqPackageVersion>4.9.0</MoqPackageVersion>
     <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
-    <XunitPackageVersion>2.4.2</XunitPackageVersion>
-    <XunitSkippableFactPackageVersion>1.3.12</XunitSkippableFactPackageVersion>
-    <XunitExtensibilityExecutionPackageVersion>2.4.2</XunitExtensibilityExecutionPackageVersion>
-    <XunitRunnerVisualStudioPackageVersion>2.4.2</XunitRunnerVisualStudioPackageVersion>
+    <XunitPackageVersion>2.5.0</XunitPackageVersion>
+    <XunitSkippableFactPackageVersion>1.4.13</XunitSkippableFactPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
@@ -123,11 +117,11 @@
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
     <AzureIdentityVersion>1.5.0</AzureIdentityVersion>
-    <CodeAnalysisVersion>4.4.0</CodeAnalysisVersion>
+    <CodeAnalysisVersion>4.5.0</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>3.1.20</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.20</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
-    <MicrosoftGraphVersion>4.5.0</MicrosoftGraphVersion>
+    <MicrosoftGraphVersion>4.54.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.3.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>

@@ -33,7 +33,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             propertyMetadata.ShortTypeName = TypeUtil.GetShortTypeName(property.ClrType);
 
             propertyMetadata.Scaffold = true;
-            var reflectionProperty = property.DeclaringEntityType.ClrType.GetProperty(property.Name);
+            var declaringEntityType = property.DeclaringType as IEntityType;
+            var reflectionProperty = declaringEntityType?.ClrType.GetProperty(property.Name);
             if (reflectionProperty != null)
             {
                 var scaffoldAttr = reflectionProperty.GetCustomAttribute(typeof(ScaffoldColumnAttribute)) as ScaffoldColumnAttribute;

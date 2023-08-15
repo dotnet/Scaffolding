@@ -2,13 +2,12 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <DeveloperBuildTestTfms>net7.0</DeveloperBuildTestTfms>
+    <DeveloperBuildTestTfms>net8.0</DeveloperBuildTestTfms>
     <StandardTestTfms>$(DeveloperBuildTestTfms)</StandardTestTfms>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-    <PackageReference Include="xunit.extensibility.execution" Version="$(XunitExtensibilityExecutionPackageVersion)" />
     <PackageReference Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
     <PackageReference Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />

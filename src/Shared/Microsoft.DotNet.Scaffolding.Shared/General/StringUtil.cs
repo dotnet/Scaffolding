@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
+namespace Microsoft.DotNet.Scaffolding.Shared
 {
     internal static class StringUtil
     {
@@ -19,6 +19,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 return input.Substring(0, length: 1).ToLowerInvariant() + input.Substring(1);
             }
             return input;
+        }
+
+        public static bool ContainsIgnoreCase(this string input, string value)
+        {
+            return input.ToLowerInvariant().Equals(value.ToLowerInvariant());
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             string input5 = "test";
             string input6 = "Hello123";
             string input7 = "123$%#Hello";
+            string input8 = null;
 
             string value1 = "hello";
             string value2 = "word";
@@ -26,6 +27,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             string value5 = "";
             string value6 = "hello123";
             string value7 = "123$%#hello";
+            string value8 = null;
 
             // Act and Assert
             Assert.True(input1.ContainsIgnoreCase(value1));
@@ -35,6 +37,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.False(input5.ContainsIgnoreCase(value5));
             Assert.True(input6.ContainsIgnoreCase(value6));
             Assert.True(input7.ContainsIgnoreCase(value7));
+            //null.ContainsIgnoreCase(string) should return false
+            Assert.False(input8.ContainsIgnoreCase(value7));
+            //null.ContainsIgnoreCase(null) should return false
+            Assert.False(input8.ContainsIgnoreCase(value8));
+            //string.ContainsIgnoreCase(null) should return false
+            Assert.False(input7.ContainsIgnoreCase(value8));
         }
     }
 }

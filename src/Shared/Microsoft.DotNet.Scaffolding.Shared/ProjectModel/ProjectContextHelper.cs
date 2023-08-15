@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             foreach (var item in dependencies)
             {
                 //only add Microsoft.EntityFrameworkCore.* or Microsoft.AspNetCore.Identity.* assemblies. Any others might be duplicates which cause in-memory compilation errors and those are the assemblies we care about.
-                if (item.Name.Contains(EntityFrameworkCore, StringComparison.OrdinalIgnoreCase) || item.Name.Contains(AspNetCoreIdentity, StringComparison.OrdinalIgnoreCase))
+                if (item.Name.ContainsIgnoreCase(EntityFrameworkCore) || item.Name.ContainsIgnoreCase(AspNetCoreIdentity))
                 {
                     var name = $"{item.Name}.dll";
                     //costly search but we're only doing it a handful of times.
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             Tuple<string, string> nameAndVersion = null;
             if (!string.IsNullOrEmpty(fullName))
             {
-                string[] splitName = fullName.Split("/");
+                string[] splitName = fullName.Split('/');
                 if (splitName.Length > 1)
                 {
                     nameAndVersion = new Tuple<string, string>(splitName[0], splitName[1]);
@@ -140,9 +140,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared
                     {
                         var dependencyTypeValue = type.ToString();
                         var DependencyTypeEnum = DependencyType.Unknown;
-                        if (Enum.TryParse(typeof(DependencyType), dependencyTypeValue, true, out var dependencyType))
+                        if (Enum.TryParse<DependencyType>(dependencyTypeValue, true, out var dependencyType))
                         {
-                            DependencyTypeEnum = (DependencyType)dependencyType;
+                            DependencyTypeEnum = dependencyType;
                         }
 
                         string packagePath = GetPath(path, nameAndVersion);

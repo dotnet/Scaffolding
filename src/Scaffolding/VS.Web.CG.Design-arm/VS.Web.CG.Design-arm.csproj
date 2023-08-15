@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\Shared.props" />
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <RuntimeIdentifier>win-arm</RuntimeIdentifier>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-</Project>

@@ -1,6 +1,25 @@
 /* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification\
 for details on configuring this project to bundle and minify static web assets. */
 
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 576px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn-link.nav-link:focus {
+  outline: black auto 1px;
+}
+
+.form-control:focus {
+  border-color: #0077cc;
+  box-shadow: 0 0 0 0.2rem #0077cc;
+}
+
 a.navbar-brand {
   white-space: normal;
   text-align: center;
@@ -9,11 +28,6 @@ a.navbar-brand {
 
 a {
   color: #0077cc;
-}
-
-.form-control:focus {
-    border-color: #0077cc;
-    box-shadow: 0 0 0 0.2rem #0077cc;
 }
 
 .btn-primary {
@@ -26,19 +40,6 @@ a {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
-}
-
-.btn-link.nav-link:focus {
-  outline: black auto 1px;
-}
-
-html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
 }
 
 .container {
@@ -65,19 +66,27 @@ button.accept-policy {
   line-height: inherit;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+.header {
+  background-color: var(--bs-body-bg);
 }
 
-body {
-  margin-bottom: 60px;
-}
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  overflow: scroll;
+  background-color: var(--bs-body-bg);
   white-space: nowrap;
-  line-height: 60px;
+  line-height: 45px;
+}
+
+@media (min-width: 576px) {
+
+  body {
+    margin-bottom: 45px;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 9;
+  }
+
 }

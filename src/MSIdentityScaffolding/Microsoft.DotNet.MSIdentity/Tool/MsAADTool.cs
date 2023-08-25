@@ -10,7 +10,8 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Shared;
-using Microsoft.Graph;
+using Microsoft.Graph.Beta;
+using Microsoft.Graph.Beta.Models;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             ConsoleLogger = new ConsoleLogger(CommandName, ProvisioningToolOptions.Json);
             TokenCredential = new MsalTokenCredential(ProvisioningToolOptions.TenantId, ProvisioningToolOptions.Username, ProvisioningToolOptions.Instance, ConsoleLogger);
             GraphServiceClient = ProvisioningToolOptions.IsGovernmentCloud
-                ? new GraphServiceClient("https://graph.microsoft.us/v1.0", new TokenCredentialAuthenticationProvider(TokenCredential, new string[] { "https://graph.microsoft.us/.default" }))
+                ? new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential, new string[] { "https://graph.microsoft.us/.default" }), "https://graph.microsoft.us/v1.0")
                 : new GraphServiceClient(new TokenCredentialAuthenticationProvider(TokenCredential));
 
             AzureManagementAPI = new AzureManagementAuthenticationProvider(TokenCredential);
@@ -106,14 +107,31 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
             if (applicationList.Any())
             {
-                var tenant = await GraphObjectRetriever.GetTenant();
-                var isB2C = tenant?.TenantType.Equals("AAD B2C", StringComparison.OrdinalIgnoreCase);
-                var isCIAM = tenant?.TenantType.Equals("CIAM", StringComparison.OrdinalIgnoreCase);
-                foreach (var app in applicationList)
-                {
-                    app.AdditionalData.Add("IsB2C", isB2C);
-                    app.AdditionalData.Add("IsCIAM", isCIAM);
-                }
+                // TODO check for b2c or ciam in VS via the tenant
+
+                //var tenant = await GraphObjectRetriever.GetTenant();
+                //var tenantType = tenant?.GetTenantType();
+                //var isB2C = string.Equals(tenantType, "AAD B2C", StringComparison.OrdinalIgnoreCase);
+                //var isCIAM = string.Equals(tenantType, "CIAM", StringComparison.OrdinalIgnoreCase);
+                //foreach (var app in applicationList)
+                //{
+                //    try
+                //    {
+                //        if (!app.AdditionalData.TryAdd("IsB2C", isB2C))
+                //        {
+                //            app.AdditionalData.Add("IsB2C", isB2C);
+                //        }
+
+                //        if (!app.AdditionalData.TryAdd("CIAM", isCIAM))
+                //        {
+                //            app.AdditionalData.Add("CIAM", isCIAM);
+                //        }
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        ConsoleLogger.LogFailureAndExit(e.Message);
+                //    }
+                //}
 
                 //order list by created date.
                 applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
@@ -163,7 +181,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         internal async Task<string> PrintTenantsList()
         {
             string outputJsonString = string.Empty;
-            IList<TenantInformation> tenantList = new List<TenantInformation>();
+            IList<TenantInfo> tenantList = new List<TenantInfo>();
             if (AzureManagementAPI != null)
             {
                 var tenantsJsonString = await AzureManagementAPI.ListTenantsAsync();
@@ -184,7 +202,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                                 string? displayName = current.GetProperty("displayName").GetString();
 
                                 tenantList.Add(
-                                    new TenantInformation()
+                                    new TenantInfo()
                                     {
                                         TenantId = tenantId,
                                         TenantType = tenantType,

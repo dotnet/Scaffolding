@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.Graph;
+using Microsoft.Graph.Beta;
+using Microsoft.Graph.Beta.Models;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
@@ -41,36 +43,35 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             List<DirectoryObject> graphObjectsList = new List<DirectoryObject>();
             try
             {
-                var graphObjects = await _graphServiceClient.Me.OwnedObjects
-                    .Request()
-                    .GetAsync();
+                var graphObjects = (await _graphServiceClient.Me.OwnedObjects
+                    .GetAsync())?.Value?.ToList();
 
                 if (graphObjects != null)
                 {
-                    graphObjectsList.AddRange(graphObjects.ToList());
+                    graphObjectsList.AddRange(graphObjects);
 
-                    var nextPage = graphObjects.NextPageRequest;
-                    while (nextPage != null)
-                    {
-                        try
-                        {
-                            var additionalGraphObjects = await nextPage.GetAsync();
-                            if (additionalGraphObjects != null)
-                            {
-                                graphObjectsList.AddRange(additionalGraphObjects.ToList());
-                                nextPage = additionalGraphObjects.NextPageRequest;
-                            }
-                            else
-                            {
-                                nextPage = null;
-                            }
-                        }
-                        catch (ServiceException se)
-                        {
-                            nextPage = null;
-                            _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
-                        }
-                    }
+                    //var nextPage = graphObjects.Next;
+                    //while (nextPage != null)
+                    //{
+                    //    try
+                    //    {
+                    //        var additionalGraphObjects = await nextPage.GetAsync();
+                    //        if (additionalGraphObjects != null)
+                    //        {
+                    //            graphObjectsList.AddRange(additionalGraphObjects.ToList());
+                    //            nextPage = additionalGraphObjects.NextPageRequest;
+                    //        }
+                    //        else
+                    //        {
+                    //            nextPage = null;
+                    //        }
+                    //    }
+                    //    catch (ServiceException se)
+                    //    {
+                    //        nextPage = null;
+                    //        _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
+                    //    }
+                    //}
                 }
             }
             catch (ServiceException se)
@@ -87,8 +88,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             try
             {
                 tenant = (await _graphServiceClient.Organization
-                    .Request()
-                    .GetAsync()).FirstOrDefault();
+                    .GetAsync())?.Value?.FirstOrDefault();
 
                 return tenant;
             }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -52,6 +53,7 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
+            Debugger.Launch();
             ValidateProjectPath();
 
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(ProvisioningToolOptions.ProjectTypeIdentifier);
@@ -499,7 +501,7 @@ namespace Microsoft.DotNet.MSIdentity
                 }
                 catch (ServiceException se)
                 {
-                    ConsoleLogger.LogFailureAndExit(se.Error?.Code);
+                    ConsoleLogger.LogFailureAndExit(se.Message);
                 }
             }
         }

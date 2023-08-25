@@ -3,12 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
-using Microsoft.Graph;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
@@ -28,13 +27,13 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         readonly TokenCredential _tokenCredentials;
         readonly IEnumerable<string> _initialScopes;
 
-        public async Task AuthenticateRequestAsync(HttpRequestMessage request)
+        public async Task AuthenticateRequestAsync(RequestInformation request, Dictionary<string, object>? additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
         {
             // Try with the Shared token cache credentials
             TokenRequestContext context = new TokenRequestContext(_initialScopes.ToArray());
-            AccessToken token = await _tokenCredentials.GetTokenAsync(context, CancellationToken.None);
+            AccessToken token = await _tokenCredentials.GetTokenAsync(context, cancellationToken);
 
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+            request.Headers.Add("Authorization", $"Bearer {token.Token}");
         }
     }
 }

@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 {
-    internal class TenantInformation
+    internal class TenantInfo
     {
         public string? TenantId { get; set; }
         public string? DisplayName { get; set; }

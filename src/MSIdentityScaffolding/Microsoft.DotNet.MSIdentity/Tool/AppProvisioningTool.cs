@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -53,7 +52,6 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
-            Debugger.Launch();
             ValidateProjectPath();
 
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(ProvisioningToolOptions.ProjectTypeIdentifier);
@@ -499,9 +497,11 @@ namespace Microsoft.DotNet.MSIdentity
                         ConsoleLogger.LogFailureAndExit(output);
                     }
                 }
-                catch (ServiceException se)
+                catch (Exception e)
                 {
-                    ConsoleLogger.LogFailureAndExit(se.Message);
+                    string? errorMessage = (e is Microsoft.Graph.Beta.Models.ODataErrors.ODataError dataError) ? dataError.Error?.Message ?? dataError.Message : e.Message;
+
+                    ConsoleLogger.LogFailureAndExit($"Failed to create password : {errorMessage}");
                 }
             }
         }

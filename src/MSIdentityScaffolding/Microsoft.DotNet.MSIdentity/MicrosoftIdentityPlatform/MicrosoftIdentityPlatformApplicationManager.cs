@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,6 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph;
 using Microsoft.Graph.Beta;
 using Microsoft.Graph.Beta.Models;
 
@@ -89,7 +87,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
                 if (createdApplication is null)
                 {
-                    consoleLogger.LogFailureAndExit("TODO add a string");
+                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
                 }
 
                 // Add the current user as a owner.
@@ -120,7 +118,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 {
                     await ExposeWebApiScopes(graphServiceClient, createdApplication, applicationParameters);
 
-                    // TODO
                     // // Blazorwasm hosted: add permission to server web API from client SPA
                     if (applicationParameters.IsBlazorWasm)
                     {
@@ -175,7 +172,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 tenant = (await graphServiceClient.Organization
                      .GetAsync())?.Value?.FirstOrDefault();
             }
-            catch (ServiceException ex)
+            catch (Exception ex)
             {
                 if (ex.InnerException != null)
                 {
@@ -257,7 +254,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             IConsoleLogger consoleLogger,
             StringBuilder? output = null)
         {
-            Debugger.Launch();
             var graphServiceClient = GetGraphServiceClient(tokenCredential, parameters);
 
             var remoteApp = (await graphServiceClient.Applications
@@ -272,7 +268,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
             output ??= new StringBuilder();
 
-            // TODO do we need to do this for update?
             if (!string.IsNullOrEmpty(toolOptions.ApiScopes)) // authorizing downstream API
             {
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
@@ -281,14 +276,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                     remoteApp);
 
                 //B2C and CIAM don't allow user consent, and therefore we need to explicitly grant permissions
-                //if (parameters.IsB2C || parameters.IsCiam)
-                //{
-                   ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
+                if (parameters.IsB2C || parameters.IsCiam)
+                {
+                    ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
                     await AddAdminConsentToApiPermissions(
                         graphServiceClient,
                         servicePrincipal,
                         scopesPerResource);
-                //}
+                }
 
                 needsUpdates = true;
             }
@@ -307,9 +302,9 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 output.Append(string.Format(Resources.SuccessfullyUpdatedApp, remoteApp.DisplayName, remoteApp.AppId));
                 consoleLogger.LogJsonMessage(State.Success, output: output.ToString());
             }
-            catch (ServiceException se)
+            catch (Exception e)
             {
-                output.Append(se.Message);
+                output.Append(e.Message);
                 consoleLogger.LogFailureAndExit(output.ToString());
             }
         }
@@ -526,7 +521,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             ApplicationParameters effectiveApplicationParameters,
             IConsoleLogger consoleLogger)
         {
-            Debugger.Launch();
             string password = string.Empty;
             var requestBody = new Microsoft.Graph.Beta.Applications.Item.AddPassword.AddPasswordPostRequestBody
             {
@@ -570,10 +564,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
         {
             var updatedApp = new Application
             {
-                IdentifierUris = new List<string> { scopeIdentifier }
+                IdentifierUris = new List<string>(new[] { scopeIdentifier }),
             };
 
             scopes ??= new List<PermissionScope>();
+
             var newScope = new PermissionScope
             {
                 Id = Guid.NewGuid(),
@@ -583,7 +578,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 IsEnabled = true,
                 UserConsentDescription = "Allows this app to access the web API on your behalf",
                 UserConsentDisplayName = "Access the API on your behalf",
-                Value = DefaultProperties.ApiScopes,
+                Value = "access_as_user",
             };
 
             scopes.Add(newScope);
@@ -645,7 +640,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         var effectivePermissionGrant = await graphServiceClient.Oauth2PermissionGrants
                             .PostAsync(oAuth2PermissionGrant);
                     }
-                    catch (Microsoft.Graph.ServiceException ex)
+                    catch (Exception ex)
                     {
                         if (ex.Message.Contains("Permission entry already exists"))
                         {
@@ -694,7 +689,14 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
 
             if (apiRequests.Any())
             {
-                application.RequiredResourceAccess = apiRequests;
+                if (application.RequiredResourceAccess != null)
+                {
+                    application.RequiredResourceAccess.AddRange(apiRequests);
+                }
+                else
+                {
+                    application.RequiredResourceAccess = apiRequests;
+                }
             }
 
             return scopesPerResource;

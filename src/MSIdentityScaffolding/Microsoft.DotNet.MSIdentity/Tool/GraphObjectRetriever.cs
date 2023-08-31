@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,38 +46,10 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             {
                 var graphObjects = (await _graphServiceClient.Me.OwnedObjects
                     .GetAsync())?.Value?.ToList();
-
-                if (graphObjects != null)
-                {
-                    graphObjectsList.AddRange(graphObjects);
-
-                    //var nextPage = graphObjects.Next;
-                    //while (nextPage != null)
-                    //{
-                    //    try
-                    //    {
-                    //        var additionalGraphObjects = await nextPage.GetAsync();
-                    //        if (additionalGraphObjects != null)
-                    //        {
-                    //            graphObjectsList.AddRange(additionalGraphObjects.ToList());
-                    //            nextPage = additionalGraphObjects.NextPageRequest;
-                    //        }
-                    //        else
-                    //        {
-                    //            nextPage = null;
-                    //        }
-                    //    }
-                    //    catch (ServiceException se)
-                    //    {
-                    //        nextPage = null;
-                    //        _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
-                    //    }
-                    //}
-                }
             }
-            catch (ServiceException se)
+            catch (Exception e)
             {
-                _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, se.Message));
+                _consoleLogger.LogFailureAndExit(string.Format(Resources.FailedToRetrieveADObjectsError, e.Message));
             }
 
             return graphObjectsList;
@@ -92,7 +65,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
                 return tenant;
             }
-            catch (ServiceException ex)
+            catch (Exception ex)
             {
                 string? errorMessage;
                 if (ex.InnerException != null)

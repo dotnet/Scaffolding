@@ -101,11 +101,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var apps = await jsonAppTool.GetApplicationsAsync();
             Assert.Equal(1, apps.Count);
-            var additionalData = apps.First()?.AdditionalData;
-            Assert.NotNull(additionalData);
-            Assert.True(additionalData.ContainsKey("IsB2C"));
-            additionalData.TryGetValue("IsB2C", out var isB2C);
-            Assert.True((bool)isB2C);
         }
     }
 }

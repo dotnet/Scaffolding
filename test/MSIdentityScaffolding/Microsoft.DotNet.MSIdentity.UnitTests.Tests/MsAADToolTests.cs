@@ -10,7 +10,6 @@ using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph;
 using Microsoft.Graph.Beta.Models;
 using Moq;
 using Xunit;
@@ -84,29 +83,29 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             Assert.Equal(expected, appsResponse);
         }
 
-        //[Fact]
-        //public async void TestGetApplications_OneAppB2C()
-        //{
-        //    var app = new Application { AdditionalData = new Dictionary<string, object>() };
-        //    var directoryObjects = new List<DirectoryObject> { app };
-        //    var tenant = new Organization { AdditionalData = new Dictionary<string, object> { { "tenantType", "AAD B2C" } } };
+        [Fact]
+        public async void TestGetApplications_OneAppB2C()
+        {
+            var app = new Application { AdditionalData = new Dictionary<string, object>() };
+            var directoryObjects = new List<DirectoryObject> { app };
+            var tenant = new Organization { AdditionalData = new Dictionary<string, object> { { "tenantType", "AAD B2C" } } };
 
-        //    Mock<IGraphObjectRetriever> graphObjectRetriever = new Mock<IGraphObjectRetriever>();
-        //    graphObjectRetriever.Setup(g => g.GetGraphObjects()).Returns(Task.FromResult(directoryObjects));
-        //    graphObjectRetriever.Setup(g => g.GetTenant()).Returns(Task.FromResult(tenant));
+            Mock<IGraphObjectRetriever> graphObjectRetriever = new Mock<IGraphObjectRetriever>();
+            graphObjectRetriever.Setup(g => g.GetGraphObjects()).Returns(Task.FromResult(directoryObjects));
+            graphObjectRetriever.Setup(g => g.GetTenant()).Returns(Task.FromResult(tenant));
 
-        //    MsAADTool jsonAppTool = new MsAADTool(Commands.LIST_AAD_APPS_COMMAND, ToolOptions)
-        //    {
-        //        GraphObjectRetriever = graphObjectRetriever.Object
-        //    };
+            MsAADTool jsonAppTool = new MsAADTool(Commands.LIST_AAD_APPS_COMMAND, ToolOptions)
+            {
+                GraphObjectRetriever = graphObjectRetriever.Object
+            };
 
-        //    var apps = await jsonAppTool.GetApplicationsAsync();
-        //    Assert.Equal(1, apps.Count);
-        //    var additionalData = apps.First()?.AdditionalData;
-        //    Assert.NotNull(additionalData);
-        //    Assert.True(additionalData.ContainsKey("IsB2C"));
-        //    additionalData.TryGetValue("IsB2C", out var isB2C);
-        //    Assert.True((bool)isB2C);
-        //}
+            var apps = await jsonAppTool.GetApplicationsAsync();
+            Assert.Equal(1, apps.Count);
+            var additionalData = apps.First()?.AdditionalData;
+            Assert.NotNull(additionalData);
+            Assert.True(additionalData.ContainsKey("IsB2C"));
+            additionalData.TryGetValue("IsB2C", out var isB2C);
+            Assert.True((bool)isB2C);
+        }
     }
 }

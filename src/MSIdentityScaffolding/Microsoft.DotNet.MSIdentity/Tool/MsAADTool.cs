@@ -107,32 +107,6 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 
             if (applicationList.Any())
             {
-                // TODO check for b2c or ciam in VS via the tenant
-
-                //var tenant = await GraphObjectRetriever.GetTenant();
-                //var tenantType = tenant?.GetTenantType();
-                //var isB2C = string.Equals(tenantType, "AAD B2C", StringComparison.OrdinalIgnoreCase);
-                //var isCIAM = string.Equals(tenantType, "CIAM", StringComparison.OrdinalIgnoreCase);
-                //foreach (var app in applicationList)
-                //{
-                //    try
-                //    {
-                //        if (!app.AdditionalData.TryAdd("IsB2C", isB2C))
-                //        {
-                //            app.AdditionalData.Add("IsB2C", isB2C);
-                //        }
-
-                //        if (!app.AdditionalData.TryAdd("CIAM", isCIAM))
-                //        {
-                //            app.AdditionalData.Add("CIAM", isCIAM);
-                //        }
-                //    }
-                //    catch (Exception e)
-                //    {
-                //        ConsoleLogger.LogFailureAndExit(e.Message);
-                //    }
-                //}
-
                 //order list by created date.
                 applicationList = applicationList.OrderByDescending(app => app.CreatedDateTime).ToList();
             }

@@ -12,8 +12,8 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph.Beta;
-using Microsoft.Graph.Beta.Models;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 {
@@ -381,8 +381,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (existingApplication.Api?.PreAuthorizedApplications?.Any(
                 app => string.Equals(toolOptions.BlazorWasmClientAppId, app.AppId)
-                && app.PermissionIds != null
-                && app.PermissionIds.Any(id => id.Equals(delegatedPermissionId))) is true)
+                && app.DelegatedPermissionIds != null
+                && app.DelegatedPermissionIds.Any(id => id.Equals(delegatedPermissionId))) is true)
             {
                 return false;
             }
@@ -390,7 +390,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             var preAuthorizedApp = new PreAuthorizedApplication
             {
                 AppId = toolOptions.BlazorWasmClientAppId,
-                PermissionIds = new List<string> { delegatedPermissionId }
+                DelegatedPermissionIds = new List<string> { delegatedPermissionId }
             };
 
             updatedApp.Api = existingApplication.Api ?? new ApiApplication();
@@ -522,7 +522,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             IConsoleLogger consoleLogger)
         {
             string password = string.Empty;
-            var requestBody = new Microsoft.Graph.Beta.Applications.Item.AddPassword.AddPasswordPostRequestBody
+            var requestBody = new Microsoft.Graph.Applications.Item.AddPassword.AddPasswordPostRequestBody
             {
                 PasswordCredential = new PasswordCredential
                 {
@@ -541,7 +541,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 }
                 catch (Exception e)
                 {
-                    string? errorMessage = (e is Microsoft.Graph.Beta.Models.ODataErrors.ODataError dataError) ? dataError.Error?.Message ?? dataError.Message : e.Message;
+                    string? errorMessage = (e is Microsoft.Graph.Models.ODataErrors.ODataError dataError) ? dataError.Error?.Message ?? dataError.Message : e.Message;
                     consoleLogger.LogMessage($"Failed to create password : {errorMessage}", LogMessageType.Error);
                     throw;
                 }
@@ -626,8 +626,6 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                         PrincipalId = null,
                         ResourceId = resourceAndScopes.FirstOrDefault()?.ResourceServicePrincipalId,
                         Scope = string.Join(" ", resourceAndScopes.Select(r => r.Scope)),
-                        StartTime = DateTimeOffset.UtcNow,
-                        ExpiryTime = DateTimeOffset.MaxValue
                     };
 
                     // Check if permissions already exist, otherwise will throw exception
@@ -801,7 +799,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (!scopes.Contains(".default"))
             {
-                permissionScopes = spWithScopes.PublishedPermissionScopes?.Where(s => scopes.Contains(s.Value?.ToLower(CultureInfo.InvariantCulture)));
+                permissionScopes = spWithScopes.Oauth2PermissionScopes?.Where(s => scopes.Contains(s.Value?.ToLower(CultureInfo.InvariantCulture)));
                 appRoles = spWithScopes.AppRoles?.Where(s => scopes.Contains(s.Value?.ToLower(CultureInfo.InvariantCulture)));
             }
 

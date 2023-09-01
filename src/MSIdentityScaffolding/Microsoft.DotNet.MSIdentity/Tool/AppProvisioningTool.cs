@@ -497,7 +497,7 @@ namespace Microsoft.DotNet.MSIdentity
                 }
                 catch (Exception e)
                 {
-                    string? errorMessage = (e is Microsoft.Graph.Beta.Models.ODataErrors.ODataError dataError) ? dataError.Error?.Message ?? dataError.Message : e.Message;
+                    string? errorMessage = (e is Microsoft.Graph.Models.ODataErrors.ODataError dataError) ? dataError.Error?.Message ?? dataError.Message : e.Message;
 
                     ConsoleLogger.LogFailureAndExit($"Failed to create password : {errorMessage}");
                 }

@@ -10,8 +10,8 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.Shared;
-using Microsoft.Graph.Beta;
-using Microsoft.Graph.Beta.Models;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {

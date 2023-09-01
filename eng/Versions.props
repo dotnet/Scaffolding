@@ -121,7 +121,7 @@
     <MicrosoftExtensionsConfigurationVersion>3.1.20</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.20</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
-    <MicrosoftGraphVersion>5.42.0-preview</MicrosoftGraphVersion>
+    <MicrosoftGraphVersion>5.25.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>2.32.0</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.3.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>

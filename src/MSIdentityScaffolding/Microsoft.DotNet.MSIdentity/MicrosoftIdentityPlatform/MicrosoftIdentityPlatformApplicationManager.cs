@@ -883,7 +883,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                         .DeleteAsync();
                     unregisterSuccess = true;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     unregisterSuccess = false;
                     throw;

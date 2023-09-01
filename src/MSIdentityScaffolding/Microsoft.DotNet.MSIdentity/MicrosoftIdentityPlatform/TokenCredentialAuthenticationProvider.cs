@@ -9,7 +9,7 @@ using Azure.Core;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 
-namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
+namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 {
     /// <summary>
     /// Graph SDK authentication provider based on an Azure SDK token credential provider.

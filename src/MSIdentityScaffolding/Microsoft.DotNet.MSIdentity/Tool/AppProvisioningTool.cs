@@ -13,12 +13,10 @@ using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.CodeReaderWriter;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
-using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
 using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph;
 using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
@@ -514,15 +512,23 @@ namespace Microsoft.DotNet.MSIdentity
         /// <returns></returns>
         private async Task UnregisterApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
-            bool unregisterSuccess = await MicrosoftIdentityPlatformApplicationManager.UnregisterAsync(tokenCredential, applicationParameters);
-            if (unregisterSuccess)
+            try
             {
-                string outputMessage = $"Unregistered the Azure AD w/ client id = {applicationParameters.ClientId}\n";
-                ConsoleLogger.LogJsonMessage(State.Success, output: outputMessage);
+                bool unregisterSuccess = await MicrosoftIdentityPlatformApplicationManager.UnregisterAsync(tokenCredential, applicationParameters);
+                if (unregisterSuccess)
+                {
+                    string outputMessage = $"Unregistered the Azure AD w/ client id = {applicationParameters.ClientId}\n";
+                    ConsoleLogger.LogJsonMessage(State.Success, output: outputMessage);
+                }
+                else
+                {
+                    string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
+                    ConsoleLogger.LogFailureAndExit(outputMessage);
+                }
             }
-            else
+            catch (Exception e)
             {
-                string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n";
+                string outputMessage = $"Unable to unregister the Azure AD w/ client id = {applicationParameters.ClientId}\n{e.Message}";
                 ConsoleLogger.LogFailureAndExit(outputMessage);
             }
         }

@@ -15,16 +15,8 @@ using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph.Beta;
 using Microsoft.Graph.Beta.Models;
 
-namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
+namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 {
-    public static class GraphServiceClientExtensions
-    {
-        public static string? GetTenantType(this Organization tenant)
-        {
-            return tenant.AdditionalData["tenantType"]?.ToString();
-        }
-    }
-
     public class MicrosoftIdentityPlatformApplicationManager
     {
         private readonly StringBuilder _output = new StringBuilder();
@@ -118,7 +110,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 {
                     await ExposeWebApiScopes(graphServiceClient, createdApplication, applicationParameters);
 
-                    // // Blazorwasm hosted: add permission to server web API from client SPA
+                    // Blazorwasm hosted: add permission to server web API from client SPA
                     if (applicationParameters.IsBlazorWasm)
                     {
                         await AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
@@ -164,7 +156,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
         }
 
-        private static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient, IConsoleLogger consoleLogger)
+        internal static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient, IConsoleLogger consoleLogger)
         {
             Organization? tenant = null;
             try
@@ -194,7 +186,15 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             return tenant;
         }
 
-        private async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
+        /// <summary>
+        /// In the Blazorwasm hosted scenario, we add permission to the server web API from client SPA
+        /// </summary>
+        /// <param name="graphServiceClient"></param>
+        /// <param name="createdApplication"></param>
+        /// <param name="createdServicePrincipal"></param>
+        /// <param name="isB2cOrCiam"></param>
+        /// <returns></returns>
+        internal async Task AddApiPermissionFromBlazorwasmHostedSpaToServerApi(
            GraphServiceClient graphServiceClient,
            Application createdApplication,
            ServicePrincipal createdServicePrincipal,
@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             }
         }
 
-        private static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
+        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
         {
             ServicePrincipal? servicePrincipal = (await graphServiceClient.ServicePrincipals
                 .GetAsync(options => options.QueryParameters.Filter = $"appId eq '{clientId}'"))?.Value?.FirstOrDefault();
@@ -536,14 +536,12 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                 {
                     PasswordCredential? returnedPasswordCredential = await graphServiceClient.Applications[$"{applicationId}"]
                         .AddPassword.PostAsync(requestBody);
-
                     password = returnedPasswordCredential?.SecretText ?? string.Empty;
                     effectiveApplicationParameters.PasswordCredentials.Add(password);
                 }
                 catch (Exception e)
                 {
                     string? errorMessage = (e is Microsoft.Graph.Beta.Models.ODataErrors.ODataError dataError) ? dataError.Error?.Message ?? dataError.Message : e.Message;
-
                     consoleLogger.LogMessage($"Failed to create password : {errorMessage}", LogMessageType.Error);
                     throw;
                 }
@@ -801,10 +799,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
             IEnumerable<PermissionScope>? permissionScopes = null;
             IEnumerable<AppRole>? appRoles = null;
 
-            if (scopes.Contains(".default"))
-            {
-            }
-            else
+            if (!scopes.Contains(".default"))
             {
                 permissionScopes = spWithScopes.PublishedPermissionScopes?.Where(s => scopes.Contains(s.Value?.ToLower(CultureInfo.InvariantCulture)));
                 appRoles = spWithScopes.AppRoles?.Where(s => scopes.Contains(s.Value?.ToLower(CultureInfo.InvariantCulture)));
@@ -888,9 +883,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication
                         .DeleteAsync();
                     unregisterSuccess = true;
                 }
-                catch
+                catch (Exception e)
                 {
                     unregisterSuccess = false;
+                    throw;
                 }
             }
 

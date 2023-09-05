@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                         new PreAuthorizedApplication
                         {
                             AppId = clientId,
-                            PermissionIds = new List<string>
+                            DelegatedPermissionIds = new List<string>
                             {
                                 permissionId
                             }
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var output = MicrosoftIdentityPlatformApplicationManager.PreAuthorizeBlazorWasmClientApp(originalApp, toolOptions, null);
             Assert.False(output);
             Assert.Equal(originalApp.Api.PreAuthorizedApplications.First().AppId, clientId);
-            Assert.Equal(originalApp.Api.PreAuthorizedApplications.First().PermissionIds.First(), permissionId);
+            Assert.Equal(originalApp.Api.PreAuthorizedApplications.First().DelegatedPermissionIds.First(), permissionId);
         }
 
         [Fact]
@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                         new PreAuthorizedApplication
                         {
                             AppId = "existingClientId",
-                            PermissionIds = new List<string>
+                            DelegatedPermissionIds = new List<string>
                             {
                                 "existingPermissionId"
                             }
@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             Assert.Equal(2, updatedApp.Api.PreAuthorizedApplications.Count());
             Assert.Contains(updatedApp.Api.PreAuthorizedApplications,
                 app => app.AppId.Equals(clientId)
-                && app.PermissionIds.Any(
+                && app.DelegatedPermissionIds.Any(
                     id => id.ToString().Equals(permissionId.ToString())));
         }
 

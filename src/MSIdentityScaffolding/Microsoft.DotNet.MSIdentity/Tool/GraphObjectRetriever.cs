@@ -45,6 +45,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             {
                 var graphObjects = (await _graphServiceClient.Me.OwnedObjects
                     .GetAsync())?.Value?.ToList();
+
+                if (graphObjects != null && graphObjects.Any())
+                {
+                    graphObjectsList.AddRange(graphObjects);
+                }
             }
             catch (Exception e)
             {

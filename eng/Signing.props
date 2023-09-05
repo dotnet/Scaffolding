@@ -9,6 +9,7 @@
       <FileSignInfo Include = "Newtonsoft.Json.dll" CertificateName="3PartySHA2"/>
       <FileSignInfo Include = "MessagePack.dll" CertificateName="3PartySHA2"/>
       <FileSignInfo Include = "MessagePack.Annotations.dll" CertificateName="3PartySHA2"/>
+      <FileSignInfo Include = "Tavis.UriTemplates" CertificateName="3PartySHA2"/>
   </ItemGroup>
 
   <ItemGroup Label="Code sign exclusions">

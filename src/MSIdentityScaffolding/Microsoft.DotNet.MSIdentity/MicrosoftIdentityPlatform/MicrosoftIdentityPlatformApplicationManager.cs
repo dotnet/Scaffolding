@@ -39,9 +39,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 Organization? tenant = await GetTenant(graphServiceClient, consoleLogger);
                 if (tenant != null)
                 {
-                    var tenantType = tenant.GetTenantType();
-                    applicationParameters.IsB2C = string.Equals(tenantType, "AAD B2C", StringComparison.OrdinalIgnoreCase);
-                    applicationParameters.IsCiam = string.Equals(tenantType, "CIAM", StringComparison.OrdinalIgnoreCase);
+                    applicationParameters.IsB2C = string.Equals(tenant.TenantType, "AAD B2C", StringComparison.OrdinalIgnoreCase);
+                    applicationParameters.IsCiam = string.Equals(tenant.TenantType, "CIAM", StringComparison.OrdinalIgnoreCase);
                 }
 
                 // Create the app.
@@ -948,9 +947,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             Application application,
             ApplicationParameters originalApplicationParameters)
         {
-            var tenantType = tenant.GetTenantType();
-            bool isCiam = string.Equals(tenantType, "CIAM", StringComparison.OrdinalIgnoreCase);
-            bool isB2C = string.Equals(tenantType, "AAD B2C", StringComparison.OrdinalIgnoreCase);
+            bool isCiam = string.Equals(tenant.TenantType, "CIAM", StringComparison.OrdinalIgnoreCase);
+            bool isB2C = string.Equals(tenant.TenantType, "AAD B2C", StringComparison.OrdinalIgnoreCase);
             var effectiveApplicationParameters = new ApplicationParameters
             {
                 ApplicationDisplayName = application.DisplayName,

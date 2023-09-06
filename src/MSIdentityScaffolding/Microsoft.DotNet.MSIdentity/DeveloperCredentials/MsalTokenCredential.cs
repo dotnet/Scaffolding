@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                     _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, e.Message));
                 }
             }
-            catch (MsalServiceException ex)
+            catch (Exception ex)
             {
                 // AAD error codes: https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
                 var errorMessage = ex.Message.Contains("AADSTS70002") // "The client does not exist or is not enabled for consumers"
@@ -138,10 +138,6 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 
                 // we want to exit here. Re-sign in will not resolve the issue.
                 _consoleLogger.LogFailureAndExit(errorMessage);
-            }
-            catch (Exception ex)
-            {
-                _consoleLogger.LogFailureAndExit(string.Join(Environment.NewLine, Resources.SignInError, ex.Message));
             }
 
             return result;

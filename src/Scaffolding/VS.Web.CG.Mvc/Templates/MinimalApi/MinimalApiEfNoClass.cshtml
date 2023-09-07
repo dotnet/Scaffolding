@@ -88,24 +88,43 @@
         @:@builderExtensions;
 }
 
-        group.MapPut("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
-        {
-            var affected = await db.@entitySetName
-                .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
-                .ExecuteUpdateAsync(setters => setters
-@{
+@if (dbProvider == "CosmosDb")
+{
+      @:group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+      @:{
+          @:var foundModel = await db.@findModel;
+
+          @:if (foundModel is null)
+          @:{
+              @:return @resultsNotFound;
+          @:}
+            
+          @:db.Update(@Model.ModelVariable);
+          @:await db.SaveChangesAsync();
+
+          @:return @resultsNoContent;
+      @:})
+}
+@if (dbProvider != "CosmosDb")
+{
+      @:group.MapPut("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+      @:{
+          @:var affected = await db.@entitySetName
+              @:.Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
+              @:.ExecuteUpdateAsync(setters => setters
     //should be atleast one property (primary key)
     foreach(var modelProperty in entityProperties)
     {
         string modelPropertyName = modelProperty.PropertyName;
         string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName})";
-                  @:@setPropertyString
+              @:@setPropertyString
     }
-}
-                );
+            @:);
 
-            return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
-        })
+            @:return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
+      @:})
+}
+
 @{
         builderExtensions = $".WithName(\"{@updateModel}\")";
         if(Model.OpenAPI)
@@ -140,14 +159,32 @@
         @:@builderExtensions;
 }
 
-        group.MapDelete("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
-        {
-            var affected = await db.@entitySetName
-                .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
-                .ExecuteDeleteAsync();
+@if (dbProvider == "CosmosDb")
+{
+        @:group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        @:{
+        @:    if (await db.@findModel is @modelName @Model.ModelVariable)
+        @:    {
+        @:        db.@remove;
+        @:        await db.SaveChangesAsync();
+        @:        return @resultsOkModelVariable;
+        @:    }
 
-            return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
-        })
+        @:    return @resultsNotFound;
+        @:})
+}
+
+@if (dbProvider != "CosmosDb")
+{
+        @:group.MapDelete("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        @:{
+        @:    var affected = await db.@entitySetName
+        @:        .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
+        @:        .ExecuteDeleteAsync();
+
+        @:    return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
+        @:})
+}
 @{
     builderExtensions = $".WithName(\"{@deleteModel}\")";
     if(Model.OpenAPI)

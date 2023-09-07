@@ -761,6 +761,15 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Permission already exists for resource {0}.
+        /// </summary>
+        internal static string PermissionExists {
+            get {
+                return ResourceManager.GetString("PermissionExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &quot;SignedOutCallbackPath&quot;: &quot;/signout/B2C_1_susi&quot;,
         ///    &quot;SignUpSignInPolicyId&quot;: &quot;b2c_1_susi&quot;,
         ///    &quot;ResetPasswordPolicyId&quot;: &quot;b2c_1_reset&quot;,

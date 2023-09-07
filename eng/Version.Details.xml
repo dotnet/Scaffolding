@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.23313.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.23408.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>59ac824080b9807fd91dbc8a6d2b4447e74874ab</Sha>
+      <Sha>3b8f3de4606c338f99e8ce85cfb6f960f6a428c8</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>43a25d8cb002d172df70e9bbaf222d718d8a253c</Sha>
+      <Sha>b11f23a1a79e2de5fb39a68b6ed330ab8a1785de</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore" Version="7.0.8">
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="7.0.11">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>43a25d8cb002d172df70e9bbaf222d718d8a253c</Sha>
+      <Sha>b11f23a1a79e2de5fb39a68b6ed330ab8a1785de</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8">
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.11">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>43a25d8cb002d172df70e9bbaf222d718d8a253c</Sha>
+      <Sha>b11f23a1a79e2de5fb39a68b6ed330ab8a1785de</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -27,9 +27,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="7.0.8">
+    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="7.0.11">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>11d3ae0996ef0eaa8b96983458699fee30b2d107</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -51,9 +51,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.8">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.11">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>11d3ae0996ef0eaa8b96983458699fee30b2d107</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Logging.Console" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -71,17 +71,17 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.8">
+    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.11">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>11d3ae0996ef0eaa8b96983458699fee30b2d107</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.8">
+    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.11">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>11d3ae0996ef0eaa8b96983458699fee30b2d107</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="7.0.8">
+    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="7.0.11">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7b0bb114cbeb320799fdcfb94a06af05b41a35f6</Sha>
+      <Sha>11d3ae0996ef0eaa8b96983458699fee30b2d107</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>

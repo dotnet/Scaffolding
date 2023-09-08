@@ -103,28 +103,28 @@ public static class @endPointsClassName
 
 @if (dbProvider == "CosmosDb")
 {
-          @:group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
-          @:{
-              @:var foundModel = await db.@findModel;
+        @:group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+        @:{
+            @:var foundModel = await db.@findModel;
 
-              @:if (foundModel is null)
-              @:{
-                  @:return @resultsNotFound;
-              @:}
+            @:if (foundModel is null)
+            @:{
+                @:return @resultsNotFound;
+            @:}
             
-              @:db.Update(@Model.ModelVariable);
-              @:await db.SaveChangesAsync();
+            @:db.Update(@Model.ModelVariable);
+            @:await db.SaveChangesAsync();
 
-              @:return @resultsNoContent;
-          @:})
+            @:return @resultsNoContent;
+        @:})
 }
 @if (dbProvider != "CosmosDb")
 {
-          @:group.MapPut("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
-            @:{
-              @:var affected = await db.@entitySetName
-                  @:.Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
-                  @:.ExecuteUpdateAsync(setters => setters
+        @:group.MapPut("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+        @:{
+            @:var affected = await db.@entitySetName
+                @:.Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
+                @:.ExecuteUpdateAsync(setters => setters
     //should be atleast one property (primary key)
     foreach(var modelProperty in entityProperties)
     {
@@ -132,12 +132,11 @@ public static class @endPointsClassName
         string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName})";
                     @:@setPropertyString
     }
-              @:);
+                    @:);
 
-              @:return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
-          @:})
+            @:return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
+        @:})
 }
-
 @{
         builderExtensions = $".WithName(\"{@updateModel}\")";
         if(Model.OpenAPI)
@@ -171,33 +170,32 @@ public static class @endPointsClassName
         }
         @:@builderExtensions;
 }
+
 @if(dbProvider == "CosmosDb")
 {
-      @:group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
-      @:{
-      @:    if (await db.@findModel is @modelName @Model.ModelVariable)
-      @:    {
-      @:        db.@remove;
-      @:        await db.SaveChangesAsync();
-      @:        return @resultsOkModelVariable;
-      @:    }
+        @:group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        @:{
+        @:    if (await db.@findModel is @modelName @Model.ModelVariable)
+        @:    {
+        @:        db.@remove;
+        @:        await db.SaveChangesAsync();
+        @:        return @resultsOkModelVariable;
+        @:    }
 
-      @:    return @resultsNotFound;
-      @:})
+        @:    return @resultsNotFound;
+        @:})
 }
-
 @if (dbProvider != "CosmosDb")
 {
-      @:group.MapDelete("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
-      @:{
-      @:    var affected = await db.@entitySetName
-      @:        .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
-      @:        .ExecuteDeleteAsync();
+        @:group.MapDelete("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        @:{
+        @:    var affected = await db.@entitySetName
+        @:        .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
+        @:        .ExecuteDeleteAsync();
 
-      @:    return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
-      @:})
+        @:    return affected == 1 ? @resultsOkEmpty : @resultsNotFound;
+        @:})
 }
-
 @{
     builderExtensions = $".WithName(\"{@deleteModel}\")";
     if(Model.OpenAPI)

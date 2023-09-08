@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph;
+using Microsoft.Graph.Models;
 using Xunit;
 
 namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [Fact]
         public void PreAuthorizeBlazorWasmClientAppTest_WhenBlazorWasmClientAppIdEmpty_ReturnFalse()
         {
-            var originalApp = new Graph.Application { Api = new Graph.ApiApplication() };
+            var originalApp = new Application { Api = new ApiApplication() };
             var toolOptions = new ProvisioningToolOptions
             {
                 BlazorWasmClientAppId = ""
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [Fact]
         public void PreAuthorizeBlazorWasmClientAppTest_WhenExistingAppHasNoPermissionScopes_ReturnFalse()
         {
-            var originalApp = new Graph.Application { Api = new Graph.ApiApplication() };
+            var originalApp = new Application { Api = new ApiApplication() };
             var toolOptions = new ProvisioningToolOptions
             {
                 BlazorWasmClientAppId = "id"
@@ -90,9 +90,9 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var clientId = "id";
             var permissionId = "permissionId";
 
-            var originalApp = new Graph.Application
+            var originalApp = new Application
             {
-                Api = new Graph.ApiApplication
+                Api = new ApiApplication
                 {
                     PreAuthorizedApplications = new List<PreAuthorizedApplication>
                     {
@@ -125,9 +125,9 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var clientId = "id";
             var permissionId = Guid.NewGuid();
 
-            var originalApp = new Graph.Application
+            var originalApp = new Application
             {
-                Api = new Graph.ApiApplication
+                Api = new ApiApplication
                 {
                     Oauth2PermissionScopes = new List<PermissionScope>
                     {
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 }
             };
 
-            var updatedApp = new Graph.Application();
+            var updatedApp = new Application();
 
             var toolOptions = new ProvisioningToolOptions
             {
@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [Fact]
         public void UpdateImplicitGrantSettingsTest_WhenBlazorWasm_SetCheckboxesTrue()
         {
-            var originalApp = new Graph.Application
+            var originalApp = new Application
             {
                 Web = new WebApplication
                 {
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         [InlineData(true, true, true, false, true)]
         public void UpdateImplicitGrantSettingsTest_SetCheckboxes(bool appAccessToken, bool toolAccessToken, bool appIdToken, bool toolIdToken, bool expected)
         {
-            var originalApp = new Graph.Application
+            var originalApp = new Application
             {
                 Web = new WebApplication
                 {

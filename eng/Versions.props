@@ -134,13 +134,13 @@
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
-    <AzureIdentityVersion>1.5.0</AzureIdentityVersion>
+    <AzureIdentityVersion>1.9.0</AzureIdentityVersion>
     <CodeAnalysisVersion>4.4.0</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>3.1.20</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.20</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
-    <MicrosoftGraphVersion>4.54.0</MicrosoftGraphVersion>
-    <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
+    <MicrosoftGraphVersion>5.25.0</MicrosoftGraphVersion>
+    <MicrosoftIdentityClientExtensionsMsalVersion>2.32.0</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.6.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>

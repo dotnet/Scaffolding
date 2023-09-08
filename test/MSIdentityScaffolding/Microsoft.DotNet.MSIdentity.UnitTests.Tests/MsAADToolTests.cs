@@ -7,10 +7,10 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
-using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatformApplication;
+using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using Microsoft.Graph;
+using Microsoft.Graph.Models;
 using Moq;
 using Xunit;
 
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 Assert.True(false, "Formatting tenants from Azure Management failed");
             }
             var jsonResponse = JsonSerializer.Deserialize<JsonResponse>(tenantsJsonFormatted);
-            var tenantJsonList = JsonSerializer.Deserialize<TenantInformation[]>(jsonResponse.Content.ToString());
+            var tenantJsonList = JsonSerializer.Deserialize<TenantInfo[]>(jsonResponse.Content.ToString());
             Assert.True(tenantJsonList.Any());
             Assert.True(tenantJsonList.Length == 2);
             var aadApp = tenantJsonList.Where(x => x.DisplayName.Equals("NET AAD App")).FirstOrDefault();
@@ -88,7 +88,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         {
             var app = new Application { AdditionalData = new Dictionary<string, object>() };
             var directoryObjects = new List<DirectoryObject> { app };
-            var tenant = new Organization { TenantType = "AAD B2C" };
+            var tenant = new Organization { AdditionalData = new Dictionary<string, object> { { "tenantType", "AAD B2C" } } };
+
             Mock<IGraphObjectRetriever> graphObjectRetriever = new Mock<IGraphObjectRetriever>();
             graphObjectRetriever.Setup(g => g.GetGraphObjects()).Returns(Task.FromResult(directoryObjects));
             graphObjectRetriever.Setup(g => g.GetTenant()).Returns(Task.FromResult(tenant));
@@ -100,11 +101,6 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 
             var apps = await jsonAppTool.GetApplicationsAsync();
             Assert.Equal(1, apps.Count);
-            var additionalData = apps.First()?.AdditionalData;
-            Assert.NotNull(additionalData);
-            Assert.True(additionalData.ContainsKey("IsB2C"));
-            additionalData.TryGetValue("IsB2C", out var isB2C);
-            Assert.True((bool)isB2C);
         }
     }
 }

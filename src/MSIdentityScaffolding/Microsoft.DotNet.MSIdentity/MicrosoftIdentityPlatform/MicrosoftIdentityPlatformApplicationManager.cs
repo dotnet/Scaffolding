@@ -81,18 +81,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                     consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
                 }
 
-                // Add the current user as a owner.
-                User? me = await graphServiceClient.Me.GetAsync();
-                var requestBody = new ReferenceCreate
-                {
-                    OdataId = $"https://graph.microsoft.com/beta/directoryObjects/{me?.Id}",
-                };
-
-                await graphServiceClient.Applications[createdApplication!.Id].Owners.Ref.PostAsync(requestBody);
+                await AddCurrentUserAsOwner(graphServiceClient, createdApplication);
 
                 // Create service principal, necessary for Web API applications
                 // and useful for Blazorwasm hosted applications. We create it always.
-                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication.AppId, consoleLogger);
+                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication!.AppId, consoleLogger);
 
                 // B2C and CIAM don't allow user consent, and therefore we need to explicitly grant permissions
                 if (applicationParameters.IsB2C || applicationParameters.IsCiam)
@@ -152,6 +145,31 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 var errorMessage = string.IsNullOrEmpty(ex.Message) ? ex.ToString() : ex.Message;
                 consoleLogger.LogFailureAndExit(errorMessage);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Attempt to add current user as owner of app registration, exception indicates the owner already exists
+        /// </summary>
+        /// <param name="graphServiceClient"></param>
+        /// <param name="createdApplication"></param>
+        /// <returns></returns>
+        internal static async Task AddCurrentUserAsOwner(GraphServiceClient graphServiceClient, Application? createdApplication)
+        {
+            try
+            {
+                // Add the current user as a owner.
+                User? me = await graphServiceClient.Me.GetAsync();
+                var requestBody = new ReferenceCreate
+                {
+                    OdataId = $"https://graph.microsoft.com/beta/directoryObjects/{me?.Id}",
+                };
+
+                await graphServiceClient.Applications[createdApplication!.Id].Owners.Ref.PostAsync(requestBody);
+            }
+            catch (Graph.Models.ODataErrors.ODataError)
+            {
+                // Owner already exists in app registration
             }
         }
 

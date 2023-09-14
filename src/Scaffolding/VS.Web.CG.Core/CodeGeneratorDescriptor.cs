@@ -79,7 +79,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException(string.Format(MessageStrings.CodeGeneratorInstanceCreationError, _codeGeneratorType.FullName, ex.Message));
+                    throw
+                        new InvalidOperationException
+                        (string.Format(MessageStrings.CodeGeneratorInstanceCreationError, _codeGeneratorType.FullName), ex);
                 }
 
                 return instance;

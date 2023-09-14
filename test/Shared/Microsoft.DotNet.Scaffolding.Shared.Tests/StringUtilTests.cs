@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             // Act and Assert
             Assert.True(input1.ContainsIgnoreCase(value1));
             Assert.False(input2.ContainsIgnoreCase(value2));
-            Assert.True(input3.ContainsIgnoreCase(value3));
+            Assert.False(input3.ContainsIgnoreCase(value3));
             Assert.False(input4.ContainsIgnoreCase(value4));
             Assert.False(input5.ContainsIgnoreCase(value5));
             Assert.True(input6.ContainsIgnoreCase(value6));

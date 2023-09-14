@@ -27,7 +27,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         /// <returns>true if lower invariants are equal, false otherwise. false for any null scenario.</returns>
         public static bool ContainsIgnoreCase(this string input, string value)
         {
-            return (input?.ToLowerInvariant().Equals(value?.ToLowerInvariant())).GetValueOrDefault();
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(value))
+            {
+                return false;
+            }
+
+            return (input?.ToLowerInvariant().Contains(value?.ToLowerInvariant())).GetValueOrDefault();
         }
     }
 }

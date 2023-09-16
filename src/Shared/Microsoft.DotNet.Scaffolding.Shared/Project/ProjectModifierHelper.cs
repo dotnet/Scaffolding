@@ -115,7 +115,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                             //change the keys from TargetFramework to $(TargetFramework) and so forth for nested variable analysis.
                             //eg. analysing <TargetFramework>$(X)</TargetFramework> and getting the value for $(X).
                             //makes for a easy string comparison without using regex and splitting.
-                            csprojVariables.TryAdd(string.Format("$({0})", elem.Name.LocalName), elem.Value);
+                            string tfmKey = string.Format("$({0})", elem.Name.LocalName);
+                            if (!csprojVariables.ContainsKey(tfmKey))
+                            {
+                                csprojVariables.Add(tfmKey, elem.Value);
+                            }
                         }
                     }
                 }
@@ -134,7 +138,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 {
                     string processedTfm = ProcessTfm(tfms.Trim(), csprojVariables);
                     //tfms should be separated by ;
-                    var splitTfms = processedTfm.Split(";");
+                    var splitTfms = processedTfm.Split(';');
                     foreach (var tfm in splitTfms)
                     {
                         if (!string.IsNullOrEmpty(tfm) && ProjectModelHelper.ShortTfmDictionary.Values.ToList().Contains(tfm, StringComparer.OrdinalIgnoreCase))
@@ -219,7 +223,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             string formattedClassName = string.Empty;
             if (!string.IsNullOrEmpty(className))
             {
-                string[] blocks = className.Split(".cs");
+                //switched to using string[] for netstandard2.0 compatibility.
+                string[] blocks = className.Split(new string[] { ".cs" }, StringSplitOptions.None);
                 if (blocks.Length > 1)
                 {
                     return blocks[0];
@@ -618,7 +623,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 {
                     foreach (var key in csprojVariables.Keys)
                     {
-                        if (tfm.Contains(key, StringComparison.OrdinalIgnoreCase) && csprojVariables.TryGetValue(key, out string val))
+                        if (tfm.ContainsIgnoreCase(key) && csprojVariables.TryGetValue(key, out string val))
                         {
                             tfm = tfm.Replace(key, val);
                         }

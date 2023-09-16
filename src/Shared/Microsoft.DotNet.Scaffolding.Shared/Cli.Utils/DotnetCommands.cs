@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
             }
 
             arguments.AddRange(additionalArgs);
-            string argumentsString = string.Join(' ', arguments);
+            string argumentsString = string.Join(" ", arguments);
             consoleLogger.LogMessage($"{MessageStrings.ExecuteDotnetNew} {argumentsString}", LogMessageLevel.Information);
             //check for minimum dotnet version
             string dotnetVersion = GetDotnetCommandVersion(consoleLogger);

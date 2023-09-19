@@ -130,9 +130,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 
         private void AddMetadataReferences(IProjectContext projectContext, ProjectId id)
         {
-            var packages = projectContext.PackageDependencies;
             var resolvedReferences = projectContext.CompilationAssemblies;
-
+            //project main itself might have types defined (broke Blazor Web App scenarios)
+            resolvedReferences = resolvedReferences.Append(new ResolvedReference(projectContext.AssemblyName, projectContext.AssemblyFullPath));
             foreach (var reference in resolvedReferences)
             {
                 var metadataRef = GetMetadataReference(reference.ResolvedPath);

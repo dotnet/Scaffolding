@@ -163,7 +163,7 @@
     <value>Authentication is not enabled yet in this project. An app registration will be created, but the tool does not add the code yet (work in progress).</value>
   </data>
   <data name="ClientDoesNotExist" xml:space="preserve">
-    <value>An Azure AD tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant.</value>
+    <value>A Microsoft identity platform tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant.</value>
   </data>
   <data name="ClientSecret" xml:space="preserve">
     <value>Client secret - {0}.</value>
@@ -250,13 +250,14 @@
     <value>Failed to add client secret.</value>
   </data>
   <data name="FailedClientSecretWithApp" xml:space="preserve">
-    <value>Failed to add client secret for Azure AD app : {0}({1})</value>
+    <value>Failed to add client secret for app registration : {0}({1})</value>
+    <comment>0: Display Name, 1: Client ID</comment>
   </data>
   <data name="FailedToAcquireToken" xml:space="preserve">
     <value>Failed to acquire a token.</value>
   </data>
   <data name="FailedToCreateApp" xml:space="preserve">
-    <value>Failed to create Azure AD/AD B2C app registration.</value>
+    <value>Failed to create remote app registration.</value>
   </data>
   <data name="FailedToGetServicePrincipal" xml:space="preserve">
     <value>Failed to get or create service principal.</value>
@@ -269,18 +270,18 @@
     <value>Failed to provision Client Application for Blazor WASM hosted project</value>
   </data>
   <data name="FailedToRetrieveADObjectsError" xml:space="preserve">
-    <value>Failed to retrieve all Azure AD/AD B2C objects (apps/service principals), exception: {0}</value>
+    <value>Failed to retrieve all graph objects (apps/service principals), exception: {0}</value>
     <comment>0 = error message</comment>
   </data>
   <data name="FailedToRetrieveApplicationParameters" xml:space="preserve">
     <value>Failed to retrieve application parameters.</value>
   </data>
   <data name="FailedToUpdateApp" xml:space="preserve">
-    <value>Failed to update Azure AD app registration {0} ({1})</value>
+    <value>Failed to update remote app registration {0} ({1})</value>
     <comment>0 = Display Name, 1 = App Id</comment>
   </data>
   <data name="FailedToUpdateAppNull" xml:space="preserve">
-    <value>Failed to update Azure AD app, null {0}</value>
+    <value>Failed to update remote app registration, null {0}</value>
     <comment>0 = null object</comment>
   </data>
   <data name="FailedToUpdateClientAppCode" xml:space="preserve">
@@ -308,11 +309,11 @@
     <value>No project found in {0}.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
-    <value>Could not find app registration with matching ID in Azure AD (ID: {0})</value>
+    <value>Could not find app registration with matching ID (ID: {0})</value>
     <comment>0 = App Id</comment>
   </data>
   <data name="NoUpdateNecessary" xml:space="preserve">
-    <value>Azure AD app {0} ({1}) did not require any remote updates</value>
+    <value>App registration {0} ({1}) did not require any remote updates</value>
     <comment>0 = Display Name, 1 = App Id</comment>
   </data>
   <data name="PermissionExists" xml:space="preserve">

@@ -321,7 +321,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An Azure AD tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant..
+        ///   Looks up a localized string similar to A Microsoft identity platform tenant, and a user in that tenant, needs to be created for this account before an application can be created. See https://aka.ms/ms-identity-app/create-a-tenant..
         /// </summary>
         internal static string ClientDoesNotExist {
             get {
@@ -590,7 +590,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to add client secret for Azure AD app : {0}({1}).
+        ///   Looks up a localized string similar to Failed to add client secret for app registration : {0}({1}).
         /// </summary>
         internal static string FailedClientSecretWithApp {
             get {
@@ -608,7 +608,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to create Azure AD/AD B2C app registration..
+        ///   Looks up a localized string similar to Failed to create remote app registration..
         /// </summary>
         internal static string FailedToCreateApp {
             get {
@@ -644,7 +644,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to retrieve all Azure AD/AD B2C objects (apps/service principals), exception: {0}.
+        ///   Looks up a localized string similar to Failed to retrieve all graph objects (apps/service principals), exception: {0}.
         /// </summary>
         internal static string FailedToRetrieveADObjectsError {
             get {
@@ -662,7 +662,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to update Azure AD app registration {0} ({1}).
+        ///   Looks up a localized string similar to Failed to update remote app registration {0} ({1}).
         /// </summary>
         internal static string FailedToUpdateApp {
             get {
@@ -671,7 +671,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to update Azure AD app, null {0}.
+        ///   Looks up a localized string similar to Failed to update remote app registration, null {0}.
         /// </summary>
         internal static string FailedToUpdateAppNull {
             get {
@@ -743,7 +743,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not find app registration with matching ID in Azure AD (ID: {0}).
+        ///   Looks up a localized string similar to Could not find app registration with matching ID (ID: {0}).
         /// </summary>
         internal static string NotFound {
             get {
@@ -752,7 +752,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Azure AD app {0} ({1}) did not require any remote updates.
+        ///   Looks up a localized string similar to App registration {0} ({1}) did not require any remote updates.
         /// </summary>
         internal static string NoUpdateNecessary {
             get {

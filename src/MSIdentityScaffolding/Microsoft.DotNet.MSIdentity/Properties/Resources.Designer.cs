@@ -109,7 +109,8 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         ///    &lt;NotAuthorized&gt;
         ///        &lt;a href=&quot;authentication/login&quot;&gt;Log in&lt;/a&gt;
         ///    &lt;/NotAuthorized&gt;
-        ///&lt;/AuthorizeView&gt;        /// [rest of string was truncated]&quot;;.
+        ///&lt;/AuthorizeView&gt;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string add_blazorwasm_LoginDisplay_razor {
             get {
@@ -743,7 +744,7 @@ namespace Microsoft.DotNet.MSIdentity.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not find app registration with matching ID (ID: {0}).
+        ///   Looks up a localized string similar to Could not find an app registration with matching ID (ID: {0}).
         /// </summary>
         internal static string NotFound {
             get {

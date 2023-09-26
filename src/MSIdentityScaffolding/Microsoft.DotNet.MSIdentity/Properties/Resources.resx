@@ -309,7 +309,7 @@
     <value>No project found in {0}.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
-    <value>Could not find app registration with matching ID (ID: {0})</value>
+    <value>Could not find an app registration with matching ID (ID: {0})</value>
     <comment>0 = App Id</comment>
   </data>
   <data name="NoUpdateNecessary" xml:space="preserve">

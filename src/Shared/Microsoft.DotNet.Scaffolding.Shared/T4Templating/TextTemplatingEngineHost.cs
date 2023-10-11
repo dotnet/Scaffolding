@@ -11,18 +11,17 @@ using Microsoft.VisualStudio.TextTemplating;
 namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
 {
     /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+    /// Enables callers to obtain an object denoting the current session.
+    /// A session represents series of executions of text templates.
+    /// The session object can be used to pass information from the host into the code of the text template.
     /// </summary>
     public class TextTemplatingEngineHost : ITextTemplatingSessionHost, ITextTemplatingEngineHost, IServiceProvider
     {
         private static readonly List<string> _noWarn = new List<string>()
-    {
-        "CS1701",
-        "CS1702"
-    };
+        {
+            "CS1701",
+            "CS1702"
+        };
 
         private readonly IServiceProvider _serviceProvider;
         private ITextTemplatingSession _session;
@@ -205,7 +204,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
             {
             }
 
-            // TODO: Expand variables?
             return assemblyReference;
         }
 

@@ -18,6 +18,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(CodeAnalysisVersion)" />
     <PackageReference Include="Humanizer" Version="$(HumanizerPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
+    <PackageReference Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

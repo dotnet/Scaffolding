@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
     /// </summary>
     public class TemplateInvoker : ITemplateInvoker
     {
-
         private readonly ConsoleLogger _consoleLogger;
         /// <summary>
         /// Constructor.
@@ -34,6 +33,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
         /// </returns>
         public string InvokeTemplate(ITextTransformation template, IDictionary<string, object> templateParameters)
         {
+            templateParameters ??= new Dictionary<string, object>();
             foreach (var param in templateParameters)
             {
                 template.Session.Add(param.Key, param.Value);
@@ -51,19 +51,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
         private string ProcessTemplate(ITextTransformation transformation)
         {
             var output = transformation.TransformText();
-
-            foreach (CompilerError error in transformation.Errors)
-            {
-                _consoleLogger.LogMessage(error.ErrorText, LogMessageLevel.Error);
-            }
-
             if (transformation.Errors.HasErrors)
             {
+                foreach (CompilerError error in transformation.Errors)
+                {
+                    _consoleLogger.LogMessage(error.ErrorText, LogMessageLevel.Error);
+                }
+
                 throw new InvalidOperationException($"Processing '{transformation.GetType().Name}' failed");
             }
 
             return output;
         }
-
     }
 }

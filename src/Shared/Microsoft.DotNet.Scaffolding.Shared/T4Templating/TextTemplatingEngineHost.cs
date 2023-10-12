@@ -56,10 +56,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
             => _extension ?? ".cs";
 
         public virtual CompilerErrorCollection Errors
-            => _errors ?? new CompilerErrorCollection();
+            => _errors ??= new CompilerErrorCollection();
 
         public virtual Encoding OutputEncoding
-            => _outputEncoding ?? Encoding.UTF8;
+            => _outputEncoding ??= Encoding.UTF8;
 
         public virtual void Initialize()
         {

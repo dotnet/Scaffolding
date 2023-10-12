@@ -1,6 +1,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
 {
@@ -33,10 +34,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
         /// </returns>
         public string InvokeTemplate(ITextTransformation template, IDictionary<string, object> templateParameters)
         {
-            templateParameters ??= new Dictionary<string, object>();
-            foreach (var param in templateParameters)
+            if (templateParameters is not null && templateParameters.Any())
             {
-                template.Session.Add(param.Key, param.Value);
+                foreach (var param in templateParameters)
+                {
+                    template.Session.Add(param.Key, param.Value);
+                }
             }
 
             string generatedCode = string.Empty;

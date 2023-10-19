@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -60,10 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// </summary>
         public static string GetSafeNameSpaceFromPath(string path, string namespacePrefix = null)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            ArgumentNullException.ThrowIfNull(path);
 
             var namespaceName = path.Replace(Path.DirectorySeparatorChar, '.');
             if (!string.IsNullOrEmpty(namespacePrefix))

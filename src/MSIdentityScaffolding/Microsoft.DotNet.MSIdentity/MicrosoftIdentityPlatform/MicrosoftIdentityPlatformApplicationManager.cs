@@ -284,23 +284,19 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             (bool needsUpdates, Application appUpdates) = GetApplicationUpdates(remoteApp, toolOptions, parameters);
             output ??= new StringBuilder();
-
-            if (!string.IsNullOrEmpty(toolOptions.ApiScopes)) // authorizing downstream API
+            // authorizing downstream API
+            if (!string.IsNullOrEmpty(toolOptions.ApiScopes))
             {
                 IEnumerable<IGrouping<string, ResourceAndScope>>? scopesPerResource = await AddApiPermissions(
                     toolOptions.ApiScopes,
                     graphServiceClient,
                     remoteApp);
 
-                //B2C and CIAM don't allow user consent, and therefore we need to explicitly grant permissions
-                if (parameters.IsB2C || parameters.IsCiam)
-                {
-                    ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
-                    await AddAdminConsentToApiPermissions(
-                        graphServiceClient,
-                        servicePrincipal,
-                        scopesPerResource);
-                }
+                ServicePrincipal? servicePrincipal = await GetOrCreateSP(graphServiceClient, parameters.ClientId, consoleLogger);
+                await AddAdminConsentToApiPermissions(
+                    graphServiceClient,
+                    servicePrincipal,
+                    scopesPerResource);
 
                 needsUpdates = true;
             }

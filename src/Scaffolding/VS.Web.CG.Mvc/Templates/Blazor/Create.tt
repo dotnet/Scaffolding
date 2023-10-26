@@ -2,16 +2,24 @@
 <#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
 <#
     string modelName = Model.ModelType.Name;
     string pluralModel = Model.ModelType.PluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextName = Model.ContextTypeName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/create"
-@inject BlazorMovieContext DB
+@inject <#=dbContextName #> DB
 @inject NavigationManager NavigationManager
+<#
+    if (!string.IsNullOrEmpty(Model.Namespace))
+    {
+        #>@using <#= Model.Namespace #>
+<#  }
+#>
 
 <PageTitle>Create</PageTitle>
 
@@ -24,27 +32,21 @@
         <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Add<#= modelName #>" FormName="create">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
-            <div class="mb-3">
-                <label for="title" class="form-label">Title:</label>
-                <InputText id="title" @bind-Value="Movie.Title" class="form-control" />
-                <ValidationMessage For="() => Movie.Title" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="release-date" class="form-label">Release date:</label>
-                <InputDate id="release-date" @bind-Value="Movie.ReleaseDate" class="form-control" />
-                <ValidationMessage For="() => Movie.ReleaseDate" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="genre" class="form-label">Genre:</label>
-                <InputText id="genre" @bind-Value="Movie.Genre" class="form-control" />
-                <ValidationMessage For="() => Movie.Genre" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="price" class="form-label">Price:</label>
-                <InputNumber id="price" @bind-Value="Movie.Price" min="0" step="0.01" class="form-control" />
-                <ValidationMessage For="() => Movie.Price" class="text-danger" />
-            </div>
-            <button type="submit" class="btn btn-primary">Create</button>
+            <#
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
+            #>
+<div class="mb-3">
+                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="form-control" /> 
+                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
+            </div>        
+            <#  } #>
+<button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
 </div>
@@ -61,7 +63,7 @@
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
     public async Task Add<#= modelName #>()
     {
-        DB.Movie.Add(<#= modelName #>);
+        DB.<#= Model.ModelMetadata.EntitySetName #>.Add(<#= modelName #>);
         await DB.SaveChangesAsync();
         NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
     }

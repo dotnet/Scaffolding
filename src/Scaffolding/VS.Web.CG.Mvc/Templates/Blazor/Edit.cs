@@ -9,70 +9,233 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
-    
-    #line 1 "D:\scaffolding-temp\scaffolding\src\Scaffolding\VS.Web.CG.Mvc\Templates\Blazor\Edit.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class Edit : EditBase
     {
-#line hidden
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@page \"/movies/edit\"\r\n@inject BlazorMovieContext DB\r\n@inject NavigationManager Na" +
-                    "vigationManager\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>Movie</h4" +
-                    ">\r\n<hr />\r\n@if (Movie is null)\r\n{\r\n    <p><em>Loading...</em></p>\r\n}\r\nelse\r\n{\r\n " +
-                    "   <div class=\"row\">\r\n        <div class=\"col-md-4\">\r\n            <EditForm meth" +
-                    "od=\"post\" Model=\"Movie\" OnValidSubmit=\"UpdateMovie\" FormName=\"edit\">\r\n          " +
-                    "      <DataAnnotationsValidator />\r\n                <ValidationSummary />\r\n     " +
-                    "           <input type=\"hidden\" name=\"Movie.Id\" value=\"@Movie.Id\" />\r\n          " +
-                    "      <div class=\"mb-3\">\r\n                    <label for=\"title\" class=\"form-lab" +
-                    "el\">Title:</label>\r\n                    <InputText id=\"title\" @bind-Value=\"Movie" +
-                    ".Title\" class=\"form-control\" />\r\n                    <ValidationMessage For=\"() " +
-                    "=> Movie.Title\" class=\"text-danger\" />\r\n                </div>\r\n                " +
-                    "<div class=\"mb-3\">\r\n                    <label for=\"release-date\" class=\"form-la" +
-                    "bel\">Release date:</label>\r\n                    <InputDate id=\"release-date\" @bi" +
-                    "nd-Value=\"Movie.ReleaseDate\" class=\"form-control\" />\r\n                    <Valid" +
-                    "ationMessage For=\"() => Movie.ReleaseDate\" class=\"text-danger\" />\r\n             " +
-                    "   </div>\r\n                <div class=\"mb-3\">\r\n                    <label for=\"g" +
-                    "enre\" class=\"form-label\">Genre:</label>\r\n                    <InputText id=\"genr" +
-                    "e\" @bind-Value=\"Movie.Genre\" class=\"form-control\" />\r\n                    <Valid" +
-                    "ationMessage For=\"() => Movie.Genre\" class=\"text-danger\" />\r\n                </d" +
-                    "iv>\r\n                <div class=\"mb-3\">\r\n                    <label for=\"price\" " +
-                    "class=\"form-label\">Price:</label>\r\n                    <InputNumber id=\"price\" @" +
-                    "bind-Value=\"Movie.Price\" min=\"0\" step=\"0.01\" class=\"form-control\" />\r\n          " +
-                    "          <ValidationMessage For=\"() => Movie.Price\" class=\"text-danger\" />\r\n   " +
-                    "             </div>\r\n                <button type=\"submit\" class=\"btn btn-primar" +
-                    "y\">Save</button>\r\n            </EditForm>\r\n        </div>\r\n    </div>\r\n}\r\n\r\n<div" +
-                    ">\r\n    <a href=\"/movies\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParamet" +
-                    "erFromQuery]\r\n    public int Id { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n" +
-                    "    public Movie? Movie { get; set; }\r\n\r\n    protected override async Task OnIni" +
-                    "tializedAsync()\r\n    {\r\n        Movie ??= await DB.Movie.FirstOrDefaultAsync(m =" +
-                    "> m.Id == Id);\r\n\r\n        if (Movie is null)\r\n        {\r\n            // Need a w" +
-                    "ay to trigger a 404 here\r\n            // https://github.com/dotnet/aspnetcore/is" +
-                    "sues/45654\r\n        }\r\n    }\r\n\r\n    // To protect from overposting attacks, enab" +
-                    "le the specific properties you want to bind to.\r\n    // For more details, see ht" +
-                    "tps://aka.ms/RazorPagesCRUD.\r\n    public async Task UpdateMovie()\r\n    {\r\n      " +
-                    "  DB.Attach(Movie!).State = EntityState.Modified;\r\n\r\n        try\r\n        {\r\n   " +
-                    "         await DB.SaveChangesAsync();\r\n        }\r\n        catch (DbUpdateConcurr" +
-                    "encyException)\r\n        {\r\n            if (!MovieExists(Movie!.Id))\r\n           " +
-                    " {\r\n                // Need a way to trigger a 404 here\r\n                // http" +
-                    "s://github.com/dotnet/aspnetcore/issues/45654\r\n            }\r\n            else\r\n" +
-                    "            {\r\n                throw;\r\n            }\r\n        }\r\n\r\n        Navig" +
-                    "ationManager.NavigateTo(\"/movies\");\r\n    }\r\n\r\n    bool MovieExists(int id)\r\n    " +
-                    "{\r\n        return DB.Movie.Any(e => e.Id == id);\r\n    }\r\n}\r\n");
-            return this.GenerationEnvironment.ToString();
+
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextName = Model.ContextTypeName;
+    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string entitySetName = Model.ModelMetadata.EntitySetName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+
+            this.Write("@page \"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
+            this.Write("/edit\"\r\n@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(" DB\r\n@inject NavigationManager NavigationManager\r\n@using Microsoft.EntityFramewor" +
+                    "kCore\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("</h4>\r\n<hr />\r\n@if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" is null)\r\n{\r\n    <p><em>Loading...</em></p>\r\n}\r\nelse\r\n{\r\n    <div class=\"row\">\r\n" +
+                    "        <div class=\"col-md-4\">\r\n            <EditForm method=\"post\" Model=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("\" OnValidSubmit=\"Update");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("\" FormName=\"edit\">\r\n                <DataAnnotationsValidator />\r\n               " +
+                    " <ValidationSummary />\r\n                <input type=\"hidden\" name=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("\" value=\"@");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("\" />\r\n");
+
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
+
+            this.Write("                <div class=\"mb-3\">\r\n                    <label for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+            this.Write("\" class=\"form-label\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write(":</label>\r\n                    <");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
+            this.Write(" id=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+            this.Write("\" @bind-Value=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"form-control\" />\r\n                    <ValidationMessage For=\"() => ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"text-danger\" />\r\n                </div>\r\n");
+  } 
+            this.Write("                <button type=\"submit\" class=\"btn btn-primary\">Save</button>\r\n    " +
+                    "        </EditForm>\r\n        </div>\r\n    </div>\r\n}\r\n\r\n<div>\r\n    <a href=\"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromQuery]\r\n    public" +
+                    " ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    public ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
+                    "        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" ??= await DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
+            this.Write(".FirstOrDefaultAsync(m => m.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(");\r\n\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(@" is null)
+        {
+            // Need a way to trigger a 404 here
+            // https://github.com/dotnet/aspnetcore/issues/45654
         }
     }
-    
-    #line default
-    #line hidden
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task Update");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("()\r\n    {\r\n        DB.Attach(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("!).State = EntityState.Modified;\r\n\r\n        try\r\n        {\r\n            await DB." +
+                    "SaveChangesAsync();\r\n        }\r\n        catch (DbUpdateConcurrencyException)\r\n  " +
+                    "      {\r\n            if (!");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("Exists(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("!.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(@"))
+            {
+                // Need a way to trigger a 404 here
+                // https://github.com/dotnet/aspnetcore/issues/45654
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo(""/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\");\r\n    }\r\n\r\n    bool ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("Exists(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(")\r\n    {\r\n        return DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
+            this.Write(".Any(e => e.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(");\r\n    }\r\n}\r\n");
+            return this.GenerationEnvironment.ToString();
+        }
+        private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
+        /// <summary>
+        /// The current host for the text templating engine
+        /// </summary>
+        public virtual global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost Host
+        {
+            get
+            {
+                return this.hostValue;
+            }
+            set
+            {
+                this.hostValue = value;
+            }
+        }
+
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel _ModelField;
+
+/// <summary>
+/// Access the Model parameter of the template.
+/// </summary>
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel Model
+{
+    get
+    {
+        return this._ModelField;
+    }
+}
+
+
+/// <summary>
+/// Initialize the template
+/// </summary>
+public virtual void Initialize()
+{
+    if ((this.Errors.HasErrors == false))
+    {
+bool ModelValueAcquired = false;
+if (this.Session.ContainsKey("Model"))
+{
+    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(this.Session["Model"]));
+    ModelValueAcquired = true;
+}
+if ((ModelValueAcquired == false))
+{
+    string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
+    if ((string.IsNullOrEmpty(parameterValue) == false))
+    {
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel));
+        if (((tc != null) 
+                    && tc.CanConvertFrom(typeof(string))))
+        {
+            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(tc.ConvertFrom(parameterValue)));
+            ModelValueAcquired = true;
+        }
+        else
+        {
+            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
+                    "e parameter \'Model\' did not match the type of the data passed to the template.");
+        }
+    }
+}
+if ((ModelValueAcquired == false))
+{
+    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    if ((data != null))
+    {
+        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
+    }
+}
+
+
+    }
+}
+
+
+    }
     #region Base class
     /// <summary>
     /// Base class for this transformation

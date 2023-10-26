@@ -19,14 +19,9 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
-using System.Text.Json;
-using NuGet.Versioning;
 using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
-using Microsoft.Extensions.DependencyInjection;
-using Mono.TextTemplating;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -100,7 +95,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var templateModel = new BlazorModel(modelTypeAndContextModel.ModelType, modelTypeAndContextModel.DbContextFullName)
             {
-                Namespace = model.Namespace,
+                Namespace = modelTypeAndContextModel.ModelType.Namespace,
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata,
                 DatabaseProvider = model.DatabaseProvider,
                 Template = model.TemplateName
@@ -124,12 +119,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             foreach (var templatePath in fullTemplatePaths)
             {
                 ITextTransformation contextTemplate = GetBlazorTransformation(templatePath);
+                var t4TemplateName = Path.GetFileNameWithoutExtension(templatePath);
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
                 {
-                    string templatedFilePath = ValidateAndGetOutputPath(templateModel.ModelTypeName, templateModel.Template);
-                    FileSystem.WriteAllText(templatePath, templatedString);
-                    Logger.LogMessage($"Added Razor Page : {templatePath}");
+                    string templatedFilePath = ValidateAndGetOutputPath(templateModel.ModelTypeName, t4TemplateName);
+                    var folderName = Path.GetDirectoryName(templatedFilePath);
+                    if (!Directory.Exists(folderName))
+                    {
+                        Directory.CreateDirectory(folderName);
+                    }
+
+                    FileSystem.WriteAllText(templatedFilePath, templatedString);
+                    Logger.LogMessage($"Added Blazor Page : {templatedFilePath}");
                 }
             }
         }
@@ -154,14 +156,38 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     Session = host.CreateSession()
                 };
             }
-/*            else if (templatePath.EndsWith("Delete.tt"))
+            else if (templatePath.EndsWith("Index.tt"))
+            {
+                return new Templates.Blazor.Index()
+                {
+                    Host = host,
+                    Session = host.CreateSession()
+                };
+            }
+            else if (templatePath.EndsWith("Delete.tt"))
             {
                 return new Delete()
                 {
                     Host = host,
                     Session = host.CreateSession()
                 };
-            }*/
+            }
+            else if (templatePath.EndsWith("Edit.tt"))
+            {
+                return new Edit()
+                {
+                    Host = host,
+                    Session = host.CreateSession()
+                };
+            }
+            else if (templatePath.EndsWith("Details.tt"))
+            {
+                return new Details()
+                {
+                    Host = host,
+                    Session = host.CreateSession()
+                };
+            }
 
             return null;
         }
@@ -189,9 +215,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal string ValidateAndGetOutputPath(string modelName, string templateName, string relativeFolderPath = null)
         {
-            string outputFileName =  $"{modelName}\\{templateName}.{Constants.BlazorExtension}";
+            string outputFileName =  $"{modelName}Pages\\{templateName}{Constants.BlazorExtension}";
             string outputFolder = string.IsNullOrEmpty(relativeFolderPath)
-                ? AppInfo.ApplicationBasePath
+                ? Path.Combine(AppInfo.ApplicationBasePath, "Components", "Pages")
                 : Path.Combine(AppInfo.ApplicationBasePath, relativeFolderPath);
 
             var outputPath = Path.Combine(outputFolder, outputFileName);

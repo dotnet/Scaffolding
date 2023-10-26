@@ -9,78 +9,167 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
-    
-    #line 1 "D:\scaffolding-temp\scaffolding\src\Scaffolding\VS.Web.CG.Mvc\Templates\Blazor\Details.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class Details : DetailsBase
     {
-#line hidden
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"@page ""/movies/details""
-@inject BlazorMovieContext DB
 
-<PageTitle>Details</PageTitle>
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextName = Model.ContextTypeName;
+    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string entitySetName = Model.ModelMetadata.EntitySetName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 
-<h1>Details</h1>
-
-<div>
-    <h4>Movie</h4>
-    <hr />
-    @if (movie is null)
+            this.Write("@page \"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/details\"\r\n@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(" DB\r\n@using Microsoft.EntityFrameworkCore\r\n\r\n<PageTitle>Details</PageTitle>\r\n\r\n<h" +
+                    "1>Details</h1>\r\n\r\n<div>\r\n    <h4>");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("</h4>\r\n    <hr />\r\n    @if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" is null)\r\n    {\r\n        <p><em>Loading...</em></p>\r\n    }\r\n    else {\r\n        " +
+                    "<dl class=\"row\">\r\n");
+  foreach (var property in entityProperties)
     {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class=""row"">
-            <dt class=""col-sm-2"">Title</dt>
-            <dd class=""col-sm-10"">@movie.Title</dd>
-            <dt class=""col-sm-2"">Release date</dt>
-            <dd class=""col-sm-10"">@movie.ReleaseDate</dd>
-            <dt class=""col-sm-2"">Genre</dt>
-            <dd class=""col-sm-10"">@movie.Genre</dd>
-            <dt class=""col-sm-2"">Price</dt>
-            <dd class=""col-sm-10"">@movie.Price</dd>
-        </dl>
-        <div>
-            <a href=""@($""/movies/edit?id={movie.Id}"")"">Edit</a> |
-            <a href=""@($""/movies"")"">Back to List</a>
-        </div>
-    }
-</div>
+        string modelPropertyName = property.PropertyName;
 
-@code {
-    Movie? movie;
-
-    [SupplyParameterFromQuery]
-    public int Id { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        movie = await DB.Movie.FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (movie is null)
+            this.Write("            <dt class=\"col-sm-2\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("</dt>\r\n            <dd class=\"col-sm-10\">@");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("</dd>\r\n");
+  } 
+            this.Write("        </dl>\r\n        <div>\r\n            <a href=\"@($\"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/edit?");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("={");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("}\")\">Edit</a> |\r\n            <a href=\"@($\"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\")\">Back to List</a>\r\n        </div>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    public ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
+                    "        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" = await DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
+            this.Write(".FirstOrDefaultAsync(m => m.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(");\r\n\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" is null)\r\n        {\r\n            // Need a way to trigger a 404 here\r\n          " +
+                    "  // https://github.com/dotnet/aspnetcore/issues/45654\r\n        }\r\n    }\r\n}\r\n");
+            return this.GenerationEnvironment.ToString();
+        }
+        private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
+        /// <summary>
+        /// The current host for the text templating engine
+        /// </summary>
+        public virtual global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost Host
         {
-            // Need a way to trigger a 404 here
-            // https://github.com/dotnet/aspnetcore/issues/45654
+            get
+            {
+                return this.hostValue;
+            }
+            set
+            {
+                this.hostValue = value;
+            }
+        }
+
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel _ModelField;
+
+/// <summary>
+/// Access the Model parameter of the template.
+/// </summary>
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel Model
+{
+    get
+    {
+        return this._ModelField;
+    }
+}
+
+
+/// <summary>
+/// Initialize the template
+/// </summary>
+public virtual void Initialize()
+{
+    if ((this.Errors.HasErrors == false))
+    {
+bool ModelValueAcquired = false;
+if (this.Session.ContainsKey("Model"))
+{
+    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(this.Session["Model"]));
+    ModelValueAcquired = true;
+}
+if ((ModelValueAcquired == false))
+{
+    string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
+    if ((string.IsNullOrEmpty(parameterValue) == false))
+    {
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel));
+        if (((tc != null) 
+                    && tc.CanConvertFrom(typeof(string))))
+        {
+            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(tc.ConvertFrom(parameterValue)));
+            ModelValueAcquired = true;
+        }
+        else
+        {
+            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
+                    "e parameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
-");
-            return this.GenerationEnvironment.ToString();
-        }
+if ((ModelValueAcquired == false))
+{
+    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    if ((data != null))
+    {
+        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
     }
-    
-    #line default
-    #line hidden
+}
+
+
+    }
+}
+
+
+    }
     #region Base class
     /// <summary>
     /// Base class for this transformation

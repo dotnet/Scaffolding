@@ -9,49 +9,177 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
-    
-    #line 1 "D:\scaffolding-temp\scaffolding\src\Scaffolding\VS.Web.CG.Mvc\Templates\Blazor\Delete.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class Delete : DeleteBase
     {
-#line hidden
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@page \"/movies/delete\"\r\n@inject BlazorMovieContext DB\r\n@inject NavigationManager " +
-                    "NavigationManager\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r\n<h1>Delete</h1>\r\n\r\n<h3>Are" +
-                    " you sure you want to delete this?</h3>\r\n<div>\r\n    <h4>Movie</h4>\r\n    <hr />\r\n" +
-                    "    @if (movie is null)\r\n    {\r\n        <p><em>Loading...</em></p>\r\n    }\r\n    e" +
-                    "lse {\r\n        <dl class=\"row\">\r\n            <dt class=\"col-sm-2\">Title</dt>\r\n  " +
-                    "          <dd class=\"col-sm-10\">@movie.Title</dd>\r\n            <dt class=\"col-sm" +
-                    "-2\">Release date</dt>\r\n            <dd class=\"col-sm-10\">@movie.ReleaseDate</dd>" +
-                    "\r\n            <dt class=\"col-sm-2\">Genre</dt>\r\n            <dd class=\"col-sm-10\"" +
-                    ">@movie.Genre</dd>\r\n            <dt class=\"col-sm-2\">Price</dt>\r\n            <dd" +
-                    " class=\"col-sm-10\">@movie.Price</dd>\r\n        </dl>\r\n\r\n        <EditForm method=" +
-                    "\"post\" Model=\"movie\" OnValidSubmit=\"DeleteMovie\" FormName=\"delete\">\r\n           " +
-                    " <button type=\"submit\" class=\"btn btn-danger\" disabled=\"@(movie is null)\">Delete" +
-                    "</button> |\r\n            <a href=\"/movies\">Back to List</a>\r\n        </EditForm>" +
-                    "\r\n    }\r\n</div>\r\n\r\n@code {\r\n    Movie? movie;\r\n\r\n    [SupplyParameterFromQuery]\r" +
-                    "\n    public int? Id { get; set; }\r\n\r\n    protected override async Task OnInitial" +
-                    "izedAsync()\r\n    {\r\n        movie = await DB.Movie.FirstOrDefaultAsync(m => m.Id" +
-                    " == Id);\r\n\r\n        if (movie is null)\r\n        {\r\n            // Need a way to " +
-                    "trigger a 404 here\r\n            // https://github.com/dotnet/aspnetcore/issues/4" +
-                    "5654\r\n        }\r\n    }\r\n\r\n    public async Task DeleteMovie()\r\n    {\r\n        DB" +
-                    ".Movie.Remove(movie!);\r\n        await DB.SaveChangesAsync();\r\n        Navigation" +
-                    "Manager.NavigateTo(\"/movies\");\r\n    }\r\n}\r\n");
+
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextName = Model.ContextTypeName;
+    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string entitySetName = Model.ModelMetadata.EntitySetName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+
+            this.Write("@page \"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/delete\"\r\n@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(" DB\r\n@inject NavigationManager NavigationManager\r\n@using Microsoft.EntityFramewor" +
+                    "kCore\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r\n<h1>Delete</h1>\r\n\r\n<h3>Are you sure yo" +
+                    "u want to delete this?</h3>\r\n<div>\r\n    <h4>");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("</h4>\r\n    <hr />\r\n    @if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" is null)\r\n    {\r\n        <p><em>Loading...</em></p>\r\n    }\r\n    else {\r\n");
+
+        foreach (var property in entityProperties)
+        {
+            string modelPropertyName = property.PropertyName;
+    
+            this.Write("        <dl class=\"row\">\r\n            <dt class=\"col-sm-2\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("</dt>\r\n            <dd class=\"col-sm-10\">@");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("</dd>\r\n        </dl>\r\n");
+  } 
+            this.Write("        <EditForm method=\"post\" Model=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write("\" OnValidSubmit=\"Delete");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("\" FormName=\"delete\">\r\n            <button type=\"submit\" class=\"btn btn-danger\" di" +
+                    "sabled=\"@(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" is null)\">Delete</button> |\r\n            <a href=\"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\">Back to List</a>\r\n        </EditForm>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    public ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
+                    "        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" = await DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
+            this.Write(".FirstOrDefaultAsync(m => m.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(");\r\n\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" is null)\r\n        {\r\n            // Need a way to trigger a 404 here\r\n          " +
+                    "  // https://github.com/dotnet/aspnetcore/issues/45654\r\n        }\r\n    }\r\n\r\n    " +
+                    "public async Task Delete");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("()\r\n    {\r\n        DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
+            this.Write(".Remove(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write("!);\r\n        await DB.SaveChangesAsync();\r\n        NavigationManager.NavigateTo(\"" +
+                    "/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
+        private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
+        /// <summary>
+        /// The current host for the text templating engine
+        /// </summary>
+        public virtual global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost Host
+        {
+            get
+            {
+                return this.hostValue;
+            }
+            set
+            {
+                this.hostValue = value;
+            }
+        }
+
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel _ModelField;
+
+/// <summary>
+/// Access the Model parameter of the template.
+/// </summary>
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel Model
+{
+    get
+    {
+        return this._ModelField;
     }
-    
-    #line default
-    #line hidden
+}
+
+
+/// <summary>
+/// Initialize the template
+/// </summary>
+public virtual void Initialize()
+{
+    if ((this.Errors.HasErrors == false))
+    {
+bool ModelValueAcquired = false;
+if (this.Session.ContainsKey("Model"))
+{
+    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(this.Session["Model"]));
+    ModelValueAcquired = true;
+}
+if ((ModelValueAcquired == false))
+{
+    string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
+    if ((string.IsNullOrEmpty(parameterValue) == false))
+    {
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel));
+        if (((tc != null) 
+                    && tc.CanConvertFrom(typeof(string))))
+        {
+            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(tc.ConvertFrom(parameterValue)));
+            ModelValueAcquired = true;
+        }
+        else
+        {
+            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
+                    "e parameter \'Model\' did not match the type of the data passed to the template.");
+        }
+    }
+}
+if ((ModelValueAcquired == false))
+{
+    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    if ((data != null))
+    {
+        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
+    }
+}
+
+
+    }
+}
+
+
+    }
     #region Base class
     /// <summary>
     /// Base class for this transformation

@@ -108,9 +108,17 @@
   <ItemGroup>
     <None Remove="Blazor\blazorWebCrudChanges.json" />
     <None Remove="Minimal Api\minimalApiChanges.json" />
+    <None Remove="Templates\Blazor\Delete.Interfaces.cs" />
+    <None Remove="Templates\Blazor\Details.Interfaces.cs" />
+    <None Remove="Templates\Blazor\Edit.Interfaces.cs" />
+    <None Remove="Templates\Blazor\Index.Interfaces.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Templates\Blazor\Delete.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Details.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Edit.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Index.Interfaces.cs" />
     <Compile Include="Templates\Blazor\Create.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -160,21 +168,46 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Templates\Blazor\Create.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Create.tt</DependentUpon>
+    </None>
     <None Update="Templates\Blazor\Create.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Create.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\Delete.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Delete.tt</DependentUpon>
     </None>
     <None Update="Templates\Blazor\Delete.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Delete.cs</LastGenOutput>
     </None>
+    <None Update="Templates\Blazor\Details.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Details.tt</DependentUpon>
+    </None>
     <None Update="Templates\Blazor\Details.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Details.cs</LastGenOutput>
     </None>
+    <None Update="Templates\Blazor\Edit.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Edit.tt</DependentUpon>
+    </None>
     <None Update="Templates\Blazor\Edit.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Edit.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\Index.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Index.tt</DependentUpon>
     </None>
     <None Update="Templates\Blazor\Index.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>

@@ -11,6 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 {
     using System.Collections.Generic;
     using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
@@ -30,47 +31,59 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextName = Model.ContextTypeName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/create\"\r\n@inject BlazorMovieContext DB\r\n@inject NavigationManager NavigationMana" +
-                    "ger\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r\n<h1>Create</h1>\r\n\r\n<h4>");
+            this.Write("/create\"\r\n@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(" DB\r\n@inject NavigationManager NavigationManager\r\n");
+
+    if (!string.IsNullOrEmpty(Model.Namespace))
+    {
+        
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
+            this.Write("\r\n");
+  }
+
+            this.Write("\r\n<PageTitle>Create</PageTitle>\r\n\r\n<h1>Create</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
                     "ethod=\"post\" Model=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" OnValidSubmit=\"Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(@""" FormName=""create"">
-            <DataAnnotationsValidator />
-            <ValidationSummary class=""text-danger"" />
-            <div class=""mb-3"">
-                <label for=""title"" class=""form-label"">Title:</label>
-                <InputText id=""title"" @bind-Value=""Movie.Title"" class=""form-control"" />
-                <ValidationMessage For=""() => Movie.Title"" class=""text-danger"" />
-            </div>
-            <div class=""mb-3"">
-                <label for=""release-date"" class=""form-label"">Release date:</label>
-                <InputDate id=""release-date"" @bind-Value=""Movie.ReleaseDate"" class=""form-control"" />
-                <ValidationMessage For=""() => Movie.ReleaseDate"" class=""text-danger"" />
-            </div>
-            <div class=""mb-3"">
-                <label for=""genre"" class=""form-label"">Genre:</label>
-                <InputText id=""genre"" @bind-Value=""Movie.Genre"" class=""form-control"" />
-                <ValidationMessage For=""() => Movie.Genre"" class=""text-danger"" />
-            </div>
-            <div class=""mb-3"">
-                <label for=""price"" class=""form-label"">Price:</label>
-                <InputNumber id=""price"" @bind-Value=""Movie.Price"" min=""0"" step=""0.01"" class=""form-control"" />
-                <ValidationMessage For=""() => Movie.Price"" class=""text-danger"" />
-            </div>
-            <button type=""submit"" class=""btn btn-primary"">Create</button>
-        </EditForm>
-    </div>
-</div>
+            this.Write("\" FormName=\"create\">\r\n            <DataAnnotationsValidator />\r\n            <Vali" +
+                    "dationSummary class=\"text-danger\" />\r\n            ");
 
-<div>
-    <a href=""/");
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
+            
+            this.Write("<div class=\"mb-3\">\r\n                <label for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+            this.Write("\" class=\"form-label\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write(":</label> \r\n                <");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
+            this.Write(" id=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+            this.Write("\" @bind-Value=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"form-control\" /> \r\n                <ValidationMessage For=\"() => ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"text-danger\" /> \r\n            </div>        \r\n            ");
+  } 
+            this.Write("<button type=\"submit\" class=\"btn btn-primary\">Create</button>\r\n        </EditForm" +
+                    ">\r\n    </div>\r\n</div>\r\n\r\n<div>\r\n    <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n\r\n    [SupplyParameterFromForm]\r\n    publi" +
                     "c ");
@@ -80,7 +93,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(" { get; set; } = new();\r\n\r\n    // To protect from overposting attacks, see https:" +
                     "//aka.ms/RazorPagesCRUD\r\n    public async Task Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("()\r\n    {\r\n        DB.Movie.Add(");
+            this.Write("()\r\n    {\r\n        DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelMetadata.EntitySetName));
+            this.Write(".Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(");\r\n        await DB.SaveChangesAsync();\r\n        NavigationManager.NavigateTo(\"/" +
                     "");

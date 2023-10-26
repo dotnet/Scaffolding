@@ -9,52 +9,171 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
-    
-    #line 1 "D:\scaffolding-temp\scaffolding\src\Scaffolding\VS.Web.CG.Mvc\Templates\Blazor\Index.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class Index : IndexBase
     {
-#line hidden
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"@page ""/movies""
-@using Microsoft.AspNetCore.Components.QuickGrid
-@inject BlazorMovieContext DB
 
-<PageTitle>Index</PageTitle>
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextName = Model.ContextTypeName;
+    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 
-<h1>Index</h1>
+            this.Write("@page \"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\"\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(" DB\r\n");
 
-<p>
-    <a href=""movies/create"">Create New</a>
-</p>
+    if (!string.IsNullOrEmpty(Model.Namespace))
+    {
+        
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
+            this.Write("\r\n");
+  }
 
-<QuickGrid Class=""table"" Items=""DB.Movie"">
-    <PropertyColumn Property=""movie => movie.Title"" />
-    <PropertyColumn Property=""movie => movie.ReleaseDate"" Title=""Release date""/>
-    <PropertyColumn Property=""movie => movie.Genre"" />
-    <PropertyColumn Property=""movie => movie.Price"" />
-    <TemplateColumn Context=""movie"">
-        <a href=""@($""movies/edit?id={movie.Id}"")"">Edit</a> |
-        <a href=""@($""movies/details?id={movie.Id}"")"">Details</a> |
-        <a href=""@($""movies/delete?id={movie.Id}"")"">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
-");
+            this.Write("\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelMetadata.EntitySetName));
+            this.Write("\">\r\n");
+
+    foreach (var property in entityProperties)
+    {
+        string modelPropertyName = property.PropertyName;
+
+            this.Write("    <PropertyColumn Property=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(" => ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" />\r\n");
+  } 
+            this.Write("\r\n    <TemplateColumn Context=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write("\">\r\n        <a href=\"@($\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/edit?");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("={");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("}\")\">Edit</a> |\r\n        <a href=\"@($\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/details?");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("={");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("}\")\">Details</a> |\r\n        <a href=\"@($\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/delete?");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("={");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("}\")\">Delete</a>\r\n    </TemplateColumn>\r\n</QuickGrid>\r\n");
             return this.GenerationEnvironment.ToString();
         }
+        private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
+        /// <summary>
+        /// The current host for the text templating engine
+        /// </summary>
+        public virtual global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost Host
+        {
+            get
+            {
+                return this.hostValue;
+            }
+            set
+            {
+                this.hostValue = value;
+            }
+        }
+
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel _ModelField;
+
+/// <summary>
+/// Access the Model parameter of the template.
+/// </summary>
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel Model
+{
+    get
+    {
+        return this._ModelField;
     }
-    
-    #line default
-    #line hidden
+}
+
+
+/// <summary>
+/// Initialize the template
+/// </summary>
+public virtual void Initialize()
+{
+    if ((this.Errors.HasErrors == false))
+    {
+bool ModelValueAcquired = false;
+if (this.Session.ContainsKey("Model"))
+{
+    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(this.Session["Model"]));
+    ModelValueAcquired = true;
+}
+if ((ModelValueAcquired == false))
+{
+    string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
+    if ((string.IsNullOrEmpty(parameterValue) == false))
+    {
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel));
+        if (((tc != null) 
+                    && tc.CanConvertFrom(typeof(string))))
+        {
+            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(tc.ConvertFrom(parameterValue)));
+            ModelValueAcquired = true;
+        }
+        else
+        {
+            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
+                    "e parameter \'Model\' did not match the type of the data passed to the template.");
+        }
+    }
+}
+if ((ModelValueAcquired == false))
+{
+    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    if ((data != null))
+    {
+        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
+    }
+}
+
+
+    }
+}
+
+
+    }
     #region Base class
     /// <summary>
     /// Base class for this transformation

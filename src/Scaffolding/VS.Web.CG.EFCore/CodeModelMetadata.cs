@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -49,6 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
         }
 
+        public string EntitySetName => string.Empty;
         /// <summary>
         /// Always returns empty array as there is no Entity type information
         /// </summary>

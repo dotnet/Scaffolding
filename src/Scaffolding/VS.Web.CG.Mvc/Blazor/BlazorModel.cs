@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         //Database type eg. SQL Server, SQLite, Cosmos DB, Postgres and more later.
         public DbProvider DatabaseProvider { get; set; }
 
-        //Generated namespace for a Endpoints class/file. If using an existing file, does not apply.
+        //Generated namespace for the model being used.
         public string Namespace { get; set; }
 
         //Holds Model and EF Context metadata.
@@ -58,6 +58,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         public string DbContextNamespace { get; private set; }
         public string Template { get; set; }
+
+        public Dictionary<string, string> _inputTypeDict;
+        //used for Create page for the Blazor CRUD scenario
+        public Dictionary<string, string> InputTypeDict
+        {
+            get
+            {
+                if (_inputTypeDict == null)
+                {
+                    _inputTypeDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "string", "InputText" },
+                        { "DateTime", "InputDate" },
+                        { "double", "InputNumber" },
+                        { "int", "InputNumber" },
+                        { "bool", "InputCheckbox" }
+                    };
+                }
+
+                return _inputTypeDict;
+            }
+        }
 
         //namespaces to add in Endpoints file.
         public HashSet<string> RequiredNamespaces

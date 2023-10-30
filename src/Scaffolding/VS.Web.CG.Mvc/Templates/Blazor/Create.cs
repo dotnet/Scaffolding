@@ -63,6 +63,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
+                    Model.InputClassDict.TryGetValue(propertyShortTypeName, out var inputClass);
             
             this.Write("<div class=\"mb-3\">\r\n                <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -76,7 +77,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("\" class=\"form-control\" /> \r\n                <ValidationMessage For=\"() => ");
+            this.Write("\" class=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
+            this.Write("\" /> \r\n                <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));

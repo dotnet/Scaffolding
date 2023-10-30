@@ -81,6 +81,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
+        public Dictionary<string, string> _inputClassDict;
+        //used for Create page for the Blazor CRUD scenario
+        public Dictionary<string, string> InputClassDict
+        {
+            get
+            {
+                if (_inputClassDict == null)
+                {
+                    _inputClassDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "string", "form-control" },
+                        { "DateTime", "form-control" },
+                        { "double", "form-control" },
+                        { "int", "form-control" },
+                        { "bool", "form-check-input" }
+                    };
+                }
+
+                return _inputClassDict;
+            }
+        }
+
         //namespaces to add in Endpoints file.
         public HashSet<string> RequiredNamespaces
         {

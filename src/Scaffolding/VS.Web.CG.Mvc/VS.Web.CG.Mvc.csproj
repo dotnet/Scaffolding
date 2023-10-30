@@ -11,10 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
-    <EmbeddedResource Include="Blazor\blazorWebCrudChanges.json">
-      <PackagePath>lib\net8.0\</PackagePath>
-      <Pack>true</Pack>
-    </EmbeddedResource>
     <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net8.0\" />
     <Content Remove="Identity\bootstrap5_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net8.0\" />
@@ -23,6 +19,7 @@
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net8.0\" />
     <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net8.0\" />
+    <EmbeddedResource Include="Blazor\blazorWebCrudChanges.json" Pack="true" PackagePath="lib\net8.0\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>

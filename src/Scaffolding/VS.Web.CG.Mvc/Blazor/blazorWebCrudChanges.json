@@ -6,47 +6,27 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "app.MapRazorPages();",
-              "Block": "app.{0}()",
-              "InsertBefore": [ "app.Run();" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            }
-          ]
-        },
-        "OpenApi": {
-          "CodeChanges": [
-            {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllers();",
-              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddSwaggerGen();", "var app = builder.Build();" ],
-              "Options": [ "OpenApi" ],
-              "Block": "WebApplication.CreateBuilder.Services.AddEndpointsApiExplorer()",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter();",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddEndpointsApiExplorer();",
-              "InsertBefore": [ "var app = builder.Build();" ],
-              "Options": [ "OpenApi" ],
-              "Block": "WebApplication.CreateBuilder.Services.AddSwaggerGen()",
+              "Block": "AddInteractiveServerRenderMode()",
+              "Parent": "MapRazorComponents<App>",
+              "CodeChangeType": "MemberAccess",
               "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.UseSwagger();\r\n    app.UseSwaggerUI();\r\n}",
-              "Options": [ "OpenApi" ],
-              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
-              "InsertBefore": [ "app.UseHttpsRedirection();" ],
-              "LeadingTrivia": {
-                "Newline": true
+                "Newline": true,
+                "NumberOfSpaces": 4
               }
             }
           ]
         }
-      }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Identity"
+      ]
     }
   ]
 }

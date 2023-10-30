@@ -22,6 +22,8 @@ using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -87,6 +89,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 ModelTypesLocator,
                 Logger,
                 areaName: string.Empty);
+
+            //check if getting model and dbcontext was successfull
+            if (modelTypeAndContextModel is null ||
+                modelTypeAndContextModel.ContextProcessingResult is null ||
+                modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus is ContextProcessingStatus.MissingContext ||
+                modelTypeAndContextModel.ModelType is null)
+            {
+                throw new InvalidOperationException("Unable to get model and/or dbcontext metadata.");
+            }
 
             if (!string.IsNullOrEmpty(modelTypeAndContextModel.DbContextFullName) && CalledFromCommandline)
             {
@@ -228,7 +239,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             var jsonText = GetBlazorCodeModifierConfig();
             CodeModifierConfig minimalApiChangesConfig = null;
-           // CodeModifierConfig minimalApiChangesConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+            try
+            {
+                minimalApiChangesConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+            }
+            catch (JsonException ex)
+            {
+                ConsoleLogger.LogMessage($"Error deserializing blazorWebCrudChanges.json file. {ex.Message}");
+            }
+
             if (minimalApiChangesConfig != null)
             {
                 //Getting Program.cs document
@@ -249,6 +268,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 {
                     var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
                     var globalChanges = globalMethod.CodeChanges;
+                    var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
+                    if (updatedIdentifer.HasValue)
+                    {
+                        (string oldValue, string newValue) = updatedIdentifer.Value;
+                        globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
+                    }
                     if (useTopLevelsStatements)
                     {
                         newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
@@ -295,7 +320,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             string jsonText = string.Empty;
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("blazorChanges.json")).FirstOrDefault();
+            var resourceName = resourceNames.Where(x => x.EndsWith("blazorWebCrudChanges.json")).FirstOrDefault();
             if (!string.IsNullOrEmpty(resourceName))
             {
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))

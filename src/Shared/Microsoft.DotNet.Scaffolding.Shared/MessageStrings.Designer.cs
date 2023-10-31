@@ -142,15 +142,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executing `dotnet new`....
-        /// </summary>
-        internal static string ExecuteDotnetNew {
-            get {
-                return ResourceManager.GetString("ExecuteDotnetNew", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to FAILED\n\n.
         /// </summary>
         internal static string Failed {

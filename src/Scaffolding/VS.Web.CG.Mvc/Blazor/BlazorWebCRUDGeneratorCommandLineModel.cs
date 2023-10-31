@@ -17,7 +17,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         public string ModelClass { get; set; }
 
         [Argument(Description = "The view template to use, supported view templates: 'Empty|Create|Edit|Delete|Details|Index|CRUD'")]
-        public string TemplateName { get; set; }
+        public string TemplateName { get; set; } = "crud";
 
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]
         public string DataContextClass { get; set; }
@@ -61,6 +61,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             ArgumentNullException.ThrowIfNull(model.TemplateName);
 
             List<string> errorList = new List<string>();
+            List<string> templateNames = new List<string>()
+            {
+                "empty", "create", "edit", "delete", "details", "index", "crud"
+            };
+
             if (!string.IsNullOrEmpty(model.Namespace) &&
                 !RoslynUtilities.IsValidNamespace(model.Namespace))
             {
@@ -80,6 +85,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
             {
                 model.DatabaseProvider = dbProvider;
+            }
+
+            if (string.IsNullOrEmpty(model.TemplateName))
+            {
+                model.TemplateName = "crud";
+            }
+            else if (!templateNames.Contains(model.TemplateName, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Invalid template name specified. Supported templates are: " + string.Join(", ", templateNames));
             }
         }
     }

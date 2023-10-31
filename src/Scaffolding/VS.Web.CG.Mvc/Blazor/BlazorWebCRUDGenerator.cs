@@ -6,24 +6,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.Scaffolding.Shared;
-using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
+using Microsoft.DotNet.Scaffolding.Shared.Cli.Utils;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -38,7 +38,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private IFilesLocator FileLocator { get; set; }
         private IProjectContext ProjectContext { get; set; }
         private IEntityFrameworkService EntityFrameworkService { get; set; }
-        private ICodeGeneratorActionsService CodeGeneratorActionsService { get; set; }
         private Workspace Workspace { get; set; }
         private ConsoleLogger ConsoleLogger { get; set; }
 
@@ -48,7 +47,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             ILogger logger,
             IFileSystem fileSystem,
             IFilesLocator fileLocator,
-            ICodeGeneratorActionsService codeGeneratorActionsService,
             IProjectContext projectContext,
             IEntityFrameworkService entityframeworkService,
             Workspace workspace)
@@ -59,7 +57,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             ModelTypesLocator = modelTypesLocator ?? throw new ArgumentNullException(nameof(modelTypesLocator));
             FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             FileLocator = fileLocator ?? throw new ArgumentNullException(nameof(fileLocator));
-            CodeGeneratorActionsService = codeGeneratorActionsService ?? throw new ArgumentNullException(nameof(codeGeneratorActionsService));
             ProjectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
             Workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             EntityFrameworkService = entityframeworkService ?? throw new ArgumentNullException(nameof(entityframeworkService));
@@ -73,12 +70,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         /// <returns></returns>
         public async Task GenerateCode(BlazorWebCRUDGeneratorCommandLineModel model)
         {
-            System.Diagnostics.Debugger.Launch();
             model.ValidateCommandline(Logger, AppInfo.ApplicationName);
             var emptyTemplate = !string.IsNullOrEmpty(model.TemplateName) && model.TemplateName.Equals("empty", StringComparison.OrdinalIgnoreCase);
             if (emptyTemplate)
             {
-                //execute empty template
+                ArgumentNullException.ThrowIfNull(model);
+                string emptyRazorName = "Empty";
+                var outputPath = ValidateAndGetOutputPath(string.Empty, emptyRazorName);
+
+                //arguments for `dotnet new razorcomponent``
+                var additionalArgs = new List<string>()
+                {
+                    "razorcomponent",
+                    "--name",
+                    emptyRazorName,
+                    "--output",
+                    Path.GetDirectoryName(outputPath),
+                };
+
+                DotnetCommands.ExecuteDotnetNew(ProjectContext.ProjectFullPath, additionalArgs, Logger);
                 return;
             }
 
@@ -206,7 +216,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         internal IList<string> GetT4Templates(string templateName)
         {
             var templates = new List<string>();
-            var crudTemplate = string.IsNullOrEmpty(templateName) || templateName.Equals("crud", StringComparison.OrdinalIgnoreCase);
+            var crudTemplate = templateName.Equals("crud", StringComparison.OrdinalIgnoreCase);
             if (crudTemplate)
             {
                 return CRUDTemplates.Values.ToList();
@@ -226,10 +236,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal string ValidateAndGetOutputPath(string modelName, string templateName, string relativeFolderPath = null)
         {
-            string outputFileName =  $"{modelName}Pages\\{templateName}{Constants.BlazorExtension}";
-            string outputFolder = string.IsNullOrEmpty(relativeFolderPath)
-                ? Path.Combine(AppInfo.ApplicationBasePath, "Components", "Pages")
-                : Path.Combine(AppInfo.ApplicationBasePath, relativeFolderPath);
+            string outputFileName = string.IsNullOrEmpty(modelName) ?
+                $"{templateName}{Constants.BlazorExtension}" :
+                $"{modelName}Pages\\{templateName}{Constants.BlazorExtension}";
+            string outputFolder = string.IsNullOrEmpty(relativeFolderPath) ?
+                Path.Combine(AppInfo.ApplicationBasePath, "Components", "Pages") :
+                Path.Combine(AppInfo.ApplicationBasePath, relativeFolderPath);
 
             var outputPath = Path.Combine(outputFolder, outputFileName);
             return outputPath;
@@ -356,7 +368,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private const string EditBlazorTemplate = "Edit.tt";
         private const string IndexBlazorTemplate = "Index.tt";
         private Dictionary<string, string> _crudTemplates;
-        private Dictionary<string, string> CRUDTemplates 
+        private Dictionary<string, string> CRUDTemplates
         {
             get
             {

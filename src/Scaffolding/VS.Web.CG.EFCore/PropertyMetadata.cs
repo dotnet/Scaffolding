@@ -1,14 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Collections.Generic;
-using System.Runtime.Intrinsics.X86;
-using System;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
@@ -79,26 +74,5 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public bool IsMultilineText { get; set; }
 
         public PropertyInfo PropertyInfo { get; set; }
-    }
-
-    public class PropertyMetadataEqualityComparer : IEqualityComparer<IPropertyMetadata>
-    {
-        public bool Equals(IPropertyMetadata x, IPropertyMetadata y)
-        {
-            if (x is null || y is null)
-            {
-                return false;
-            }
-
-            return string.Equals(x.PropertyName, y.PropertyName) &&
-                string.Equals(x.ShortTypeName, y.ShortTypeName) &&
-                string.Equals(x.TypeName, y.TypeName);
-        }
-        
-        public int GetHashCode(IPropertyMetadata obj)
-        {
-            var hash = obj.GetHashCode();
-            return hash;
-        }
     }
 }

@@ -78,7 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 string emptyRazorName = "Empty";
                 var outputPath = ValidateAndGetOutputPath(string.Empty, emptyRazorName);
 
-                //arguments for `dotnet new razorcomponent``
+                //arguments for 'dotnet new razorcomponent'
                 var additionalArgs = new List<string>()
                 {
                     "razorcomponent",

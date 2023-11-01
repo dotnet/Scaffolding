@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration
+namespace Microsoft.DotNet.Scaffolding.Shared
 {
     /// <summary>
     /// An abstraction over common file/disk utilities.

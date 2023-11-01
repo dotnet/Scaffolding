@@ -115,6 +115,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The directory is not empty : &apos;{0}&apos;.
+        /// </summary>
+        internal static string DirectoryNotEmpty {
+            get {
+                return ResourceManager.GetString("DirectoryNotEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while running dotnet-user-secrets init.
         /// </summary>
         internal static string DotnetUserSecretsError {
@@ -210,6 +219,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         internal static string InvalidProjectInformationMessage {
             get {
                 return ResourceManager.GetString("InvalidProjectInformationMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 	Could not find a part of the path &apos;{0}&apos;.
+        /// </summary>
+        internal static string PathNotFound {
+            get {
+                return ResourceManager.GetString("PathNotFound", resourceCulture);
             }
         }
         

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources;
 using Moq;

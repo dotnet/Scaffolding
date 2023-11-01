@@ -90,7 +90,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 
         protected string GetDefaultControllerNamespace(string relativeFolderPath)
         {
-            return NameSpaceUtilities.GetSafeNameSpaceFromPath(relativeFolderPath, ApplicationInfo.ApplicationName);
+            return NameSpaceUtilities.GetSafeNamespaceFromPath(relativeFolderPath, ApplicationInfo.ApplicationName);
         }
 
         protected void ValidateNameSpaceName(CommandLineGeneratorModel generatorModel)

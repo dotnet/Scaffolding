@@ -70,7 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         /// <returns></returns>
         public async Task GenerateCode(BlazorWebCRUDGeneratorCommandLineModel model)
         {
-            model.ValidateCommandline(Logger, AppInfo.ApplicationName);
+            model.ValidateCommandline();
             var emptyTemplate = !string.IsNullOrEmpty(model.TemplateName) && model.TemplateName.Equals("empty", StringComparison.OrdinalIgnoreCase);
             if (emptyTemplate)
             {
@@ -126,93 +126,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             await ModifyProgramCsAsync();
         }
 
-        private void ExecuteTemplates(BlazorModel templateModel)
-        {
-            var templateFolders = TemplateFolders;
-            var templateNames = GetT4Templates(templateModel.Template);
-            var fullTemplatePaths = templateNames.Select(x => FileLocator.GetFilePath(x, templateFolders));
-            TemplateInvoker templateInvoker = new TemplateInvoker();
-            var dictParams = new Dictionary<string, object>()
-            {
-                { "Model" , templateModel }
-            };
-
-            foreach (var templatePath in fullTemplatePaths)
-            {
-                ITextTransformation contextTemplate = GetBlazorTransformation(templatePath);
-                var t4TemplateName = Path.GetFileNameWithoutExtension(templatePath);
-                var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
-                if (!string.IsNullOrEmpty(templatedString))
-                {
-                    string templatedFilePath = ValidateAndGetOutputPath(templateModel.ModelTypeName, t4TemplateName);
-                    var folderName = Path.GetDirectoryName(templatedFilePath);
-                    if (!Directory.Exists(folderName))
-                    {
-                        Directory.CreateDirectory(folderName);
-                    }
-
-                    FileSystem.WriteAllText(templatedFilePath, templatedString);
-                    Logger.LogMessage($"Added Blazor Page : {templatedFilePath}");
-                }
-            }
-        }
-
-        private ITextTransformation GetBlazorTransformation(string templatePath)
-        {
-            if (string.IsNullOrEmpty(templatePath))
-            {
-                return null;
-            }
-
-            var host = new TextTemplatingEngineHost()
-            {
-                TemplateFile = templatePath
-            };
-
-            if (templatePath.EndsWith("Create.tt"))
-            {
-                return new Create()
-                {
-                    Host = host,
-                    Session = host.CreateSession()
-                };
-            }
-            else if (templatePath.EndsWith("Index.tt"))
-            {
-                return new Templates.Blazor.Index()
-                {
-                    Host = host,
-                    Session = host.CreateSession()
-                };
-            }
-            else if (templatePath.EndsWith("Delete.tt"))
-            {
-                return new Delete()
-                {
-                    Host = host,
-                    Session = host.CreateSession()
-                };
-            }
-            else if (templatePath.EndsWith("Edit.tt"))
-            {
-                return new Edit()
-                {
-                    Host = host,
-                    Session = host.CreateSession()
-                };
-            }
-            else if (templatePath.EndsWith("Details.tt"))
-            {
-                return new Details()
-                {
-                    Host = host,
-                    Session = host.CreateSession()
-                };
-            }
-
-            return null;
-        }
-
         internal IList<string> GetT4Templates(string templateName)
         {
             var templates = new List<string>();
@@ -266,7 +179,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault();
                 var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
                 var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
-                var programDocument = GetUpdatedDocument(project, programType);
+                var programDocument = project.GetUpdatedDocument(FileSystem, programType);
 
                 //Modifying Program.cs document
                 var docEditor = await DocumentEditor.CreateAsync(programDocument);
@@ -310,23 +223,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        //Given CodeAnalysis.Project and ModelType, return CodeAnalysis.Document by reading the latest file from disk.
-        //Need CodeAnalysis.Project for AddDocument method.
-        internal Document GetUpdatedDocument(Project project, ModelType type)
-        {
-            if (project != null && type != null)
-            {
-                string filePath = type.TypeSymbol?.Locations.FirstOrDefault()?.SourceTree?.FilePath;
-                string fileText = FileSystem.ReadAllText(filePath);
-                if (!string.IsNullOrEmpty(fileText))
-                {
-                    return project.AddDocument(filePath, fileText);
-                }
-            }
-
-            return null;
-        }
-
         private string GetBlazorCodeModifierConfig()
         {
             string jsonText = string.Empty;
@@ -358,6 +254,71 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         }
 
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+
+        private void ExecuteTemplates(BlazorModel templateModel)
+        {
+            var templateFolders = TemplateFolders;
+            var templateNames = GetT4Templates(templateModel.Template);
+            var fullTemplatePaths = templateNames.Select(x => FileLocator.GetFilePath(x, templateFolders));
+            TemplateInvoker templateInvoker = new TemplateInvoker();
+            var dictParams = new Dictionary<string, object>()
+            {
+                { "Model" , templateModel }
+            };
+
+            foreach (var templatePath in fullTemplatePaths)
+            {
+                ITextTransformation contextTemplate = GetBlazorTransformation(templatePath);
+                var t4TemplateName = Path.GetFileNameWithoutExtension(templatePath);
+                var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
+                if (!string.IsNullOrEmpty(templatedString))
+                {
+                    string templatedFilePath = ValidateAndGetOutputPath(templateModel.ModelTypeName, t4TemplateName);
+                    var folderName = Path.GetDirectoryName(templatedFilePath);
+                    if (!FileSystem.DirectoryExists(folderName))
+                    {
+                        FileSystem.CreateDirectory(folderName);
+                    }
+
+                    FileSystem.WriteAllText(templatedFilePath, templatedString);
+                    Logger.LogMessage($"Added Blazor Page : {templatedFilePath}");
+                }
+            }
+        }
+
+        private ITextTransformation GetBlazorTransformation(string templatePath)
+        {
+            if (string.IsNullOrEmpty(templatePath)) return null;
+
+            var host = new TextTemplatingEngineHost { TemplateFile = templatePath };
+            ITextTransformation transformation = null;
+
+            switch (Path.GetFileName(templatePath))
+            {
+                case "Create.tt":
+                    transformation = new Create() { Host = host };
+                    break;
+                case "Index.tt":
+                    transformation = new Templates.Blazor.Index() { Host = host };
+                    break;
+                case "Delete.tt":
+                    transformation = new Delete() { Host = host };
+                    break;
+                case "Edit.tt":
+                    transformation = new Edit() { Host = host };
+                    break;
+                case "Details.tt":
+                    transformation = new Details() { Host = host };
+                    break;
+            }
+
+            if (transformation != null)
+            {
+                transformation.Session = host.CreateSession();
+            }
+
+            return transformation;
+        }
 
         public const string Main = nameof(Main);
 

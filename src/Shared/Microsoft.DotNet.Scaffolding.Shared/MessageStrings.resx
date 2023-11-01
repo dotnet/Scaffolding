@@ -180,4 +180,10 @@
   <data name="FailedAddPackage" xml:space="preserve">
     <value>Failed to add package {0}</value>
   </data>
+  <data name="DirectoryNotEmpty" xml:space="preserve">
+    <value>The directory is not empty : '{0}'</value>
+  </data>
+  <data name="PathNotFound" xml:space="preserve">
+    <value>	Could not find a part of the path '{0}'</value>
+  </data>
 </root>

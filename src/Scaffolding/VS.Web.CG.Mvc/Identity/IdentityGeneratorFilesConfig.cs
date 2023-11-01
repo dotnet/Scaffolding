@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity

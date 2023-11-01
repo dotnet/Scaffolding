@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -55,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
     public static class BlazorWebCRUDGeneratorCommandLineModelExtensions
     {
-        public static void ValidateCommandline(this BlazorWebCRUDGeneratorCommandLineModel model, ILogger logger, string appName)
+        public static void ValidateCommandline(this BlazorWebCRUDGeneratorCommandLineModel model)
         {
             ArgumentNullException.ThrowIfNull(model.ModelClass);
             ArgumentNullException.ThrowIfNull(model.TemplateName);
@@ -74,8 +76,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     MessageStrings.InvalidNamespaceName,
                     model.Namespace));
             }
-
-            model.Namespace = model.Namespace ?? NameSpaceUtilities.GetSafeNameSpaceFromPath(model.RelativeFolderPath, appName);
 
             if (errorList.Count != 0)
             {

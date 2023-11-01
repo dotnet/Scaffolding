@@ -151,7 +151,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             string outputFileName = string.IsNullOrEmpty(modelName) ?
                 $"{templateName}{Constants.BlazorExtension}" :
-                $"{modelName}Pages\\{templateName}{Constants.BlazorExtension}";
+                Path.Combine($"{modelName}Pages", $"{templateName}{Constants.BlazorExtension}");
             string outputFolder = string.IsNullOrEmpty(relativeFolderPath) ?
                 Path.Combine(AppInfo.ApplicationBasePath, "Components", "Pages") :
                 Path.Combine(AppInfo.ApplicationBasePath, relativeFolderPath);

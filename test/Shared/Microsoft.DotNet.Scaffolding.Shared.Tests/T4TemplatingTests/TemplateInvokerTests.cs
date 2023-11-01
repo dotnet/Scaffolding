@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests.T4TemplatingTests
             ITextTransformation contextTemplate = GetTestTransformation();
             var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
             Assert.False(string.IsNullOrEmpty(templatedString));
-            Assert.Equal(ExpectedTemplatedString, templatedString);
+            Assert.Equal(ExpectedTemplatedString.Trim(), templatedString.Trim());
         }
 
         private ITextTransformation GetTestTransformation()

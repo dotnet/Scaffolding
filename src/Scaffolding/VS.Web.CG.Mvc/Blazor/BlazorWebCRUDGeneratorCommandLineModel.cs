@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {

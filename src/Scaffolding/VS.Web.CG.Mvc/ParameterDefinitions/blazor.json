@@ -9,23 +9,28 @@
   ],
   "Options": [
     {
-      "Name": "-m|--model",
+      "Name": "model",
+      "ShortName": "m",
       "Description": "Model class to use"
     },
     {
-      "Name": "-dc|--dataContext",
+      "Name": "dataContext",
+      "ShortName":  "dc",
       "Description": "DbContext class to use"
     },
     {
-      "Name": "-outDir|--relativeFolderPath",
+      "Name": "relativeFolderPath",
+      "ShortName": "outDir",
       "Description": "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder"
     },
     {
-      "Name": "-namespace|--namespaceName",
+      "Name": "namespaceName",
+      "ShortName": "ns",
       "Description": "Specify the name of the namespace to use for the generated Endpoints file"
     },
     {
       "Name": "databaseProvider",
+      "ShortName": "dbProvider",
       "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
     }
   ]

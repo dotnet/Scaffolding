@@ -3,7 +3,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Contracts;
 using System.Reflection;
-using System.Collections.Generic;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {

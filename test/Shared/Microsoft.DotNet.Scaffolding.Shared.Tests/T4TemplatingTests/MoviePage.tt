@@ -1,0 +1,9 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Scaffolding.Shared.Tests.T4TemplatingTests.TestMovieModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+ID : <#= Model.ID #>
+Title : <#= Model.Title #>
+Genre : <#= Model.Genre #>
+Price : <#= Model.Price #>

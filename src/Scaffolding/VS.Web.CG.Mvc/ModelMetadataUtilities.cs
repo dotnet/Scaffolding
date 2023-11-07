@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
@@ -32,38 +33,81 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         internal static async Task<ModelTypeAndContextModel> ValidateModelAndGetEFMetadata(
-            CommonCommandLineModel commandLineModel,
-            IEntityFrameworkService entityFrameworkService,
-            IModelTypesLocator modelTypesLocator,
-            ILogger logger,
-            string areaName)
+           string modelClass,
+           string dbContextClass,
+           string dbProviderString,
+           IEntityFrameworkService entityFrameworkService,
+           IModelTypesLocator modelTypesLocator,
+           ILogger logger,
+           string areaName)
         {
-            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
-            ModelType dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
-
+            ModelType model = ValidationUtil.ValidateType(modelClass, "model", modelTypesLocator);
             // Validation successful
             Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
 
-            var dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
-
-            if (dataContext == null)
+            ModelType dataContext = null;
+            DbProvider dbProvider = DbProvider.None;
+            var dbContextFullName = string.Empty;
+            ContextProcessingResult modelMetadata = new ContextProcessingResult()
             {
-                commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
-            }
+                ContextProcessingStatus = ContextProcessingStatus.MissingContext,
+                ModelMetadata = null
+            };
 
-            var modelMetadata = await entityFrameworkService.GetModelMetadata(
-                dbContextFullName,
-                model,
-                areaName,
-                commandLineModel.DatabaseProvider);
+            if (!string.IsNullOrEmpty(dbContextClass))
+            {
+                dataContext = ValidationUtil.ValidateType(dbContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
+                dbContextFullName = dataContext != null ? dataContext.FullName : dbContextClass;
+                dbProvider = dataContext == null ? ValidateDatabaseProvider(dbProviderString, logger) : DbProvider.Existing;
+
+                modelMetadata = await entityFrameworkService.GetModelMetadata(
+                    dbContextFullName,
+                    model,
+                    areaName,
+                    databaseProvider: dbProvider);
+            }
 
             return new ModelTypeAndContextModel()
             {
                 ModelType = model,
                 DbContextFullName = dbContextFullName,
                 ContextProcessingResult = modelMetadata,
-                DatabaseProvider = commandLineModel.DatabaseProvider
+                DatabaseProvider = dbProvider
             };
+        }
+
+        internal static async Task<ModelTypeAndContextModel> ValidateModelAndGetEFMetadata(
+            CommonCommandLineModel commandLineModel,
+            IEntityFrameworkService entityFrameworkService,
+            IModelTypesLocator modelTypesLocator,
+            ILogger logger,
+            string areaName)
+        {
+            return await ValidateModelAndGetEFMetadata(
+                commandLineModel.ModelClass,
+                commandLineModel.DataContextClass,
+                commandLineModel.DatabaseProviderString,
+                entityFrameworkService,
+                modelTypesLocator,
+                logger,
+                areaName);
+        }
+
+        internal static async Task<ModelTypeAndContextModel> GetModelEFMetadataBlazorAsync(
+            BlazorWebCRUDGeneratorCommandLineModel commandLineModel,
+            IEntityFrameworkService entityFrameworkService,
+            IModelTypesLocator modelTypesLocator,
+            ILogger logger,
+            string areaName)
+        {
+            return await ValidateModelAndGetEFMetadata(
+                commandLineModel.ModelClass,
+                commandLineModel.DataContextClass,
+                commandLineModel.DatabaseProviderString,
+                entityFrameworkService,
+                modelTypesLocator,
+                logger,
+                areaName);
         }
 
         internal static async Task<ModelTypeAndContextModel> GetModelEFMetadataMinimalAsync(
@@ -73,41 +117,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             ILogger logger,
             string areaName)
         {
-            ModelType model = ValidationUtil.ValidateType(commandLineModel.ModelClass, "model", modelTypesLocator);
-            // Validation successful
-            Contract.Assert(model != null, MessageStrings.ValidationSuccessfull_modelUnset);
-
-            ModelType dataContext = null;
-            var dbContextFullName = string.Empty;
-            ContextProcessingResult modelMetadata = new ContextProcessingResult()
-            {
-                ContextProcessingStatus = ContextProcessingStatus.MissingContext,
-                ModelMetadata = null
-            };
-
-            if (!string.IsNullOrEmpty(commandLineModel.DataContextClass))
-            {
-                dataContext = ValidationUtil.ValidateType(commandLineModel.DataContextClass, "dataContext", modelTypesLocator, throwWhenNotFound: false);
-                dbContextFullName = dataContext != null ? dataContext.FullName : commandLineModel.DataContextClass;
-                if (dataContext == null)
-                {
-                    commandLineModel.DatabaseProvider = ValidateDatabaseProvider(commandLineModel.DatabaseProviderString, logger);
-                }
-
-                modelMetadata = await entityFrameworkService.GetModelMetadata(
-                    dbContextFullName,
-                    model,
-                    areaName,
-                    databaseProvider: commandLineModel.DatabaseProvider);
-            }
-
-            return new ModelTypeAndContextModel()
-            {
-                ModelType = model,
-                DbContextFullName = dbContextFullName,
-                ContextProcessingResult = modelMetadata,
-                DatabaseProvider = commandLineModel.DatabaseProvider
-            };
+            return await ValidateModelAndGetEFMetadata(
+                commandLineModel.ModelClass,
+                commandLineModel.DataContextClass,
+                commandLineModel.DatabaseProviderString,
+                entityFrameworkService,
+                modelTypesLocator,
+                logger,
+                areaName);
         }
 
         internal static DbProvider ValidateDatabaseProvider(string databaseProviderString, ILogger logger)

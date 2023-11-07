@@ -20,6 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public const string ViewExtension = ".cshtml";
         public const string CodeFileExtension = ".cs";
         public const string RazorTemplateExtension = ".cshtml";
+        public const string BlazorExtension = ".razor";
 
         public static readonly string ThisAssemblyName = typeof(Constants).GetTypeInfo().Assembly.GetName().Name;
 

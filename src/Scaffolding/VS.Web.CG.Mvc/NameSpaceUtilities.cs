@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// <summary>
         /// Converts a namespace name to a safe namespace name.
         /// </summary>
-        public static string GetSafeNameSpaceName(string namespaceName)
+        public static string GetSafeNamespaceName(string namespaceName)
         {
             if (namespaceName == null)
             {
@@ -58,20 +58,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         /// <summary>
         /// Converts a path like a/b/c/d to namespace like a.b.c.d
         /// </summary>
-        public static string GetSafeNameSpaceFromPath(string path, string namespacePrefix = null)
+        public static string GetSafeNamespaceFromPath(string path, string namespacePrefix = null)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
+            ArgumentNullException.ThrowIfNull(path);
             var namespaceName = path.Replace(Path.DirectorySeparatorChar, '.');
             if (!string.IsNullOrEmpty(namespacePrefix))
             {
                 namespaceName = namespacePrefix + "." + namespaceName;
             }
 
-            return GetSafeNameSpaceName(namespaceName);
+            return GetSafeNamespaceName(namespaceName);
         }
     }
 }

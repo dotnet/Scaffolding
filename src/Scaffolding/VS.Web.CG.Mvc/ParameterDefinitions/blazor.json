@@ -1,0 +1,37 @@
+{
+  "Alias": "blazor",
+  "Description": "Generates Blazor CRUD pages given a model.",
+  "Arguments": [
+    {
+      "Name": "templateName",
+      "Description": "The template to use. Supported view templates: 'Empty|Create|Edit|Delete|Details|List|CRUD'"
+    }
+  ],
+  "Options": [
+    {
+      "Name": "model",
+      "ShortName": "m",
+      "Description": "Model class to use"
+    },
+    {
+      "Name": "dataContext",
+      "ShortName":  "dc",
+      "Description": "DbContext class to use"
+    },
+    {
+      "Name": "relativeFolderPath",
+      "ShortName": "outDir",
+      "Description": "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder"
+    },
+    {
+      "Name": "namespaceName",
+      "ShortName": "ns",
+      "Description": "Specify the name of the namespace to use for the generated Endpoints file"
+    },
+    {
+      "Name": "databaseProvider",
+      "ShortName": "dbProvider",
+      "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
+    }
+  ]
+}

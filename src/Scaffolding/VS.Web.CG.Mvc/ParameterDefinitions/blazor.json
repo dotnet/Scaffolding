@@ -4,7 +4,7 @@
   "Arguments": [
     {
       "Name": "templateName",
-      "Description": "The template to use, supported view templates: 'Empty|Create|Edit|Delete|Details|List|CRUD'"
+      "Description": "The template to use. Supported view templates: 'Empty|Create|Edit|Delete|Details|List|CRUD'"
     }
   ],
   "Options": [

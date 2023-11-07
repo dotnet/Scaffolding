@@ -124,6 +124,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This dotnet version does not meet the minimum requirement..
+        /// </summary>
+        internal static string DotnetRequirementNotMet {
+            get {
+                return ResourceManager.GetString("DotnetRequirementNotMet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while running dotnet-user-secrets init.
         /// </summary>
         internal static string DotnetUserSecretsError {
@@ -223,7 +232,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 	Could not find a part of the path &apos;{0}&apos;.
+        ///   Looks up a localized string similar to Could not find a part of the path &apos;{0}&apos;.
         /// </summary>
         internal static string PathNotFound {
             get {

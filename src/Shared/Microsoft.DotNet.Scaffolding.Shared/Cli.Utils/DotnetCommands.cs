@@ -54,8 +54,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
             if (SemanticVersion.TryParse(dotnetVersion, out var parsedVersion))
             {
                 validDotnetVersion = parsedVersion.CompareTo(MinimumDotnetVersion) >= 0;
-                var validText = validDotnetVersion ? "meets" : "does not meet";
-                consoleLogger.LogMessage($"\nFound dotnet version ({parsedVersion}). It {validText} the minimum requirement.\n");
+                if (!validDotnetVersion)
+                {
+                    consoleLogger.LogMessage($"\nFound dotnet version ({parsedVersion}). {MessageStrings.DotnetRequirementNotMet}");
+                }
             }
             else
             {

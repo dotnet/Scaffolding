@@ -16,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         [Option(Name = "model", ShortName = "m", Description = "Model class to use")]
         public string ModelClass { get; set; }
 
-        [Argument(Description = "The view template to use, supported view templates: 'Empty|Create|Edit|Delete|Details|Index|CRUD'")]
+        [Argument(Description = "The view template to use. Supported view templates: 'Empty|Create|Edit|Delete|Details|Index|CRUD'")]
         public string TemplateName { get; set; } = "crud";
 
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]

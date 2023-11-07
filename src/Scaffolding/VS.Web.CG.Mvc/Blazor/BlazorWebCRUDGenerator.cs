@@ -129,7 +129,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         internal IList<string> GetT4Templates(string templateName)
         {
             var templates = new List<string>();
-            var crudTemplate = templateName.Equals("crud", StringComparison.OrdinalIgnoreCase);
+            var crudTemplate = string.Equals(templateName, "crud", StringComparison.OrdinalIgnoreCase);
             if (crudTemplate)
             {
                 return CRUDTemplates.Values.ToList();
@@ -162,7 +162,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal async Task ModifyProgramCsAsync()
         {
-            var jsonText = GetBlazorCodeModifierConfig();
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceNames = assembly.GetManifestResourceNames();
+            var resourceName = resourceNames.Where(x => x.EndsWith("blazorWebCrudChanges.json")).FirstOrDefault();
+            var jsonText = GetBlazorCodeModifierConfig(assembly, resourceName);
             CodeModifierConfig minimalApiChangesConfig = null;
             try
             {
@@ -170,7 +173,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
             catch (JsonException ex)
             {
-                ConsoleLogger.LogMessage($"Error deserializing blazorWebCrudChanges.json file. {ex.Message}");
+                ConsoleLogger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
             }
 
             if (minimalApiChangesConfig != null)
@@ -223,13 +226,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        private string GetBlazorCodeModifierConfig()
+        private string GetBlazorCodeModifierConfig(Assembly assembly, string resourceName)
         {
             string jsonText = string.Empty;
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("blazorWebCrudChanges.json")).FirstOrDefault();
-            if (!string.IsNullOrEmpty(resourceName))
+            if (assembly != null && !string.IsNullOrEmpty(resourceName))
             {
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                 using (StreamReader reader = new StreamReader(stream))

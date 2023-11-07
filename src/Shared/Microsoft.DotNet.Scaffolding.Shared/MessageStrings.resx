@@ -184,6 +184,9 @@
     <value>The directory is not empty : '{0}'</value>
   </data>
   <data name="PathNotFound" xml:space="preserve">
-    <value>	Could not find a part of the path '{0}'</value>
+    <value>Could not find a part of the path '{0}'</value>
+  </data>
+  <data name="DotnetRequirementNotMet" xml:space="preserve">
+    <value>This dotnet version does not meet the minimum requirement.</value>
   </data>
 </root>

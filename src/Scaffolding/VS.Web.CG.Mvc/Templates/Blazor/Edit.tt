@@ -34,7 +34,7 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Update<#= modelName #>" FormName="edit">
+            <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Update<#= modelName #>" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
                 <ValidationSummary />
                 <input type="hidden" name="<#= modelName #>.<#= primaryKeyName #>" value="@<#= modelName #>.<#= primaryKeyName #>" />
@@ -45,10 +45,11 @@ else
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
+                    Model.InputClassDict.TryGetValue(propertyShortTypeName, out var inputClass);
 #>
                 <div class="mb-3">
                     <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
-                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="form-control" />
+                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" />
                     <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
                 </div>
 <#  } #>
@@ -75,8 +76,7 @@ else
 
         if (<#= modelName #> is null)
         {
-            // Need a way to trigger a 404 here
-            // https://github.com/dotnet/aspnetcore/issues/45654
+            NavigationManager.NavigateTo("notfound");
         }
     }
 
@@ -94,8 +94,7 @@ else
         {
             if (!<#= modelName #>Exists(<#= modelName #>!.<#= primaryKeyName #>))
             {
-                // Need a way to trigger a 404 here
-                // https://github.com/dotnet/aspnetcore/issues/45654
+                NavigationManager.NavigateTo("notfound");
             }
             else
             {

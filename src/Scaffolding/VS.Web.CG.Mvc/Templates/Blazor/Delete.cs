@@ -65,8 +65,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write("\" OnValidSubmit=\"Delete");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\" FormName=\"delete\">\r\n            <button type=\"submit\" class=\"btn btn-danger\" di" +
-                    "sabled=\"@(");
+            this.Write("\" FormName=\"delete\" Enhance>\r\n            <button type=\"submit\" class=\"btn btn-da" +
+                    "nger\" disabled=\"@(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" is null)\">Delete</button> |\r\n            <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
@@ -89,9 +89,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(");\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n        {\r\n            // Need a way to trigger a 404 here\r\n          " +
-                    "  // https://github.com/dotnet/aspnetcore/issues/45654\r\n        }\r\n    }\r\n\r\n    " +
-                    "public async Task Delete");
+            this.Write(" is null)\r\n        {\r\n            NavigationManager.NavigateTo(\"notfound\");\r\n    " +
+                    "    }\r\n    }\r\n\r\n    public async Task Delete");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        DB.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));

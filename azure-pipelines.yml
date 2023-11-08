@@ -60,7 +60,6 @@ stages:
           # DotNet-Blob-Feed provides: dotnetfeed-storage-access-key-1
           # DotNet-Symbol-Server-Pats provides: microsoft-symbol-server-pat, symweb-symbol-server-pat
           # Publish-Build-Assets provides: MaestroAccessToken, BotAccount-dotnet-maestro-bot-PAT
-          - group: DotNet-Blob-Feed
           - group: DotNet-Symbol-Server-Pats
           - group: Publish-Build-Assets
           - _PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json

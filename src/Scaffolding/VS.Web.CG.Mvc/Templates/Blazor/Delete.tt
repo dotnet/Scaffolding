@@ -43,7 +43,7 @@
             <dd class="col-sm-10">@<#= modelNameLowerInv #>.<#= modelPropertyName #></dd>
         </dl>
 <#  } #>
-        <EditForm method="post" Model="<#= modelNameLowerInv #>" OnValidSubmit="Delete<#= modelName #>" FormName="delete">
+        <EditForm method="post" Model="<#= modelNameLowerInv #>" OnValidSubmit="Delete<#= modelName #>" FormName="delete" Enhance>
             <button type="submit" class="btn btn-danger" disabled="@(<#= modelNameLowerInv #> is null)">Delete</button> |
             <a href="/<#= pluralModelLowerInv #>">Back to List</a>
         </EditForm>
@@ -62,8 +62,7 @@
 
         if (<#= modelNameLowerInv #> is null)
         {
-            // Need a way to trigger a 404 here
-            // https://github.com/dotnet/aspnetcore/issues/45654
+            NavigationManager.NavigateTo("notfound");
         }
     }
 

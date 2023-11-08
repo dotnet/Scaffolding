@@ -54,8 +54,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" OnValidSubmit=\"Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\" FormName=\"create\">\r\n            <DataAnnotationsValidator />\r\n            <Vali" +
-                    "dationSummary class=\"text-danger\" />\r\n            ");
+            this.Write("\" FormName=\"create\" Enhance>\r\n            <DataAnnotationsValidator />\r\n         " +
+                    "   <ValidationSummary class=\"text-danger\" />\r\n            ");
 
                 foreach (var property in entityProperties)
                 {

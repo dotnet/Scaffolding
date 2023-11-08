@@ -51,8 +51,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" OnValidSubmit=\"Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\" FormName=\"edit\">\r\n                <DataAnnotationsValidator />\r\n               " +
-                    " <ValidationSummary />\r\n                <input type=\"hidden\" name=\"");
+            this.Write("\" FormName=\"edit\" Enhance>\r\n                <DataAnnotationsValidator />\r\n       " +
+                    "         <ValidationSummary />\r\n                <input type=\"hidden\" name=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
@@ -68,6 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
+                    Model.InputClassDict.TryGetValue(propertyShortTypeName, out var inputClass);
 
             this.Write("                <div class=\"mb-3\">\r\n                    <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -81,7 +82,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("\" class=\"form-control\" />\r\n                    <ValidationMessage For=\"() => ");
+            this.Write("\" class=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
+            this.Write("\" />\r\n                    <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
@@ -112,8 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(@" is null)
         {
-            // Need a way to trigger a 404 here
-            // https://github.com/dotnet/aspnetcore/issues/45654
+            NavigationManager.NavigateTo(""notfound"");
         }
     }
 
@@ -131,18 +133,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("!.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(@"))
-            {
-                // Need a way to trigger a 404 here
-                // https://github.com/dotnet/aspnetcore/issues/45654
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        NavigationManager.NavigateTo(""/");
+            this.Write("))\r\n            {\r\n                NavigationManager.NavigateTo(\"notfound\");\r\n   " +
+                    "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
+                    " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\");\r\n    }\r\n\r\n    bool ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));

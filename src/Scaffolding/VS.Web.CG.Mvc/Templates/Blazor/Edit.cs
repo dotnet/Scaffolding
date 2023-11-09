@@ -67,8 +67,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
                     string modelPropertyName = property.PropertyName;
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
-                    Model.InputTypeDict.TryGetValue(propertyShortTypeName, out var inputTypeName);
-                    Model.InputClassDict.TryGetValue(propertyShortTypeName, out var inputClass);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    var inputClass = Model.GetInputClassType(propertyShortTypeName);
 
             this.Write("                <div class=\"mb-3\">\r\n                    <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));

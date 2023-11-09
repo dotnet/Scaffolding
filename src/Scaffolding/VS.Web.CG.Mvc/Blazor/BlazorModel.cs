@@ -59,48 +59,40 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         public string DbContextNamespace { get; private set; }
         public string Template { get; set; }
 
-        public Dictionary<string, string> _inputTypeDict;
-        //used for Create page for the Blazor CRUD scenario
-        public Dictionary<string, string> InputTypeDict
+        //used for Create and Edit pages for the Blazor CRUD scenario
+        public string GetInputType(string inputType)
         {
-            get
+            if (string.IsNullOrEmpty(inputType))
             {
-                if (_inputTypeDict == null)
-                {
-                    _inputTypeDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                    {
-                        { "string", "InputText" },
-                        { "DateTime", "InputDate" },
-                        { "double", "InputNumber" },
-                        { "int", "InputNumber" },
-                        { "bool", "InputCheckbox" }
-                    };
-                }
+                return "InputText";
+            }
 
-                return _inputTypeDict;
+            switch (inputType)
+            { 
+                case "string":
+                    return "InputText";
+                case "DateTime":
+                    return "InputDate";
+                case "double":
+                case "decimal":
+                case "int":
+                    return "InputNumber";
+                case "bool":
+                    return "InputCheckbox";
+                default:
+                    return "InputText";
             }
         }
 
-        public Dictionary<string, string> _inputClassDict;
-        //used for Create page for the Blazor CRUD scenario
-        public Dictionary<string, string> InputClassDict
+        //used for Create and Edit pages for the Blazor CRUD scenario
+        public string GetInputClassType(string inputType)
         {
-            get
+            if (string.Equals(inputType, "bool", StringComparison.OrdinalIgnoreCase))
             {
-                if (_inputClassDict == null)
-                {
-                    _inputClassDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                    {
-                        { "string", "form-control" },
-                        { "DateTime", "form-control" },
-                        { "double", "form-control" },
-                        { "int", "form-control" },
-                        { "bool", "form-check-input" }
-                    };
-                }
-
-                return _inputClassDict;
+                return "form-check-input";
             }
+
+            return "form-control";
         }
 
         //namespaces to add in Endpoints file.

@@ -10,6 +10,8 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\SystemTextJson.props" />
+
   <ItemGroup>
     <EmbeddedResource Include="..\..\Shared\Microsoft.DotNet.Scaffolding.Shared\General\**\*.resx">
       <Link>Shared\%(RecursiveDir)%(FileName).resx</Link>

@@ -5,6 +5,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\SystemTextJson.props" />
+
   <ItemGroup>
     <Compile Remove="CleanUp.cs" />
     <Compile Remove="E2ETests.cs" />

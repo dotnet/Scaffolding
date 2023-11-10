@@ -9,6 +9,8 @@
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\SystemTextJson.props" />
+
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\tools\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj" />
     <ProjectReference Include="$(RepoRoot)\tools\dotnet-msidentity\dotnet-msidentity.csproj" />

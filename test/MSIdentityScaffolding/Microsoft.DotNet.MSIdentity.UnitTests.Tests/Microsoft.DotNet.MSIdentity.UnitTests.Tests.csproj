@@ -5,9 +5,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
-  </ItemGroup>
-
+  <Import Project="$(RepoRoot)eng\SystemTextJson.props" />
+  
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj" />
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />

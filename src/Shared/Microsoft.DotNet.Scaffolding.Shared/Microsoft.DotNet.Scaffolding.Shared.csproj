@@ -10,6 +10,8 @@
     <LangVersion>11</LangVersion>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\SystemTextJson.props" />
+  
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
@@ -37,5 +39,4 @@
       <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 </Project>

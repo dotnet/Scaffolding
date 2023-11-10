@@ -4,6 +4,7 @@
   <PropertyGroup>
     <UsingToolXliff>false</UsingToolXliff>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>2.0.7</VersionPrefix>
@@ -15,4 +16,8 @@
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
   </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="System.Text.Json" Version="7.0.3" />
+  </ItemGroup>
 </Project>

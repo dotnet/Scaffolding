@@ -10,6 +10,8 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\SystemTextJson.props" />
+
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Utils\VS.Web.CG.Utils.csproj" />
   </ItemGroup>
@@ -19,5 +21,4 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="$(MicrosoftCodeAnalysisRazorPackageVersion)" />
   </ItemGroup>
-
 </Project>

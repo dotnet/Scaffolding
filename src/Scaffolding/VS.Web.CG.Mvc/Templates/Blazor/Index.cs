@@ -30,7 +30,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     string pluralModel = Model.ModelType.PluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextName = Model.ContextTypeName;
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
@@ -39,14 +41,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\"\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
             this.Write(" DB\r\n");
 
-    if (!string.IsNullOrEmpty(Model.Namespace))
+    if (!string.IsNullOrEmpty(modelNamespace))
     {
         
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
             this.Write("\r\n");
   }
 

@@ -8,7 +8,9 @@
     string pluralModel = Model.ModelType.PluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextName = Model.ContextTypeName;
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
@@ -16,7 +18,14 @@
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/details"
-@inject <#= dbContextName #> DB
+@inject <#= dbContextFullName #> DB
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+@inject NavigationManager NavigationManager
 @using Microsoft.EntityFrameworkCore
 
 <PageTitle>Details</PageTitle>

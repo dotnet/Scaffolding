@@ -117,8 +117,8 @@
     <MicrosoftExtensionsConfigurationVersion>3.1.20</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.20</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
-    <MicrosoftGraphVersion>5.33.0</MicrosoftGraphVersion>
-    <MicrosoftIdentityClientExtensionsMsalVersion>2.32.0</MicrosoftIdentityClientExtensionsMsalVersion>
+    <MicrosoftGraphVersion>5.34.0</MicrosoftGraphVersion>
+    <MicrosoftIdentityClientExtensionsMsalVersion>4.57.0</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.3.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.3</NewtonsoftJsonMsIdentityPackageVersion>

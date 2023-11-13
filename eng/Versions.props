@@ -34,7 +34,7 @@
     <!-- Microsoft.Extensions.DependencyModel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0-rtm.23519.14</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.0</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->

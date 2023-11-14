@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <NoWarn>$(NoWarn);NU1605;NU5104;</NoWarn>
+    <NoWarn>$(NoWarn);NU5104;</NoWarn>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="7.0.3" />
-  </ItemGroup>
 </Project>

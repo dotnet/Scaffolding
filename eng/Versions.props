@@ -18,15 +18,15 @@
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>6.0.25</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>6.0.25</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>6.0.26</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>6.0.25</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>6.0.26</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>6.0.25</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>6.0.26</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>6.0.25</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>6.0.26</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.25</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.26</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>6.0.16</VersionPrefix>

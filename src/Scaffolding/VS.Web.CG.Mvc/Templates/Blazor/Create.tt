@@ -8,18 +8,20 @@
     string pluralModel = Model.ModelType.PluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextName = Model.ContextTypeName;
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/create"
-@inject <#=dbContextName #> DB
-@inject NavigationManager NavigationManager
+@inject <#=dbContextFullName #> DB
 <#
-    if (!string.IsNullOrEmpty(Model.Namespace))
+    if (!string.IsNullOrEmpty(modelNamespace))
     {
-        #>@using <#= Model.Namespace #>
+        #>@using <#= modelNamespace#>
 <#  }
 #>
+@inject NavigationManager NavigationManager
 
 <PageTitle>Create</PageTitle>
 

@@ -30,7 +30,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     string pluralModel = Model.ModelType.PluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextName = Model.ContextTypeName;
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
@@ -40,9 +42,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
             this.Write("/edit\"\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
-            this.Write(" DB\r\n@inject NavigationManager NavigationManager\r\n@using Microsoft.EntityFramewor" +
-                    "kCore\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
+            this.Write(" DB\r\n");
+
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
+            this.Write("\r\n");
+  }
+
+            this.Write("@inject NavigationManager NavigationManager\r\n@using Microsoft.EntityFrameworkCore" +
+                    "\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n<hr />\r\n@if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));

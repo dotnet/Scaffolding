@@ -30,24 +30,27 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     string pluralModel = Model.ModelType.PluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextName = Model.ContextTypeName;
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("/create\"\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
-            this.Write(" DB\r\n@inject NavigationManager NavigationManager\r\n");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
+            this.Write(" DB\r\n");
 
-    if (!string.IsNullOrEmpty(Model.Namespace))
+    if (!string.IsNullOrEmpty(modelNamespace))
     {
         
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
             this.Write("\r\n");
   }
 
-            this.Write("\r\n<PageTitle>Create</PageTitle>\r\n\r\n<h1>Create</h1>\r\n\r\n<h4>");
+            this.Write("@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r\n<" +
+                    "h1>Create</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
                     "ethod=\"post\" Model=\"");

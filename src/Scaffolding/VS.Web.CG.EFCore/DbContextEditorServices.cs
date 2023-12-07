@@ -346,19 +346,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var syntaxTree = sourceLocation.SourceTree;
                     var rootNode = syntaxTree.GetRoot();
                     var dbContextNode = rootNode.FindNode(sourceLocation.SourceSpan);
-                    var lastNode = dbContextNode.ChildNodes().Last();
-
                     var safeModelName = GetSafeModelName(modelType.Name, dbContext.TypeSymbol);
                     parameters.TryGetValue("nullableEnabled", out var nullableEnabled);
-                    var nullableEnabledBool = string.IsNullOrEmpty(nullableEnabled) ? true : nullableEnabled.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
+                    var nullableEnabledBool = string.IsNullOrEmpty(nullableEnabled) || nullableEnabled.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
                     var nullabilityClause = nullableEnabledBool ? " = default!;" : "";
                     // Todo : Need pluralization for property name below.
                     // It is not always safe to just use DbSet<modelType.Name> as there can be multiple class names in different namespaces.
                     var dbSetProperty = "public DbSet<" + modelType.FullName + "> " + safeModelName + " { get; set; }" + nullabilityClause + Environment.NewLine;
                     var propertyDeclarationWrapper = CSharpSyntaxTree.ParseText(dbSetProperty);
-
-                    var newNode = rootNode.InsertNodesAfter(lastNode,
-                            propertyDeclarationWrapper.GetRoot().WithTriviaFrom(lastNode).ChildNodes());
+                    var dbContextClassDeclaration = dbContextNode as ClassDeclarationSyntax;
+                    var baseTrivia = dbContextClassDeclaration.GetLeadingTrivia().ToString() + "    ";
+                    var newMemberTrivia = SyntaxFactory.ParseTrailingTrivia(baseTrivia);
+                    var memberDeclaration = SyntaxFactory.ParseMemberDeclaration(propertyDeclarationWrapper.ToString()).WithLeadingTrivia(newMemberTrivia);
+                    var withAdditionalMembers = new SyntaxList<MemberDeclarationSyntax>(dbContextClassDeclaration.Members.Append(memberDeclaration));
+                    var newDbContextClassDeclaration = dbContextClassDeclaration.WithMembers(withAdditionalMembers).WithTriviaFrom(dbContextNode);
+                    var newNode = rootNode.ReplaceNode(dbContextClassDeclaration, newDbContextClassDeclaration);
 
                     newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded("Microsoft.EntityFrameworkCore", newNode as CompilationUnitSyntax); //DbSet namespace
                     newNode = RoslynCodeEditUtilities.AddUsingDirectiveIfNeeded(modelType.Namespace, newNode as CompilationUnitSyntax);

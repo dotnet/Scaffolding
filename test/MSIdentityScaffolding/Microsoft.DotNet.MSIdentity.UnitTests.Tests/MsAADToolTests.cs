@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             string tenantsJsonFormatted = await jsonTenantTool.PrintTenantsList();
             if (string.IsNullOrEmpty(tenantsJsonFormatted))
             {
-                Assert.True(false, "Formatting tenants from Azure Management failed");
+                Assert.Fail("Formatting tenants from Azure Management failed");
             }
             var jsonResponse = JsonSerializer.Deserialize<JsonResponse>(tenantsJsonFormatted);
             var tenantJsonList = JsonSerializer.Deserialize<TenantInfo[]>(jsonResponse.Content.ToString());
@@ -57,10 +57,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             var aadB2CApp = tenantJsonList.Where(x => x.DisplayName.Equals("NET AAD B2C App")).FirstOrDefault();
             Assert.True(aadApp != null && aadB2CApp != null);
 
-            Assert.True(aadApp.TenantType.Equals("AAD"));
+            Assert.Equal("AAD", aadApp.TenantType);
             Assert.True(!string.IsNullOrEmpty(aadApp.TenantId));
 
-            Assert.True(aadB2CApp.TenantType.Equals("AAD B2C"));
+            Assert.Equal("AAD B2C", aadB2CApp.TenantType);
             Assert.True(!string.IsNullOrEmpty(aadB2CApp.TenantId));
         }
 
@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             var apps = await jsonAppTool.GetApplicationsAsync();
-            Assert.Equal(1, apps.Count);
+            Assert.Single(apps);
         }
     }
 }

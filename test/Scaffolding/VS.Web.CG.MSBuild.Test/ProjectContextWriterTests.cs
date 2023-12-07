@@ -44,8 +44,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
 
                 var projectContext = GetProjectContext(path, true);
                 //we know the project name is Test so test some basic properties.
-                Assert.True(string.Equals(projectContext.DepsFile, "Test.deps.json", StringComparison.OrdinalIgnoreCase));
-                Assert.True(string.Equals(projectContext.RuntimeConfig, "Test.runtimeconfig.json", StringComparison.OrdinalIgnoreCase));
+                Assert.Equal("Test.deps.json", projectContext.DepsFile, ignoreCase: true);
+                Assert.Equal("Test.runtimeconfig.json", projectContext.RuntimeConfig, ignoreCase: true);
                 Assert.False(string.IsNullOrEmpty(projectContext.TargetFramework));
                 Assert.False(string.IsNullOrEmpty(projectContext.TargetFrameworkMoniker));
                 Assert.True(projectContext.PackageDependencies.Any());
@@ -64,8 +64,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
 
                 var projectContext = GetProjectContext(path, true);
                 //we know the project name is Test so test some basic properties.
-                Assert.True(string.Equals(projectContext.DepsFile, "Test.deps.json", StringComparison.OrdinalIgnoreCase));
-                Assert.True(string.Equals(projectContext.RuntimeConfig, "Test.runtimeconfig.json", StringComparison.OrdinalIgnoreCase));
+                Assert.Equal("Test.deps.json", projectContext.DepsFile, ignoreCase: true);
+                Assert.Equal("Test.runtimeconfig.json", projectContext.RuntimeConfig, ignoreCase: true);
                 Assert.False(string.IsNullOrEmpty(projectContext.TargetFramework));
                 Assert.False(string.IsNullOrEmpty(projectContext.TargetFrameworkMoniker));
                 Assert.True(projectContext.PackageDependencies.Any());

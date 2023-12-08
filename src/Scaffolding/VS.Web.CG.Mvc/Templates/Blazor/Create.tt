@@ -1,0 +1,73 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+#>
+@page "/<#= pluralModelLowerInv #>/create"
+@inject <#=dbContextFullName #> DB
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h4><#= modelName #></h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Add<#= modelName #>" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <#
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    var inputClass = Model.GetInputClassType(propertyShortTypeName);
+            #>
+<div class="mb-3">
+                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" /> 
+                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
+            </div>        
+            <#  } #>
+<button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/<#= pluralModelLowerInv #>">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public <#= modelName #> <#= modelName #> { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task Add<#= modelName #>()
+    {
+        DB.<#= Model.ModelMetadata.EntitySetName #>.Add(<#= modelName #>);
+        await DB.SaveChangesAsync();
+        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+    }
+}

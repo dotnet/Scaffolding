@@ -34,6 +34,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
         /// </returns>
         public string InvokeTemplate(ITextTransformation template, IDictionary<string, object> templateParameters)
         {
+            if (template is null)
+            {
+                return string.Empty;
+            }
+
             if (templateParameters is not null && templateParameters.Any())
             {
                 foreach (var param in templateParameters)
@@ -42,13 +47,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
                 }
             }
 
-            string generatedCode = string.Empty;
-            if (template != null)
-            {
-                template.Initialize();
-                generatedCode = ProcessTemplate(template);
-            }
-            return generatedCode;
+            template.Initialize();
+            return ProcessTemplate(template);
         }
 
         private string ProcessTemplate(ITextTransformation transformation)

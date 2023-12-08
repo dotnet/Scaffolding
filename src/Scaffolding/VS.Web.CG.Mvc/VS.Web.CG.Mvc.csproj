@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
@@ -19,10 +19,12 @@
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net8.0\" />
     <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net8.0\" />
+    <EmbeddedResource Include="Blazor\blazorWebCrudChanges.json" Pack="true" PackagePath="lib\net8.0\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
+    <None Pack="true" Include="Templates\Blazor\*" PackagePath="Templates\Blazor\" />
     <None Pack="true" Include="Templates\MinimalApi\*" PackagePath="Templates\MinimalApi\" />
     <None Pack="true" Include="Templates\ControllerGenerator\*" PackagePath="Templates\ControllerGenerator\" />
     <None Pack="true" Include="Templates\MvcLayout\*" PackagePath="Templates\MvcLayout\" />
@@ -101,7 +103,45 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Blazor\blazorWebCrudChanges.json" />
     <None Remove="Minimal Api\minimalApiChanges.json" />
+    <None Remove="Templates\Blazor\Delete.Interfaces.cs" />
+    <None Remove="Templates\Blazor\Details.Interfaces.cs" />
+    <None Remove="Templates\Blazor\Edit.Interfaces.cs" />
+    <None Remove="Templates\Blazor\Index.Interfaces.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Templates\Blazor\Delete.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Details.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Edit.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Index.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Create.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Create.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\Blazor\Create.Interfaces.cs" />
+    <Compile Include="Templates\Blazor\Delete.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Delete.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\Blazor\Details.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Details.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\Blazor\Edit.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Edit.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\Blazor\Index.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Index.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -123,5 +163,59 @@
       <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\Blazor\Create.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Create.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\Create.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Create.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\Delete.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Delete.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\Delete.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Delete.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\Details.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Details.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\Details.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Details.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\Edit.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Edit.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\Edit.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Edit.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\Index.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Index.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\Index.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Index.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties parameterdefinitions_4blazor_1json__JsonSchema="json" /></VisualStudio></ProjectExtensions>
 
 </Project>

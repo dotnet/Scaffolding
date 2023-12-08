@@ -1,0 +1,83 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
+    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string entitySetName = Model.ModelMetadata.EntitySetName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+#>
+@page "/<#= pluralModelLowerInv #>/delete"
+@inject <#= dbContextFullName #> DB
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4><#= modelName #></h4>
+    <hr />
+    @if (<#= modelNameLowerInv #> is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+<#
+        foreach (var property in entityProperties)
+        {
+            string modelPropertyName = property.PropertyName;
+    #>
+        <dl class="row">
+            <dt class="col-sm-2"><#= modelPropertyName #></dt>
+            <dd class="col-sm-10">@<#= modelNameLowerInv #>.<#= modelPropertyName #></dd>
+        </dl>
+<#  } #>
+        <EditForm method="post" Model="<#= modelNameLowerInv #>" OnValidSubmit="Delete<#= modelName #>" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(<#= modelNameLowerInv #> is null)">Delete</button> |
+            <a href="/<#= pluralModelLowerInv #>">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    <#= modelName #>? <#= modelNameLowerInv #>;
+
+    [SupplyParameterFromQuery]
+    public <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        <#= modelNameLowerInv #> = await DB.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+
+        if (<#= modelNameLowerInv #> is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task Delete<#= modelName #>()
+    {
+        DB.<#= entitySetName #>.Remove(<#= modelNameLowerInv #>!);
+        await DB.SaveChangesAsync();
+        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+    }
+}

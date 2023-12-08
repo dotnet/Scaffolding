@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration
+namespace Microsoft.DotNet.Scaffolding.Shared
 {
     /// <summary>
     /// Default implementation of <see cref="IFileSystem"/>

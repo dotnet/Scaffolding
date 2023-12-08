@@ -74,13 +74,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 case "string":
                     return "InputText";
                 case "DateTime":
+                case "DateTimeOffset":
+                case "DateOnly":
+                case "TimeOnly":
                     return "InputDate";
-                case "double":
-                case "decimal":
                 case "int":
+                case "long":
+                case "short":
+                case "float":
+                case "decimal":
+                case "double":
                     return "InputNumber";
                 case "bool":
                     return "InputCheckbox";
+                case "enum":
+                case "enum[]":
+                    return "InputSelect";
                 default:
                     return "InputText";
             }

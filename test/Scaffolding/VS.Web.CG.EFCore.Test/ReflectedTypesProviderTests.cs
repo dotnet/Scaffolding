@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.Extensions.ProjectModel;
@@ -29,16 +30,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         }
 
         [Fact(Skip = "Disable tests on CI that need to load assemblies")]
-        public void TestGetReflectedType()
+        public async Task TestGetReflectedType()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 SetupProjectInformation(fileProvider);
 
-                var compilation = _workspace.CurrentSolution.Projects
+                var compilation = await _workspace.CurrentSolution.Projects
                     .First()
-                    .GetCompilationAsync()
-                    .Result;
+                    .GetCompilationAsync();
 
                 Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> func = (c) =>
                 {
@@ -61,16 +61,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         }
 
         [Fact(Skip = "test fail")]
-        public void TestGetReflectedType_FailedCompilation()
+        public async Task TestGetReflectedType_FailedCompilation()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {
                 SetupProjectInformation(fileProvider);
 
-                var compilation = _workspace.CurrentSolution.Projects
+                var compilation = await _workspace.CurrentSolution.Projects
                     .First()
-                    .GetCompilationAsync()
-                    .Result;
+                    .GetCompilationAsync();
 
                 Func<CodeAnalysis.Compilation, CodeAnalysis.Compilation> func = (c) =>
                 {

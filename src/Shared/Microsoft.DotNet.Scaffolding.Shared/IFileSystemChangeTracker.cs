@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.Scaffolding.Shared;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration
+namespace Microsoft.DotNet.Scaffolding.Shared
 {
     public interface IFileSystemChangeTracker
     {

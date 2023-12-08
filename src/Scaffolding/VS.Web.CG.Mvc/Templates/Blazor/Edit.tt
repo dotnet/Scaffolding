@@ -1,0 +1,120 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelType.Name;
+    string pluralModel = Model.ModelType.PluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
+    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string entitySetName = Model.ModelMetadata.EntitySetName;
+    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+#>
+@page "/<#= pluralModel #>/edit"
+@inject <#= dbContextFullName #> DB
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h4><#= modelName #></h4>
+<hr />
+@if (<#= modelName #> is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Update<#= modelName #>" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="<#= modelName #>.<#= primaryKeyName #>" value="@<#= modelName #>.<#= primaryKeyName #>" />
+<#
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    var inputClass = Model.GetInputClassType(propertyShortTypeName);
+#>
+                <div class="mb-3">
+                    <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
+                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" />
+                    <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
+                </div>
+<#  } #>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/<#= pluralModelLowerInv #>">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+
+    [SupplyParameterFromForm]
+    public <#= modelName #>? <#= modelName #> { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        <#= modelName #> ??= await DB.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+
+        if (<#= modelName #> is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task Update<#= modelName #>()
+    {
+        DB.Attach(<#= modelName #>!).State = EntityState.Modified;
+
+        try
+        {
+            await DB.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!<#= modelName #>Exists(<#= modelName #>!.<#= primaryKeyName #>))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+    }
+
+    bool <#= modelName #>Exists(<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerInv #>)
+    {
+        return DB.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
+    }
+}

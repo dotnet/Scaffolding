@@ -44,7 +44,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             try
             {
                 generator.Generate(model);
-                Assert.True(false, "Expected an exception");
+                Assert.Fail("Expected an exception");
             }
             catch (InvalidOperationException ex)
             {

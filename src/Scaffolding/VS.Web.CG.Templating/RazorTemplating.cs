@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
             var fileSystem = RazorProjectFileSystem.Create(Directory.GetCurrentDirectory());
             var projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, fileSystem, (builder) =>
             {
-                builder.SetCSharpLanguageVersion(LanguageVersion.Preview);
+                builder.SetCSharpLanguageVersion(LanguageVersion.Latest);
 
                 SectionDirective.Register(builder);
 

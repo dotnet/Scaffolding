@@ -94,17 +94,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 if (existingDbContext == null)
                 {
                     // We need to create one with what the user specified.
-                    DbContextClass = GetClassNameFromTypeName(_commandlineModel.DbContext);
-                    DbContextNamespace = GetNamespaceFromTypeName(_commandlineModel.DbContext)
+                    DbContextClass = IdentityHelper.GetClassNameFromTypeName(_commandlineModel.DbContext);
+                    DbContextNamespace = IdentityHelper.GetNamespaceFromTypeName(_commandlineModel.DbContext)
                         ?? defaultDbContextNamespace;
                     DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(_commandlineModel.DatabaseProviderString, _logger);
                 }
                 else
                 {
-                    ValidateExistingDbContext(existingDbContext);
+                    IdentityHelper.ValidateExistingDbContext(existingDbContext, _commandlineModel.UserClass);
                     IsGenerateCustomUser = false;
                     IsUsingExistingDbContext = true;
-                    UserType = FindUserTypeFromDbContext(existingDbContext);
+                    UserType = IdentityHelper.FindUserTypeFromDbContext(existingDbContext);
                     DbContextClass = existingDbContext.Name;
                     DbContextNamespace = existingDbContext.Namespace;
                 }
@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             else
             {
                 // --dbContext paramter was not specified. So we need to generate one using convention.
-                DbContextClass = GetDefaultDbContextName();
+                DbContextClass = IdentityHelper.GetDefaultDbContextName(_applicationInfo.ApplicationName);
                 DbContextNamespace = defaultDbContextNamespace;
                 DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(_commandlineModel.DatabaseProviderString, _logger);
             }
@@ -132,15 +132,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     var existingUser = await FindExistingType(_commandlineModel.UserClass);
                     if (existingUser != null)
                     {
-                        ValidateExistingUserType(existingUser);
+                        IdentityHelper.ValidateExistingUserType(existingUser);
                         IsGenerateCustomUser = false;
                         UserType = existingUser;
                     }
                     else
                     {
                         IsGenerateCustomUser = true;
-                        UserClass = GetClassNameFromTypeName(_commandlineModel.UserClass);
-                        UserClassNamespace = GetNamespaceFromTypeName(_commandlineModel.UserClass)
+                        UserClass = IdentityHelper.GetClassNameFromTypeName(_commandlineModel.UserClass);
+                        UserClassNamespace = IdentityHelper.GetNamespaceFromTypeName(_commandlineModel.UserClass)
                             ?? defaultDbContextNamespace;
                     }
                 }
@@ -509,141 +509,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
             }
-        }
-
-        private string GetDefaultDbContextName()
-        {
-            var defaultDbContextName = $"{_applicationInfo.ApplicationName}IdentityDbContext";
-
-            if (!SyntaxFacts.IsValidIdentifier(defaultDbContextName))
-            {
-                defaultDbContextName = "IdentityDataContext";
-            }
-
-            return defaultDbContextName;
-        }
-
-        private string GetNamespaceFromTypeName(string dbContext)
-        {
-            if (dbContext.LastIndexOf('.') == -1)
-            {
-                return null;
-            }
-
-            return dbContext.Substring(0, dbContext.LastIndexOf('.'));
-        }
-
-        private string GetClassNameFromTypeName(string dbContext)
-        {
-            return dbContext.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last();
-        }
-
-        private void ValidateExistingDbContext(Type existingDbContext)
-        {
-            var errorStrings = new List<string>();
-
-            // Validate that the dbContext inherits from IdentityDbContext.
-            bool foundValidParentDbContextClass = IsTypeDerivedFromIdentityDbContext(existingDbContext);
-
-            if (!foundValidParentDbContextClass)
-            {
-                errorStrings.Add(
-                    string.Format(MessageStrings.DbContextNeedsToInheritFromIdentityContextMessage,
-                        existingDbContext.Name,
-                        "Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext"));
-            }
-
-            // Validate that the `--userClass` parameter is not passed.
-            if (!string.IsNullOrEmpty(_commandlineModel.UserClass))
-            {
-                errorStrings.Add(MessageStrings.UserClassAndDbContextCannotBeSpecifiedTogether);
-            }
-
-            if (errorStrings.Any())
-            {
-                throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
-            }
-        }
-
-        private void ValidateExistingUserType(Type existingUser)
-        {
-            var errorStrings = new List<string>();
-
-            // Validate that the user type inherits from IdentityUser
-            bool foundValidParentDbContextClass = IsTypeDerivedFromIdentityUser(existingUser);
-
-            if (!foundValidParentDbContextClass)
-            {
-                errorStrings.Add(
-                    string.Format(MessageStrings.DbContextNeedsToInheritFromIdentityContextMessage,
-                        existingUser.Name,
-                        "Microsoft.AspNetCore.Identity.IdentityUser"));
-            }
-
-            if (errorStrings.Any())
-            {
-                throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
-            }
-        }
-
-        private static bool IsTypeDerivedFromIdentityUser(Type type)
-        {
-            var parentType = type.BaseType;
-            while (parentType != null && parentType != typeof(object))
-            {
-                if (parentType.FullName == "Microsoft.AspNetCore.Identity.IdentityUser"
-                    && parentType.Assembly.GetName().Name == "Microsoft.Extensions.Identity.Stores")
-                {
-                    return true;
-                }
-
-                parentType = parentType.BaseType;
-            }
-
-            return false;
-        }
-
-        private static bool IsTypeDerivedFromIdentityDbContext(Type type)
-        {
-            var parentType = type.BaseType;
-            while (parentType != null && parentType != typeof(object))
-            {
-                // There are multiple variations of IdentityDbContext classes.
-                // So have to use StartsWith instead of comparing names.
-                // 1. IdentityDbContext
-                // 2. IdentityDbContext <TUser, TRole, TKey>
-                // 3. IdentityDbContext <TUser, TRole, string>
-                // 4. IdentityDbContext<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken> etc.
-                if (parentType.Name.StartsWith("IdentityDbContext")
-                    && parentType.Namespace == "Microsoft.AspNetCore.Identity.EntityFrameworkCore"
-                    && parentType.Assembly.GetName().Name == "Microsoft.AspNetCore.Identity.EntityFrameworkCore")
-                {
-                    return true;
-                }
-
-                parentType = parentType.BaseType;
-            }
-
-            return false;
-        }
-
-        private Type FindUserTypeFromDbContext(Type existingDbContext)
-        {
-            var usersProperty = existingDbContext.GetProperties()
-                .FirstOrDefault(p => p.Name == "Users");
-
-            if (usersProperty == null ||
-                !usersProperty.PropertyType.IsGenericType ||
-                usersProperty.PropertyType.GetGenericArguments().Count() != 1)
-            {
-                // The IdentityDbContext has DbSet<UserType> Users property.
-                // The only case this would happen is if the user hides the inherited property.
-                throw new InvalidOperationException(
-                    string.Format(MessageStrings.UserClassCouldNotBeDetermined,
-                        existingDbContext.Name));
-            }
-
-            return usersProperty.PropertyType.GetGenericArguments().First();
         }
 
         private async Task<Type> FindExistingType(string type)

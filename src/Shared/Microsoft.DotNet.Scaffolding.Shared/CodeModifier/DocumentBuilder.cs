@@ -314,6 +314,26 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return updatedMethod ?? originalMethod;
         }
 
+        internal static async Task ApplyTextReplacements(CodeFile file, Document document, CodeChangeOptions toolOptions)
+        {
+            if (document is null)
+            {
+                return;
+            }
+
+            var replacements = file.Replacements.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+            if (!replacements.Any())
+            {
+                return;
+            }
+
+            var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
+            if (editedDocument != null)
+            {
+                await ProjectModifierHelper.UpdateDocument(editedDocument);
+            }
+        }
+
         private static SyntaxNode InsertBefore(CodeSnippet codeChange, IEnumerable<SyntaxNode> children, SyntaxNode originalMethod)
         {
             var followingNode = GetFollowingNode(codeChange.InsertBefore, children);

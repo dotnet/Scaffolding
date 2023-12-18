@@ -1,0 +1,12 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+@page "/Account/InvalidUser"
+
+<PageTitle>Invalid user</PageTitle>
+
+<h3>Invalid user</h3>
+
+<StatusMessage />

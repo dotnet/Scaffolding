@@ -119,7 +119,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 Namespace = modelTypeAndContextModel.ModelType.Namespace,
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata,
                 DatabaseProvider = model.DatabaseProvider,
-                Template = model.TemplateName
+                Template = model.TemplateName,
+                BlazorWebAppProperties = await GetBlazorPropertiesAsync()
             };
 
             ExecuteTemplates(templateModel);
@@ -226,6 +227,65 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
+        private async Task<IDictionary<string, string>> GetBlazorPropertiesAsync()
+        {
+            var blazorAppProperties = new Dictionary<string, string>();
+            //get Program.cs document
+            var allTypes = ModelTypesLocator.GetAllTypes();
+            var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var programDocument = project.GetUpdatedDocument(FileSystem, programType);
+            var appRazorDocument = project.Documents.FirstOrDefault(x => x.FilePath.ContainsIgnoreCase("App.razor"));
+            bool hasAddRazorComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddRazorComponentsMethod, IRazorComponentsBuilderType);
+            blazorAppProperties.Add("hasAddRazorComponents", hasAddRazorComponents.ToString());
+            if (!hasAddRazorComponents)
+            {
+                return blazorAppProperties;
+            }
+            //AddRazorComponents() is present, check if it is server or webassembly.
+            else
+            {
+                bool hasInteractiveServerComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveServerComponentsMethod, IRazorComponentsBuilderType);
+                bool hasInteractiveWebAssemblyComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveWebAssemblyComponentsMethod, IRazorComponentsBuilderType);
+                bool addInteractiveComponents = !hasInteractiveServerComponents && !hasInteractiveWebAssemblyComponents;
+                blazorAppProperties.Add("hasInteractiveServerComponents", hasInteractiveServerComponents.ToString());
+                blazorAppProperties.Add("hasInteractiveWebAssemblyComponents", hasInteractiveWebAssemblyComponents.ToString());
+                if (addInteractiveComponents)
+                {
+                    return blazorAppProperties;
+                }
+            }
+
+            //check for MapRazorComponents
+            bool hasMapRazorComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, MapRazorComponentsMethod, IEndpointRouteBuilderContainingType);
+            blazorAppProperties.Add("hasMapRazorComponents", hasMapRazorComponents.ToString());
+            if (!hasMapRazorComponents)
+            {
+                return blazorAppProperties;
+            }
+            //MapRazorComponents() is present, check if it is server or webassembly.
+            else
+            {
+                bool hasInteractiveServerRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveServerRenderModeMethod, RazorComponentsEndpointsConventionBuilderType);
+                bool hasInteractiveWebAssemblyRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveWebAssemblyRenderModeMethod, RazorComponentsEndpointsConventionBuilderType);
+                bool addInteractiveRenderMode = !hasInteractiveServerRenderMode && !hasInteractiveWebAssemblyRenderMode;
+                blazorAppProperties.Add("hasInteractiveServerRenderMode", hasInteractiveServerRenderMode.ToString());
+                blazorAppProperties.Add("hasInteractiveWebAssemblyRenderMode", hasInteractiveWebAssemblyRenderMode.ToString());
+
+                if (addInteractiveRenderMode)
+                {
+                    return blazorAppProperties;
+                }
+            }
+
+            if (appRazorDocument != null)
+            {
+                //bool isGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, );
+            }
+            
+            return blazorAppProperties;
+        }
+
         private string GetBlazorCodeModifierConfig(Assembly assembly, string resourceName)
         {
             string jsonText = string.Empty;
@@ -328,6 +388,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private const string DetailsBlazorTemplate = "Details.tt";
         private const string EditBlazorTemplate = "Edit.tt";
         private const string IndexBlazorTemplate = "Index.tt";
+        private const string IEndpointRouteBuilderContainingType = "Microsoft.AspNetCore.Routing.IEndpointRouteBuilder";
+        private const string IRazorComponentsBuilderType = "Microsoft.Extensions.DependencyInjection.IRazorComponentsBuilder";
+        private const string RazorComponentsEndpointsConventionBuilderType = "Microsoft.AspNetCore.Builder.RazorComponentsEndpointsConventionBuilder";
+        private const string IServerSideBlazorBuilderType = "Microsoft.Extensions.DependencyInjection.IServerSideBlazorBuilder";
+        private const string AddInteractiveWebAssemblyComponentsMethod = "AddInteractiveWebAssemblyComponents";
+        private const string AddInteractiveServerComponentsMethod = "AddInteractiveServerComponents";
+        private const string AddInteractiveWebAssemblyRenderModeMethod = "AddInteractiveWebAssemblyRenderMode";
+        private const string AddInteractiveServerRenderModeMethod = "AddInteractiveServerRenderMode";
+        private const string AddRazorComponentsMethod = "AddRazorComponents";
+        private const string MapRazorComponentsMethod = "MapRazorComponents";
+        private const string GlobalServerRenderModeText = @"<HeadOutlet @rendermode=""@InteractiveServer"" />";
+        private const string GlobalWebAssemblyRenderModeText = @"<HeadOutlet @rendermode=""@InteractiveWebAssembly"" />";
+        private const string GlobalWebAssemblyRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveWebAssembly"" />";
+        private const string GlobalServerRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveServer"" />";
+
         private Dictionary<string, string> _crudTemplates;
         private Dictionary<string, string> CRUDTemplates
         {

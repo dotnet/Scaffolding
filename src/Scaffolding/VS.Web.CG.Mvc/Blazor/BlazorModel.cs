@@ -32,6 +32,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
+        public IDictionary<string, string> BlazorWebAppProperties { get; set; }
+
         //Database type eg. SQL Server, SQLite, Cosmos DB, Postgres and more later.
         public DbProvider DatabaseProvider { get; set; }
 

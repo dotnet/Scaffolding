@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        public IDictionary<string, string> BlazorWebAppProperties { get; set; }
+        public BlazorWebAppProperties BlazorWebAppProperties { get; set; }
 
         //Database type eg. SQL Server, SQLite, Cosmos DB, Postgres and more later.
         public DbProvider DatabaseProvider { get; set; }
@@ -132,5 +132,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return new HashSet<string>(requiredNamespaces);
             }
         }
+    }
+
+    public class BlazorWebAppProperties
+    {
+        public bool AddRazorComponentsNeeded { get; set; }
+        public bool InteractiveServerComponentsExists { get; set; }
+        public bool InteractiveWebAssemblyComponentsExists { get; set; }
+        public bool MapRazorComponentsNeeded { get; set; }
+        public bool InteractiveServerRenderModeNeeded { get; set; }
+        public bool InteractiveWebAssemblyRenderModeNeeded { get; set; }
     }
 }

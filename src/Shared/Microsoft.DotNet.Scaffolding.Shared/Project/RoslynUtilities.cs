@@ -123,13 +123,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return fileText.ContainsIgnoreCase(text);
         }   
 
-        internal static bool SymbolMatchesType(IMethodSymbol symbol, string? methodName, string methodContainingType)
+        internal static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string methodContainingType)
         {
             return SymbolMatchesType(symbol, methodName, new string[] { methodContainingType });
         }
 
 
-        private static bool SymbolMatchesType(IMethodSymbol symbol, string? methodName, string[] methodContainingTypes)
+        private static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)
         {
             if (symbol is null || string.IsNullOrEmpty(methodName) || methodContainingTypes is null || !methodContainingTypes.Any())
             {

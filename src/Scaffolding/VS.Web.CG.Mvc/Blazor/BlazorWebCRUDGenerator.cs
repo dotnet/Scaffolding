@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -100,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 Logger,
                 areaName: string.Empty);
 
-            //check if getting model and dbcontext was successfull
+            //check if getting model and dbcontext was successful
             if (modelTypeAndContextModel is null ||
                 modelTypeAndContextModel.ContextProcessingResult is null ||
                 modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus is ContextProcessingStatus.MissingContext ||
@@ -227,60 +228,41 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        private async Task<IDictionary<string, string>> GetBlazorPropertiesAsync()
+        private async Task<BlazorWebAppProperties> GetBlazorPropertiesAsync()
         {
-            var blazorAppProperties = new Dictionary<string, string>();
-            //get Program.cs document
+            Debugger.Launch();
+            var blazorAppProperties = new BlazorWebAppProperties();
+            //get Program.cs, App.razor and Routes.razor document
             var allTypes = ModelTypesLocator.GetAllTypes();
             var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
             var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
             var programDocument = project.GetUpdatedDocument(FileSystem, programType);
             var appRazorDocument = project.Documents.FirstOrDefault(x => x.FilePath.ContainsIgnoreCase("App.razor"));
-            bool hasAddRazorComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddRazorComponentsMethod, IRazorComponentsBuilderType);
-            blazorAppProperties.Add("hasAddRazorComponents", hasAddRazorComponents.ToString());
-            if (!hasAddRazorComponents)
+            var routesRazorDocument = project.Documents.FirstOrDefault(x => x.FilePath.ContainsIgnoreCase("Routes.razor"));
+
+            blazorAppProperties.AddRazorComponentsNeeded = !(await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddRazorComponentsMethod, IRazorComponentsBuilderType));
+            if (!blazorAppProperties.AddRazorComponentsNeeded)
             {
-                return blazorAppProperties;
-            }
-            //AddRazorComponents() is present, check if it is server or webassembly.
-            else
-            {
-                bool hasInteractiveServerComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveServerComponentsMethod, IRazorComponentsBuilderType);
-                bool hasInteractiveWebAssemblyComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveWebAssemblyComponentsMethod, IRazorComponentsBuilderType);
-                bool addInteractiveComponents = !hasInteractiveServerComponents && !hasInteractiveWebAssemblyComponents;
-                blazorAppProperties.Add("hasInteractiveServerComponents", hasInteractiveServerComponents.ToString());
-                blazorAppProperties.Add("hasInteractiveWebAssemblyComponents", hasInteractiveWebAssemblyComponents.ToString());
-                if (addInteractiveComponents)
-                {
-                    return blazorAppProperties;
-                }
+                blazorAppProperties.InteractiveServerComponentsExists = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveServerComponentsMethod, IRazorComponentsBuilderType);
+                blazorAppProperties.InteractiveWebAssemblyComponentsExists = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveWebAssemblyComponentsMethod, IRazorComponentsBuilderType);
             }
 
-            //check for MapRazorComponents
-            bool hasMapRazorComponents = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, MapRazorComponentsMethod, IEndpointRouteBuilderContainingType);
-            blazorAppProperties.Add("hasMapRazorComponents", hasMapRazorComponents.ToString());
-            if (!hasMapRazorComponents)
-            {
-                return blazorAppProperties;
-            }
-            //MapRazorComponents() is present, check if it is server or webassembly.
-            else
+            blazorAppProperties.MapRazorComponentsNeeded = !(await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, MapRazorComponentsMethod, IEndpointRouteBuilderContainingType));
+            if (!blazorAppProperties.MapRazorComponentsNeeded)
             {
                 bool hasInteractiveServerRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveServerRenderModeMethod, RazorComponentsEndpointsConventionBuilderType);
                 bool hasInteractiveWebAssemblyRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, AddInteractiveWebAssemblyRenderModeMethod, RazorComponentsEndpointsConventionBuilderType);
-                bool addInteractiveRenderMode = !hasInteractiveServerRenderMode && !hasInteractiveWebAssemblyRenderMode;
-                blazorAppProperties.Add("hasInteractiveServerRenderMode", hasInteractiveServerRenderMode.ToString());
-                blazorAppProperties.Add("hasInteractiveWebAssemblyRenderMode", hasInteractiveWebAssemblyRenderMode.ToString());
 
-                if (addInteractiveRenderMode)
-                {
-                    return blazorAppProperties;
-                }
+                blazorAppProperties.InteractiveServerRenderModeNeeded = !hasInteractiveServerRenderMode && blazorAppProperties.InteractiveServerComponentsExists;
+                blazorAppProperties.InteractiveWebAssemblyRenderModeNeeded = !hasInteractiveWebAssemblyRenderMode && blazorAppProperties.InteractiveWebAssemblyComponentsExists && blazorAppProperties.InteractiveServerRenderModeNeeded;
             }
 
             if (appRazorDocument != null)
             {
-                //bool isGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, );
+                bool isGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalServerRenderModeText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalWebAssemblyRenderModeText);
+                bool isRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routesRazorDocument, GlobalServerRenderModeRoutesText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(routesRazorDocument, GlobalWebAssemblyRenderModeRoutesText);
             }
             
             return blazorAppProperties;

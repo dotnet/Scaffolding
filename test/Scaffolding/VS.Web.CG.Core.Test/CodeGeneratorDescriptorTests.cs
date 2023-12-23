@@ -51,8 +51,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
 
             //Act
             var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorAction);
-            Assert.Equal("GenerateCode method with a model parameter is not found in class: " +
-                "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithGenerateCodeNoParameters",
+            Assert.Equal("[GenerateCode] method with a model parameter is not found in class: " +
+                "[Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithGenerateCodeNoParameters]",
                 ex.Message);
         }
 
@@ -66,8 +66,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
 
             //Act
             var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorAction);
-            Assert.Equal("Multiple GenerateCode methods with a model parameter are found in class: " +
-                "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+ClassWithMultipleGenerateCodeMethods",
+            Assert.Equal("Multiple [GenerateCode] methods with a model parameter are found in class: " +
+                "[Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+ClassWithMultipleGenerateCodeMethods]",
                 ex.Message);
         }
 
@@ -119,7 +119,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
             //Act & Assert
             var ex = Assert.Throws<InvalidOperationException>(() => descriptor.CodeGeneratorInstance);
             Assert.StartsWith("There was an error creating the code generator instance: " +
-                "Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithDependencies", ex.Message);
+                "[Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests+CodeGeneratorWithDependencies]", ex.Message);
         }
 
         [Alias("MyAlias")]

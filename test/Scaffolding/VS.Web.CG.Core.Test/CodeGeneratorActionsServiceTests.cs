@@ -28,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                     "Template",
                     new[] { "TemplateFolder1", "TemplateFolder2" },
                     null));
-            Assert.Equal("Template file Template not found within search paths TemplateFolder1;TemplateFolder2", ex.Message);
+            Assert.Equal("Template file 'Template' not found within search paths [TemplateFolder1;TemplateFolder2]", ex.Message);
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
                     templateName,
                     new[] { "TemplateFolder1", "TemplateFolder2" },
                     null));
-            Assert.Equal("There was an error running the template " + templatePath + ": Template Processing Failed:Error1", ex.Message);
+            Assert.Equal($"There was an error running the template at '{ templatePath }': [Template Processing Failed:Error1]", ex.Message);
         }
 
         [Fact]

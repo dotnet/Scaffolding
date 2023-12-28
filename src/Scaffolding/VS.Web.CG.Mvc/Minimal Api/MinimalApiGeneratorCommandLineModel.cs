@@ -27,16 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         [Option(Name = "endpointsNamespace", ShortName = "namespace", Description = "Specify the name of the namespace to use for the generated controller")]
         public string EndpointsNamespace { get; set; }
 
-        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqLite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSqlite { get; set; }
-
-        //adding UseSqlite2 for backwards compat. for VS Mac scenarios (casing issue).
-        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSqlite2 { get; set; }
-
-        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options (without quotes) include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'. Example: -dbProvider sqlite")]
         public string DatabaseProviderString { get; set; }
         public DbProvider DatabaseProvider { get; set; }
 

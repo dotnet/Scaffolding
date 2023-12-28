@@ -64,25 +64,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 throw new ArgumentNullException(nameof(model));
             }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (model.UseSqlite || model.UseSqlite2)
+            if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
             {
-#pragma warning restore CS0618 // Type or member is obsolete
-                //instead of throwing an error, letting the devs know that its obsolete.
-                logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
-                //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
-                if (string.IsNullOrEmpty(model.DatabaseProviderString))
-                {
-                    model.DatabaseProvider = DbProvider.SQLite;
-                    model.DatabaseProviderString = EfConstants.SQLite;
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
-                {
-                    model.DatabaseProvider = dbProvider;
-                }
+                model.DatabaseProvider = dbProvider;
             }
         }
     }

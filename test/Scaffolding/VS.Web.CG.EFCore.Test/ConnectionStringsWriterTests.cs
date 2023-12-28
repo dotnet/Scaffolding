@@ -28,8 +28,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var fs = new MockFileSystem();
             var testObj = GetTestObject(fs);
 
-            //Act, test obsolete AddConnectionString
-            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid", false);
             //test SqlServer
             testObj.AddConnectionString("MyDbContext2", "MyDbContext-SqlServerDb", DbProvider.SqlServer);
             //test SqlServer
@@ -41,7 +39,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             //Assert
             string expected = @"{
   ""ConnectionStrings"": {
-    ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true"",
     ""MyDbContext2"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-SqlServerDb;Trusted_Connection=True;MultipleActiveResultSets=true"",
     ""MyDbContext3"": ""Data Source=MyDbContext-SqliteDb.db"",
     ""MyDbContext4"": ""AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="",
@@ -58,14 +55,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         [Theory]
         // Local Db Tests
         // Empty appsettings.json
-        [InlineData(false, "{}",
+        [InlineData(DbProvider.SqlServer, "{}",
                     @"{
   ""ConnectionStrings"": {
     ""MyDbContext"": ""Server=(localdb)\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true""
   }
 }")]
         // File with no node for connection name
-        [InlineData(false, @"{
+        [InlineData(DbProvider.SqlServer, @"{
   ""ConnectionStrings"": {
   }
 }",
@@ -76,7 +73,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 }")]
         // File with node for connection name and also existing ConnectionString property
         // modification should be skipped in this case
-        [InlineData(false, @"{
+        [InlineData(DbProvider.SqlServer, @"{
   ""ConnectionStrings"": {
     ""MyDbContext"": ""SomeExistingValue""
   }
@@ -87,14 +84,14 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
   }
 }")]
         // SQLite tests
-        [InlineData(true, "{}",
+        [InlineData(DbProvider.SQLite, "{}",
                     @"{
   ""ConnectionStrings"": {
     ""MyDbContext"": ""Data Source=MyDbContext-NewGuid.db""
   }
 }")]
         // File with no node for connection name
-        [InlineData(true, @"{
+        [InlineData(DbProvider.SQLite, @"{
   ""ConnectionStrings"": {
   }
 }",
@@ -105,7 +102,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 }")]
         // File with node for connection name and also existing ConnectionString property
         // modification should be skipped in this case
-        [InlineData(true, @"{
+        [InlineData(DbProvider.SQLite, @"{
   ""ConnectionStrings"": {
     ""MyDbContext"": ""SomeExistingValue""
   }
@@ -115,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     ""MyDbContext"": ""SomeExistingValue""
   }
 }")]
-        public void AddConnectionString_Modifies_App_Settings_File_As_Required(bool useSqLite, string previousContent, string newContent)
+        public void AddConnectionString_Modifies_App_Settings_File_As_Required(DbProvider dbProvider, string previousContent, string newContent)
         {
             //Arrange
             var fs = new MockFileSystem();
@@ -124,7 +121,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var testObj = GetTestObject(fs);
 
             //Act
-            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid", useSqLite);
+            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid", dbProvider);
 
             //Assert
             Assert.Equal(newContent, fs.ReadAllText(appSettingsPath), ignoreCase: false, ignoreLineEndingDifferences: true);

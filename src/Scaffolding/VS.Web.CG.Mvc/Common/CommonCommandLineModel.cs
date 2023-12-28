@@ -16,15 +16,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Option(Name = "dataContext", ShortName = "dc", Description = "DbContext class to use")]
         public string DataContextClass { get; set; }
 
-        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqLite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSqlite { get; set; }
-
-        //adding UseSqlite2 for backwards compat. for VS Mac scenarios (casing issue).
-        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSqlite2 { get; set; }
-
         [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
         public string DatabaseProviderString { get; set; }
         public DbProvider DatabaseProvider { get; set; }
@@ -76,25 +67,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 throw new ArgumentNullException(nameof(model));
             }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (model.UseSqlite || model.UseSqlite2)
+            if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
             {
-#pragma warning restore CS0618 // Type or member is obsolete
-                //instead of throwing an error, letting the devs know that its obsolete.
-                logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
-                //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
-                if (string.IsNullOrEmpty(model.DatabaseProviderString))
-                {
-                    model.DatabaseProvider = DbProvider.SQLite;
-                    model.DatabaseProviderString = EfConstants.SQLite;
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
-                {
-                    model.DatabaseProvider = dbProvider;
-                }
+                model.DatabaseProvider = dbProvider;
             }
         }
     }

@@ -222,10 +222,6 @@
             {
               "Name": "dataBaseName",
               "Type": "System.String"
-            },
-            {
-              "Name": "useSQLite",
-              "Type": "System.Boolean"
             }
           ],
           "ReturnType": "System.Void",
@@ -651,10 +647,6 @@
             {
               "Name": "dataBaseName",
               "Type": "System.String"
-            },
-            {
-              "Name": "useSQLite",
-              "Type": "System.Boolean"
             }
           ],
           "ReturnType": "System.Void",

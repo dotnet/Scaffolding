@@ -13,12 +13,10 @@
               }
             },
             {
-              "Block": "AddInteractiveServerRenderMode()",
-              "Parent": "MapRazorComponents<App>",
-              "CodeChangeType": "MemberAccess",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter();",
               "LeadingTrivia": {
-                "Newline": true,
-                "NumberOfSpaces": 4
+                "Newline": true
               }
             }
           ]

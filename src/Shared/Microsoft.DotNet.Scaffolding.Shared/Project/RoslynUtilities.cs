@@ -128,6 +128,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return SymbolMatchesType(symbol, methodName, new string[] { methodContainingType });
         }
 
+        internal static async Task<Tuple<IfStatementSyntax, IfStatementSyntax>> GetDevelopmentBlock(Document document)
+        {
+            var root = await document.GetSyntaxRootAsync();
+            var ifStatements = root.DescendantNodes().OfType<IfStatementSyntax>();
+            var developmentStatement = ifStatements.FirstOrDefault(x => x.ToFullString().Contains("app.Environment.IsDevelopment()"));
+            var negatedDevelopmentStatementFound = ifStatements.FirstOrDefault(x => x.ToFullString().Contains("!app.Environment.IsDevelopment()"));
+            if (developmentStatement != null && developmentStatement.Statement is BlockSyntax ifBlock)
+            {
+                return Tuple.Create(developmentStatement, developmentStatement);
+            }
+
+            if (negatedDevelopmentStatementFound != null && negatedDevelopmentStatementFound.Statement is BlockSyntax ifBlock2)
+            {
+                //check if else block exists, if not create
+            }
+
+            return null;
+        }
 
         private static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)
         {
@@ -138,10 +156,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
             if (symbol.IsExtensionMethod)
             {
-                if ((methodName is null || string.Equals(symbol.Name, methodName, StringComparison.Ordinal)) &&
-                        methodContainingTypes.Contains(symbol.ReducedFrom?.Parameters.FirstOrDefault()?.Type.ToString(), StringComparer.Ordinal))
+                if ((methodName is null || string.Equals(symbol.Name, methodName, StringComparison.Ordinal)))
                 {
-                    return true;
+                    var methodContainingTypeIntersections = methodContainingTypes.Intersect(symbol.ReducedFrom?.Parameters.Select(x => x.Type.ToString()), StringComparer.Ordinal);
+                    return methodContainingTypeIntersections.Any();
                 }
             }
             else

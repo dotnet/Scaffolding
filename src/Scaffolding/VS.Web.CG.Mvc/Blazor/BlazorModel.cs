@@ -136,11 +136,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
     public class BlazorWebAppProperties
     {
-        public bool AddRazorComponentsNeeded { get; set; }
+        public bool AddRazorComponentsExists { get; set; }
         public bool InteractiveServerComponentsExists { get; set; }
         public bool InteractiveWebAssemblyComponentsExists { get; set; }
-        public bool MapRazorComponentsNeeded { get; set; }
+        public bool MapRazorComponentsExists { get; set; }
         public bool InteractiveServerRenderModeNeeded { get; set; }
         public bool InteractiveWebAssemblyRenderModeNeeded { get; set; }
+        public bool IsGlobal { get; set; }
+        public bool AreRoutesGlobal { get; set; }
     }
 }

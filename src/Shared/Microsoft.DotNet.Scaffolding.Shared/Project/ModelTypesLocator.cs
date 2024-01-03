@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
@@ -25,6 +26,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
                 .Aggregate((col1, col2) => col1.Concat(col2).ToList())
                 .Select(ts => ModelType.FromITypeSymbol(ts));
+        }
+
+        public async Task<IEnumerable<ITypeSymbol>> GetAllTypesAsync()
+        {
+            var projectCompilations = await Task.WhenAll(_projectWorkspace.CurrentSolution.Projects
+                .Select(async project => await project.GetCompilationAsync()));
+            var allITypeSymbols = projectCompilations.SelectMany(RoslynUtilities.GetDirectTypesInCompilation);
+            return allITypeSymbols;
         }
 
         public IEnumerable<Document> GetAllDocuments()

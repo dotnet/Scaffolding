@@ -61,16 +61,6 @@
       "Name": "noPageModel",
       "ShortName": "npm",
       "Description": "Switch to not generate a PageModel class for Empty template"
-    },
-    {
-      "Name": "databaseProvider",
-      "ShortName": "dbProvider",
-      "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
-    },
-    {
-      "Name": "useSqLite",
-      "ShortName": "sqlite",
-      "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
     }
   ]
 }

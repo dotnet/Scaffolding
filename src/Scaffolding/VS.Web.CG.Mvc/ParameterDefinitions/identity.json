@@ -52,11 +52,6 @@
       "Name": "bootstrapVersion",
       "ShortName": "b",
       "Description": "Specify the bootstrap version. Valid values: '3', '4'. Default is 4."
-    },
-    {
-      "Name": "useSqLite",
-      "ShortName": "sqlite",
-      "Description": "Flag to specify if DbContext should use SQLite instead of SQL Server."
     }
   ]
 }

@@ -27,16 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         [Option(Name = "endpointsNamespace", ShortName = "namespace", Description = "Specify the name of the namespace to use for the generated controller")]
         public string EndpointsNamespace { get; set; }
 
-        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqLite", ShortName = "sqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSqlite { get; set; }
-
-        //adding UseSqlite2 for backwards compat. for VS Mac scenarios (casing issue).
-        [Obsolete("Use --databaseProvider or -dbProvider to configure database type instead")]
-        [Option(Name = "useSqlite", Description = "Flag to specify if DbContext should use SQLite instead of SQL Server.")]
-        public bool UseSqlite2 { get; set; }
-
-        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]
+        [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options (without quotes) include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'. Example: -dbProvider sqlite")]
         public string DatabaseProviderString { get; set; }
         public DbProvider DatabaseProvider { get; set; }
 
@@ -73,25 +64,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 throw new ArgumentNullException(nameof(model));
             }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (model.UseSqlite || model.UseSqlite2)
+            if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
             {
-#pragma warning restore CS0618 // Type or member is obsolete
-                //instead of throwing an error, letting the devs know that its obsolete.
-                logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
-                //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
-                if (string.IsNullOrEmpty(model.DatabaseProviderString))
-                {
-                    model.DatabaseProvider = DbProvider.SQLite;
-                    model.DatabaseProviderString = EfConstants.SQLite;
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
-                {
-                    model.DatabaseProvider = dbProvider;
-                }
+                model.DatabaseProvider = dbProvider;
             }
         }
     }

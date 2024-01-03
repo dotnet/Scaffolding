@@ -690,27 +690,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 errorStrings.Add(string.Format(MessageStrings.InvalidDbContextClassName, model.DbContext));
             }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (model.UseSqlite || model.UseSqlite2)
-            {
-#pragma warning restore CS0618 // Type or member is obsolete
-                //instead of throwing an error, letting the devs know that its obsolete.
-                _logger.LogMessage(MessageStrings.SqliteObsoleteOption, LogMessageLevel.Information);
-                //Setting DatabaseProvider to SQLite if --databaseProvider|-dbProvider is not provided.
-                if (string.IsNullOrEmpty(model.DatabaseProviderString))
-                {
-                    model.DatabaseProvider = DbProvider.SQLite;
-                    model.DatabaseProviderString = EfConstants.SQLite;
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(model.DatabaseProviderString) && EfConstants.AllDbProviders.TryGetValue(model.DatabaseProviderString, out var dbProvider))
-                {
-                    model.DatabaseProvider = dbProvider;
-                }
-            }
-
             if (!string.IsNullOrEmpty(model.DatabaseProviderString) && !EfConstants.IdentityDbProviders.Keys.Contains(model.DatabaseProviderString, StringComparer.OrdinalIgnoreCase))
             {
                 string dbList = $"'{string.Join("', ", EfConstants.IdentityDbProviders.ToArray(), 0, EfConstants.IdentityDbProviders.Count - 1)}' and '{EfConstants.IdentityDbProviders.LastOrDefault()}'";

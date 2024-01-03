@@ -27,11 +27,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
-        public void AddConnectionString(string connectionStringName, string dataBaseName, bool useSqlite)
-        {
-            AddConnectionString(connectionStringName, dataBaseName, useSqlite ? DbProvider.SQLite : DbProvider.SqlServer);
-        }
-
         public void AddConnectionString(string connectionStringName, string databaseName, DbProvider databaseProvider)
         {
             var appSettingsFile = Path.Combine(_applicationInfo.ApplicationBasePath, "appsettings.json");

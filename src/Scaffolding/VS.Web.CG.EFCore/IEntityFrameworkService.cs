@@ -10,8 +10,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public interface IEntityFrameworkService
     {
-        [Obsolete]
-        Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeName, string areaName, bool useSqlite);
         /// <summary>
         /// Gets the EF metadata for given context and model.
         /// Method takes in full type name of context and if there is no context with that name,

@@ -104,8 +104,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 var efServicesSqlite = GetEfServices(path, appName, true);
 
                 var modelType = _modelTypesLocator.GetType("Library1.Models.Car").First();
-                var metadata = await efServices.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty, false);
-                var metadataSqlite = await efServicesSqlite.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty, true);
+                var metadata = await efServices.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty, DbProvider.SqlServer);
+                var metadataSqlite = await efServicesSqlite.GetModelMetadata("TestProject.Models.CarContext", modelType, string.Empty, DbProvider.SQLite);
 
                 Assert.Equal(ContextProcessingStatus.ContextAvailable, metadata.ContextProcessingStatus);
                 Assert.Equal(3, metadata.ModelMetadata.Properties.Length);

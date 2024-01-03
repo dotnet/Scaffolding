@@ -119,30 +119,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return safeName;
         }
 
-        public EditSyntaxTreeResult EditStartupForNewContext(
-            ModelType startUp,
-            string dbContextTypeName,
-            string dbContextNamespace,
-            string dataBaseName,
-            bool useSqlite,
-            bool useTopLevelStatements)
-        {
-            Contract.Assert(startUp != null && startUp.TypeSymbol != null);
-            Contract.Assert(!string.IsNullOrEmpty(dbContextTypeName));
-            Contract.Assert(!string.IsNullOrEmpty(dataBaseName));
-
-            var parameters = new Dictionary<string, string>
-            {
-                { nameof(NewDbContextTemplateModel.DbContextTypeName),  dbContextTypeName },
-                { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextNamespace },
-                { "dataBaseName", dataBaseName},
-                { "databaseProvider", useSqlite ? EfConstants.SQLite : EfConstants.SqlServer },
-                { "useTopLevelStatements", useTopLevelStatements.ToString() }
-            };
-
-            return EditStartupForNewContext(startUp, parameters);
-        }
-
         /// <summary>
         /// Get the StatementSyntax that adds the db context to the WebApplicationBuilder.
         /// </summary>

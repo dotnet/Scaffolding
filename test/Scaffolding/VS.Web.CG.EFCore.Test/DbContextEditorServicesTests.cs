@@ -136,8 +136,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             var types = RoslynUtilities.GetDirectTypesInCompilation(compilation);
             var startupType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "Startup").First());
             var contextType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyContext").First());
+            var parameters = new Dictionary<string, string>
+            {
+                { nameof(NewDbContextTemplateModel.DbContextTypeName),  "MyContext" },
+                { nameof(NewDbContextTemplateModel.DbContextNamespace),  "ContextNamespace" },
+                { "dataBaseName", "MyContext" + "-" + Guid.NewGuid().ToString()},
+                { "databaseProvider", DbProvider.SqlServer.ToString() },
+                { "useTopLevelStatements", "false" }
+            };
 
-            var result = testObj.EditStartupForNewContext(startupType, "MyContext", "ContextNamespace", "MyContext-NewGuid", false, false);
+            var result = testObj.EditStartupForNewContext(startupType, parameters);
 
             Assert.True(result.Edited);
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString(), ignoreCase: false, ignoreLineEndingDifferences: true);

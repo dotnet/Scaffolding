@@ -72,7 +72,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         /// <returns></returns>
         public async Task GenerateCode(BlazorWebCRUDGeneratorCommandLineModel model)
         {
-            Debugger.Launch();
             model.ValidateCommandline();
             var emptyTemplate = !string.IsNullOrEmpty(model.TemplateName) && model.TemplateName.Equals("empty", StringComparison.OrdinalIgnoreCase);
             if (emptyTemplate)
@@ -179,6 +178,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     (string oldValue, string newValue) = updatedIdentifer.Value;
                     globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
                 }
+
                 if (useTopLevelsStatements)
                 {
                     newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
@@ -210,18 +210,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return programCsFile;
             }
 
-            var codeChanges = globalMethod.CodeChanges.ToList();
+            var codeChanges = globalMethod.CodeChanges.ToHashSet();
             if (appProperties.AddRazorComponentsExists)
             {
                 if (!appProperties.InteractiveWebAssemblyComponentsExists && !appProperties.InteractiveServerComponentsExists)
                 {
                     codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerComponentsSnippet);
+                    codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerRenderModeSnippet);
                 }
             }
             else
             {
                 codeChanges.Add(BlazorWebCRUDHelper.AddRazorComponentsSnippet);
                 codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerComponentsSnippet);
+                codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerRenderModeSnippet);
             }
 
             if (appProperties.MapRazorComponentsExists)
@@ -270,23 +272,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 bool hasInteractiveServerRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddInteractiveServerRenderModeMethod, BlazorWebCRUDHelper.RazorComponentsEndpointsConventionBuilderType);
                 bool hasInteractiveWebAssemblyRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddInteractiveWebAssemblyRenderModeMethod, BlazorWebCRUDHelper.RazorComponentsEndpointsConventionBuilderType);
 
-                blazorAppProperties.InteractiveServerRenderModeNeeded = !hasInteractiveServerRenderMode && !blazorAppProperties.InteractiveServerComponentsExists;
-                blazorAppProperties.InteractiveWebAssemblyRenderModeNeeded = !hasInteractiveWebAssemblyRenderMode && !blazorAppProperties.InteractiveWebAssemblyComponentsExists;
+                blazorAppProperties.InteractiveServerRenderModeNeeded = !hasInteractiveServerRenderMode && !blazorAppProperties.InteractiveWebAssemblyComponentsExists;
+                blazorAppProperties.InteractiveWebAssemblyRenderModeNeeded = !hasInteractiveWebAssemblyRenderMode && blazorAppProperties.InteractiveWebAssemblyComponentsExists;
             }
 
             var appRazorDocument = project.GetDocumentFromName("App.razor", FileSystem);
-            var routesRazorDocument = project.GetDocumentFromName("Routes.razor", FileSystem);
-
             if (appRazorDocument != null)
             {
                 blazorAppProperties.IsGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeText) ||
                     await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeText);
-            }
 
-            if (routesRazorDocument != null)
-            {
-                blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routesRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeRoutesText) ||
-                    await RoslynUtilities.CheckDocumentForTextAsync(routesRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeRoutesText);
+                blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeRoutesText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeRoutesText);
             }
             
             return blazorAppProperties;

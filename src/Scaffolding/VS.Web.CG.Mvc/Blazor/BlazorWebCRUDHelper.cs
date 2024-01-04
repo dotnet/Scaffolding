@@ -1,14 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
-using System.Collections.Generic;
 using System;
-using Microsoft.DotNet.Scaffolding.Shared;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using System.IO;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -142,7 +142,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal static ITextTransformation GetBlazorTransformation(string templatePath)
         {
-            if (string.IsNullOrEmpty(templatePath)) return null;
+            if (string.IsNullOrEmpty(templatePath))
+            {
+                return null;
+            }
 
             var host = new TextTemplatingEngineHost { TemplateFile = templatePath };
             ITextTransformation transformation = null;

@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return SymbolMatchesType(symbol, methodName, new string[] { methodContainingType });
         }
 
-        internal static async Task<Tuple<IfStatementSyntax, IfStatementSyntax>> GetDevelopmentBlock(Document document)
+        internal static async Task GetDevelopmentBlock(Document document)
         {
             var root = await document.GetSyntaxRootAsync();
             var ifStatements = root.DescendantNodes().OfType<IfStatementSyntax>();
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             var negatedDevelopmentStatementFound = ifStatements.FirstOrDefault(x => x.ToFullString().Contains("!app.Environment.IsDevelopment()"));
             if (developmentStatement != null && developmentStatement.Statement is BlockSyntax ifBlock)
             {
-                return Tuple.Create(developmentStatement, developmentStatement);
+                //return Tuple.Create(developmentStatement, developmentStatement);
             }
 
             if (negatedDevelopmentStatementFound != null && negatedDevelopmentStatementFound.Statement is BlockSyntax ifBlock2)
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 //check if else block exists, if not create
             }
 
-            return null;
+            //return null;
         }
 
         private static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)

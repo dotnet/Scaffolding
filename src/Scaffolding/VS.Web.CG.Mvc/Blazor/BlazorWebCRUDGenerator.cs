@@ -202,7 +202,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 
-        private CodeFile AddBlazorChangesToCodeFile(CodeFile programCsFile, BlazorWebAppProperties appProperties)
+        internal CodeFile AddBlazorChangesToCodeFile(CodeFile programCsFile, BlazorWebAppProperties appProperties)
         {
             programCsFile.Methods.TryGetValue("Global", out var globalMethod);
             if (globalMethod is null)
@@ -249,7 +249,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             return programCsFile;
         }
 
-        private async Task<BlazorWebAppProperties> GetBlazorPropertiesAsync()
+        internal async Task<BlazorWebAppProperties> GetBlazorPropertiesAsync()
         {
             var blazorAppProperties = new BlazorWebAppProperties();
             //get Program.cs, App.razor and Routes.razor document
@@ -279,7 +279,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var appRazorDocument = project.GetDocumentFromName("App.razor", FileSystem);
             if (appRazorDocument != null)
             {
-                blazorAppProperties.IsGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeText) ||
+                blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeText) ||
                     await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeText);
 
                 blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeRoutesText) ||

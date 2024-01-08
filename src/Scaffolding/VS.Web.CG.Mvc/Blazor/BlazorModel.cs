@@ -134,15 +134,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         }
     }
 
+    /// <summary>
+    /// All properties needed for the Blazor CRUD scenario
+    /// </summary>
     public class BlazorWebAppProperties
     {
+        //if WebApplication.CreateBuilder.AddRazorComponents() exists in Program.cs
         public bool AddRazorComponentsExists { get; set; }
+        // if AddRazorComponents().AddInteractiveServerComponents() exists in Program.cs
         public bool InteractiveServerComponentsExists { get; set; }
+        // if AddRazorComponents().AddInteractiveWebAssemblyComponents() exists in Program.cs
         public bool InteractiveWebAssemblyComponentsExists { get; set; }
+        // if WebApplication.MapRazorComponents<App>() exists in Program.cs
         public bool MapRazorComponentsExists { get; set; }
+        // if MapRazorComponents<App>().AddInteractiveServerRenderMode() is needed in Program.cs
         public bool InteractiveServerRenderModeNeeded { get; set; }
+        // if MapRazorComponents<App>().AddInteractiveWebAssemblyRenderMode() is needed in Program.cs
         public bool InteractiveWebAssemblyRenderModeNeeded { get; set; }
-        public bool IsGlobal { get; set; }
+        public bool IsHeadOutletGlobal { get; set; }
         public bool AreRoutesGlobal { get; set; }
     }
 }

@@ -61,11 +61,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return true;
         }
 
-        public static bool IsValidIdentifier(string identifier)
-        {
-            return SyntaxFacts.IsValidIdentifier(identifier);
-        }
-
         /// <summary>
         /// Given a document, checks if the document contains a method invocation with the given method name and containing type (string).
         /// </summary>
@@ -128,26 +123,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return SymbolMatchesType(symbol, methodName, new string[] { methodContainingType });
         }
 
-        internal static async Task GetDevelopmentBlock(Document document)
-        {
-            var root = await document.GetSyntaxRootAsync();
-            var ifStatements = root.DescendantNodes().OfType<IfStatementSyntax>();
-            var developmentStatement = ifStatements.FirstOrDefault(x => x.ToFullString().Contains("app.Environment.IsDevelopment()"));
-            var negatedDevelopmentStatementFound = ifStatements.FirstOrDefault(x => x.ToFullString().Contains("!app.Environment.IsDevelopment()"));
-            if (developmentStatement != null && developmentStatement.Statement is BlockSyntax ifBlock)
-            {
-                //return Tuple.Create(developmentStatement, developmentStatement);
-            }
-
-            if (negatedDevelopmentStatementFound != null && negatedDevelopmentStatementFound.Statement is BlockSyntax ifBlock2)
-            {
-                //check if else block exists, if not create
-            }
-
-            //return null;
-        }
-
-        private static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)
+        internal static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)
         {
             if (symbol is null || string.IsNullOrEmpty(methodName) || methodContainingTypes is null || !methodContainingTypes.Any())
             {
@@ -174,7 +150,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return false;
         }
 
-        private static void CollectTypes(INamespaceSymbol ns, List<ITypeSymbol> types)
+        internal static void CollectTypes(INamespaceSymbol ns, List<ITypeSymbol> types)
         {
             types.AddRange(ns.GetTypeMembers().Cast<ITypeSymbol>());
 
@@ -183,13 +159,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 CollectTypes(nestedNs, types);
             }
         }
-        private static bool IsKeyWord(string identifier)
+
+        internal static bool IsKeyWord(string identifier)
         {
             if (SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None
                 || SyntaxFacts.GetContextualKeywordKind(identifier) != SyntaxKind.None)
             {
                 return true;
             }
+
             return false;
         }
     }

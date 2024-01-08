@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -514,7 +515,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             var defaultDbContextName = $"{_applicationInfo.ApplicationName}IdentityDbContext";
 
-            if (!RoslynUtilities.IsValidIdentifier(defaultDbContextName))
+            if (!SyntaxFacts.IsValidIdentifier(defaultDbContextName))
             {
                 defaultDbContextName = "IdentityDataContext";
             }

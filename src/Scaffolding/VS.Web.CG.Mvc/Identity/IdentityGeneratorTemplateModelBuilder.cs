@@ -7,9 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
@@ -66,6 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 UserClassNamespace = _userType?.Namespace;
             }
         }
+
         internal DbProvider DatabaseProvider { get; set; }
         internal string DbContextClass { get; private set; }
         internal string DbContextNamespace { get; private set; }
@@ -513,7 +515,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         {
             var defaultDbContextName = $"{_applicationInfo.ApplicationName}IdentityDbContext";
 
-            if (!RoslynUtilities.IsValidIdentifier(defaultDbContextName))
+            if (!SyntaxFacts.IsValidIdentifier(defaultDbContextName))
             {
                 defaultDbContextName = "IdentityDataContext";
             }

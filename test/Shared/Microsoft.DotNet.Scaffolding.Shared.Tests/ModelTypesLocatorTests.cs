@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Xunit;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
+namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 {
     public class ModelTypesLocatorTests
     {
@@ -141,6 +142,18 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest
             workspace.AddDocument(classLib2Project.Id, "Class1.cs", class2);
 
             return workspace;
+        }
+
+
+        [Fact]
+        public async Task GetAllTypesAsyncTests()
+        {
+            //Arrange
+            var locator = GetModelTypesLocator();
+            //Act
+            var types = await locator.GetAllTypesAsync();
+            //Assert
+            Assert.True(types?.Count() == 4);
         }
     }
 }

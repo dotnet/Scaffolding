@@ -282,7 +282,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
 
             if (!string.IsNullOrEmpty(model.EndpintsClassName) &&
-                !RoslynUtilities.IsValidIdentifier(model.EndpintsClassName))
+                !SyntaxFacts.IsValidIdentifier(model.EndpintsClassName))
             {
                 errorList.Add(string.Format(
                     CultureInfo.CurrentCulture,

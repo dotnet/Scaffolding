@@ -150,10 +150,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             //Arrange
             var locator = GetModelTypesLocator();
-
             //Act
             var types = await locator.GetAllTypesAsync();
-
             //Assert
             Assert.True(types?.Count() == 4);
         }

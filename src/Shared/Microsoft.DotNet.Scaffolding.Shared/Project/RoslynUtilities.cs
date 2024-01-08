@@ -162,8 +162,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
 
         internal static bool IsKeyWord(string identifier)
         {
-            if (SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None
-                || SyntaxFacts.GetContextualKeywordKind(identifier) != SyntaxKind.None)
+            if (SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None || 
+                SyntaxFacts.GetContextualKeywordKind(identifier) != SyntaxKind.None)
             {
                 return true;
             }

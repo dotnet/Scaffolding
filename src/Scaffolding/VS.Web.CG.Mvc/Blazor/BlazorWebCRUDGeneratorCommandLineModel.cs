@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor

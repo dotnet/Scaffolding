@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
         private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
-
+        private static readonly MetadataReference SystemConsoleReference = MetadataReference.CreateFromFile(typeof(System.Console).Assembly.Location);
         internal static string DefaultFilePathPrefix = "Test";
         internal static string CSharpDefaultFileExt = "cs";
         internal static string TestProjectName = "TestProject";
@@ -70,13 +70,22 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             var workspace = new AdhocWorkspace();
             workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
 
+            var references = new List<MetadataReference>()
+            {
+                CorlibReference,
+                SystemCoreReference,
+                SystemConsoleReference,
+                CSharpSymbolsReference,
+                CodeAnalysisReference
+            };
+
+            var netcorePath = Path.GetDirectoryName(typeof(System.Linq.Expressions.BinaryExpression).Assembly.Location);
+            var netcoreReferences = Directory.EnumerateFiles(netcorePath, "*.dll").Select(f => MetadataReference.CreateFromFile(f));
             var solution = workspace
                 .CurrentSolution
                 .AddProject(projectInfo)
-                .AddMetadataReference(projectId, CorlibReference)
-                .AddMetadataReference(projectId, SystemCoreReference)
-                .AddMetadataReference(projectId, CSharpSymbolsReference)
-                .AddMetadataReference(projectId, CodeAnalysisReference);
+                .AddMetadataReferences(projectId, references)
+                .AddMetadataReferences(projectId, netcoreReferences);
 
             int count = 0;
             foreach (var source in sources)
@@ -300,6 +309,26 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             }
         ";
 
+        protected const string ConsoleAppProgramCsFile = @"
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        string sampleString = ""Hello, World!"";
+        // String length
+        int length = sampleString.Length;
+        Console.WriteLine($""Length of the string: {length}"");
+
+        // Convert to uppercase and lowercase
+        string upperCase = sampleString.ToUpper();
+        string lowerCase = sampleString.ToLower();
+        Console.WriteLine($""Uppercase: {upperCase}"");
+        Console.WriteLine($""Lowercase: {lowerCase}"");
+
+        Console.ReadLine();
+    }
+}";
+
         protected const string MinimalProgramCsFile = @"
             var builder = WebApplication.CreateBuilder(args);
 
@@ -393,6 +422,17 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 {
                 }
             }";
+
+        protected const string Net8Csproj = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+";
 
         protected SyntaxTriviaList MemberLeadingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace("    "));
         protected SyntaxTriviaList MemberTrailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);

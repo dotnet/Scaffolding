@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
@@ -13,6 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
         /// </summary>
         IEnumerable<Document> GetAllDocuments();
         IEnumerable<ModelType> GetAllTypes();
+        Task<IEnumerable<ITypeSymbol>> GetAllTypesAsync();
 
         /// <summary>
         /// Returns the types matching a type name.

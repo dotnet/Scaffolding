@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         public async Task ModifyProgramCsTests()
         {
             var blazorGenerator = CreateBlazorWebCRUDGenerator();
-            await blazorGenerator.ModifyProgramCsAsync();
+            await blazorGenerator.ModifyProgramCsAsync(new BlazorWebAppProperties());
             string programCsText = fileSystem.ReadAllText("Program.cs");
             Assert.Contains("AddQuickGridEntityFrameworkAdapter()", programCsText);
             Assert.Contains("AddInteractiveServerRenderMode()", programCsText);

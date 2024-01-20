@@ -76,7 +76,6 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             else
             {
                 var uniqueUsings = GetUniqueUsings(_docRoot.Usings.ToArray(), usingNodes);
-
                 return uniqueUsings.Any() ? _docRoot.WithUsings(_docRoot.Usings.AddRange(uniqueUsings)) : _docRoot;
             }
         }

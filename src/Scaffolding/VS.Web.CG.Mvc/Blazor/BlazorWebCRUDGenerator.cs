@@ -100,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 Logger,
                 areaName: string.Empty);
 
-            //check if getting model and dbcontext was successfull
+            //check if getting model and dbcontext was successful
             if (modelTypeAndContextModel is null ||
                 modelTypeAndContextModel.ContextProcessingResult is null ||
                 modelTypeAndContextModel.ContextProcessingResult.ContextProcessingStatus is ContextProcessingStatus.MissingContext ||
@@ -119,32 +119,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 Namespace = modelTypeAndContextModel.ModelType.Namespace,
                 ModelMetadata = modelTypeAndContextModel.ContextProcessingResult?.ModelMetadata,
                 DatabaseProvider = model.DatabaseProvider,
-                Template = model.TemplateName
+                Template = model.TemplateName,
+                BlazorWebAppProperties = await GetBlazorPropertiesAsync()
             };
 
             ExecuteTemplates(templateModel);
-            await ModifyProgramCsAsync();
-        }
-
-        internal IList<string> GetT4Templates(string templateName)
-        {
-            var templates = new List<string>();
-            var crudTemplate = string.Equals(templateName, "crud", StringComparison.OrdinalIgnoreCase);
-            if (crudTemplate)
-            {
-                return CRUDTemplates.Values.ToList();
-            }
-            else if (CRUDTemplates.TryGetValue(templateName, out var t4Template))
-            {
-                templates.Add(t4Template);
-            }
-            else
-            {
-                Logger.LogMessage($"Invalid template for the Blazor CRUD scaffolder '{templateName}' entered!", LogMessageLevel.Error);
-                throw new ArgumentException(templateName);
-            }
-
-            return templates;
+            await ModifyProgramCsAsync(templateModel.BlazorWebAppProperties);
         }
 
         internal string ValidateAndGetOutputPath(string modelName, string templateName, string relativeFolderPath = null)
@@ -160,12 +140,168 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             return outputPath;
         }
 
-        internal async Task ModifyProgramCsAsync()
+        internal async Task ModifyProgramCsAsync(BlazorWebAppProperties appProperties)
+        {
+            CodeModifierConfig minimalApiChangesConfig = GetBlazorCodeModifierConfig();
+            if (minimalApiChangesConfig is null)
+            {
+                return;
+            }
+
+            var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
+            programCsFile = AddBlazorChangesToCodeFile(programCsFile, appProperties);
+            var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var programDocument = project.GetUpdatedDocument(FileSystem, programType);
+
+            //Modifying Program.cs document
+            var docEditor = await DocumentEditor.CreateAsync(programDocument);
+            var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
+            var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
+            if (docRoot is null)
+            {
+                return;
+            }
+            //adding usings
+            var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
+            var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
+            //add code snippets/changes.
+            if (programCsFile.Methods != null && programCsFile.Methods.Count != 0)
+            {
+                var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+                var globalChanges = globalMethod.CodeChanges;
+                var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
+                if (updatedIdentifer.HasValue)
+                {
+                    (string oldValue, string newValue) = updatedIdentifer.Value;
+                    globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
+                }
+
+                if (useTopLevelsStatements)
+                {
+                    newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
+                }
+                else
+                {
+                    var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, BlazorWebCRUDHelper.Main);
+                    if (mainMethod != null)
+                    {
+                        var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, globalChanges);
+                        newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
+                    }
+                }
+            }
+            //replace root node with all the updates.
+            docEditor.ReplaceNode(docRoot, newRoot);
+            //write to Program.cs file
+            var changedDocument = docEditor.GetChangedDocument();
+            var classFileTxt = await changedDocument.GetTextAsync();
+            FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
+            ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+        }
+
+        internal CodeFile AddBlazorChangesToCodeFile(CodeFile programCsFile, BlazorWebAppProperties appProperties)
+        {
+            programCsFile.Methods.TryGetValue("Global", out var globalMethod);
+            if (globalMethod is null)
+            {
+                return programCsFile;
+            }
+
+            var codeChanges = globalMethod.CodeChanges.ToHashSet();
+            if (appProperties.AddRazorComponentsExists)
+            {
+                if (!appProperties.InteractiveWebAssemblyComponentsExists && !appProperties.InteractiveServerComponentsExists)
+                {
+                    codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerComponentsSnippet);
+                    codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerRenderModeSnippet);
+                }
+            }
+            else
+            {
+                codeChanges.Add(BlazorWebCRUDHelper.AddRazorComponentsSnippet);
+                codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerComponentsSnippet);
+                codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerRenderModeSnippet);
+            }
+
+            if (appProperties.MapRazorComponentsExists)
+            {
+                if (appProperties.InteractiveServerRenderModeNeeded)
+                {
+                    codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerRenderModeSnippet);
+                }
+
+                if (appProperties.InteractiveWebAssemblyRenderModeNeeded)
+                {
+                    codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveWebAssemblyRenderModeSnippet);
+                }
+            }
+            else
+            {
+                codeChanges.Add(BlazorWebCRUDHelper.AddMapRazorComponentsSnippet);
+                codeChanges.Add(BlazorWebCRUDHelper.AddInteractiveServerRenderModeSnippet);
+            }
+
+            globalMethod.CodeChanges = codeChanges.ToArray();
+            programCsFile.Methods["Global"] = globalMethod;
+            return programCsFile;
+        }
+
+        internal async Task<BlazorWebAppProperties> GetBlazorPropertiesAsync()
+        {
+            var blazorAppProperties = new BlazorWebAppProperties();
+            //get Program.cs, App.razor and Routes.razor document
+            var allTypes = await ModelTypesLocator.GetAllTypesAsync();
+            var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var programDocument = project.GetUpdatedDocument(FileSystem, programType);
+            var programDocumentDirectory = Path.GetDirectoryName(programDocument.FilePath);
+
+            blazorAppProperties.AddRazorComponentsExists = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddRazorComponentsMethod, BlazorWebCRUDHelper.IServiceCollectionType);
+            if (blazorAppProperties.AddRazorComponentsExists)
+            {
+                blazorAppProperties.InteractiveServerComponentsExists = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddInteractiveServerComponentsMethod, BlazorWebCRUDHelper.IRazorComponentsBuilderType);
+                blazorAppProperties.InteractiveWebAssemblyComponentsExists = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddInteractiveWebAssemblyComponentsMethod, BlazorWebCRUDHelper.IRazorComponentsBuilderType);
+            }
+
+            blazorAppProperties.MapRazorComponentsExists = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.MapRazorComponentsMethod, BlazorWebCRUDHelper.IEndpointRouteBuilderContainingType);
+            if (blazorAppProperties.MapRazorComponentsExists)
+            {
+                bool hasInteractiveServerRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddInteractiveServerRenderModeMethod, BlazorWebCRUDHelper.RazorComponentsEndpointsConventionBuilderType);
+                bool hasInteractiveWebAssemblyRenderMode = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorWebCRUDHelper.AddInteractiveWebAssemblyRenderModeMethod, BlazorWebCRUDHelper.RazorComponentsEndpointsConventionBuilderType);
+
+                blazorAppProperties.InteractiveServerRenderModeNeeded = !hasInteractiveServerRenderMode && !blazorAppProperties.InteractiveWebAssemblyComponentsExists;
+                blazorAppProperties.InteractiveWebAssemblyRenderModeNeeded = !hasInteractiveWebAssemblyRenderMode && blazorAppProperties.InteractiveWebAssemblyComponentsExists;
+            }
+
+            var appRazorDocument = project.GetDocumentFromName("App.razor", FileSystem);
+            if (appRazorDocument != null)
+            {
+                blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeText);
+
+                blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeRoutesText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeRoutesText);
+            }
+            
+            return blazorAppProperties;
+        }
+
+        private CodeModifierConfig GetBlazorCodeModifierConfig()
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly.GetManifestResourceNames();
             var resourceName = resourceNames.Where(x => x.EndsWith("blazorWebCrudChanges.json")).FirstOrDefault();
-            var jsonText = GetBlazorCodeModifierConfig(assembly, resourceName);
+            string jsonText = string.Empty;
+            if (assembly != null && !string.IsNullOrEmpty(resourceName))
+            {
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    jsonText = reader.ReadToEnd();
+                }
+            }
+
             CodeModifierConfig minimalApiChangesConfig = null;
             try
             {
@@ -176,68 +312,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 ConsoleLogger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
             }
 
-            if (minimalApiChangesConfig != null)
-            {
-                //Getting Program.cs document
-                var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault();
-                var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
-                var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
-                var programDocument = project.GetUpdatedDocument(FileSystem, programType);
-
-                //Modifying Program.cs document
-                var docEditor = await DocumentEditor.CreateAsync(programDocument);
-                var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-                var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
-                //adding usings
-                var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
-                var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
-                //add code snippets/changes.
-                if (programCsFile.Methods != null && programCsFile.Methods.Count != 0)
-                {
-                    var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
-                    var globalChanges = globalMethod.CodeChanges;
-                    var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
-                    if (updatedIdentifer.HasValue)
-                    {
-                        (string oldValue, string newValue) = updatedIdentifer.Value;
-                        globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
-                    }
-                    if (useTopLevelsStatements)
-                    {
-                        newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
-                    }
-                    else
-                    {
-                        var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
-                        if (mainMethod != null)
-                        {
-                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, globalChanges);
-                            newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
-                        }
-                    }
-                }
-                //replace root node with all the updates.
-                docEditor.ReplaceNode(docRoot, newRoot);
-                //write to Program.cs file
-                var changedDocument = docEditor.GetChangedDocument();
-                var classFileTxt = await changedDocument.GetTextAsync();
-                FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
-                ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
-            }
-        }
-
-        private string GetBlazorCodeModifierConfig(Assembly assembly, string resourceName)
-        {
-            string jsonText = string.Empty;
-            if (assembly != null && !string.IsNullOrEmpty(resourceName))
-            {
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    jsonText = reader.ReadToEnd();
-                }
-            }
-            return jsonText;
+            return minimalApiChangesConfig;
         }
 
         //Folders where the .tt templates for Blazor CRUD scenario live. Should be in VS.Web.CG.Mvc\Templates\Blazor
@@ -258,7 +333,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private void ExecuteTemplates(BlazorModel templateModel)
         {
             var templateFolders = TemplateFolders;
-            var templateNames = GetT4Templates(templateModel.Template);
+            var templateNames = BlazorWebCRUDHelper.GetT4Templates(templateModel.Template, Logger);
             var fullTemplatePaths = templateNames.Select(x => FileLocator.GetFilePath(x, templateFolders));
             TemplateInvoker templateInvoker = new TemplateInvoker();
             var dictParams = new Dictionary<string, object>()
@@ -268,7 +343,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             foreach (var templatePath in fullTemplatePaths)
             {
-                ITextTransformation contextTemplate = GetBlazorTransformation(templatePath);
+                ITextTransformation contextTemplate = BlazorWebCRUDHelper.GetBlazorTransformation(templatePath);
                 var t4TemplateName = Path.GetFileNameWithoutExtension(templatePath);
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
@@ -283,69 +358,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     FileSystem.WriteAllText(templatedFilePath, templatedString);
                     Logger.LogMessage($"Added Blazor Page : {templatedFilePath}");
                 }
-            }
-        }
-
-        private ITextTransformation GetBlazorTransformation(string templatePath)
-        {
-            if (string.IsNullOrEmpty(templatePath)) return null;
-
-            var host = new TextTemplatingEngineHost { TemplateFile = templatePath };
-            ITextTransformation transformation = null;
-
-            switch (Path.GetFileName(templatePath))
-            {
-                case "Create.tt":
-                    transformation = new Create() { Host = host };
-                    break;
-                case "Index.tt":
-                    transformation = new Templates.Blazor.Index() { Host = host };
-                    break;
-                case "Delete.tt":
-                    transformation = new Delete() { Host = host };
-                    break;
-                case "Edit.tt":
-                    transformation = new Edit() { Host = host };
-                    break;
-                case "Details.tt":
-                    transformation = new Details() { Host = host };
-                    break;
-            }
-
-            if (transformation != null)
-            {
-                transformation.Session = host.CreateSession();
-            }
-
-            return transformation;
-        }
-
-        public const string Main = nameof(Main);
-
-        //Template info
-        private const string CreateBlazorTemplate = "Create.tt";
-        private const string DeleteBlazorTemplate = "Delete.tt";
-        private const string DetailsBlazorTemplate = "Details.tt";
-        private const string EditBlazorTemplate = "Edit.tt";
-        private const string IndexBlazorTemplate = "Index.tt";
-        private Dictionary<string, string> _crudTemplates;
-        private Dictionary<string, string> CRUDTemplates
-        {
-            get
-            {
-                if (_crudTemplates == null)
-                {
-                    _crudTemplates = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                    {
-                        { "Create", CreateBlazorTemplate },
-                        { "Delete", DeleteBlazorTemplate },
-                        { "Details", DetailsBlazorTemplate },
-                        { "Edit",  EditBlazorTemplate },
-                        { "Index", IndexBlazorTemplate }
-                    };
-                }
-
-                return _crudTemplates;
             }
         }
     }

@@ -29,6 +29,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         [Build.Framework.Required]
         public ITaskItem[] ResolvedReferences { get; set; }
 
+        public ITaskItem[] ProjectCapability { get; set; }
 
         [Build.Framework.Required]
         public ITaskItem[] ProjectReferences { get; set; }
@@ -94,6 +95,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 AssemblyFullPath = this.AssemblyFullPath,
                 AssemblyName = string.IsNullOrEmpty(this.AssemblyName) ? Path.GetFileName(this.AssemblyFullPath) : this.AssemblyName,
                 CompilationAssemblies = GetCompilationAssemblies(this.ResolvedReferences),
+                ProjectCapabilities = ProjectCapability.Select(i => i.ItemSpec),
                 CompilationItems = this.CompilationItems.Select(i => i.ItemSpec),
                 PackageDependencies = ProjectContextHelper.GetPackageDependencies(this.ProjectAssetsFile, this.TargetFramework, this.TargetFrameworkMoniker),
                 Config = this.AssemblyFullPath + ".config",

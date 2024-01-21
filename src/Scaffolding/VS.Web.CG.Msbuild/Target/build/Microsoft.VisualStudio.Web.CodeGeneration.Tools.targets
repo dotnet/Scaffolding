@@ -41,6 +41,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           Platform="$(Platform)"
                           RootNameSpace ="$(RootNamespace)"
                           CompilationItems ="@(Compile)"
+                          ProjectCapability = "@(ProjectCapability)"
                           TargetDirectory="$(TargetDir)"
                           EmbeddedItems="@(EmbeddedResource)"
                           Configuration="$(Configuration)"

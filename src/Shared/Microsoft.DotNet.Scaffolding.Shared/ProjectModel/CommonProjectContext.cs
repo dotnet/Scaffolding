@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
 
         /// <inheritdoc/>
         public IEnumerable<string> CompilationItems { get; set; }
-
+        public IEnumerable<string> ProjectCapabilities { get; set; }
         /// <inheritdoc/>
         public string Config { get; set; }
 

@@ -100,6 +100,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         IEnumerable<string> CompilationItems { get; }
 
         /// <summary>
+        /// values for 'ProjectCapability' msbuild item for a given project.
+        /// </summary>
+        IEnumerable<string> ProjectCapabilities { get; }
+
+        /// <summary>
         /// Items inlcuded as embedded resources.
         /// &lt;EmbeddedResource Include="" /&gt;
         /// </summary>

@@ -333,7 +333,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal async Task ModifyFilesAsync(BlazorIdentityModel blazorIdentityModel)
         {
-            Debugger.Launch();
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly.GetManifestResourceNames();
             var resourceName = resourceNames.Where(x => x.EndsWith("blazorIdentityChanges.json")).FirstOrDefault();
@@ -360,9 +359,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 var fileDoc = project.GetDocumentFromName(file.FileName, FileSystem);
                 await DocumentBuilder.ApplyTextReplacements(file, fileDoc, new CodeChangeOptions());
-                if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase))
+                if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase) &&
+                    FileSystem.FileExists(fileDoc.Name))
                 {
-                    
+                    var fileText = FileSystem.ReadAllText(fileDoc.Name);
+                    fileText = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared" + Environment.NewLine + fileText;
+                    FileSystem.WriteAllText(fileDoc.Name, fileText.ToString());
                 }
             }
         }

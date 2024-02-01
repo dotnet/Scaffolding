@@ -83,7 +83,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         internal static SyntaxList<UsingDirectiveSyntax> GetUniqueUsings(UsingDirectiveSyntax[] existingUsings, UsingDirectiveSyntax[] newUsings)
         {
             return SyntaxFactory.List(
-                newUsings.Where(u => !existingUsings.Any(oldUsing => oldUsing.Name.ToString().Equals(u.Name.ToString()))));
+                newUsings.Where(u => !existingUsings.Any(oldUsing => oldUsing.Name.ToString().Equals(u.Name.ToString())))
+                         .OrderBy(us => us.Name.ToString()));
         }
 
         internal static IList<string> FilterUsingsWithOptions(CodeFile codeFile, CodeChangeOptions options)

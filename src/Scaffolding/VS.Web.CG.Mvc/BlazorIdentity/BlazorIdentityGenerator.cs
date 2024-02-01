@@ -26,10 +26,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General;
-using NuGet.Protocol.Plugins;
-using NuGet.Versioning;
 using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
@@ -48,7 +45,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private ICodeGenAssemblyLoadContext AssemblyLoadContextLoader { get; set; }
         private const string Main = nameof(Main);
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
-        private static readonly string[] baseFolders = new[] { "BlazorIdentity", "General" };
         private static readonly char[] semicolonSeparator = new char[] { ';' };
         private IDictionary<string, string> _allBlazorIdentityFiles;
         private IDictionary<string, string> AllBlazorIdentityFiles
@@ -71,7 +67,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 if (_generalT4Files == null || _generalT4Files.Count() == 0)
                 {
-                    _generalT4Files = GetGeneralT4Files();
+                    _generalT4Files = BlazorIdentityHelper.GetGeneralT4Files(FileSystem, TemplateFolders);
                 }
 
                 return _generalT4Files;
@@ -121,7 +117,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         /// <returns></returns>
         public async Task GenerateCode(BlazorIdentityCommandLineModel model)
         {
-            //Debugger.Launch();
             ArgumentNullException.ThrowIfNull(model);
             if (model.ListFiles)
             {
@@ -136,6 +131,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal async Task<BlazorIdentityModel> ValidateAndBuild(BlazorIdentityCommandLineModel commandlineModel)
         {
+            Debugger.Launch();
             commandlineModel.DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(commandlineModel.DatabaseProviderString, Logger, isIdentity: true);
             ValidateRequiredDependencies(commandlineModel.DatabaseProvider);
             if (string.IsNullOrEmpty(commandlineModel.RootNamespace) || RoslynUtilities.IsValidNamespace(commandlineModel.RootNamespace))
@@ -250,7 +246,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 connectionStringsWriter.AddConnectionString("DefaultConnection", dbContextModel.DbContextName, commandlineModel.DatabaseProvider);
             }
 
-            var filesToGenerate = new List<string>();
+            blazorIdentityModel.FilesToGenerate = new List<string>();
             if (!string.IsNullOrEmpty(commandlineModel.Files))
             {
                 blazorIdentityModel.FilesToGenerate = commandlineModel.Files.Split(semicolonSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -276,20 +272,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 blazorIdentityModel.FilesToGenerate = AllBlazorIdentityFiles.Keys.Except(excludedFiles).ToList();
             }
 
-            if (filesToGenerate.Count == 0)
+            if (blazorIdentityModel.FilesToGenerate.Count == 0)
             {
                 blazorIdentityModel.FilesToGenerate = AllBlazorIdentityFiles.Keys.ToList();
             }
 
-            if (!string.IsNullOrEmpty(commandlineModel.RelativeFolderPath))
-            {
-                blazorIdentityModel.BaseOutputPath = Path.Combine(AppInfo.ApplicationBasePath, commandlineModel.RelativeFolderPath);
-            }
-            else
-            {
-                blazorIdentityModel.BaseOutputPath = StringUtil.ToPath(blazorIdentityModel.BlazorIdentityNamespace, AppInfo.ApplicationBasePath);
-            }
-
+            blazorIdentityModel.BaseOutputPath = Path.Combine(AppInfo.ApplicationBasePath, commandlineModel.RelativeFolderPath);
             return blazorIdentityModel;
         }
 
@@ -325,18 +313,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        internal string ValidateAndGetOutputPath(BlazorIdentityModel identityModel, string templateName)
-        { 
-            var outputPath = Path.Combine(identityModel.BaseOutputPath, templateName);
-            return outputPath;
-        }
-
         internal async Task ModifyFilesAsync(BlazorIdentityModel blazorIdentityModel)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("blazorIdentityChanges.json")).FirstOrDefault();
-            var jsonText = GetBlazorCodeModifierConfig(assembly, resourceName);
+
+            var jsonText = ProjectModelHelper.GetManifestResource(assembly, resourceName);
             CodeModifierConfig minimalApiChangesConfig = null;
             try
             {
@@ -415,7 +396,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 //add more changes to newRoot
                 (string oldBuilderVal, string newBuilderVal) = updatedIdentifer.Value;
                 var serverComponentNode = newRoot.Members.FirstOrDefault(x => x.ToString().Contains("Services.AddRazorComponents()"));
-                newRoot = newRoot.InsertNodesAfter(serverComponentNode, GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel.DbContextName, blazorIdentityModel.UserClassName));
+                newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel.DbContextName, blazorIdentityModel.UserClassName));
                 //replace root node with all the updates.
                 docEditor.ReplaceNode(docRoot, newRoot);
                 //write to Program.cs file
@@ -423,30 +404,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var classFileTxt = await changedDocument.GetTextAsync();
                 FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
                 ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
-            }
-        }
-
-        private void ModifyNavMenu()
-        {
-            var projectPath = Path.GetDirectoryName(ProjectContext.ProjectFullPath);
-            var navMenuRazorFile = Path.Combine(projectPath, "Components", "Layout", "NavMenu.razor");
-            if (FileSystem.FileExists(navMenuRazorFile))
-            {
-                string allFileText = FileSystem.ReadAllText(navMenuRazorFile);
-                allFileText = BlazorIdentityHelper.NavMenuStartAddition + Environment.NewLine + allFileText;
-                allFileText = allFileText.Replace(BlazorIdentityHelper.NavMenuReplacementTextOriginal, BlazorIdentityHelper.NavMenuReplacementText);
-                allFileText = allFileText + Environment.NewLine + BlazorIdentityHelper.NavMenuEndAddition;
-                FileSystem.WriteAllText(navMenuRazorFile, allFileText);
-                ConsoleLogger.LogMessage($"Modified {navMenuRazorFile}.\n");
-            }
-
-            var navMenuCssFile = Path.Combine(AppInfo.ApplicationBasePath, "Components", "Layout", "NavMenu.razor.css");
-            if (FileSystem.FileExists(navMenuCssFile))
-            {
-                string allFileText = FileSystem.ReadAllText(navMenuCssFile);
-                allFileText = allFileText + Environment.NewLine + BlazorIdentityHelper.NavMenuCssEndAddition;
-                FileSystem.WriteAllText(navMenuCssFile, allFileText);
-                ConsoleLogger.LogMessage($"Modified {navMenuCssFile}.\n");
             }
         }
 
@@ -458,13 +415,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 { "Model" , templateModel }
             };
 
-            foreach (var templatePath in templateModel.FilesToGenerate)
+            foreach (var templateName in templateModel.FilesToGenerate)
             {
-                ITextTransformation contextTemplate = GetBlazorIdentityTransformation(templatePath);
+                ITextTransformation contextTemplate = GetBlazorIdentityTransformation(templateName);
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
                 {
-                    string templatedFilePath = Path.Combine(templateModel.BaseOutputPath, templatePath);
+                    string extension = templateName.StartsWith("identity", StringComparison.OrdinalIgnoreCase) ? ".cs" : ".razor";
+                    string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{templateName}";
+                    string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
+                    string templatedFilePath = $"{templatePath}{extension}";
                     var folderName = Path.GetDirectoryName(templatedFilePath);
                     if (!FileSystem.DirectoryExists(folderName))
                     {
@@ -544,9 +504,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return null;
             }
 
-            var noExtensionTemplateName = Path.GetFileNameWithoutExtension(templateName);
-            string templateNamespaced = StringUtil.ToNamespace(templateName);
-            var t4TemplateType = BlazorIdentityTemplateTypes.FirstOrDefault(x => x.FullName.Contains(templateNamespaced) && x.Name.Equals(noExtensionTemplateName, StringComparison.OrdinalIgnoreCase));
+            var typeName = StringUtil.GetTypeNameFromNamespace(templateName);
+            var t4TemplateType = BlazorIdentityTemplateTypes.FirstOrDefault(x => x.FullName.Contains(templateName) && x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
             var t4TemplatePath = AllBlazorIdentityFiles[templateName];
             var host = new TextTemplatingEngineHost { TemplateFile = t4TemplatePath };
             try
@@ -566,26 +525,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        private IList<SyntaxNode> GetBlazorIdentityGlobalNodes(string builderVarName, string dbContextName, string userClassName)
-        {
-            var globalNodes = new List<SyntaxNode>
-            {
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddCascadingAuthenticationState();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddScoped<IdentityUserAccessor>();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddScoped<IdentityRedirectManager>();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(
-                    ($"\n{builderVarName}.Services.AddAuthentication(options =>\r\n{{\r\n    options.DefaultScheme = IdentityConstants.ApplicationScheme;\r\n    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;\r\n}})\r\n.AddIdentityCookies();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\nvar connectionString = {builderVarName}.Configuration.GetConnectionString(\"DefaultConnection\") ?? throw new InvalidOperationException(\"Connection string 'DefaultConnection' not found.\");\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddDbContext<{dbContextName}>(options => \n    options.UseSqlite(connectionString));\n")),
-                //SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"{builderVarName}.Services.AddDatabaseDeveloperPageExceptionFilter();\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddIdentityCore<{userClassName}>(options => options.SignIn.RequireConfirmedAccount = true)\n    .AddEntityFrameworkStores<{dbContextName}>()\n    .AddSignInManager()\n    .AddDefaultTokenProviders();\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddSingleton<IEmailSender<{userClassName}>, IdentityNoOpEmailSender>();\n"))
-            };
-
-            return globalNodes;
-        }
-
         /// <summary>
         /// returning full file paths (.tt) for all blazor identity templates
         /// TODO throw exception if nothing found, can't really scaffold is no files were found
@@ -603,31 +542,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             return null;
         }
 
-        private IEnumerable<string> GetGeneralT4Files()
-        {
-            var generalTemplateFolder = TemplateFolders.FirstOrDefault(x => x.Contains("General", StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(generalTemplateFolder) && FileSystem.DirectoryExists(generalTemplateFolder))
-            {
-                return FileSystem.EnumerateFiles(generalTemplateFolder, "*.tt", SearchOption.AllDirectories);
-            }
-
-            return null;
-        }
-
-        private string GetBlazorCodeModifierConfig(Assembly assembly, string resourceName)
-        {
-            string jsonText = string.Empty;
-            if (assembly != null && !string.IsNullOrEmpty(resourceName))
-            {
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    jsonText = reader.ReadToEnd();
-                }
-            }
-            return jsonText;
-        }
-
         //Folders where the .tt templates for Blazor CRUD scenario live. Should be in VS.Web.CG.Mvc\Templates\Blazor
         private IEnumerable<string> TemplateFolders
         {
@@ -636,7 +550,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: AppInfo.ApplicationBasePath,
-                    baseFolders: baseFolders,
+                    baseFolders: new[] { "BlazorIdentity", "General" },
                     projectContext: ProjectContext);
             }
         }

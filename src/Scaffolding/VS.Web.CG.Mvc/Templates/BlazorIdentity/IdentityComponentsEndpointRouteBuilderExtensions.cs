@@ -25,22 +25,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("using System.Security.Claims;\r\nusing System.Text.Json;\r\nusing ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write(";\r\nusing ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
-            this.Write(";\r\nusing ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
-            this.Write(".Pages;\r\nusing ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
-            this.Write(@".Pages.Manage;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
+            this.Write("using System.Security.Claims;\r\nusing System.Text.Json;\r\n");
 
+    var sortedUsings = new SortedSet<string>()
+    {
+        Model.UserClassNamespace,
+        Model.DbContextNamespace,
+        $"{Model.BlazorIdentityNamespace}.Pages",
+        $"{Model.BlazorIdentityNamespace}.Pages.Manage",
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Components.Authorization",
+        "Microsoft.AspNetCore.Http.Extensions",
+        "Microsoft.AspNetCore.Identity",
+        "Microsoft.AspNetCore.Mvc",
+        "Microsoft.Extensions.Primitives",
+    };
+
+    foreach (var usingNamespace in sortedUsings)
+    {
+            this.Write("using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(usingNamespace));
+            this.Write(";\r\n");
+  }
+
+            this.Write(@"
 namespace Microsoft.AspNetCore.Routing
 {
     internal static class IdentityComponentsEndpointRouteBuilderExtensions

@@ -5,16 +5,26 @@
 <#@  import namespace="System.Linq" #>
 using System.Security.Claims;
 using System.Text.Json;
-using <#= Model.UserClassNamespace #>;
-using <#= Model.DbContextNamespace #>;
-using <#= Model.BlazorIdentityNamespace #>.Pages;
-using <#= Model.BlazorIdentityNamespace #>.Pages.Manage;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
+<#
+    var sortedUsings = new SortedSet<string>()
+    {
+        Model.UserClassNamespace,
+        Model.DbContextNamespace,
+        $"{Model.BlazorIdentityNamespace}.Pages",
+        $"{Model.BlazorIdentityNamespace}.Pages.Manage",
+        "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Components.Authorization",
+        "Microsoft.AspNetCore.Http.Extensions",
+        "Microsoft.AspNetCore.Identity",
+        "Microsoft.AspNetCore.Mvc",
+        "Microsoft.Extensions.Primitives",
+    };
+
+    foreach (var usingNamespace in sortedUsings)
+    {#>
+using <#= usingNamespace #>;
+<#  }
+#>
 
 namespace Microsoft.AspNetCore.Routing
 {

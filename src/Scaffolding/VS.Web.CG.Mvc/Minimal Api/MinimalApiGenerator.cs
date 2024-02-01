@@ -300,7 +300,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         {
             string endpointsNamespace = templateModel.EndpointsNamespace;
             string mapMethodName = templateModel.MethodName;
-            var jsonText = GetMinimalApiCodeModifierConfig();
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "minimalApiChanges.json";
+            string jsonText = ProjectModelHelper.GetManifestResource(assembly, resourceName);
             CodeModifierConfig minimalApiChangesConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
             if (minimalApiChangesConfig != null)
             {
@@ -414,18 +416,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 
         private string GetMinimalApiCodeModifierConfig()
         {
-            string jsonText = string.Empty;
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("minimalApiChanges.json")).FirstOrDefault();
-            if (!string.IsNullOrEmpty(resourceName))
-            {
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    jsonText = reader.ReadToEnd();
-                }
-            }
+
             return jsonText;
         }
 

@@ -14,7 +14,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         {
             // Arrange & Act
             string result = BlazorIdentityHelper.GetFormattedRelativeIdentityFile(fullFileName);
-
             // Assert
             Assert.Equal(expected, result);
         }
@@ -26,7 +25,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 return new[]
                 {
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\file.tt", "file.razor" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\file.tt", "file" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\file.tt", "Pages.file" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\file.tt", "Pages.Manage.file" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Thing\\file.tt", "Thing.file" },
                 };
             }
         }

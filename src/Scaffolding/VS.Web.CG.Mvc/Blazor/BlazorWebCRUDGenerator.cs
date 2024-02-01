@@ -290,18 +290,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private CodeModifierConfig GetBlazorCodeModifierConfig()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.Where(x => x.EndsWith("blazorWebCrudChanges.json")).FirstOrDefault();
-            string jsonText = string.Empty;
-            if (assembly != null && !string.IsNullOrEmpty(resourceName))
-            {
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    jsonText = reader.ReadToEnd();
-                }
-            }
-
+            var resourceName = "blazorWebCrudChanges.json";
+            string jsonText = ProjectModelHelper.GetManifestResource(assembly, resourceName);
             CodeModifierConfig minimalApiChangesConfig = null;
             try
             {

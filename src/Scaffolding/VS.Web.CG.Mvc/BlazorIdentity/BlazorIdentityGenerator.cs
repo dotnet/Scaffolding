@@ -43,6 +43,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private ICodeGenAssemblyLoadContext AssemblyLoadContextLoader { get; set; }
         private const string Main = nameof(Main);
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+
+        private IEnumerable<string> _templateFolders;
+        //Folders where the .tt templates for Blazor Identity scenario live. Should be in VS.Web.CG.Mvc\Templates\BlazorIdentity
+        private IEnumerable<string> TemplateFolders
+        {
+            get
+            {
+                if (_templateFolders is null || !_templateFolders.Any())
+                {
+                    _templateFolders = TemplateFoldersUtilities.GetTemplateFolders(
+                        containingProject: Constants.ThisAssemblyName,
+                        applicationBasePath: AppInfo.ApplicationBasePath,
+                        baseFolders: new[] { "BlazorIdentity", "General" },
+                        projectContext: ProjectContext);
+                }
+                return _templateFolders;
+            }
+        }
         private IDictionary<string, string> _allBlazorIdentityFiles;
         private IDictionary<string, string> AllBlazorIdentityFiles
         {
@@ -243,6 +261,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 connectionStringsWriter.AddConnectionString("DefaultConnection", dbContextModel.DbContextName, commandlineModel.DatabaseProvider);
             }
 
+            //gather blazor identity files to generate
             blazorIdentityModel.FilesToGenerate = new List<string>();
             if (!string.IsNullOrEmpty(commandlineModel.Files))
             {
@@ -343,65 +362,65 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     var fileText = FileSystem.ReadAllText(fileDoc.Name);
                     fileText = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared" + Environment.NewLine + fileText;
                     FileSystem.WriteAllText(fileDoc.Name, fileText.ToString());
+                    ConsoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
                 }
             }
         }
 
         internal async Task ModifyProgramCsAsync(CodeFile programCsFile, BlazorIdentityModel blazorIdentityModel)
         {
-            if (programCsFile != null)
+            if (programCsFile is null)
             {
-                var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
-                var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
-                var programDocument = project.GetUpdatedDocument(FileSystem, programType);
-                //Modifying Program.cs document
-                var docEditor = await DocumentEditor.CreateAsync(programDocument);
-                var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-                programCsFile.Usings = programCsFile.Usings.Append(blazorIdentityModel.DbContextNamespace).ToArray();
-                programCsFile.Usings = programCsFile.Usings.Append(blazorIdentityModel.BlazorIdentityNamespace).ToArray();
-                var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
-                //adding usings
-                var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
-                var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
-                var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
-                //add code snippets/changes.
-                if (programCsFile.Methods != null && programCsFile.Methods.Count != 0)
-                {
-                    var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
-                    var globalChanges = globalMethod.CodeChanges;
-                    if (updatedIdentifer.HasValue)
-                    {
-                        (string oldValue, string newValue) = updatedIdentifer.Value;
-                        globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
-                    }
+                return;
+            }
 
-                    if (useTopLevelsStatements)
-                    {
-                        newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
-                    }
-                    else
-                    {
-                        var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
-                        if (mainMethod != null)
-                        {
-                            var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, globalChanges);
-                            newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
-                        }
-                    }
+            var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var programDocument = project.GetUpdatedDocument(FileSystem, programType);
+            //Modifying Program.cs document
+            var docEditor = await DocumentEditor.CreateAsync(programDocument);
+            var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
+            programCsFile.Usings = programCsFile.Usings.Union(new string[] { blazorIdentityModel.DbContextNamespace, blazorIdentityModel.BlazorIdentityNamespace }).ToArray();
+            var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
+            var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
+            var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
+            var builderIdentifier = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
+            //add code snippets/changes.
+            if (programCsFile.Methods != null && programCsFile.Methods.Count != 0)
+            {
+                var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+                var globalChanges = globalMethod.CodeChanges;
+                if (builderIdentifier.HasValue)
+                {
+                    (string oldValue, string newValue) = builderIdentifier.Value;
+                    globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
                 }
 
-                //add more changes to newRoot
-                (string oldBuilderVal, string newBuilderVal) = updatedIdentifer.Value;
-                var serverComponentNode = newRoot.Members.FirstOrDefault(x => x.ToString().Contains("Services.AddRazorComponents()"));
-                newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel));
-                //replace root node with all the updates.
-                docEditor.ReplaceNode(docRoot, newRoot);
-                //write to Program.cs file
-                var changedDocument = docEditor.GetChangedDocument();
-                var classFileTxt = await changedDocument.GetTextAsync();
-                FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
-                ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+                if (useTopLevelsStatements)
+                {
+                    newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
+                }
+                else
+                {
+                    var mainMethod = DocumentBuilder.GetMethodFromSyntaxRoot(newRoot, Main);
+                    if (mainMethod != null)
+                    {
+                        var updatedMethod = DocumentBuilder.ApplyChangesToMethod(mainMethod.Body, globalChanges);
+                        newRoot = newRoot?.ReplaceNode(mainMethod.Body, updatedMethod);
+                    }
+                }
             }
+
+            (string oldBuilderVal, string newBuilderVal) = builderIdentifier.Value;
+            var serverComponentNode = newRoot.Members.FirstOrDefault(x => x.ToString().Contains("Services.AddRazorComponents()"));
+            newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel));
+            //replace root node with all the updates.
+            docEditor.ReplaceNode(docRoot, newRoot);
+            //write to Program.cs file
+            var changedDocument = docEditor.GetChangedDocument();
+            var classFileTxt = await changedDocument.GetTextAsync();
+            FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
+            ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 
         private void ExecuteTemplates(BlazorIdentityModel templateModel)
@@ -418,6 +437,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
                 {
+                    //currently only Identity...cs files are of CSharp type, rest are razor
                     string extension = templateName.StartsWith("identity", StringComparison.OrdinalIgnoreCase) ? ".cs" : ".razor";
                     string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{templateName}";
                     string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
@@ -515,23 +535,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
                 return transformation;
             }
-            //TODO: catch specific exceptions
             catch (Exception)
             {
                 return null;
-            }
-        }
-
-        //Folders where the .tt templates for Blazor CRUD scenario live. Should be in VS.Web.CG.Mvc\Templates\Blazor
-        private IEnumerable<string> TemplateFolders
-        {
-            get
-            {
-                return TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: Constants.ThisAssemblyName,
-                    applicationBasePath: AppInfo.ApplicationBasePath,
-                    baseFolders: new[] { "BlazorIdentity", "General" },
-                    projectContext: ProjectContext);
             }
         }
     }

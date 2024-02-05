@@ -18,7 +18,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.Equal(expected, result);
         }
 
-        //TODO finish test data
         public static IEnumerable<object[]> BlazorIdentityFiles
         {
             get
@@ -29,6 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\file.tt", "Pages.file" },
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\file.tt", "Pages.Manage.file" },
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Thing\\file.tt", "Thing.file" },
+                    new object[] { "C:\\Some\\Path\\Templates\\Thing\\file.tt", "" },
                 };
             }
         }

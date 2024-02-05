@@ -301,7 +301,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             string endpointsNamespace = templateModel.EndpointsNamespace;
             string mapMethodName = templateModel.MethodName;
             var assembly = Assembly.GetExecutingAssembly();
-            string jsonText = ProjectModelHelper.GetManifestResource(assembly, resourceName: "minimalApiChanges.json");
+            string jsonText = ProjectModelHelper.GetManifestResource(assembly, shortResourceName: "minimalApiChanges.json");
             CodeModifierConfig minimalApiChangesConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
             if (minimalApiChangesConfig != null)
             {

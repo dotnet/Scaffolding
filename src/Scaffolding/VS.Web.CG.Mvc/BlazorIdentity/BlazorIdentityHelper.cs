@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.Shared;
 using System.Linq;
+using System;
+using System.IO;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 {
@@ -25,8 +27,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             return string.Empty;
         }
 
-        internal static IList<SyntaxNode> GetBlazorIdentityGlobalNodes(string builderVarName, string dbContextName, string userClassName)
+        internal static IList<SyntaxNode> GetBlazorIdentityGlobalNodes(string builderVarName, BlazorIdentityModel blazorIdentityModel)
         {
+            var dbProviderString = blazorIdentityModel.DatabaseProvider.Equals(DbProvider.SqlServer) ? "UseSqlServer" : "UseSqlite";
             var globalNodes = new List<SyntaxNode>
             {
                 SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddCascadingAuthenticationState();\n"))),
@@ -36,9 +39,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
                 SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(
                     ($"\n{builderVarName}.Services.AddAuthentication(options =>\r\n{{\r\n    options.DefaultScheme = IdentityConstants.ApplicationScheme;\r\n    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;\r\n}})\r\n.AddIdentityCookies();\n"))),
                 SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\nvar connectionString = {builderVarName}.Configuration.GetConnectionString(\"DefaultConnection\") ?? throw new InvalidOperationException(\"Connection string 'DefaultConnection' not found.\");\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddDbContext<{dbContextName}>(options => \n    options.UseSqlite(connectionString));\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddIdentityCore<{userClassName}>(options => options.SignIn.RequireConfirmedAccount = true)\n    .AddEntityFrameworkStores<{dbContextName}>()\n    .AddSignInManager()\n    .AddDefaultTokenProviders();\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddSingleton<IEmailSender<{userClassName}>, IdentityNoOpEmailSender>();\n"))
+                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddDbContext<{blazorIdentityModel.DbContextName}>(options => \n    options.{dbProviderString}(connectionString));\n")),
+                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddIdentityCore<{blazorIdentityModel.UserClassName}>(options => options.SignIn.RequireConfirmedAccount = true)\n    .AddEntityFrameworkStores<{blazorIdentityModel.DbContextName}>()\n    .AddSignInManager()\n    .AddDefaultTokenProviders();\n")),
+                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddSingleton<IEmailSender<{blazorIdentityModel.UserClassName}>, IdentityNoOpEmailSender>();\n"))
             };
 
             return globalNodes;

@@ -55,9 +55,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
             var resourceName = resourceNames?.FirstOrDefault(x => x.EndsWith(shortResourceName));
             if (assembly != null && !string.IsNullOrEmpty(resourceName))
             {
-                using Stream stream = assembly.GetManifestResourceStream(resourceName);
-                using StreamReader reader = new(stream);
-                jsonText = reader.ReadToEnd();
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    jsonText = reader.ReadToEnd();
+                }
             }
 
             return jsonText;

@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -131,7 +130,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         internal async Task<BlazorIdentityModel> ValidateAndBuild(BlazorIdentityCommandLineModel commandlineModel)
         {
-            Debugger.Launch();
             commandlineModel.DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(commandlineModel.DatabaseProviderString, Logger, isIdentity: true);
             ValidateRequiredDependencies(commandlineModel.DatabaseProvider);
             if (string.IsNullOrEmpty(commandlineModel.RootNamespace) || RoslynUtilities.IsValidNamespace(commandlineModel.RootNamespace))
@@ -165,7 +163,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     blazorIdentityModel.DbContextName = IdentityHelper.GetClassNameFromTypeName(commandlineModel.DataContextClass);
                     blazorIdentityModel.DbContextNamespace = IdentityHelper.GetNamespaceFromTypeName(commandlineModel.DataContextClass)
                         ?? defaultDbContextNamespace;
-                    blazorIdentityModel.DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(commandlineModel.DatabaseProviderString, Logger, isIdentity: true);
+                    blazorIdentityModel.DatabaseProvider = commandlineModel.DatabaseProvider;
                     createDbContext = true;
                 }
                 else
@@ -176,6 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     blazorIdentityModel.UserClassNamespace = userClassType.Namespace;
                     blazorIdentityModel.DbContextName = existingDbContext.Name;
                     blazorIdentityModel.DbContextNamespace = existingDbContext.Namespace;
+                    blazorIdentityModel.DatabaseProvider = commandlineModel.DatabaseProvider;
                 }
             }
             else
@@ -183,7 +182,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 // --dbContext paramter was not specified. So we need to generate one using convention.
                 blazorIdentityModel.DbContextName = IdentityHelper.GetDefaultDbContextName(ProjectContext.ProjectName);
                 blazorIdentityModel.DbContextNamespace = defaultDbContextNamespace;
-                blazorIdentityModel.DatabaseProvider = ModelMetadataUtilities.ValidateDatabaseProvider(commandlineModel.DatabaseProviderString, Logger, isIdentity: true);
+                blazorIdentityModel.DatabaseProvider = commandlineModel.DatabaseProvider;
                 createDbContext = true;
             }
 
@@ -316,7 +315,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         internal async Task ModifyFilesAsync(BlazorIdentityModel blazorIdentityModel)
         {
             var assembly = Assembly.GetExecutingAssembly();
-
+            var resourceName = "blazorIdentityChanges.json";
             var jsonText = ProjectModelHelper.GetManifestResource(assembly, resourceName);
             CodeModifierConfig minimalApiChangesConfig = null;
             try
@@ -396,7 +395,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 //add more changes to newRoot
                 (string oldBuilderVal, string newBuilderVal) = updatedIdentifer.Value;
                 var serverComponentNode = newRoot.Members.FirstOrDefault(x => x.ToString().Contains("Services.AddRazorComponents()"));
-                newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel.DbContextName, blazorIdentityModel.UserClassName));
+                newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel));
                 //replace root node with all the updates.
                 docEditor.ReplaceNode(docRoot, newRoot);
                 //write to Program.cs file

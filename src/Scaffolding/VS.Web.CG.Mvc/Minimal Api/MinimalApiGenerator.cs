@@ -414,12 +414,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
-        private string GetMinimalApiCodeModifierConfig()
-        {
-
-            return jsonText;
-        }
-
         //Folders where the .cshtml templates are. Should be in VS.Web.CG.Mvc\Templates\MinimalApi
         private IEnumerable<string> TemplateFolders
         {

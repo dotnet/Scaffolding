@@ -31,22 +31,12 @@
     {
       "Name": "databaseProvider",
       "ShortName": "dbProvider",
-      "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'."
+      "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite'."
     },
     {
       "Name": "force",
       "ShortName": "f",
       "Description": "Use this option to overwrite existing files."
-    },
-    {
-      "Name": "layout",
-      "ShortName": "l",
-      "Description": "Specify a custom layout file to use."
-    },
-    {
-      "Name": "generateLayout",
-      "ShortName": "gl",
-      "Description": "Use this option to generate a new _Layout.cshtml"
     }
   ]
 }

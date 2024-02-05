@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -44,15 +43,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private ICodeGenAssemblyLoadContext AssemblyLoadContextLoader { get; set; }
         private const string Main = nameof(Main);
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
-        private static readonly char[] semicolonSeparator = new char[] { ';' };
         private IDictionary<string, string> _allBlazorIdentityFiles;
         private IDictionary<string, string> AllBlazorIdentityFiles
         {
             get
             {
-                if (_allBlazorIdentityFiles == null || _allBlazorIdentityFiles.Count == 0)
+                if (_allBlazorIdentityFiles == null || !_allBlazorIdentityFiles.Any())
                 {
-                    _allBlazorIdentityFiles = GetBlazorIdentityFiles();
+                    _allBlazorIdentityFiles = BlazorIdentityHelper.GetBlazorIdentityFiles(FileSystem, TemplateFolders);
                 }
 
                 return _allBlazorIdentityFiles;
@@ -64,7 +62,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_generalT4Files == null || _generalT4Files.Count() == 0)
+                if (_generalT4Files == null || !_generalT4Files.Any())
                 {
                     _generalT4Files = BlazorIdentityHelper.GetGeneralT4Files(FileSystem, TemplateFolders);
                 }
@@ -78,7 +76,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_blazorIdentityTemplateTypes is null)
+                if (_blazorIdentityTemplateTypes is null || !_blazorIdentityTemplateTypes.Any())
                 {
                     var allTypes = Assembly.GetExecutingAssembly().GetTypes();
                     _blazorIdentityTemplateTypes = allTypes.Where(t => t.FullName.Contains("Mvc.Templates.BlazorIdentity")).ToList();
@@ -248,11 +246,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             blazorIdentityModel.FilesToGenerate = new List<string>();
             if (!string.IsNullOrEmpty(commandlineModel.Files))
             {
-                blazorIdentityModel.FilesToGenerate = commandlineModel.Files.Split(semicolonSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
+                blazorIdentityModel.FilesToGenerate = commandlineModel.Files.Split(IdentityHelper.SemicolonSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
             }
             else if (!string.IsNullOrEmpty(commandlineModel.ExcludeFiles))
             {
-                IEnumerable<string> excludedFiles = commandlineModel.ExcludeFiles.Split(semicolonSeparator, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+                IEnumerable<string> excludedFiles = commandlineModel.ExcludeFiles.Split(IdentityHelper.SemicolonSeparator, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
                 //validate excluded files
                 var errors = new List<string>();
                 var invalidFiles = excludedFiles.Where(f => !AllBlazorIdentityFiles.ContainsKey(f));
@@ -522,23 +520,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 return null;
             }
-        }
-
-        /// <summary>
-        /// returning full file paths (.tt) for all blazor identity templates
-        /// TODO throw exception if nothing found, can't really scaffold is no files were found
-        /// </summary>
-        /// <returns></returns>
-        private IDictionary<string, string> GetBlazorIdentityFiles()
-        {
-            var blazorIdentityTemplateFolder = TemplateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(blazorIdentityTemplateFolder) && FileSystem.DirectoryExists(blazorIdentityTemplateFolder))
-            {
-                var allFiles = FileSystem.EnumerateFiles(blazorIdentityTemplateFolder, "*.tt", SearchOption.AllDirectories);
-                return allFiles.ToDictionary(x => BlazorIdentityHelper.GetFormattedRelativeIdentityFile(x), x => x);
-            }
-
-            return null;
         }
 
         //Folders where the .tt templates for Blazor CRUD scenario live. Should be in VS.Web.CG.Mvc\Templates\Blazor

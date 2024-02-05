@@ -57,5 +57,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 
             return null;
         }
+
+        /// <summary>
+        /// returning full file paths (.tt) for all blazor identity templates
+        /// TODO throw exception if nothing found, can't really scaffold is no files were found
+        /// </summary>
+        /// <returns></returns>
+        internal static IDictionary<string, string> GetBlazorIdentityFiles(IFileSystem fileSystem, IEnumerable<string> templateFolders)
+        {
+            var blazorIdentityTemplateFolder = templateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(blazorIdentityTemplateFolder) && fileSystem.DirectoryExists(blazorIdentityTemplateFolder))
+            {
+                var allFiles = fileSystem.EnumerateFiles(blazorIdentityTemplateFolder, "*.tt", SearchOption.AllDirectories);
+                return allFiles.ToDictionary(x => GetFormattedRelativeIdentityFile(x), x => x);
+            }
+
+            return null;
+        }
     }
 }

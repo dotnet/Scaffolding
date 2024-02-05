@@ -182,7 +182,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             ValidateIndividualFileOptions();
             if (!string.IsNullOrEmpty(_commandlineModel.Files))
             {
-                NamedFiles = _commandlineModel.Files.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                NamedFiles = _commandlineModel.Files.Split(IdentityHelper.SemicolonSeparator, StringSplitOptions.RemoveEmptyEntries);
             }
             else if (!string.IsNullOrEmpty(_commandlineModel.ExcludeFiles))
             {
@@ -195,7 +195,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     contentVersion = IdentityGenerator.ContentVersionDefault;
                 }
-                IEnumerable<string> excludedFiles = _commandlineModel.ExcludeFiles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+                IEnumerable<string> excludedFiles = _commandlineModel.ExcludeFiles.Split(IdentityHelper.SemicolonSeparator, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
                 IEnumerable<string> allFiles = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
                 //validate excluded files
                 var errors = new List<string>();

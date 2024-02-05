@@ -148,5 +148,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 throw new InvalidOperationException(string.Join(Environment.NewLine, errorStrings));
             }
         }
+
+        internal static readonly char[] SemicolonSeparator = new char[] { ';' };
     }
 }

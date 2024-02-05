@@ -35,14 +35,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         [Option(Name = "excludeFiles", ShortName = "exf", Description = "Use this option to overwrite all but list of semicolon separated files.  Use the --listFiles option to see the available options.")]
         public string ExcludeFiles { get; set; }
 
-        public bool IsGeneratingCustomUser
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(UserClass) && !string.IsNullOrEmpty(DataContextClass);
-            }
-        }
-
         public BlazorIdentityCommandLineModel()
         {
         }

@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity;
 using Xunit;
@@ -8,10 +9,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     public class BlazorIdentityHelperTests
     {
-        [Theory]
+        [SkippableTheory]
         [MemberData(nameof(BlazorIdentityFiles))]
         public void GetFormattedRelativeIdentityFileTest(string fullFileName, string expected)
         {
+            Skip.If(!OperatingSystem.IsWindows());
             // Arrange & Act
             string result = BlazorIdentityHelper.GetFormattedRelativeIdentityFile(fullFileName);
             // Assert

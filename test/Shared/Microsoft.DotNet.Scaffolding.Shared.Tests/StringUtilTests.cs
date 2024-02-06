@@ -48,14 +48,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.False(input7.ContainsIgnoreCase(value8));
         }
 
-        [Theory]
+        [SkippableTheory]
         [MemberData(nameof(ToPathTestData))]
         public void ToPathTests(string namespaceString, string basePath, string projectRootNamespace, string expectedPath)
         {
+            Skip.If(!OperatingSystem.IsWindows());
             Assert.Equal(expectedPath, StringUtil.ToPath(namespaceString, basePath, projectRootNamespace));
         }
 
-        [Theory]
+        [SkippableTheory]
         [MemberData(nameof(ToNamespaceTestData))]
         public void ToNamespaceTests(string path, string expectedNamespace)
         {
@@ -63,7 +64,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.Equal(expectedNamespace, StringUtil.ToNamespace(path));
         }
 
-        [Theory]
+        [SkippableTheory]
         [MemberData(nameof(GetFilePathWithoutExtensionTestData))]
         public void GetFilePathWithoutExtensionTests(string fullFileName, string expected)
         {

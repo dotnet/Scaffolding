@@ -229,23 +229,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             await AddStaticFiles(templateModel);
         }
 
-        private string GetIdentityCodeModifierConfig()
-        {
-            string jsonText = string.Empty;
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames();
-            var resourceName = resourceNames.FirstOrDefault(x => x.EndsWith("identityMinimalHostingChanges.json"));
-            if (!string.IsNullOrEmpty(resourceName))
-            {
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    jsonText = reader.ReadToEnd();
-                }
-            }
-            return jsonText;
-        }
-
         /// <summary>
         /// Edit the Program.cs file for Individual Auth. Adds GlobalStatements found in 'identityMinimalHostingChanges.json' file.
         /// </summary>
@@ -262,7 +245,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             string dbContextNamespace,
             DbProvider databaseProvider)
         {
-            var jsonText = GetIdentityCodeModifierConfig();
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "identityMinimalHostingChanges.json";
+            string jsonText = ProjectModelHelper.GetManifestResource(assembly, resourceName);
             CodeModifierConfig identityProgramFileConfig = JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
             if (identityProgramFileConfig != null)
             {

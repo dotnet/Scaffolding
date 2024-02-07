@@ -1,0 +1,42 @@
+{
+  "Alias": "blazor-identity",
+  "Description": "Generates blazor identity files.",
+  "Arguments": [ ],
+  "Options": [
+    {
+      "Name": "dataContext",
+      "ShortName": "dc",
+      "Description": "DbContext class to use"
+    },
+    {
+      "Name": "rootNamespace",
+      "ShortName": "rn",
+      "Description": "Root namesapce to use for generating identity code."
+    },
+    {
+      "Name": "files",
+      "ShortName": "fi",
+      "Description": "List of semicolon separated files to scaffold. Use the --listFiles option to see the available options."
+    },
+    {
+      "Name": "listFiles",
+      "ShortName": "lf",
+      "Description": "Lists the files that can be scaffolded by using the '--files' option."
+    },
+    {
+      "Name": "userClass",
+      "ShortName": "u",
+      "Description": "Name of the User class to generate."
+    },
+    {
+      "Name": "databaseProvider",
+      "ShortName": "dbProvider",
+      "Description": "Database provider to use. Options include 'sqlserver' (default), 'sqlite'."
+    },
+    {
+      "Name": "force",
+      "ShortName": "f",
+      "Description": "Use this option to overwrite existing files."
+    }
+  ]
+}

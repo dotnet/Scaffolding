@@ -1,0 +1,14 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General.IdentityApplicationUserModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+using Microsoft.AspNetCore.Identity;
+
+namespace <#= Model.UserClassNamespace #>
+{
+    // Add profile data for application users by adding properties to the ApplicationUser class
+    public class <#= Model.UserClassName #> : IdentityUser
+    {
+    }
+}

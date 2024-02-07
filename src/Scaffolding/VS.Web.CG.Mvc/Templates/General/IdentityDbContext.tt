@@ -1,0 +1,15 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General.IdentityDbContextModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using <#= Model.UserClassModel.UserClassNamespace #>;
+
+namespace <#= Model.DbContextNamespace #>
+{
+    public class <#= Model.DbContextName #>(DbContextOptions<<#= Model.DbContextName #>> options) : IdentityDbContext<<#= Model.UserClassModel.UserClassName #>>(options)
+    {
+    }
+}

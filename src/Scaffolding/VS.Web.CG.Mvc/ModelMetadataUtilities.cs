@@ -127,21 +127,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 areaName);
         }
 
-        internal static DbProvider ValidateDatabaseProvider(string databaseProviderString, ILogger logger)
+        internal static DbProvider ValidateDatabaseProvider(string databaseProviderString, ILogger logger, bool isIdentity = false)
         {
+            var dbProviders = isIdentity ? EfConstants.IdentityDbProviders : EfConstants.AllDbProviders;
             if (string.IsNullOrEmpty(databaseProviderString))
             {
                 logger.LogMessage(MessageStrings.NoDbProviderFound, LogMessageLevel.Information);
+                logger.LogMessage("Using 'SQL Server' by default!", LogMessageLevel.Information);
                 return DbProvider.SqlServer;
             }
-            else if (Enum.TryParse(databaseProviderString, ignoreCase: true, out DbProvider dbProvider))
+            else if (dbProviders.TryGetValue(databaseProviderString, out DbProvider dbProvider))
             {
                 return dbProvider;
             }
             else
             {
-                string dbList = $"'{string.Join("', ", EfConstants.AllDbProviders.ToArray(), 0, EfConstants.AllDbProviders.Count - 1)} and '{EfConstants.AllDbProviders.LastOrDefault()}'";
-                throw new InvalidOperationException($"Invalid database provider '{databaseProviderString}'.\nSupported database providers include : {dbList}");
+                logger.LogMessage($"Invalid database provider '{databaseProviderString}' provided.", LogMessageLevel.Information);
+                logger.LogMessage("Using 'SQL Server' by default!", LogMessageLevel.Information);
+                return DbProvider.SqlServer;
             }
         }
     }

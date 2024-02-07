@@ -3,7 +3,11 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 {

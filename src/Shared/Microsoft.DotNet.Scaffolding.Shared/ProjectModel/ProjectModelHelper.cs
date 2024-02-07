@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
 {
@@ -44,6 +46,23 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         internal static bool IsTfmPreRelease(string tfm)
         {
             return tfm.Equals("net8.0", StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal static string GetManifestResource(Assembly assembly, string shortResourceName)
+        {
+            string jsonText = string.Empty;
+            var resourceNames = assembly.GetManifestResourceNames();
+            var resourceName = resourceNames?.FirstOrDefault(x => x.EndsWith(shortResourceName));
+            if (assembly != null && !string.IsNullOrEmpty(resourceName))
+            {
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    jsonText = reader.ReadToEnd();
+                }
+            }
+
+            return jsonText;
         }
     }
 }

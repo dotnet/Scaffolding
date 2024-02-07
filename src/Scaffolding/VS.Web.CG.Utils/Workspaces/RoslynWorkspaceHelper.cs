@@ -5,8 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Evaluation;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Project = Microsoft.Build.Evaluation.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
 {
@@ -56,6 +59,25 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                 CompilationItems = compileItems.ToList(),
                 FullPath = fullPath
             };
+        }
+
+        public static async Task<Type> FindExistingType(Workspace workspace, ICodeGenAssemblyLoadContext loader, string projectAssemblyName, string type)
+        {
+            var compilation = await workspace.CurrentSolution.Projects
+                .Where(p => p.AssemblyName == projectAssemblyName)
+                .First()
+                .GetCompilationAsync();
+
+            if (compilation == null)
+            {
+                return null;
+            }
+            var compilationResult = CommonUtilities.GetAssemblyFromCompilation(loader, compilation);
+            var allTypes = compilationResult.Assembly.GetTypes();
+            //get all types and return the one with the same name. There should be no duplicates so only one should match.
+            return allTypes.FirstOrDefault(
+                r => r.Name.Equals(type, StringComparison.OrdinalIgnoreCase) ||
+                     r.FullName.Equals(type, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

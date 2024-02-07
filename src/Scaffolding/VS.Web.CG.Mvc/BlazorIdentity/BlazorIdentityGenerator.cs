@@ -66,7 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_allBlazorIdentityFiles == null)
+                if (_allBlazorIdentityFiles is null)
                 {
                     _allBlazorIdentityFiles = BlazorIdentityHelper.GetBlazorIdentityFiles(FileSystem, TemplateFolders);
                 }
@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_generalT4Files == null)
+                if (_generalT4Files is null)
                 {
                     _generalT4Files = BlazorIdentityHelper.GetGeneralT4Files(FileSystem, TemplateFolders);
                 }
@@ -174,7 +174,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     ProjectContext.AssemblyName,
                     commandlineModel.DataContextClass);
                 // We need to create one with what the user specified.
-                if (existingDbContext == null)
+                if (existingDbContext is null)
                 {
                     blazorIdentityModel.DbContextName = IdentityHelper.GetClassNameFromTypeName(commandlineModel.DataContextClass);
                     blazorIdentityModel.DbContextNamespace = IdentityHelper.GetNamespaceFromTypeName(commandlineModel.DataContextClass)

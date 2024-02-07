@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.DotNet.Scaffolding.Shared.Project;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
@@ -49,7 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 return string.Empty;
             }
 
-            return dbContext.Substring(lastIndexOfDot + 1, dbContext.Length - lastIndexOfDot - 1);
+            return dbContext.Substring(lastIndexOfDot + 1);
         }
 
         internal static void ValidateExistingDbContext(Type existingDbContext, string userclassName)

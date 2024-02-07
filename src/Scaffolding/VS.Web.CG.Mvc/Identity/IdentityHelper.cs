@@ -43,7 +43,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         internal static string GetClassNameFromTypeName(string dbContext)
         {
-            return dbContext.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last();
+            var lastIndexOfDot = dbContext.LastIndexOf('.');
+            if (lastIndexOfDot == -1)
+            {
+                return string.Empty;
+            }
+
+            return dbContext.Substring(lastIndexOfDot + 1, dbContext.Length - lastIndexOfDot - 1);
         }
 
         internal static void ValidateExistingDbContext(Type existingDbContext, string userclassName)

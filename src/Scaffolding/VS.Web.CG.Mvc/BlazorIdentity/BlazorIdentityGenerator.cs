@@ -50,7 +50,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_templateFolders is null || !_templateFolders.Any())
+                if (_templateFolders is null)
                 {
                     _templateFolders = TemplateFoldersUtilities.GetTemplateFolders(
                         containingProject: Constants.ThisAssemblyName,
@@ -66,7 +66,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_allBlazorIdentityFiles == null || !_allBlazorIdentityFiles.Any())
+                if (_allBlazorIdentityFiles == null)
                 {
                     _allBlazorIdentityFiles = BlazorIdentityHelper.GetBlazorIdentityFiles(FileSystem, TemplateFolders);
                 }
@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_generalT4Files == null || !_generalT4Files.Any())
+                if (_generalT4Files == null)
                 {
                     _generalT4Files = BlazorIdentityHelper.GetGeneralT4Files(FileSystem, TemplateFolders);
                 }
@@ -94,7 +94,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         {
             get
             {
-                if (_blazorIdentityTemplateTypes is null || !_blazorIdentityTemplateTypes.Any())
+                if (_blazorIdentityTemplateTypes is null)
                 {
                     var allTypes = Assembly.GetExecutingAssembly().GetTypes();
                     _blazorIdentityTemplateTypes = allTypes.Where(t => t.FullName.Contains("Mvc.Templates.BlazorIdentity")).ToList();
@@ -262,7 +262,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             //gather blazor identity files to generate
-            blazorIdentityModel.FilesToGenerate = new List<string>();
             if (!string.IsNullOrEmpty(commandlineModel.Files))
             {
                 blazorIdentityModel.FilesToGenerate = commandlineModel.Files.Split(IdentityHelper.SemicolonSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -287,8 +286,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 //get files to overwrite
                 blazorIdentityModel.FilesToGenerate = AllBlazorIdentityFiles.Keys.Except(excludedFiles).ToList();
             }
-
-            if (blazorIdentityModel.FilesToGenerate.Count == 0)
+            else
             {
                 blazorIdentityModel.FilesToGenerate = AllBlazorIdentityFiles.Keys.ToList();
             }
@@ -341,7 +339,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
             catch (JsonException ex)
             {
-                ConsoleLogger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
+                Logger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
             }
 
             //Getting Program.cs document
@@ -362,7 +360,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     var fileText = FileSystem.ReadAllText(fileDoc.Name);
                     fileText = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared" + Environment.NewLine + fileText;
                     FileSystem.WriteAllText(fileDoc.Name, fileText.ToString());
-                    ConsoleLogger.LogMessage($"Modified {fileDoc.Name}.\n");
+                    Logger.LogMessage($"Modified {fileDoc.Name}.\n");
                 }
             }
         }
@@ -383,10 +381,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             programCsFile.Usings = programCsFile.Usings.Union(new string[] { blazorIdentityModel.DbContextNamespace, blazorIdentityModel.BlazorIdentityNamespace }).ToArray();
             var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
             var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
-            var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
+            var useTopLevelStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
             var builderIdentifier = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
             //add code snippets/changes.
-            if (programCsFile.Methods != null && programCsFile.Methods.Count != 0)
+            if (programCsFile.Methods != null && programCsFile.Methods.Count > 0)
             {
                 var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
                 var globalChanges = globalMethod.CodeChanges;
@@ -396,7 +394,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
                 }
 
-                if (useTopLevelsStatements)
+                if (useTopLevelStatements)
                 {
                     newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
                 }
@@ -420,7 +418,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var changedDocument = docEditor.GetChangedDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
             FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
-            ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+            Logger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 
         private void ExecuteTemplates(BlazorIdentityModel templateModel)

@@ -126,5 +126,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             string[] parts = templateName.Split('.');
             return parts[parts.Length - 1];
         }
+
+        internal static string NormalizeLineEndings(string text)
+        {
+            //change all line endings to "\n" and then replace them with the appropriate ending
+            return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine);
+        }
     }
 }

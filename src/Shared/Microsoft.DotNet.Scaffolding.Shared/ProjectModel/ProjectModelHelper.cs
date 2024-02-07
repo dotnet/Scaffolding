@@ -39,11 +39,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
             { ".NETCoreApp,Version=v2.1", "netcoreapp2.1" },
             { ".NETCoreApp,Version=v7.0", "net7.0" },
             { ".NETCoreApp,Version=v8.0", "net8.0" },
+            { ".NETCoreApp,Version=v9.0", "net9.0" },
         };
 
         internal static bool IsTfmPreRelease(string tfm)
         {
-            return tfm.Equals("net8.0", StringComparison.OrdinalIgnoreCase);
+            return tfm.Equals("net9.0", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -417,7 +417,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             //write to Program.cs file
             var changedDocument = docEditor.GetChangedDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
-            FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
+            var classFileString = classFileTxt.ToString();
+            classFileString = StringUtil.NormalizeLineEndings(classFileString);
+            FileSystem.WriteAllText(programDocument.Name, classFileString);
             Logger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 
@@ -446,6 +448,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                         FileSystem.CreateDirectory(folderName);
                     }
 
+                    templatedString = StringUtil.NormalizeLineEndings(templatedString);
                     FileSystem.WriteAllText(templatedFilePath, templatedString);
                     Logger.LogMessage($"Added Blazor identity file : {templatedFilePath}");
                 }
@@ -477,6 +480,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 }
 
                 string templatedFilePath = Path.Combine(identityDataPath, $"{model.UserClassName}.cs");
+                templatedString = StringUtil.NormalizeLineEndings(templatedString);
                 FileSystem.WriteAllText(templatedFilePath, templatedString);
                 Logger.LogMessage($"Added IdentityUser class : {templatedFilePath}");
             }
@@ -507,6 +511,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 }
 
                 string templatedFilePath = Path.Combine(identityDataPath, $"{model.DbContextName}.cs");
+                templatedString = StringUtil.NormalizeLineEndings(templatedString);
                 FileSystem.WriteAllText(templatedFilePath, templatedString);
                 Logger.LogMessage($"Added IdentityDbContext class : {templatedFilePath}");
             }

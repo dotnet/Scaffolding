@@ -1,0 +1,13 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+@page "/Account/Lockout"
+
+<PageTitle>Locked out</PageTitle>
+
+<header>
+    <h1 class="text-danger">Locked out</h1>
+    <p class="text-danger">This account has been locked out, please try again later.</p>
+</header>

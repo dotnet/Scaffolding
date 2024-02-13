@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
@@ -90,5 +92,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
             return context;
         }
 
+        /// <summary>
+        /// a very simple check for WebApplication.AddRazorComponents()
+        /// workaround for when 'ProjectCapability' msbuild item not initialized.
+        /// </summary>
+        public static bool IsBlazorWebProject(this IProjectContext context)
+        {
+            var programCsFile = context.CompilationItems.FirstOrDefault(x => x.EndsWith("Program.cs"));
+            if (!string.IsNullOrEmpty(programCsFile))
+            {
+                var programCsFilePath = Path.IsPathRooted(programCsFile)
+                ? programCsFile
+                : Path.Combine(Path.GetDirectoryName(context.ProjectFullPath), programCsFile);
+
+                string programCsText = File.ReadAllText(programCsFilePath);
+                return programCsText.Contains("AddRazorComponents");
+            }
+           
+            return false;
+        }
     }
 }

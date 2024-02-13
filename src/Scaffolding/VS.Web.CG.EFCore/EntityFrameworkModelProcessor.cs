@@ -333,6 +333,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         ? string.Empty
                         : string.Join(Environment.NewLine, compilationErrors)));
             }
+            else if (addResult.NoEditsNeeded)
+            {
+                _reflectedTypesProvider = GetReflectedTypesProvider(
+                    projectCompilation,
+                    c => c);
+            }
             else
             {
                 _logger.LogMessage(MessageStrings.CompilingInMemory);
@@ -612,6 +618,41 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
 
             return outputPath;
+        }
+
+        // Look for the model type in the current project.
+        // If its not found in the current project, look in the dependencies.
+        public Type GetTypeFromProjectContext(string modelTypeName)
+        {
+            if (string.IsNullOrEmpty(modelTypeName))
+            {
+                throw new ArgumentNullException(nameof(modelTypeName));
+            }
+
+            Type modelType = null;
+            // Need to look in the dependencies of this project now.
+            var dependencies = _projectContext.CompilationAssemblies.GetEnumerator();
+            while (modelType == null && dependencies.MoveNext())
+            {
+                try
+                {
+                    // Since we are running in the project's dependency context, loading assemblies
+                    // by name just works.
+                    var dAssemblyName = new AssemblyName(Path.GetFileNameWithoutExtension(dependencies.Current.ResolvedPath));
+                    var dAssembly = _loader.LoadFromName(dAssemblyName);
+                    modelType = dAssembly.GetType(modelTypeName);
+                }
+                catch (Exception ex)
+                {
+                    // This is a best effort approach. If we cannot load an assembly for any reason,
+                    // just ignore it and look for the type in the next one.
+                    _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
+                    continue;
+                }
+
+            }
+
+            return modelType;
         }
 
         //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.

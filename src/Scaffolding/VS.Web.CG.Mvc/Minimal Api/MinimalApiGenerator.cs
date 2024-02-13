@@ -50,16 +50,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             IEntityFrameworkService entityframeworkService,
             Workspace workspace)
         {
-            ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)); ;
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger)); ;
-            AppInfo = applicationInfo ?? throw new ArgumentNullException(nameof(applicationInfo)); ;
+            ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            AppInfo = applicationInfo ?? throw new ArgumentNullException(nameof(applicationInfo));
             ModelTypesLocator = modelTypesLocator ?? throw new ArgumentNullException(nameof(modelTypesLocator));
             FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             CodeGeneratorActionsService = codeGeneratorActionsService ?? throw new ArgumentNullException(nameof(codeGeneratorActionsService));
             ProjectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
             Workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             EntityFrameworkService = entityframeworkService ?? throw new ArgumentNullException(nameof(entityframeworkService));
-            ConsoleLogger = new DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false);
+            ConsoleLogger = new ConsoleLogger(jsonOutput: false);
         }
 
         /// <summary>

@@ -59,7 +59,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                 fullPath);
 
             OnProjectAdded(projectInfo);
-
             foreach (var file in referenceInfo.CompilationItems)
             {
                 var filePath = Path.IsPathRooted(file)
@@ -84,7 +83,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                 fullPath);
 
             OnProjectAdded(projectInfo);
-
             foreach (var file in context.CompilationItems)
             {
                 var filePath = Path.IsPathRooted(file)
@@ -92,18 +90,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
                     : Path.Combine(Path.GetDirectoryName(fullPath), file);
                 AddSourceFile(projectInfo, filePath);
             }
-            if (!string.IsNullOrEmpty(context.GeneratedImplicitNamespaceImportFile) && !string.IsNullOrEmpty(fullPath))
+
+            if (context.CompilationItems.FirstOrDefault(x => x.EndsWith("GlobalUsings.g.cs")) is null)
             {
-                var namespaceImportsFilePath = Path.Combine(Path.GetDirectoryName(fullPath), context.GeneratedImplicitNamespaceImportFile);
-                AddSourceFile(projectInfo, namespaceImportsFilePath);
-            }
-            // manually add the ImplicitImports.cs file.
-            else
-            {
-                var namespaceImportsFilePath = $"{context?.TargetDirectory?.Replace("\\bin\\", "\\obj\\")}\\{context?.ProjectName}.GlobalUsings.g.cs";
-                if (!string.IsNullOrEmpty(namespaceImportsFilePath))
+                if (!string.IsNullOrEmpty(context.GeneratedImplicitNamespaceImportFile) && !string.IsNullOrEmpty(fullPath))
                 {
+                    var namespaceImportsFilePath = Path.Combine(Path.GetDirectoryName(fullPath), context.GeneratedImplicitNamespaceImportFile);
                     AddSourceFile(projectInfo, namespaceImportsFilePath);
+                }
+                // manually add the ImplicitImports.cs file.
+                else
+                {
+                    var namespaceImportsFilePath = $"{context?.TargetDirectory?.Replace("\\bin\\", "\\obj\\")}\\{context?.ProjectName}.GlobalUsings.g.cs";
+                    if (!string.IsNullOrEmpty(namespaceImportsFilePath))
+                    {
+                        AddSourceFile(projectInfo, namespaceImportsFilePath);
+                    }
                 }
             }
 
@@ -132,7 +134,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
         {
             var resolvedReferences = projectContext.CompilationAssemblies;
             //project main itself might have types defined (broke Blazor Web App scenarios)
-            resolvedReferences = resolvedReferences.Append(new ResolvedReference(projectContext.AssemblyName, projectContext.AssemblyFullPath));
+            if ((projectContext.ProjectCapabilities != null && projectContext.ProjectCapabilities.Contains("DotNetCoreRazor")) ||
+                (projectContext.ProjectCapabilities is null && projectContext.IsBlazorWebProject()))
+            {
+                resolvedReferences = resolvedReferences.Append(new ResolvedReference(projectContext.AssemblyName, projectContext.AssemblyFullPath));
+            }
+
             foreach (var reference in resolvedReferences)
             {
                 var metadataRef = GetMetadataReference(reference.ResolvedPath);

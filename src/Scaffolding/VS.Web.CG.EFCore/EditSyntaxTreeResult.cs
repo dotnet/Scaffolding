@@ -7,6 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 {
     public class EditSyntaxTreeResult
     {
+        public bool NoEditsNeeded { get; set; } = false;
         public bool Edited { get; set; }
 
         public SyntaxTree OldTree { get; set; }

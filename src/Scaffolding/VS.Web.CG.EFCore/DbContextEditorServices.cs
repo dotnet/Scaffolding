@@ -374,10 +374,19 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                         NewTree = modifiedTree
                     };
                 }
+                else
+                {
+                    return new EditSyntaxTreeResult()
+                    {
+                        Edited = false
+                    };
+                }
             }
 
+            //model property exists in DbContext
             return new EditSyntaxTreeResult()
             {
+                NoEditsNeeded = true,
                 Edited = false
             };
         }

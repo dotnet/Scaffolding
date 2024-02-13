@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
@@ -90,5 +91,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
             return context;
         }
 
+        /// <summary>
+        /// a very simple check for WebApplication.AddRazorComponents()
+        /// 
+        /// </summary>
+        public static bool IsBlazorWebProject(this IProjectContext context)
+        {
+            var programCsFile = context.CompilationItems.FirstOrDefault(x => x.EndsWith("Program.cs"));
+            if (!string.IsNullOrEmpty(programCsFile))
+            {
+                var programCsFilePath = Path.IsPathRooted(programCsFile)
+                ? programCsFile
+                : Path.Combine(Path.GetDirectoryName(context.ProjectFullPath), programCsFile);
+
+                string programCsText = File.ReadAllText(programCsFilePath);
+                return programCsText.Contains("AddRazorComponents");
+            }
+           
+            return false;
+        }
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel

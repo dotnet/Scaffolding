@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -11,26 +11,18 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
-    <EmbeddedResource Include="BlazorIdentity\blazorIdentityChanges.json">
-      <PackagePath>lib\net8.0\</PackagePath>
-      <Pack>true</Pack>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net8.0\" />
+    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\bootstrap5_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net8.0\" />
+    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net8.0\" />
+    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net8.0\" />
-    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net8.0\" />
-    <EmbeddedResource Include="Blazor\blazorWebCrudChanges.json" Pack="true" PackagePath="lib\net8.0\" />
+    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net7.0\" />
+    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net7.0\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
-    <None Pack="true" Include="Templates\Blazor\*.tt" PackagePath="Templates\Blazor\" />
-    <None Pack="true" Include="Templates\BlazorIdentity\**\*.tt" PackagePath="Templates\BlazorIdentity\" />
-    <None Pack="true" Include="Templates\General\*" PackagePath="Templates\General\" />
     <None Pack="true" Include="Templates\MinimalApi\*" PackagePath="Templates\MinimalApi\" />
     <None Pack="true" Include="Templates\ControllerGenerator\*" PackagePath="Templates\ControllerGenerator\" />
     <None Pack="true" Include="Templates\MvcLayout\*" PackagePath="Templates\MvcLayout\" />
@@ -109,67 +101,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="BlazorIdentity\blazorIdentityChanges.json" />
-    <None Remove="Blazor\blazorWebCrudChanges.json" />
     <None Remove="Minimal Api\minimalApiChanges.json" />
-    <None Remove="Templates\Blazor\Delete.Interfaces.cs" />
-    <None Remove="Templates\Blazor\Details.Interfaces.cs" />
-    <None Remove="Templates\Blazor\Edit.Interfaces.cs" />
-    <None Remove="Templates\Blazor\Index.Interfaces.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Templates\BlazorIdentity\IdentityUserAccessor.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\IdentityRedirectManager.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\IdentityNoOpEmailSender.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\_Imports.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Register.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\RegisterConfirmation.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ResendEmailConfirmation.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ResetPassword.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ResetPasswordConfirmation.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\LoginWithRecoveryCode.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\LoginWith2fa.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Login.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Lockout.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\InvalidUser.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\InvalidPasswordReset.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ForgotPasswordConfirmation.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ForgotPassword.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ExternalLogin.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ConfirmEmailChange.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\ConfirmEmail.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\_Imports.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\TwoFactorAuthentication.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\SetPassword.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\ResetAuthenticator.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\PersonalData.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\Index.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\GenerateRecoveryCodes.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\ExternalLogins.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\EnableAuthenticator.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\Email.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\Disable2fa.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\DeletePersonalData.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Pages\Manage\ChangePassword.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\ManageLayout.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\ExternalLoginPicker.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\ManageNavMenu.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\RedirectToLogin.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\StatusMessage.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\ShowRecoveryCodes.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\AccountLayout.Interfaces.cs" />
-    <Compile Include="Templates\Blazor\Delete.Interfaces.cs" />
-    <Compile Include="Templates\Blazor\Details.Interfaces.cs" />
-    <Compile Include="Templates\Blazor\Edit.Interfaces.cs" />
-    <Compile Include="Templates\Blazor\Index.Interfaces.cs" />
-    <Compile Include="Templates\Blazor\Create.Interfaces.cs" />
-    <Compile Include="Templates\General\IdentityApplicationUser.Interfaces.cs" />
-    <Compile Include="Templates\General\IdentityApplicationUserModel.cs" />
-    <Compile Include="Templates\General\IdentityDbContext.Interfaces.cs" />
-    <Compile Include="Templates\General\IdentityDbContextModel.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -191,85 +123,5 @@
       <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>IdentityComponentsEndpointRouteBuilderExtensions.tt</DependentUpon>
-    </None>
-    <None Update="Templates\Blazor\Create.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Create.tt</DependentUpon>
-    </None>
-    <None Update="Templates\Blazor\Create.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>Create.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\Blazor\Delete.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Delete.tt</DependentUpon>
-    </None>
-    <None Update="Templates\Blazor\Delete.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>Delete.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\Blazor\Details.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Details.tt</DependentUpon>
-    </None>
-    <None Update="Templates\Blazor\Details.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>Details.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\Blazor\Edit.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Edit.tt</DependentUpon>
-    </None>
-    <None Update="Templates\Blazor\Edit.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>Edit.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\Blazor\Index.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Index.tt</DependentUpon>
-    </None>
-    <None Update="Templates\Blazor\Index.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>Index.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\General\IdentityApplicationUser.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>IdentityApplicationUser.tt</DependentUpon>
-    </None>
-    <None Update="Templates\General\IdentityApplicationUser.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>IdentityApplicationUser.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\General\IdentityDbContext.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>IdentityDbContext.tt</DependentUpon>
-    </None>
-    <None Update="Templates\General\IdentityDbContext.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>IdentityDbContext.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\BlazorIdentity\**\*.tt" Generator="TextTemplatingFilePreprocessor">
-      <LastGenOutput>%(Filename).cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ProjectExtensions><VisualStudio><UserProperties parameterdefinitions_4blazor_1json__JsonSchema="json" /></VisualStudio></ProjectExtensions>
 
 </Project>

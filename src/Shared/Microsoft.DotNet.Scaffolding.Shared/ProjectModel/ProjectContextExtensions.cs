@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
 
         /// <summary>
         /// a very simple check for WebApplication.AddRazorComponents()
-        /// 
+        /// workaround for when 'ProjectCapability' msbuild item not initialized.
         /// </summary>
         public static bool IsBlazorWebProject(this IProjectContext context)
         {

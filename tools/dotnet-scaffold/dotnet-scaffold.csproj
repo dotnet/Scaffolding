@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Scaffolding tool for .NET projects. Contains the dotnet-scaffold command used for generating areas, views, controllers, identity pages etc. </Description>
+    <Description>Scaffolding tool for .NET projects. </Description>
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -8,10 +8,4 @@
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\tools\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj" />
-    <ProjectReference Include="$(RepoRoot)\tools\dotnet-msidentity\dotnet-msidentity.csproj" />
-    <PackageReference Include="System.Commandline"  Version="$(SystemCommandLineVersion)" />
-  </ItemGroup>
 </Project>

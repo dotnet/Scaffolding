@@ -7,5 +7,19 @@
     <PackAsTool>true</PackAsTool>
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
+    <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console.Flow" Version="0.5.568" />
+    <PackageReference Include="Spectre.Console" Version="0.47.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.47.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AppBuilder\" />
+    <Folder Include="Command\" />
+  </ItemGroup>
 </Project>

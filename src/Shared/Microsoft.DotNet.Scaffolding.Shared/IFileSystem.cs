@@ -1,37 +1,53 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
 {
-    /// <summary>
-    /// An abstraction over common file/disk utilities.
-    /// Intended for mocking the disk operations in unit tests
-    /// by providing an alternate mock implemention.
-    /// </summary>
-    public interface IFileSystem
+    ///<summary>
+    /// A wrapper interface to be used for all file system related operations for easy unit testing.
+    /// Any component that does some file system operations should only talk to this interface but not directly
+    /// to System.IO implementations. Unit tests can then provide a mock implementation of
+    /// this interface for testing that component.
+    ///</summary>
+    public interface IFileSystem : IService
     {
         bool FileExists(string path);
 
-        bool DirectoryExists(string path);
+        bool DirectoryExists(string dirPath);
+
+        void CreateDirectory(string dirPath);
+
+        string ReadAllText(string filePath);
+
+        string[] ReadAllLines(string filePath);
+
+        void WriteAllText(string filePath, string content);
+
+        void WriteAllLines(string filePath, string[] content);
+
+        Stream OpenFileStream(string path, FileMode mode, FileAccess access, FileShare share);
+
+        IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption);
 
         IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
 
-        void MakeFileWritable(string path);
+        void DeleteFile(string filePath);
 
-        string ReadAllText(string path);
+        void CopyFile(string sourcePath, string destinationPath, bool overwrite);
 
-        void WriteAllText(string path, string contents);
+        string GetTempPath();
 
-        Task AddFileAsync(string outputPath, Stream sourceStream);
+        DateTime GetLastWriteTime(string filePath);
 
-        void CreateDirectory(string path);
+        string? GetFileVersion(string filePath);
 
-        void DeleteFile(string path);
+        Version? GetAssemblyVersion(string filePath);
+    }
 
-        void RemoveDirectory(string path, bool removeIfNotEmpty);
+    public interface IService
+    {
     }
 }

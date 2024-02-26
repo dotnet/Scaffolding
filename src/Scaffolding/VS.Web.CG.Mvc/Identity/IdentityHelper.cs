@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             var lastIndexOfDot = dbContext.LastIndexOf('.');
             if (lastIndexOfDot == -1)
             {
-                return string.Empty;
+                return dbContext;
             }
 
             return dbContext.Substring(lastIndexOfDot + 1);

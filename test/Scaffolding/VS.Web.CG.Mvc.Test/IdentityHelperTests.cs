@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     new object[] { "Project.Namespace.SubNamespace.ClassName", "ClassName"},
                     new object[] { "Project.Namespace.SubNamespace", "SubNamespace"},
                     new object[] { "Project.Namespace", "Namespace"},
-                    new object[] { "Project", ""},
+                    new object[] { "Project", "Project"},
                     new object[] { "", ""},
                 };
             }

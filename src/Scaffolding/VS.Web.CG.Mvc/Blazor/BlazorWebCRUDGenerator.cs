@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Cli.Utils;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
@@ -22,8 +23,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -39,7 +38,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private IProjectContext ProjectContext { get; set; }
         private IEntityFrameworkService EntityFrameworkService { get; set; }
         private Workspace Workspace { get; set; }
-        private ConsoleLogger ConsoleLogger { get; set; }
 
         public BlazorWebCRUDGenerator(IApplicationInfo applicationInfo,
             IServiceProvider serviceProvider,
@@ -60,7 +58,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             ProjectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
             Workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             EntityFrameworkService = entityframeworkService ?? throw new ArgumentNullException(nameof(entityframeworkService));
-            ConsoleLogger = new ConsoleLogger(jsonOutput: false);
         }
 
         /// <summary>
@@ -157,7 +154,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             //Modifying Program.cs document
             var docEditor = await DocumentEditor.CreateAsync(programDocument);
             var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-            var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
+            var docBuilder = new DocumentBuilder(docEditor, programCsFile, Logger);
             if (docRoot is null)
             {
                 return;
@@ -197,7 +194,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var changedDocument = docEditor.GetChangedDocument();
             var classFileTxt = await changedDocument.GetTextAsync();
             FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
-            ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+            Logger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 
         internal CodeFile AddBlazorChangesToCodeFile(CodeFile programCsFile, BlazorWebAppProperties appProperties)
@@ -299,7 +296,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
             catch (JsonException ex)
             {
-                ConsoleLogger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
+                Logger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
             }
 
             return minimalApiChangesConfig;
@@ -318,7 +315,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+        //TODO fix
+        private bool CalledFromCommandline => true;
 
         private void ExecuteTemplates(BlazorModel templateModel)
         {

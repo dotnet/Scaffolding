@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Messaging
 {
@@ -47,7 +48,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Messaging
                     string.Format(MessageStrings.ProtocolVersionMismatch,
                         message.ProtocolVersion,
                         CurrentProtocolVersion),
-                    LogMessageLevel.Warning);
+                    LogMessageType.Warning);
             }
 
             return HandleMessageInternal(sender, message);

@@ -1,10 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace Microsoft.DotNet.Scaffolding.Shared
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services
 {
     ///<summary>
     /// A wrapper interface to be used for all file system related operations for easy unit testing.
@@ -12,7 +8,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
     /// to System.IO implementations. Unit tests can then provide a mock implementation of
     /// this interface for testing that component.
     ///</summary>
-    public interface IFileSystem : IService
+    public interface IFileSystem
     {
         bool FileExists(string path);
 
@@ -45,9 +41,9 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         string? GetFileVersion(string filePath);
 
         Version? GetAssemblyVersion(string filePath);
-    }
 
-    public interface IService
-    {
+        void MakeFileWritable(string filePath);
+
+        Task AddFileAsync(string filePath, Stream fileStream);
     }
 }

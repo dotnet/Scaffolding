@@ -15,9 +15,8 @@ using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Directory = System.IO.Directory;
 using ProjectDescription = Microsoft.DotNet.MSIdentity.Project.ProjectDescription;
 
@@ -36,7 +35,7 @@ namespace Microsoft.DotNet.MSIdentity
         private IEnumerable<string> FilePaths => _filePaths ??= s_fileExtensions.SelectMany(
             ext => Directory.EnumerateFiles(ProvisioningToolOptions.ProjectPath, ext, SearchOption.AllDirectories));
 
-        internal IConsoleLogger ConsoleLogger { get; }
+        internal ILogger ConsoleLogger { get; }
 
         private ProjectDescriptionReader? _projectDescriptionReader;
         private ProjectDescriptionReader ProjectDescriptionReader => _projectDescriptionReader ??= new ProjectDescriptionReader(FilePaths);
@@ -229,7 +228,7 @@ namespace Microsoft.DotNet.MSIdentity
         /// <param name="provisioningToolOptions"></param>
         /// <param name="currentApplicationTenantId"></param>
         /// <returns></returns>
-        internal static TokenCredential GetTokenCredential(ProvisioningToolOptions provisioningToolOptions, string? currentApplicationTenantId, IConsoleLogger consoleLogger)
+        internal static TokenCredential GetTokenCredential(ProvisioningToolOptions provisioningToolOptions, string? currentApplicationTenantId, ILogger consoleLogger)
         {
             DeveloperCredentialsReader developerCredentialsReader = new DeveloperCredentialsReader();
             return developerCredentialsReader.GetDeveloperCredentials(

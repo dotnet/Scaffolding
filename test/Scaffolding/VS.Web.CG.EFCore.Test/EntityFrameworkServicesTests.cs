@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.Extensions.ProjectModel;
@@ -73,7 +74,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
                 _packageInstaller.Object,
                 _serviceProvider.Object,
                 _workspace,
-                DefaultFileSystem.Instance,
+                new FileSystem(),
                 _logger);
 
         }

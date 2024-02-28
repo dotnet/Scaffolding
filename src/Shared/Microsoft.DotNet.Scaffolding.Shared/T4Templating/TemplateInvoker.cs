@@ -2,6 +2,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
 {
@@ -58,7 +59,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.T4Templating
             {
                 foreach (CompilerError error in transformation.Errors)
                 {
-                    _consoleLogger.LogMessage(error.ErrorText, LogMessageLevel.Error);
+                    _consoleLogger.LogMessage(error.ErrorText, LogMessageType.Error);
                 }
 
                 throw new InvalidOperationException($"Processing '{transformation.GetType().Name}' failed");

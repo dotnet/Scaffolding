@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.Extensions.ProjectModel;

@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.Extensions.Internal;
@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             var instance = new Program();
-            instance.Logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
+            instance.Logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageType.Trace);
 
             _isNoBuild = ToolCommandLineHelper.IsNoBuild(args);
             try
@@ -85,7 +85,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
 
-                instance.Logger.LogMessage("RunTime " + elapsedTime, LogMessageLevel.Information);
+                instance.Logger.LogMessage("RunTime " + elapsedTime, LogMessageType.Information);
             }
 
             return exitCode;
@@ -136,15 +136,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
-                    Logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                    Logger.LogMessage(Resources.GenericErrorMessage, LogMessageType.Error);
+                    Logger.LogMessage(ex.Message, LogMessageType.Error);
 
                     if (isShowHelp)
                     {
                         app.ShowHelp();
                     }
 
-                    Logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
+                    Logger.LogMessage(ex.StackTrace, LogMessageType.Trace);
                     if (Logger is ConsoleLogger consoleLogger && !consoleLogger.IsTracing)
                     {
                         Logger.LogMessage(Resources.EnableTracingMessage);
@@ -195,8 +195,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     server);
 
                 var exitCode = command
-                    .OnErrorLine(e => logger.LogMessage(e, LogMessageLevel.Error))
-                    .OnOutputLine(e => logger.LogMessage(e, LogMessageLevel.Information))
+                    .OnErrorLine(e => logger.LogMessage(e, LogMessageType.Error))
+                    .OnOutputLine(e => logger.LogMessage(e, LogMessageType.Information))
                     .Execute()
                     .ExitCode;
 
@@ -327,8 +327,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 //Build failed.
                 // Stop the process here.
                 logger.LogMessage(Resources.BuildFailed);
-                logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageLevel.Error);
-                logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageLevel.Error);
+                logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdOut), LogMessageType.Error);
+                logger.LogMessage(string.Join(Environment.NewLine, buildResult.StdErr), LogMessageType.Error);
             }
 
             return buildResult.Result.ExitCode;

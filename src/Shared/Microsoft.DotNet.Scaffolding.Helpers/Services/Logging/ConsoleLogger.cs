@@ -4,16 +4,18 @@
 using System;
 using System.Text;
 
-namespace Microsoft.DotNet.MSIdentity.Shared
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services
 {
-    internal class ConsoleLogger : IConsoleLogger
+    public class ConsoleLogger : ILogger
     {
         private readonly bool _jsonOutput;
         private readonly bool _silent;
+        private static bool isTrace = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("codegen_trace"));
+        public bool IsTracing => isTrace;
 
         private string CommandName { get; }
 
-        public ConsoleLogger(string commandName = null, bool jsonOutput = false, bool silent = false)
+        public ConsoleLogger(string? commandName = null, bool jsonOutput = false, bool silent = false)
         {
             CommandName = commandName ?? string.Empty;
             _jsonOutput = jsonOutput;
@@ -21,7 +23,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             Console.OutputEncoding = Encoding.UTF8;
         }
 
-        public void LogMessage(string message, LogMessageType level, bool removeNewLine = false)
+        public void LogMessage(string? message, LogMessageType level, bool removeNewLine = false)
         {
             //if json output is enabled, don't write to console at all.
             if (!_silent && !_jsonOutput)
@@ -52,7 +54,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             }
         }
 
-        public void LogJsonMessage(string state = null, object content = null, string output = null)
+        public void LogJsonMessage(string? state = null, object? content = null, string? output = null)
         {
             if (!_silent)
             {
@@ -75,7 +77,7 @@ namespace Microsoft.DotNet.MSIdentity.Shared
             }
         }
 
-        public void LogMessage(string message, bool removeNewLine = false)
+        public void LogMessage(string? message, bool removeNewLine = false)
         {
             if (!_silent && !_jsonOutput)
             {

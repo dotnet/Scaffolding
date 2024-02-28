@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
@@ -22,7 +23,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
 {
@@ -38,7 +38,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         private IEntityFrameworkService EntityFrameworkService { get; set; }
         private ICodeGeneratorActionsService CodeGeneratorActionsService { get; set; }
         private Workspace Workspace { get; set; }
-        private ConsoleLogger ConsoleLogger { get; set; }
 
         public MinimalApiGenerator(IApplicationInfo applicationInfo,
             IServiceProvider serviceProvider,
@@ -59,7 +58,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             ProjectContext = projectContext ?? throw new ArgumentNullException(nameof(projectContext));
             Workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             EntityFrameworkService = entityframeworkService ?? throw new ArgumentNullException(nameof(entityframeworkService));
-            ConsoleLogger = new ConsoleLogger(jsonOutput: false);
         }
 
         /// <summary>
@@ -184,7 +182,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                     }
 
                     var endpointsCodeFile = new CodeFile { Usings = usings.ToArray() };
-                    var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, ConsoleLogger);
+                    var docBuilder = new DocumentBuilder(docEditor, endpointsCodeFile, Logger);
                     var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                     var classNode = newRoot.DescendantNodes().FirstOrDefault(node => node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Identifier.ValueText.Contains(className));
                     //get namespace node just for the namespace name.
@@ -315,7 +313,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 //Modifying Program.cs document
                 var docEditor = await DocumentEditor.CreateAsync(programDocument);
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-                var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
+                var docBuilder = new DocumentBuilder(docEditor, programCsFile, Logger);
                 //adding usings
                 var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
                 var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
@@ -376,7 +374,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
                 var changedDocument = docEditor.GetChangedDocument();
                 var classFileTxt = await changedDocument.GetTextAsync();
                 FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
-                ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+                Logger.LogMessage($"Modified {programDocument.Name}.\n");
             }
         }
 
@@ -426,7 +424,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
             }
         }
 
-        private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+        //TODO fix
+        private bool CalledFromCommandline => true;
 
         public const string Main = nameof(Main);
     }

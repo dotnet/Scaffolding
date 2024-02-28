@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -19,7 +20,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         private IEntityFrameworkService _entityFrameworkService;
         private IModelTypesLocator _modelTypesLocator;
         private IFileSystem _fileSystem;
-        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
+        //TODO fix
+        private bool CalledFromCommandline => true;
 
         public EFModelBasedViewScaffolder(
             IProjectContext projectContext,

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {

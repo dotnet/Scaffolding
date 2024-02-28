@@ -7,7 +7,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 
@@ -81,7 +81,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             catch (Exception ex)
             {
-                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage(ex.Message, LogMessageType.Error);
                 if (throwOnError)
                 {
                     throw;
@@ -117,7 +117,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             }
             catch (Exception ex)
             {
-                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage(ex.Message, LogMessageType.Error);
             }
 
             if (modelReflectedType == null && lookInDependencies)
@@ -138,7 +138,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     {
                         // This is a best effort approach. If we cannot load an assembly for any reason,
                         // just ignore it and look for the type in the next one.
-                        _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
+                        _logger.LogMessage(ex.Message, LogMessageType.Trace);
                         continue;
                     }
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             _loader = new DefaultAssemblyLoadContext();
             _logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            _logger.Setup(l => l.LogMessage(It.IsAny<string>()));
+            //_logger.Setup(l => l.LogMessage(It.IsAny<string>()));
         }
 
         [Fact(Skip = "test fail")]
@@ -57,7 +57,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     _projectContext,
                     workspace,
                     _loader,
-                    new DefaultFileSystem(),
+                    new FileSystem(),
                     _logger.Object);
 
                 var templateModel = await builder.ValidateAndBuild();

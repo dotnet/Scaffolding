@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
@@ -133,7 +134,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
             else
             {
-                logger.LogMessage($"Invalid template for the Blazor CRUD scaffolder '{templateName}' entered!", LogMessageLevel.Error);
+                logger.LogMessage($"Invalid template for the Blazor CRUD scaffolder '{templateName}' entered!", LogMessageType.Error);
                 throw new ArgumentException(templateName);
             }
 

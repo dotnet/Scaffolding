@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
@@ -25,7 +26,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General;
-using ConsoleLogger = Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 {
@@ -42,7 +42,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private ConsoleLogger ConsoleLogger { get; set; }
         private ICodeGenAssemblyLoadContext AssemblyLoadContextLoader { get; set; }
         private const string Main = nameof(Main);
-        private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
+
+        //TODO fix
+        private bool CalledFromCommandline => true;
 
         private IEnumerable<string> _templateFolders;
         //Folders where the .tt templates for Blazor Identity scenario live. Should be in VS.Web.CG.Mvc\Templates\BlazorIdentity
@@ -300,13 +302,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             Logger.LogMessage("File List:\n");
             IEnumerable<string> files = AllBlazorIdentityFiles.Keys;
             Logger.LogMessage(string.Join(Environment.NewLine, files));
-            if (FileSystem is SimulationModeFileSystem simModefileSystem)
+            //TODO fix
+/*            if (FileSystem is SimulationModeFileSystem simModefileSystem)
             {
                 foreach (string fileName in files)
                 {
                     simModefileSystem.AddMetadataMessage(fileName);
                 }
-            }
+            }*/
         }
 
         private void ValidateRequiredDependencies(DbProvider dbProvider)

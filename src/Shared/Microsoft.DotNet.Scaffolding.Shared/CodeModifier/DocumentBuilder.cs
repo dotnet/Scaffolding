@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using NuGet.Protocol;
@@ -24,12 +24,12 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         private readonly DocumentEditor _documentEditor;
         private readonly CodeFile _codeFile;
         private readonly CompilationUnitSyntax _docRoot;
-        private readonly IConsoleLogger _consoleLogger;
+        private readonly ILogger _consoleLogger;
 
         public DocumentBuilder(
             DocumentEditor documentEditor,
             CodeFile codeFile,
-            IConsoleLogger consoleLogger)
+            ILogger consoleLogger)
         {
             _documentEditor = documentEditor ?? throw new ArgumentNullException(nameof(_documentEditor));
             _codeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));

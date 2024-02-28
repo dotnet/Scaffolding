@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Azure.Core;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
 {
     public class DeveloperCredentialsReader
     {
-        public TokenCredential GetDeveloperCredentials(string? username, string? currentApplicationTenantId, string? instance, IConsoleLogger consoleLogger)
+        public TokenCredential GetDeveloperCredentials(string? username, string? currentApplicationTenantId, string? instance, ILogger consoleLogger)
         {
 #if AzureSDK
             * Tried but does not work if another tenant than the home tenant id is specified

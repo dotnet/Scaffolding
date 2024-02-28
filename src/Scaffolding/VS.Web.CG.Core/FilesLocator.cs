@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
@@ -15,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
         private readonly IFileSystem _fileSystem;
 
         public FilesLocator()
-            : this(new DefaultFileSystem())
+            : this(new FileSystem())
         {
         }
 

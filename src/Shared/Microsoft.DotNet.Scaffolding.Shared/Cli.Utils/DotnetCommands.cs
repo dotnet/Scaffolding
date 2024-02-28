@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.Extensions.Internal;
 using NuGet.Versioning;
@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
         /// </summary>
         /// <param name="projectPath">csproj path for the project being scaffolded.</param>
         /// <param name="additionalArgs">additional arguments </param>
-        /// <param name="consoleLogger">IConsoleLogger for console output</param>
+        /// <param name="consoleLogger">ILogger for console output</param>
         public static void ExecuteDotnetNew(string projectPath, IList<string> additionalArgs, ILogger consoleLogger)
         {
             //need IList<string> populated with at least the template name.
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
 
             arguments.AddRange(additionalArgs);
             string argumentsString = string.Join(" ", arguments);
-            consoleLogger.LogMessage($"\nExecuting 'dotnet new {argumentsString}'", LogMessageLevel.Information);
+            consoleLogger.LogMessage($"\nExecuting 'dotnet new {argumentsString}'", LogMessageType.Information);
             //check for minimum dotnet version
             string dotnetVersion = GetDotnetCommandVersion(consoleLogger);
             bool validDotnetVersion = true;
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
 
                 if (result.ExitCode != 0)
                 {
-                    consoleLogger.LogMessage(MessageStrings.FailedDotnetNew, LogMessageLevel.Error);
+                    consoleLogger.LogMessage(MessageStrings.FailedDotnetNew, LogMessageType.Error);
 
                     if (errors != null)
                     {
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
         /// <param name="projectPath"></param>
         /// <param name="consoleLogger"></param>
         /// <exception cref="Exception"></exception>
-        public static void InitUserSecrets(string projectPath, IConsoleLogger consoleLogger)
+        public static void InitUserSecrets(string projectPath, ILogger consoleLogger)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
             }
         }
 
-        public static void SetUserSecrets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
+        public static void SetUserSecrets(string projectPath, string key, string value, ILogger consoleLogger)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
             }
         }
 
-        public static void AddPackage(string packageName, string tfm, IConsoleLogger consoleLogger, string packageVersion = null)
+        public static void AddPackage(string packageName, string tfm, ILogger consoleLogger, string packageVersion = null)
         {
             if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
             {

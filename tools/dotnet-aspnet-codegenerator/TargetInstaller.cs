@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 {

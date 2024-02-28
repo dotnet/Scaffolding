@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -601,7 +602,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             }
         }
 
-        //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.
-        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
+        //TODO fix
+        private bool CalledFromCommandline => true;
     }
 }

@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Scaffolding.ExtensibilityModel
 
         public Parameter[] GetParameters(string jsonText)
         {
-            Parameter[] parameters = null;
+            Parameter[]? parameters = null;
             try
             {
                 parameters = JsonSerializer.Deserialize<Parameter[]>(jsonText);

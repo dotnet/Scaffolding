@@ -8,14 +8,14 @@ using System.Linq;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.Extensions.Internal;
 
 namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
 {
     public static class CodeWriter
     {
-        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconciledApplicationParameters, IConsoleLogger consoleLogger)
+        internal static void WriteConfiguration(Summary summary, IEnumerable<Replacement> replacements, ApplicationParameters reconciledApplicationParameters, ILogger consoleLogger)
         {
             foreach (var replacementsInFile in replacements.GroupBy(r => r.FilePath))
             {
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
         }
 
         //TODO : Add integration tests for testing instead of mocking for unit tests.
-        public static void AddUserSecrets(bool isB2C, string projectPath, string value, IConsoleLogger consoleLogger)
+        public static void AddUserSecrets(bool isB2C, string projectPath, string value, ILogger consoleLogger)
         {
             //init regardless. If it's already initiated, dotnet-user-secrets confirms it.
             InitUserSecrets(projectPath, consoleLogger);
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             SetUserSecrets(projectPath, key, value, consoleLogger);
         }
 
-        public static void InitUserSecrets(string projectPath, IConsoleLogger consoleLogger)
+        public static void InitUserSecrets(string projectPath, ILogger consoleLogger)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        public static void AddPackage(string packageName, string tfm, IConsoleLogger consoleLogger, string? packageVersion = null)
+        public static void AddPackage(string packageName, string tfm, ILogger consoleLogger, string? packageVersion = null)
         {
             if (!string.IsNullOrEmpty(packageName) && ((!string.IsNullOrEmpty(packageVersion)) || (!string.IsNullOrEmpty(tfm))))
             {
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             return tfm.Equals("net9.0", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void SetUserSecrets(string projectPath, string key, string value, IConsoleLogger consoleLogger)
+        private static void SetUserSecrets(string projectPath, string key, string value, ILogger consoleLogger)
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             }
         }
 
-        private static string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters, IConsoleLogger consoleLogger)
+        private static string? ComputeReplacement(string replaceBy, ApplicationParameters reconciledApplicationParameters, ILogger consoleLogger)
         {
             string? replacement = replaceBy;
             switch (replaceBy)

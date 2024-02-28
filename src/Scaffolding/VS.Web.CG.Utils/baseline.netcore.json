@@ -269,7 +269,7 @@
             },
             {
               "Name": "level",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageLevel"
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageType"
             }
           ],
           "ReturnType": "System.Void",
@@ -305,7 +305,7 @@
             },
             {
               "Name": "level",
-              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageLevel"
+              "Type": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageType"
             }
           ],
           "ReturnType": "System.Void",
@@ -327,7 +327,7 @@
       "GenericParameters": []
     },
     {
-      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageLevel",
+      "Name": "Microsoft.VisualStudio.Web.CodeGeneration.LogMessageType",
       "Visibility": "Public",
       "Kind": "Enumeration",
       "Sealed": true,

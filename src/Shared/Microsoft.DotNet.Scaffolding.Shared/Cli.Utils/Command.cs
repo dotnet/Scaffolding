@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.Extensions.Internal
 {
@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.Internal
         {
             ThrowIfRunning();
             Command._logger.LogMessage(
-                $"Executing external command:\n{this}\n", LogMessageLevel.Trace
+                $"Executing external command:\n{this}\n", LogMessageType.Trace
             );
             _running = true;
             _process.EnableRaisingEvents = true;

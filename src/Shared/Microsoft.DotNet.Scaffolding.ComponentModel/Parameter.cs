@@ -5,12 +5,12 @@ namespace Microsoft.DotNet.Scaffolding.ExtensibilityModel
 {
     public class Parameter
     {
-        public string Name { get; set; }
-        public string ShortName { get; set; }
+        public string? Name { get; set; }
+        public string? ShortName { get; set; }
         public bool Required { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public BaseTypes Type { get; set; }
-        public object Value { get; set; }
+        public object? Value { get; set; }
     }
 
     public enum BaseTypes
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Scaffolding.ExtensibilityModel
         ListString
     }
 
-    public Dictionary<BaseTypes, Type> TypeDict = new Dictionary<BaseTypes, Type>()
+/*    public static Dictionary<BaseTypes, Type> TypeDict = new Dictionary<BaseTypes, Type>()
     {
         { BaseTypes.Bool, typeof(bool) },
         { BaseTypes.Int, typeof(int) },
@@ -44,6 +44,8 @@ namespace Microsoft.DotNet.Scaffolding.ExtensibilityModel
         { BaseTypes.ListLong, typeof(List<long>) },
         { BaseTypes.ListInt, typeof(List<int>) },
         { BaseTypes.ListDouble, typeof(List<double>) },
-        { BaseTypes.Li }
-    }
+        { BaseTypes.ListDecimal, typeof(List<decimal>) },
+        { BaseTypes.ListChar, typeof(List<char>) },
+        { BaseTypes.ListString, typeof(List<string>) }
+    };*/
 }

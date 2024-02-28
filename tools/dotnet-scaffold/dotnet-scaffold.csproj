@@ -12,14 +12,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />
+
   <ItemGroup>
-    <PackageReference Include="Spectre.Console.Flow" Version="0.5.568" />
-    <PackageReference Include="Spectre.Console" Version="0.47.0" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.47.0" />
+    <PackageReference Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
+    <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="AppBuilder\" />
     <Folder Include="Command\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
   </ItemGroup>
 </Project>

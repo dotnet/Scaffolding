@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -54,7 +54,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     ex = ex.InnerException;
                 }
-                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                _logger.LogMessage(ex.Message, LogMessageType.Error);
                 _logger.LogMessage(ex.StackTrace);
             }
             return 0;

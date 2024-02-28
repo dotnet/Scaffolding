@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
@@ -13,20 +14,20 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
         private List<string> _info = new List<string>();
         private List<string> _trace = new List<string>();
 
-        public void LogMessage(string message, LogMessageLevel level)
+        public void LogMessage(string message, LogMessageType level)
         {
             switch (level)
             {
-                case LogMessageLevel.Error:
+                case LogMessageType.Error:
                     _errors.Add(message);
                     break;
-                case LogMessageLevel.Information:
+                case LogMessageType.Information:
                     _info.Add(message);
                     break;
-                case LogMessageLevel.Trace:
+                case LogMessageType.Trace:
                     _trace.Add(message);
                     break;
-                case LogMessageLevel.Warning:
+                case LogMessageType.Warning:
                     _warnings.Add(message);
                     break;
             }
@@ -34,7 +35,27 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 
         public void LogMessage(string message)
         {
-            LogMessage(message, LogMessageLevel.Information);
+            LogMessage(message, LogMessageType.Information);
+        }
+
+        public void LogMessage(string message, LogMessageType level, bool removeNewLine = false)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void LogMessage(string message, bool removeNewLine = false)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void LogJsonMessage(string state = null, object content = null, string output = null)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void LogFailureAndExit(string failureMessage)
+        {
+            throw new System.NotImplementedException();
         }
 
         public List<string> Warnings => _warnings;

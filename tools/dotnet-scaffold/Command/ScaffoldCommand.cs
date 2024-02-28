@@ -1,5 +1,7 @@
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 using Microsoft.UpgradeAssistant.Cli.Commands;
@@ -8,12 +10,17 @@ using Spectre.Console.Flow;
 
 public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger _logger;
+    private readonly IEnvironmentService _environmentService;
     public ScaffoldCommand(
+        IEnvironmentService environmentService,
         IFileSystem fileSystem,
-        ILogger logger,
-        IFlowProvider flowProvider)
+        IFlowProvider flowProvider,
+        ILogger logger)
         : base(flowProvider)
     {
+        _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
     }
@@ -31,10 +38,12 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     {
         IEnumerable<IFlowStep> flowSteps = new IFlowStep[]
         {
-            new StartupFlowStep(),
+/*            new StartupFlowStep(),
             new SourceProjectFlowStep(_fileSystem),
+            new ScaffoldPickerStep()*/
         };
 
         return await RunFlowAsync(flowSteps, settings, settings.NonInteractive);
     }
 }
+

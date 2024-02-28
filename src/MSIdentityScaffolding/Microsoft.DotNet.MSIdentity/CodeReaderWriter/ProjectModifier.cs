@@ -14,8 +14,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
@@ -26,12 +26,12 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
     {
         private readonly ProvisioningToolOptions _toolOptions;
         private readonly IEnumerable<string> _files;
-        private readonly IConsoleLogger _consoleLogger;
+        private readonly ILogger _consoleLogger;
         private PropertyInfo? _codeModifierConfigPropertyInfo;
         private const string Main = nameof(Main);
         private readonly StringBuilder _output;
 
-        public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, IConsoleLogger consoleLogger)
+        public ProjectModifier(ProvisioningToolOptions toolOptions, IEnumerable<string> files, ILogger consoleLogger)
         {
             _toolOptions = toolOptions ?? throw new ArgumentNullException(nameof(toolOptions));
             _files = files;

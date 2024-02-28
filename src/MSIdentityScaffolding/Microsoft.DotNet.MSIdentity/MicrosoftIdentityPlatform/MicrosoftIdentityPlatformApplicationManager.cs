@@ -10,8 +10,9 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Shared;
+
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
-            IConsoleLogger consoleLogger)
+            ILogger consoleLogger)
         {
             try
             {
@@ -173,7 +174,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
         }
 
-        internal static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient, IConsoleLogger consoleLogger)
+        internal static async Task<Organization?> GetTenant(GraphServiceClient graphServiceClient, ILogger consoleLogger)
         {
             Organization? tenant = null;
             try
@@ -268,7 +269,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             TokenCredential tokenCredential,
             ApplicationParameters parameters,
             ProvisioningToolOptions toolOptions,
-            IConsoleLogger consoleLogger,
+            ILogger consoleLogger,
             StringBuilder? output = null)
         {
             var graphServiceClient = GetGraphServiceClient(tokenCredential, parameters);
@@ -322,7 +323,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
         }
 
-        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
+        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, ILogger consoleLogger)
         {
             ServicePrincipal? servicePrincipal = (await graphServiceClient.ServicePrincipals
                 .GetAsync(options => options.QueryParameters.Filter = $"appId eq '{clientId}'"))?.Value?.FirstOrDefault();
@@ -532,7 +533,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             GraphServiceClient graphServiceClient,
             string? applicationId,
             ApplicationParameters effectiveApplicationParameters,
-            IConsoleLogger consoleLogger)
+            ILogger consoleLogger)
         {
             string password = string.Empty;
             var requestBody = new Microsoft.Graph.Applications.Item.AddPassword.AddPasswordPostRequestBody
@@ -920,7 +921,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         /// <param name="applicationParameters"></param>
         /// <param name="consoleLogger"></param>
         /// <returns></returns>
-        public async Task<ApplicationParameters?> ReadApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters, IConsoleLogger consoleLogger)
+        public async Task<ApplicationParameters?> ReadApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters, ILogger consoleLogger)
         {
             if (string.IsNullOrEmpty(applicationParameters.EffectiveClientId) &&
                (string.IsNullOrEmpty(applicationParameters.ClientId) || DefaultProperties.ClientId.Equals(applicationParameters.ClientId, StringComparison.OrdinalIgnoreCase)))

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.DeveloperCredentials;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 {
     internal class MsAADTool : IMsAADTool
     {
-        internal IConsoleLogger ConsoleLogger { get; }
+        internal ILogger ConsoleLogger { get; }
         private ProvisioningToolOptions ProvisioningToolOptions { get; set; }
         private string CommandName { get; }
         public GraphServiceClient GraphServiceClient { get; set; }

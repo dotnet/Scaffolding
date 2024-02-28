@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "All.sln",
+    "projects": [
+      "src\\Shared\\Microsoft.DotNet.Scaffolding.Helpers\\Microsoft.DotNet.Scaffolding.Helpers.csproj",
+      "src\\Shared\\Microsoft.DotNet.Scaffolding.ComponentModel\\Microsoft.DotNet.Scaffolding.ExtensibilityModel.csproj",
+      "tools\\dotnet-scaffold\\dotnet-scaffold.csproj",
+    ]
+  }
+}

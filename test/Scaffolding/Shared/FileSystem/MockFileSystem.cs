@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
@@ -105,6 +106,51 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
             {
                 _files.Remove(subFile);
             }
+        }
+
+        public string[] ReadAllLines(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteAllLines(string filePath, string[] content)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Stream OpenFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CopyFile(string sourcePath, string destinationPath, bool overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetTempPath()
+        {
+            throw new NotImplementedException();
+        }
+
+        public DateTime GetLastWriteTime(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetFileVersion(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Version GetAssemblyVersion(string filePath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

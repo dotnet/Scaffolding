@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
@@ -30,9 +30,9 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     public class GraphObjectRetriever : IGraphObjectRetriever
     {
         private readonly GraphServiceClient _graphServiceClient;
-        private readonly IConsoleLogger _consoleLogger;
+        private readonly ILogger _consoleLogger;
 
-        public GraphObjectRetriever(GraphServiceClient graphServiceClient, IConsoleLogger consoleLogger)
+        public GraphObjectRetriever(GraphServiceClient graphServiceClient, ILogger consoleLogger)
         {
             _graphServiceClient = graphServiceClient;
             _consoleLogger = consoleLogger;

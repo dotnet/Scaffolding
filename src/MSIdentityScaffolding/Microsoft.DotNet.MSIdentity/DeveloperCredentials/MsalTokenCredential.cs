@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.DotNet.MSIdentity.Properties;
-using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 
@@ -20,13 +20,13 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
         private const string RedirectUri = "http://localhost";
 #pragma warning restore S1075 // URIs should not be hardcoded
 
-        private readonly IConsoleLogger _consoleLogger;
+        private readonly ILogger _consoleLogger;
 
         public MsalTokenCredential(
             string? tenantId,
             string? username,
             string? instance,
-            IConsoleLogger consoleLogger)
+            ILogger consoleLogger)
         {
             _consoleLogger = consoleLogger;
             TenantId = tenantId ?? "organizations"; // MSA-passthrough

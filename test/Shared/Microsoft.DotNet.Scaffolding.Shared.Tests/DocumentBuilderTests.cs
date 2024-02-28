@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             {
                 Usings = usings
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
             var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
 
             Assert.True(newRoot.Usings.Count == 4);
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             {
                 Usings = usings
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
             var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
 
             Assert.True(newRoot.Usings.Count == 3);
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 Usings = usings
             };
 
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
             docBuilder.AddUsings(new CodeChangeOptions());
 
             //Get modified SyntaxNode root
@@ -102,7 +103,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             {
                 ClassProperties = classProperties
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
             classSyntax = docBuilder.AddProperties(classSyntax, new CodeChangeOptions());
             //Members count should be up by 2.
             Assert.True(classSyntax.Members.Count > memberCount);
@@ -130,7 +131,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             {
                 ClassAttributes = classAttributes.ToArray()
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
             classSyntax = docBuilder.AddClassAttributes(classSyntax, new CodeChangeOptions());
             //Members count should be up by 2.
             Assert.True(classSyntax.AttributeLists.Count == 4);
@@ -151,7 +152,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             //Add usings
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
             var usingDirectiveSyntax = DocumentBuilder.CreateUsings(usingsStrings);
             Assert.True(usingDirectiveSyntax.Length == 3);
 
@@ -169,7 +170,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         public async Task CreateAttributeListTests(string[] attributeStrings)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
             var classAttributes = attributeStrings.Select(at => new CodeBlock() { Block = at }).ToArray();
             var attributes = DocumentBuilder.CreateAttributeList(classAttributes, new SyntaxList<AttributeListSyntax>(), SyntaxFactory.TriviaList());
             Assert.True(attributes.Count == 4);
@@ -189,7 +190,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         public async Task VerfiyParametersTests(string[] types, string[] vals)
         {
             DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
             var paramList = CreateParameterList(types, vals);
             var paramDict = ProjectModifierHelper.VerifyParameters(types, paramList);
             Assert.True(paramDict != null);
@@ -214,8 +215,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             {
                 ClassProperties = classProperties
             };
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
-            DocumentBuilder emptyDocBuilder = new DocumentBuilder(emptyDocEditor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new ConsoleLogger());
+            DocumentBuilder emptyDocBuilder = new DocumentBuilder(emptyDocEditor, codeFile, new ConsoleLogger());
 
             var members = docBuilder.CreateClassProperties(classSyntax.Members, MemberLeadingTrivia, MemberTrailingTrivia);
             var membersInEmptyDoc = emptyDocBuilder.CreateClassProperties(emptyClassSyntax.Members, MemberLeadingTrivia, MemberTrailingTrivia);
@@ -247,7 +248,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
 
             var classSyntax = await CreateClassSyntax(editor);
             var members = classSyntax.Members;
-            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new MSIdentity.Shared.ConsoleLogger());
+            DocumentBuilder docBuilder = new DocumentBuilder(editor, new CodeFile(), new ConsoleLogger());
 
             foreach (var property in existingProperties)
             {

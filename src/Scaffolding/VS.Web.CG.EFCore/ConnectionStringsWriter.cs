@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Newtonsoft.Json.Linq;
@@ -15,7 +16,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private IFileSystem _fileSystem;
 
         public ConnectionStringsWriter(IApplicationInfo applicationInfo)
-            : this(applicationInfo, DefaultFileSystem.Instance)
+            : this(applicationInfo, new FileSystem())
         {
         }
 

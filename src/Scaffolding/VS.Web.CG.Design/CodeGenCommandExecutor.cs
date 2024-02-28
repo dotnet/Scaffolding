@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -26,22 +27,10 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
         public CodeGenCommandExecutor(IProjectContext projectInformation, string[] codeGenArguments, string configuration, ILogger logger, bool isSimulationMode)
         {
-            if (projectInformation == null)
-            {
-                throw new ArgumentNullException(nameof(projectInformation));
-            }
-            if (codeGenArguments == null)
-            {
-                throw new ArgumentNullException(nameof(codeGenArguments));
-            }
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-            _projectInformation = projectInformation;
-            _codeGenArguments = codeGenArguments;
+            _projectInformation = projectInformation ?? throw new ArgumentNullException(nameof(projectInformation));
+            _codeGenArguments = codeGenArguments ?? throw new ArgumentNullException(nameof(codeGenArguments));
             _configuration = configuration;
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _isSimulationMode = isSimulationMode;
         }
 
@@ -55,16 +44,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             try
             {
                 codeGenCommand.Execute(_codeGenArguments);
-
-                if (_isSimulationMode && simModeAction != null)
-                {
-                    simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChanges);
-                }
             }
             catch (InvalidOperationException ioe)
             {
-                _logger.LogMessage(ioe.Message, LogMessageLevel.Error);
-                _logger.LogMessage(ioe.StackTrace, LogMessageLevel.Trace);
+                _logger.LogMessage(ioe.Message, LogMessageType.Error);
+                _logger.LogMessage(ioe.StackTrace, LogMessageType.Trace);
             }
 
             return 0;
@@ -89,9 +73,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            IFileSystem fileSystem = _isSimulationMode
-                ? (IFileSystem)SimulationModeFileSystem.Instance
-                : (IFileSystem)DefaultFileSystem.Instance;
+            IFileSystem fileSystem = new FileSystem();
             //Ordering of services is important here
             serviceProvider.Add(typeof(IFileSystem), fileSystem);
             serviceProvider.Add(typeof(ILogger), _logger);

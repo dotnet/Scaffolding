@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Newtonsoft.Json;
@@ -83,7 +84,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogMessage(ex.Message, LogMessageLevel.Error);
+                    _logger.LogMessage(ex.Message, LogMessageType.Error);
                     throw ex;
                 }
             }

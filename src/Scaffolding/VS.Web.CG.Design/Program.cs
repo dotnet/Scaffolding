@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
 
@@ -20,7 +20,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
         public static void Main(string[] args)
         {
             _logger = new ConsoleLogger();
-            _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
+            _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageType.Trace);
 
             //DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
             Execute(args, _logger);
@@ -91,9 +91,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
                 }
                 catch (Exception ex)
                 {
-                    logger.LogMessage(Resources.GenericErrorMessage, LogMessageLevel.Error);
-                    logger.LogMessage(ex.Message, LogMessageLevel.Error);
-                    logger.LogMessage(ex.StackTrace, LogMessageLevel.Trace);
+                    logger.LogMessage(Resources.GenericErrorMessage, LogMessageType.Error);
+                    logger.LogMessage(ex.Message, LogMessageType.Error);
+                    logger.LogMessage(ex.StackTrace, LogMessageType.Trace);
                     if (!logger.IsTracing)
                     {
                         logger.LogMessage(Resources.EnableTracingMessage);

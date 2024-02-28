@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -646,7 +647,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 {
                     // This is a best effort approach. If we cannot load an assembly for any reason,
                     // just ignore it and look for the type in the next one.
-                    _logger.LogMessage(ex.Message, LogMessageLevel.Trace);
+                    _logger.LogMessage(ex.Message, LogMessageType.Trace);
                     continue;
                 }
 
@@ -655,7 +656,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return modelType;
         }
 
-        //IFileSystem is DefaultFileSystem in commandline scenarios and SimulationModeFileSystem in VS scenarios.
-        private bool CalledFromCommandline => !(_fileSystem is SimulationModeFileSystem);
+        //TODO fix later
+        private bool CalledFromCommandline => true;
     }
 }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
@@ -259,7 +260,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var docEditor = await DocumentEditor.CreateAsync(programDocument);
 
                 var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-                var docBuilder = new DocumentBuilder(docEditor, programCsFile, new Microsoft.DotNet.MSIdentity.Shared.ConsoleLogger(jsonOutput: false));
+                var docBuilder = new DocumentBuilder(docEditor, programCsFile, new ConsoleLogger(jsonOutput: false));
                 //adding usings
                 var modifiedRoot = docBuilder.AddUsings(new CodeChangeOptions());
                 var useTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(modelTypesLocator);
@@ -358,14 +359,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             IEnumerable<string> files = IdentityGeneratorFilesConfig.GetFilesToList(contentVersion);
 
             _logger.LogMessage(string.Join(Environment.NewLine, files));
-
-            if (_fileSystem is SimulationModeFileSystem simModefileSystem)
+            //TODO fix
+/*            if (_fileSystem is SimulationModeFileSystem simModefileSystem)
             {
                 foreach (string fileName in files)
                 {
                     simModefileSystem.AddMetadataMessage(fileName);
                 }
-            }
+            }*/
         }
 
         private async Task AddStaticFiles(IdentityGeneratorTemplateModel templateModel)
@@ -379,7 +380,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 if (staticFile.ShouldOverWrite != OverWriteCondition.Never || !DoesFileExist(staticFile, projectDir))
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
-                    _logger.LogMessage($"Adding static file: {staticFile.Name}", LogMessageLevel.Trace);
+                    _logger.LogMessage($"Adding static file: {staticFile.Name}", LogMessageType.Trace);
 
                     await _codegeneratorActionService.AddFileAsync(
                         outputPath,
@@ -400,7 +401,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 if (template.ShouldOverWrite != OverWriteCondition.Never || !DoesFileExist(template, projectDir))
                 {
                     // We never overwrite some files like _ViewImports.cshtml.
-                    _logger.LogMessage($"Adding template: {template.Name}", LogMessageLevel.Trace);
+                    _logger.LogMessage($"Adding template: {template.Name}", LogMessageType.Trace);
 
                     await _codegeneratorActionService.AddFileFromTemplateAsync(
                         outputPath,
@@ -462,7 +463,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 var path = Path.Combine(areaPath, areaFolder);
                 if (!_fileSystem.DirectoryExists(path))
                 {
-                    _logger.LogMessage($"Adding folder: {path}", LogMessageLevel.Trace);
+                    _logger.LogMessage($"Adding folder: {path}", LogMessageType.Trace);
                     _fileSystem.CreateDirectory(path);
                 }
             }

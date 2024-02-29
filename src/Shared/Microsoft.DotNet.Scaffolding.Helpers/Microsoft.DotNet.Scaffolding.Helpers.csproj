@@ -12,5 +12,9 @@
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="8.0.2" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ExtensibilityModel.csproj" />
+  </ItemGroup>
 
 </Project>

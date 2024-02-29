@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Folder Include="Command\" />
+    <Folder Include="Flow\Steps\Project\" />
   </ItemGroup>
 
   <ItemGroup>

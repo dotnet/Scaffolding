@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
-using System;
-using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.DotNet.Tools.Scaffold.Flow;
+using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
@@ -37,7 +36,8 @@ public class ScaffoldCommandAppBuilder(string[] args)
         var registrar = new TypeRegistrar();
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
-        registrar.Register(typeof(ILogger), typeof(ConsoleLogger));
+        registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
+        registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
         return registrar;
     }
 

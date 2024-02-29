@@ -1,7 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
-using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -31,18 +29,18 @@ public class EnvironmentService : IEnvironmentService
         }
     }
 
-    public static string LocalUserProfilePath => Environment.GetEnvironmentVariable(
-        RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? "USERPROFILE"
-            : "HOME") ?? "USERPROFILE";
+    public static string LocalUserProfilePath
+    {
+        get
+        {
+            return Environment.GetEnvironmentVariable(
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        ? "USERPROFILE"
+                        : "HOME") ?? "USERPROFILE";
+        }
+    }
 
     public const string DotnetProfileDirectoryName = ".dotnet";
-    private readonly IFileSystem _fileSystem;
-
-    public EnvironmentService(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-    }
 
     /// <inheritdoc />
     public string CurrentDirectory => Environment.CurrentDirectory;
@@ -89,6 +87,20 @@ public class EnvironmentService : IEnvironmentService
             }
 
             return _dotnetHomePath!;
+        }
+    }
+
+    private string? _localUserFolderPath;
+    public string LocalUserFolderPath
+    {
+        get
+        {
+            if (string.IsNullOrEmpty (_localUserFolderPath))
+            {
+                _localUserFolderPath = LocalUserProfilePath;
+            }
+
+            return _localUserFolderPath!;
         }
     }
 

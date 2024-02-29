@@ -7,7 +7,7 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
-    internal class ParameterBasedFlowStep : IFlowStep
+    internal class ParameterBasedFlowStep<Parameter> : IFlowStep
     {
         public string Id => throw new System.NotImplementedException();
 

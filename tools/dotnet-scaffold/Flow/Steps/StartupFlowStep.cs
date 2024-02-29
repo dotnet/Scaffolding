@@ -1,5 +1,7 @@
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
@@ -12,9 +14,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 /// </summary>
 public class StartupFlowStep : IFlowStep
 {
-    public string Id => throw new System.NotImplementedException();
+    private readonly IEnvironmentService _environmentService;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger _logger;
+    private readonly string _dotnetScaffolderFolder = ".dotnet-scaffold";
+    private readonly string _manifestFile = "manifest.json";
+    public StartupFlowStep(IEnvironmentService environmentService, IFileSystem fileSystem, ILogger logger)
+    {
+        _environmentService = environmentService;
+        _fileSystem = fileSystem;
+        _logger = logger;
+    }
 
-    public string DisplayName => throw new System.NotImplementedException();
+    public string Id => nameof(StartupFlowStep);
+
+    public string DisplayName => "Startup step";
 
     public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
     {
@@ -28,6 +42,20 @@ public class StartupFlowStep : IFlowStep
 
     public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
     {
-        return new ValueTask<FlowStepResult>(FlowStepResult.Failure("always initialize StartupFlow so going straight to RunAsync()")); 
+        // check for first initialization
+        string userPath =_environmentService.LocalUserFolderPath;
+        string dotnetScaffoldFolder = Path.Combine(userPath, _dotnetScaffolderFolder);
+        if (!_fileSystem.DirectoryExists(dotnetScaffoldFolder))
+        {
+            _fileSystem.CreateDirectory(dotnetScaffoldFolder);
+        }
+        //.dotnet-scaffold folder should now exist
+        var manifestFileFullPath = Path.Combine(dotnetScaffoldFolder, _manifestFile);
+        if (_fileSystem.FileExists(dotnetScaffoldFolder))
+        {
+            _fileSystem.WriteAllText(manifestFileFullPath, string.Empty);
+        }
+
+        return new ValueTask<FlowStepResult>(FlowStepResult.Success);
     }
 }

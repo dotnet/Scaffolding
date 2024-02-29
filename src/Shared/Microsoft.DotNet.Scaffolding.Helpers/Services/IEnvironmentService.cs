@@ -6,6 +6,7 @@ public interface IEnvironmentService
 {
     string UserProfilePath { get; }
     string NugetCachePath { get; }
+    string LocalUserFolderPath { get; }
     string DotnetUserProfilePath { get; }
     string CurrentDirectory { get; }
     bool Is64BitOperatingSystem { get; }

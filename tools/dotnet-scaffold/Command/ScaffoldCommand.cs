@@ -38,9 +38,9 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     {
         IEnumerable<IFlowStep> flowSteps = new IFlowStep[]
         {
-/*            new StartupFlowStep(),
-            new SourceProjectFlowStep(_fileSystem),
-            new ScaffoldPickerStep()*/
+            new StartupFlowStep(_environmentService, _fileSystem, _logger),
+            // new SourceProjectFlowStep(_fileSystem),
+            // new ScaffoldPickerStep()
         };
 
         return await RunFlowAsync(flowSteps, settings, settings.NonInteractive);

@@ -15,7 +15,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
     {
         Error,
         Information,
-        Warning,
         Trace
     }
 }

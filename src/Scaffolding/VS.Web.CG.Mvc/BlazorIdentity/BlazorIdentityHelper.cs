@@ -9,6 +9,7 @@ using System.Linq;
 using System;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 {

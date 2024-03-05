@@ -5,38 +5,10 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.DotNet.Scaffolding.Shared
+namespace Microsoft.DotNet.Scaffolding.Helpers.General
 {
-    internal static class StringUtil
+    public static class StringUtil
     {
-        public static string ToLowerInvariantFirstChar(this string input)
-        {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
-            if (input != string.Empty)
-            {
-                return input.Substring(0, length: 1).ToLowerInvariant() + input.Substring(1);
-            }
-            return input;
-        }
-
-        /// <summary>
-        /// since netstandard2.0 does not have a Contains that allows StringOrdinal param, using lower invariant comparison.
-        /// </summary>
-        /// <returns>true if lower invariants are equal, false otherwise. false for any null scenario.</returns>
-        public static bool ContainsIgnoreCase(this string input, string value)
-        {
-            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(value))
-            {
-                return false;
-            }
-
-            return (input?.ToLowerInvariant().Contains(value?.ToLowerInvariant())).GetValueOrDefault();
-        }
-
         //converts Project.Namespace.SubNamespace to Project//Namespace//SubNamespace or Project\\Namespace\\SubNamespace (based on OS)
         public static string ToPath(string namespaceName, string basePath, string projectRootNamespace)
         {
@@ -53,7 +25,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
                 }
                 //invalid path
                 catch (Exception ex) when (ex is ArgumentException || ex is PathTooLongException || ex is NotSupportedException)
-                {}
+                { }
             }
 
             return path;
@@ -63,7 +35,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         public static string RemovePrefix(string projectNamespace, string basePath, string prefix)
         {
             string[] namespaceParts = projectNamespace.Split('.');
-            string[] basePathParts = basePath.Split(new char[] { Path.DirectorySeparatorChar } , StringSplitOptions.RemoveEmptyEntries);
+            string[] basePathParts = basePath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
             if (namespaceParts.Length > 0 && namespaceParts[0] == prefix && basePathParts[basePathParts.Length - 1] == prefix)
             {
                 projectNamespace = string.Join(".", namespaceParts, 1, namespaceParts.Length - 1);
@@ -121,13 +93,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             return path;
         }
 
-        internal static string GetTypeNameFromNamespace(string templateName)
+        public static string GetTypeNameFromNamespace(string templateName)
         {
             string[] parts = templateName.Split('.');
             return parts[parts.Length - 1];
         }
 
-        internal static string NormalizeLineEndings(string text)
+        public static string NormalizeLineEndings(string text)
         {
             //change all line endings to "\n" and then replace them with the appropriate ending
             return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine);

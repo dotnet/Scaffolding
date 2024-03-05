@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 /// do first time initialization in ValidateUserInputAsync
 ///   - check for .dotnet-scaffold folder in USER
 ///   - check for .dotnet-scaffold/manifest.json file
+///   - initialize msbuild
 ///   - read and check for 1st party .NET scaffolders, update them if needed
 /// </summary>
 public class StartupFlowStep : IFlowStep
@@ -51,11 +52,12 @@ public class StartupFlowStep : IFlowStep
         }
         //.dotnet-scaffold folder should now exist
         var manifestFileFullPath = Path.Combine(dotnetScaffoldFolder, _manifestFile);
-        if (_fileSystem.FileExists(dotnetScaffoldFolder))
+        if (!_fileSystem.FileExists(dotnetScaffoldFolder))
         {
             _fileSystem.WriteAllText(manifestFileFullPath, string.Empty);
         }
 
+        //read manifest file and update the manifest context var, will use this after project picker.
         return new ValueTask<FlowStepResult>(FlowStepResult.Success);
     }
 }

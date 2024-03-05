@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Shared;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test

@@ -1,10 +1,10 @@
 set VERSION=0.1.0-dev
 set DEFAULT_NUPKG_PATH=%userprofile%/.nuget/packages
 set SRC_DIR=%cd%
-set NUPKG=artifacts/packages/Release/Shipping/
+set NUPKG=artifacts/packages/Debug/Shipping/
 call taskkill /f /im dotnet.exe
 call rd /Q /S artifacts
-call dotnet pack dotnet-scaffold.slnf
+call dotnet pack dotnet-scaffold.slnf -c Debug
 call dotnet tool uninstall -g Microsoft.dotnet-scaffold
 
 call cd %DEFAULT_NUPKG_PATH%

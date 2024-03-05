@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
     internal class ParameterBasedFlowStep<Parameter> : IFlowStep
     {
+        public ParameterBasedFlowStep(Parameter parameter) { }
         public string Id => throw new System.NotImplementedException();
 
         public string DisplayName => throw new System.NotImplementedException();

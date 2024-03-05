@@ -27,9 +27,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
                 case LogMessageType.Trace:
                     _trace.Add(message);
                     break;
-                case LogMessageType.Warning:
-                    _warnings.Add(message);
-                    break;
             }
         }
 

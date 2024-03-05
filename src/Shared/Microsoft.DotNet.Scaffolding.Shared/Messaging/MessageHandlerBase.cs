@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Messaging
                     string.Format(MessageStrings.ProtocolVersionMismatch,
                         message.ProtocolVersion,
                         CurrentProtocolVersion),
-                    LogMessageType.Warning);
+                    LogMessageType.Information);
             }
 
             return HandleMessageInternal(sender, message);

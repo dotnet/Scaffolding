@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
@@ -6,9 +6,9 @@ namespace Microsoft.DotNet.Tools.Scaffold;
 public class ScaffoldCommandApp
 {
     private readonly string[] _args;
-    private readonly Spectre.Console.Cli.CommandApp _commandApp;
+    private readonly Spectre.Console.Cli.CommandApp<ScaffoldCommand> _commandApp;
 
-    public ScaffoldCommandApp(Spectre.Console.Cli.CommandApp commandApp, string[] args)
+    public ScaffoldCommandApp(Spectre.Console.Cli.CommandApp<ScaffoldCommand> commandApp, string[] args)
     {
         _commandApp = commandApp;
         _args = args;

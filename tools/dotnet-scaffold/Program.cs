@@ -5,4 +5,3 @@ using Microsoft.DotNet.Tools.Scaffold;
 var builder = new ScaffoldCommandAppBuilder(args);
 var app = builder.Build();
 await app.RunAsync();
-

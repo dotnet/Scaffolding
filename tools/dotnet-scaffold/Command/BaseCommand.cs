@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Tools.Scaffold.Flow;
+using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 

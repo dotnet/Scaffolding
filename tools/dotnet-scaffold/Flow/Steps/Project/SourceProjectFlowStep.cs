@@ -1,27 +1,126 @@
-﻿using System.Threading;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project;
 
-public class SourceProjectFlowStep : IFlowStep
+internal class SourceProjectFlowStep : IFlowStep
 {
-    public string Id => throw new System.NotImplementedException();
-
-    public string DisplayName => throw new System.NotImplementedException();
-
-    public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
+    private readonly IFileSystem _fileSystem;
+    private readonly IEnvironmentService _environmentService;
+    public SourceProjectFlowStep(
+        IEnvironmentService environment,
+        IFileSystem fileSystem)
     {
-        throw new System.NotImplementedException();
+        _fileSystem = fileSystem;
+        _environmentService = environment;
     }
 
-    public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
-    {
-        throw new System.NotImplementedException();
-    }
+    /// <inheritdoc />
+    public string Id => nameof(SourceProjectFlowStep);
 
+    /// <inheritdoc />
+    public string DisplayName => "Source Project";
+
+    /// <inheritdoc />
     public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
     {
-        throw new System.NotImplementedException();
+        var projectPath = context.GetSourceProjectPath();
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            var settings = context.GetCommandSettings();
+            projectPath = settings?.Project;
+        }
+
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Source project is needed!"));
+        }
+
+        if (!projectPath.IsCSharpProject())
+        {
+            return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Project path is invalid '{projectPath}'"));
+        }
+
+        if (!Path.IsPathRooted(projectPath))
+        {
+            projectPath = Path.GetFullPath(Path.Combine(_environmentService.CurrentDirectory, projectPath.Trim(Path.DirectorySeparatorChar)));
+        }
+
+        if (!_fileSystem.FileExists(projectPath))
+        {
+            return new ValueTask<FlowStepResult>(FlowStepResult.Failure(string.Format("Project file '{0}' does not exist", projectPath)));
+        }
+
+        SelectSourceProject(context, projectPath);
+        return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+    }
+
+    /// <inheritdoc />
+    public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
+    {
+        var settings = context.GetCommandSettings();
+        var path = settings?.Project;
+        if (string.IsNullOrEmpty(path))
+        {
+            path = _environmentService.CurrentDirectory;
+        }
+
+        if (!Path.IsPathRooted(path))
+        {
+            path = Path.GetFullPath(Path.Combine(_environmentService.CurrentDirectory, path.Trim(Path.DirectorySeparatorChar)));
+        }
+
+        var workingDir = _environmentService.CurrentDirectory;
+        if (path.EndsWith(".sln"))
+        {
+            workingDir = Path.GetDirectoryName(path)!;
+        }
+        else if (_fileSystem.DirectoryExists(path))
+        {
+            workingDir = path;
+        }
+
+        ProjectDiscovery projectDiscovery = new ProjectDiscovery(_fileSystem, workingDir);
+        var projectPath = projectDiscovery.Discover(context, path);
+
+        if (projectDiscovery.State.IsNavigation())
+        {
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = projectDiscovery.State });
+        }
+
+        if (projectPath is not null)
+        {
+            SelectSourceProject(context, projectPath);
+            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+        }
+
+        AnsiConsole.WriteLine("No projects found in current directory");
+        return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
+    }
+
+    /// <inheritdoc />
+    public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
+    {
+        context.Unset(FlowContextProperties.SourceProjectPath);
+        return new ValueTask();
+    }
+
+    private void SelectSourceProject(IFlowContext context, string projectPath)
+    {
+        context.Set(new FlowProperty(
+            FlowContextProperties.SourceProjectPath,
+            projectPath,
+            FlowContextProperties.SourceProject,
+            isVisible: true));
+
+        var projectService = new ProjectService(projectPath);
+        projectService.Setup();
     }
 }
+
+

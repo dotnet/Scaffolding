@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 
 using System.Collections.Generic;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Flow;
+namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
 internal class FlowProvider : IFlowProvider
 {

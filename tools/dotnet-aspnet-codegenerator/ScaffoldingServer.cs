@@ -149,7 +149,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogMessage(ex.Message, LogMessageType.Warning);
+                    _logger.LogMessage(ex.Message, LogMessageType.Information);
                     if (!TerminateSessionRequested)
                     {
                         continue;

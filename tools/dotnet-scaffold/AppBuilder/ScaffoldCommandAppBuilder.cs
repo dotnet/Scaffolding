@@ -3,7 +3,6 @@
 using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
-using Microsoft.DotNet.Tools.Scaffold.Flow;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
 
@@ -17,15 +16,12 @@ public class ScaffoldCommandAppBuilder(string[] args)
     public ScaffoldCommandApp Build()
     {
         var serviceRegistrations = GetDefaultServices();
-        var commandApp = new CommandApp(serviceRegistrations);
+        var commandApp = new CommandApp<ScaffoldCommand>(serviceRegistrations);
         commandApp.Configure(config =>
         {
             config
                 .SetApplicationName("dotnet-scaffold")
-                .SetApplicationVersion(GetToolVersion())
-                .AddCommand<ScaffoldCommand>("scaffold")
-                    .WithDescription("blah blah scaffold description")
-                    .WithExample(["scaffold", "<PROJECT_PATH>"]);
+                .SetApplicationVersion(GetToolVersion());
         });
 
         return new ScaffoldCommandApp(commandApp, _args);
@@ -33,6 +29,8 @@ public class ScaffoldCommandAppBuilder(string[] args)
 
     private ITypeRegistrar? GetDefaultServices()
     {
+        var msbuildInitializer = new MsBuildInitializer(new ConsoleLogger());
+        msbuildInitializer.Initialize();
         var registrar = new TypeRegistrar();
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));

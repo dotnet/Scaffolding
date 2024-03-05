@@ -30,22 +30,4 @@ namespace Microsoft.DotNet.Scaffolding.ExtensibilityModel
         ListChar,
         ListString
     }
-
-/*    public static Dictionary<BaseTypes, Type> TypeDict = new Dictionary<BaseTypes, Type>()
-    {
-        { BaseTypes.Bool, typeof(bool) },
-        { BaseTypes.Int, typeof(int) },
-        { BaseTypes.Long, typeof(long) },
-        { BaseTypes.Double, typeof(double) },
-        { BaseTypes.Decimal, typeof(decimal) },
-        { BaseTypes.Char, typeof(char) },
-        { BaseTypes.String, typeof(string) },
-        { BaseTypes.ListBool, typeof(List<bool>) },
-        { BaseTypes.ListLong, typeof(List<long>) },
-        { BaseTypes.ListInt, typeof(List<int>) },
-        { BaseTypes.ListDouble, typeof(List<double>) },
-        { BaseTypes.ListDecimal, typeof(List<decimal>) },
-        { BaseTypes.ListChar, typeof(List<char>) },
-        { BaseTypes.ListString, typeof(List<string>) }
-    };*/
 }

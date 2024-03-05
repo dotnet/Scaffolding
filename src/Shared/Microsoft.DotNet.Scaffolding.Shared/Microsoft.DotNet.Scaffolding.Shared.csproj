@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>Microsoft.DotNet.Scaffolding.Shared</AssemblyName>
@@ -9,6 +9,11 @@
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="MsIdentity\**" />
+    <EmbeddedResource Remove="MsIdentity\**" />
+    <None Remove="MsIdentity\**" />
+  </ItemGroup>
 
   <!-- Packages for CodeAnalysis code changes-->
   <ItemGroup>
@@ -37,10 +42,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>MessageStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="MsIdentity\" />
   </ItemGroup>
 
 </Project>

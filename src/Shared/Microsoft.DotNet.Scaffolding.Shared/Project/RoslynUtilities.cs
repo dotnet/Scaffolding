@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Project
 {

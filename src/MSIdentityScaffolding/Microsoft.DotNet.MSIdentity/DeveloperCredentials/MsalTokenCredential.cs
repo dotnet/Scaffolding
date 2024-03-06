@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Azure.Core;
@@ -89,10 +89,11 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             {
                 account = accounts.FirstOrDefault();
             }
+
             try
             {
                 result = await app.AcquireTokenSilent(requestContext.Scopes, account)
-                    .WithAuthority(Instance, TenantId)
+                    .WithTenantId(TenantId)
                     .ExecuteAsync(cancellationToken);
             }
             catch (MsalUiRequiredException ex)
@@ -104,7 +105,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                 result = await app.AcquireTokenInteractive(requestContext.Scopes)
                     .WithAccount(account)
                     .WithClaims(ex.Claims)
-                    .WithAuthority(Instance, TenantId)
+                    .WithTenantId(TenantId)
                     .ExecuteAsync(cancellationToken);
             }
             catch (MsalServiceException ex)

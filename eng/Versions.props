@@ -29,7 +29,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.28</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>6.0.16</VersionPrefix>
+    <VersionPrefix>6.0.17</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
@@ -58,8 +58,8 @@
     <MicrosoftExtensionsDependencyInjectionPackageVersion>6.0.0</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>6.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
-    <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
-    <NuGetPackagingVersion>6.6.1</NuGetPackagingVersion>
+    <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>
+    <NuGetPackagingVersion>6.9.1</NuGetPackagingVersion>
     <HumanizerPackageVersion>2.14.1</HumanizerPackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
@@ -115,16 +115,16 @@
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
-    <AzureIdentityVersion>1.5.0</AzureIdentityVersion>
+    <AzureIdentityVersion>1.10.4</AzureIdentityVersion>
     <CodeAnalysisVersion>4.0.0</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>3.1.20</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>3.1.20</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>4.5.0</MicrosoftGraphVersion>
-    <MicrosoftIdentityClientExtensionsMsalVersion>2.19.1</MicrosoftIdentityClientExtensionsMsalVersion>
-    <NuGetProjectModelVersion>6.6.1</NuGetProjectModelVersion>
+    <MicrosoftIdentityClientExtensionsMsalVersion>4.59.0</MicrosoftIdentityClientExtensionsMsalVersion>
+    <NuGetProjectModelVersion>6.9.1</NuGetProjectModelVersion>
     <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
     <SystemCommandLineVersion>2.0.0-beta1.21308.1</SystemCommandLineVersion>
-    <NewtonsoftJsonMsIdentityPackageVersion>13.0.1</NewtonsoftJsonMsIdentityPackageVersion>
+    <NewtonsoftJsonMsIdentityPackageVersion>13.0.3</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>
 </Project>

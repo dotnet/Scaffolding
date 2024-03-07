@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Tools.Scaffold
         private const string RAZORPAGE_COMMAND = "--razorpage";
         private const string VIEW_COMMAND = "--view";
         /*
+
         dotnet scaffold [generator] [-p|--project] [-n|--nuget-package-dir] [-c|--configuration] [-tfm|--target-framework] [-b|--build-base-path] [--no-build]
 
         This commands supports the following generators :

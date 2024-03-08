@@ -41,9 +41,6 @@ extends:
       jobs:
       - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
-          artifacts:
-            publish:
-              artifacts: true
           enableMicrobuild: true
           enablePublishBuildArtifacts: true
           enablePublishTestResults: true

@@ -15,7 +15,6 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
-  - template: /eng/common/templates-official/variables/pool-providers.yml@self
   - group: DotNet-AspNet-SDLValidation-Params
 
 resources:
@@ -30,8 +29,8 @@ extends:
   parameters:
     sdl:
       sourceAnalysisPool:
-        name: $(DncEngInternalBuildPool)
-        image: 1es-windows-2022-pt
+        name: NetCore1ESPool-Svc-Internal
+        image: 1es-windows-2019-pt
         os: windows
     customBuildTags:
     - ES365AIMigrationTooling
@@ -53,8 +52,8 @@ extends:
           - job: Windows_NT
             timeoutInMinutes: 180
             pool:
-              name: $(DncEngInternalBuildPool)
-              image: 1es-windows-2022-pt
+              name: NetCore1ESPool-Svc-Internal
+              image: 1es-windows-2019-pt
             variables:
             - _Script: eng\common\cibuild.cmd
             - _ValidateSdkArgs: ''

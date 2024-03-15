@@ -39,7 +39,7 @@ extends:
     - stage: build
       displayName: Build
       jobs:
-      - template: /eng/common/templates/jobs/jobs.yml
+      - template: eng/common/templates/jobs/jobs.yml
         parameters:
           enableMicrobuild: true
           enablePublishBuildArtifacts: true

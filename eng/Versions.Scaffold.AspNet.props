@@ -17,8 +17,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <SpectreConsoleFlowVersion>0.5.568</SpectreConsoleFlowVersion>
-    <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
+    <SpectreConsoleVersion>0.48.0</SpectreConsoleVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -12,10 +12,12 @@ internal static class FlowContextProperties
     public const string ProjectTemplateName = nameof(ProjectTemplateName);
     public const string Slice = nameof(Slice);
     public const string SourceProjectPath = nameof(SourceProjectPath);
+    public const string SourceProjectDisplay = "Source project";
+    public const string CommandArgs = nameof(CommandArgs);
     public const string ComponentName = nameof(ComponentName);
+    public const string ComponentNameDisplay = "Component";
+    //of type Microsoft.Build.Evaluation.Project
     public const string SourceProject = nameof(SourceProject);
     public const string TargetFrameworkName = nameof(TargetFrameworkName);
-    public const string TelemetryEvent = nameof(TelemetryEvent);
-    public const string Traits = nameof(Traits);
-    public const string UpgradeType = nameof(UpgradeType);
+    public const string RemainingArgs = nameof(RemainingArgs);
 }

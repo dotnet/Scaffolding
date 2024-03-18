@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General
 {
@@ -36,7 +38,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
                 return false;
             }
 
-            return (input?.ToLowerInvariant().Contains(value?.ToLowerInvariant())).GetValueOrDefault();
+            return (input?.ToLowerInvariant().Contains(value.ToLowerInvariant())).GetValueOrDefault();
         }
 
         public static string ToLowerInvariantFirstChar(this string input)
@@ -62,7 +64,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
         {
             if (string.IsNullOrEmpty(basePath) || string.IsNullOrEmpty(fullPath))
             {
-                return fullPath!;
+                return fullPath;
             }
 
             var separator = Path.DirectorySeparatorChar.ToString();

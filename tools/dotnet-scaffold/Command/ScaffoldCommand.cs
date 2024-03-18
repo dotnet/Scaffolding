@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
@@ -40,14 +41,15 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        Debugger.Launch();
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_environmentService, _fileSystem, _logger),
-            new SourceProjectFlowStep(_environmentService, _fileSystem),
-            new ComponentFlowStep()
+            new SourceProjectFlowStep(_environmentService, _fileSystem, _logger),
+            new ComponentFlowStep(_logger)
         ];
 
-        return await RunFlowAsync(flowSteps, settings, settings.NonInteractive);
+        return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive);
     }
 }
 

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General
 {
@@ -13,20 +14,22 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
         public static string ToPath(string namespaceName, string basePath, string projectRootNamespace)
         {
             string path = string.Empty;
-            if (!string.IsNullOrEmpty(basePath) && !string.IsNullOrEmpty(namespaceName))
+            if (string.IsNullOrEmpty(namespaceName) || string.IsNullOrEmpty(basePath))
             {
-                namespaceName = RemovePrefix(namespaceName, basePath, projectRootNamespace);
-                namespaceName = namespaceName.Replace(".", Path.DirectorySeparatorChar.ToString());
-                try
-                {
-                    basePath = Path.HasExtension(basePath) ? Path.GetDirectoryName(basePath) : basePath;
-                    var combinedPath = Path.Combine(basePath, namespaceName);
-                    path = Path.GetFullPath(combinedPath);
-                }
-                //invalid path
-                catch (Exception ex) when (ex is ArgumentException || ex is PathTooLongException || ex is NotSupportedException)
-                { }
+                return string.Empty;
             }
+
+            namespaceName = RemovePrefix(namespaceName, basePath, projectRootNamespace);
+            namespaceName = namespaceName.Replace(".", Path.DirectorySeparatorChar.ToString());
+            try
+            {
+                basePath = Path.HasExtension(basePath) ? Path.GetDirectoryName(basePath) ?? basePath : basePath;
+                var combinedPath = Path.Combine(basePath, namespaceName);
+                path = Path.GetFullPath(combinedPath);
+            }
+            //invalid path
+            catch (Exception ex) when (ex is ArgumentException || ex is PathTooLongException || ex is NotSupportedException)
+            { }
 
             return path;
         }
@@ -54,7 +57,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
             string ns = path ?? "";
             if (!string.IsNullOrEmpty(ns))
             {
-                ns = Path.HasExtension(ns) ? Path.GetDirectoryName(ns) : ns;
+                ns = Path.HasExtension(ns) ? Path.GetDirectoryName(ns) ?? ns : ns;
                 if (ns.Contains(Path.DirectorySeparatorChar))
                 {
                     ns = ns.Replace(Path.DirectorySeparatorChar.ToString(), ".");
@@ -103,6 +106,30 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
         {
             //change all line endings to "\n" and then replace them with the appropriate ending
             return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine);
+        }
+
+        public static Dictionary<string, string> ParseArguments(List<string> args)
+        {
+            var arguments = new Dictionary<string, string>();
+            if (args != null && args.Count > 0)
+            {
+                string currentKey = string.Empty;
+                foreach (var arg in args)
+                {
+                    if (arg.StartsWith("--") || arg.StartsWith("-"))
+                    {
+                        currentKey = arg;
+                        arguments[currentKey] = string.Empty;
+                    }
+                    else if (!string.IsNullOrEmpty(currentKey))
+                    {
+                        arguments[currentKey] = arg;
+                        currentKey = string.Empty;
+                    }
+                }
+            }
+
+            return arguments;
         }
     }
 }

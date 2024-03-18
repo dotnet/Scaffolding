@@ -29,8 +29,6 @@ public class ScaffoldCommandAppBuilder(string[] args)
 
     private ITypeRegistrar? GetDefaultServices()
     {
-        var msbuildInitializer = new MsBuildInitializer(new ConsoleLogger());
-        msbuildInitializer.Initialize();
         var registrar = new TypeRegistrar();
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));

@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project
             var projects = FileSystem.EnumerateFiles(path, "*.csproj", SearchOption.AllDirectories).ToList();
             var slnFiles = FileSystem.EnumerateFiles(path, "*.sln", SearchOption.TopDirectoryOnly).ToList();
             var projectsFromSlnFiles = GetProjectsFromSolutionFiles(slnFiles, WorkingDir);
-            projects.AddRange(projectsFromSlnFiles);
+            projects = projects.Union(projectsFromSlnFiles).ToList();
             
             //should we search in all directories if nothing in top level? (yes, for now)
             if (projects.Count == 0)

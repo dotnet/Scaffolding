@@ -1,31 +1,41 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.Build.Evaluation;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+public class ProjectService : IProjectService, IDisposable
 {
-    public class ProjectService : IProjectService
+    private readonly string _projectPath;
+    private readonly ILogger _logger;
+    private readonly bool _shouldUnload;
+
+    public ProjectService(string projectPath, ILogger logger)
     {
-        private readonly string _projectPath;
-        public ProjectService(string projectPath)
-        {
-            _projectPath = projectPath ?? throw new ArgumentNullException(nameof(projectPath));
-        }
+        _projectPath = projectPath ?? string.Empty;
+        _logger = logger;
+        var projects = ProjectCollection.GlobalProjectCollection.GetLoadedProjects(_projectPath);
+        _shouldUnload = projects.Count == 0;
+        Project = projects.SingleOrDefault() ?? ProjectCollection.GlobalProjectCollection.LoadProject(_projectPath);
+    }
 
-        public IList<string> GetItemValues()
-        {
-            throw new NotImplementedException();
-        }
+    public Project Project { get; }
 
-        public IList<string> GetPropertyValues()
+    public void Dispose()
+    {
+        if (_shouldUnload && Project is not null)
         {
-            throw new NotImplementedException();
+            // Unload it again if we were the ones who loaded it.
+            // Unload both, project and project root element, to remove it from strong and weak MSBuild caches.
+            ProjectCollection.GlobalProjectCollection.UnloadProject(Project);
+            ProjectCollection.GlobalProjectCollection.UnloadProject(Project.Xml);
         }
+    }
 
-        public void Setup()
-        {
+    public IList<string> GetItemValues(string itemName)
+    {
+        throw new NotImplementedException();
+    }
 
-            //var msbuildThang = new DefaultMsbuildProjectAccess(_projectPath, NullLogger.Instance, CancellationToken.None);
-            //var projectStuff = msbuildThang.Project;
-        }
+    public IList<string> GetPropertyValues(string propertyName)
+    {
+        throw new NotImplementedException();
     }
 }

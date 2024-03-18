@@ -35,6 +35,22 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.Equal(expected, StringUtil.GetFilePathWithoutExtension(fullFileName));
         }
 
+        [Fact]
+        public void ParseArgumentsTests()
+        {
+            List<string> sampleString1 = new List<string>
+            {
+                "--name",
+                "bleh",
+                "-ns",
+                "bleh-namespace",
+                "--openapi"
+            };
+
+            var dictThing = StringUtil.ParseArguments(sampleString1);
+            Assert.True(dictThing.Count > 0);
+        }
+
         public static IEnumerable<object[]> ToPathTestData
         {
             get

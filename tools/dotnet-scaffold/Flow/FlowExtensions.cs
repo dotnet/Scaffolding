@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Spectre.Console;
+using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow
@@ -23,9 +22,31 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
             return context.GetValueOrThrow<string>(FlowContextProperties.SourceProjectPath, throwIfEmpty);
         }
 
+        public static Build.Evaluation.Project? GetSourceProject(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<Build.Evaluation.Project>(FlowContextProperties.SourceProject, throwIfEmpty);
+        }
+
         public static ScaffoldCommand.Settings? GetCommandSettings(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<ScaffoldCommand.Settings>(FlowContextProperties.CommandSettings, throwIfEmpty);
+        }
+
+        public static IRemainingArguments? GetRemainingArgs(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<IRemainingArguments>(FlowContextProperties.RemainingArgs, throwIfEmpty);
+        }
+
+        public static IDictionary<string, List<string>>? GetArgsDict(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<IDictionary<string, List<string>>>(FlowContextProperties.CommandArgs, throwIfEmpty);
+        }
+        public static Status WithSpinner(this Status status)
+        {
+            return status
+                .AutoRefresh(true)
+                .Spinner(Spinner.Known.Aesthetic)
+                .SpinnerStyle(Styles.Highlight);
         }
 
         private static T? GetValueOrThrow<T>(this IFlowContext context, string propertyName, bool throwIfEmpty = false)

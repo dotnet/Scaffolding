@@ -1,10 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Scaffolding.ExtensibilityModel;
+using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -17,26 +18,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     /// </summary>
     public class ComponentFlowStep : IFlowStep
     {
-        public Parameter[] Parameters { get; set; }
+        private readonly ILogger _logger;
 
         public string Id => nameof(ComponentFlowStep);
 
         public string DisplayName => "Scaffolding Component";
 
-        public ComponentFlowStep()
+        public ComponentFlowStep(ILogger logger)
         {
+            _logger = logger;
         }
 
-       /* public string GetJsonString()
+        public string GetJsonString(string jsonString)
         {
             string jsonText = string.Empty;
             try
             {
-                jsonText = JsonSerializer.Serialize(Parameters);
+                jsonText = JsonSerializer.Serialize(jsonString);
             }
             catch (JsonException ex)
             {
-                AnsiConsole.WriteLine(ex.ToString());
+                _logger.LogFailureAndExit(ex.ToString());
             }
 
             if (string.IsNullOrEmpty(jsonText))
@@ -46,29 +48,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return jsonText;
         }
 
-        public Parameter[] GetParameters(string jsonText)
+        public CommandInfo[] GetParameters(string jsonText)
         {
-            Parameter[]? parameters = null;
+            CommandInfo[]? commands = null;
             try
             {
-                parameters = JsonSerializer.Deserialize<Parameter[]>(jsonText);
+                commands = JsonSerializer.Deserialize<CommandInfo[]>(jsonText);
             }
             catch (JsonException ex)
             {
-                AnsiConsole.WriteLine(ex.ToString());
+                _logger.LogFailureAndExit(ex.ToString());
             }
 
-            if (parameters is null || !parameters.Any())
+            if (commands is null || commands.Length == 0)
             {
                 throw new Exception("parameter json parsing error, check the json string being passed.");
             }
-            else
-            {
-                Parameters = parameters.ToArray();
-            }
 
-            return parameters;
-        }*/
+            return commands;
+        }
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
@@ -84,36 +82,39 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Scaffolding component name is needed!"));
             }
 
-            SelectSourceProject(context, projectPath);
+            SelectComponent(context, componentName);
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            SelectComponent(context, "thang");
+            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+        }
+
+        public void ExecuteComponent()
+        {
+            //get all parameters from area scaffolder
+            //
+            //currently executing area scaffolder 1st party component for testing
         }
 
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            context.Unset(FlowContextProperties.ComponentName);
+            return new ValueTask();
         }
 
-        public static Dictionary<BaseTypes, Type> TypeDict = new()
+        private void SelectComponent(IFlowContext context, string component)
         {
-            { BaseTypes.Bool, typeof(bool) },
-            { BaseTypes.Int, typeof(int) },
-            { BaseTypes.Long, typeof(long) },
-            { BaseTypes.Double, typeof(double) },
-            { BaseTypes.Decimal, typeof(decimal) },
-            { BaseTypes.Char, typeof(char) },
-            { BaseTypes.String, typeof(string) },
-            { BaseTypes.ListBool, typeof(List<bool>) },
-            { BaseTypes.ListLong, typeof(List<long>) },
-            { BaseTypes.ListInt, typeof(List<int>) },
-            { BaseTypes.ListDouble, typeof(List<double>) },
-            { BaseTypes.ListDecimal, typeof(List<decimal>) },
-            { BaseTypes.ListChar, typeof(List<char>) },
-            { BaseTypes.ListString, typeof(List<string>) }
-        };
+            if (!string.IsNullOrEmpty(component))
+            {
+                context.Set(new FlowProperty(
+                    FlowContextProperties.ComponentName,
+                    component,
+                    FlowContextProperties.ComponentNameDisplay,
+                    isVisible: true));
+            }
+        }
     }
 }

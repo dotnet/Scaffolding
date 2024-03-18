@@ -51,7 +51,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
             Assert.True(handler.HandleMessage(mockSender.Object, message));
             Assert.Equal(
                 "The protocol version '0' of the message is different than currently handled version '1'.",
-                mockLogger.Warnings.First());
+                mockLogger.Info.First());
         }
     }
 

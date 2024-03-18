@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -11,12 +11,7 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Locator" Version="1.7.1" />
-    <PackageReference Include="System.Text.Json" Version="8.0.2" />
     <PackageReference Include="Microsoft.Build" Version="17.9.5" ExcludeAssets="runtime" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ExtensibilityModel.csproj" />
   </ItemGroup>
 
 </Project>

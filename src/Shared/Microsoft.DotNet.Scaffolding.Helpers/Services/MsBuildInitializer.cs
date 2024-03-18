@@ -29,6 +29,7 @@ public class MsBuildInitializer
         if (instance is null)
         {
             _logger.LogMessage($"No msbuild find out at path '{msbuildPath}'", LogMessageType.Error);
+            return string.Empty;
         }
 
         // Must register instance rather than just path so everything gets set correctly for .NET SDK instances
@@ -99,6 +100,4 @@ public class MsBuildInitializer
             }
         }
     }
-
-    private static string ExpectedBitness => Environment.Is64BitProcess ? "x64" : "x86";
 }

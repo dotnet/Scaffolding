@@ -12,12 +12,15 @@ internal class SourceProjectFlowStep : IFlowStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly IEnvironmentService _environmentService;
+    private readonly ILogger _logger;
     public SourceProjectFlowStep(
         IEnvironmentService environment,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        ILogger logger)
     {
         _fileSystem = fileSystem;
         _environmentService = environment;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -107,19 +110,29 @@ internal class SourceProjectFlowStep : IFlowStep
     public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
     {
         context.Unset(FlowContextProperties.SourceProjectPath);
+        context.Unset(FlowContextProperties.SourceProject);
         return new ValueTask();
     }
 
     private void SelectSourceProject(IFlowContext context, string projectPath)
     {
-        context.Set(new FlowProperty(
-            FlowContextProperties.SourceProjectPath,
-            projectPath,
-            FlowContextProperties.SourceProject,
-            isVisible: true));
+        if (!string.IsNullOrEmpty(projectPath))
+        {
+            context.Set(new FlowProperty(
+                FlowContextProperties.SourceProjectPath,
+                projectPath,
+                FlowContextProperties.SourceProjectDisplay,
+                isVisible: true));
 
-        var projectService = new ProjectService(projectPath);
-        projectService.Setup();
+            ProjectService projectService = new(projectPath, _logger);
+            if (projectService != null && projectService.Project != null)
+            {
+                context.Set(new FlowProperty(
+                    FlowContextProperties.SourceProject,
+                    projectService.Project,
+                    isVisible: false));
+            }
+        }
     }
 }
 

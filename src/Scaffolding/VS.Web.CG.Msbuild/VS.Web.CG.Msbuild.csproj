@@ -12,7 +12,7 @@
     <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\General\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Helpers\General\*.cs">
+    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Helpers\General\StringExtensions.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
     <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\*.cs">

@@ -9,7 +9,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 {
     internal class MockLogger : ILogger
     {
-        private List<string> _warnings = new List<string>();
         private List<string> _errors = new List<string>();
         private List<string> _info = new List<string>();
         private List<string> _trace = new List<string>();
@@ -37,25 +36,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test
 
         public void LogMessage(string message, LogMessageType level, bool removeNewLine = false)
         {
-            throw new System.NotImplementedException();
+            LogMessage(message, level);
         }
 
         public void LogMessage(string message, bool removeNewLine = false)
         {
-            throw new System.NotImplementedException();
+            LogMessage(message);
         }
 
         public void LogJsonMessage(string state = null, object content = null, string output = null)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
         public void LogFailureAndExit(string failureMessage)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
-        public List<string> Warnings => _warnings;
         public List<string> Errors => _errors;
         public List<string> Info => _info;
         public List<string> Trace => _trace;

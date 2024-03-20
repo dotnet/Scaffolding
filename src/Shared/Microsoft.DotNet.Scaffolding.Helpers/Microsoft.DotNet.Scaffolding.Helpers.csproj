@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.Build" Version="17.9.5" ExcludeAssets="runtime" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
+  </ItemGroup>
+
 </Project>

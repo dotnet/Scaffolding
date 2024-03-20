@@ -83,7 +83,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project
         {
             var name = Path.GetFileNameWithoutExtension(projectPath);
             var relativePath = projectPath.MakeRelativePath(WorkingDir).ToSuggestion();
-
             return $"{name} {relativePath.ToSuggestion(withBrackets: true)}";
         }
 

@@ -3,7 +3,7 @@
     "path": "All.sln",
     "projects": [
       "src\\Shared\\Microsoft.DotNet.Scaffolding.Helpers\\Microsoft.DotNet.Scaffolding.Helpers.csproj",
-      "src\\Shared\\Microsoft.DotNet.Scaffolding.ComponentModel\\Microsoft.DotNet.Scaffolding.ExtensibilityModel.csproj",
+      "src\\Shared\\Microsoft.DotNet.Scaffolding.ComponentModel\\Microsoft.DotNet.Scaffolding.ComponentModel.csproj",
       "tools\\dotnet-scaffold\\dotnet-scaffold.csproj",
     ]
   }

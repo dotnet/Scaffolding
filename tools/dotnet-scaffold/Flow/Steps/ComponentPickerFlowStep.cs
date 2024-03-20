@@ -1,11 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project;
+using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -19,14 +22,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     public class ComponentFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
+        private readonly IDotNetToolService _dotnetToolService;
 
         public string Id => nameof(ComponentFlowStep);
 
         public string DisplayName => "Scaffolding Component";
 
-        public ComponentFlowStep(ILogger logger)
+        public ComponentFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
         {
             _logger = logger;
+            _dotnetToolService = dotnetToolService;
         }
 
         public string GetJsonString(string jsonString)
@@ -48,12 +53,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return jsonText;
         }
 
-        public CommandInfo[] GetParameters(string jsonText)
+        public CommandInfo[] GetCommandInfo(string componentName)
         {
             CommandInfo[]? commands = null;
             try
             {
-                commands = JsonSerializer.Deserialize<CommandInfo[]>(jsonText);
+                //commands = JsonSerializer.Deserialize<CommandInfo[]>("{bleh}");
             }
             catch (JsonException ex)
             {
@@ -82,17 +87,37 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Scaffolding component name is needed!"));
             }
 
-            SelectComponent(context, componentName);
+            var componentPicked = _dotnetToolService.GetDotNetTool(componentName);
+            if (componentPicked is null)
+            {
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Scaffolding component (dotnet tool) {componentName} not found!"));
+            }
+
+            SelectComponent(context, componentPicked);
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            SelectComponent(context, "thang");
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            ComponentDiscovery componentDiscovery = new ComponentDiscovery(_dotnetToolService);
+            var componentPicked = componentDiscovery.Discover(context);
+
+            if (componentDiscovery.State.IsNavigation())
+            {
+                return new ValueTask<FlowStepResult>(new FlowStepResult { State = componentDiscovery.State });
+            }
+
+            if (componentPicked is not null)
+            {
+                SelectComponent(context, componentPicked);
+                return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            }
+
+            AnsiConsole.WriteLine("No projects found in current directory");
+            return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
         }
 
-        public void ExecuteComponent()
+        public void ExecuteComponent(DotNetToolInfo component)
         {
             //get all parameters from area scaffolder
             //
@@ -105,14 +130,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask();
         }
 
-        private void SelectComponent(IFlowContext context, string component)
+        private void SelectComponent(IFlowContext context, DotNetToolInfo component)
         {
-            if (!string.IsNullOrEmpty(component))
+            if (component != null)
             {
                 context.Set(new FlowProperty(
-                    FlowContextProperties.ComponentName,
-                    component,
-                    FlowContextProperties.ComponentNameDisplay,
+                    name : FlowContextProperties.ComponentName,
+                    value: component,
+                    displayName: component.ToDisplayString(),
                     isVisible: true));
             }
         }

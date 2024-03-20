@@ -12,16 +12,19 @@ using Spectre.Console.Flow;
 
 public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
+    private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
     public ScaffoldCommand(
+        IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
         ILogger logger)
         : base(flowProvider)
     {
+        _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
@@ -46,7 +49,7 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         [
             new StartupFlowStep(_environmentService, _fileSystem, _logger),
             new SourceProjectFlowStep(_environmentService, _fileSystem, _logger),
-            new ComponentFlowStep(_logger)
+            new ComponentPickerFlowStep(_logger, _dotnetToolService)
         ];
 
         return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive);

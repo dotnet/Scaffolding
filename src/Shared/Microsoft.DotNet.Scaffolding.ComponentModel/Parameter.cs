@@ -64,7 +64,6 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         public static bool CheckType(BaseTypes baseType, List<string> values)
         {
             var expectedType = Parameter.TypeDict[baseType];
-
             if (values.Count == 1 && expectedType.IsGenericType)
             {
                 // Handle singular value when a list type is expected

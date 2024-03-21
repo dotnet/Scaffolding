@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -33,7 +34,32 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var commandName = context.GetComponentName();
+            var componentName = context.GetComponentName();
+            CommandInfo? commandInfo;
+            if (string.IsNullOrEmpty(commandName))
+            {
+                if (string.IsNullOrEmpty(componentName))
+                {
+                    throw new Exception();
+                }
+
+                CommandDiscovery commandDiscovery = new CommandDiscovery(_dotnetToolService);
+                commandInfo = commandDiscovery.Discover(context, componentName);
+            }
+            else
+            {
+                var allCommands = context.GetCommandInfos();
+                commandInfo = allCommands?.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (commandInfo is null)
+            {
+                throw new Exception();
+            }
+
+            var commandSteps = GetParameterBasedSteps(commandInfo);
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = commandSteps });
         }
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
@@ -46,14 +72,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             var allCommands = context.GetCommandInfos();
-            var commandInfo = allCommands?.FirstOrDefault(x => x.Name.Equals(commandName, System.StringComparison.OrdinalIgnoreCase));
+            var commandInfo = allCommands?.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             if (commandInfo is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Command '{commandName}' not found in component '{componentName}'!"));
             }
 
             var commandSteps = GetParameterBasedSteps(commandInfo);
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = commandSteps });
         }
 
         internal List<ParameterBasedFlowStep> GetParameterBasedSteps(CommandInfo commandInfo)
@@ -69,6 +95,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 //throw exception
             }
+
             return allParametersSteps;
         }
     }

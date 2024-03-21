@@ -15,7 +15,6 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
-  - template: /eng/common/templates-official/variables/pool-providers.yml@self
   - group: DotNet-AspNet-SDLValidation-Params
 
 resources:

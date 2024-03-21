@@ -20,28 +20,36 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             }
         }
 
-        public List<CommandInfo>? GetCommands(string dotnetToolName)
+        public List<CommandInfo> GetCommands(string dotnetToolName)
         {
-            var commands = new List<CommandInfo>();
-            var runner = DotnetCliRunner.CreateDotNet(dotnetToolName, ["get-commands"]);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+            List<CommandInfo>? commands = null;
+            if (DotNetTools.FirstOrDefault(x => x.Command.Equals(dotnetToolName, StringComparison.OrdinalIgnoreCase)) != null)
             {
-                try
+                var runner = DotnetCliRunner.CreateDotNet(dotnetToolName, ["get-commands"]);
+                var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
                 {
-                    commands = JsonSerializer.Deserialize<List<CommandInfo>>(stdOut);
-                }
-                catch (Exception)
-                {
+                    try
+                    {
+                        commands = JsonSerializer.Deserialize<List<CommandInfo>>(stdOut);
+                    }
+                    catch (Exception)
+                    {
 
+                    }
                 }
             }
 
-            return commands;
+            return commands ?? new List<CommandInfo>();
         }
 
-        public DotNetToolInfo? GetDotNetTool(string componentName, string? version = null)
+        public DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null)
         {
+            if (string.IsNullOrEmpty(componentName))
+            {
+                return null;
+            }
+
             var matchingTools = DotNetTools.Where(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (string.IsNullOrEmpty(version))
             {
@@ -90,6 +98,13 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             }
 
             return null;
+        }
+
+        public CommandInfo? GetCommandInfo(string dotnetToolName, string commandName)
+        {
+            var allCommands = GetCommands(dotnetToolName);
+            var command = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            return command;
         }
     }
 }

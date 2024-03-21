@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -48,26 +49,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             if (string.IsNullOrEmpty(jsonText))
             {
-                throw new Exception("json serialization error, check the parameters used to initalize.");
+                throw new Exception("json serialization error, check the parameters used to initialize.");
             }
             return jsonText;
         }
 
-        public CommandInfo[] GetCommandInfo(string componentName)
+        public List<CommandInfo>? GetCommandInfo(string componentName)
         {
-            CommandInfo[]? commands = null;
-            try
+            List<CommandInfo> commands;
+            commands = _dotnetToolService.GetCommands(componentName);
+            if (commands is null || commands.Count == 0)
             {
-                //commands = JsonSerializer.Deserialize<CommandInfo[]>("{bleh}");
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogFailureAndExit(ex.ToString());
-            }
-
-            if (commands is null || commands.Length == 0)
-            {
-                throw new Exception("parameter json parsing error, check the json string being passed.");
+                _logger.LogFailureAndExit("get-commands' json parsing error, check the json string being passed.");
             }
 
             return commands;
@@ -117,16 +110,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
         }
 
-        public void ExecuteComponent(DotNetToolInfo component)
-        {
-            //get all parameters from area scaffolder
-            //
-            //currently executing area scaffolder 1st party component for testing
-        }
-
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             context.Unset(FlowContextProperties.ComponentName);
+            context.Unset(FlowContextProperties.CommandInfos);
             return new ValueTask();
         }
 
@@ -134,11 +121,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         {
             if (component != null)
             {
+                var commandInfos = _dotnetToolService.GetCommands(component.Command);
                 context.Set(new FlowProperty(
                     name : FlowContextProperties.ComponentName,
                     value: component,
                     displayName: component.ToDisplayString(),
                     isVisible: true));
+
+                context.Set(new FlowProperty(
+                    name: FlowContextProperties.CommandInfos,
+                    value: commandInfos,
+                    isVisible: false));
             }
         }
     }

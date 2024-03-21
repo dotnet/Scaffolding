@@ -8,7 +8,8 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
     public interface IDotNetToolService
     {
         IList<DotNetToolInfo> DotNetTools { get; }
-        DotNetToolInfo? GetDotNetTool(string componentName, string? version = null);
+        DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null);
         List<CommandInfo> GetCommands(string dotnetToolName);
+        CommandInfo? GetCommandInfo(string dotnetToolName, string commandName);
     }
 }

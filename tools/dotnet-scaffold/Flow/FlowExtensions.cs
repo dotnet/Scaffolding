@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
@@ -15,6 +16,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
         public static string? GetComponentName(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<string>(FlowContextProperties.ComponentName, throwIfEmpty);
+        }
+
+        public static string? GetCommandName(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<string>(FlowContextProperties.CommandName, throwIfEmpty);
+        }
+
+        public static List<CommandInfo>? GetCommandInfos(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<List<CommandInfo>>(FlowContextProperties.CommandInfos, throwIfEmpty);
         }
 
         public static string? GetSourceProjectPath(this IFlowContext context, bool throwIfEmpty = false)

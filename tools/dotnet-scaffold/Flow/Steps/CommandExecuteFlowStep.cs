@@ -29,13 +29,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            context.Unset(FlowContextProperties.CommandName);
+            return new ValueTask();
         }
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            var commandName = context.GetComponentName();
-            var componentName = context.GetComponentName();
+            var commandName = string.Empty;
+            var componentName = context.GetComponentObj()?.Command;
             CommandInfo? commandInfo;
             if (string.IsNullOrEmpty(commandName))
             {
@@ -44,8 +45,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     throw new Exception();
                 }
 
-                CommandDiscovery commandDiscovery = new CommandDiscovery(_dotnetToolService);
-                commandInfo = commandDiscovery.Discover(context, componentName);
+                CommandDiscovery commandDiscovery = new();
+                commandInfo = commandDiscovery.Discover(context);
             }
             else
             {
@@ -58,14 +59,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 throw new Exception();
             }
 
-            var commandSteps = GetParameterBasedSteps(commandInfo);
-            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = commandSteps });
+            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
+            if (commandFirstStep is null)
+            {
+                throw new Exception("asdf");
+            }
+
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var commandName = context.GetCommandName();
-            var componentName = context.GetComponentName();
+            var componentName = context.GetComponentObj();
             if (string.IsNullOrEmpty(commandName))
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("A command name for the given scaffolding component is needed!"));
@@ -78,25 +84,61 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Command '{commandName}' not found in component '{componentName}'!"));
             }
 
-            var commandSteps = GetParameterBasedSteps(commandInfo);
-            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = commandSteps });
+            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
+            if (commandFirstStep is null)
+            {
+                throw new Exception("asdf");
+            }
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
-        internal List<ParameterBasedFlowStep> GetParameterBasedSteps(CommandInfo commandInfo)
+        internal ParameterBasedFlowStep? GetFirstParameterBasedStep(CommandInfo commandInfo)
         {
-            var allParameters = commandInfo.Parameters?.ToList();
-            var allParametersSteps = new List<ParameterBasedFlowStep>();
-            allParameters?.ForEach(x =>
+            ParameterBasedFlowStep? firstParameterStep = null;
+            if (commandInfo.Parameters != null && commandInfo.Parameters.Length != 0)
             {
-                allParametersSteps.Add(new ParameterBasedFlowStep(x));
-            });
-
-            if (allParametersSteps.Count == 0)
-            {
-                //throw exception
+                firstParameterStep = BuildParameterFlowSteps([.. commandInfo.Parameters]);
             }
 
-            return allParametersSteps;
+            return firstParameterStep;
+        }
+
+        internal ParameterBasedFlowStep? BuildParameterFlowSteps(List<Parameter> parameters)
+        {
+            ParameterBasedFlowStep? firstStep = null;
+            ParameterBasedFlowStep? previousStep = null;
+
+            foreach (var parameter in parameters)
+            {
+                var step = new ParameterBasedFlowStep(parameter, null);
+
+                if (firstStep == null)
+                {
+                    // This is the first step
+                    firstStep = step;
+                }
+                else
+                {
+                    if (previousStep != null)
+                    {
+                        // Connect the previous step to this step
+                        previousStep.NextStep = step;
+                    }
+                }
+
+                previousStep = step;
+            }
+
+            return firstStep;
+        }
+
+        private void SelectCommandName(IFlowContext context, string commandName)
+        {
+            context.Set(new FlowProperty(
+                FlowContextProperties.CommandName,
+                commandName,
+                "Command Name",
+                isVisible: true));
         }
     }
 }

@@ -13,14 +13,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
 {
     internal static class FlowContextExtensions
     {
-        public static string? GetComponentName(this IFlowContext context, bool throwIfEmpty = false)
+        public static DotNetToolInfo? GetComponentObj(this IFlowContext context, bool throwIfEmpty = false)
         {
-            return context.GetValueOrThrow<string>(FlowContextProperties.ComponentName, throwIfEmpty);
+            return context.GetValueOrThrow<DotNetToolInfo>(FlowContextProperties.ComponentObj, throwIfEmpty);
         }
 
         public static string? GetCommandName(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<string>(FlowContextProperties.CommandName, throwIfEmpty);
+        }
+
+        public static List<string>? GetCommandArgValues(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<List<string>>(FlowContextProperties.CommandArgValues, throwIfEmpty);
         }
 
         public static List<CommandInfo>? GetCommandInfos(this IFlowContext context, bool throwIfEmpty = false)

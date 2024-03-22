@@ -11,24 +11,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
     internal class CommandDiscovery
     {
-        private readonly IDotNetToolService _dotnetToolService;
-
-        public CommandDiscovery(IDotNetToolService dotNetToolService)
+        public CommandDiscovery()
         {
-            _dotnetToolService = dotNetToolService;
         }
 
         public FlowStepState State { get; private set; }
 
-        public CommandInfo? Discover(IFlowContext context, string componentName)
+        public CommandInfo? Discover(IFlowContext context)
         {
-            return Prompt(context, "Pick a scaffolding command (from chosen component)", componentName);
+            return Prompt(context, "Pick a scaffolding command (from chosen component)");
         }
 
-        private CommandInfo? Prompt(IFlowContext context, string title, string componentName)
+        private CommandInfo? Prompt(IFlowContext context, string title)
         {
-            var commands = _dotnetToolService.GetCommands(componentName); 
-            if (commands.Count == 0)
+            var commands = context.GetCommandInfos();
+            if (commands is null || commands.Count == 0)
             {
                 return null;
             }

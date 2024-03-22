@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            var componentName = context.GetComponentName();
+            var componentName = context.GetComponentObj()?.Command;
             if (string.IsNullOrEmpty(componentName))
             {
                 var settings = context.GetCommandSettings();
@@ -113,6 +113,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             context.Unset(FlowContextProperties.ComponentName);
+            context.Unset(FlowContextProperties.ComponentObj);
             context.Unset(FlowContextProperties.CommandInfos);
             return new ValueTask();
         }
@@ -123,10 +124,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 var commandInfos = _dotnetToolService.GetCommands(component.Command);
                 context.Set(new FlowProperty(
-                    name : FlowContextProperties.ComponentName,
+                    name: FlowContextProperties.ComponentName,
+                    value: component.Command,
+                    displayName: "Component Name",
+                    isVisible: true));
+
+                context.Set(new FlowProperty(
+                    name : FlowContextProperties.ComponentObj,
                     value: component,
                     displayName: component.ToDisplayString(),
-                    isVisible: true));
+                    isVisible: false));
 
                 context.Set(new FlowProperty(
                     name: FlowContextProperties.CommandInfos,

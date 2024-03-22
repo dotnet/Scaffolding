@@ -15,7 +15,9 @@ internal static class FlowContextProperties
     public const string SourceProjectPath = nameof(SourceProjectPath);
     public const string SourceProjectDisplay = "Source project";
     public const string CommandArgs = nameof(CommandArgs);
+    public const string CommandArgValues = nameof(CommandArgValues);
     public const string ComponentName = nameof(ComponentName);
+    public const string ComponentObj = nameof(ComponentObj);
     public const string CommandName = nameof(CommandName);
     public const string ComponentNameDisplay = "Component";
     //of type Microsoft.Build.Evaluation.Project

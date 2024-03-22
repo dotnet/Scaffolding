@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -14,9 +15,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     internal class ParameterBasedFlowStep : IFlowStep
     {
         public Parameter Parameter { get; set; }
-        public ParameterBasedFlowStep(Parameter parameter)
+        public ParameterBasedFlowStep? NextStep { get; set; }
+        public ParameterBasedFlowStep(Parameter parameter, ParameterBasedFlowStep? nextStep)
         {
             Parameter = parameter;
+            NextStep = nextStep;
         }
 
         public string Id => nameof(ParameterBasedFlowStep);
@@ -24,12 +27,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            context.Unset(Parameter.Name);
+            return new ValueTask();
         }
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (Parameter.Required)
+            {
+                ParameterDiscovery paraDiscovery = new ParameterDiscovery(Parameter);
+                var parameterValue = paraDiscovery.Discover(context);
+                if (string.Equals(parameterValue, FlowNavigation.BackInputToken, StringComparison.OrdinalIgnoreCase))
+                {
+                    return new ValueTask<FlowStepResult>(FlowStepResult.Back);
+                }
+            }
+
+            if (NextStep != null)
+            {
+                return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { NextStep } });
+            }
+            else
+            {
+                return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            }
         }
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
@@ -50,10 +71,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"No value found for required option '{Parameter.Name}'"));
             }
+            else if (NextStep != null)
+            {
+                return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { NextStep } });
+            }
             else
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Success);
             }
+        }
+
+        private void SelectParameter(IFlowContext context, string parameterValue)
+        {
+            context.Set(new FlowProperty(
+                Parameter.Name,
+                parameterValue,
+                Parameter.DisplayName,
+                isVisible: true));
         }
     }
 }

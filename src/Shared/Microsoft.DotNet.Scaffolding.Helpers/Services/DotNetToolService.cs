@@ -25,13 +25,14 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             List<CommandInfo>? commands = null;
             if (DotNetTools.FirstOrDefault(x => x.Command.Equals(dotnetToolName, StringComparison.OrdinalIgnoreCase)) != null)
             {
-                var runner = DotnetCliRunner.CreateDotNet(dotnetToolName, ["get-commands"]);
+                var runner = DotnetCliRunner.Create(dotnetToolName, ["get-commands"]);
                 var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
                 if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
                 {
                     try
                     {
-                        commands = JsonSerializer.Deserialize<List<CommandInfo>>(stdOut);
+                        string escapedJsonString = stdOut.Replace("\r", "").Replace("\n", "");
+                        commands = JsonSerializer.Deserialize<List<CommandInfo>>(escapedJsonString);
                     }
                     catch (Exception)
                     {

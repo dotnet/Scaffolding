@@ -11,9 +11,9 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
-    internal class ComponentExecuteStep : IFlowStep
+    internal class ComponentExecuteFlowStep : IFlowStep
     {
-        public string Id => nameof(ComponentExecuteStep);
+        public string Id => nameof(ComponentExecuteFlowStep);
 
         public string DisplayName => throw new System.NotImplementedException();
 

@@ -41,6 +41,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 {
                     return new ValueTask<FlowStepResult>(FlowStepResult.Back);
                 }
+                else
+                {
+                    SelectParameter(context, parameterValue);
+                }
             }
 
             if (NextStep != null)

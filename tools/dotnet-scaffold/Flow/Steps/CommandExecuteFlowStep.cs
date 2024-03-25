@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow;
+using Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -47,6 +48,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
                 CommandDiscovery commandDiscovery = new();
                 commandInfo = commandDiscovery.Discover(context);
+                if (commandDiscovery.State.IsNavigation())
+                {
+                    return new ValueTask<FlowStepResult>(new FlowStepResult { State = commandDiscovery.State });
+                }
             }
             else
             {
@@ -57,6 +62,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             if (commandInfo is null)
             {
                 throw new Exception();
+            }
+            else
+            {
+                commandName = commandInfo.Name;
+                SelectCommandName(context, commandName);
             }
 
             var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
@@ -82,6 +92,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             if (commandInfo is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Command '{commandName}' not found in component '{componentName}'!"));
+            }
+            else
+            {
+                SelectCommandName(context, commandName);
             }
 
             var commandFirstStep = GetFirstParameterBasedStep(commandInfo);

@@ -51,7 +51,7 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
             new SourceProjectFlowStep(_environmentService, _fileSystem, _logger),
             new ComponentFlowStep(_logger, _dotnetToolService),
             new CommandExecuteFlowStep(_logger, _dotnetToolService),
-            new ComponentExecuteStep()
+            new ComponentExecuteFlowStep()
         ];
 
         return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive);

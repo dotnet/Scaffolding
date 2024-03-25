@@ -49,6 +49,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal static Parameter DatabaseProvider = new() { Name = "--dbProvider", DisplayName = "Database Provider", Description = "", Required = true, Type = BaseTypes.String };
         internal static Parameter AreaName = new() { Name = "--name", DisplayName = "Area Name", Description = "Name for the area being created", Required = true, Type = BaseTypes.String };
         internal static Parameter[] AreaParameters = [AreaName];
-        internal static Parameter[] MinimalApiParameters = [ModelName, EndpointsClass, DataContextClass, OpenApi, DatabaseProvider, AreaName];
+        internal static Parameter[] MinimalApiParameters = [ModelName, EndpointsClass, DataContextClass, OpenApi, DatabaseProvider];
     }
 }

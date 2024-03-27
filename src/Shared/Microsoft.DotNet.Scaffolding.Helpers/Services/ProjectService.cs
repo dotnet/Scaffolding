@@ -14,6 +14,7 @@ public class ProjectService : IProjectService, IDisposable
         var projects = ProjectCollection.GlobalProjectCollection.GetLoadedProjects(_projectPath);
         _shouldUnload = projects.Count == 0;
         Project = projects.SingleOrDefault() ?? ProjectCollection.GlobalProjectCollection.LoadProject(_projectPath);
+        Project.Build();
     }
 
     public Project Project { get; }

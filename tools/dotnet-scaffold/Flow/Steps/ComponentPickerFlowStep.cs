@@ -24,46 +24,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     {
         private readonly ILogger _logger;
         private readonly IDotNetToolService _dotnetToolService;
-
         public string Id => nameof(ComponentFlowStep);
-
         public string DisplayName => "Scaffolding Component";
 
         public ComponentFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
         {
             _logger = logger;
             _dotnetToolService = dotnetToolService;
-        }
-
-        public string GetJsonString(string jsonString)
-        {
-            string jsonText = string.Empty;
-            try
-            {
-                jsonText = JsonSerializer.Serialize(jsonString);
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogFailureAndExit(ex.ToString());
-            }
-
-            if (string.IsNullOrEmpty(jsonText))
-            {
-                throw new Exception("json serialization error, check the parameters used to initialize.");
-            }
-            return jsonText;
-        }
-
-        public List<CommandInfo>? GetCommandInfo(string componentName)
-        {
-            List<CommandInfo> commands;
-            commands = _dotnetToolService.GetCommands(componentName);
-            if (commands is null || commands.Count == 0)
-            {
-                _logger.LogFailureAndExit("get-commands' json parsing error, check the json string being passed.");
-            }
-
-            return commands;
         }
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
@@ -80,7 +47,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Scaffolding component name is needed!"));
             }
 
-            var componentPicked = _dotnetToolService.GetDotNetTool(componentName);
+            DotNetToolInfo? componentPicked = AnsiConsole
+                .Status()
+                .WithSpinner()
+                .Start("Invoking 'dotnet tool' to get components!", statusContext =>
+                {
+                    return _dotnetToolService.GetDotNetTool(componentName);
+                });
+
             if (componentPicked is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Scaffolding component (dotnet tool) {componentName} not found!"));
@@ -92,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            ComponentDiscovery componentDiscovery = new ComponentDiscovery(_dotnetToolService);
+            ComponentDiscovery componentDiscovery = new(_dotnetToolService);
             var componentPicked = componentDiscovery.Discover(context);
 
             if (componentDiscovery.State.IsNavigation())
@@ -122,7 +96,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         {
             if (component != null)
             {
-                var commandInfos = _dotnetToolService.GetCommands(component.Command);
+                var commandInfos = AnsiConsole
+                .Status()
+                .WithSpinner()
+                .Start($"Retrieving commands from '{component.Command}'", statusContext =>
+                {
+                    return _dotnetToolService.GetCommands(component.Command);
+                });
+
                 context.Set(new FlowProperty(
                     name: FlowContextProperties.ComponentName,
                     value: component.Command,

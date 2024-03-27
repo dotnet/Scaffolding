@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         public bool Required { get; set; } = false;
         public string? Description { get; set; }
         public BaseTypes Type { get; set; }
-        public object Value { get; set; } = default!;
+        public InteractivePickerType? PickerType { get; set; }
 
         internal static Dictionary<BaseTypes, Type> TypeDict = new()
         {
@@ -38,11 +38,6 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         public Type GetParameterType()
         {
             return TypeDict[Type];
-        }
-
-        public T GetCastedObject<T>()
-        {
-            return (T)Value;
         }
     }
 
@@ -115,5 +110,12 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         ListDecimal,
         ListChar,
         ListString
+    }
+
+    public enum InteractivePickerType
+    {
+        ClassPicker,
+        FilePicker,
+        DbProviderPicker
     }
 }

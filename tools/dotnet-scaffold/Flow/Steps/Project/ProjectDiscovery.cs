@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project
@@ -27,21 +28,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project
 
         public string? Discover(IFlowContext context, string path)
         {
-            if (!FileSystem.DirectoryExists(path))
-            {
-                return null;
-            }
+            List<string> projects = []; 
+            projects = AnsiConsole
+                .Status()
+                .WithSpinner()
+                .Start("Discovering project files!", statusContext =>
+                {
+                    if (!FileSystem.DirectoryExists(path))
+                    {
+                        return [];
+                    }
 
-            var projects = FileSystem.EnumerateFiles(path, "*.csproj", SearchOption.AllDirectories).ToList();
-            var slnFiles = FileSystem.EnumerateFiles(path, "*.sln", SearchOption.TopDirectoryOnly).ToList();
-            var projectsFromSlnFiles = GetProjectsFromSolutionFiles(slnFiles, WorkingDir);
-            projects = projects.Union(projectsFromSlnFiles).ToList();
-            
-            //should we search in all directories if nothing in top level? (yes, for now)
-            if (projects.Count == 0)
-            {
-                projects = FileSystem.EnumerateFiles(path, "*.csproj", SearchOption.AllDirectories).ToList();
-            }
+                    var projects = FileSystem.EnumerateFiles(path, "*.csproj", SearchOption.AllDirectories).ToList();
+                    var slnFiles = FileSystem.EnumerateFiles(path, "*.sln", SearchOption.TopDirectoryOnly).ToList();
+                    var projectsFromSlnFiles = GetProjectsFromSolutionFiles(slnFiles, WorkingDir);
+                    projects = projects.Union(projectsFromSlnFiles).ToList();
+
+                    //should we search in all directories if nothing in top level? (yes, for now)
+                    if (projects.Count == 0)
+                    {
+                        projects = FileSystem.EnumerateFiles(path, "*.csproj", SearchOption.AllDirectories).ToList();
+                    }
+
+                    return projects;
+                });
 
             return Prompt(context, $"Pick project ({projects.Count})", projects);
         }

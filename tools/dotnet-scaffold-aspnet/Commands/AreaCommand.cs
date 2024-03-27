@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             "Views"
         ];
 
-        public class AreaSettings : CommandSettings
+        public class AreaSettings : ProjectScaffolderSettings
         {
             [CommandOption("--name <NAME>")]
             public string Name { get; set; } = default!;

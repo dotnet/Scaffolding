@@ -25,12 +25,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public string Discover(IFlowContext context)
         {
-            return Prompt(context, $"Provider a value for {_parameter.DisplayName}");
+            return Prompt(context, $"Enter new value for '{_parameter.DisplayName}' (or [lightseagreen]<[/] to go back : ");
         }
 
         private string Prompt(IFlowContext context, string title)
         {
-            var prompt = new TextPrompt<string>(title)
+            //check if Parameter has a InteractivePickerType
+/*            if (_parameter.PickerType is null)
+            {*/
+                var prompt = new TextPrompt<string>(title)
                 .ValidationErrorMessage("bad value fix it please")
                 .Validate(x =>
                 {
@@ -42,7 +45,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     return Validate(context, x);
                 });
 
-            return AnsiConsole.Prompt(prompt).Trim();
+                return AnsiConsole.Prompt(prompt).Trim();
+/*            }
+            else
+            {
+                var msBuildProject = context.GetSourceProject();
+                var compileItems = msBuildProject?.GetItems("Compile");
+                var sourceFiles = msBuildProject?.GetItems("Compile").Select(i => i.EvaluatedInclude);
+                return "";
+            }*/
+            
         }
 
         private ValidationResult Validate(IFlowContext context, string promptVal)

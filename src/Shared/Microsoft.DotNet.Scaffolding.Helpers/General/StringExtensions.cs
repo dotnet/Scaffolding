@@ -133,5 +133,17 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
         {
             return s.Length == 0 || s[s.Length - 1] != ch ? s + ch : s;
         }
+
+        public static string WithOsPathSeparators(this string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
+            return text.Replace(IncorrectPathSeparator, Path.DirectorySeparatorChar);
+        }
+
+        private static readonly char IncorrectPathSeparator = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';
     }
 }

@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             return 0;
         }
 
-        public class MinimalApiSettings : CommandSettings
+        public class MinimalApiSettings : ProjectScaffolderSettings
         {
             [CommandOption("--model <MODEL>")]
             public string Model { get; set; } = default!;

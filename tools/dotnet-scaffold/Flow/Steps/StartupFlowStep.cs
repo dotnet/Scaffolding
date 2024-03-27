@@ -68,6 +68,9 @@ public class StartupFlowStep : IFlowStep
                     _fileSystem.WriteAllText(manifestFileFullPath, string.Empty);
                 }
 
+                statusContext.Status = "Gathering environment variables";
+                //var environmentVariableProvider = new EnvironmentVariablesStartup();
+
                 statusContext.Status = "Initializing msbuild!";
                 new MsBuildInitializer(_logger).Initialize();
 

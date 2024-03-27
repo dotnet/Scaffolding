@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
@@ -30,11 +31,18 @@ public class ScaffoldCommandAppBuilder(string[] args)
     private ITypeRegistrar? GetDefaultServices()
     {
         var registrar = new TypeRegistrar();
+/*        var logger = new AnsiConsoleLogger();
+        var envProviders = new List<IEnvironmentVariableProvider>()
+        {
+            new MacMsbuildEnvironmentVariableProvider()
+        };*/
+
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
-        registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
+        registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
+//        registrar.RegisterInstance(typeof(IHostService), new HostService(logger, );
         return registrar;
     }
 

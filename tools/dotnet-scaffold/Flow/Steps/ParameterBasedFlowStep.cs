@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
-using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -66,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 cmdlineArgs.TryGetValue(Parameter.Name, out var cmdlineValues);
                 if (cmdlineValues != null && cmdlineValues.Count != 0 && ParameterHelpers.CheckType(Parameter.Type, cmdlineValues))
                 {
-                    Parameter.Value = cmdlineValues;
+                    //Parameter.Value = cmdlineValues;
                     return new ValueTask<FlowStepResult>(FlowStepResult.Success);
                 }
             }

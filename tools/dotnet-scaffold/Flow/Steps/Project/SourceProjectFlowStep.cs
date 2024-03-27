@@ -1,6 +1,8 @@
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Spectre.Console;
@@ -88,9 +90,8 @@ internal class SourceProjectFlowStep : IFlowStep
             workingDir = path;
         }
 
-        ProjectDiscovery projectDiscovery = new ProjectDiscovery(_fileSystem, workingDir);
+        ProjectDiscovery projectDiscovery = new(_fileSystem, workingDir);
         var projectPath = projectDiscovery.Discover(context, path);
-
         if (projectDiscovery.State.IsNavigation())
         {
             return new ValueTask<FlowStepResult>(new FlowStepResult { State = projectDiscovery.State });
@@ -124,7 +125,25 @@ internal class SourceProjectFlowStep : IFlowStep
                 FlowContextProperties.SourceProjectDisplay,
                 isVisible: true));
 
-            ProjectService projectService = new(projectPath, _logger);
+            ProjectService projectService = AnsiConsole
+                .Status()
+                .WithSpinner()
+                .Start("Gathering project information!", statusContext =>
+                {
+                    ProjectService msbuildProj = new(projectPath, _logger);
+                    var evaluatedProperties = msbuildProj.Project.AllEvaluatedProperties
+                        .ToLookup(p => p.Name, p => p.EvaluatedValue);
+
+                    // Create a dictionary with the first value for each key
+                    var uniqueProperties = evaluatedProperties
+                        .ToDictionary(group => group.Key, group => group.First());
+
+                    // Create the MSBuildWorkspace using the evaluated properties
+                    var workspace = MSBuildWorkspace.Create(uniqueProperties);
+                    //var roslynproject = workspace.OpenProjectAsync(projectPath).Result;
+                    return msbuildProj;
+                });
+       
             if (projectService != null && projectService.Project != null)
             {
                 context.Set(new FlowProperty(

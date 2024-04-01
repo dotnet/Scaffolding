@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvider
 {
@@ -18,7 +18,6 @@ public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvide
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
-    [ImportingConstructor]
     public MacMsbuildEnvironmentVariableProvider(IAppSettings settings, IFileSystem fileSystem, ILogger logger)
     {
         _settings = settings;
@@ -27,15 +26,15 @@ public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvide
     }
 
     /// <inheritdoc />
-    public ValueTask<IEnumerable<KeyValuePair<string, string>>?> GetEnvironmentVariablesAsync(CancellationToken cancellationToken)
+    public ValueTask<IEnumerable<KeyValuePair<string, string>>?> GetEnvironmentVariablesAsync()
     {
         // Note: try to do it for Mac and Linux.
         return !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? GetMacEnvironmentVariablesAsync(cancellationToken)
+            ? GetMacEnvironmentVariablesAsync()
             : new ValueTask<IEnumerable<KeyValuePair<string, string>>?>((IEnumerable<KeyValuePair<string, string>>?)null);
     }
 
-    private ValueTask<IEnumerable<KeyValuePair<string, string>>?> GetMacEnvironmentVariablesAsync(CancellationToken cancellationToken)
+    private ValueTask<IEnumerable<KeyValuePair<string, string>>?> GetMacEnvironmentVariablesAsync()
     {
         var variables = new Dictionary<string, string>();
         var msbuildPath = _settings.Workspace().MSBuildPath;
@@ -45,7 +44,7 @@ public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvide
         // by the MSBuildLocator.
         if (string.IsNullOrEmpty(msbuildPath))
         {
-            msbuildPath = Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
+            msbuildPath = System.Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
         }
 
         var msbuildExtensionsPath = GetMacOSMSBuildExtensionsPath(msbuildPath);
@@ -63,7 +62,7 @@ public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvide
             variables.Add(Constants.EnvironmentVariables.MSBuildSDKsPath, msbuildSdksPath);
         }
 
-        variables.Add(Constants.EnvironmentVariables.USERPROFILE, Environment.GetEnvironmentVariable("HOME") ?? string.Empty);
+        variables.Add(Constants.EnvironmentVariables.USERPROFILE, System.Environment.GetEnvironmentVariable("HOME") ?? string.Empty);
 
         return new ValueTask<IEnumerable<KeyValuePair<string, string>>?>(variables);
     }
@@ -99,7 +98,7 @@ public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvide
             // directory that we'll use to symlink everything.
             if (createTempExtensionsDir)
             {
-                var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                var homeDir = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
                 //var versionDir = Path.GetFileName(suppliedPath.TrimEndPathSeparators());
                 var versionDir = suppliedPath;
                 msbuildExtensionsPath = Path.Combine(homeDir, ".dotnet-upgrade-assistant", "dotnet-sdk", versionDir);

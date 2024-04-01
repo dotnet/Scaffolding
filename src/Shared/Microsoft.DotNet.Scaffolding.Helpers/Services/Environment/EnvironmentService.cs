@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
+using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 /// <summary>
 /// Wrapper over System.Environment abstraction for unit testing.
@@ -18,7 +19,7 @@ public class EnvironmentService : IEnvironmentService
         {
             if (string.IsNullOrEmpty(_nugetCache))
             {
-                var nugetPackagesEnvironmentVariable = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+                var nugetPackagesEnvironmentVariable = System.Environment.GetEnvironmentVariable("NUGET_PACKAGES");
 
                 _nugetCache = string.IsNullOrWhiteSpace(nugetPackagesEnvironmentVariable)
                     ? Path.Combine(LocalUserProfilePath, ".nuget", "packages")
@@ -33,7 +34,7 @@ public class EnvironmentService : IEnvironmentService
     {
         get
         {
-            return Environment.GetEnvironmentVariable(
+            return System.Environment.GetEnvironmentVariable(
                     RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                         ? "USERPROFILE"
                         : "HOME") ?? "USERPROFILE";
@@ -43,16 +44,16 @@ public class EnvironmentService : IEnvironmentService
     public const string DotnetProfileDirectoryName = ".dotnet";
 
     /// <inheritdoc />
-    public string CurrentDirectory => Environment.CurrentDirectory;
+    public string CurrentDirectory => System.Environment.CurrentDirectory;
 
     /// <inheritdoc />
-    public OperatingSystem OS => Environment.OSVersion;
+    public OperatingSystem OS => System.Environment.OSVersion;
 
     /// <inheritdoc />
-    public bool Is64BitOperatingSystem => Environment.Is64BitOperatingSystem;
+    public bool Is64BitOperatingSystem => System.Environment.Is64BitOperatingSystem;
 
     /// <inheritdoc />
-    public bool Is64BitProcess => Environment.Is64BitProcess;
+    public bool Is64BitProcess => System.Environment.Is64BitProcess;
 
     /// <inheritdoc />
     public string UserProfilePath => LocalNugetCachePath;
@@ -72,7 +73,7 @@ public class EnvironmentService : IEnvironmentService
         {
             if (string.IsNullOrEmpty(_dotnetHomePath))
             {
-                var homePath = Environment.GetEnvironmentVariable("DOTNET_CLI_HOME");
+                var homePath = System.Environment.GetEnvironmentVariable("DOTNET_CLI_HOME");
                 if (string.IsNullOrEmpty(homePath))
                 {
                     homePath = UserProfilePath;
@@ -95,7 +96,7 @@ public class EnvironmentService : IEnvironmentService
     {
         get
         {
-            if (string.IsNullOrEmpty (_localUserFolderPath))
+            if (string.IsNullOrEmpty(_localUserFolderPath))
             {
                 _localUserFolderPath = LocalUserProfilePath;
             }
@@ -107,31 +108,31 @@ public class EnvironmentService : IEnvironmentService
     /// <inheritdoc />
     public string GetMachineName()
     {
-        return Environment.MachineName;
+        return System.Environment.MachineName;
     }
 
     /// <inheritdoc />
     public string? GetEnvironmentVariable(string name)
     {
-        return Environment.GetEnvironmentVariable(name);
+        return System.Environment.GetEnvironmentVariable(name);
     }
 
     /// <inheritdoc />
     public void SetEnvironmentVariable(string name, string value, EnvironmentVariableTarget envTarget)
     {
-        Environment.SetEnvironmentVariable(name, value, envTarget);
+        System.Environment.SetEnvironmentVariable(name, value, envTarget);
     }
 
     /// <inheritdoc />
-    public string GetFolderPath(Environment.SpecialFolder specifalFolder)
+    public string GetFolderPath(System.Environment.SpecialFolder specifalFolder)
     {
-        return Environment.GetFolderPath(specifalFolder);
+        return System.Environment.GetFolderPath(specifalFolder);
     }
 
     /// <inheritdoc />
     public string ExpandEnvironmentVariables(string name)
     {
-        return Environment.ExpandEnvironmentVariables(name);
+        return System.Environment.ExpandEnvironmentVariables(name);
     }
 }
 

@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
         public static string NormalizeLineEndings(string text)
         {
             //change all line endings to "\n" and then replace them with the appropriate ending
-            return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine);
+            return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", System.Environment.NewLine);
         }
 
         public static Dictionary<string, string> ParseArguments(List<string> args)

@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
-                var stdOutByLine = stdOut.Split(Environment.NewLine);
+                var stdOutByLine = stdOut.Split(System.Environment.NewLine);
                 foreach (var line in stdOutByLine)
                 {
                     var parsedDotNetTool = ParseToolInfo(line);

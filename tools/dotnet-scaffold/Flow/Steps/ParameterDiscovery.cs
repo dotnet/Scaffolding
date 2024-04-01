@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -23,16 +24,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         }
         public FlowStepState State { get; private set; }
 
-        public string Discover(IFlowContext context)
+        public async Task<string> DiscoverAsync(IFlowContext context)
         {
-            return Prompt(context, $"Enter new value for '{_parameter.DisplayName}' (or [lightseagreen]<[/] to go back : ");
+            return await PromptAsync(context, $"Enter new value for '{_parameter.DisplayName}' (or [lightseagreen]<[/] to go back : ");
         }
 
-        private string Prompt(IFlowContext context, string title)
+        private async Task<string> PromptAsync(IFlowContext context, string title)
         {
             //check if Parameter has a InteractivePickerType
-/*            if (_parameter.PickerType is null)
-            {*/
+            if (_parameter.PickerType is null)
+            {
                 var prompt = new TextPrompt<string>(title)
                 .ValidationErrorMessage("bad value fix it please")
                 .Validate(x =>
@@ -46,16 +47,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 });
 
                 return AnsiConsole.Prompt(prompt).Trim();
-/*            }
+        }
             else
             {
-                var msBuildProject = context.GetSourceProject();
-                var compileItems = msBuildProject?.GetItems("Compile");
-                var sourceFiles = msBuildProject?.GetItems("Compile").Select(i => i.EvaluatedInclude);
+                var codeService = context.GetCodeService();
+                if (codeService != null)
+                {
+                    var workspace = await codeService.GetWorkspaceAsync();
+                }
+
                 return "";
-            }*/
-            
-        }
+            }
+
+}
 
         private ValidationResult Validate(IFlowContext context, string promptVal)
         {

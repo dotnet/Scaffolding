@@ -2,7 +2,7 @@
 
 using System.Reflection;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 public class HostService : IHostService
 {
@@ -32,7 +32,7 @@ public class HostService : IHostService
             {
                 try
                 {
-                    var providerVariables = await provider.GetEnvironmentVariablesAsync(cancellationToken);
+                    var providerVariables = await provider.GetEnvironmentVariablesAsync();
                     if (providerVariables is not null)
                     {
                         foreach (var kvp in providerVariables)

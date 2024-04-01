@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
@@ -20,15 +22,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 /// </summary>
 public class StartupFlowStep : IFlowStep
 {
+    private readonly IAppSettings _appSettings;
     private readonly IEnvironmentService _environmentService;
     private readonly IFileSystem _fileSystem;
+    private readonly IHostService _hostService;
     private readonly ILogger _logger;
     private readonly string _dotnetScaffolderFolder = ".dotnet-scaffold";
     private readonly string _manifestFile = "manifest.json";
-    public StartupFlowStep(IEnvironmentService environmentService, IFileSystem fileSystem, ILogger logger)
+    public StartupFlowStep(IAppSettings appSettings, IEnvironmentService environmentService, IFileSystem fileSystem, IHostService hostService, ILogger logger)
     {
+        _appSettings = appSettings;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
+        _hostService = hostService;
         _logger = logger;
     }
 
@@ -50,7 +56,7 @@ public class StartupFlowStep : IFlowStep
     {
         AnsiConsole.Status()
             .WithSpinner()
-            .Start("Initializing dotnet-scaffold", statusContext =>
+            .Start("Initializing dotnet-scaffold", async statusContext =>
             {
                 statusContext.Refresh();
                 // check for first initialization
@@ -68,11 +74,15 @@ public class StartupFlowStep : IFlowStep
                     _fileSystem.WriteAllText(manifestFileFullPath, string.Empty);
                 }
 
-                statusContext.Status = "Gathering environment variables";
-                //var environmentVariableProvider = new EnvironmentVariablesStartup();
+                var workspaceSettings = new WorkspaceSettings();
+                _appSettings.AddSettings("workspace", workspaceSettings);
 
                 statusContext.Status = "Initializing msbuild!";
                 new MsBuildInitializer(_logger).Initialize();
+
+                statusContext.Status = "Gathering environment variables";
+                var environmentVariableProvider = new EnvironmentVariablesStartup(_hostService, _environmentService, _appSettings);
+                await environmentVariableProvider.StartupAsync(cancellationToken);
 
                 statusContext.Status = "Parsing args!";
                 var remainingArgs = context.GetRemainingArgs();

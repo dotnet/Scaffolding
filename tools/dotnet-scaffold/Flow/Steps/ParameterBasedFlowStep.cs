@@ -29,15 +29,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask();
         }
 
-        public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
+        public async ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             if (Parameter.Required)
             {
                 ParameterDiscovery paraDiscovery = new ParameterDiscovery(Parameter);
-                var parameterValue = paraDiscovery.Discover(context);
+                var parameterValue = await paraDiscovery.DiscoverAsync(context);
                 if (string.Equals(parameterValue, FlowNavigation.BackInputToken, StringComparison.OrdinalIgnoreCase))
                 {
-                    return new ValueTask<FlowStepResult>(FlowStepResult.Back);
+                    return FlowStepResult.Back;
                 }
                 else
                 {
@@ -47,11 +47,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             if (NextStep != null)
             {
-                return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { NextStep } });
+                return new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { NextStep } };
             }
             else
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+                return FlowStepResult.Success;
             }
         }
 

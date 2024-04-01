@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+
 namespace Microsoft.DotNet.Tools.Scaffold.Flow;
 
 internal static class FlowContextProperties
@@ -20,8 +22,10 @@ internal static class FlowContextProperties
     public const string ComponentObj = nameof(ComponentObj);
     public const string CommandName = nameof(CommandName);
     public const string ComponentNameDisplay = "Component";
-    //of type Microsoft.Build.Evaluation.Project
+    //of type Microsoft.DotNet.Scaffolding.Helpers.Services.IProjectService
     public const string SourceProject = nameof(SourceProject);
+    //of type Microsoft.DotNet.Scaffolding.Helpers.Services.ICodeService
+    public const string CodeService = nameof(CodeService);
     public const string TargetFrameworkName = nameof(TargetFrameworkName);
     public const string RemainingArgs = nameof(RemainingArgs);
 }

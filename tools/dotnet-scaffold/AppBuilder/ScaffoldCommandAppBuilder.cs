@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.DotNet.Scaffolding.Helpers.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
@@ -31,18 +33,15 @@ public class ScaffoldCommandAppBuilder(string[] args)
     private ITypeRegistrar? GetDefaultServices()
     {
         var registrar = new TypeRegistrar();
-/*        var logger = new AnsiConsoleLogger();
-        var envProviders = new List<IEnvironmentVariableProvider>()
-        {
-            new MacMsbuildEnvironmentVariableProvider()
-        };*/
-
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
         registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
-//        registrar.RegisterInstance(typeof(IHostService), new HostService(logger, );
+        registrar.Register(typeof(IAppSettings), typeof(AppSettings));
+        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(MacMsbuildEnvironmentVariableProvider));
+        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(WindowsEnvironmentVariableProvider));
+        registrar.Register(typeof(IHostService), typeof(HostService));
         return registrar;
     }
 

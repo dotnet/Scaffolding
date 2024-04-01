@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask<Workspace?> GetWorkspaceAsync(CancellationToken cancellationToken);
+        Task<Workspace?> GetWorkspaceAsync();
 
         /// <summary>
         /// Attempts to apply changes to current Roslyn workspace and returns true if it was successful.
@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
         /// <param name="solution"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask<bool> TryApplyChangesAsync(Solution? solution, CancellationToken cancellationToken);
+        bool TryApplyChanges(Solution? solution);
 
         /// <summary>
         /// Reloads Roslyn workspace.
@@ -28,6 +28,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
         /// <param name="projectPath"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask ReloadWorkspaceAsync(string? projectPath, CancellationToken cancellationToken);
+        Task ReloadWorkspaceAsync(string? projectPath);
     }
 }

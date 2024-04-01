@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using System.Composition;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 /// <summary>
 /// Sets environment variables for this process.

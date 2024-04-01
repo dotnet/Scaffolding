@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
     {
         private readonly bool _jsonOutput;
         private readonly bool _silent;
-        private static bool isTrace = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("codegen_trace"));
+        private static bool isTrace = !string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("codegen_trace"));
         public bool IsTracing => isTrace;
 
         private string CommandName { get; }
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
                 LogMessage(failureMessage, LogMessageType.Error);
             }
 
-            Environment.Exit(1);
+            System.Environment.Exit(1);
         }
     }
 }

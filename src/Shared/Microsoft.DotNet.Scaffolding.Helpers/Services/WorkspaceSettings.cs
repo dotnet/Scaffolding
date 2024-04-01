@@ -20,9 +20,9 @@ public class WorkspaceSettings
 {
     public WorkspaceSettings()
     {
-        MSBuildPath = Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
-        VisualStudioPath = Environment.GetEnvironmentVariable("VSINSTALLDIR");
-        VisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
+        MSBuildPath = System.Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
+        VisualStudioPath = System.Environment.GetEnvironmentVariable("VSINSTALLDIR");
+        VisualStudioVersion = System.Environment.GetEnvironmentVariable("VisualStudioVersion");
     }
 
     private string? _inputPath;

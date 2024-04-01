@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
@@ -38,9 +39,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
             return context.GetValueOrThrow<string>(FlowContextProperties.SourceProjectPath, throwIfEmpty);
         }
 
-        public static Build.Evaluation.Project? GetSourceProject(this IFlowContext context, bool throwIfEmpty = false)
+        public static IProjectService? GetSourceProject(this IFlowContext context, bool throwIfEmpty = false)
         {
-            return context.GetValueOrThrow<Build.Evaluation.Project>(FlowContextProperties.SourceProject, throwIfEmpty);
+            return context.GetValueOrThrow<IProjectService>(FlowContextProperties.SourceProject, throwIfEmpty);
+        }
+
+        public static ICodeService? GetCodeService(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<ICodeService>(FlowContextProperties.CodeService, throwIfEmpty);
         }
 
         public static ScaffoldCommand.Settings? GetCommandSettings(this IFlowContext context, bool throwIfEmpty = false)

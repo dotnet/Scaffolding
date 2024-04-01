@@ -12,10 +12,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Locator" Version="1.7.1" />
     <PackageReference Include="Microsoft.Build" Version="17.9.5" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(CodeAnalysisVersion)"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(CodeAnalysisVersion)"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisVersion)"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(CodeAnalysisVersion)"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(CodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(CodeAnalysisVersion)" />
   </ItemGroup>
 
   <ItemGroup>

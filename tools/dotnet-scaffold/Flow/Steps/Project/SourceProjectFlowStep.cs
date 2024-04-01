@@ -1,10 +1,9 @@
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -12,14 +11,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project;
 
 internal class SourceProjectFlowStep : IFlowStep
 {
+    private readonly IAppSettings _appSettings;
     private readonly IFileSystem _fileSystem;
     private readonly IEnvironmentService _environmentService;
     private readonly ILogger _logger;
     public SourceProjectFlowStep(
+        IAppSettings appSettings,
         IEnvironmentService environment,
         IFileSystem fileSystem,
         ILogger logger)
     {
+        _appSettings = appSettings;
         _fileSystem = fileSystem;
         _environmentService = environment;
         _logger = logger;
@@ -124,33 +126,26 @@ internal class SourceProjectFlowStep : IFlowStep
                 projectPath,
                 FlowContextProperties.SourceProjectDisplay,
                 isVisible: true));
+            _appSettings.Workspace().InputPath = projectPath;
 
-            ProjectService projectService = AnsiConsole
+            IProjectService projectService = AnsiConsole
                 .Status()
                 .WithSpinner()
                 .Start("Gathering project information!", statusContext =>
                 {
-                    ProjectService msbuildProj = new(projectPath, _logger);
-                    var evaluatedProperties = msbuildProj.Project.AllEvaluatedProperties
-                        .ToLookup(p => p.Name, p => p.EvaluatedValue);
-
-                    // Create a dictionary with the first value for each key
-                    var uniqueProperties = evaluatedProperties
-                        .ToDictionary(group => group.Key, group => group.First());
-
-                    // Create the MSBuildWorkspace using the evaluated properties
-                    var workspace = MSBuildWorkspace.Create(uniqueProperties);
-                    //var roslynproject = workspace.OpenProjectAsync(projectPath).Result;
-                    return msbuildProj;
+                    return new ProjectService(projectPath, _logger);
                 });
-       
-            if (projectService != null && projectService.Project != null)
-            {
-                context.Set(new FlowProperty(
+
+            context.Set(new FlowProperty(
                     FlowContextProperties.SourceProject,
-                    projectService.Project,
+                    projectService,
                     isVisible: false));
-            }
+
+            ICodeService codeService = new CodeService(_appSettings, _logger);
+            context.Set(new FlowProperty(
+                    FlowContextProperties.CodeService,
+                    codeService,
+                    isVisible: false));
         }
     }
 }

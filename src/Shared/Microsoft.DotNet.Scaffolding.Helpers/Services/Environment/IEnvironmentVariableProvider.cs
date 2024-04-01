@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 public interface IEnvironmentVariableProvider
 {
@@ -15,5 +15,5 @@ public interface IEnvironmentVariableProvider
     /// Returns environment variables to be set in current process.
     /// </summary>
     /// <returns></returns>
-    ValueTask<IEnumerable<KeyValuePair<string, string>>?> GetEnvironmentVariablesAsync(CancellationToken cancellationToken);
+    ValueTask<IEnumerable<KeyValuePair<string, string>>?> GetEnvironmentVariablesAsync();
 }

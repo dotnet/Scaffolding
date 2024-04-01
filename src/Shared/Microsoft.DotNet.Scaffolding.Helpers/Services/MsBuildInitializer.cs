@@ -90,7 +90,7 @@ public class MsBuildInitializer
         {
             var is32bit = instance.MSBuildPath.Contains("x86", StringComparison.OrdinalIgnoreCase);
 
-            if (Environment.Is64BitProcess == !is32bit)
+            if (System.Environment.Is64BitProcess == !is32bit)
             {
                 yield return instance;
             }

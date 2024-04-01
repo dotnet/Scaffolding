@@ -1,6 +1,4 @@
-using System;
-
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 public interface IEnvironmentService
 {
@@ -16,6 +14,6 @@ public interface IEnvironmentService
     string GetMachineName();
     string? GetEnvironmentVariable(string name);
     void SetEnvironmentVariable(string name, string value, EnvironmentVariableTarget envTarget = EnvironmentVariableTarget.Process);
-    string GetFolderPath(Environment.SpecialFolder specifalFolder);
+    string GetFolderPath(System.Environment.SpecialFolder specifalFolder);
     string ExpandEnvironmentVariables(string name);
 }

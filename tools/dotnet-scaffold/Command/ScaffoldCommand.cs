@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project;
 using Microsoft.DotNet.Tools.Scaffold.Services;
@@ -12,21 +13,27 @@ using Spectre.Console.Flow;
 
 public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
+    private readonly IAppSettings _appSettings;
     private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
+    private readonly IHostService _hostService;
     public ScaffoldCommand(
+        IAppSettings appSettings,
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
+        IHostService hostService,
         ILogger logger)
         : base(flowProvider)
     {
+        _appSettings = appSettings;
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
+        _hostService = hostService;
         _logger = logger;
     }
 
@@ -47,8 +54,8 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         //Debugger.Launch();
         IEnumerable<IFlowStep> flowSteps =
         [
-            new StartupFlowStep(_environmentService, _fileSystem, _logger),
-            new SourceProjectFlowStep(_environmentService, _fileSystem, _logger),
+            new StartupFlowStep(_appSettings, _environmentService, _fileSystem, _hostService, _logger),
+            new SourceProjectFlowStep(_appSettings, _environmentService, _fileSystem, _logger),
             new ComponentFlowStep(_logger, _dotnetToolService),
             new CommandExecuteFlowStep(_logger, _dotnetToolService),
             new ComponentExecuteFlowStep()

@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using System.Composition;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-
-namespace Microsoft.UpgradeAssistant.Cli.Slices.Services.Code;
+  
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 /// <summary>
 /// Service that manages Roslyn workspace. It ensures that all projects of interest are loaded in the workspace and are up to date.
@@ -16,38 +13,37 @@ namespace Microsoft.UpgradeAssistant.Cli.Slices.Services.Code;
 ///       when it creates a new instance of <see cref="IProject"/>) it should call OpenProjectAsync
 ///       here and that would ensure project is loaded in the workspace.
 /// </summary>
-internal class CodeService : ICodeService, IDisposable
+public class CodeService : ICodeService, IDisposable
 {
     private readonly ILogger _logger;
     private MSBuildWorkspace? _workspace;
-    private IDictionary<string, string> _properties;
+    private readonly IAppSettings _settings;
 
-    public CodeService(IDictionary<string, string> properties, ILogger logger)
+    public CodeService(IAppSettings settings, ILogger logger)
     {
         _logger = logger;
-        _properties = properties;
+        _settings = settings;
     }
 
     /// <inheritdoc />
-    public async ValueTask<Workspace?> GetWorkspaceAsync(CancellationToken cancellationToken)
+    public async Task<Workspace?> GetWorkspaceAsync()
     {
-        return await GetMsBuildWorkspaceAsync("", cancellationToken).ConfigureAwait(false);
+        return await GetMsBuildWorkspaceAsync(_settings.Workspace().InputPath);
     }
 
     /// <inheritdoc />
-    public ValueTask<bool> TryApplyChangesAsync(Solution? solution, CancellationToken cancellationToken)
+    public bool TryApplyChanges(Solution? solution)
     {
         if (solution is null || _workspace is null)
         {
-            return new ValueTask<bool>(false);
+            return false;
         }
 
         var success = _workspace?.TryApplyChanges(solution) == true;
-
-        return new ValueTask<bool>(success);
+        return success;
     }
 
-    private async ValueTask<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(string? path, CancellationToken token)
+    private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(string? path)
     {
         if (string.IsNullOrEmpty(path))
         {
@@ -59,22 +55,22 @@ internal class CodeService : ICodeService, IDisposable
             return _workspace;
         }
 
-        var workspace = MSBuildWorkspace.Create(_properties);
+        var workspace = MSBuildWorkspace.Create(_settings.GlobalProperties);
         workspace.WorkspaceFailed += OnWorkspaceFailed;
-        var project = await workspace.OpenProjectAsync(path, cancellationToken: token).ConfigureAwait(false);
-        project.Build();
+        workspace.LoadMetadataForReferencedProjects = true;
+        await workspace.OpenProjectAsync(path).ConfigureAwait(false);
         _workspace = workspace;
         return _workspace;
     }
 
-    public async ValueTask OpenProjectAsync(string projectPath, CancellationToken cancellationToken)
+    public async Task OpenProjectAsync(string projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))
         {
             return;
         }
 
-        var workspace = await GetWorkspaceAsync(cancellationToken).ConfigureAwait(false);
+        var workspace = await GetWorkspaceAsync();
         if (workspace is not MSBuildWorkspace msbuildWorkspace)
         {
             return;
@@ -90,9 +86,9 @@ internal class CodeService : ICodeService, IDisposable
 
         try
         {
-            await msbuildWorkspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await msbuildWorkspace.OpenProjectAsync(projectPath).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             //_logger.LogError(ex.ToString());
         }
@@ -111,15 +107,12 @@ internal class CodeService : ICodeService, IDisposable
         }
     }
 
-    public async ValueTask ReloadWorkspaceAsync(string? projectPath, CancellationToken cancellationToken)
+    public async Task ReloadWorkspaceAsync(string? projectPath)
     {
         UnloadWorkspace();
 
-        await GetMsBuildWorkspaceAsync(
-            "",
-            cancellationToken).ConfigureAwait(false);
-
-        await OpenProjectAsync(projectPath!, cancellationToken).ConfigureAwait(false);
+        await GetMsBuildWorkspaceAsync(_settings.Workspace().InputPath);
+        await OpenProjectAsync(projectPath!);
     }
 
     private void OnWorkspaceFailed(object? sender, WorkspaceDiagnosticEventArgs e)

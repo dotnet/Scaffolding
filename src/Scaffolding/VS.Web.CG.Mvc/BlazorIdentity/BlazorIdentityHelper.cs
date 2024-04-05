@@ -8,6 +8,8 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using System.Linq;
 using System;
 using System.IO;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 {
@@ -27,8 +29,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             return string.Empty;
         }
 
-        internal static IList<SyntaxNode> GetBlazorIdentityGlobalNodes(string builderVarName, BlazorIdentityModel blazorIdentityModel)
+        internal static IList<SyntaxNode> GetBlazorIdentityGlobalNodes(string builderVarName, BlazorIdentityModel blazorIdentityModel, List<MemberDeclarationSyntax> existingMembers)
         {
+            Debugger.Launch();
             var dbProviderString = blazorIdentityModel.DatabaseProvider.Equals(DbProvider.SqlServer) ? "UseSqlServer" : "UseSqlite";
             var globalNodes = new List<SyntaxNode>
             {
@@ -44,6 +47,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
                 SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddSingleton<IEmailSender<{blazorIdentityModel.UserClassName}>, IdentityNoOpEmailSender>();\n"))
             };
 
+            globalNodes = globalNodes.Except(existingMembers).Distinct().ToList();
             return globalNodes;
         }
 

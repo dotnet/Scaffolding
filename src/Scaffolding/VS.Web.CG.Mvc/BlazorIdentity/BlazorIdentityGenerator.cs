@@ -411,7 +411,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             (string oldBuilderVal, string newBuilderVal) = builderIdentifier.Value;
             var serverComponentNode = newRoot.Members.FirstOrDefault(x => x.ToString().Contains("Services.AddRazorComponents()"));
-            newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel));
+            newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel, newRoot.Members.ToList()));
             //replace root node with all the updates.
             docEditor.ReplaceNode(docRoot, newRoot);
             //write to Program.cs file

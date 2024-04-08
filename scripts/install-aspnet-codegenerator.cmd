@@ -17,6 +17,6 @@ call rd /Q /S microsoft.visualstudio.web.codegeneration.entityframeworkcore
 call rd /Q /S microsoft.visualstudio.web.codegeneration.templating
 call rd /Q /S microsoft.visualstudio.web.codegeneration.utils
 call rd /Q /S microsoft.visualstudio.web.codegenerators.mvc
-call dotnet tool install -g dotnet-aspnet-codegenerator --add-source "C:\Users\decho\other scaffolding\scaffolding\artifacts\packages\Debug\Shipping" --version %VERSION%
+call dotnet tool install -g dotnet-aspnet-codegenerator --add-source "" --version %VERSION%
 call cd %SRC_DIR%
 call taskkill /f /im dotnet.exe

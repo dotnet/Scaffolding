@@ -11,6 +11,80 @@
               "LeadingTrivia": {
                 "Newline": true
               }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddCascadingAuthenticationState()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddScoped<IdentityUserAccessor>()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddScoped<IdentityRedirectManager>()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "MultiLineBlock": [
+                "WebApplication.CreateBuilder.Services.AddAuthentication(options =>",
+                "    {",
+                "        options.DefaultScheme = IdentityConstants.ApplicationScheme;",
+                "        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;",
+                "    })",
+                "    .AddIdentityCookies()"
+              ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\") ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\");"
+            },
+            {
+              "InsertAfter": "builder.Configuration.GetConnectionString",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContext<ApplicationDbContext>(options => options.{0}(connectionString))\"",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "MultiLineBlock": [
+                "builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)",
+                "    .AddEntityFrameworkStores<ApplicationDbContext>()",
+                "    .AddSignInManager()",
+                "    .AddDefaultTokenProviders()"
+              ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
             }
           ]
         }

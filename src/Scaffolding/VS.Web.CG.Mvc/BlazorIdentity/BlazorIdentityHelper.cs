@@ -1,18 +1,24 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.Shared;
 using System.Linq;
 using System;
 using System.IO;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 {
     internal static class BlazorIdentityHelper
     {
+        internal const string ApplicationDbContext = nameof(ApplicationDbContext);
+        internal const string ApplicationUser = nameof(ApplicationUser);
+        internal const string OptionsUseConnectionString = "options.{0}(connectionString)";
+        internal const string GetConnectionString = nameof(GetConnectionString);
+        internal const string UseSqlite = nameof(UseSqlite);
+        internal const string UseSqlServer = nameof(UseSqlServer);
         internal static string GetFormattedRelativeIdentityFile(string fullFileName)
         {
             string identifier = "BlazorIdentity\\";
@@ -27,24 +33,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             return string.Empty;
         }
 
-        internal static IList<SyntaxNode> GetBlazorIdentityGlobalNodes(string builderVarName, BlazorIdentityModel blazorIdentityModel)
+        internal static string EditIdentityStrings(string stringToModify, string dbContextClassName, string identityUserClassName, DbProvider databaseProvider)
         {
-            var dbProviderString = blazorIdentityModel.DatabaseProvider.Equals(DbProvider.SqlServer) ? "UseSqlServer" : "UseSqlite";
-            var globalNodes = new List<SyntaxNode>
+            if (string.IsNullOrEmpty(stringToModify))
             {
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddCascadingAuthenticationState();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddScoped<IdentityUserAccessor>();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddScoped<IdentityRedirectManager>();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(($"\n{builderVarName}.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement(
-                    ($"\n{builderVarName}.Services.AddAuthentication(options =>\r\n{{\r\n    options.DefaultScheme = IdentityConstants.ApplicationScheme;\r\n    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;\r\n}})\r\n.AddIdentityCookies();\n"))),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\nvar connectionString = {builderVarName}.Configuration.GetConnectionString(\"DefaultConnection\") ?? throw new InvalidOperationException(\"Connection string 'DefaultConnection' not found.\");\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddDbContext<{blazorIdentityModel.DbContextName}>(options => \n    options.{dbProviderString}(connectionString));\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddIdentityCore<{blazorIdentityModel.UserClassName}>(options => options.SignIn.RequireConfirmedAccount = true)\n    .AddEntityFrameworkStores<{blazorIdentityModel.DbContextName}>()\n    .AddSignInManager()\n    .AddDefaultTokenProviders();\n")),
-                SyntaxFactory.GlobalStatement(SyntaxFactory.ParseStatement($"\n{builderVarName}.Services.AddSingleton<IEmailSender<{blazorIdentityModel.UserClassName}>, IdentityNoOpEmailSender>();\n"))
-            };
+                return string.Empty;
+            }
 
-            return globalNodes;
+            string modifiedString = stringToModify;
+            if (stringToModify.Contains(ApplicationDbContext))
+            {
+                modifiedString = modifiedString.Replace(ApplicationDbContext, dbContextClassName);
+            }
+            if (stringToModify.Contains(ApplicationUser))
+            {
+                modifiedString = modifiedString.Replace(ApplicationUser, identityUserClassName);
+            }
+            if (stringToModify.Contains(OptionsUseConnectionString))
+            {
+                modifiedString = modifiedString.Replace("options.{0}",
+                    databaseProvider.Equals(DbProvider.SQLite) ? $"options.{UseSqlite}" : $"options.{UseSqlServer}");
+            }
+            if (stringToModify.Contains(GetConnectionString))
+            {
+                modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
+                modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}Connection'");
+            }
+
+            return modifiedString;
         }
 
         internal static IEnumerable<string> GetGeneralT4Files(IFileSystem fileSystem, IEnumerable<string> templateFolders)
@@ -73,6 +89,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             }
 
             return null;
+        }
+
+        internal static CodeSnippet[] ApplyIdentityChanges(CodeSnippet[] filteredChanges, string dbContextClassName, string identityUserClassName, DbProvider databaseProvider)
+        {
+            foreach (var codeChange in filteredChanges)
+            {
+                codeChange.LeadingTrivia = codeChange.LeadingTrivia ?? new Formatting();
+                codeChange.Block = EditIdentityStrings(codeChange.Block, dbContextClassName, identityUserClassName, databaseProvider);
+            }
+
+            return filteredChanges;
         }
     }
 }

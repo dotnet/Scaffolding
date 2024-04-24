@@ -66,22 +66,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            ComponentDiscovery componentDiscovery = new(_dotnetToolService);
-            var componentPicked = componentDiscovery.Discover(context);
-
-            if (componentDiscovery.State.IsNavigation())
-            {
-                return new ValueTask<FlowStepResult>(new FlowStepResult { State = componentDiscovery.State });
-            }
-
-            if (componentPicked is not null)
-            {
-                SelectComponent(context, componentPicked);
-                return new ValueTask<FlowStepResult>(FlowStepResult.Success);
-            }
-
-            AnsiConsole.WriteLine("No projects found in current directory");
-            return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
+            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)

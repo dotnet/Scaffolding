@@ -24,7 +24,8 @@ public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
     {
         var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
-            { FlowContextProperties.RemainingArgs, remainingArgs }
+            { FlowContextProperties.RemainingArgs, remainingArgs },
+            { FlowContextProperties.CommandSettings, settings }
         };
 
         IFlow? flow = null;
@@ -33,7 +34,6 @@ public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         try
         {
             flow = FlowProvider.GetFlow(flowSteps, properties, nonInteractive, showSelectedOptions);
-
             return await flow.RunAsync(CancellationToken.None);
         }
         catch (Exception) {}

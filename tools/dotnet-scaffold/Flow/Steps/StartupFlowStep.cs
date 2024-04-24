@@ -1,14 +1,11 @@
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
-using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
@@ -24,18 +21,27 @@ public class StartupFlowStep : IFlowStep
 {
     private readonly IAppSettings _appSettings;
     private readonly IEnvironmentService _environmentService;
+    private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly IHostService _hostService;
     private readonly ILogger _logger;
-    private readonly string _dotnetScaffolderFolder = ".dotnet-scaffold";
-    private readonly string _manifestFile = "manifest.json";
-    public StartupFlowStep(IAppSettings appSettings, IEnvironmentService environmentService, IFileSystem fileSystem, IHostService hostService, ILogger logger)
+    private readonly bool _initializeMsbuild;
+    public StartupFlowStep(
+        IAppSettings appSettings,
+        IDotNetToolService dotnetToolService,
+        IEnvironmentService environmentService,
+        IFileSystem fileSystem,
+        IHostService hostService,
+        ILogger logger,
+        bool initializeMsbuild = true)
     {
         _appSettings = appSettings;
+        _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _hostService = hostService;
         _logger = logger;
+        _initializeMsbuild = initializeMsbuild;
     }
 
     public string Id => nameof(StartupFlowStep);
@@ -61,29 +67,20 @@ public class StartupFlowStep : IFlowStep
                 statusContext.Refresh();
                 // check for first initialization
                 statusContext.Status = "Checking user files!";
-                string userPath = _environmentService.LocalUserFolderPath;
-                string dotnetScaffoldFolder = Path.Combine(userPath, _dotnetScaffolderFolder);
-                if (!_fileSystem.DirectoryExists(dotnetScaffoldFolder))
+                if (_initializeMsbuild)
                 {
-                    _fileSystem.CreateDirectory(dotnetScaffoldFolder);
-                }
-                //.dotnet-scaffold folder should now exist
-                var manifestFileFullPath = Path.Combine(dotnetScaffoldFolder, _manifestFile);
-                if (!_fileSystem.FileExists(dotnetScaffoldFolder))
-                {
-                    _fileSystem.WriteAllText(manifestFileFullPath, string.Empty);
+                    var workspaceSettings = new WorkspaceSettings();
+                    _appSettings.AddSettings("workspace", workspaceSettings);
+
+                    statusContext.Status = "Initializing msbuild!";
+                    new MsBuildInitializer(_logger).Initialize();
+                    statusContext.Status = "DONE\n";
                 }
 
-                var workspaceSettings = new WorkspaceSettings();
-                _appSettings.AddSettings("workspace", workspaceSettings);
-
-                statusContext.Status = "Initializing msbuild!";
-                new MsBuildInitializer(_logger).Initialize();
-
-                statusContext.Status = "Gathering environment variables";
+                statusContext.Status = "Gathering environment variables!";
                 var environmentVariableProvider = new EnvironmentVariablesStartup(_hostService, _environmentService, _appSettings);
-                await environmentVariableProvider.StartupAsync(cancellationToken);
-
+                await environmentVariableProvider.StartupAsync();
+                statusContext.Status = "DONE\n";
                 statusContext.Status = "Parsing args!";
                 var remainingArgs = context.GetRemainingArgs();
                 if (remainingArgs != null)
@@ -94,6 +91,8 @@ public class StartupFlowStep : IFlowStep
                         SelectCommandArgs(context, argDict);
                     }
                 }
+
+                statusContext.Status = "DONE\n";
             });
 
         //read manifest file and update the manifest context var, will use this after project picker.
@@ -107,6 +106,17 @@ public class StartupFlowStep : IFlowStep
             context.Set(new FlowProperty(
                 FlowContextProperties.CommandArgs,
                 args,
+                isVisible: false));
+        }
+    }
+
+    private void SelectComponents(IFlowContext context, IList<DotNetToolInfo>? components)
+    {
+        if (components != null)
+        {
+            context.Set(new FlowProperty(
+                FlowContextProperties.DotnetToolComponents,
+                components,
                 isVisible: false));
         }
     }

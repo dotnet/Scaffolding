@@ -12,11 +12,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 {
     internal static class CommandHelper
     {
-    }
 
-    public class ProjectScaffolderSettings : CommandSettings
-    {
-        [CommandOption("--project <PROJECT>")]
-        public string Project { get; set; } = default!;
     }
 }

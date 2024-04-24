@@ -17,5 +17,5 @@ public interface IHostService
     /// Returns host specific environment variables to be set in current process.
     /// </summary>
     /// <returns></returns>
-    ValueTask<IDictionary<string, string>> GetEnvironmentVariablesAsync(CancellationToken cancellationToken);
+    ValueTask<IDictionary<string, string>> GetEnvironmentVariablesAsync();
 }

@@ -39,11 +39,14 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 
     public class Settings : CommandSettings
     {
-        [CommandArgument(0, "[PROJECT]")]
-        public string? Project { get; init; }
-
-        [CommandArgument(1, "[COMPONENT]")]
+        [CommandArgument(0, "[COMPONENT]")]
         public string? ComponentName { get; set; }
+
+        [CommandArgument(1, "[COMMAND NAME]")]
+        public string? CommandName { get; set; }
+
+        [CommandOption("--project")]
+        public string? Project { get; init; }
 
         [CommandOption("--non-interactive")]
         public bool NonInteractive { get; init; }
@@ -54,11 +57,11 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         //Debugger.Launch();
         IEnumerable<IFlowStep> flowSteps =
         [
-            new StartupFlowStep(_appSettings, _environmentService, _fileSystem, _hostService, _logger),
+            new StartupFlowStep(_appSettings, _dotnetToolService, _environmentService, _fileSystem, _hostService, _logger),
             new SourceProjectFlowStep(_appSettings, _environmentService, _fileSystem, _logger),
-            new ComponentFlowStep(_logger, _dotnetToolService),
-            new CommandExecuteFlowStep(_logger, _dotnetToolService),
-            new ComponentExecuteFlowStep()
+            //new ComponentFlowStep(_logger, _dotnetToolService),
+            new CommandPickerFlowStep(_logger, _dotnetToolService),
+            new CommandExecuteFlowStep()
         ];
 
         return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive);

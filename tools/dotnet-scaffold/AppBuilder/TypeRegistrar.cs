@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
 using System;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AppBuilder;

@@ -14,20 +14,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             AnsiConsole.MarkupLine("[green]Executing area command...[/]");
             if (string.IsNullOrEmpty(settings.Name))
             {
-                AnsiConsole.WriteException(new ArgumentNullException("--name parameter required for area"));
-            }
-            else
-            {
-                EnsureFolderLayout(settings.Name);
-                return 0;
+                AnsiConsole.WriteException(new ArgumentNullException("'--name' parameter required for area"));
             }
 
-            return -1;
+            if (string.IsNullOrEmpty(settings.Project))
+            {
+                AnsiConsole.WriteException(new ArgumentNullException("'--project' parameter required for area"));
+            }
+
+            var projectDirectory = Path.GetDirectoryName(settings.Project);
+
+            EnsureFolderLayout(projectDirectory, settings.Name);
+            return 0;;
         }
 
-        private void EnsureFolderLayout(string areaName)
+        private void EnsureFolderLayout(string? basePath, string areaName)
         {
-            var areaBasePath = Path.Combine("blehTODO", "Areas");
+            var currDirectory = basePath ?? Environment.CurrentDirectory;
+            var areaBasePath = Path.Combine(currDirectory, "Areas");
             if (!Directory.Exists(areaBasePath))
             {
                 Directory.CreateDirectory(areaBasePath);
@@ -57,8 +61,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             "Views"
         ];
 
-        public class AreaSettings : ProjectScaffolderSettings
+        public class AreaSettings : CommandSettings
         {
+            [CommandOption("--project <PROJECT>")]
+            public string Project { get; set; } = default!;
+
             [CommandOption("--name <NAME>")]
             public string Name { get; set; } = default!;
         }

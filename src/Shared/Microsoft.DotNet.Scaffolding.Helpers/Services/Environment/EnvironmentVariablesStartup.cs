@@ -23,9 +23,9 @@ public class EnvironmentVariablesStartup
     }
 
     /// <inheritdoc />
-    public async ValueTask<bool> StartupAsync(CancellationToken cancellationToken)
+    public async ValueTask<bool> StartupAsync()
     {
-        var environmentVariables = await _hostService.GetEnvironmentVariablesAsync(cancellationToken);
+        var environmentVariables = await _hostService.GetEnvironmentVariablesAsync();
 
         SetEnvironmentVariables(environmentVariables);
 

@@ -1,7 +1,6 @@
-using Microsoft.Build.Locator;
-
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Locator;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
@@ -32,8 +31,12 @@ public class MsBuildInitializer
             return string.Empty;
         }
 
-        // Must register instance rather than just path so everything gets set correctly for .NET SDK instances
-        MSBuildLocator.RegisterInstance(instance);
+        if (!MSBuildLocator.IsRegistered)
+        {
+            // Must register instance rather than just path so everything gets set correctly for .NET SDK instances
+            MSBuildLocator.RegisterInstance(instance);
+
+        }
 
         var resolver = new AssemblyDependencyResolver(msbuildPath);
 

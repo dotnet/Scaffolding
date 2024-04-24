@@ -16,13 +16,58 @@
   <Import Project="$(RepoRoot)eng\Versions.Scaffold.AspNet.props" />
 
   <ItemGroup>
+    <PackageReference Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
     <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Pack="true" Include="Templates\MinimalApi\*.tt" PackagePath="Templates\MinimalApi\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Commands\MinimalApi\minimalApiChanges.json">
+      <PackagePath>lib\net8.0\</PackagePath>
+      <Pack>true</Pack>
+    </EmbeddedResource>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Templates\MinimalApi\MinimalApiEf.tt">
+      <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\MinimalApi\MinimalApi.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MinimalApi.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Templates\MinimalApi\MinimalApiEf.cs">
+      <DependentUpon>MinimalApiEf.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\MinimalApi\MinimalApi.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MinimalApi.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Commands\CodeConfigs\" />
   </ItemGroup>
 
 </Project>

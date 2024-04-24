@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions
+namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn
 {
     public static class ClassDeclarationSyntaxExtensions
     {
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions
             }
 
             return classNode.BaseList?.Types.Any(
-                x => string.Equals(x.Type.ToString().GetTypeNameFromFullType(), baseTypeSimpleName, StringComparison.Ordinal)) == true;
+                x => string.Equals(x.Type.ToString(), baseTypeSimpleName, StringComparison.Ordinal)) == true;
         }
 
         public static IEnumerable<MethodDeclarationSyntax> GetPublicMethods(this ClassDeclarationSyntax classNode)
@@ -34,6 +34,13 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions
                 .Where(x =>
                     x.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PublicKeyword) &&
                     !x.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.StaticKeyword))));
+        }
+
+        public static bool IsStaticClass(this ClassDeclarationSyntax? classDeclaration)
+        {
+            return classDeclaration is not null ?
+                classDeclaration.Modifiers.Any(x => x.Text.Equals(SyntaxFactory.Token(SyntaxKind.StaticKeyword).Text)) :
+                false;
         }
     }
 }

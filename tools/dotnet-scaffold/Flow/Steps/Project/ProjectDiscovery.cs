@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project
                     return projects;
                 });
 
-            return Prompt(context, $"Pick project ({projects.Count})", projects);
+            return Prompt(context, $"[lightseagreen]Pick project ({projects.Count}): [/]", projects);
         }
 
         internal IList<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)

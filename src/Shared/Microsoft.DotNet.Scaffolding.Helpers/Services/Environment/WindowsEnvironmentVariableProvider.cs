@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
-using Microsoft.Build.Locator;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Environment;
 public class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
@@ -63,11 +62,11 @@ public class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
 
     private (string? InstallPath, string? MsBuildPath, Version? Version) GetLatestVisualStudio()
     {
-        var vsInstances = MSBuildLocator.QueryVisualStudioInstances();
+        //var vsInstances = MSBuildLocator.QueryVisualStudioInstances();
         string? latestPath = null;
         string? latestMsBuildPath = null;
         Version? latestVersion = null;
-        foreach (var instance in vsInstances)
+/*        foreach (var instance in vsInstances)
         {
             if (latestVersion is null || instance.Version > latestVersion)
             {
@@ -75,7 +74,7 @@ public class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
                 latestMsBuildPath = instance.MSBuildPath;
                 latestVersion = instance.Version;
             }
-        }
+        }*/
 
         return (latestPath, latestMsBuildPath, latestVersion);
     }

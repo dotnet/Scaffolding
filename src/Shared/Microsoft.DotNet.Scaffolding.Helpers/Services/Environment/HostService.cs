@@ -23,7 +23,7 @@ public class HostService : IHostService
     }
 
     /// <inheritdoc />
-    public async ValueTask<IDictionary<string, string>> GetEnvironmentVariablesAsync(CancellationToken cancellationToken)
+    public async ValueTask<IDictionary<string, string>> GetEnvironmentVariablesAsync()
     {
         if (_variables is null)
         {

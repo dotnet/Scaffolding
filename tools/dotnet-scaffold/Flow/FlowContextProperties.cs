@@ -21,6 +21,7 @@ internal static class FlowContextProperties
     public const string ComponentName = nameof(ComponentName);
     public const string ComponentObj = nameof(ComponentObj);
     public const string CommandName = nameof(CommandName);
+    public const string CommandObj = nameof(CommandObj);
     public const string ComponentNameDisplay = "Component";
     //of type Microsoft.DotNet.Scaffolding.Helpers.Services.IProjectService
     public const string SourceProject = nameof(SourceProject);
@@ -28,4 +29,5 @@ internal static class FlowContextProperties
     public const string CodeService = nameof(CodeService);
     public const string TargetFrameworkName = nameof(TargetFrameworkName);
     public const string RemainingArgs = nameof(RemainingArgs);
+    public const string DotnetToolComponents = nameof(DotnetToolComponents);
 }

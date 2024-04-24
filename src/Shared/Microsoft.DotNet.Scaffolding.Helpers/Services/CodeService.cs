@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
-  
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
+
+
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 /// <summary>
@@ -17,6 +21,7 @@ public class CodeService : ICodeService, IDisposable
 {
     private readonly ILogger _logger;
     private MSBuildWorkspace? _workspace;
+    private Compilation? _compilation;
     private readonly IAppSettings _settings;
 
     public CodeService(IAppSettings settings, ILogger logger)
@@ -76,9 +81,7 @@ public class CodeService : ICodeService, IDisposable
             return;
         }
 
-        Project? project = null;
-
-        //var project = msbuildWorkspace.CurrentSolution.GetProject(projectPath);
+        Project? project = msbuildWorkspace.CurrentSolution.GetProject(projectPath);
         if (project is not null)
         {
             return;
@@ -98,7 +101,7 @@ public class CodeService : ICodeService, IDisposable
     {
         var workspace = _workspace;
         _workspace = null;
-
+        _compilation = null;
         if (workspace is not null)
         {
             workspace.WorkspaceFailed -= OnWorkspaceFailed;
@@ -124,5 +127,69 @@ public class CodeService : ICodeService, IDisposable
     public void Dispose()
     {
         UnloadWorkspace();
+    }
+
+    public async Task<IList<ISymbol>> GetAllClassSymbolsAsync()
+    {
+        List<ISymbol> classSymbols = [];
+        if (_compilation is null)
+        {
+            var workspace = await GetWorkspaceAsync();
+            var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
+            if (project is not null)
+            {
+                _compilation = await project.GetCompilationAsync();
+            }
+        }
+
+        var compilationClassSymbols = _compilation?.SyntaxTrees.SelectMany(tree =>
+        {
+            var model = _compilation.GetSemanticModel(tree);
+            var allNodes = tree.GetRoot().DescendantNodes();
+            return tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().Select(classSyntax =>
+            {
+                var classSymbol = model.GetDeclaredSymbol(classSyntax);
+                return classSymbol;
+            });
+        }).Append(_compilation.GetEntryPoint(CancellationToken.None)?.ContainingType).ToList();
+
+        compilationClassSymbols?.ForEach(x =>
+        {
+            if (x is not null)
+            {
+                classSymbols.Add(x);
+            }
+        });
+
+        return classSymbols;
+    }
+
+    public async Task<IList<Document>> GetAllDocumentsAsync()
+    {
+        var workspace = await GetWorkspaceAsync();
+        var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
+        if (project is not null)
+        {
+            return project.Documents.ToList();
+        }
+
+        return new List<Document>();
+    }
+
+    public async Task<Document?> GetDocumentAsync(string? documentName)
+    {
+        if (string.IsNullOrWhiteSpace(documentName))
+        {
+            return null;
+        }
+
+        var workspace = await GetWorkspaceAsync();
+        var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
+        if (project is not null)
+        {
+            return project.Documents.FirstOrDefault(x => x.Name.EndsWith(documentName));
+        }
+
+        return null;
     }
 }

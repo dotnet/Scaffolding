@@ -131,5 +131,47 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
 
             return arguments;
         }
+
+        /// <summary>
+        /// Use enumeration to get file name if they already exist on disk.
+        /// For example, if File.cs exists, try File1.cs and so forth.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static string GetUniqueFilePath(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                return filePath;
+            }
+
+            var directory = Path.GetDirectoryName(filePath);
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
+            var fileExtension = Path.GetExtension(filePath);
+
+            if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(fileNameWithoutExtension))
+            {
+                return filePath;
+            }
+
+            int count = 1;
+            string newFilePath;
+            do
+            {
+                newFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}{count}{fileExtension}");
+                count++;
+            } while (File.Exists(newFilePath));
+
+            return newFilePath;
+        }
+
+        public static string EnsureCsExtension(string filePath)
+        {
+            if (!filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            {
+                filePath += ".cs";
+            }
+            return filePath;
+        }
     }
 }

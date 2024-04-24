@@ -29,5 +29,9 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task ReloadWorkspaceAsync(string? projectPath);
+
+        Task <IList<ISymbol>> GetAllClassSymbolsAsync();
+        Task<IList<Document>> GetAllDocumentsAsync();
+        Task<Document?> GetDocumentAsync(string? documentName);
     }
 }

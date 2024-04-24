@@ -1,156 +1,99 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
     internal class CommandExecuteFlowStep : IFlowStep
     {
-        private readonly ILogger _logger;
-        private readonly IDotNetToolService _dotnetToolService;
-        public CommandExecuteFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
-        {
-            _logger = logger;
-            _dotnetToolService = dotnetToolService;
-        }
-
         public string Id => nameof(CommandExecuteFlowStep);
 
-        public string DisplayName => "Command Name";
+        public string DisplayName => "Command Execute";
 
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            context.Unset(FlowContextProperties.CommandName);
-            return new ValueTask();
+            return ValueTask.CompletedTask;
         }
 
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            var commandName = string.Empty;
-            var componentName = context.GetComponentObj()?.Command;
-            CommandInfo? commandInfo;
-            if (string.IsNullOrEmpty(commandName))
-            {
-                if (string.IsNullOrEmpty(componentName))
-                {
-                    throw new Exception();
-                }
-
-                CommandDiscovery commandDiscovery = new();
-                commandInfo = commandDiscovery.Discover(context);
-                if (commandDiscovery.State.IsNavigation())
-                {
-                    return new ValueTask<FlowStepResult>(new FlowStepResult { State = commandDiscovery.State });
-                }
-            }
-            else
-            {
-                var allCommands = context.GetCommandInfos();
-                commandInfo = allCommands?.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (commandInfo is null)
-            {
-                throw new Exception();
-            }
-            else
-            {
-                commandName = commandInfo.Name;
-                SelectCommandName(context, commandName);
-            }
-
-            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
-            if (commandFirstStep is null)
-            {
-                throw new Exception("asdf");
-            }
-
-            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
+            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            var commandName = context.GetCommandName();
-            var componentName = context.GetComponentObj();
-            if (string.IsNullOrEmpty(commandName))
+            //need all 3 things, throw if not found
+            var componentName = context.GetComponentObj()?.Command;
+            var commandObj = context.GetCommandObj();
+            if (commandObj is null)
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("A command name for the given scaffolding component is needed!"));
+                throw new System.Exception();
             }
 
-            var allCommands = context.GetCommandInfos();
-            var commandInfo = allCommands?.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
-            if (commandInfo is null)
+            var commandName = commandObj.Name;
+            var parameterValues = GetAllParameterValues(context, commandObj);
+            if (!string.IsNullOrEmpty(componentName) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandName))
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Command '{commandName}' not found in component '{componentName}'!"));
-            }
-            else
-            {
-                SelectCommandName(context, commandName);
-            }
-
-            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
-            if (commandFirstStep is null)
-            {
-                throw new Exception("asdf");
-            }
-            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
-        }
-
-        internal ParameterBasedFlowStep? GetFirstParameterBasedStep(CommandInfo commandInfo)
-        {
-            ParameterBasedFlowStep? firstParameterStep = null;
-            if (commandInfo.Parameters != null && commandInfo.Parameters.Length != 0)
-            {
-                firstParameterStep = BuildParameterFlowSteps([.. commandInfo.Parameters]);
-            }
-
-            return firstParameterStep;
-        }
-
-        internal ParameterBasedFlowStep? BuildParameterFlowSteps(List<Parameter> parameters)
-        {
-            ParameterBasedFlowStep? firstStep = null;
-            ParameterBasedFlowStep? previousStep = null;
-
-            foreach (var parameter in parameters)
-            {
-                var step = new ParameterBasedFlowStep(parameter, null);
-
-                if (firstStep == null)
+                var componentExecutionString = $"{componentName} {commandName} {string.Join(" ", parameterValues)}";
+                parameterValues.Insert(0, commandName);
+                string? stdOut = null, stdErr = null;
+                int? exitCode = null;
+                AnsiConsole.Status().WithSpinner()
+                .Start($"Executing '{componentExecutionString}'", statusContext =>
                 {
-                    // This is the first step
-                    firstStep = step;
-                }
-                else
+                    var cliRunner = DotnetCliRunner.Create(componentName, parameterValues);
+                    exitCode = cliRunner.ExecuteAndCaptureOutput(out stdOut, out stdErr);
+                });
+
+                if (exitCode != null && (!string.IsNullOrEmpty(stdOut) || string.IsNullOrEmpty(stdErr)))
                 {
-                    if (previousStep != null)
+                    AnsiConsole.Console.WriteLine($"\nCommand executed : '{componentExecutionString}'");
+                    AnsiConsole.Console.WriteLine($"Command exit code - {exitCode}");
+                    if (exitCode == 0)
                     {
-                        // Connect the previous step to this step
-                        previousStep.NextStep = step;
+                        AnsiConsole.Console.MarkupLine($"Command stdout :\n[green]{stdOut}[/]");
                     }
-                }
+                    else
+                    {
+                        AnsiConsole.Console.MarkupLine($"Command stderr :\n[red]{stdErr}[/]");
+                    }
 
-                previousStep = step;
+                    return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+                }
             }
 
-            return firstStep;
+            return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
         }
 
-        private void SelectCommandName(IFlowContext context, string commandName)
+        private List<string> GetAllParameterValues(IFlowContext context, CommandInfo commandInfo)
         {
-            context.Set(new FlowProperty(
-                FlowContextProperties.CommandName,
-                commandName,
-                "Command Name",
-                isVisible: true));
+            var allParameters = commandInfo.Parameters;
+            var sourceProjectPath = context.GetSourceProjectPath();
+            var parameterValues = new List<string>();
+            if (!string.IsNullOrEmpty(sourceProjectPath))
+            {
+                parameterValues.Add("--project");
+                parameterValues.Add(sourceProjectPath);
+            }
+
+            foreach (var parameter in allParameters)
+            {
+                var parameterValue = context.GetValue<string>(parameter.Name);
+                if (!string.IsNullOrEmpty(parameterValue))
+                {
+                    parameterValues.Add(parameter.Name);
+                    parameterValues.Add(parameterValue);
+                }
+            }
+
+            return parameterValues;
         }
     }
 }

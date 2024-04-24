@@ -128,7 +128,7 @@ internal class SourceProjectFlowStep : IFlowStep
                 isVisible: true));
             _appSettings.Workspace().InputPath = projectPath;
 
-            IProjectService projectService = AnsiConsole
+/*            IProjectService projectService = AnsiConsole
                 .Status()
                 .WithSpinner()
                 .Start("Gathering project information!", statusContext =>
@@ -139,7 +139,7 @@ internal class SourceProjectFlowStep : IFlowStep
             context.Set(new FlowProperty(
                     FlowContextProperties.SourceProject,
                     projectService,
-                    isVisible: false));
+                    isVisible: false));*/
 
             ICodeService codeService = new CodeService(_appSettings, _logger);
             context.Set(new FlowProperty(

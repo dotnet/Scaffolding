@@ -15,5 +15,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         public string DisplayName { get; set; } = default!;
         public string? Description { get; set; }
         public Parameter[] Parameters { get; set; } = default!;
+        //add a --project option
+        public bool AddProjectOption { get; set; }
     }
 }

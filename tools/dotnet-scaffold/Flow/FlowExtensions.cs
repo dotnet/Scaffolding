@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
             return context.GetValueOrThrow<DotNetToolInfo>(FlowContextProperties.ComponentObj, throwIfEmpty);
         }
 
-        public static string? GetCommandName(this IFlowContext context, bool throwIfEmpty = false)
+        public static CommandInfo? GetCommandObj(this IFlowContext context, bool throwIfEmpty = false)
         {
-            return context.GetValueOrThrow<string>(FlowContextProperties.CommandName, throwIfEmpty);
+            return context.GetValueOrThrow<CommandInfo>(FlowContextProperties.CommandObj, throwIfEmpty);
         }
 
         public static List<string>? GetCommandArgValues(this IFlowContext context, bool throwIfEmpty = false)
@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
             return context.GetValueOrThrow<List<string>>(FlowContextProperties.CommandArgValues, throwIfEmpty);
         }
 
-        public static List<CommandInfo>? GetCommandInfos(this IFlowContext context, bool throwIfEmpty = false)
+        public static IList<KeyValuePair<string, CommandInfo>>? GetCommandInfos(this IFlowContext context, bool throwIfEmpty = false)
         {
-            return context.GetValueOrThrow<List<CommandInfo>>(FlowContextProperties.CommandInfos, throwIfEmpty);
+            return context.GetValueOrThrow<IList<KeyValuePair<string, CommandInfo>>>(FlowContextProperties.CommandInfos, throwIfEmpty);
         }
 
         public static string? GetSourceProjectPath(this IFlowContext context, bool throwIfEmpty = false)

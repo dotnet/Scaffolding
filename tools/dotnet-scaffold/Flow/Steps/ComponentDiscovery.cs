@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public DotNetToolInfo? Discover(IFlowContext context)
         {
-            return Prompt(context, "Pick a scaffolding component ('dotnet tool')", _dotnetToolService.DotNetTools);
+            return Prompt(context, "Pick a scaffolding component ('dotnet tool')", _dotnetToolService.GlobalDotNetTools);
         }
 
         private DotNetToolInfo? Prompt(IFlowContext context, string title, IList<DotNetToolInfo> components)

@@ -10,6 +10,7 @@
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />

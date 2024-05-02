@@ -1,17 +1,29 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Scaffolding tool for .NET projects. Contains the dotnet-scaffold command used for generating areas, views, controllers, identity pages etc. </Description>
+    <Description>Scaffolding tool for .NET projects. </Description>
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
+    <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />
+
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\tools\dotnet-aspnet-codegenerator\dotnet-aspnet-codegenerator.csproj" />
-    <ProjectReference Include="$(RepoRoot)\tools\dotnet-msidentity\dotnet-msidentity.csproj" />
-    <PackageReference Include="System.Commandline"  Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
+    <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
+  </ItemGroup>
+
 </Project>

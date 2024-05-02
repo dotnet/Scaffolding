@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
                 }
             }
 
-            return commands ?? new List<CommandInfo>();
+            return commands ?? [];
         }
 
         public DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null)
@@ -70,13 +70,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             {
                 return matchingTools.FirstOrDefault(x => x.Version.Equals(version));
             }
-        }
-
-        public CommandInfo? GetCommandInfo(string dotnetToolName, string commandName)
-        {
-            var allCommands = GetCommands(dotnetToolName);
-            var command = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
-            return command;
         }
 
         public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null)

@@ -1,5 +1,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;

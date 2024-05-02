@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
-        private IList<Tuple<string, string>> GetDocumentNames(List<Document> documents)
+        private List<Tuple<string, string>> GetDocumentNames(List<Document> documents)
         {
             List<Tuple<string, string>> classNames = [];
             if (documents != null && documents.Count != 0)
@@ -162,20 +162,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
-        private static IList<Tuple<string, string>>? _dbProviders;
-        private static IList<Tuple<string, string>> DbProviders
+        private static List<Tuple<string, string>>? _dbProviders;
+        private static List<Tuple<string, string>> DbProviders
         {
             get
             {
                 if (_dbProviders == null)
                 {
-                    _dbProviders = new List<Tuple<string, string>>()
-                    {
+                    _dbProviders =
+                    [
                         Tuple.Create("SQL Server", "sqlserver"),
                         Tuple.Create("SQLite", "sqlite"),
                         Tuple.Create("PostgreSQL", "postgres"),
                         Tuple.Create("Cosmos DB", "cosmos")
-                    };
+                    ];
                 }
 
                 return _dbProviders;

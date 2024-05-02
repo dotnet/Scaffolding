@@ -16,8 +16,6 @@ public class EnvironmentService : IEnvironmentService
         _fileSystem = fileSystem;
     }
 
-    public string DotnetScaffolderFolder => ".dotnet-scaffold";
-    public string ManifestFile => "manifest.json";
     private const string DOTNET_RUNNING_IN_CONTAINER = nameof(DOTNET_RUNNING_IN_CONTAINER);
 
     private static string? _nugetCache;
@@ -141,24 +139,6 @@ public class EnvironmentService : IEnvironmentService
     public string ExpandEnvironmentVariables(string name)
     {
         return System.Environment.ExpandEnvironmentVariables(name);
-    }
-
-    public string InitializeAndGetManifestFile()
-    {
-        string userPath = LocalUserFolderPath;
-        string dotnetScaffoldFolder = Path.Combine(userPath, DotnetScaffolderFolder);
-        if (!_fileSystem.DirectoryExists(dotnetScaffoldFolder))
-        {
-            _fileSystem.CreateDirectory(dotnetScaffoldFolder);
-        }
-        //.dotnet-scaffold folder should now exist
-        var manifestFileFullPath = Path.Combine(dotnetScaffoldFolder, ManifestFile);
-        if (!_fileSystem.FileExists(dotnetScaffoldFolder))
-        {
-            _fileSystem.WriteAllText(manifestFileFullPath, string.Empty);
-        }
-
-        return manifestFileFullPath;
     }
 }
 

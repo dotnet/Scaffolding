@@ -61,6 +61,7 @@ public class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
         return (latest.InstallPath, latest.MsBuildPath, latest.Version?.Major);
     }
 
+    //TODOFIX
     private (string? InstallPath, string? MsBuildPath, Version? Version) GetLatestVisualStudio()
     {
         //var vsInstances = MSBuildLocator.QueryVisualStudioInstances();

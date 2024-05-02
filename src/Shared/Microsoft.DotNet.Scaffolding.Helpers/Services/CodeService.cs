@@ -1,13 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
 
-
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
-
 /// <summary>
 /// Service that manages Roslyn workspace. It ensures that all projects of interest are loaded in the workspace and are up to date.
 ///     - If user's input path is project we also always open it since we expect some contracts might

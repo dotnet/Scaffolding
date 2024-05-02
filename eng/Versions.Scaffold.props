@@ -20,9 +20,4 @@
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <FileSignInfo Include = "Spectre.Console.Cli.dll" CertificateName="3PartySHA2"/>
-    <FileSignInfo Include = "Spectre.Console.dll" CertificateName="3PartySHA2"/>
-  </ItemGroup>
 </Project>

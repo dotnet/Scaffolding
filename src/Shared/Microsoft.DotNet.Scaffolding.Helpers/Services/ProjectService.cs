@@ -29,14 +29,4 @@ public class ProjectService : IProjectService, IDisposable
             ProjectCollection.GlobalProjectCollection.UnloadProject(Project.Xml);
         }
     }
-
-    public IList<string> GetItemValues(string itemName)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IList<string> GetPropertyValues(string propertyName)
-    {
-        throw new NotImplementedException();
-    }
 }

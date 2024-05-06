@@ -7,7 +7,5 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
     public interface IProjectService
     {
         Project Project { get; }
-        IList<string> GetPropertyValues(string propertyName);
-        IList<string> GetItemValues(string itemName);
     }
 }

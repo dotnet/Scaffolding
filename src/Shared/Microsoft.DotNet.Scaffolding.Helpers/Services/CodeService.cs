@@ -88,9 +88,9 @@ public class CodeService : ICodeService, IDisposable
         {
             await msbuildWorkspace.OpenProjectAsync(projectPath).ConfigureAwait(false);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            //_logger.LogError(ex.ToString());
+            _logger.LogMessage(ex.ToString(), LogMessageType.Error);
         }
     }
 

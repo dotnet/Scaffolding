@@ -19,7 +19,6 @@ public class AppSettings : IAppSettings
     {
         if (string.IsNullOrEmpty(sectionName))
         {
-            //Diagnostic.Fail("Section name must be provided");
             return null;
         }
 
@@ -31,7 +30,6 @@ public class AppSettings : IAppSettings
     {
         if (string.IsNullOrEmpty(sectionName))
         {
-            //Diagnostic.Fail("Section name must be provided");
             return;
         }
 

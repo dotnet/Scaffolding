@@ -167,16 +167,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         {
             get
             {
-                if (_dbProviders == null)
-                {
-                    _dbProviders =
-                    [
-                        Tuple.Create("SQL Server", "sqlserver"),
-                        Tuple.Create("SQLite", "sqlite"),
-                        Tuple.Create("PostgreSQL", "postgres"),
-                        Tuple.Create("Cosmos DB", "cosmos")
-                    ];
-                }
+                _dbProviders ??=
+                [
+                    Tuple.Create("SQL Server", "sqlserver"),
+                    Tuple.Create("SQLite", "sqlite"),
+                    Tuple.Create("PostgreSQL", "postgres"),
+                    Tuple.Create("Cosmos DB", "cosmos")
+                ];
 
                 return _dbProviders;
             }

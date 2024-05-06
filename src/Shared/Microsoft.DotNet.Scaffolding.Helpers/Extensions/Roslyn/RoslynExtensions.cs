@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn
                 return null;
             }
 
+            //often Document.Name is the file path of the document and not the name.
+            //check for all possible cases. 
             return project.Documents.FirstOrDefault(x =>
                 x.Name.EndsWith(fileName, StringComparison.OrdinalIgnoreCase) ||
                 x.Name.Equals(documentName, StringComparison.OrdinalIgnoreCase) ||

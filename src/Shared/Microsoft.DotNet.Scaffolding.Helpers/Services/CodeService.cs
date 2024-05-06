@@ -118,7 +118,7 @@ public class CodeService : ICodeService, IDisposable
     private void OnWorkspaceFailed(object? sender, WorkspaceDiagnosticEventArgs e)
     {
         var diagnostic = e.Diagnostic!;
-        //_logger.LogDebug($"[{diagnostic.Kind}] Problem loading file in MSBuild workspace {diagnostic.Message}");
+        _logger.LogMessage($"[{diagnostic.Kind}] Problem loading file in MSBuild workspace {diagnostic.Message}");
     }
 
     public void Dispose()
@@ -170,7 +170,7 @@ public class CodeService : ICodeService, IDisposable
             return project.Documents.ToList();
         }
 
-        return new List<Document>();
+        return [];
     }
 
     public async Task<Document?> GetDocumentAsync(string? documentName)

@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 var strippedParameterName = Parameter.Name.Replace("--", string.Empty);
                 cmdlineArgs.TryGetValue(strippedParameterName, out var cmdlineValues);
-                if (cmdlineValues != null && cmdlineValues.Count != 0 && ParameterHelpers.CheckType(Parameter.Type, cmdlineValues))
+                if (cmdlineValues != null && cmdlineValues.Count != 0 && ParameterHelpers.CheckType(Parameter.Type, cmdlineValues.First()))
                 {
                     SelectParameter(context, cmdlineValues.First());
                     if (NextStep != null)

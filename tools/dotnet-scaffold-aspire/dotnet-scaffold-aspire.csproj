@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Scaffolding tool for .NET Aspire scenarios</Description>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>exe</OutputType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackAsTool>true</PackAsTool>
+    <PackageTags>dotnet;scaffold;aspire;</PackageTags>
+    <PackageId>Microsoft.dotnet-scaffold-aspire</PackageId>
+    <RootNamespace>Microsoft.DotNet.Tools.Scaffold.Aspire</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Import Project="$(RepoRoot)eng\Versions.Scaffold.Aspire.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -52,5 +52,6 @@ public enum InteractivePickerType
 {
     ClassPicker,
     FilePicker,
-    DbProviderPicker
+    DbProviderPicker,
+    ProjectPicker
 }

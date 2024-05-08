@@ -7,7 +7,7 @@ internal sealed class ProcessOutputStreamReader : IDisposable
 {
     private const char FlushBuilderCharacter = '\n';
 
-    private static readonly char[] IgnoreCharacters = new char[] { '\r' };
+    private static readonly char[] IgnoreCharacters = [ '\r' ];
 
     private StringBuilder? _builder;
     private StringWriter? _capture;

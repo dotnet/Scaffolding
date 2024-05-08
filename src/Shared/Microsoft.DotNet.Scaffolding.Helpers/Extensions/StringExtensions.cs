@@ -1,11 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.General
+namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions
 {
     public static class StringExtensions
     {
@@ -81,7 +80,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General
                     if (fullPath.Length < tempBasePath.Length)
                     {
                         Debug.Assert(
-                            (tempBasePath.Length - fullPath.Length) == 1,
+                            tempBasePath.Length - fullPath.Length == 1,
                             "We are at the end. Nothing more to do. Add an empty string to handle case where the paths are equal");
                     }
                     else

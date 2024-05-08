@@ -9,13 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\General\*.cs">
+    <Compile Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\General\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Helpers\General\StringExtensions.cs">
+    <Compile Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Extensions\StringExtensions.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\*.cs">
+    <Compile Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\ProjectModel\*.cs">
       <Link>Contracts\%(RecursiveDir)%(FileName)</Link>
     </Compile>
   </ItemGroup>

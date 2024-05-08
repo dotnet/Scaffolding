@@ -16,12 +16,7 @@ public interface IFlowProvider
     IFlow? CurrentFlow { get; }
 
     /// <summary>
-    /// 
+    /// Initialize the FlowRunner with given steps and properties.
     /// </summary>
-    /// <param name="steps"></param>
-    /// <param name="properties"></param>
-    /// <param name="nonInteractive"></param>
-    /// <param name="showSelectedOptions"></param>
-    /// <returns></returns>
     IFlow GetFlow(IEnumerable<IFlowStep> steps, Dictionary<string, object> properties, bool nonInteractive, bool showSelectedOptions = true);
 }

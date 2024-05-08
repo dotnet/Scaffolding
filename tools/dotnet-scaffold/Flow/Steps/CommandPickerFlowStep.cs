@@ -8,11 +8,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
+    /// <summary>
+    /// IFlowStep that deals with the selection of the component(DotnetToolInfo) and the associated command(CommandInfo).
+    /// if provided by the user, verify if the component is installed and the command is supported.
+    /// </summary>
     internal class CommandPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
@@ -41,35 +44,38 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var settings = context.GetCommandSettings();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
-            var allComponents = new List<DotNetToolInfo>();
-            KeyValuePair<string, CommandInfo>? commandInfo = null;
+            //KeyValuePair with key being name of the DotnetToolInfo (component) and value being the CommandInfo supported by that component.
+            KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
+            CommandInfo? commandInfo = null;
             var dotnetToolComponent = _dotnetToolService.GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent);
-            commandInfo = commandDiscovery.Discover(context);
+            commandInfoKvp = commandDiscovery.Discover(context);
             if (commandDiscovery.State.IsNavigation())
             {
                 return new ValueTask<FlowStepResult>(new FlowStepResult { State = commandDiscovery.State });
             }
 
-            if (commandInfo is null || !commandInfo.HasValue || commandInfo.Value.Value is null || string.IsNullOrEmpty(commandInfo.Value.Key))
+            if (commandInfoKvp is null || !commandInfoKvp.HasValue || commandInfoKvp.Value.Value is null || string.IsNullOrEmpty(commandInfoKvp.Value.Key))
             {
-                throw new Exception();
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any commands!"));
             }
             else
             {
-                dotnetToolComponent ??= _dotnetToolService.GetDotNetTool(commandInfo.Value.Key);
+                commandInfo = commandInfoKvp.Value.Value;
+                componentName = commandInfoKvp.Value.Key;
+                dotnetToolComponent ??= _dotnetToolService.GetDotNetTool(componentName);
                 if (dotnetToolComponent != null)
                 {
                     SelectComponent(context, dotnetToolComponent);
                 }
 
-                SelectCommand(context, commandInfo.Value.Value);
+                SelectCommand(context, commandInfo);
             }
 
-            var commandFirstStep = GetFirstParameterBasedStep(commandInfo.Value.Value);
+            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
             if (commandFirstStep is null)
             {
-                throw new Exception("asdf");
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
             }
 
             return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
@@ -81,6 +87,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
+
+            //check if user input included a component name.
+            //if included, check for a command name, and get the CommandInfo object.
             var dotnetToolComponent = _dotnetToolService.GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
@@ -94,13 +103,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             if (commandInfo is null)
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component {componentName}"));
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));
             }
 
             var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
             if (commandFirstStep is null)
             {
-                throw new Exception("asdf");
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
             }
 
             SelectComponent(context, dotnetToolComponent);
@@ -108,6 +117,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
+        //Wrapper to get the first ParameterBasedFlowStep. Use 'BuildParameterFlowSteps'
         internal ParameterBasedFlowStep? GetFirstParameterBasedStep(CommandInfo commandInfo)
         {
             ParameterBasedFlowStep? firstParameterStep = null;
@@ -119,6 +129,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return firstParameterStep;
         }
 
+        /// <summary>
+        /// Take all the 'Parameter's, create ParameterBasedFlowSteps with connecting them using 'NextStep'.
+        /// </summary>
+        /// <returns>first step from the connected ParameterBasedFlowSteps</returns>
         internal ParameterBasedFlowStep? BuildParameterFlowSteps(List<Parameter> parameters)
         {
             ParameterBasedFlowStep? firstStep = null;

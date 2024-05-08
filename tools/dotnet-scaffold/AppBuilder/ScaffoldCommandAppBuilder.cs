@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
-using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Helpers.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -14,6 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold;
 public class ScaffoldCommandAppBuilder(string[] args)
 {
     private readonly string[] _args = args;
+    //try to update this every release
     private readonly string _backupDotNetScaffoldVersion = "0.1.0-dev";
 
     public ScaffoldCommandApp Build()

@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Environment;
 public class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider

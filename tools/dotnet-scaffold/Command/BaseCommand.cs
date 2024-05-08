@@ -36,6 +36,7 @@ public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
             flow = FlowProvider.GetFlow(flowSteps, properties, nonInteractive, showSelectedOptions);
             return await flow.RunAsync(CancellationToken.None);
         }
+
         catch (Exception) {}
 
         return exception is not null

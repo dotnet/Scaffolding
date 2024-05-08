@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -37,11 +36,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
         public static string? GetSourceProjectPath(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<string>(FlowContextProperties.SourceProjectPath, throwIfEmpty);
-        }
-
-        public static IProjectService? GetSourceProject(this IFlowContext context, bool throwIfEmpty = false)
-        {
-            return context.GetValueOrThrow<IProjectService>(FlowContextProperties.SourceProject, throwIfEmpty);
         }
 
         public static ICodeService? GetCodeService(this IFlowContext context, bool throwIfEmpty = false)

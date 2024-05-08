@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
@@ -21,11 +21,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project
         }
 
         protected IFileSystem FileSystem { get; }
-
         protected string WorkingDir { get; set; }
-
         public FlowStepState State { get; private set; }
-
         public string? Discover(IFlowContext context, string path)
         {
             List<string> projects = []; 

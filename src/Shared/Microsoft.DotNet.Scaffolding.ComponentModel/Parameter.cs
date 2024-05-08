@@ -20,14 +20,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
             { BaseTypes.Double, typeof(double) },
             { BaseTypes.Decimal, typeof(decimal) },
             { BaseTypes.Char, typeof(char) },
-            { BaseTypes.String, typeof(string) },
-            { BaseTypes.ListBool, typeof(List<bool>) },
-            { BaseTypes.ListLong, typeof(List<long>) },
-            { BaseTypes.ListInt, typeof(List<int>) },
-            { BaseTypes.ListDouble, typeof(List<double>) },
-            { BaseTypes.ListDecimal, typeof(List<decimal>) },
-            { BaseTypes.ListChar, typeof(List<char>) },
-            { BaseTypes.ListString, typeof(List<string>) }
+            { BaseTypes.String, typeof(string) }
         };
 
         public static Type GetParameterType(BaseTypes baseType)
@@ -38,19 +31,6 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         public Type GetParameterType()
         {
             return TypeDict[Type];
-        }
-    }
-
-    public static class ParameterExtensions
-    {
-        public static Parameter? GetParameterFromName(this Parameter[] parameter, string name)
-        {
-            return parameter.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public static Parameter? GetParameterFromName(this IList<Parameter> parameter, string name)
-        {
-            return parameter.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -94,6 +74,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         }
     }
 
+    //will add List types for all these soon!
     public enum BaseTypes
     {
         Bool,
@@ -102,14 +83,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
         Double,
         Decimal,
         Char,
-        String,
-        ListBool,
-        ListInt,
-        ListLong,
-        ListDouble,
-        ListDecimal,
-        ListChar,
-        ListString
+        String
     }
 
     public enum InteractivePickerType

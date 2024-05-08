@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;

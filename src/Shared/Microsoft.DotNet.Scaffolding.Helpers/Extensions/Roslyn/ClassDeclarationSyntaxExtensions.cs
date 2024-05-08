@@ -26,16 +26,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn
                 x => string.Equals(x.Type.ToString(), baseTypeSimpleName, StringComparison.Ordinal)) == true;
         }
 
-        public static IEnumerable<MethodDeclarationSyntax> GetPublicMethods(this ClassDeclarationSyntax classNode)
-        {
-            return classNode
-                .DescendantNodes()
-                .OfType<MethodDeclarationSyntax>()
-                .Where(x =>
-                    x.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PublicKeyword) &&
-                    !x.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.StaticKeyword))));
-        }
-
         public static bool IsStaticClass(this ClassDeclarationSyntax? classDeclaration)
         {
             return classDeclaration is not null ?

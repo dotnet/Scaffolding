@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
 {

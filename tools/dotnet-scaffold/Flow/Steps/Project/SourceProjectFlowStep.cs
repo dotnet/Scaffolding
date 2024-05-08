@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
@@ -105,7 +105,7 @@ internal class SourceProjectFlowStep : IFlowStep
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
-        AnsiConsole.WriteLine("No projects found in current directory");
+        _logger.LogMessage("No projects found in current directory", LogMessageType.Error);
         return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
     }
 
@@ -127,19 +127,6 @@ internal class SourceProjectFlowStep : IFlowStep
                 FlowContextProperties.SourceProjectDisplay,
                 isVisible: true));
             _appSettings.Workspace().InputPath = projectPath;
-
-/*            IProjectService projectService = AnsiConsole
-                .Status()
-                .WithSpinner()
-                .Start("Gathering project information!", statusContext =>
-                {
-                    return new ProjectService(projectPath, _logger);
-                });
-
-            context.Set(new FlowProperty(
-                    FlowContextProperties.SourceProject,
-                    projectService,
-                    isVisible: false));*/
 
             ICodeService codeService = new CodeService(_appSettings, _logger);
             context.Set(new FlowProperty(

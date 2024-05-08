@@ -10,12 +10,11 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 /// <summary>
-/// check for first initialization in ValidateUserInputAsync, 
 /// do first time initialization in ValidateUserInputAsync
-///   - check for .dotnet-scaffold folder in USER
-///   - check for .dotnet-scaffold/manifest.json file
-///   - initialize msbuild
-///   - read and check for 1st party .NET scaffolders, update them if needed
+///   - initialize MSBuild instance
+///   - gather some specific environment variables
+///   - 
+///   - 
 /// </summary>
 public class StartupFlowStep : IFlowStep
 {
@@ -65,22 +64,23 @@ public class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", async statusContext =>
             {
                 statusContext.Refresh();
-                // check for first initialization
-                statusContext.Status = "Checking user files!";
+                //add 'workspace' settings
+                var workspaceSettings = new WorkspaceSettings();
+                _appSettings.AddSettings("workspace", workspaceSettings);
+
                 if (_initializeMsbuild)
                 {
-                    var workspaceSettings = new WorkspaceSettings();
-                    _appSettings.AddSettings("workspace", workspaceSettings);
-
                     statusContext.Status = "Initializing msbuild!";
                     new MsBuildInitializer(_logger).Initialize();
                     statusContext.Status = "DONE\n";
                 }
-
+                //initialize environment variables
                 statusContext.Status = "Gathering environment variables!";
                 var environmentVariableProvider = new EnvironmentVariablesStartup(_hostService, _environmentService, _appSettings);
                 await environmentVariableProvider.StartupAsync();
                 statusContext.Status = "DONE\n";
+
+                //parse args passed
                 statusContext.Status = "Parsing args!";
                 var remainingArgs = context.GetRemainingArgs();
                 if (remainingArgs != null)
@@ -95,7 +95,6 @@ public class StartupFlowStep : IFlowStep
                 statusContext.Status = "DONE\n";
             });
 
-        //read manifest file and update the manifest context var, will use this after project picker.
         return new ValueTask<FlowStepResult>(FlowStepResult.Success);
     }
 
@@ -106,17 +105,6 @@ public class StartupFlowStep : IFlowStep
             context.Set(new FlowProperty(
                 FlowContextProperties.CommandArgs,
                 args,
-                isVisible: false));
-        }
-    }
-
-    private void SelectComponents(IFlowContext context, IList<DotNetToolInfo>? components)
-    {
-        if (components != null)
-        {
-            context.Set(new FlowProperty(
-                FlowContextProperties.DotnetToolComponents,
-                components,
                 isVisible: false));
         }
     }

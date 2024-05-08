@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn
             var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
             foreach (var file in filteredFiles)
             {
-                Document? originalDocument = roslynProject.GetDocument(file.FileName);
+                Document? originalDocument = roslynProject?.GetDocument(file.FileName);
                 var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, _codeChangeOptions);
                 roslynProject = modifiedDocument.Project;
             }

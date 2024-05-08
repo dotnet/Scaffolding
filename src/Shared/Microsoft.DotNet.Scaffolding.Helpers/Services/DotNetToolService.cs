@@ -107,35 +107,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             return commands.ToList();
         }
 
-/*        public IList<DotNetToolInfo> GetRegisteredComponents()
-        {
-            var manifestFileFullPath = _environmentService.InitializeAndGetManifestFile();
-            var manifestText = _fileSystem.ReadAllText(manifestFileFullPath);
-            List<DotNetToolInfo>? dotnetToolComponents = null;
-            try
-            {
-                dotnetToolComponents = JsonSerializer.Deserialize<List<DotNetToolInfo>>(manifestText);
-            }
-            catch (Exception) { }
-
-            return dotnetToolComponents ?? [];
-        }
-
-        public void RegisterComponent(DotNetToolInfo dotnetToolComponent)
-        {
-            if (dotnetToolComponent != null)
-            {
-                var allComponents = GetRegisteredComponents();
-                if (!allComponents.Any(x => x.Command.Equals(dotnetToolComponent.Command, StringComparison.OrdinalIgnoreCase)))
-                {
-                    allComponents.Add(dotnetToolComponent);
-                    var manifestFileFullPath = _environmentService.InitializeAndGetManifestFile();
-                    var allComponentsJsonText = JsonSerializer.Serialize(allComponents);
-                    _fileSystem.WriteAllText(manifestFileFullPath, allComponentsJsonText);
-                }
-            }
-        }*/
-
         private static IList<DotNetToolInfo> GetDotNetTools()
         {
             var dotnetToolList = new List<DotNetToolInfo>();

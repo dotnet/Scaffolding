@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     {
         private readonly IDotNetToolService _dotnetToolService;
         private readonly DotNetToolInfo? _componentPicked;
-        public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked )
+        public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
         {
             _dotnetToolService = dotnetToolService;
             _componentPicked = componentPicked;
@@ -40,7 +40,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     return _dotnetToolService.GetAllCommandsParallel();
                 });
 
-                context.Set(FlowContextProperties.CommandInfos, allCommands);
+                if (allCommands is not null)
+                {
+                    context.Set(FlowContextProperties.CommandInfos, allCommands);
+                }
             }
 
             return Prompt(context);
@@ -49,7 +52,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         private KeyValuePair<string, CommandInfo>? Prompt(IFlowContext context)
         {
             var allCommands = context.GetCommandInfos();
-            
             var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()
                 .Title("[lightseagreen]Pick a scaffolding command: [/]")
                 .Converter(GetCommandInfoDisplayName)

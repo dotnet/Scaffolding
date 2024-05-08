@@ -13,21 +13,29 @@ public class MsBuildInitializer
         _logger = logger;
     }
 
-    /// <inheritdoc />
     public void Initialize()
     {
         RegisterMsbuild();
     }
 
+    /// <summary>
+    /// use MSBuildLocator to find MSBuild instances, return the first (highest version found).
+    /// </summary>
+    /// <returns></returns>
     private string RegisterMsbuild()
     {
         var msbuildPath = FindMSBuildPath();
+        if (string.IsNullOrEmpty(msbuildPath))
+        {
+            _logger.LogMessage($"No msbuild path found!", LogMessageType.Error);
+            return string.Empty;
+        }
+
         var instance = MSBuildLocator.QueryVisualStudioInstances()
             .FirstOrDefault(i => string.Equals(msbuildPath, i.MSBuildPath, StringComparison.OrdinalIgnoreCase));
-
         if (instance is null)
         {
-            _logger.LogMessage($"No msbuild find out at path '{msbuildPath}'", LogMessageType.Error);
+            _logger.LogMessage($"No msbuild find out at path '{msbuildPath}'!", LogMessageType.Error);
             return string.Empty;
         }
 
@@ -54,16 +62,14 @@ public class MsBuildInitializer
 
             if (resolver.ResolveAssemblyToPath(assemblyName) is string path)
             {
-                //_logger.LogDebug(string.Format(Strings.AssemblyLoadedFromPath, assemblyName.FullName, context.Name, path));
                 return context.LoadFromAssemblyPath(path);
             }
 
-            //_logger.LogDebug(string.Format(Strings.UnableToResolveAssembly, assemblyName.FullName));
             return null;
         }
     }
 
-    private string FindMSBuildPath()
+    private string? FindMSBuildPath()
     {
         var msBuildInstances = FilterForBitness(MSBuildLocator.QueryVisualStudioInstances())
             .OrderByDescending(m => m.Version)
@@ -71,19 +77,11 @@ public class MsBuildInitializer
 
         if (msBuildInstances.Count == 0)
         {
-            //_logger.LogError(string.Format(Strings.NoMsbuildFound, ExpectedBitness));
             return string.Empty;
         }
         else
         {
-            foreach (var instance in msBuildInstances)
-            {
-                //_logger.LogDebug(string.Format(Strings.FoundCandidateMsBuildInstance, instance.MSBuildPath));
-            }
-
-            var selected = msBuildInstances.First();
-
-            return selected.MSBuildPath;
+            return msBuildInstances.FirstOrDefault()?.MSBuildPath;
         }
     }
 
@@ -96,10 +94,6 @@ public class MsBuildInitializer
             if (System.Environment.Is64BitProcess == !is32bit)
             {
                 yield return instance;
-            }
-            else
-            {
-                //_logger.LogMessage(string.Format(Strings.SkippingToolWithInconsistentBitnesss, instance.MSBuildPath, ExpectedBitness));
             }
         }
     }

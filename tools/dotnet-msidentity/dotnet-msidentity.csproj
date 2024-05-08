@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Microsoft.DotNet.MSIdentity</RootNamespace>
     <SignAssembly>true</SignAssembly>
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
    <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
   <!-- package settings -->

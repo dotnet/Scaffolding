@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31423.177
 MinimumVisualStudioVersion = 15.0.26730.03
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4057ACF-27F0-4724-963B-44548B6BC4E9}"
-	ProjectSection(SolutionItems) = preProject
-		src\Directory.Build.props = src\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{81B64EBF-613D-43AE-82DA-B375FB751921}"
 EndProject
@@ -122,7 +119,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffoldin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.ComponentModel", "src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj", "{A31A0E2D-F990-413C-91F6-8B5B8E570EC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Scaffolding.ComponentModel.Tests", "test\Shared\Microsoft.DotNet.Scaffolding.ComponentModel.Tests\Microsoft.DotNet.Scaffolding.ComponentModel.Tests.csproj", "{F85BABAD-4C0B-419C-AE6A-BA95D259AB53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.ComponentModel.Tests", "test\Shared\Microsoft.DotNet.Scaffolding.ComponentModel.Tests\Microsoft.DotNet.Scaffolding.ComponentModel.Tests.csproj", "{F85BABAD-4C0B-419C-AE6A-BA95D259AB53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

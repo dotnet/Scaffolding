@@ -3,10 +3,11 @@
   <PropertyGroup>
     <TargetFramework>$(StandardTestTfms)</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" /> 
+    <Compile Include="..\..\src\Shared\Cli.Utils\*.cs" />
     <Compile Include="..\Shared\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>

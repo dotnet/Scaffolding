@@ -4,5 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
     <IsPackable>false</IsPackable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 </Project>

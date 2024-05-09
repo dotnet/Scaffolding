@@ -8,6 +8,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;aspnetcoremvc;codegenerator;scaffolding;visualstudioweb</PackageTags>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
@@ -64,7 +65,7 @@
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation\dist\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap3\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity_Versioned\Bootstrap3\wwwroot\lib\jquery-validation-unobtrusive\" />
-    
+
     <!-- Identity Bootstrap4 -->
     <None Pack="true" Include="Templates\Identity\Bootstrap4\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap4\Data\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\Data\" />

@@ -8,6 +8,7 @@
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <IncludeSymbols>true</IncludeSymbols>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -9,8 +9,6 @@
     <PackageTags>dotnet;scaffold;aspnet;</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold-aspnet</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold.AspNet</RootNamespace>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
@@ -21,7 +19,7 @@
     <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />

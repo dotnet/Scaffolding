@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>$(StandardTestTfms)</TargetFramework>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

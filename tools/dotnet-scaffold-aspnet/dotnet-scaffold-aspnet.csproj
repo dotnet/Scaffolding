@@ -11,6 +11,7 @@
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold.AspNet</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.Scaffold.AspNet.props" />

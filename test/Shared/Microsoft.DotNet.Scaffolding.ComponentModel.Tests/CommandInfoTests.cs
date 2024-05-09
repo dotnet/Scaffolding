@@ -48,6 +48,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
             {
                 Name = "command1",
                 DisplayName = "Command 1",
+                DisplayCategory = "General",
                 Description = "Description 1",
                 Parameters = [ValidParameter]
             };
@@ -56,6 +57,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
             {
                 Name = "command2",
                 DisplayName = "Command 2",
+                DisplayCategory = "General",
                 Parameters =
                 [
                     ValidParameter, PartialParameter
@@ -66,6 +68,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
             {
                 Name = "command3",
                 DisplayName = "Command 3",
+                DisplayCategory = "General",
                 Description = null,
                 Parameters =
                 [

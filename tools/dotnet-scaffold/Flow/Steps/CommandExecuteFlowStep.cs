@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var parameterValues = GetAllParameterValues(context, commandObj);
             if (!string.IsNullOrEmpty(componentName) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
-                var componentExecutionString = $"{componentName} {commandObj.Name} {string.Join(" ", parameterValues)}";
+                var componentExecutionString = $"{componentName} {string.Join(" ", parameterValues)}";
                 string? stdOut = null, stdErr = null;
                 int? exitCode = null;
                 AnsiConsole.Status().WithSpinner()

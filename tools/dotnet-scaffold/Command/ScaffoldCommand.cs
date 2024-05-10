@@ -54,9 +54,11 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        Debugger.Launch();
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_appSettings, _dotnetToolService, _environmentService, _fileSystem, _hostService, _logger),
+            new CategoryPickerFlowStep(_logger, _dotnetToolService),
             new SourceProjectFlowStep(_appSettings, _environmentService, _fileSystem, _logger),
             new CommandPickerFlowStep(_logger, _dotnetToolService),
             new CommandExecuteFlowStep()

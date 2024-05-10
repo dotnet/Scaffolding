@@ -2,27 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Spectre.Console;
 using Spectre.Console.Flow;
+using Spectre.Console;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 
-internal class CommandDiscovery
+internal class CategoryDiscovery
 {
     private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
-    public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
+    public FlowStepState State { get; private set; }
+    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
     {
         _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
     }
 
-    public FlowStepState State { get; private set; }
-
-    public KeyValuePair<string, CommandInfo>? Discover(IFlowContext context)
+    public string? Discover(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
         if (allCommands is null || allCommands.Count == 0)
@@ -44,29 +43,26 @@ internal class CommandDiscovery
         return Prompt(context);
     }
 
-    private KeyValuePair<string, CommandInfo>? Prompt(IFlowContext context)
+    private string? Prompt(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
+        var displayCategories = new List<string>();
+        //only get categories from the picked DotNetToolInfo
         if (_componentPicked != null)
         {
-            allCommands = allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)).ToList();
+            displayCategories = allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)).Select(y => y.Value.DisplayCategory).ToList();
+        }
+        else
+        {
+            displayCategories = allCommands?.Select(x => x.Value.DisplayCategory).ToList();
         }
 
-        var scaffoldingCategory = context.GetScaffoldingCategory();
-        var allCommandsByCategory = allCommands?.Where(x => x.Value.DisplayCategory.Equals(scaffoldingCategory)).ToList();
-
-        var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()
-            .Title("[lightseagreen]Pick a scaffolding command: [/]")
-            .Converter(GetCommandInfoDisplayName)
-            .AddChoices(allCommandsByCategory, navigation: context.Navigation);
+        var prompt = new FlowSelectionPrompt<string>()
+            .Title("[lightseagreen]Pick a scaffolding category: [/]")
+            .AddChoices(displayCategories, navigation: context.Navigation);
 
         var result = prompt.Show();
         State = result.State;
         return result.Value;
-    }
-
-    private string GetCommandInfoDisplayName(KeyValuePair<string, CommandInfo> commandInfo)
-    {
-        return $"{commandInfo.Value.DisplayName} ({commandInfo.Key})";
     }
 }

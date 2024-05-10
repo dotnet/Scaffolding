@@ -77,6 +77,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     .WithSpinner()
                     .Start("Gathering project classes!", async statusContext =>
                     {
+                        //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
+                        //will add better documentation so users will know what to expect.
                         var codeService = context.GetCodeService();
                         if (codeService is null)
                         {
@@ -90,6 +92,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     interactiveTitle = "Class";
                     break;
                 case InteractivePickerType.FilePicker:
+                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
+                    //will add better documentation so users will know what to expect.
                     var codeService = context.GetCodeService();
                     if (codeService is null)
                     {

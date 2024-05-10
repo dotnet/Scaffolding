@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <RootNamespace>Microsoft.DotNet.MSIdentity</RootNamespace>
     <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
@@ -22,7 +21,7 @@
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
-  
+
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(AzureIdentityVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftExtensionsConfigurationVersion)" />

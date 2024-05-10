@@ -4,5 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <PlatformTarget>AnyCpu</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 </Project>

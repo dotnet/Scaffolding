@@ -11,8 +11,9 @@
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>

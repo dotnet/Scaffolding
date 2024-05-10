@@ -7,6 +7,7 @@
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Templating</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

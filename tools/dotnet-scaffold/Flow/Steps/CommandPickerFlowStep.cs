@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -18,12 +19,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     /// </summary>
     internal class CommandPickerFlowStep : IFlowStep
     {
+        private readonly IAppSettings _appSettings;
         private readonly ILogger _logger;
         private readonly IDotNetToolService _dotnetToolService;
-        public CommandPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
+        private readonly IEnvironmentService _environmentService;
+        private readonly IFileSystem _fileSystem;
+        public CommandPickerFlowStep(
+            IAppSettings appSettings,
+            ILogger logger,
+            IDotNetToolService dotnetToolService,
+            IEnvironmentService environmentService,
+            IFileSystem fileSystem)
         {
+            _appSettings = appSettings; 
             _logger = logger;
             _dotnetToolService = dotnetToolService;
+            _environmentService = environmentService;
+            _fileSystem = fileSystem;
         }
 
         public string Id => nameof(CommandPickerFlowStep);
@@ -140,7 +152,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             foreach (var parameter in parameters)
             {
-                var step = new ParameterBasedFlowStep(parameter, null);
+                var step = new ParameterBasedFlowStep(
+                    parameter,
+                    null,
+                    _appSettings,
+                    _environmentService,
+                    _fileSystem,
+                    _logger);
                 if (firstStep == null)
                 {
                     // This is the first step

@@ -100,6 +100,25 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             return commands.ToList();
         }
 
+        public bool InstallDotNetTool(string toolName, string? version = null)
+        {
+            if (string.IsNullOrEmpty(toolName))
+            {
+                return false;
+            }
+
+            var installParams = new List<string> { "install", "-g", toolName };
+            if (!string.IsNullOrEmpty(version))
+            {
+                installParams.Add("-v");
+                installParams.Add(version);
+            }
+            
+            var runner = DotnetCliRunner.CreateDotNet("tool", installParams);
+            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+            return exitCode == 0;
+        }
+
         private static IList<DotNetToolInfo> GetDotNetTools()
         {
             var dotnetToolList = new List<DotNetToolInfo>();

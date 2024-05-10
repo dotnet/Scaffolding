@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -67,7 +67,7 @@ public class StartupFlowStep : IFlowStep
                 //add 'workspace' settings
                 var workspaceSettings = new WorkspaceSettings();
                 _appSettings.AddSettings("workspace", workspaceSettings);
-
+                //initialize msbuild
                 if (_initializeMsbuild)
                 {
                     statusContext.Status = "Initializing msbuild!";
@@ -79,7 +79,10 @@ public class StartupFlowStep : IFlowStep
                 var environmentVariableProvider = new EnvironmentVariablesStartup(_hostService, _environmentService, _appSettings);
                 await environmentVariableProvider.StartupAsync();
                 statusContext.Status = "DONE\n";
-
+                //initialize 1st party components (dotnet tools)
+                statusContext.Status = "Initializing 1st party components (dotnet tools)";
+                new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();
+                statusContext.Status = "DONE\n";
                 //parse args passed
                 statusContext.Status = "Parsing args!";
                 var remainingArgs = context.GetRemainingArgs();

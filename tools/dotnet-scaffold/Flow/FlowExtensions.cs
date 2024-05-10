@@ -33,6 +33,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
             return context.GetValueOrThrow<IList<KeyValuePair<string, CommandInfo>>>(FlowContextProperties.CommandInfos, throwIfEmpty);
         }
 
+        public static string? GetScaffoldingCategory(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<string>(FlowContextProperties.ScaffoldingCategory, throwIfEmpty);
+        }
+
         public static string? GetSourceProjectPath(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<string>(FlowContextProperties.SourceProjectPath, throwIfEmpty);

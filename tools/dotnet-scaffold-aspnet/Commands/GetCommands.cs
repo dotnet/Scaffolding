@@ -43,6 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
     public static class GetCmdsHelper
     {
+        internal static Parameter Project = new() { Name = "--project", DisplayName = "Project File", Description = "Project file for scaffolding's project context", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ModelName = new()  { Name = "--model", DisplayName = "Model Name", Description = "Name for the model class to be used for scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ClassPicker };
         internal static Parameter EndpointsClass = new()  { Name = "--endpoints", DisplayName = "Endpoints File Name", Description = "", Required = true, Type = BaseTypes.String };
         internal static Parameter DataContextClass = new() { Name = "--dataContext", DisplayName = "Data Context Class", Description = "", Required = false, Type = BaseTypes.String, PickerType = InteractivePickerType.ClassPicker };
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal static Parameter OpenApi = new() { Name = "--open", DisplayName = "Open API Enabled", Description = "", Required = false, Type = BaseTypes.Bool };
         internal static Parameter DatabaseProvider = new() { Name = "--dbProvider", DisplayName = "Database Provider", Description = "", Required = false, Type = BaseTypes.String, PickerType = InteractivePickerType.DbProviderPicker };
         internal static Parameter AreaName = new() { Name = "--name", DisplayName = "Area Name", Description = "Name for the area being created", Required = true, Type = BaseTypes.String };
-        internal static Parameter[] AreaParameters = [AreaName];
-        internal static Parameter[] MinimalApiParameters = [ModelName, EndpointsClass, DataContextClass, OpenApi, DatabaseProvider];
+        internal static Parameter[] AreaParameters = [Project, AreaName];
+        internal static Parameter[] MinimalApiParameters = [Project, ModelName, EndpointsClass, DataContextClass, OpenApi, DatabaseProvider];
     }
 }

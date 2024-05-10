@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
-using Microsoft.DotNet.Tools.Scaffold.Flow.Steps.Project;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.UpgradeAssistant.Cli.Commands;
 using Spectre.Console.Cli;
@@ -45,9 +44,6 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         [CommandArgument(1, "[COMMAND NAME]")]
         public string? CommandName { get; set; }
 
-        [CommandOption("--project")]
-        public string? Project { get; init; }
-
         [CommandOption("--non-interactive")]
         public bool NonInteractive { get; init; }
     }
@@ -58,8 +54,7 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         [
             new StartupFlowStep(_appSettings, _dotnetToolService, _environmentService, _fileSystem, _hostService, _logger),
             new CategoryPickerFlowStep(_logger, _dotnetToolService),
-            new SourceProjectFlowStep(_appSettings, _environmentService, _fileSystem, _logger),
-            new CommandPickerFlowStep(_logger, _dotnetToolService),
+            new CommandPickerFlowStep(_appSettings, _logger, _dotnetToolService, _environmentService, _fileSystem),
             new CommandExecuteFlowStep()
         ];
 

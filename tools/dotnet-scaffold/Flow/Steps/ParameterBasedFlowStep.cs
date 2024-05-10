@@ -3,12 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -17,10 +17,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     {
         public Parameter Parameter { get; set; }
         public ParameterBasedFlowStep? NextStep { get; set; }
-        public ParameterBasedFlowStep(Parameter parameter, ParameterBasedFlowStep? nextStep)
+        private readonly IAppSettings _appSettings;
+        private readonly IEnvironmentService _environmentService;
+        private readonly IFileSystem _fileSystem;
+        private readonly ILogger _logger;
+        public ParameterBasedFlowStep(
+            Parameter parameter,
+            ParameterBasedFlowStep? nextStep,
+            IAppSettings appSettings,
+            IEnvironmentService environmentService,
+            IFileSystem fileSystem,
+            ILogger logger)
         {
             Parameter = parameter;
             NextStep = nextStep;
+            _appSettings = appSettings;
+            _environmentService = environmentService;
+            _fileSystem = fileSystem;
+            _logger = logger;
         }
 
         public string Id => nameof(ParameterBasedFlowStep);
@@ -34,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public async ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            ParameterDiscovery paraDiscovery = new ParameterDiscovery(Parameter);
+            ParameterDiscovery paraDiscovery = new ParameterDiscovery(Parameter, _fileSystem, _environmentService);
             var parameterValue = await paraDiscovery.DiscoverAsync(context);
             if (string.Equals(parameterValue, FlowNavigation.BackInputToken, StringComparison.OrdinalIgnoreCase))
             {
@@ -105,6 +119,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     parameterValue,
                     Parameter.DisplayName,
                     isVisible: true));
+
+                SelectCodeService(context, parameterValue);
+            }
+        }
+
+        private void SelectCodeService(IFlowContext context, string projectPath)
+        {
+            var codeService = context.GetCodeService();
+            if (Parameter.PickerType is InteractivePickerType.ProjectPicker && codeService is null && !string.IsNullOrEmpty(projectPath))
+            {
+                _appSettings.Workspace().InputPath = projectPath;
+                codeService = new CodeService(_appSettings, _logger);
+                context.Set(new FlowProperty(
+                    FlowContextProperties.CodeService,
+                    codeService));
             }
         }
     }

@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers
             internal const string ApiServiceTablesPackageName = "Aspire.Azure.Data.Tables";
             internal static readonly Dictionary<string, string> StoragePackagesDict = new()
             {
-                { "azure-storage-queues", ApiServiceBlobsPackageName },
-                { "azure-storage-blobs", ApiServiceQueuesPackageName },
+                { "azure-storage-queues", ApiServiceQueuesPackageName },
+                { "azure-storage-blobs", ApiServiceBlobsPackageName },
                 { "azure-data-tables", ApiServiceTablesPackageName }
             };
         }
@@ -40,7 +40,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers
             internal const string ApiServicePostgresEfCorePackageName = "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL";
             internal const string ApiServiceSqlServerPackageName = "Aspire.Microsoft.EntityFrameworkCore.SqlServer";
             internal const string ApiServiceCosmosPackageName = "Aspire.Microsoft.EntityFrameworkCore.Cosmos";
-
             internal static readonly Dictionary<string, string> DatabasePackagesAppHostDict = new()
             {
                 { "npgsql-efcore", AppHostPostgresPackageName },

@@ -48,14 +48,10 @@ internal class CategoryDiscovery
         var allCommands = context.GetCommandInfos();
         var displayCategories = new List<string>();
         //only get categories from the picked DotNetToolInfo
-        if (_componentPicked != null)
-        {
-            displayCategories = allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)).Select(y => y.Value.DisplayCategory).Distinct().ToList();
-        }
-        else
-        {
-            displayCategories = allCommands?.Select(x => x.Value.DisplayCategory).Distinct().ToList();
-        }
+        displayCategories = (_componentPicked != null ? allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)) : allCommands)
+            ?.Select(y => y.Value.DisplayCategory)
+            ?.Distinct()
+            ?.ToList();
 
         var prompt = new FlowSelectionPrompt<string>()
             .Title("[lightseagreen]Pick a scaffolding category: [/]")

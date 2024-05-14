@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         public override int Execute([NotNull] CommandContext context, [NotNull] CachingCommandSettings settings)
         {
-            Debugger.Launch();
             if (!ValidateCachingCommandSettings(settings))
             {
                 return -1;

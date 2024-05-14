@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
     public static class GetCmdsHelper
     {
-        internal static Parameter HostProjectParameter = new() { Name = "--host-project", DisplayName = "Aspire Host project file", Description = "Aspire host app for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+        internal static Parameter AppHostProjectParameter = new() { Name = "--host-project", DisplayName = "Aspire Host project file", Description = "Aspire host app for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ApiProjectParameter = new() { Name = "--api-project", DisplayName = "API project file", Description = "API project associated with the Aspire Starter App", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter WebProjectParameter = new() { Name = "--web-project", DisplayName = "Web project file", Description = "Web project associated with the Aspire Starter App", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
@@ -58,8 +58,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         internal static Parameter CachingTypeParameter = new() { Name = "--type", DisplayName = "Caching type", Description = "Types of caching", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = CachingTypeCustomValues };
         internal static Parameter DatabaseTypeParameter = new() { Name = "--type", DisplayName = "Database type", Description = "Types of database", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = DatabaseTypeCustomValues };
         internal static Parameter StorageTypeParameter = new() { Name = "--type", DisplayName = "Storage type", Description = "Types of storage", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = StorageTypeCustomValues };
-        internal static Parameter[] CachingParameters = [CachingTypeParameter, HostProjectParameter, WebProjectParameter];
-        internal static Parameter[] DatabaseParameters = [DatabaseTypeParameter, HostProjectParameter, ApiProjectParameter];
-        internal static Parameter[] StorageParameters = [StorageTypeParameter, HostProjectParameter, ApiProjectParameter];
+        internal static Parameter[] CachingParameters = [CachingTypeParameter, AppHostProjectParameter, WebProjectParameter];
+        internal static Parameter[] DatabaseParameters = [DatabaseTypeParameter, AppHostProjectParameter, ApiProjectParameter];
+        internal static Parameter[] StorageParameters = [StorageTypeParameter, AppHostProjectParameter, ApiProjectParameter];
     }
 }

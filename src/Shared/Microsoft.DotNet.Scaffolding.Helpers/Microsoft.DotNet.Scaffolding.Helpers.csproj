@@ -23,7 +23,6 @@
       <!-- This package is mostly COM definitions which can be loaded in .NET 6 runtime just fine -->
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
-    <PackageReference Include="NuGet.Protocol" Version="$(NuGetPackagingVersion)" />
   </ItemGroup>
 
   <ItemGroup>

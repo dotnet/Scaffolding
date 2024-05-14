@@ -39,8 +39,6 @@ public class ScaffoldCommandAppBuilder(string[] args)
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
         registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
         registrar.Register(typeof(IAppSettings), typeof(AppSettings));
-/*        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(MacMsbuildEnvironmentVariableProvider));
-        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(WindowsEnvironmentVariableProvider));*/
         registrar.Register(typeof(IHostService), typeof(HostService));
         return registrar;
     }

@@ -1,4 +1,3 @@
-using Microsoft.DotNet.Scaffolding.Helpers.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.AppBuilder;
@@ -31,8 +30,6 @@ public static class Program
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
         registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
-/*        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(MacMsbuildEnvironmentVariableProvider));
-        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(WindowsEnvironmentVariableProvider));*/
         registrar.Register(typeof(IHostService), typeof(HostService));
         registrar.Register(typeof(ICodeService), typeof(CodeService));
         return registrar;

@@ -67,6 +67,6 @@ internal class CommandDiscovery
 
     private string GetCommandInfoDisplayName(KeyValuePair<string, CommandInfo> commandInfo)
     {
-        return $"{commandInfo.Value.DisplayName} ({commandInfo.Key})";
+        return $"{commandInfo.Value.DisplayName} {commandInfo.Key.ToSuggestion(withBrackets: true)}";
     }
 }

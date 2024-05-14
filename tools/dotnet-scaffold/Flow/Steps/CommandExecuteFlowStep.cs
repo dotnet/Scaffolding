@@ -75,14 +75,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         private List<string> GetAllParameterValues(IFlowContext context, CommandInfo commandInfo)
         {
-            var sourceProjectPath = context.GetSourceProjectPath();
             var parameterValues = new List<string> { commandInfo.Name };
-            if (!string.IsNullOrEmpty(sourceProjectPath))
-            {
-                parameterValues.Add("--project");
-                parameterValues.Add(sourceProjectPath);
-            }
-
             foreach (var parameter in commandInfo.Parameters)
             {
                 var parameterValue = context.GetValue<string>(parameter.Name);

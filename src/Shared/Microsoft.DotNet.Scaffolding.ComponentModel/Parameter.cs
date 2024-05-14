@@ -12,6 +12,7 @@ public class Parameter
     public string? Description { get; set; }
     public required BaseTypes Type { get; set; } = BaseTypes.String;
     public InteractivePickerType? PickerType { get; set; }
+    public List<string>? CustomPickerValues { get; set; }
 
     internal static readonly ReadOnlyDictionary<BaseTypes, Type> TypeDict = new(
         new Dictionary<BaseTypes, Type>
@@ -53,5 +54,6 @@ public enum InteractivePickerType
     ClassPicker,
     FilePicker,
     DbProviderPicker,
-    ProjectPicker
+    ProjectPicker,
+    CustomPicker
 }

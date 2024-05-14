@@ -12,6 +12,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
+using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -35,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         public async Task<string> DiscoverAsync(IFlowContext context)
         {
             var optionParameterAddition = _parameter.Required ? "(" : "(empty to skip, ";
-            return await PromptAsync(context, $"Enter new value for '{_parameter.DisplayName}' {optionParameterAddition}[sandybrown]<[/] to go back) : ");
+            return await PromptAsync(context, $"Enter a new value for '{_parameter.DisplayName}' {optionParameterAddition}[sandybrown]<[/] to go back) : ");
         }
 
         private async Task<string> PromptAsync(IFlowContext context, string title)
@@ -68,33 +69,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         private async Task<string?> PromptInteractivePicker(IFlowContext context, InteractivePickerType? pickerType)
         {
             IList<Tuple<string, string>>? displayTuples = [];
-            string interactiveTitle = string.Empty;
+            var codeService = context.GetCodeService();
             switch (pickerType)
             {
                 case InteractivePickerType.ClassPicker:
-                    var allClassSymbols = await AnsiConsole
-                    .Status()
-                    .WithSpinner()
-                    .Start("Gathering project classes!", async statusContext =>
+                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
+                    //will add better documentation so users will know what to expect.
+                    if (codeService is null)
                     {
-                        //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
-                        //will add better documentation so users will know what to expect.
-                        var codeService = context.GetCodeService();
-                        if (codeService is null)
-                        {
-                            return [];
-                        }
+                        displayTuples = [];
+                    }
+                    else
+                    {
+                        displayTuples = await GetClassDisplayNamesAsync(codeService);
+                    }
 
-                        return (await codeService.GetAllClassSymbolsAsync()).ToList();
-                    });
-
-                    displayTuples = GetClassDisplayNames(allClassSymbols);
-                    interactiveTitle = "Class";
                     break;
                 case InteractivePickerType.FilePicker:
                     //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     //will add better documentation so users will know what to expect.
-                    var codeService = context.GetCodeService();
                     if (codeService is null)
                     {
                         displayTuples = [];
@@ -105,15 +98,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                         displayTuples = GetDocumentNames(allDocuments);
                     }
 
-                    interactiveTitle = "File";
                     break;
                 case InteractivePickerType.DbProviderPicker:
                     displayTuples = DbProviders;
-                    interactiveTitle = "DbProvider";
                     break;
                 case InteractivePickerType.ProjectPicker:
                     displayTuples = GetProjectFiles();
-                    interactiveTitle = "Project";
+                    break;
+                case InteractivePickerType.CustomPicker:
+                    displayTuples = GetCustomValues(_parameter.CustomPickerValues);
                     break;
             }
 
@@ -123,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             var prompt = new FlowSelectionPrompt<Tuple<string, string>>()
-                .Title($"[lightseagreen]Pick a {interactiveTitle}: [/]")
+                .Title($"[lightseagreen]Pick a {_parameter.DisplayName}: [/]")
                 .Converter(GetDisplayNameFromTuple)
                 .AddChoices(displayTuples, navigation: context.Navigation);
 
@@ -132,10 +125,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return result.Value?.Item2;
         }
 
+        private IList<Tuple<string, string>> GetCustomValues(List<string>? customPickerValues)
+        {
+            if (customPickerValues is null || customPickerValues.Count == 0)
+            {
+                throw new InvalidOperationException("Missing 'Parameter.CustomPickerValues' values!.\nNeeded when using 'Parameter.InteractivePicker.CustomPicker'");
+            }
+
+            return customPickerValues.Select(x => Tuple.Create(x, x)).ToList();
+        }
+
         private string GetDisplayNameFromTuple(Tuple<string, string> tuple)
         {
             bool displayNone = tuple.Item1.Equals("None", StringComparison.OrdinalIgnoreCase);
-            return displayNone ? $"[sandybrown]{tuple.Item1} (empty to skip parameter)[/]" : $"{tuple.Item1} ({tuple.Item2})";
+            return displayNone ? $"[sandybrown]{tuple.Item1} (empty to skip parameter)[/]" : $"{tuple.Item1} {tuple.Item2.ToSuggestion(withBrackets: true)}";
         }
 
         private ValidationResult Validate(IFlowContext context, string promptVal)
@@ -153,12 +156,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return ValidationResult.Success();
         }
 
-        private List<Tuple<string, string>> GetClassDisplayNames(List<ISymbol> compilationClassSymbols)
+        private async Task<List<Tuple<string, string>>> GetClassDisplayNamesAsync(ICodeService codeService)
         {
+            var allClassSymbols = await AnsiConsole
+                .Status()
+                .WithSpinner()
+                .Start("Gathering project classes!", async statusContext =>
+                {
+                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
+                    //will add better documentation so users will know what to expect.
+                    if (codeService is null)
+                    {
+                        return [];
+                    }
+
+                    return (await codeService.GetAllClassSymbolsAsync()).ToList();
+                });
+
             List<Tuple<string, string>> classNames = [];
-            if (compilationClassSymbols != null && compilationClassSymbols.Count != 0)
+            if (allClassSymbols != null && allClassSymbols.Count != 0)
             {
-                compilationClassSymbols.ForEach(
+                allClassSymbols.ForEach(
                 x =>
                 {
                     if (x != null)
@@ -171,7 +189,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
-        private List<Tuple<string, string>> GetDocumentNames(List<Document> documents)
+        internal List<Tuple<string, string>> GetDocumentNames(List<Document> documents)
         {
             List<Tuple<string, string>> classNames = [];
             if (documents != null && documents.Count != 0)
@@ -218,7 +236,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         internal IList<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)
         {
-            List<string> projectPaths = new();
+            List<string> projectPaths = [];
             foreach (var solutionFile in solutionFiles)
             {
                 projectPaths.AddRange(GetProjectsFromSolutionFile(solutionFile, workingDir));
@@ -251,9 +269,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         internal string GetProjectDisplayName(string projectPath, string workingDir)
         {
-            var name = Path.GetFileNameWithoutExtension(projectPath);
-            var relativePath = projectPath.MakeRelativePath(workingDir).ToSuggestion();
-            return $"{name} {relativePath.ToSuggestion(withBrackets: true)}";
+            return Path.GetFileNameWithoutExtension(projectPath);
         }
 
         private static List<Tuple<string, string>>? _dbProviders;

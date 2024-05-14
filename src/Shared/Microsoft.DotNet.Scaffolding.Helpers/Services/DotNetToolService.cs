@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             return commands.ToList();
         }
 
-        public bool InstallDotNetTool(string toolName, string? version = null)
+        public bool InstallDotNetTool(string toolName, string? version = null, bool prerelease = false)
         {
             if (string.IsNullOrEmpty(toolName))
             {
@@ -112,6 +112,11 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             {
                 installParams.Add("-v");
                 installParams.Add(version);
+            }
+
+            if (prerelease)
+            {
+                installParams.Add("--prerelease");
             }
             
             var runner = DotnetCliRunner.CreateDotNet("tool", installParams);

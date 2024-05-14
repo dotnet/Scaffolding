@@ -30,7 +30,7 @@ internal class FirstPartyComponentInitializer
         foreach (var tool in toolsToInstall)
         {
             _logger.LogMessage($"Installing {tool}!");
-            var successfullyInstalled = _dotnetToolService.InstallDotNetTool(tool);
+            var successfullyInstalled = _dotnetToolService.InstallDotNetTool(tool, prerelease: true);
             if (!successfullyInstalled)
             {
                 _logger.LogMessage($"Failed to install {tool}!");

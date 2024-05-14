@@ -58,8 +58,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         internal static Parameter CachingTypeParameter = new() { Name = "--type", DisplayName = "Caching type", Description = "Types of caching", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = CachingTypeCustomValues };
         internal static Parameter DatabaseTypeParameter = new() { Name = "--type", DisplayName = "Database type", Description = "Types of database", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = DatabaseTypeCustomValues };
         internal static Parameter StorageTypeParameter = new() { Name = "--type", DisplayName = "Storage type", Description = "Types of storage", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = StorageTypeCustomValues };
-        internal static Parameter[] CachingParameters = [HostProjectParameter, WebProjectParameter, CachingTypeParameter];
-        internal static Parameter[] DatabaseParameters = [HostProjectParameter, ApiProjectParameter, DatabaseTypeParameter];
-        internal static Parameter[] StorageParameters = [HostProjectParameter, ApiProjectParameter, StorageTypeParameter];
+        internal static Parameter[] CachingParameters = [CachingTypeParameter, HostProjectParameter, WebProjectParameter];
+        internal static Parameter[] DatabaseParameters = [DatabaseTypeParameter, HostProjectParameter, ApiProjectParameter];
+        internal static Parameter[] StorageParameters = [StorageTypeParameter, HostProjectParameter, ApiProjectParameter];
     }
 }

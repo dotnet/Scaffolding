@@ -50,11 +50,11 @@ internal class CategoryDiscovery
         //only get categories from the picked DotNetToolInfo
         if (_componentPicked != null)
         {
-            displayCategories = allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)).Select(y => y.Value.DisplayCategory).ToList();
+            displayCategories = allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)).Select(y => y.Value.DisplayCategory).Distinct().ToList();
         }
         else
         {
-            displayCategories = allCommands?.Select(x => x.Value.DisplayCategory).ToList();
+            displayCategories = allCommands?.Select(x => x.Value.DisplayCategory).Distinct().ToList();
         }
 
         var prompt = new FlowSelectionPrompt<string>()

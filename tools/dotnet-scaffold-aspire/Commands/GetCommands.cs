@@ -14,13 +14,29 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         {
             var commands = new List<CommandInfo>
             {
-                new CommandInfo
+                new()
                 {
-                    Name = "redis",
-                    DisplayName = "Redis",
+                    Name = "caching",
+                    DisplayName = "Caching",
                     DisplayCategory = "Aspire",
-                    Description = "Modifies Aspire project to make it redis ready",
-                    Parameters = GetCmdsHelper.RedisParameters
+                    Description = "Modifies Aspire project to make it caching ready!",
+                    Parameters = GetCmdsHelper.CachingParameters
+                },
+                new()
+                {
+                    Name = "storage",
+                    DisplayName = "Storage",
+                    DisplayCategory = "Aspire",
+                    Description = "Modifies Aspire project to make it storage ready!",
+                    Parameters = GetCmdsHelper.StorageParameters
+                },
+                new()
+                {
+                    Name = "database",
+                    DisplayName = "Database",
+                    DisplayCategory = "Aspire",
+                    Description = "Modifies Aspire project to make it database ready!",
+                    Parameters = GetCmdsHelper.DatabaseParameters
                 }
                 // Add other commands here
             };
@@ -33,7 +49,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
     public static class GetCmdsHelper
     {
-        internal static Parameter ProjectParameter = new() { Name = "--project", DisplayName = "Project Name", Description = "Project of choice for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
-        internal static Parameter[] RedisParameters = [ProjectParameter];
+        internal static Parameter HostProjectParameter = new() { Name = "--host-project", DisplayName = "Aspire Host project file", Description = "Aspire host app for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+        internal static Parameter ApiProjectParameter = new() { Name = "--api-project", DisplayName = "API project file", Description = "API project associated with the Aspire Starter App", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+        internal static Parameter WebProjectParameter = new() { Name = "--web-project", DisplayName = "Web project file", Description = "Web project associated with the Aspire Starter App", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+        internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
+        internal static List<string> DatabaseTypeCustomValues = ["npgsql", "npgsql-efcore", "sqlserver-efcore", "cosmos-efcore"];
+        internal static List<string> StorageTypeCustomValues = ["azure-storage-queues", "azure-storage-blobs", "azure-data-tables"];
+        internal static Parameter CachingTypeParameter = new() { Name = "--type", DisplayName = "Caching type", Description = "Types of caching", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = CachingTypeCustomValues };
+        internal static Parameter DatabaseTypeParameter = new() { Name = "--type", DisplayName = "Database type", Description = "Types of database", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = DatabaseTypeCustomValues };
+        internal static Parameter StorageTypeParameter = new() { Name = "--type", DisplayName = "Storage type", Description = "Types of storage", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = StorageTypeCustomValues };
+        internal static Parameter[] CachingParameters = [HostProjectParameter, WebProjectParameter, CachingTypeParameter];
+        internal static Parameter[] DatabaseParameters = [HostProjectParameter, ApiProjectParameter, DatabaseTypeParameter];
+        internal static Parameter[] StorageParameters = [HostProjectParameter, ApiProjectParameter, StorageTypeParameter];
     }
 }

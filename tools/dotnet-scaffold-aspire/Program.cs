@@ -14,7 +14,9 @@ public static class Program
         var app = new CommandApp(serviceRegistrations);
         app.Configure(config =>
         {
-            config.AddCommand<RedisCommand>("redis");
+            config.AddCommand<CachingCommand>("caching");
+            config.AddCommand<DatabaseCommand>("database");
+            config.AddCommand<StorageCommand>("storage");
             config.AddCommand<GetCmdsCommand>("get-commands");
         });
 
@@ -29,8 +31,8 @@ public static class Program
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
         registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
-        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(MacMsbuildEnvironmentVariableProvider));
-        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(WindowsEnvironmentVariableProvider));
+/*        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(MacMsbuildEnvironmentVariableProvider));
+        registrar.Register(typeof(IEnvironmentVariableProvider), typeof(WindowsEnvironmentVariableProvider));*/
         registrar.Register(typeof(IHostService), typeof(HostService));
         registrar.Register(typeof(ICodeService), typeof(CodeService));
         return registrar;

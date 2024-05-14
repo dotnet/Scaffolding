@@ -61,24 +61,12 @@ public class StartupFlowStep : IFlowStep
     {
         AnsiConsole.Status()
             .WithSpinner()
-            .Start("Initializing dotnet-scaffold", async statusContext =>
+            .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
                 //add 'workspace' settings
                 var workspaceSettings = new WorkspaceSettings();
                 _appSettings.AddSettings("workspace", workspaceSettings);
-                //initialize msbuild
-                if (_initializeMsbuild)
-                {
-                    statusContext.Status = "Initializing msbuild!";
-                    new MsBuildInitializer(_logger).Initialize();
-                    statusContext.Status = "DONE\n";
-                }
-                //initialize environment variables
-                statusContext.Status = "Gathering environment variables!";
-                var environmentVariableProvider = new EnvironmentVariablesStartup(_hostService, _environmentService, _appSettings);
-                await environmentVariableProvider.StartupAsync();
-                statusContext.Status = "DONE\n";
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Initializing 1st party components (dotnet tools)";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();

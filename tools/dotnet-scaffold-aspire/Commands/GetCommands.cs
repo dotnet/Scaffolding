@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
     public static class GetCmdsHelper
     {
-        internal static Parameter AppHostProjectParameter = new() { Name = "--host-project", DisplayName = "Aspire Host project file", Description = "Aspire host app for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+        internal static Parameter AppHostProjectParameter = new() { Name = "--apphost-project", DisplayName = "Aspire AppHost project file", Description = "Aspire AppHost project for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ApiProjectParameter = new() { Name = "--api-project", DisplayName = "API project file", Description = "API project associated with the Aspire Starter App", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter WebProjectParameter = new() { Name = "--web-project", DisplayName = "Web project file", Description = "Web project associated with the Aspire Starter App", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];

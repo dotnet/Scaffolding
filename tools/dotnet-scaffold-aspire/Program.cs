@@ -3,7 +3,6 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 using Spectre.Console.Cli;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire;
 public static class Program

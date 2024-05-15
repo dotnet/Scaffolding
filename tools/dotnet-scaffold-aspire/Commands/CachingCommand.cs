@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             }
 
             InstallPackages(settings);
-            return await UpdateAppHostAsync(settings) && await UpdateWebAppAsync(settings) ? 0 : 1;
+            return await UpdateAppHostAsync(settings) && await UpdateWebAppAsync(settings) ? 0 : -1;
         }
 
         public class CachingCommandSettings : CommandSettings

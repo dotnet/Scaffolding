@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                         exitCode = cliRunner.ExecuteAndCaptureOutput(out stdOut, out stdErr);
                     });
 
-                if (exitCode != null && (string.IsNullOrEmpty(stdOut) || string.IsNullOrEmpty(stdErr)))
+                if (exitCode != null)
                 {
                     AnsiConsole.Console.WriteLine($"\nCommand executed : '{componentExecutionString}'");
                     AnsiConsole.Console.WriteLine($"\nCommand exit code - {exitCode}");

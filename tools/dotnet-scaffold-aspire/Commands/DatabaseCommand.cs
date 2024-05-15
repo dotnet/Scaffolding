@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                     projectFile: commandSettings.Project);
             }
 
-            PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? apiServicePackageName);
+            PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? apiServicePackageName);
             if (_fileSystem.FileExists(commandSettings.ApiProject) && !string.IsNullOrEmpty(apiServicePackageName))
             {
                 DotnetCommands.AddPackage(

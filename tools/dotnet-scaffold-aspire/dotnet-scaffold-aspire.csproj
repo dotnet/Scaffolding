@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Commands\CodeModificationConfigs\Caching\*.json">
-      <PackagePath>lib\net8.0\</PackagePath>
       <Pack>true</Pack>
     </EmbeddedResource>
   </ItemGroup>

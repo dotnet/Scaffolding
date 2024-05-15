@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             [CommandOption("--type <TYPE>")]
             public required string Type { get; set; }
 
-            [CommandOption("--host-project <PROJECT>")]
+            [CommandOption("--apphost-project <PROJECT>")]
             public required string Project { get; set; }
 
             [CommandOption("--api-project <APIPROJECT>")]

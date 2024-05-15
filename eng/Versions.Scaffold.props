@@ -5,16 +5,6 @@
     <UsingToolXliff>false</UsingToolXliff>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
   </PropertyGroup>
-  <PropertyGroup>
-    <VersionPrefix>0.1.0</VersionPrefix>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
-    <!--
-        When StabilizePackageVersion is set to 'true', this branch will produce stable outputs for 'Shipping' packages
-    -->
-    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
-    <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
-  </PropertyGroup>
   
   <PropertyGroup>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>

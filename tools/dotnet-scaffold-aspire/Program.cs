@@ -25,13 +25,10 @@ public static class Program
     private static ITypeRegistrar? GetDefaultServices()
     {
         var registrar = new TypeRegistrar();
-        registrar.Register(typeof(IAppSettings), typeof(AppSettings));
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
         registrar.Register(typeof(ILogger), typeof(AnsiConsoleLogger));
-        registrar.Register(typeof(IHostService), typeof(HostService));
-        registrar.Register(typeof(ICodeService), typeof(CodeService));
         return registrar;
     }
 }

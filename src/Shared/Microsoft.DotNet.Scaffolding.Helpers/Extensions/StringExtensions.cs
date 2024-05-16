@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions
         /// basePath to fullPath. Note that if either path is null, fullPath will be returned.
         /// Note that two paths that are equal return ".\".
         /// </summary>
-        public static string MakeRelativePath(this string fullPath, string basePath)
+        public static string? MakeRelativePath(this string? fullPath, string? basePath)
         {
             if (string.IsNullOrEmpty(basePath) || string.IsNullOrEmpty(fullPath))
             {

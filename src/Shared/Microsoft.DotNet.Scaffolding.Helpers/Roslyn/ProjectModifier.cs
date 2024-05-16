@@ -3,14 +3,17 @@
 
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
 public class ProjectModifier
 {
     private readonly ILogger _consoleLogger;
+    private readonly IEnvironmentService _environmentService;
     private readonly ICodeService _codeService;
     private readonly IAppSettings _appSettings;
     private const string Main = nameof(Main);
@@ -19,6 +22,7 @@ public class ProjectModifier
     private readonly CodeModifierConfig? _codeModifierConfig;
 
     public ProjectModifier(
+        IEnvironmentService environmentService,
         IAppSettings appSettings,
         ICodeService codeService,
         ILogger consoleLogger,
@@ -26,6 +30,7 @@ public class ProjectModifier
         CodeModifierConfig? codeModifierConfig = null)
     {
         _appSettings = appSettings;
+        _environmentService = environmentService;
         _codeService = codeService;
         _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
         _output = new StringBuilder();
@@ -48,6 +53,8 @@ public class ProjectModifier
         {
             Document? originalDocument = roslynProject?.GetDocument(file.FileName);
             var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, _codeChangeOptions);
+            var relativeModifiedPath = modifiedDocument?.FilePath.MakeRelativePath(_environmentService.CurrentDirectory) ?? modifiedDocument?.Name.MakeRelativePath(_environmentService.CurrentDirectory);
+            _consoleLogger.LogMessage($"Modified '{relativeModifiedPath}'!\n");
             roslynProject = modifiedDocument?.Project;
         }
 

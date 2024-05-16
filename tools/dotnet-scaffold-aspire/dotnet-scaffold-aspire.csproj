@@ -25,4 +25,10 @@
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Commands\CodeModificationConfigs\Caching\*.json">
+      <Pack>true</Pack>
+    </EmbeddedResource>
+  </ItemGroup>
+  
 </Project>

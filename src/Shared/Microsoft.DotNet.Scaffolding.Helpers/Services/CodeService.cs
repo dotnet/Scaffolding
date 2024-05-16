@@ -115,10 +115,10 @@ public class CodeService : ICodeService, IDisposable
         await OpenProjectAsync(projectPath!);
     }
 
+    //TODO add a debug option to logging.
     private void OnWorkspaceFailed(object? sender, WorkspaceDiagnosticEventArgs e)
     {
         var diagnostic = e.Diagnostic!;
-        _logger.LogMessage($"[{diagnostic.Kind}] Problem loading file in MSBuild workspace {diagnostic.Message}");
     }
 
     public void Dispose()

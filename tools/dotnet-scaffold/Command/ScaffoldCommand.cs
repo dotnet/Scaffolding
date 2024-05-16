@@ -57,7 +57,7 @@ public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
             new CommandExecuteFlowStep()
         ];
 
-        return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive);
+        return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);
     }
 }
 

@@ -44,11 +44,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             [CommandOption("--type <TYPE>")]
             public required string Type { get; set; }
 
-            [CommandOption("--apphost-project <PROJECT>")]
-            public required string Project { get; set; }
+            [CommandOption("--apphost-project <APPHOSTPROJECT>")]
+            public required string AppHostProject { get; set; }
 
-            [CommandOption("--web-project <WEBPROJECT>")]
-            public required string WebProject { get; set; }
+            [CommandOption("--project <PROJECT>")]
+            public required string Project { get; set; }
         }
 
         internal async Task<bool> UpdateAppHostAsync(CachingCommandSettings commandSettings)
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
-                InputPath = commandSettings.Project
+                InputPath = commandSettings.AppHostProject
             };
 
             var hostAppSettings = new AppSettings();
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-webapp.json", System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
-                InputPath = commandSettings.WebProject
+                InputPath = commandSettings.Project
             };
 
             var hostAppSettings = new AppSettings();
@@ -126,15 +126,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 return false;
             }
 
-            if (string.IsNullOrEmpty(commandSettings.Project))
+            if (string.IsNullOrEmpty(commandSettings.AppHostProject))
             {
                 _logger.LogMessage("Missing/Invalid --apphost-project option.", LogMessageType.Error);
                 return false;
             }
 
-            if (string.IsNullOrEmpty(commandSettings.WebProject))
+            if (string.IsNullOrEmpty(commandSettings.Project))
             {
-                _logger.LogMessage("Missing/Invalid --web-project option.", LogMessageType.Error);
+                _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
                 return false;
             }
 
@@ -143,21 +143,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         internal void InstallPackages(CachingCommandSettings commandSettings)
         {
-            if (_fileSystem.FileExists(commandSettings.Project))
+            if (_fileSystem.FileExists(commandSettings.AppHostProject))
             {
                 DotnetCommands.AddPackage(
                     packageName: PackageConstants.CachingPackages.AppHostRedisPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.Project);
+                    projectFile: commandSettings.AppHostProject);
             }
-
-            PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? webAppPackageName);
-            if (_fileSystem.FileExists(commandSettings.WebProject) && !string.IsNullOrEmpty(webAppPackageName))
+            
+            PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
+            if (_fileSystem.FileExists(commandSettings.Project) && !string.IsNullOrEmpty(projectPackageName))
             {
                 DotnetCommands.AddPackage(
-                    packageName: webAppPackageName,
+                    packageName: projectPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.WebProject);
+                    projectFile: commandSettings.Project);
             }
         }
     }

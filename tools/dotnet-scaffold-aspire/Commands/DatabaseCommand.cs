@@ -37,11 +37,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             [CommandOption("--type <TYPE>")]
             public required string Type { get; set; }
 
-            [CommandOption("--apphost-project <PROJECT>")]
-            public required string Project { get; set; }
+            [CommandOption("--apphost-project <APPHOSTPROJECT>")]
+            public required string AppHostProject { get; set; }
 
-            [CommandOption("--api-project <APIPROJECT>")]
-            public required string ApiProject { get; set; }
+            [CommandOption("--project <PROJECT>")]
+            public required string Project { get; set; }
         }
 
         internal bool ValidateDatabaseCommandSettings(DatabaseCommandSettings commandSettings)
@@ -55,15 +55,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 return false;
             }
 
-            if (string.IsNullOrEmpty(commandSettings.Project))
+            if (string.IsNullOrEmpty(commandSettings.AppHostProject))
             {
-                _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+                _logger.LogMessage("Missing/Invalid --apphost-project option.", LogMessageType.Error);
                 return false;
             }
 
-            if (string.IsNullOrEmpty(commandSettings.ApiProject))
+            if (string.IsNullOrEmpty(commandSettings.Project))
             {
-                _logger.LogMessage("Missing/Invalid --api-project option.", LogMessageType.Error);
+                _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
                 return false;
             }
 
@@ -73,21 +73,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         internal void InstallPackages(DatabaseCommandSettings commandSettings)
         {
             PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName);
-            if (_fileSystem.FileExists(commandSettings.Project) && !string.IsNullOrEmpty(appHostPackageName))
+            if (_fileSystem.FileExists(commandSettings.AppHostProject) && !string.IsNullOrEmpty(appHostPackageName))
             {
                 DotnetCommands.AddPackage(
                     packageName: appHostPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.Project);
+                    projectFile: commandSettings.AppHostProject);
             }
 
-            PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? apiServicePackageName);
-            if (_fileSystem.FileExists(commandSettings.ApiProject) && !string.IsNullOrEmpty(apiServicePackageName))
+            PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
+            if (_fileSystem.FileExists(commandSettings.Project) && !string.IsNullOrEmpty(projectPackageName))
             {
                 DotnetCommands.AddPackage(
-                    packageName: apiServicePackageName,
+                    packageName: projectPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.ApiProject);
+                    projectFile: commandSettings.Project);
             }
         }
     }

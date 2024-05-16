@@ -14,7 +14,7 @@ public class ScaffoldCommandAppBuilder(string[] args)
 {
     private readonly string[] _args = args;
     //try to update this every release
-    private readonly string _backupDotNetScaffoldVersion = "0.1.0-dev";
+    private readonly string _backupDotNetScaffoldVersion = "9.0.0-dev";
 
     public ScaffoldCommandApp Build()
     {

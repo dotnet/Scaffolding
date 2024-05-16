@@ -53,17 +53,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                         exitCode = cliRunner.ExecuteAndCaptureOutput(out stdOut, out stdErr);
                     });
 
-                if (exitCode != null && (!string.IsNullOrEmpty(stdOut) || string.IsNullOrEmpty(stdErr)))
+                if (exitCode != null)
                 {
-                    AnsiConsole.Console.WriteLine($"\nCommand executed : '{componentExecutionString}'");
-                    AnsiConsole.Console.WriteLine($"\nCommand exit code - {exitCode}");
-                    if (exitCode == 0)
+                    // TODO: Put this behind a --verbose type flag. It's helpful for debugging but makes the 
+                    // demo noisy
+                    //AnsiConsole.Console.WriteLine($"\nCommand: '{componentExecutionString}'");
+
+                    // TODO: Long-term we probably want to pipe these out as we get them rather than
+                    // just collect them, otherwise they're out of order
+                    if (!string.IsNullOrWhiteSpace(stdOut))
                     {
-                        AnsiConsole.Console.MarkupLine($"\nCommand stdout :\n[lightgreen]{stdOut}[/]");
+                        AnsiConsole.Console.MarkupLine($"\n[lightgreen]{stdOut}[/]");
                     }
-                    else
+                    if (!string.IsNullOrWhiteSpace(stdErr))
                     {
-                        AnsiConsole.Console.MarkupLine($"\nCommand stderr :\n[lightred]{stdErr}[/]");
+                        AnsiConsole.Console.MarkupLine($"\n[lightred]{stdErr}[/]");
+                    }
+                    if (exitCode != 0)
+                    {
+                        AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");
                     }
 
                     return new ValueTask<FlowStepResult>(FlowStepResult.Success);

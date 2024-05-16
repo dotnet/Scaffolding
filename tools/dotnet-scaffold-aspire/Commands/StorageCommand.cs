@@ -38,11 +38,11 @@ internal class StorageCommand : Command<StorageCommand.StorageCommandSettings>
         [CommandOption("--type <TYPE>")]
         public required string Type { get; set; }
 
-        [CommandOption("--apphost-project <PROJECT>")]
-        public required string Project { get; set; }
+        [CommandOption("--apphost-project <APPHOSTPROJECT>")]
+        public required string AppHostProject { get; set; }
 
-        [CommandOption("--api-project <APIPROJECT>")]
-        public required string ApiProject { get; set; }
+        [CommandOption("--project <PROJECT>")]
+        public required string Project { get; set; }
     }
 
     internal bool ValidateStorageCommandSettings(StorageCommandSettings commandSettings)
@@ -56,15 +56,15 @@ internal class StorageCommand : Command<StorageCommand.StorageCommandSettings>
             return false;
         }
 
-        if (string.IsNullOrEmpty(commandSettings.Project))
+        if (string.IsNullOrEmpty(commandSettings.AppHostProject))
         {
-            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+            _logger.LogMessage("Missing/Invalid --apphost-project option.", LogMessageType.Error);
             return false;
         }
 
-        if (string.IsNullOrEmpty(commandSettings.ApiProject))
+        if (string.IsNullOrEmpty(commandSettings.Project))
         {
-            _logger.LogMessage("Missing/Invalid --api-project option.", LogMessageType.Error);
+            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
             return false;
         }
 
@@ -73,21 +73,21 @@ internal class StorageCommand : Command<StorageCommand.StorageCommandSettings>
 
     internal void InstallPackages(StorageCommandSettings commandSettings)
     {
-        if (_fileSystem.FileExists(commandSettings.Project))
+        if (_fileSystem.FileExists(commandSettings.AppHostProject))
         {
             DotnetCommands.AddPackage(
                 packageName: PackageConstants.StoragePackages.AppHostStoragePackageName,
                 logger: _logger,
-                projectFile: commandSettings.Project);
+                projectFile: commandSettings.AppHostProject);
         }
 
-        PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? apiPackageName);
-        if (_fileSystem.FileExists(commandSettings.ApiProject) && !string.IsNullOrEmpty(apiPackageName))
+        PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
+        if (_fileSystem.FileExists(commandSettings.Project) && !string.IsNullOrEmpty(projectPackageName))
         {
             DotnetCommands.AddPackage(
-                packageName: apiPackageName,
+                packageName: projectPackageName,
                 logger: _logger,
-                projectFile: commandSettings.ApiProject);
+                projectFile: commandSettings.Project);
         }
     }
 }

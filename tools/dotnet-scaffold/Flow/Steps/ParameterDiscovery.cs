@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
             }
             
-            return projects.Select(x => Tuple.Create(GetProjectDisplayName(x, workingDirectory), x)).ToList();
+            return projects.Select(x => Tuple.Create(GetProjectDisplayName(x), x)).ToList();
         }
 
         internal IList<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)
@@ -267,7 +267,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return projectPaths;
         }
 
-        internal string GetProjectDisplayName(string projectPath, string workingDir)
+        private static string GetProjectDisplayName(string projectPath)
         {
             return Path.GetFileNameWithoutExtension(projectPath);
         }

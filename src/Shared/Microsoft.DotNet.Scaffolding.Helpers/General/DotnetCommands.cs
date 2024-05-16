@@ -25,7 +25,7 @@ public static class DotnetCommands
             }
 
             arguments.Add("--prerelease");
-            logger.LogMessage(string.Format("\nAdding package '{0}'.", packageName));
+            logger.LogMessage(string.Format("\nAdding package '{0}'", packageName));
 
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);

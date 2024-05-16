@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
-                InputPath = commandSettings.Project
+                InputPath = commandSettings.AppHostProject
             };
 
             var hostAppSettings = new AppSettings();
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-webapp.json", System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
-                InputPath = commandSettings.WebProject
+                InputPath = commandSettings.Project
             };
 
             var hostAppSettings = new AppSettings();

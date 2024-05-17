@@ -9,5 +9,6 @@
   <PropertyGroup>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
+    <MicrosoftCodeAnalysisVersion>4.10.0-3.final</MicrosoftCodeAnalysisVersion>
   </PropertyGroup>
 </Project>

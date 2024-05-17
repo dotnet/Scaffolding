@@ -54,7 +54,7 @@ public class ProjectModifier
             Document? originalDocument = roslynProject?.GetDocument(file.FileName);
             var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, _codeChangeOptions);
             var relativeModifiedPath = modifiedDocument?.FilePath.MakeRelativePath(_environmentService.CurrentDirectory) ?? modifiedDocument?.Name.MakeRelativePath(_environmentService.CurrentDirectory);
-            _consoleLogger.LogMessage($"Modified '{relativeModifiedPath}'!\n");
+            _consoleLogger.LogMessage($"Modified '{relativeModifiedPath}'\n");
             roslynProject = modifiedDocument?.Project;
         }
 

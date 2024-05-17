@@ -11,6 +11,15 @@
               "LeadingTrivia": {
                 "Newline": true
               }
+            },
+            {
+              "Block": "WithReference(redis)",
+              "Parent": "builder.AddProject<{0}>",
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
             }
           ]
         }

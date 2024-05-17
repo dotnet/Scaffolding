@@ -32,5 +32,21 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn
                 classDeclaration.Modifiers.Any(x => x.Text.Equals(SyntaxFactory.Token(SyntaxKind.StaticKeyword).Text)) :
                 false;
         }
+
+        public static bool IsInNamespace(this ClassDeclarationSyntax classSyntax, string namespaceName)
+        {
+            return classSyntax.Ancestors().OfType<NamespaceDeclarationSyntax>().Any(n => n.Name.ToString().Equals(namespaceName)) ||
+                   classSyntax.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().Any(n => n.Name.ToString().Equals(namespaceName));
+        }
+
+        public static string? GetStringPropertyValue(this ClassDeclarationSyntax classSyntax, string propertyName)
+        {
+            var propertySyntax = classSyntax.Members
+                .OfType<PropertyDeclarationSyntax>()
+                .FirstOrDefault(prop => prop.Identifier.Text.Equals(propertyName));
+
+            var propertyExpression = propertySyntax?.ExpressionBody?.Expression as LiteralExpressionSyntax;
+            return propertyExpression?.Token.ValueText;
+        }
     }
 }

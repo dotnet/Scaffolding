@@ -14,7 +14,7 @@
             },
             {
               "Block": "WithReference(redis)",
-              "Parent": "(\"webfrontend\")",
+              "Parent": "builder.AddProject<{0}>",
               "CodeChangeType": "MemberAccess",
               "LeadingTrivia": {
                 "Newline": true,

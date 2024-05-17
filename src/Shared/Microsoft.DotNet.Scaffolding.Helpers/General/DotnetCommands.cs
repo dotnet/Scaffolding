@@ -40,10 +40,12 @@ public static class DotnetCommands
                 }
 
                 logger.LogMessage("Failed!");
+                logger.LogMessage($"stdout :\n{stdOut}");
+                logger.LogMessage($"stderr :\n{stdErr}");
             }
             else
             {
-                logger.LogMessage("Success!");
+                logger.LogMessage("DONE");
             }
         }
     }

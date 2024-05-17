@@ -38,6 +38,7 @@ public static class DotnetCommands
                 {
                     logger.LogMessage($"\n{stdErr}");
                 }
+
                 logger.LogMessage("Failed!");
             }
             else

@@ -10,8 +10,6 @@ public static class DotnetCommands
     {
         if (!string.IsNullOrEmpty(packageName))
         {
-            var errors = new List<string>();
-            var output = new List<string>();
             var arguments = new List<string>();
             if (!string.IsNullOrEmpty(projectFile))
             {
@@ -32,8 +30,16 @@ public static class DotnetCommands
 
             if (exitCode != 0)
             {
+                if (!string.IsNullOrWhiteSpace(stdOut))
+                {
+                    logger.LogMessage($"\n{stdOut}");
+                }
+                if (!string.IsNullOrWhiteSpace(stdErr))
+                {
+                    logger.LogMessage($"\n{stdErr}");
+                }
+
                 logger.LogMessage("Failed!");
-                logger.LogMessage($"stderr :\n{stdErr}");
             }
             else
             {

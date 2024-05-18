@@ -44,13 +44,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             if (!string.IsNullOrEmpty(componentName) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
                 var componentExecutionString = $"{componentName} {string.Join(" ", parameterValues)}";
-                string? stdOut = null, stdErr = null;
                 int? exitCode = null;
-                AnsiConsole.Status().WithSpinner()
-                    .Start($"Executing '{componentExecutionString}'", statusContext =>
+                AnsiConsole.Status()
+                    .Start($"Executing '{componentName}'", statusContext =>
                     {
                         var cliRunner = DotnetCliRunner.Create(componentName, parameterValues);
-                        exitCode = cliRunner.ExecuteAndCaptureOutput(out stdOut, out stdErr);
+                        exitCode = cliRunner.ExecuteWithCallbacks(
+                            (s) => AnsiConsole.Console.MarkupLine($"[lightgreen]{s}[/]"),
+                            (s) => AnsiConsole.Console.MarkupLine($"[lightred]{s}[/]"));
                     });
 
                 if (exitCode != null)
@@ -59,16 +60,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     // demo noisy
                     //AnsiConsole.Console.WriteLine($"\nCommand: '{componentExecutionString}'");
 
-                    // TODO: Long-term we probably want to pipe these out as we get them rather than
-                    // just collect them, otherwise they're out of order
-                    if (!string.IsNullOrWhiteSpace(stdOut))
-                    {
-                        AnsiConsole.Console.MarkupLine($"\n[lightgreen]{stdOut}[/]");
-                    }
-                    if (!string.IsNullOrWhiteSpace(stdErr))
-                    {
-                        AnsiConsole.Console.MarkupLine($"\n[lightred]{stdErr}[/]");
-                    }
                     if (exitCode != 0)
                     {
                         AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");

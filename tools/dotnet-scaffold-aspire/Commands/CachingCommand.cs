@@ -41,8 +41,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 return -1;
             }
 
+            _logger.LogMessage("Installing packages...");
             InstallPackages(settings);
-            return await UpdateAppHostAsync(settings) && await UpdateWebAppAsync(settings) ? 0 : -1;
+
+            _logger.LogMessage("Updating App host project...");
+            var appHostResult = await UpdateAppHostAsync(settings);
+
+            _logger.LogMessage("Updating web/worker project...");
+            var workerResult = await UpdateWebAppAsync(settings);
+
+            if (appHostResult && workerResult)
+            {
+                _logger.LogMessage("Finished");
+                return 0;
+            }
+            else
+            {
+                _logger.LogMessage("An error occurred.");
+                return -1;
+            }
         }
 
         public class CachingCommandSettings : CommandSettings

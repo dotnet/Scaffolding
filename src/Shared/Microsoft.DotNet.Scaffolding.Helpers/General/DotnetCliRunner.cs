@@ -19,6 +19,38 @@ public class DotnetCliRunner
         return new DotnetCliRunner(commandName, args);
     }
 
+    public int ExecuteWithCallbacks(Action<string> stdOutCallback, Action<string> stdErrCallback)
+    {
+        using var process = new Process()
+        {
+            StartInfo = _psi,
+            EnableRaisingEvents = true
+        };
+
+        process.OutputDataReceived += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                stdOutCallback(e.Data);
+            }
+        };
+
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                stdErrCallback(e.Data);
+            }
+        };
+
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        process.WaitForExit();
+
+        return process.ExitCode;
+    }
+
     public int ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr)
     {
         using var outStream = new ProcessOutputStreamReader();
@@ -26,9 +58,6 @@ public class DotnetCliRunner
 
         outStream.Capture();
         errStream.Capture();
-
-        _psi.RedirectStandardOutput = true;
-        _psi.RedirectStandardError = true;
 
         using var process = new Process
         {
@@ -61,6 +90,8 @@ public class DotnetCliRunner
             FileName = commandName,
             Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
             UseShellExecute = false,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true
         };
     }
 }

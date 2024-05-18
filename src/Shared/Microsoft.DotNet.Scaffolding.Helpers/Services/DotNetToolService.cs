@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             if (GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(dotnetToolName, StringComparison.OrdinalIgnoreCase)) != null)
             {
                 var runner = DotnetCliRunner.Create(dotnetToolName, ["get-commands"]);
-                var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
                 if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
                 {
                     try
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
             }
             
             var runner = DotnetCliRunner.CreateDotNet("tool", installParams);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+            var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
             return exitCode == 0;
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services
         {
             var dotnetToolList = new List<DotNetToolInfo>();
             var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
                 var stdOutByLine = stdOut.Split(System.Environment.NewLine);

@@ -12,7 +12,6 @@ using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
-using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
@@ -68,8 +67,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         private async Task<string?> PromptInteractivePicker(IFlowContext context, InteractivePickerType? pickerType)
         {
-            IList<Tuple<string, string>>? displayTuples = [];
+            List<StepOption> stepOptions = [];
             var codeService = context.GetCodeService();
+            var converter = GetDisplayName;
             switch (pickerType)
             {
                 case InteractivePickerType.ClassPicker:
@@ -77,11 +77,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     //will add better documentation so users will know what to expect.
                     if (codeService is null)
                     {
-                        displayTuples = [];
+                        stepOptions = [];
                     }
                     else
                     {
-                        displayTuples = await GetClassDisplayNamesAsync(codeService);
+                        stepOptions = await GetClassDisplayNamesAsync(codeService);
                     }
 
                     break;
@@ -90,55 +90,62 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     //will add better documentation so users will know what to expect.
                     if (codeService is null)
                     {
-                        displayTuples = [];
+                        stepOptions = [];
                     }
                     else
                     {
                         var allDocuments = (await codeService.GetAllDocumentsAsync()).ToList();
-                        displayTuples = GetDocumentNames(allDocuments);
+                        stepOptions = GetDocumentNames(allDocuments);
                     }
 
                     break;
                 case InteractivePickerType.DbProviderPicker:
-                    displayTuples = DbProviders;
+                    stepOptions = DbProviders;
                     break;
                 case InteractivePickerType.ProjectPicker:
-                    displayTuples = GetProjectFiles();
+                    stepOptions = GetProjectFiles();
+                    converter = GetDisplayNameForProjects;
                     break;
                 case InteractivePickerType.CustomPicker:
-                    displayTuples = GetCustomValues(_parameter.CustomPickerValues);
+                    stepOptions = GetCustomValues(_parameter.CustomPickerValues);
                     break;
             }
 
             if (!_parameter.Required)
             {
-                displayTuples.Insert(0, Tuple.Create("None", string.Empty));
+                stepOptions.Insert(0, new StepOption() { Name = "None", Value = string.Empty });
             }
 
-            var prompt = new FlowSelectionPrompt<Tuple<string, string>>()
+            var prompt = new FlowSelectionPrompt<StepOption>()
                 .Title($"[lightseagreen]Pick a {_parameter.DisplayName}: [/]")
-                .Converter(GetDisplayNameFromTuple)
-                .AddChoices(displayTuples, navigation: context.Navigation);
+                .Converter(converter)
+                .AddChoices(stepOptions, navigation: context.Navigation);
 
             var result = prompt.Show();
             State = result.State;
-            return result.Value?.Item2;
+            return result.Value?.Value;
         }
 
-        private IList<Tuple<string, string>> GetCustomValues(List<string>? customPickerValues)
+        private static List<StepOption> GetCustomValues(List<string>? customPickerValues)
         {
             if (customPickerValues is null || customPickerValues.Count == 0)
             {
                 throw new InvalidOperationException("Missing 'Parameter.CustomPickerValues' values!.\nNeeded when using 'Parameter.InteractivePicker.CustomPicker'");
             }
 
-            return customPickerValues.Select(x => Tuple.Create(x, x)).ToList();
+            return customPickerValues.Select(x => new StepOption() { Name = x, Value = x }).ToList();
         }
 
-        private string GetDisplayNameFromTuple(Tuple<string, string> tuple)
+        private static string GetDisplayName(StepOption stepOption)
         {
-            bool displayNone = tuple.Item1.Equals("None", StringComparison.OrdinalIgnoreCase);
-            return displayNone ? $"[sandybrown]{tuple.Item1} (empty to skip parameter)[/]" : $"{tuple.Item1} {tuple.Item2.ToSuggestion(withBrackets: true)}";
+            bool displayNone = stepOption.Name.Equals("None", StringComparison.OrdinalIgnoreCase);
+            return displayNone ? $"[sandybrown]{stepOption.Name} (empty to skip parameter)[/]" : $"{stepOption.Name} {stepOption.Value.ToSuggestion(withBrackets: true)}";
+        }
+
+        private string GetDisplayNameForProjects(StepOption stepOption)
+        {
+            var pathDisplay = stepOption.Value.MakeRelativePath(_environmentService.CurrentDirectory) ?? stepOption.Value;
+            return $"{stepOption.Name} {pathDisplay.ToSuggestion(withBrackets: true)}";
         }
 
         private ValidationResult Validate(IFlowContext context, string promptVal)
@@ -156,7 +163,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return ValidationResult.Success();
         }
 
-        private async Task<List<Tuple<string, string>>> GetClassDisplayNamesAsync(ICodeService codeService)
+        private static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService)
         {
             var allClassSymbols = await AnsiConsole
                 .Status()
@@ -173,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     return (await codeService.GetAllClassSymbolsAsync()).ToList();
                 });
 
-            List<Tuple<string, string>> classNames = [];
+            List<StepOption> classNames = [];
             if (allClassSymbols != null && allClassSymbols.Count != 0)
             {
                 allClassSymbols.ForEach(
@@ -181,7 +188,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 {
                     if (x != null)
                     {
-                        classNames.Add(Tuple.Create(x.MetadataName, x.Name));
+                        classNames.Add(new StepOption() { Name = x.MetadataName, Value = x.Name });
                     }
                 });
             }
@@ -189,9 +196,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
-        internal List<Tuple<string, string>> GetDocumentNames(List<Document> documents)
+        internal static List<StepOption> GetDocumentNames(List<Document> documents)
         {
-            List<Tuple<string, string>> classNames = [];
+            List<StepOption> classNames = [];
             if (documents != null && documents.Count != 0)
             {
                 documents.ForEach(
@@ -200,7 +207,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     if (x != null)
                     {
                         string fileName = System.IO.Path.GetFileName(x.Name);
-                        classNames.Add(Tuple.Create(fileName, x.Name));
+                        classNames.Add(new StepOption() { Name = fileName, Value = x.Name });
                     }
                 });
             }
@@ -208,7 +215,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
-        internal List<Tuple<string, string>> GetProjectFiles()
+        internal List<StepOption> GetProjectFiles()
         {
             var workingDirectory = _environmentService.CurrentDirectory;
             if (!Path.IsPathRooted(workingDirectory))
@@ -231,7 +238,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
             }
             
-            return projects.Select(x => Tuple.Create(GetProjectDisplayName(x), x)).ToList();
+            return projects.Select(x => new StepOption() { Name = GetProjectDisplayName(x), Value = x }).ToList();
         }
 
         internal IList<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)
@@ -272,21 +279,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return Path.GetFileNameWithoutExtension(projectPath);
         }
 
-        private static List<Tuple<string, string>>? _dbProviders;
-        private static List<Tuple<string, string>> DbProviders
+        private static List<StepOption>? _dbProviders;
+        private static List<StepOption> DbProviders
         {
             get
             {
                 _dbProviders ??=
                 [
-                    Tuple.Create("SQL Server", "sqlserver"),
-                    Tuple.Create("SQLite", "sqlite"),
-                    Tuple.Create("PostgreSQL", "postgres"),
-                    Tuple.Create("Cosmos DB", "cosmos")
+                    new() { Name = "SQL Server", Value = "sqlserver" },
+                    new() { Name = "SQLite", Value = "sqlite" },
+                    new() { Name = "PostgreSQL", Value = "postgres" },
+                    new() { Name = "Cosmos DB", Value = "cosmos" }
                 ];
 
                 return _dbProviders;
             }
+        }
+
+        internal class StepOption
+        {
+            public required string Name { get; set; }
+            public required string Value { get; set; }
         }
     }
 }

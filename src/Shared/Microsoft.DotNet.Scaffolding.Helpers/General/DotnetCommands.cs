@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
 public static class DotnetCommands
 {
-    public static void AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null)
+    public static void AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
         {
@@ -22,7 +22,10 @@ public static class DotnetCommands
                 arguments.AddRange(["-v", packageVersion]);
             }
 
-            arguments.Add("--prerelease");
+            if (includePrerelease)
+            {
+                arguments.Add("--prerelease");
+            }
             logger.LogMessage(string.Format("\nAdding package '{0}'...", packageName));
 
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);

@@ -72,6 +72,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
             [CommandOption("--project <PROJECT>")]
             public required string Project { get; set; }
+
+            [CommandOption("--prerelease")]
+            public required bool Prerelease { get; set; }
         }
 
         internal async Task<bool> UpdateAppHostAsync(CachingCommandSettings commandSettings)
@@ -202,7 +205,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 DotnetCommands.AddPackage(
                     packageName: PackageConstants.CachingPackages.AppHostRedisPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.AppHostProject);
+                    projectFile: commandSettings.AppHostProject,
+                    includePrerelease: commandSettings.Prerelease);
             }
             
             PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
@@ -211,7 +215,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 DotnetCommands.AddPackage(
                     packageName: projectPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.Project);
+                    projectFile: commandSettings.Project,
+                    includePrerelease: commandSettings.Prerelease);
             }
         }
 

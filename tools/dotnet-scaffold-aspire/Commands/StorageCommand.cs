@@ -43,6 +43,9 @@ internal class StorageCommand : Command<StorageCommand.StorageCommandSettings>
 
         [CommandOption("--project <PROJECT>")]
         public required string Project { get; set; }
+
+        [CommandOption("--prerelease")]
+        public required bool Prerelease { get; set; }
     }
 
     internal bool ValidateStorageCommandSettings(StorageCommandSettings commandSettings)
@@ -78,7 +81,8 @@ internal class StorageCommand : Command<StorageCommand.StorageCommandSettings>
             DotnetCommands.AddPackage(
                 packageName: PackageConstants.StoragePackages.AppHostStoragePackageName,
                 logger: _logger,
-                projectFile: commandSettings.AppHostProject);
+                projectFile: commandSettings.AppHostProject,
+                includePrerelease: commandSettings.Prerelease);
         }
 
         PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
@@ -87,7 +91,8 @@ internal class StorageCommand : Command<StorageCommand.StorageCommandSettings>
             DotnetCommands.AddPackage(
                 packageName: projectPackageName,
                 logger: _logger,
-                projectFile: commandSettings.Project);
+                projectFile: commandSettings.Project,
+                includePrerelease: commandSettings.Prerelease);
         }
     }
 }

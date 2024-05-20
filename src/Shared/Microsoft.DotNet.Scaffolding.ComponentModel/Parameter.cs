@@ -55,5 +55,6 @@ public enum InteractivePickerType
     FilePicker,
     DbProviderPicker,
     ProjectPicker,
-    CustomPicker
+    CustomPicker,
+    YesNo
 }

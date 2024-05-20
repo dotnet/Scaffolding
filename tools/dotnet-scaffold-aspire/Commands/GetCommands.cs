@@ -51,14 +51,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
     {
         internal static Parameter AppHostProjectParameter = new() { Name = "--apphost-project", DisplayName = "Aspire App host project file", Description = "Aspire App host project for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ProjectParameter = new() { Name = "--project", DisplayName = "Web or worker project file", Description = "Web or worker project associated with the Aspire App host", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+
         internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
         internal static List<string> DatabaseTypeCustomValues = ["npgsql", "npgsql-efcore", "sqlserver-efcore", "cosmos-efcore"];
         internal static List<string> StorageTypeCustomValues = ["azure-storage-queues", "azure-storage-blobs", "azure-data-tables"];
+
         internal static Parameter CachingTypeParameter = new() { Name = "--type", DisplayName = "Caching type", Description = "Types of caching", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = CachingTypeCustomValues };
         internal static Parameter DatabaseTypeParameter = new() { Name = "--type", DisplayName = "Database type", Description = "Types of database", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = DatabaseTypeCustomValues };
         internal static Parameter StorageTypeParameter = new() { Name = "--type", DisplayName = "Storage type", Description = "Types of storage", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = StorageTypeCustomValues };
-        internal static Parameter[] CachingParameters = [CachingTypeParameter, AppHostProjectParameter, ProjectParameter];
-        internal static Parameter[] DatabaseParameters = [DatabaseTypeParameter, AppHostProjectParameter, ProjectParameter];
-        internal static Parameter[] StorageParameters = [StorageTypeParameter, AppHostProjectParameter, ProjectParameter];
+
+        internal static Parameter PrereleaseParameter = new() { Name = "--prerelease", DisplayName = "Include prerelease packages?", Description = "Include prerelease package versions when installing latest Aspire components", Required = true, Type = BaseTypes.Bool, PickerType = InteractivePickerType.YesNo };
+
+        internal static Parameter[] CachingParameters = [CachingTypeParameter, AppHostProjectParameter, ProjectParameter, PrereleaseParameter];
+        internal static Parameter[] DatabaseParameters = [DatabaseTypeParameter, AppHostProjectParameter, ProjectParameter, PrereleaseParameter];
+        internal static Parameter[] StorageParameters = [StorageTypeParameter, AppHostProjectParameter, ProjectParameter, PrereleaseParameter];
     }
 }

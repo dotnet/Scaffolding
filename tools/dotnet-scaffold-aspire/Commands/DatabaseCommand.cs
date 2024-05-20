@@ -42,6 +42,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
             [CommandOption("--project <PROJECT>")]
             public required string Project { get; set; }
+
+            [CommandOption("--prerelease")]
+            public required bool Prerelease { get; set; }
         }
 
         internal bool ValidateDatabaseCommandSettings(DatabaseCommandSettings commandSettings)
@@ -78,7 +81,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 DotnetCommands.AddPackage(
                     packageName: appHostPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.AppHostProject);
+                    projectFile: commandSettings.AppHostProject,
+                    includePrerelease: commandSettings.Prerelease);
             }
 
             PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
@@ -87,7 +91,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 DotnetCommands.AddPackage(
                     packageName: projectPackageName,
                     logger: _logger,
-                    projectFile: commandSettings.Project);
+                    projectFile: commandSettings.Project,
+                    includePrerelease: commandSettings.Prerelease);
             }
         }
     }

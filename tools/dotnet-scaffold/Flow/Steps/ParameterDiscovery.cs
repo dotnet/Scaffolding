@@ -106,6 +106,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     stepOptions = GetProjectFiles();
                     converter = GetDisplayNameForProjects;
                     break;
+                case InteractivePickerType.YesNo:
+                    stepOptions = [new() { Name = "Yes", Value = "true" }, new() { Name = "No", Value = "false" }];
+                    converter = GetDisplayNameForYesNo;
+                    break;
                 case InteractivePickerType.CustomPicker:
                     stepOptions = GetCustomValues(_parameter.CustomPickerValues);
                     break;
@@ -117,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             var prompt = new FlowSelectionPrompt<StepOption>()
-                .Title($"[lightseagreen]Pick a {_parameter.DisplayName}: [/]")
+                .Title($"[lightseagreen]{_parameter.DisplayName}: [/]")
                 .Converter(converter)
                 .AddChoices(stepOptions, navigation: context.Navigation);
 
@@ -147,6 +151,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var pathDisplay = stepOption.Value.MakeRelativePath(_environmentService.CurrentDirectory) ?? stepOption.Value;
             return $"{stepOption.Name} {pathDisplay.ToSuggestion(withBrackets: true)}";
         }
+
+        private string GetDisplayNameForYesNo(StepOption stepOption) => stepOption.Name;
 
         private ValidationResult Validate(IFlowContext context, string promptVal)
         {

@@ -50,8 +50,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     {
                         var cliRunner = DotnetCliRunner.Create(componentName, parameterValues);
                         exitCode = cliRunner.ExecuteWithCallbacks(
-                            (s) => AnsiConsole.Console.MarkupLine($"[lightgreen]{s}[/]"),
-                            (s) => AnsiConsole.Console.MarkupLine($"[lightred]{s}[/]"));
+                            (s) => AnsiConsole.Console.MarkupLineInterpolated($"[lightgreen]{s}[/]"),
+                            (s) => AnsiConsole.Console.MarkupLineInterpolated($"[lightred]{s}[/]"));
                     });
 
                 if (exitCode != null)

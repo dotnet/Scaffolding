@@ -30,7 +30,7 @@ extends:
     sdl:
       sourceAnalysisPool:
         name: NetCore1ESPool-Svc-Internal
-        image: 1es-windows-2019-pt
+        image: 1es-windows-2019
         os: windows
     customBuildTags:
     - ES365AIMigrationTooling
@@ -53,7 +53,7 @@ extends:
             timeoutInMinutes: 180
             pool:
               name: NetCore1ESPool-Svc-Internal
-              image: 1es-windows-2019-pt
+              image: 1es-windows-2019
             variables:
             - _Script: eng\common\cibuild.cmd
             - _ValidateSdkArgs: ''

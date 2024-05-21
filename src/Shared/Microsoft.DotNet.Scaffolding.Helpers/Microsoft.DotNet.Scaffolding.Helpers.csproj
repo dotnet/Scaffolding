@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="runtime" Version ="$(MicrosoftVisualStudioSetupConfigurationInteropPackageVersion)">
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="runtime" Version="$(MicrosoftVisualStudioSetupConfigurationInteropPackageVersion)">
       <!-- This package is mostly COM definitions which can be loaded in .NET 6 runtime just fine -->
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
@@ -29,4 +29,22 @@
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Templates\DbContext\NewDbContext.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>NewDbContext.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Templates\DbContext\NewDbContext.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NewDbContext.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

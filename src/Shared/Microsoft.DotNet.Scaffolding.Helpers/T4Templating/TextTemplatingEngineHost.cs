@@ -8,7 +8,7 @@ using System.Text;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.VisualStudio.TextTemplating;
 
-namespace Microsoft.EntityFrameworkCore.Scaffolding.Internal;
+namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 
 /// <summary>
 ///     This is an internal API that supports the T4 Templating infrastructure and not subject to

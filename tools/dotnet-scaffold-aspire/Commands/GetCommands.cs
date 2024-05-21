@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         internal static Parameter ProjectParameter = new() { Name = "--project", DisplayName = "Web or worker project file", Description = "Web or worker project associated with the Aspire App host", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
 
         internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
-        internal static List<string> DatabaseTypeCustomValues = ["npgsql", "npgsql-efcore", "sqlserver-efcore", "cosmos-efcore"];
+        internal static List<string> DatabaseTypeCustomValues = DbContextHelper.DatabaseTypes;
         internal static List<string> StorageTypeCustomValues = ["azure-storage-queues", "azure-storage-blobs", "azure-data-tables"];
 
         internal static Parameter CachingTypeParameter = new() { Name = "--type", DisplayName = "Caching type", Description = "Types of caching", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = CachingTypeCustomValues };

@@ -26,9 +26,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Commands\CodeModificationConfigs\Caching\*.json">
+    <EmbeddedResource Include="Commands\CodeModificationConfigs\*\*.json">
       <Pack>true</Pack>
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Pack="true" Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Templates\DbContext\*.tt" PackagePath="Templates\DbContext\" />
+  </ItemGroup>
 </Project>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -62,11 +61,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             public required bool Prerelease { get; set; }
         }
 
+        /// <summary>
+        /// generate a path for DbContext, then use DbContextHelper.CreateDbContext to invoke 'NewDbContext.tt'
+        /// DbContextHelper.CreateDbContext will also write the resulting templated string (class text) to disk
+        /// </summary>
         internal void CreateNewDbContext(DatabaseCommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
             var relativeContextPath = Path.GetRelativePath(settings.Project, newDbContextPath);
-            var dbContextCreated = DbContextHelper.CreateDbContext(DbContextHelper.SqlServerDefaults, newDbContextPath, _fileSystem, _logger);
+            var dbContextCreated = DbContextHelper.CreateDbContext(DbContextHelper.SqlServerDefaults, newDbContextPath, _fileSystem);
             if (dbContextCreated)
             {
                 _logger.LogMessage($"Created '{relativeContextPath}'");
@@ -237,7 +240,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             return await projectModifier.RunAsync();
         }
 
-        // Currently only formatting the 'builder.AddProject<{0}>' Parent value in one of the CodeChange's in redis-apphost.json' 
         internal CodeModifierConfig? EditConfigForAppHost(CodeModifierConfig? configToEdit, CodeChangeOptions codeChangeOptions, string? projectName, string dbType)
         {
             if (configToEdit is null)
@@ -252,10 +254,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 DbContextHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
                 dbProperties is not null)
             {
-
-                var addMethodMapping = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
-                var addDbChange = addMethodMapping?.CodeChanges?.FirstOrDefault(x => !string.IsNullOrEmpty(x.Block) && x.Block.Contains("AddDatabase"));
-                var addProjectChange = addMethodMapping?.CodeChanges?.FirstOrDefault(x => !string.IsNullOrEmpty(x.Parent) && x.Parent.Contains("builder.AddProject<{0}>"));
+                var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+                var addDbChange = globalMethod?.CodeChanges?.FirstOrDefault(x => !string.IsNullOrEmpty(x.Block) && x.Block.Contains("AddDatabase"));
+                var addProjectChange = globalMethod?.CodeChanges?.FirstOrDefault(x => !string.IsNullOrEmpty(x.Parent) && x.Parent.Contains("builder.AddProject<{0}>"));
                 if (!codeChangeOptions.UsingTopLevelsStatements && addProjectChange != null)
                 {
                     addProjectChange = DocumentBuilder.AddLeadingTriviaSpaces(addProjectChange, spaces: 12);
@@ -263,8 +264,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
                 if (addProjectChange != null && !string.IsNullOrEmpty(addProjectChange.Parent) && !string.IsNullOrEmpty(projectName))
                 {
-                    //update the parent value with the project name inserted.
+                    //format projectName onto "builder.AddProject<{0}>"
                     addProjectChange.Parent = string.Format(addProjectChange.Parent, projectName);
+                    //format DbContextProperties onto "var {0} = builder.{1}("{2}").AddDatabase("{0}")"
                     addProjectChange.Block = string.Format(addProjectChange.Block, dbProperties.DbName);
                 }
 
@@ -292,10 +294,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
             if (programCsFile != null && programCsFile.Methods != null && programCsFile.Methods.Count != 0)
             {
-
-                var addMethodMapping = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+                var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
                 //only one change in here
-                var addDbChange = addMethodMapping?.CodeChanges?.FirstOrDefault();
+                var addDbChange = globalMethod?.CodeChanges?.FirstOrDefault();
                 if (!codeChangeOptions.UsingTopLevelsStatements && addDbChange != null)
                 {
                     addDbChange = DocumentBuilder.AddLeadingTriviaSpaces(addDbChange, spaces: 12);
@@ -306,11 +307,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                     DbContextHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
                     dbProperties is not null)
                 {
-                    //update the block value with the 3 db strings.
-                    var dbContextName = dbProperties.DbContextName;
-                    var addDbMethod = dbProperties.AddDbContextMethod;
-                    var dbName = dbProperties.DbName;
-                    addDbChange.Block = string.Format(addDbChange.Block, addDbMethod, dbContextName, dbName);
+                    //formatting DbContextProperties vars onto "builder.{0}<{1}>("{2}")"
+                    addDbChange.Block = string.Format(addDbChange.Block, dbProperties.AddDbContextMethod, dbProperties.DbContextName, dbProperties.DbName);
                 }
             }
 

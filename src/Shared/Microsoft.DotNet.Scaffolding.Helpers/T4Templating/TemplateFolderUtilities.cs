@@ -47,7 +47,7 @@ public static class TemplateFoldersUtilities
         return allTemplates;
     }
 
-    static string? FindFolderWithToolsFolder(string startPath)
+    private static string? FindFolderWithToolsFolder(string startPath)
     {
         DirectoryInfo? directory = new DirectoryInfo(startPath);
 

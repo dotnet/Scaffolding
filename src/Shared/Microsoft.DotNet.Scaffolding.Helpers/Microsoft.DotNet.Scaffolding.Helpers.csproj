@@ -19,10 +19,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="runtime" Version="$(MicrosoftVisualStudioSetupConfigurationInteropPackageVersion)">
-      <!-- This package is mostly COM definitions which can be loaded in .NET 6 runtime just fine -->
-      <NoWarn>NU1701</NoWarn>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

@@ -849,7 +849,6 @@ public class DocumentBuilder
         // Find parent's expression statement
         var exprNode = children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) as ExpressionStatementSyntax;
         var invocationExpression = children.FirstOrDefault(n => n.IsKind(SyntaxKind.InvocationExpression)) as InvocationExpressionSyntax;
-
         if (exprNode is null && invocationExpression is null)
         {
             return originalMethod;
@@ -875,10 +874,12 @@ public class DocumentBuilder
             // Replace existing expression with updated expression
             updatedParent = parent.ReplaceNode(exprNode, modifiedExprNode);
         }
+        //add the scenario to check for an InvocationExpressionSyntax and update it if needed.
         else if(invocationExpression != null)
         {
             // Parse the method call string into an InvocationExpressionSyntax, helps extract the ArgumentList out.
             var identifierExpression = SyntaxFactory.ParseExpression(change.Block) as InvocationExpressionSyntax;
+            //create a new MemberAccessExpression with the parsed method call and the identifier.
             var newExpression = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 invocationExpression,

@@ -8,5 +8,4 @@ public class DbContextProperties
     public required string AddDbContextMethod { get; init; }
     public required string DbName { get; init; }
     public required string DbType { get; init; }
-    public bool IdentityDbContext { get; set; } = false;
 }

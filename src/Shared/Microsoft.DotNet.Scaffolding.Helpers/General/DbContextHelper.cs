@@ -3,7 +3,6 @@
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 using Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext;
-using Microsoft.VisualStudio.TextTemplating;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
@@ -33,7 +32,7 @@ public static class DbContextHelper
 
     public static List<string> DatabaseTypes = DatabaseTypeDefaults.Keys.ToList();
 
-    internal static ITextTransformation? GetDbContextTransformation(string? t4TemplatePath)
+    public static ITextTransformation? GetDbContextTransformation(string? t4TemplatePath)
     {
         if (string.IsNullOrEmpty(t4TemplatePath))
         {
@@ -51,7 +50,7 @@ public static class DbContextHelper
         return transformation;
     }
 
-    public static bool CreateDbContext(DbContextProperties dbContextProperties, string dbContextPath, IFileSystem fileSystem, ILogger logger)
+    public static bool CreateDbContext(DbContextProperties dbContextProperties, string dbContextPath, IFileSystem fileSystem)
     {
         var allT4Templates = TemplateFoldersUtilities.GetAllT4Templates(["DbContext"]);
         string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));

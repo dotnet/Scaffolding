@@ -37,7 +37,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         }
         public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] DatabaseCommandSettings settings)
         {
-            Debugger.Launch();
             if (!ValidateDatabaseCommandSettings(settings))
             {
                 return -1;
@@ -65,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         internal void CreateNewDbContext(DatabaseCommandSettings settings)
         {
-            var newDbContextPath = CreateNewDbContextPath(DbContextHelper.SqlServerDefaults, settings);
+            var newDbContextPath = CreateNewDbContextPath(settings);
             var relativeContextPath = Path.GetRelativePath(settings.Project, newDbContextPath);
             var dbContextCreated = DbContextHelper.CreateDbContext(DbContextHelper.SqlServerDefaults, newDbContextPath, _fileSystem, _logger);
             if (dbContextCreated)
@@ -73,8 +72,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 _logger.LogMessage($"Created '{relativeContextPath}'");
             }
         }
-        internal string CreateNewDbContextPath(DbContextProperties dbContextProperties, DatabaseCommandSettings commandSettings)
+
+        internal string CreateNewDbContextPath(DatabaseCommandSettings commandSettings)
         {
+            if (!DbContextHelper.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
+            {
+                return string.Empty;
+            }
+
             var dbContextPath = string.Empty;
             var dbContextFileName = $"{dbContextProperties.DbContextName}.cs";
             var baseProjectPath = Path.GetDirectoryName(commandSettings.Project);

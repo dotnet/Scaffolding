@@ -73,15 +73,16 @@ public class ProjectModifier
                 switch (file.Extension)
                 {
                     case "cs":
-                        return await ModifyCsFile(file, document, options);
+                        //apply CodeFile.CodeSnippet changes
+                        var doc = await ModifyCsFile(file, document, options);
+                        //replace simple CodeFile.Replacements
+                        return await ApplyTextReplacements(file, doc, options);
                     case "cshtml":
                         return await ModifyCshtmlFile(file, document, options);
                     case "razor":
                     case "html":
                         return await ApplyTextReplacements(file, document, options);
                 }
-
-                //_output.AppendLine(string.Format(Resources.ModifiedCodeFile, file.FileName));
             }
         }
         catch (Exception)
@@ -128,16 +129,12 @@ public class ProjectModifier
         }
 
         var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-        if (replacements != null && !replacements.Any())
+        if (replacements is null || !replacements.Any())
         {
             return document;
         }
 
         return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements);
-/*            if (editedDocument != null)
-        {
-            await ProjectModifierHelper.UpdateDocument(editedDocument);
-        }*/
     }
 
     internal async Task<Document?> ModifyCsFile(CodeFile file, Document? fileDoc, CodeChangeOptions options)

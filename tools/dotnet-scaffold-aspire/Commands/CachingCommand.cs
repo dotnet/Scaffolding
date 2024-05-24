@@ -146,7 +146,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 MSBuildLocator.RegisterDefaults();
             }
 
-            CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-webapp.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var configName = commandSettings.Type.Equals("redis-with-output-caching", StringComparison.OrdinalIgnoreCase) ? "redis-webapp-oc.json" : "redis-webapp.json";
+            CodeModifierConfig ? config = ProjectModifierHelper.GetCodeModifierConfig(configName, System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
                 InputPath = commandSettings.Project

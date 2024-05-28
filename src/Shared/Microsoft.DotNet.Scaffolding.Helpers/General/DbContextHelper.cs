@@ -52,7 +52,8 @@ public static class DbContextHelper
 
     public static bool CreateDbContext(DbContextProperties dbContextProperties, string dbContextPath, IFileSystem fileSystem)
     {
-        var allT4Templates = TemplateFoldersUtilities.GetAllT4Templates(["DbContext"]);
+        var templateUtilities = new TemplateFoldersUtilities();
+        var allT4Templates = templateUtilities.GetAllT4Templates(["DbContext"]);
         string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));
         ITextTransformation? textTransformation = GetDbContextTransformation(t4TemplatePath);
         if (textTransformation is null)

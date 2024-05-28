@@ -875,7 +875,7 @@ public class DocumentBuilder
             updatedParent = parent.ReplaceNode(exprNode, modifiedExprNode);
         }
         //add the scenario to check for an InvocationExpressionSyntax and update it if needed.
-        else if(invocationExpression != null)
+        else if (invocationExpression != null)
         {
             // Parse the method call string into an InvocationExpressionSyntax, helps extract the ArgumentList out.
             var identifierExpression = SyntaxFactory.ParseExpression(change.Block) as InvocationExpressionSyntax;

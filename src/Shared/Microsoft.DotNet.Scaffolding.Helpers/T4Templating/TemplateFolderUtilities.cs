@@ -3,9 +3,9 @@
 using System.Reflection;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
-public static class TemplateFoldersUtilities
+public class TemplateFoldersUtilities : ITemplateFolderService
 {
-    public static List<string> GetTemplateFolders(string[] baseFolders)
+    public IEnumerable<string> GetTemplateFolders(string[] baseFolders)
     {
         ArgumentNullException.ThrowIfNull(baseFolders);
         var rootFolders = new List<string>();
@@ -32,11 +32,11 @@ public static class TemplateFoldersUtilities
         return templateFolders;
     }
 
-    public static List<string> GetAllT4Templates(string[] baseFolders)
+    public IEnumerable<string> GetAllT4Templates(string[] baseFolders)
     {
         List<string> allTemplates = [];
         var allTemplateFolders = GetTemplateFolders(baseFolders);
-        if (allTemplateFolders != null && allTemplateFolders.Count > 0)
+        if (allTemplateFolders != null && allTemplateFolders.Count() > 0)
         {
             foreach (var templateFolder in allTemplateFolders)
             {
@@ -47,7 +47,7 @@ public static class TemplateFoldersUtilities
         return allTemplates;
     }
 
-    private static string? FindFolderWithToolsFolder(string startPath)
+    private string? FindFolderWithToolsFolder(string startPath)
     {
         DirectoryInfo? directory = new DirectoryInfo(startPath);
 

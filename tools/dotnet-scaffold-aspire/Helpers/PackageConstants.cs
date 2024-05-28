@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers
             internal static readonly Dictionary<string, string> CachingPackagesDict = new()
             {
                 { "redis", WebAppRedisPackageName },
-                { "redis-output-caching", WebAppRedisOutputCachingPackageName }
+                { "redis-with-output-caching", WebAppRedisOutputCachingPackageName }
             };
         }
 

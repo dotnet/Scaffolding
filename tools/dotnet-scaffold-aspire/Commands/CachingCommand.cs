@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             }
 
             var configName = commandSettings.Type.Equals("redis-with-output-caching", StringComparison.OrdinalIgnoreCase) ? "redis-webapp-oc.json" : "redis-webapp.json";
-            CodeModifierConfig ? config = ProjectModifierHelper.GetCodeModifierConfig(configName, System.Reflection.Assembly.GetExecutingAssembly());
+            CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig(configName, System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
                 InputPath = commandSettings.Project

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Data;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -846,7 +847,9 @@ public class DocumentBuilder
         }
 
         // Find parent's expression statement
-        if (!(children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) is ExpressionStatementSyntax exprNode))
+        var exprNode = children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) as ExpressionStatementSyntax;
+        var invocationExpression = children.FirstOrDefault(n => n.IsKind(SyntaxKind.InvocationExpression)) as InvocationExpressionSyntax;
+        if (exprNode is null && invocationExpression is null)
         {
             return originalMethod;
         }
@@ -854,21 +857,58 @@ public class DocumentBuilder
         // Create new expression to update old expression
         var leadingTrivia = GetLeadingTrivia(change.LeadingTrivia);
         var identifier = SyntaxFactory.IdentifierName(change.Block);
-
-        var newExpression = SyntaxFactory.MemberAccessExpression(
-            SyntaxKind.SimpleMemberAccessExpression,
-            exprNode.Expression.WithTrailingTrivia(leadingTrivia),
-            identifier);
-
-        var modifiedExprNode = exprNode.WithExpression(newExpression);
-
-        if (modifiedExprNode is null)
+        SyntaxNode? updatedParent = null;
+        if (exprNode != null)
         {
-            return originalMethod;
-        }
+            var newExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                exprNode.Expression.WithTrailingTrivia(leadingTrivia),
+                identifier);
 
-        // Replace existing expression with updated expression
-        var updatedParent = parent.ReplaceNode(exprNode, modifiedExprNode);
+            var modifiedExprNode = exprNode.WithExpression(newExpression);
+            if (modifiedExprNode is null)
+            {
+                return originalMethod;
+            }
+
+            // Replace existing expression with updated expression
+            updatedParent = parent.ReplaceNode(exprNode, modifiedExprNode);
+        }
+        //add the scenario to check for an InvocationExpressionSyntax and update it if needed.
+        else if (invocationExpression != null)
+        {
+            // Parse the method call string into an InvocationExpressionSyntax, helps extract the ArgumentList out.
+            var identifierExpression = SyntaxFactory.ParseExpression(change.Block) as InvocationExpressionSyntax;
+            //create a new MemberAccessExpression with the parsed method call and the identifier.
+            var newExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                invocationExpression,
+                (identifierExpression?.Expression as IdentifierNameSyntax) ?? identifier
+            );
+
+            InvocationExpressionSyntax? modifiedExprNode = null;
+            if (identifierExpression != null)
+            {
+                // Combine the original invocation expression with the parsed method call's argument list
+                modifiedExprNode = SyntaxFactory.InvocationExpression(
+                    newExpression,
+                    identifierExpression.ArgumentList
+                );
+            }
+            else
+            {
+                modifiedExprNode = invocationExpression.WithExpression(newExpression);
+            }
+
+            // Ensure modifiedExprNode is not null
+            if (modifiedExprNode is null)
+            {
+                return originalMethod;
+            }
+
+            // Replace existing expression with updated expression
+            updatedParent = parent.ReplaceNode(invocationExpression, modifiedExprNode);
+        }
 
         return updatedParent != null ? originalMethod.ReplaceNode(parent, updatedParent) : originalMethod;
     }

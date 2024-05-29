@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
             var relativeContextPath = Path.GetRelativePath(settings.Project, newDbContextPath);
-            var dbContextCreated = DbContextHelper.CreateDbContext(DbContextHelper.SqlServerDefaults, newDbContextPath, _fileSystem);
+            var dbContextCreated = DbContextHelper.CreateDbContext(GetCmdsHelper.SqlServerDefaults, newDbContextPath, _fileSystem);
             if (dbContextCreated)
             {
                 _logger.LogMessage($"Created '{relativeContextPath}'");
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         private string CreateNewDbContextPath(DatabaseCommandSettings commandSettings)
         {
-            if (!DbContextHelper.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
+            if (!GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
             {
                 return string.Empty;
             }
@@ -252,7 +252,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             if (programCsFile != null &&
                 programCsFile.Methods != null &&
                 programCsFile.Methods.Count != 0 &&
-                DbContextHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
+                GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
                 dbProperties is not null)
             {
                 var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
@@ -305,7 +305,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
                 if (addDbChange != null &&
                     !string.IsNullOrEmpty(addDbChange.Block) &&
-                    DbContextHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
+                    GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
                     dbProperties is not null)
                 {
                     //formatting DbContextProperties vars onto "builder.{0}<{1}>("{2}")"

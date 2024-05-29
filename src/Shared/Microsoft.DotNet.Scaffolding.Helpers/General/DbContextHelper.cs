@@ -8,30 +8,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
 public static class DbContextHelper
 {
-    public static DbContextProperties SqlServerDefaults = new()
-    {
-        DbType = "sqlserver",
-        DbName = "sqldb",
-        AddDbMethod = "AddSqlServer",
-        AddDbContextMethod = "AddSqlServerDbContext"
-    };
-
-    public static DbContextProperties NpgsqlDefaults = new()
-    {
-        DbType = "postgresql",
-        DbName = "postgresqldb",
-        AddDbMethod = "AddPostgres",
-        AddDbContextMethod = "AddNpgsqlDbContext"
-    };
-
-    public static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
-    {
-        { "npgsql-efcore", NpgsqlDefaults },
-        { "sqlserver-efcore", SqlServerDefaults }
-    };
-
-    public static List<string> DatabaseTypes = DatabaseTypeDefaults.Keys.ToList();
-
     public static ITextTransformation? GetDbContextTransformation(string? t4TemplatePath)
     {
         if (string.IsNullOrEmpty(t4TemplatePath))

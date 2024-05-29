@@ -52,9 +52,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
     {
         internal static Parameter AppHostProjectParameter = new() { Name = "--apphost-project", DisplayName = "Aspire App host project file", Description = "Aspire App host project for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ProjectParameter = new() { Name = "--project", DisplayName = "Web or worker project file", Description = "Web or worker project associated with the Aspire App host", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
+        internal static DbContextProperties SqlServerDefaults = new()
+        {
+            DbType = "sqlserver",
+            DbName = "sqldb",
+            AddDbMethod = "AddSqlServer",
+            AddDbContextMethod = "AddSqlServerDbContext"
+        };
+
+        internal static DbContextProperties NpgsqlDefaults = new()
+        {
+            DbType = "postgresql",
+            DbName = "postgresqldb",
+            AddDbMethod = "AddPostgres",
+            AddDbContextMethod = "AddNpgsqlDbContext"
+        };
 
         internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
-        internal static List<string> DatabaseTypeCustomValues = DbContextHelper.DatabaseTypes;
+        internal static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
+        {
+            { "npgsql-efcore", NpgsqlDefaults },
+            { "sqlserver-efcore", SqlServerDefaults }
+        };
+
+        internal static List<string> DatabaseTypeCustomValues = [.. DatabaseTypeDefaults.Keys];
         internal static List<string> StorageTypeCustomValues = ["azure-storage-queues", "azure-storage-blobs", "azure-data-tables"];
 
         internal static Parameter CachingTypeParameter = new() { Name = "--type", DisplayName = "Caching type", Description = "Types of caching", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = CachingTypeCustomValues };

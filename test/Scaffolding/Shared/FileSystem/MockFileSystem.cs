@@ -72,7 +72,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources
             // length is too much. Hopefully for the tests, that's not the case
             // and it's mostly ok.
             byte[] contents = new byte[sourceStream.Length];
-            await sourceStream.ReadAsync(contents, 0, contents.Length);
+            await sourceStream.ReadExactlyAsync(contents);
             _files[outputPath] = Encoding.UTF8.GetString(contents);
         }
 

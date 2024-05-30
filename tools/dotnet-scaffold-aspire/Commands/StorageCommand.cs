@@ -38,7 +38,6 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] StorageCommandSettings settings)
     {
-        Debugger.Launch();
         if (!ValidateStorageCommandSettings(settings))
         {
             return -1;
@@ -62,21 +61,6 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
             _logger.LogMessage("An error occurred.");
             return -1;
         }
-    }
-
-    public class StorageCommandSettings : CommandSettings
-    {
-        [CommandOption("--type <TYPE>")]
-        public required string Type { get; set; }
-
-        [CommandOption("--apphost-project <APPHOSTPROJECT>")]
-        public required string AppHostProject { get; set; }
-
-        [CommandOption("--project <PROJECT>")]
-        public required string Project { get; set; }
-
-        [CommandOption("--prerelease")]
-        public required bool Prerelease { get; set; }
     }
 
     internal async Task<bool> UpdateAppHostAsync(StorageCommandSettings commandSettings)
@@ -291,5 +275,20 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
                 projectFile: commandSettings.Project,
                 includePrerelease: commandSettings.Prerelease);
         }
+    }
+
+    public class StorageCommandSettings : CommandSettings
+    {
+        [CommandOption("--type <TYPE>")]
+        public required string Type { get; set; }
+
+        [CommandOption("--apphost-project <APPHOSTPROJECT>")]
+        public required string AppHostProject { get; set; }
+
+        [CommandOption("--project <PROJECT>")]
+        public required string Project { get; set; }
+
+        [CommandOption("--prerelease")]
+        public required bool Prerelease { get; set; }
     }
 }

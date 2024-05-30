@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Templating\VS.Web.CG.Templating.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Templating\VS.Web.CG.Templating.csproj" />
   </ItemGroup>
 
   <ItemGroup>

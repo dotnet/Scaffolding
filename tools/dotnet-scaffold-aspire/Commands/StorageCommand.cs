@@ -149,12 +149,12 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
         config = EditConfigForApiService(config, options, commandSettings.Type);
         var projectModifier = new ProjectModifier(
-        _environmentService,
-        webApiSettings,
-        codeService,
-        _logger,
-        options,
-        config);
+            _environmentService,
+            webApiSettings,
+            codeService,
+            _logger,
+            options,
+            config);
         return await projectModifier.RunAsync();
     }
 
@@ -166,8 +166,8 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
         }
 
         var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-        if (programCsFile != null &&
-            programCsFile.Methods != null &&
+        if (programCsFile is not null &&
+            programCsFile.Methods is not null &&
             programCsFile.Methods.Count != 0 &&
             StorageConstants.StoragePropertiesDict.TryGetValue(storageType, out var storageProperties))
         {
@@ -176,25 +176,25 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
             var addAzureStorageChange = globalMethod?.CodeChanges?.FirstOrDefault(x => !string.IsNullOrEmpty(x.InsertAfter) && x.InsertAfter.Contains("builder.AddAzureStorage"));
             var addProjectChange = globalMethod?.CodeChanges?.FirstOrDefault(x => !string.IsNullOrEmpty(x.Parent) && x.Parent.Contains("builder.AddProject<{0}>"));
             //apply changes to addAzureStorageCommand
-            if (!codeChangeOptions.UsingTopLevelsStatements && addAzureStorageChange != null)
+            if (!codeChangeOptions.UsingTopLevelsStatements && addAzureStorageChange is not null)
             {
                 addAzureStorageChange = DocumentBuilder.AddLeadingTriviaSpaces(addAzureStorageChange, spaces: 12);
             }
 
-            if (addAzureStorageChange != null && !string.IsNullOrEmpty(addAzureStorageChange.Block) && storageProperties != null)
+            if (addAzureStorageChange is not null && !string.IsNullOrEmpty(addAzureStorageChange.Block) && storageProperties is not null)
             {
                 //update the parent value with the project name inserted.
                 addAzureStorageChange.Block = string.Format(addAzureStorageChange.Block, storageProperties.VariableName, storageProperties.AddMethodName);
             }
 
             //apply changes to addProjectChange
-            if (!codeChangeOptions.UsingTopLevelsStatements && addProjectChange != null)
+            if (!codeChangeOptions.UsingTopLevelsStatements && addProjectChange is not null)
             {
                 addProjectChange = DocumentBuilder.AddLeadingTriviaSpaces(addProjectChange, spaces: 12);
             }
 
-            if (addProjectChange != null &&
-                storageProperties != null &&
+            if (addProjectChange is not null &&
+                storageProperties is not null &&
                 !string.IsNullOrEmpty(addProjectChange.Parent) &&
                 !string.IsNullOrEmpty(addProjectChange.Block))
             {
@@ -215,12 +215,12 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
         }
 
         var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-        if (programCsFile != null && programCsFile.Methods != null && programCsFile.Methods.Count != 0 && StorageConstants.StoragePropertiesDict.TryGetValue(storageType, out var storageProperties))
+        if (programCsFile is not null && programCsFile.Methods is not null && programCsFile.Methods.Count != 0 && StorageConstants.StoragePropertiesDict.TryGetValue(storageType, out var storageProperties))
         {
             var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
             //only one change in here
             var addClientChange = globalMethod?.CodeChanges?.FirstOrDefault();
-            if (addClientChange != null && storageProperties != null)
+            if (addClientChange is not null && storageProperties is not null)
             {
                 addClientChange.Block = string.Format(addClientChange.Block, storageProperties.VariableName, storageProperties.AddClientMethodName);
             }

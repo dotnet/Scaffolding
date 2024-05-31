@@ -9,7 +9,7 @@
     <PackageTags>dotnet;scaffold;aspire;</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold-aspire</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold.Aspire</RootNamespace>
-    <SignAssembly>false</SignAssembly>
+    <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.Scaffold.Aspire.props" />

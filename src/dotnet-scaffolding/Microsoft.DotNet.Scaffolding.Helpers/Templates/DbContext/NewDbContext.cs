@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class NewDbContext : NewDbContextBase
+    internal partial class NewDbContext : NewDbContextBase
     {
         /// <summary>
         /// Create the template output

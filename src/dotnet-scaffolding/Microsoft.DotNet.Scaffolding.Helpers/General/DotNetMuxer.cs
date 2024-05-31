@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
-public static class DotNetMuxer
+internal static class DotNetMuxer
 {
     private const string MuxerName = "dotnet";
 

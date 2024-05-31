@@ -13,7 +13,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
-public static class ProjectModifierHelper
+internal static class ProjectModifierHelper
 {
     internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
     internal static IEnumerable<string> CodeSnippetTrimStrings = CodeSnippetTrimChars.Select(c => c.ToString());

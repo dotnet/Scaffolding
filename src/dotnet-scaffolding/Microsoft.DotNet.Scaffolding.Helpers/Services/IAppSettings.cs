@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-public interface IAppSettings
+internal interface IAppSettings
 {
     IDictionary<string, string> GlobalProperties { get; }
     object? GetSettings(string sectionName);

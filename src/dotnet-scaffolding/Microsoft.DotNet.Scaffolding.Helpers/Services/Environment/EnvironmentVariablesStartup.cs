@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using System.Composition;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 /// <summary>
 /// Sets environment variables for this process.
 /// </summary>
-public class EnvironmentVariablesStartup
+internal class EnvironmentVariablesStartup
 {
     private readonly IHostService _hostService;
     private readonly IEnvironmentService _environment;

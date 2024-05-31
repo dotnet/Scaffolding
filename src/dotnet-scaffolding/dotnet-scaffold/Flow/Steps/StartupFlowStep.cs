@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 ///   - 
 ///   - 
 /// </summary>
-public class StartupFlowStep : IFlowStep
+internal class StartupFlowStep : IFlowStep
 {
     private readonly IAppSettings _appSettings;
     private readonly IEnvironmentService _environmentService;

@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.Build.Evaluation;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services
+namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+
+internal interface IProjectService
 {
-    public interface IProjectService
-    {
-        Project Project { get; }
-    }
+    Project Project { get; }
 }

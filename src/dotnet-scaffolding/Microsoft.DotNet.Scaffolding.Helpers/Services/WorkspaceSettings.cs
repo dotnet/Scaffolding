@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 /// then user could explicitly specify those paths, and only then if nothing happened we would set them ourselves
 /// to the value we think is the best on current machine.
 /// </summary>
-public class WorkspaceSettings
+internal class WorkspaceSettings
 {
     public WorkspaceSettings()
     {

@@ -1,5 +1,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
 

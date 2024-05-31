@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.CodeDom.Compiler;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -17,7 +16,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 ///     doing so can result in application failures when updating to a new scaffolding release.
 ///     Referencing from dotnet/efcore/src/EFCore.Design/Scaffolding/Internal/TextTemplatingEngineHost.cs
 /// </summary>
-public class TextTemplatingEngineHost : ITextTemplatingSessionHost, ITextTemplatingEngineHost, IServiceProvider
+internal class TextTemplatingEngineHost : ITextTemplatingSessionHost, ITextTemplatingEngineHost, IServiceProvider
 {
     private static readonly List<string> _noWarn = ["CS1701", "CS1702"];
 

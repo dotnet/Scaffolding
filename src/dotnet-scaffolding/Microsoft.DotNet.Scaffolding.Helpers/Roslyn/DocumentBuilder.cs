@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Data;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -12,7 +11,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
-public class DocumentBuilder
+internal class DocumentBuilder
 {
     private readonly CodeFile _codeFile;
     private readonly ILogger _consoleLogger;

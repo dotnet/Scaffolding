@@ -4,7 +4,7 @@ using Microsoft.DotNet.Scaffolding.ComponentModel;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-public interface IDotNetToolService
+internal interface IDotNetToolService
 {
     IList<DotNetToolInfo> GlobalDotNetTools { get; }
     IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null);

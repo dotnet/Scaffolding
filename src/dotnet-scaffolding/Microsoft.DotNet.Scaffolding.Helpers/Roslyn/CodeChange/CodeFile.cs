@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
-public class CodeFile
+internal class CodeFile
 {
     public Dictionary<string, Method>? Methods { get; set; }
     public CodeSnippet[]? Replacements { get; set; }

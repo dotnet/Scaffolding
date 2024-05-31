@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Microsoft.DotNet.Scaffolding.ComponentModel;
 
-public class Parameter
+internal class Parameter
 {
     public required string Name { get; init; }
     public required string DisplayName { get; init; }

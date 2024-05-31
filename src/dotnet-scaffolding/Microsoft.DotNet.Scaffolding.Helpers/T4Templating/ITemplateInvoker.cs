@@ -3,7 +3,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 /// <summary>
 /// Services for invoking T4 text templates for code generation.
 /// </summary>
-public interface ITemplateInvoker
+internal interface ITemplateInvoker
 {
     /// <summary>
     /// Invokes a T4 text template and returns the result.

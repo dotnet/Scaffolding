@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 /// to System.IO implementations. Unit tests can then provide a mock implementation of
 /// this interface for testing that component.
 ///</summary>
-public interface IFileSystem
+internal interface IFileSystem
 {
     bool FileExists(string path);
 

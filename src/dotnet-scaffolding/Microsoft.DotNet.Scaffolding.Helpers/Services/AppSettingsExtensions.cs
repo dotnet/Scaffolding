@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-public static class AppSettingsExtensions
+internal static class AppSettingsExtensions
 {
     public static WorkspaceSettings Workspace(this IAppSettings settings)
     {

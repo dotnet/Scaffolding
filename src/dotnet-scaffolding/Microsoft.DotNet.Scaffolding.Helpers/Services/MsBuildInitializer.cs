@@ -4,7 +4,7 @@ using Microsoft.Build.Locator;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-public class MsBuildInitializer
+internal class MsBuildInitializer
 {
     private readonly ILogger _logger;
 

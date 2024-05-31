@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-
 using System.Reflection;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
-public class HostService : IHostService
+internal class HostService : IHostService
 {
     private readonly ILogger _logger;
     private readonly IEnumerable<IEnvironmentVariableProvider> _providers;

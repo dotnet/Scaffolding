@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Formatting;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
-public static class ClassModifier
+internal static class ClassModifier
 {
     public static CompilationUnitSyntax AddUsings(CompilationUnitSyntax docRoot, string[] usings)
     {

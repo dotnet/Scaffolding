@@ -5,7 +5,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.General;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
-public class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvider
+internal class MacMsbuildEnvironmentVariableProvider : IEnvironmentVariableProvider
 {
     private const string MacOSMonoFrameworkMSBuildExtensionsDir = "/Library/Frameworks/Mono.framework/External/xbuild";
 

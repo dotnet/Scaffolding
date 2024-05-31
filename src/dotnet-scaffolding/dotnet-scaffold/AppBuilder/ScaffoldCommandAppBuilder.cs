@@ -10,7 +10,7 @@ using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
 
-public class ScaffoldCommandAppBuilder(string[] args)
+internal class ScaffoldCommandAppBuilder(string[] args)
 {
     private readonly string[] _args = args;
     //try to update this every release

@@ -4,7 +4,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
-public static class DotnetCommands
+internal static class DotnetCommands
 {
     public static void AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {

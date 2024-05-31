@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 /// <summary>
 ///     This is currently an internal API that supports scaffolding. Use with caution.
 /// </summary>
-public interface ITextTransformation
+internal interface ITextTransformation
 {
     /// <summary>
     /// Session object that can be used to transmit information into a template.

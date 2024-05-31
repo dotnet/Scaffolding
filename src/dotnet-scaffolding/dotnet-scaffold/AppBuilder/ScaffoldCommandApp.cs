@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
 
-public class ScaffoldCommandApp
+internal class ScaffoldCommandApp
 {
     private readonly string[] _args;
     private readonly Spectre.Console.Cli.CommandApp<ScaffoldCommand> _commandApp;

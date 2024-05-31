@@ -9,7 +9,7 @@ using Microsoft.UpgradeAssistant.Cli.Commands;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
-public class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
+internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
     private readonly IAppSettings _appSettings;
     private readonly IDotNetToolService _dotnetToolService;

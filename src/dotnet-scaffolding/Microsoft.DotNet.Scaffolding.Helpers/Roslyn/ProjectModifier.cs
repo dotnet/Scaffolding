@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
@@ -10,7 +9,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
-public class ProjectModifier
+internal class ProjectModifier
 {
     private readonly ILogger _consoleLogger;
     private readonly IEnvironmentService _environmentService;

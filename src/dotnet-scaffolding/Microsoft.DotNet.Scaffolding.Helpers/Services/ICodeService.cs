@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-public interface ICodeService
+internal interface ICodeService
 {
     /// <summary>
     /// Returns current Roslyn workspace object.

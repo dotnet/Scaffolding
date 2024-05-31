@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 ///       when it creates a new instance of <see cref="IProject"/>) it should call OpenProjectAsync
 ///       here and that would ensure project is loaded in the workspace.
 /// </summary>
-public class CodeService : ICodeService, IDisposable
+internal class CodeService : ICodeService, IDisposable
 {
     private readonly ILogger _logger;
     private MSBuildWorkspace? _workspace;

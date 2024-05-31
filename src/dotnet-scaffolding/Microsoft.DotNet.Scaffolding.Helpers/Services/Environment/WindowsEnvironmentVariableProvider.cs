@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.VisualStudio.Setup.Configuration;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Environment;
-public class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
+internal class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
 {
     private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
 

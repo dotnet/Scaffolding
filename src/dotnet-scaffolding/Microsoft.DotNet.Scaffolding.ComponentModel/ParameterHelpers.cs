@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Scaffolding.ComponentModel;
 
-public static class ParameterHelpers
+internal static class ParameterHelpers
 {
     public static bool CheckType(BaseTypes baseType, string value)
     {

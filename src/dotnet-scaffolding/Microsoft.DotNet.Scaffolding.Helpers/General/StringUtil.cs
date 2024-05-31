@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
-public static class StringUtil
+internal static class StringUtil
 {
     //converts Project.Namespace.SubNamespace to Project//Namespace//SubNamespace or Project\\Namespace\\SubNamespace (based on OS)
     public static string ToPath(string namespaceName, string basePath, string projectRootNamespace)

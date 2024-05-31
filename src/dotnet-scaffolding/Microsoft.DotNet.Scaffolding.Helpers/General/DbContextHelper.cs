@@ -6,7 +6,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
-public static class DbContextHelper
+internal static class DbContextHelper
 {
     public static ITextTransformation? GetDbContextTransformation(string? t4TemplatePath)
     {

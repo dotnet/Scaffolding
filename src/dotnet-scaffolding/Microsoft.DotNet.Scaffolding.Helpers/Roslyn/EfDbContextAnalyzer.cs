@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
-public static class EfDbContextHelpers
+internal static class EfDbContextHelpers
 {
     public static EfDbContextProperties GetEfDbContextProperties(ISymbol dbContextSymbol, ISymbol modelSymbol)
     {

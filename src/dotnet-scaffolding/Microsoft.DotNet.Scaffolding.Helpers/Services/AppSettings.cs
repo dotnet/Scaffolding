@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-public class AppSettings : IAppSettings
+internal class AppSettings : IAppSettings
 {
     private readonly Dictionary<string, object> _settings;
 

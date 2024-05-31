@@ -9,7 +9,7 @@
     <PackageTags>dotnet;scaffold;aspnet;</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold-aspnet</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold.AspNet</RootNamespace>
-    <SignAssembly>false</SignAssembly>
+    <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.Scaffold.AspNet.props" />

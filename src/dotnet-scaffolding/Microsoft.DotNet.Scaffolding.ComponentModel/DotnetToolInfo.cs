@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel
     /// <summary>
     /// Info from 'dotnet tool list -g'
     /// </summary>
-    public class DotNetToolInfo
+    internal class DotNetToolInfo
     {
         public string PackageName { get; set; } = default!;
         public string Version { get; set; } = default!;

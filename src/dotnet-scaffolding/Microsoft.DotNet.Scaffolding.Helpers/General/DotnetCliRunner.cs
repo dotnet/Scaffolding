@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 /// <summary>
 /// To run 'dotnet' or any processes and capture consequent stdout and stderr (using 'ExecuteAndCaptureOutput'
 /// </summary>
-public class DotnetCliRunner
+internal class DotnetCliRunner
 {
     public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args)
     {

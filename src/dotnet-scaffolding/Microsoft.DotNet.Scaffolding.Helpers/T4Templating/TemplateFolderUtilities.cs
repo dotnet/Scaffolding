@@ -3,7 +3,7 @@
 using System.Reflection;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
-public class TemplateFoldersUtilities : ITemplateFolderService
+internal class TemplateFoldersUtilities : ITemplateFolderService
 {
     public IEnumerable<string> GetTemplateFolders(string[] baseFolders)
     {

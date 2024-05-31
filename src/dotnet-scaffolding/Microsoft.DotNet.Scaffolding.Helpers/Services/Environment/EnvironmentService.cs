@@ -1,6 +1,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-
-using System;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
@@ -8,7 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 /// <summary>
 /// Wrapper over System.Environment abstraction for unit testing.
 /// </summary>
-public class EnvironmentService : IEnvironmentService
+internal class EnvironmentService : IEnvironmentService
 {
     private readonly IFileSystem _fileSystem;
     public EnvironmentService(IFileSystem fileSystem)

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
-public static class CliHelpers
+internal static class CliHelpers
 {
     public static IDictionary<string, List<string>> ParseILookup(ILookup<string, string?> lookup)
     {

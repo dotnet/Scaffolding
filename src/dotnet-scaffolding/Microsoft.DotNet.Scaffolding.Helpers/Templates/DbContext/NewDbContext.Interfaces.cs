@@ -4,7 +4,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext
 {
-    public partial class NewDbContext : ITextTransformation
+    internal partial class NewDbContext : ITextTransformation
     {
     }
 }

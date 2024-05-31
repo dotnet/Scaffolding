@@ -4,7 +4,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 /// <summary>
 /// Abstracts out host properties. Host represents a tool running a the moment: VS, CLI etc.
 /// </summary>
-public interface IHostService
+internal interface IHostService
 {
     /// <summary>
     /// Returns host installation directory.

@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 /// <summary>
 /// switch out the CallContext.LogicalGetData call in the generated .cs template with this
 /// </summary>
-public sealed class CallContext
+internal sealed class CallContext
 {
     public static object? LogicalGetData(string name)
         => null;

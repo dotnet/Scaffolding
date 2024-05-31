@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 /// For internal microsoft use only. Use <see cref="ITemplateInvoker"/>
 /// in custom code generators.
 /// </summary>
-public class TemplateInvoker : ITemplateInvoker
+internal class TemplateInvoker : ITemplateInvoker
 {
     private readonly ConsoleLogger _consoleLogger;
     /// <summary>

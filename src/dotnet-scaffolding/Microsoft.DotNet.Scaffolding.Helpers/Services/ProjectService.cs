@@ -1,7 +1,7 @@
 using Microsoft.Build.Evaluation;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
-public class ProjectService : IProjectService, IDisposable
+internal class ProjectService : IProjectService, IDisposable
 {
     private readonly string _projectPath;
     private readonly ILogger _logger;

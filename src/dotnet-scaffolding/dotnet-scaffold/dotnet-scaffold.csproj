@@ -11,8 +11,6 @@
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
-  <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />
-
   <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
     <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />

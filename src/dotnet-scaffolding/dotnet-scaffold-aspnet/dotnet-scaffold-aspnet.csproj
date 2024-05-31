@@ -12,8 +12,6 @@
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
-  <Import Project="$(RepoRoot)eng\Versions.Scaffold.AspNet.props" />
-
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
     <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />

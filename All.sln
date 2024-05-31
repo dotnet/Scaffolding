@@ -113,9 +113,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{CA1DAC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.Shared.Tests", "test\Shared\Microsoft.DotNet.Scaffolding.Shared.Tests\Microsoft.DotNet.Scaffolding.Shared.Tests.csproj", "{A4C14F41-7EBC-40C2-93DF-B131B713AB8D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.Helpers", "src\Shared\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj", "{E1F14286-FA19-47F2-8AB4-51B9DFA9EA27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.Helpers", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj", "{E1F14286-FA19-47F2-8AB4-51B9DFA9EA27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.ComponentModel", "src\Shared\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj", "{A31A0E2D-F990-413C-91F6-8B5B8E570EC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.ComponentModel", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj", "{A31A0E2D-F990-413C-91F6-8B5B8E570EC5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.ComponentModel.Tests", "test\Shared\Microsoft.DotNet.Scaffolding.ComponentModel.Tests\Microsoft.DotNet.Scaffolding.ComponentModel.Tests.csproj", "{F85BABAD-4C0B-419C-AE6A-BA95D259AB53}"
 EndProject
@@ -829,8 +829,8 @@ Global
 		{06E6C642-BB9B-4946-8AAA-8A8A463CBA48} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
 		{CA1DAC77-5D18-4986-A4BB-F6171DEE5A52} = {81B64EBF-613D-43AE-82DA-B375FB751921}
 		{A4C14F41-7EBC-40C2-93DF-B131B713AB8D} = {CA1DAC77-5D18-4986-A4BB-F6171DEE5A52}
-		{E1F14286-FA19-47F2-8AB4-51B9DFA9EA27} = {06E6C642-BB9B-4946-8AAA-8A8A463CBA48}
-		{A31A0E2D-F990-413C-91F6-8B5B8E570EC5} = {06E6C642-BB9B-4946-8AAA-8A8A463CBA48}
+		{E1F14286-FA19-47F2-8AB4-51B9DFA9EA27} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
+		{A31A0E2D-F990-413C-91F6-8B5B8E570EC5} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 		{F85BABAD-4C0B-419C-AE6A-BA95D259AB53} = {CA1DAC77-5D18-4986-A4BB-F6171DEE5A52}
 		{289D2898-EC15-4496-9AF8-E20FAB151BFE} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 		{E86098F3-69EF-4530-8ADD-D49EB8BBFA92} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}

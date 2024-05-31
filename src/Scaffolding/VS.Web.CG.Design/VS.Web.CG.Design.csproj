@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(OutputPath)$(AssemblyName).dll;
@@ -24,6 +24,6 @@
       <Pack>true</Pack>
       <PackagePath>lib\net8.0\</PackagePath>
     </Content>
-    <None Include="$(RepoRoot)\src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
+    <None Include="$(RepoRoot)src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

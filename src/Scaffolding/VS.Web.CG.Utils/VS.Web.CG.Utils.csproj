@@ -15,7 +15,7 @@
     <EmbeddedResource Include="..\..\Shared\Microsoft.DotNet.Scaffolding.Shared\General\**\*.resx">
       <Link>Shared\%(RecursiveDir)%(FileName).resx</Link>
     </EmbeddedResource>
-    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

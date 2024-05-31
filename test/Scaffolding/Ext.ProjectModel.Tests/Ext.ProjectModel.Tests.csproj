@@ -10,16 +10,16 @@
     <Compile Include="..\Shared\*.cs">
       <Link>Shared\%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\MsBuild\**\*.cs;">
+    <Compile Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\MsBuild\**\*.cs;">
       <Link>MsBuildSources\%(RecursiveDir)%(FileName)</Link>
     </Compile>
-    <Compile Include="$(RepoRoot)\src\Shared\Cli.Utils\*.cs">
+    <Compile Include="$(RepoRoot)src\Shared\Cli.Utils\*.cs">
       <Link>Shared\Cli.Utils\%(FileName)</Link>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

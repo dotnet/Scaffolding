@@ -2,8 +2,7 @@
   "solution": {
     "path": "All.sln",
     "projects": [
-        "tools\\dotnet-aspnet-codegenerator\\dotnet-aspnet-codegenerator.csproj",
-        "tools\\dotnet-scaffold\\dotnet-scaffold.csproj",
+        "src\\Scaffolding\\dotnet-aspnet-codegenerator\\dotnet-aspnet-codegenerator.csproj",
         "src\\Scaffolding\\VS.Web.CG\\VS.Web.CG.csproj",
         "src\\Shared\\Microsoft.DotNet.Scaffolding.Shared\\Microsoft.DotNet.Scaffolding.Shared.csproj",
         "src\\Scaffolding\\VS.Web.CG.Core\\VS.Web.CG.Core.csproj",

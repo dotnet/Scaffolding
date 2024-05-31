@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\Scaffolding\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
     <ProjectReference Include="..\TestApps\ModelTypesLocatorTestWebApp\ModelTypesLocatorTestWebApp.csproj" />
   </ItemGroup>
 

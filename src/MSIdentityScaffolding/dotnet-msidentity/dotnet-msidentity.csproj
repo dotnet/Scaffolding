@@ -38,8 +38,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
-    <None Include="$(RepoRoot)\tools\dotnet-msidentity\README.md" Pack="true" PackagePath="\"/>
+    <None Include="$(RepoRoot)LICENSE" Pack="true" PackagePath="\"/>
+    <None Include="$(RepoRoot)src\MSIdentityScaffolding\dotnet-msidentity\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\MSIdentityScaffolding\Microsoft.DotNet.MSIdentity\Microsoft.DotNet.MSIdentity.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
-    <SignAssembly>false</SignAssembly>
+    <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />

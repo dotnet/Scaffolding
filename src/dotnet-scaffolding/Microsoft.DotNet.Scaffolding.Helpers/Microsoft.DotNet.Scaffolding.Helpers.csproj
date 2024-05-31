@@ -4,9 +4,7 @@
     <TargetFrameworks>net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
-  <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />
-
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" ExcludeAssets="runtime" />

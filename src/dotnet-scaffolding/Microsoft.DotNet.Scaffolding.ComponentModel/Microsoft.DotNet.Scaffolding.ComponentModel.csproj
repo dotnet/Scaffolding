@@ -5,6 +5,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <Import Project="$(RepoRoot)eng\Versions.Scaffold.props" />
-
 </Project>

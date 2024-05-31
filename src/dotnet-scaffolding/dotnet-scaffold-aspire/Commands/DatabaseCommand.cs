@@ -47,10 +47,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             _logger.LogMessage("Updating App host project...");
             var appHostResult = await UpdateAppHostAsync(settings);
 
+            _logger.LogMessage("Adding new DbContext...");
+            var dbContextCreationResult = CreateNewDbContext(settings);
+
             _logger.LogMessage("Updating web/worker project...");
             var workerResult = await UpdateWebAppAsync(settings);
 
-            if (appHostResult && workerResult)
+            if (appHostResult && dbContextCreationResult && workerResult)
             {
                 _logger.LogMessage("Finished");
                 return 0;
@@ -66,15 +69,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         /// generate a path for DbContext, then use DbContextHelper.CreateDbContext to invoke 'NewDbContext.tt'
         /// DbContextHelper.CreateDbContext will also write the resulting templated string (class text) to disk
         /// </summary>
-        private void CreateNewDbContext(DatabaseCommandSettings settings)
+        private bool CreateNewDbContext(DatabaseCommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
             var relativeContextPath = Path.GetRelativePath(settings.Project, newDbContextPath);
             var dbContextCreated = DbContextHelper.CreateDbContext(GetCmdsHelper.SqlServerDefaults, newDbContextPath, _fileSystem);
-            if (dbContextCreated)
-            {
-                _logger.LogMessage($"Created '{relativeContextPath}'");
-            }
+            return dbContextCreated;
         }
 
         private string CreateNewDbContextPath(DatabaseCommandSettings commandSettings)

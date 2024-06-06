@@ -22,7 +22,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Services
             CommandName = commandName ?? string.Empty;
             _jsonOutput = jsonOutput;
             _silent = silent;
-            AnsiConsole.Console.Profile.Encoding = Encoding.UTF8;
         }
 
         public void LogMessage(string? message, LogMessageType level, bool removeNewLine = false)

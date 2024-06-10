@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
@@ -263,10 +264,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var baseProjectNames = baseList.Select(x => Path.GetFileName(x));
             foreach(var projectPath in projectPathsToAdd)
             {
-                var projectName = Path.GetFileName(projectPath);
+                var normalizedPath = StringUtil.NormalizePathSeparators(projectPath);
+                var projectName = Path.GetFileName(normalizedPath);
                 if (!baseProjectNames.Contains(projectName))
                 {
-                    baseList.Add(projectPath);
+                    baseList.Add(normalizedPath);
                 }
             }
 

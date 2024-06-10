@@ -29,6 +29,22 @@ internal static class StringUtil
         return path;
     }
 
+    //normalize the path separators between mac/linux and windows. 
+    //replacing the other platform's path separator with the one we're on.
+    public static string NormalizePathSeparators(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return path;
+        }
+        
+        // get current platform's path separator
+        string currentSeparator = Path.DirectorySeparatorChar.ToString();
+        string otherSeparator = Path.DirectorySeparatorChar == '/' ? "\\" : "/";
+        //replace the other platform's separator with the current one.
+        return path.Replace(otherSeparator, currentSeparator);
+    }
+
     //remove prefix from namespace, used to remove the project name from namespace when creating the path
     public static string RemovePrefix(string projectNamespace, string basePath, string prefix)
     {

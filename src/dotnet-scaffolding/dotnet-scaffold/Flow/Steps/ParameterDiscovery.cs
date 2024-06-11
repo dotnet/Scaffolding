@@ -266,6 +266,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 var normalizedPath = StringUtil.NormalizePathSeparators(projectPath);
                 var projectName = Path.GetFileName(normalizedPath);
+                //not using case comparison, seems like macOS/Linux project names in the .sln file are not case sensitive. 
                 if (!baseProjectNames.Contains(projectName))
                 {
                     baseList.Add(normalizedPath);

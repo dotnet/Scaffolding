@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
@@ -233,10 +234,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 return [];
             }
 
-            var projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
+            List<string> projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
             var slnFiles = _fileSystem.EnumerateFiles(workingDirectory, "*.sln", SearchOption.TopDirectoryOnly).ToList();
-            var projectsFromSlnFiles = GetProjectsFromSolutionFiles(slnFiles, workingDirectory);
-            projects = projects.Union(projectsFromSlnFiles).ToList();
+            List<string> projectsFromSlnFiles = GetProjectsFromSolutionFiles(slnFiles, workingDirectory);
+            projects = AddUniqueProjects(projects, projectsFromSlnFiles);
 
             //should we search in all directories if nothing in top level? (yes, for now)
             if (projects.Count == 0)
@@ -247,7 +248,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return projects.Select(x => new StepOption() { Name = GetProjectDisplayName(x), Value = x }).ToList();
         }
 
-        internal IList<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)
+        internal List<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)
         {
             List<string> projectPaths = [];
             foreach (var solutionFile in solutionFiles)
@@ -256,6 +257,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             return projectPaths;
+        }
+
+        internal List<string> AddUniqueProjects(List<string> baseList, List<string> projectPathsToAdd)
+        {
+            var baseProjectNames = baseList.Select(x => Path.GetFileName(x));
+            foreach(var projectPath in projectPathsToAdd)
+            {
+                var normalizedPath = StringUtil.NormalizePathSeparators(projectPath);
+                var projectName = Path.GetFileName(normalizedPath);
+                //not making a case-sensitive comparison, seems like macOS/Linux project names in the .sln file are not case sensitive. 
+                if (!baseProjectNames.Contains(projectName, StringComparer.OrdinalIgnoreCase))
+                {
+                    baseList.Add(normalizedPath);
+                }
+            }
+
+            return baseList;
         }
 
         internal IList<string> GetProjectsFromSolutionFile(string solutionFilePath, string workingDir)

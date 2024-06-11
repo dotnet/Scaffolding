@@ -30,11 +30,14 @@
     <PackageReference Include="Microsoft.Graph" Version="$(MicrosoftGraphVersion)" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="$(MicrosoftIdentityClientExtensionsMsalVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonMsIdentityPackageVersion)" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="6.0.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Resources\" />
   </ItemGroup>
 

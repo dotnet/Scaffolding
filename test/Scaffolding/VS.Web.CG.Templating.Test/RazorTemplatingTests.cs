@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
@@ -10,7 +11,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
     public class RazorTemplatingTests
     {
         [Fact(Skip = "Disabling test on CI")]
-        public async void RunTemplateAsync_Generates_Text_For_Template_With_A_Model()
+        public async Task RunTemplateAsync_Generates_Text_For_Template_With_A_Model()
         {
             //Arrange
             var templateContent = @"Hello @Model.Name";
@@ -27,7 +28,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
         }
 
         [Fact(Skip = "Disabling test on CI")]
-        public async void RunTemplateAsync_Returns_Error_For_Invalid_Template()
+        public async Task RunTemplateAsync_Returns_Error_For_Invalid_Template()
         {
             //Arrange
             var templateContent = "@Invalid";

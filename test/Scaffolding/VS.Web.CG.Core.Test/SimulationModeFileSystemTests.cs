@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Xunit;
 
@@ -36,7 +37,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
         }
 
         [Fact]
-        public async void SimulationModeFileSystem_AddFile()
+        public async Task SimulationModeFileSystem_AddFile()
         {
             var fileSystem = new SimulationModeFileSystem();
             var contents = "DummyContents";
@@ -51,7 +52,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
         }
 
         [Fact]
-        public async void SimulationModeFileSystem_EditFile()
+        public async Task SimulationModeFileSystem_EditFile()
         {
             var fileSystem = new SimulationModeFileSystem();
             var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -76,7 +77,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
         }
 
         [Fact]
-        public async void SimulationModeFileSystem_EnumerateFiles_AddedFiles()
+        public async Task SimulationModeFileSystem_EnumerateFiles_AddedFiles()
         {
             var fileSystem = new SimulationModeFileSystem();
             var dirPath = Directory.GetCurrentDirectory();

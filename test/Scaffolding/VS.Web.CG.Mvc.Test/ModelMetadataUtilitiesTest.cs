@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         }
 
         [Fact]
-        public async void TestValidateModelAndGetCodeModelMetadata()
+        public async Task TestValidateModelAndGetCodeModelMetadata()
         {
             var modelTypes = new List<ModelType>();
             //Arrange
@@ -79,7 +79,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         }
 
         [Fact]
-        public async void TestValidateModelAndGetModelMetadata()
+        public async Task TestValidateModelAndGetModelMetadata()
         {
             var modelTypes = new List<ModelType>();
             var dataContextTypes = new List<ModelType>();
@@ -156,7 +156,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
         }
 
         [Fact]
-        public async void TestGetModelEFMetadataMinimalAsync()
+        public async Task TestGetModelEFMetadataMinimalAsync()
         {
             var modelTypes = new List<ModelType>();
             var dataContextTypes = new List<ModelType>();

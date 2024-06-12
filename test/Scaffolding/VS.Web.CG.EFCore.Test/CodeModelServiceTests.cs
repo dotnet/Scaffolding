@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.Extensions.ProjectModel;
@@ -48,7 +49,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         }
 
         [Fact(Skip = "test fail")]
-        public async void TestGetModelMetadata_WithoutDbContext()
+        public async Task TestGetModelMetadata_WithoutDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {

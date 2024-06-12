@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.Extensions.ProjectModel;
@@ -92,7 +93,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test
         }
 
         [Fact(Skip = "Need to workaround the fact that the test doesn't run in the project's dependency context.")]
-        public async void TestGetModelMetadata_WithDbContext()
+        public async Task TestGetModelMetadata_WithDbContext()
         {
             using (var fileProvider = new TemporaryFileProvider())
             {

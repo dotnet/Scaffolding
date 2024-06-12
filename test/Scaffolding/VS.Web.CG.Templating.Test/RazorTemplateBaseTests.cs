@@ -10,7 +10,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test
     public class RazorTemplateBaseTests
     {
         [Fact]
-        public async void ExecuteTemplate_Sets_Output_And_Calls_ExecuteAsync()
+        public async Task ExecuteTemplate_Sets_Output_And_Calls_ExecuteAsync()
         {
             //Arrange
             var customInstance = new CustomClass();

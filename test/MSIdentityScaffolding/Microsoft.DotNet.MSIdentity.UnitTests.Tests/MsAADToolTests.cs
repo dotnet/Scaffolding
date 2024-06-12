@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         }
 
         [Fact]
-        public async void TestPrintTenantsList()
+        public async Task TestPrintTenantsList()
         {
             string path = Assembly.GetExecutingAssembly().Location;
             MsAADTool jsonTenantTool = new MsAADTool(Commands.LIST_TENANTS_COMMAND, ToolOptions);
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         }
 
         [Fact]
-        public async void TestPrintApplicationsList_NoGraphObjects()
+        public async Task TestPrintApplicationsList_NoGraphObjects()
         {
             var directoryObjects = new List<DirectoryObject>();
 
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         }
 
         [Fact]
-        public async void TestGetApplications_OneAppB2C()
+        public async Task TestGetApplications_OneAppB2C()
         {
             var app = new Application { AdditionalData = new Dictionary<string, object>() };
             var directoryObjects = new List<DirectoryObject> { app };

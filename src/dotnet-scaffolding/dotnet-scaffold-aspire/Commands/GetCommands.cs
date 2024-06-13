@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Scaffolders;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -68,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             AddDbContextMethod = "AddNpgsqlDbContext"
         };
 
-        internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
+        internal static List<string> CachingTypeCustomValues = [CachingScaffolder.Type_Redis, CachingScaffolder.Type_RedisWithOutputCaching];
         internal static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
         {
             { "npgsql-efcore", NpgsqlDefaults },

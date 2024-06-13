@@ -1,23 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Scaffolders;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers
 {
     internal class PackageConstants
     {
-        internal class CachingPackages
-        {
-            internal const string AppHostRedisPackageName = "Aspire.Hosting.Redis";
-            internal const string WebAppRedisPackageName = "Aspire.StackExchange.Redis";
-            internal const string WebAppRedisOutputCachingPackageName = "Aspire.StackExchange.Redis.OutputCaching";
-            internal static readonly Dictionary<string, string> CachingPackagesDict = new()
-            {
-                { "redis", WebAppRedisPackageName },
-                { "redis-with-output-caching", WebAppRedisOutputCachingPackageName }
-            };
-        }
-
         internal class StoragePackages
         {
             internal const string AppHostStoragePackageName = "Aspire.Hosting.Azure.Storage";

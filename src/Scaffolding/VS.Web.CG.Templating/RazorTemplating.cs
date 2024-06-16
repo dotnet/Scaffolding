@@ -11,6 +11,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Razor;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 
+// ClassDeclarationIntermediateNode
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
+
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
 {
     //Todo: Make this internal and expose as a sevice
@@ -40,10 +43,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Templating
 
                 SectionDirective.Register(builder);
 
-                builder.AddTargetExtension(new TemplateTargetExtension()
+                builder
+                .AddTargetExtension(new TemplateTargetExtension()
                 {
                     TemplateTypeName = "global::Microsoft.AspNetCore.Mvc.Razor.HelperResult",
-                });
+                })
+                .ConfigureClass(
+                    (RazorCodeDocument doc, ClassDeclarationIntermediateNode cl)
+                    => cl.ClassName = string.Join('_',
+                        fileSystem.GetItem(doc.Source.FilePath).FilePathWithoutExtension.Substring(0X1).Split('/'));
 
                 builder.AddDefaultImports(@"
 @using System

@@ -17,6 +17,15 @@ internal abstract class Scaffolder
             try
             {
                 await step.ExecuteAsync();
+                if (step is OutputScaffoldStep outputStep)
+                {
+                    // No, don't do this
+                    // Instead, build up some sort of a
+                    // property bag of outputs that can be queried
+                    // by subsequent steps
+
+                    Output = outputStep.Output;
+                }
             }
             catch
             {

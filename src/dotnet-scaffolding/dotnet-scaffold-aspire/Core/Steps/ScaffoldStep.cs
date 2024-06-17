@@ -11,8 +11,7 @@ internal abstract class ScaffoldStep
     public bool ContinueOnError { get; set; }
 }
 
-
-// Scaffolding Component (dotnet-scaffold-aspire, dotnet-scaffold-aspnet)
-// Scaffolding Step (add reference, code mod, drop file, templated file)
-// Scaffolder (collection of steps)
-// Command (routes from CLI input or command line args to a Scaffolder)
+internal abstract class OutputScaffoldStep : ScaffoldStep
+{
+    public string? Output { get; set; }
+}

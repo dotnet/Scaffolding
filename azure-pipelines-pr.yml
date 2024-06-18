@@ -78,7 +78,7 @@ stages:
         - job: OSX
           timeoutInMinutes: 180
           pool:
-            vmImage: macOS-11
+            vmImage: macOS-13
           strategy:
             matrix:
               release_configuration:

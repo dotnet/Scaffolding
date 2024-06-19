@@ -29,9 +29,9 @@ internal class AspNetDbContextHelper
 
     internal static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
     {
-        { "npgsql-efcore", NpgsqlDefaults },
-        { "sqlserver-efcore", SqlServerDefaults },
-        { "sqlite-efcore", SqliteDefaults },
-        { "cosmos-efcore", CosmosDefaults }
+        { PackageConstants.EfConstants.Postgres, NpgsqlDefaults },
+        { PackageConstants.EfConstants.SqlServer, SqlServerDefaults },
+        { PackageConstants.EfConstants.SQLite, SqliteDefaults },
+        { PackageConstants.EfConstants.CosmosDb, CosmosDefaults }
     };
 }

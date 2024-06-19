@@ -3,12 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
@@ -49,12 +47,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] MinimalApiSettings settings)
     {
-        Debugger.Launch();
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
-
+        MsBuildInitializer.RegisterMsbuild();
         if (!ValidateMinimalApiSettings(settings))
         {
             return -1;

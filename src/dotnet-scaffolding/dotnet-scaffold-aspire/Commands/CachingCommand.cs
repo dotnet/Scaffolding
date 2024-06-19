@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
@@ -36,6 +35,7 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] CachingCommandSettings settings)
     {
+        MsBuildInitializer.RegisterMsbuild();
         if (!ValidateCachingCommandSettings(settings))
         {
             return -1;
@@ -79,11 +79,6 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
 
     internal async Task<bool> UpdateAppHostAsync(CachingCommandSettings commandSettings)
     {
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
-
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
         var workspaceSettings = new WorkspaceSettings
         {
@@ -141,11 +136,6 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
 
     internal async Task<bool> UpdateWebAppAsync(CachingCommandSettings commandSettings)
     {
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
-
         var configName = commandSettings.Type.Equals("redis-with-output-caching", StringComparison.OrdinalIgnoreCase) ? "redis-webapp-oc.json" : "redis-webapp.json";
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig(configName, System.Reflection.Assembly.GetExecutingAssembly());
         var workspaceSettings = new WorkspaceSettings

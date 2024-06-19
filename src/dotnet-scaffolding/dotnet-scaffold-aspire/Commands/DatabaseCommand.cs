@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
@@ -36,6 +35,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         }
         public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] DatabaseCommandSettings settings)
         {
+            MsBuildInitializer.RegisterMsbuild();
             if (!ValidateDatabaseCommandSettings(settings))
             {
                 return -1;
@@ -147,11 +147,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         private async Task<bool> UpdateAppHostAsync(DatabaseCommandSettings commandSettings)
         {
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
-
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {
@@ -209,11 +204,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         private async Task<bool> UpdateWebAppAsync(DatabaseCommandSettings commandSettings)
         {
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
-
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
             var workspaceSettings = new WorkspaceSettings
             {

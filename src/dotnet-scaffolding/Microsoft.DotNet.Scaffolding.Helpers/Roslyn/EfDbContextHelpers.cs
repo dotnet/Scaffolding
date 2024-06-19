@@ -1,12 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
 internal static class EfDbContextHelpers
 {
+    /// <summary>
+    /// Given a model class' ISymbol, initialize an EfModelProperties object.
+    /// </summary>
     public static EfModelProperties? GetModelProperties(ISymbol modelSymbol)
     {
         if (modelSymbol is INamedTypeSymbol namedTypeSymbol)
@@ -30,6 +32,10 @@ internal static class EfDbContextHelpers
         return null;
     }
 
+    /// <summary>
+    /// Following the official EF Core (https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=data-annotations) guide on assigning primary keys to extract primary key info
+    /// TODO : account for [PrimaryLKey] attribute and composite keys.
+    /// </summary>
     private static bool IsPrimaryKey(IPropertySymbol propertySymbol)
     {
         return HasPrimaryKeyAttribute(propertySymbol) ||
@@ -49,6 +55,10 @@ internal static class EfDbContextHelpers
         return propertySymbol.GetAttributes().Any(a => a.AttributeClass is not null && a.AttributeClass.Name.Equals("KeyAttribute"));
     }
 
+    /// <summary>
+    /// check for the specific DbSet variable in a given DbContext's ISymbol.
+    /// return the DbSet property's name.
+    /// </summary>
     internal static string? GetEntitySetVariableName(ISymbol dbContextSymbol, string modelTypeName)
     {
         if (dbContextSymbol is INamedTypeSymbol dbContextTypeSymbol)

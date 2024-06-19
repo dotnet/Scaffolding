@@ -40,44 +40,12 @@ internal class PackageConstants
             { Postgres, PostgresPackageName }
         };
 
-        public static DbContextProperties SqlServerDefaults = new()
+        internal static Dictionary<string, string> UseDatabaseMethods = new()
         {
-            DbType = "sqlserver",
-            DbName = "sqldb",
-            AddDbMethod = "AddSqlServer",
-            AddDbContextMethod = "AddSqlServerDbContext"
-        };
-
-        public static DbContextProperties SqliteDefaults = new()
-        {
-            DbType = "sqlite",
-            DbName = "sqlitedb",
-            AddDbMethod = "AddSqlite",
-            AddDbContextMethod = "AddSqliteDbContext"
-        };
-
-        public static DbContextProperties CosmosDbDefaults = new()
-        {
-            DbType = "cosmos",
-            DbName = "cosmosdb",
-            AddDbMethod = "AddCosmos",
-            AddDbContextMethod = "AddCosmosDbContext"
-        };
-
-        public static DbContextProperties NpgsqlDefaults = new()
-        {
-            DbType = "postgresql",
-            DbName = "postgresqldb",
-            AddDbMethod = "AddPostgres",
-            AddDbContextMethod = "AddNpgsqlDbContext"
-        };
-
-        internal static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
-        {
-            { Postgres, NpgsqlDefaults },
-            { SqlServer, SqlServerDefaults },
-            { SQLite, SqliteDefaults },
-            { CosmosDb, CosmosDbDefaults }
+            { Postgres, "UsePostgres" },
+            { SqlServer, "UseSqlServer" },
+            { SQLite, "UseSqlite" },
+            { CosmosDb, "UseCosmos" }
         };
     }
 }

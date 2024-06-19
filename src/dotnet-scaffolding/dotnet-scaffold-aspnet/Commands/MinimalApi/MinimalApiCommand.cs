@@ -20,7 +20,7 @@ using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
 
-internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSettings>
+internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
 {
     private readonly IAppSettings _appSettings;
     private readonly IFileSystem _fileSystem;
@@ -135,7 +135,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
         }
 
         if (!string.IsNullOrEmpty(commandSettings.DataContext) &&
-            (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.DatabaseTypeDefaults.ContainsKey(commandSettings.DatabaseProvider)))
+            (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider)))
         {
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
@@ -237,9 +237,9 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
         }
 
         var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-        if (programCsFile is not null && programCsFile.Methods is not null && programCsFile.Methods.Count != 0)
-        {
-            var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+        var globalMethod = programCsFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
+        if (globalMethod is not null)
+        {   
             //only one change in here
             var addEndpointsChange = globalMethod?.CodeChanges?.FirstOrDefault();
             if (minimalApiModel.CodeChangeOptions is not null &&
@@ -256,11 +256,30 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
                 //formatting the endpoints method call onto "app.{0}()"
                 addEndpointsChange.Block = string.Format(addEndpointsChange.Block, minimalApiModel.EndpointsMethodName);
             }
+        }
 
-            if (minimalApiModel.EfScenario &&
-                string.IsNullOrEmpty(minimalApiModel.EntitySetVariableName) &&
+        if (minimalApiModel.EfScenario)
+        {
+            var efChangesFile = configToEdit.Files?.FirstOrDefault(x =>
+                    !string.IsNullOrEmpty(x.FileName) &&
+                    x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase) &&
+                    x.Options is not null &&
+                    x.Options.Contains(CodeChangeOptionStrings.EfScenario));
+
+            var efChangesGlobalMethod = efChangesFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
+            var addDbContextChange = efChangesGlobalMethod?.CodeChanges?.FirstOrDefault(x => x.Block.Contains("builder.Services.AddDbContext", StringComparison.OrdinalIgnoreCase));
+            if (minimalApiModel.CreateDbContext &&
+                addDbContextChange is not null &&
+                !string.IsNullOrEmpty(minimalApiModel.DatabaseProvider) &&
+                PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(minimalApiModel.DatabaseProvider, out var useDbMethod))
+            {
+                addDbContextChange.Block = string.Format(addDbContextChange.Block, minimalApiModel.DbContextClassName, useDbMethod);
+            }
+
+            if (string.IsNullOrEmpty(minimalApiModel.EntitySetVariableName) &&
                 !minimalApiModel.CreateDbContext &&
-                !string.IsNullOrEmpty(minimalApiModel.DbContextClassName))
+                !string.IsNullOrEmpty(minimalApiModel.DbContextClassName) &&
+                efChangesGlobalMethod != null)
             {
                 var addDbStatementCodeChange = new CodeFile()
                 {
@@ -271,6 +290,8 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
                         Block = minimalApiModel.NewDbSetStatement
                     }]
                 };
+
+                configToEdit.Files = configToEdit.Files?.Append(addDbStatementCodeChange).ToArray();
             }
         }
 
@@ -280,6 +301,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
     private async Task<MinimalApiModel?> GetMinimalApiModelAsync(MinimalApiSettings settings)
     {
         MinimalApiModel scaffoldingModel = new();
+        //set MinimalApiModel.CodeService
         var workspaceSettings = new WorkspaceSettings
         {
             InputPath = settings.Project
@@ -288,13 +310,12 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
         var projectAppSettings = new AppSettings();
         projectAppSettings.AddSettings("workspace", workspaceSettings);
         var codeService = new CodeService(projectAppSettings, _logger);
-
         scaffoldingModel.CodeService = codeService;
         scaffoldingModel.AppSettings = projectAppSettings;
+
+        //find and set --model class properties
         var allClasses = await codeService.GetAllClassSymbolsAsync();
-        var allDocs = await codeService.GetAllDocumentsAsync();
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
-        //check for model class, throw if not found
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {
             _logger.LogMessage($"Invalid --model '{settings.Model}' provided", LogMessageType.Error);
@@ -305,8 +326,18 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
             scaffoldingModel.ModelTypeName = settings.Model;
             scaffoldingModel.ModelNamespace = modelClassSymbol.ContainingNamespace.ToDisplayString();
             scaffoldingModel.EndpointsMethodName = $"Map{settings.Model}Endpoints";
+            var efModelProperties = EfDbContextHelpers.GetModelProperties(modelClassSymbol);
+            if (efModelProperties != null)
+            {
+                scaffoldingModel.PrimaryKeyName = efModelProperties.PrimaryKeyName;
+                scaffoldingModel.PrimaryKeyShortTypeName = efModelProperties.PrimaryKeyShortTypeName;
+                scaffoldingModel.PrimaryKeyTypeName = efModelProperties.PrimaryKeyTypeName;
+                scaffoldingModel.ModelProperties = efModelProperties.AllModelProperties.Select(x => x.Name).ToList();
+            }
         }
 
+        //find endpoints class name and path
+        var allDocs = await codeService.GetAllDocumentsAsync();
         if (!string.IsNullOrEmpty(settings.Endpoints))
         {
             scaffoldingModel.EndpointsFileName = StringUtil.EnsureCsExtension(settings.Endpoints);
@@ -328,6 +359,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
             scaffoldingModel.EndpointsPath = GetNewFilePath(scaffoldingModel, scaffoldingModel.EndpointsFileName);
         }
 
+        //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         if (!string.IsNullOrEmpty(dbContextClassName))
         {
@@ -349,19 +381,6 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
                 scaffoldingModel.DbContextClassPath = GetNewFilePath(scaffoldingModel, scaffoldingModel.DbContextClassName);
                 scaffoldingModel.DatabaseProvider = settings.DatabaseProvider;
                 scaffoldingModel.EntitySetVariableName = scaffoldingModel.ModelTypeName;
-            }
-
-            var efModelProperties = EfDbContextHelpers.GetModelProperties(modelClassSymbol);
-            if (efModelProperties != null)
-            {
-                scaffoldingModel.PrimaryKeyName = efModelProperties.PrimaryKeyName;
-                scaffoldingModel.PrimaryKeyShortTypeName = efModelProperties.PrimaryKeyShortTypeName;
-                scaffoldingModel.PrimaryKeyTypeName = efModelProperties.PrimaryKeyTypeName;
-                scaffoldingModel.ModelProperties = efModelProperties.AllModelProperties.Select(x => x.Name).ToList();
-            }
-            else
-            {
-                //complain that we could not analyze the model and give up STAT
             }
         }
 
@@ -412,29 +431,5 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiCommand.MinimalApiSett
                 projectFile: commandSettings.Project,
                 includePrerelease: commandSettings.Prerelease);
         }
-    }
-
-    public class MinimalApiSettings : CommandSettings
-    {
-        [CommandOption("--project <PROJECT>")]
-        public required string Project { get; set; }
-
-        [CommandOption("--model <MODEL>")]
-        public required string Model { get; set; }
-
-        [CommandOption("--endpoints <ENDPOINTS>")]
-        public string? Endpoints { get; set; }
-
-        [CommandOption("--dataContext <DATACONTEXT>")]
-        public string? DataContext { get; set; }
-
-        [CommandOption("--open")]
-        public bool OpenApi { get; set; } = true;
-
-        [CommandOption("--dbProvider <DBPROVIDER>")]
-        public string? DatabaseProvider { get; set; }
-
-        [CommandOption("--prerelease")]
-        public required bool Prerelease { get; set; }
     }
 }

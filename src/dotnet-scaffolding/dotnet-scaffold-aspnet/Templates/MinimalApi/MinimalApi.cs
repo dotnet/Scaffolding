@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
                 
             this.Write("//return TypedResults.Created($\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(routePrefix));
-            this.Write("/{model.ID}\", model);\r\n            ");
+            this.Write("/{model.ID}\", model);\r\n        ");
 
             }
         
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
                 
             this.Write("//return TypedResults.Ok(new ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelTypeName));
-            this.Write(" { ID = id });\r\n            ");
+            this.Write(" { ID = id });\r\n        ");
 
             }
         

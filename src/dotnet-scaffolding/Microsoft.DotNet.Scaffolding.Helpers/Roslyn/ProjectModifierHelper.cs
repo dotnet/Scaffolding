@@ -466,7 +466,7 @@ internal static class ProjectModifierHelper
         {
             return false;
         }
-        //if the CodeChange in the config is for an 'EfScenario' and 
+        //if the CodeChange in the config is for an 'EfScenario' and the scenario is not, skip the CodeChange
         if (options.Contains(CodeChangeOptionStrings.EfScenario) && !codeChangeOptions.EfScenario)
         {
             return false;

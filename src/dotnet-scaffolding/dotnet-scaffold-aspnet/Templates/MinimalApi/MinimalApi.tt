@@ -91,7 +91,7 @@ public static class <#= Model.EndpointsClassName #>
             else
             {
                 #>//return TypedResults.Created($"<#= routePrefix #>/{model.ID}", model);
-            <#
+        <#
             }
         #>
 })
@@ -119,7 +119,7 @@ public static class <#= Model.EndpointsClassName #>
             else
             {
                 #>//return TypedResults.Ok(new <#= Model.ModelTypeName #> { ID = id });
-            <#
+        <#
             }
         #>
 })<#

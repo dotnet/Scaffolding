@@ -1,6 +1,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using System.Diagnostics;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;

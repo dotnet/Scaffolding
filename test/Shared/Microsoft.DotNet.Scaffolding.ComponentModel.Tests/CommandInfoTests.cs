@@ -22,8 +22,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 DisplayName = "Param Display Name",
                 Required = true,
                 Description = "Parameter description",
-                Type = BaseTypes.String,
-                PickerType = InteractivePickerType.DbProviderPicker
+                Type = BaseTypes.String
             };
 
             PartialParameter = new()

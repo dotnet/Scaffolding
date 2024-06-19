@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using Microsoft.Build.Locator;
 
@@ -7,7 +8,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 internal class MsBuildInitializer
 {
     private readonly ILogger _logger;
-
     public MsBuildInitializer(ILogger logger)
     {
         _logger = logger;
@@ -19,82 +19,63 @@ internal class MsBuildInitializer
     }
 
     /// <summary>
-    /// use MSBuildLocator to find MSBuild instances, return the first (highest version found).
+    /// find the newest dotnet sdk on disk first, if none found, use the MsBuildLocator.RegisterDefaults().
     /// </summary>
     /// <returns></returns>
-    private string RegisterMsbuild()
+    private void RegisterMsbuild()
     {
-        var msbuildPath = FindMSBuildPath();
-        if (string.IsNullOrEmpty(msbuildPath))
-        {
-            _logger.LogMessage($"No msbuild path found!", LogMessageType.Error);
-            return string.Empty;
-        }
-
-        var instance = MSBuildLocator.QueryVisualStudioInstances()
-            .FirstOrDefault(i => string.Equals(msbuildPath, i.MSBuildPath, StringComparison.OrdinalIgnoreCase));
-        if (instance is null)
-        {
-            _logger.LogMessage($"No msbuild find out at path '{msbuildPath}'!", LogMessageType.Error);
-            return string.Empty;
-        }
-
         if (!MSBuildLocator.IsRegistered)
         {
-            // Must register instance rather than just path so everything gets set correctly for .NET SDK instances
-            MSBuildLocator.RegisterInstance(instance);
+            // Path to the directory containing the SDKs
+            string sdkBasePath = GetDefaultSdkPath();
+            //register newest MSBuild from the newest dotnet sdk installed.
+            var sdkPath = Directory.GetDirectories(sdkBasePath)
+                                  .OrderByDescending(d => new DirectoryInfo(d).Name)
+                                  .FirstOrDefault();
 
-        }
-
-        var resolver = new AssemblyDependencyResolver(msbuildPath);
-
-        AssemblyLoadContext.Default.Resolving += ResolveAssembly;
-
-        var version = instance.Version.ToString();
-        return version;
-
-        Assembly? ResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
-        {
-            if (context is null || assemblyName is null)
+            if (!Directory.Exists(sdkBasePath) || string.IsNullOrEmpty(sdkPath))
             {
-                return null;
+                _logger.LogMessage($"Could not find a .NET SDK at the default locations.");
+                MSBuildLocator.RegisterDefaults();
+                return;
             }
 
-            if (resolver.ResolveAssemblyToPath(assemblyName) is string path)
+            var msbuildPath = Path.Combine(sdkPath, "MSBuild.dll");
+            if (File.Exists(msbuildPath))
             {
-                return context.LoadFromAssemblyPath(path);
+                // Register the latest SDK
+                //MSBuildLocator.RegisterMSBuildPath(sdkPath);
+                MSBuildLocator.RegisterDefaults();
+                _logger.LogMessage($"Registered .NET SDK at {sdkPath}");
             }
-
-            return null;
+            else
+            {
+                _logger.LogMessage($"MSBuild.dll not found in the SDK path '{sdkPath}'.");
+                MSBuildLocator.RegisterDefaults();
+            }
         }
     }
 
-    private string? FindMSBuildPath()
+    private string GetDefaultSdkPath()
     {
-        var msBuildInstances = FilterForBitness(MSBuildLocator.QueryVisualStudioInstances())
-            .OrderByDescending(m => m.Version)
-            .ToList();
-
-        if (msBuildInstances.Count == 0)
+        string sdkBasePath = string.Empty;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return string.Empty;
+            sdkBasePath = @"C:\Program Files\dotnet\sdk";
         }
-        else
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            return msBuildInstances.FirstOrDefault()?.MSBuildPath;
+            sdkBasePath = @"/usr/local/share/dotnet/sdk";
         }
-    }
-
-    private IEnumerable<VisualStudioInstance> FilterForBitness(IEnumerable<VisualStudioInstance> instances)
-    {
-        foreach (var instance in instances)
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            var is32bit = instance.MSBuildPath.Contains("x86", StringComparison.OrdinalIgnoreCase);
-
-            if (System.Environment.Is64BitProcess == !is32bit)
+            sdkBasePath = @"/usr/share/dotnet/sdk";
+            if (!Directory.Exists(sdkBasePath))
             {
-                yield return instance;
+                sdkBasePath = @"/usr/local/share/dotnet/sdk";
             }
         }
+
+        return sdkBasePath;
     }
 }

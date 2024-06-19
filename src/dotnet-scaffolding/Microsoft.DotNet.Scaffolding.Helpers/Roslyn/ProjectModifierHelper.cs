@@ -466,6 +466,11 @@ internal static class ProjectModifierHelper
         {
             return false;
         }
+        //if the CodeChange in the config is for an 'EfScenario' and 
+        if (options.Contains(CodeChangeOptionStrings.EfScenario) && !codeChangeOptions.EfScenario)
+        {
+            return false;
+        }
 
         //an app will either support DownstreamApi, MicrosoftGraph, both, or neither.
         if (codeChangeOptions.DownstreamApi)

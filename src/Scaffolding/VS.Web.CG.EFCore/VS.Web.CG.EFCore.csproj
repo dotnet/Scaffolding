@@ -20,7 +20,7 @@
        without adding EntityFrameworkCore dependency.
        https://github.com/dotnet/scaffolding/issues/434
        -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

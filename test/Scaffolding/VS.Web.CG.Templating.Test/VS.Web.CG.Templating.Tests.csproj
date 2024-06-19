@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <!-- TODO stop using project.json era API -->
-    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="$(MicrosoftDotNetProjectModelPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectModel" />
   </ItemGroup>
 
 </Project>

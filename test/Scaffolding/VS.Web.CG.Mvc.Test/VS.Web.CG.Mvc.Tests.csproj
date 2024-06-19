@@ -17,9 +17,9 @@
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="$(MicrosoftExtensionsFileProvidersEmbeddedPackageVersion)" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" />
     <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
     <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Msbuild\VS.Web.CG.Msbuild.csproj" ReferenceOutputAssembly="false" CopyToOutputDirectory="Always" OutputItemType="Content" />
   </ItemGroup>

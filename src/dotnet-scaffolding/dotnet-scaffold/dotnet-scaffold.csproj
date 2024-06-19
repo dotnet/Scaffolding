@@ -12,10 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
-    <PackageReference Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
-    <PackageReference Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
+    <PackageReference Include="Spectre.Console.Flow" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>

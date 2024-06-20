@@ -23,4 +23,39 @@
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Commands\CodeModificationConfigs\*.json">
+      <Pack>true</Pack>
+    </EmbeddedResource>
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\*\*.tt" PackagePath="Templates\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Helpers\Templates\DbContext\*.tt" PackagePath="Templates\DbContext\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\MinimalApi\MinimalApi.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MinimalApi.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Templates\MinimalApi\MinimalApi.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MinimalApi.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\MinimalApi\MinimalApiEf.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MinimalApiEf.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\MinimalApi\MinimalApiEf.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>

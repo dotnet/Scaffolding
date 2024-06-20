@@ -7,4 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class <#= Model.DbContextName #>(DbContextOptions<<#= Model.DbContextName #>> options) : DbContext(options)
 {
+<# if (!string.IsNullOrEmpty(Model.DbSetStatement))
+{
+#>    <#= Model.DbSetStatement #>
+<# }
+#>
 }

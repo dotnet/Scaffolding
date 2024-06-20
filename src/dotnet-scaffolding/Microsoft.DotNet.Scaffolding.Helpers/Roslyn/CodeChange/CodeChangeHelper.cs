@@ -22,6 +22,7 @@ internal class CodeChangeOptionStrings
     public const string NonMinimalApp = nameof(NonMinimalApp);
     public const string MinimalApp = nameof(MinimalApp);
     public const string OpenApi = nameof(OpenApi);
+    public const string EfScenario = nameof(EfScenario);
 }
 
 internal class CodeChangeOptions
@@ -30,4 +31,5 @@ internal class CodeChangeOptions
     public bool DownstreamApi { get; set; } = false;
     public bool IsMinimalApp { get; set; } = false;
     public bool UsingTopLevelsStatements { get; set; } = true;
+    public bool EfScenario { get; set; }
 }

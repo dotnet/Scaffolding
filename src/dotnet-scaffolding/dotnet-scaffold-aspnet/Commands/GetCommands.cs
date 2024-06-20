@@ -1,10 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -46,12 +44,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal static Parameter Project = new() { Name = "--project", DisplayName = "Project File", Description = "Project file for scaffolding's project context", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ModelName = new()  { Name = "--model", DisplayName = "Model Name", Description = "Name for the model class to be used for scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ClassPicker };
         internal static Parameter EndpointsClass = new()  { Name = "--endpoints", DisplayName = "Endpoints File Name", Description = "", Required = true, Type = BaseTypes.String };
-        internal static Parameter DataContextClass = new() { Name = "--dataContext", DisplayName = "Data Context Class", Description = "", Required = false, Type = BaseTypes.String, PickerType = InteractivePickerType.ClassPicker };
-        internal static Parameter RelativeFolderPath = new() { Name = "--relativeFolderPath", DisplayName = "Relative Folder Path", Description = "The relative folder path where scaffolded files will be added", Required = false, Type = BaseTypes.String };
-        internal static Parameter OpenApi = new() { Name = "--open", DisplayName = "Open API Enabled", Description = "", Required = false, Type = BaseTypes.Bool };
-        internal static Parameter DatabaseProvider = new() { Name = "--dbProvider", DisplayName = "Database Provider", Description = "", Required = false, Type = BaseTypes.String, PickerType = InteractivePickerType.DbProviderPicker };
+        internal static Parameter DataContextClass = new() { Name = "--dataContext", DisplayName = "Data Context Class", Description = "", Required = false, Type = BaseTypes.String };
+        internal static Parameter OpenApi = new() { Name = "--open", DisplayName = "Open API Enabled", Description = "", Required = false, Type = BaseTypes.Bool, PickerType = InteractivePickerType.YesNo };
+        internal static Parameter DatabaseProvider = new() { Name = "--dbProvider", DisplayName = "Database Provider", Description = "", Required = false, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = [.. AspNetDbContextHelper.DatabaseTypeDefaults.Keys] };
+        internal static Parameter PrereleaseParameter = new() { Name = "--prerelease", DisplayName = "Include prerelease packages?", Description = "Include prerelease package versions when installing latest Aspire components", Required = true, Type = BaseTypes.Bool, PickerType = InteractivePickerType.YesNo };
         internal static Parameter AreaName = new() { Name = "--name", DisplayName = "Area Name", Description = "Name for the area being created", Required = true, Type = BaseTypes.String };
         internal static Parameter[] AreaParameters = [Project, AreaName];
-        internal static Parameter[] MinimalApiParameters = [Project, ModelName, EndpointsClass, DataContextClass, OpenApi, DatabaseProvider];
+        internal static Parameter[] MinimalApiParameters = [Project, ModelName, EndpointsClass, DataContextClass, DatabaseProvider, OpenApi, PrereleaseParameter];
     }
 }

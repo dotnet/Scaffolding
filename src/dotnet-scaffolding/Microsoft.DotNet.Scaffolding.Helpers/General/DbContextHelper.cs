@@ -31,17 +31,12 @@ internal static class DbContextHelper
         var templateUtilities = new TemplateFoldersUtilities();
         var allT4Templates = templateUtilities.GetAllT4Templates(["DbContext"]);
         string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));
-        ITextTransformation? textTransformation = GetDbContextTransformation(t4TemplatePath);
-        if (textTransformation is null)
-        {
-            throw new Exception($"Unable to process T4 template for a new DbContext correctly");
-        }
-
+        ITextTransformation? textTransformation = GetDbContextTransformation(t4TemplatePath) ?? throw new Exception($"Unable to process T4 template for a new DbContext correctly");
         var templateInvoker = new TemplateInvoker();
         var dictParams = new Dictionary<string, object>()
-            {
-                { "Model" , dbContextProperties }
-            };
+        {
+            { "Model" , dbContextProperties }
+        };
 
         var t4TemplateName = Path.GetFileNameWithoutExtension(t4TemplatePath);
         var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);

@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
@@ -38,6 +35,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] StorageCommandSettings settings)
     {
+        MsBuildInitializer.RegisterMsbuild();
         if (!ValidateStorageCommandSettings(settings))
         {
             return -1;
@@ -65,11 +63,6 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     internal async Task<bool> UpdateAppHostAsync(StorageCommandSettings commandSettings)
     {
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
-
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("storage-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
         var workspaceSettings = new WorkspaceSettings
         {
@@ -126,11 +119,6 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     internal async Task<bool> UpdateWebApiAsync(StorageCommandSettings commandSettings)
     {
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
-
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("storage-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
         var workspaceSettings = new WorkspaceSettings
         {

@@ -3,9 +3,10 @@
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 internal class DbContextProperties
 {
-    public string DbContextName { get; } = "NewDbContext";
-    public required string AddDbMethod { get; init; }
-    public required string AddDbContextMethod { get; init; }
-    public required string DbName { get; init; }
-    public required string DbType { get; init; }
+    public string DbContextName { get; set; } = "NewDbContext";
+    public required string AddDbMethod { get; set; }
+    public string? AddDbContextMethod { get; set; }
+    public string? DbName { get; set; }
+    public string? DbType { get; set; }
+    public string? DbSetStatement { get; set; }
 }

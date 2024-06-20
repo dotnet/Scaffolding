@@ -11,7 +11,7 @@ internal class DotnetCliRunner
 {
     public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args)
     {
-        return Create(DotNetMuxer.MuxerPathOrDefault(), new[] { commandName }.Concat(args));
+        return Create("dotnet", new[] { commandName }.Concat(args));
     }
 
     public static DotnetCliRunner Create(string commandName, IEnumerable<string> args)

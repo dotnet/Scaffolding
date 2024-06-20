@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,27 +18,156 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    internal partial class NewDbContext : NewDbContextBase
+    public partial class MinimalApi : MinimalApiBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("using Microsoft.EntityFrameworkCore;\r\n\r\npublic class ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextName));
-            this.Write("(DbContextOptions<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextName));
-            this.Write("> options) : DbContext(options)\r\n{\r\n");
- if (!string.IsNullOrEmpty(Model.DbSetStatement))
-{
+            this.Write("public static class ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.EndpointsClassName));
+            this.Write("\r\n{\r\n    public static void ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.EndpointsMethodName));
+            this.Write("(this IEndpointRouteBuilder routes)\r\n    {\r\n        ");
 
-            this.Write("    ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbSetStatement));
-            this.Write("\r\n");
- }
+        string modelName = Model.ModelTypeName;
+        string modelConstructor = $"{modelName}()";
+        string modelArray = $"{modelName}[]";
+        string routePrefix = "/api/" + modelName;
+        string endPointsClassName = Model.EndpointsClassName;
+        string methodName = $"Map{@modelName}Endpoints";
+        string pluralModel = Model.ModelTypeName;
+        string routePrefixPlural = "/api/" + pluralModel;
+        string getAllModels = $"GetAll{@pluralModel}";
+        string getModelById = $"Get{modelName}ById";
+        string deleteModel = $"Delete{modelName}";
+        string createModel = $"Create{modelName}";
+        string updateModel = $"Update{modelName}";
+        string resultsExtension = (Model.UseTypedResults ? "TypedResults" : "Results") + ".NoContent()";
+        string builderExtensionSpaces = new string(' ', 8);
+            string group = Model.OpenAPI
+            ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelTypeName}));"
+            : $"var group = routes.MapGroup(\"{routePrefix}\");";
+        
+            this.Write(this.ToStringHelper.ToStringWithCulture(group));
+            this.Write("\r\n\r\n        group.MapGet(\"/\", () =>\r\n        {\r\n            return new[] { new ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelConstructor));
+            this.Write(" };\r\n        })");
 
-            this.Write("}\r\n");
+        string builderExtensions = $".WithName(\"{getAllModels}\")";
+        if(Model.OpenAPI)
+        {
+            builderExtensions += $"\r\n.WithOpenApi()";
+        }
+        if(!Model.UseTypedResults)
+        {
+            builderExtensions += $"\r\n.Produces<{modelArray}>(StatusCodes.Status200OK)";
+        }
+        
+            this.Write("\r\n        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
+            this.Write(";\r\n\r\n        group.MapGet(\"/{id}\", (int id) =>\r\n        {\r\n            //return n" +
+                    "ew ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelTypeName));
+            this.Write(" { ID = id };\r\n        })");
+
+        builderExtensions = $".WithName(\"{getModelById}\")";
+        if(Model.OpenAPI)
+        {
+            builderExtensions += $"\r\n.WithOpenApi()";
+        }
+        if(!Model.UseTypedResults)
+        {
+            builderExtensions += $"\r\n.Produces<{Model.ModelTypeName}>(StatusCodes.Status200OK)";
+        }
+        
+            this.Write("\r\n        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
+            this.Write(";\r\n\r\n        group.MapPut(\"/{id}\", (int id, ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelTypeName));
+            this.Write(" input) =>\r\n        {\r\n            return ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(resultsExtension));
+            this.Write(";\r\n        })");
+
+        builderExtensions = $".WithName(\"{updateModel}\")";
+        if(Model.OpenAPI)
+        {
+            builderExtensions += $"\r\n.WithOpenApi()";
+        }
+        if (!Model.UseTypedResults)
+        {
+            builderExtensions += $"\r\n.Produces(StatusCodes.Status204NoContent)";
+        }
+        
+            this.Write("\r\n        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
+            this.Write(";\r\n\r\n        group.MapPost(\"/\", (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelTypeName));
+            this.Write(" model) =>\r\n        {\r\n            ");
+
+            if(!Model.UseTypedResults)
+            {
+                
+            this.Write("//return Results.Created($\"/{model.ID}\", model);\r\n            ");
+
+            }
+            else
+            {
+                
+            this.Write("//return TypedResults.Created($\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(routePrefix));
+            this.Write("/{model.ID}\", model);\r\n        ");
+
+            }
+        
+            this.Write("})\r\n        ");
+
+        builderExtensions = $".WithName(\"{createModel}\")";
+        if(Model.OpenAPI)
+        {
+            builderExtensions+= $"\r\n.WithOpenApi()";
+        }
+        if (!Model.UseTypedResults)
+        {
+            builderExtensions += $"\r\n.Produces<{Model.ModelTypeName}>(StatusCodes.Status201Created)";
+        }
+        
+            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
+            this.Write(";\r\n\r\n        group.MapDelete(\"/{id}\", (int id) =>\r\n        {\r\n            ");
+
+            if(!Model.UseTypedResults)
+            {
+                
+            this.Write("//return Results.Ok(new ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelTypeName));
+            this.Write(" { ID = id });\r\n            ");
+
+            }
+            else
+            {
+                
+            this.Write("//return TypedResults.Ok(new ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelTypeName));
+            this.Write(" { ID = id });\r\n        ");
+
+            }
+        
+            this.Write("})");
+
+        builderExtensions = $".WithName(\"{deleteModel}\")";
+        if(Model.OpenAPI)
+        {
+            builderExtensions += $"\r\n.WithOpenApi()";
+        }
+        if (!Model.UseTypedResults)
+        {
+            builderExtensions += $"\r\n.Produces<{Model.ModelTypeName}>(StatusCodes.Status200OK)";
+        }
+        
+            this.Write("\r\n        ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
+            this.Write(";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -57,12 +186,12 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext
             }
         }
 
-private global::Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel Model
 {
     get
     {
@@ -81,7 +210,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -89,17 +218,18 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties\' of th" +
-                    "e parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiMo" +
+                    "del\' of the parameter \'Model\' did not match the type of the data passed to the t" +
+                    "emplate.");
         }
     }
 }
@@ -108,7 +238,7 @@ if ((ModelValueAcquired == false))
     object data = global::Microsoft.DotNet.Scaffolding.Helpers.T4Templating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Scaffolding.Helpers.General.DbContextProperties)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel)(data));
     }
 }
 
@@ -123,7 +253,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class NewDbContextBase
+    public class MinimalApiBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

@@ -100,9 +100,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     }
 
                     break;
-                case InteractivePickerType.DbProviderPicker:
-                    stepOptions = DbProviders;
-                    break;
                 case InteractivePickerType.ProjectPicker:
                     stepOptions = GetProjectFiles();
                     converter = GetDisplayNameForProjects;
@@ -116,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     break;
             }
 
-            if (!_parameter.Required)
+            if (!_parameter.Required && stepOptions.FirstOrDefault(x => x.Name.Equals("None")) is null)
             {
                 stepOptions.Insert(0, new StepOption() { Name = "None", Value = string.Empty });
             }

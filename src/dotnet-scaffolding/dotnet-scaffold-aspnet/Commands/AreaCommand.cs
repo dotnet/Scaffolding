@@ -1,74 +1,94 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Spectre.Console.Cli;
-using Spectre.Console;
 using System.IO;
-using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
+
+internal class AreaCommand : Command<AreaCommand.AreaSettings>
 {
-    public class AreaCommand : Command<AreaCommand.AreaSettings>
+    private readonly ILogger _logger;
+    private readonly IFileSystem _fileSystem;
+    private readonly IEnvironmentService _environmentService;
+    public AreaCommand(IFileSystem fileSystem, ILogger logger, IEnvironmentService environmentService)
     {
-        public override int Execute([NotNull] CommandContext context, [NotNull] AreaSettings settings)
+        _environmentService = environmentService;
+        _fileSystem = fileSystem;
+        _logger = logger;
+    }
+
+    public override int Execute([NotNull] CommandContext context, [NotNull] AreaSettings settings)
+    {
+        if (!ValidateAreaCommandSettings(settings))
         {
-            AnsiConsole.MarkupLine("[green]Executing area command...[/]");
-            if (string.IsNullOrEmpty(settings.Name))
-            {
-                AnsiConsole.WriteException(new ArgumentNullException("'--name' parameter required for area"));
-            }
-
-            if (string.IsNullOrEmpty(settings.Project))
-            {
-                AnsiConsole.WriteException(new ArgumentNullException("'--project' parameter required for area"));
-            }
-
-            var projectDirectory = Path.GetDirectoryName(settings.Project);
-
-            EnsureFolderLayout(projectDirectory, settings.Name);
-            return 0;;
+            return -1;
         }
 
-        private void EnsureFolderLayout(string? basePath, string areaName)
+        _logger.LogMessage("Updating project...");
+        EnsureFolderLayout(settings);
+        _logger.LogMessage("Finished");
+        return 0;
+    }
+
+    private bool ValidateAreaCommandSettings(AreaSettings commandSettings)
+    {
+        if (string.IsNullOrEmpty(commandSettings.Name))
         {
-            var currDirectory = basePath ?? Environment.CurrentDirectory;
-            var areaBasePath = Path.Combine(currDirectory, "Areas");
-            if (!Directory.Exists(areaBasePath))
-            {
-                Directory.CreateDirectory(areaBasePath);
-            }
-
-            var areaPath = Path.Combine(areaBasePath, areaName);
-            if (!Directory.Exists(areaPath))
-            {
-                Directory.CreateDirectory(areaPath);
-            }
-
-            foreach (var areaFolder in AreaFolders)
-            {
-                var path = Path.Combine(areaPath, areaFolder);
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-            }
+            _logger.LogMessage("Missing/Invalid --name option.", LogMessageType.Error);
+            return false;
         }
 
-        private static readonly string[] AreaFolders =
-        [
-            "Controllers",
-            "Models",
-            "Data",
-            "Views"
-        ];
+        return true;
+    }
 
-        public class AreaSettings : CommandSettings
+    private void EnsureFolderLayout(AreaSettings commandSettings)
+    {
+        var basePath = _environmentService.CurrentDirectory;
+        var projectDirectoryPath = Path.GetDirectoryName(commandSettings.Project);
+        if (!string.IsNullOrEmpty(projectDirectoryPath) && _fileSystem.DirectoryExists(projectDirectoryPath))
         {
-            [CommandOption("--project <PROJECT>")]
-            public string Project { get; set; } = default!;
-
-            [CommandOption("--name <NAME>")]
-            public string Name { get; set; } = default!;
+            basePath = projectDirectoryPath;
         }
+
+        var areaBasePath = Path.Combine(basePath, "Areas");
+        if (!_fileSystem.DirectoryExists(areaBasePath))
+        {
+            _fileSystem.CreateDirectory(areaBasePath);
+        }
+
+        var areaPath = Path.Combine(areaBasePath, commandSettings.Name);
+        if (!_fileSystem.DirectoryExists(areaPath))
+        {
+            _fileSystem.CreateDirectory(areaPath);
+        }
+
+        foreach (var areaFolder in AreaFolders)
+        {
+            var path = Path.Combine(areaPath, areaFolder);
+            if (!_fileSystem.DirectoryExists(path))
+            {
+                _fileSystem.CreateDirectory(path);
+            }
+        }
+    }
+
+    private static readonly string[] AreaFolders =
+    [
+        "Controllers",
+        "Models",
+        "Data",
+        "Views"
+    ];
+
+    public class AreaSettings : CommandSettings
+    {
+        [CommandOption("--project <PROJECT>")]
+        public string? Project { get; set; }
+
+        [CommandOption("--name <NAME>")]
+        public required string Name { get; set; }
     }
 }

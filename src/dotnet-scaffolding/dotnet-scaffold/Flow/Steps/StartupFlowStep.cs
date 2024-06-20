@@ -67,6 +67,7 @@ internal class StartupFlowStep : IFlowStep
                 //add 'workspace' settings
                 var workspaceSettings = new WorkspaceSettings();
                 _appSettings.AddSettings("workspace", workspaceSettings);
+                MsBuildInitializer.RegisterMsbuild();
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Initializing 1st party components (dotnet tools)";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();

@@ -35,7 +35,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] StorageCommandSettings settings)
     {
-        MsBuildInitializer.RegisterMsbuild();
+        new MsBuildInitializer(_logger).Initialize();
         if (!ValidateStorageCommandSettings(settings))
         {
             return -1;

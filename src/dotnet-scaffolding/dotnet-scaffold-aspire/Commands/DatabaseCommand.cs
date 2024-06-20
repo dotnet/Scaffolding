@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         }
         public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] DatabaseCommandSettings settings)
         {
-            MsBuildInitializer.RegisterMsbuild();
+            new MsBuildInitializer(_logger).Initialize();
             if (!ValidateDatabaseCommandSettings(settings))
             {
                 return -1;

@@ -35,7 +35,7 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] CachingCommandSettings settings)
     {
-        MsBuildInitializer.RegisterMsbuild();
+        new MsBuildInitializer(_logger).Initialize();
         if (!ValidateCachingCommandSettings(settings))
         {
             return -1;

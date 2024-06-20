@@ -1,0 +1,9 @@
+// IMPORTANT: This file is read by the merge flow from main branch only. 
+{
+    "merge-flow-configurations": {
+        // Automate opening PRs to merge aspnet release/2.1 branches back to release/3.0 or release/3.1.
+        "release/2.1":{
+            "MergeToBranch": "release/3.0"
+        }
+    }
+}

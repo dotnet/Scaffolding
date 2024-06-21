@@ -65,7 +65,7 @@ internal class MsBuildInitializer
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            sdkBasePath = @"/usr/local/share/dotnet/sdk";
+            sdkBasePath = @"/usr/local/share/dotnet/x64/sdk";
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {

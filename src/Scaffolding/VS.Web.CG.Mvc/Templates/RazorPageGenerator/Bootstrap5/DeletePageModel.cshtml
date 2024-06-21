@@ -62,15 +62,14 @@ namespace @Model.NamespaceName
 
             var @viewDataTypeShortNameLowerCase = await _context.@(entitySetName).FirstOrDefaultAsync(m => m.@primaryKeyName == id);
 
-            if (@viewDataTypeShortNameLowerCase == null)
-            {
-                return NotFound();
-            }
-            else
+            if (@viewDataTypeShortNameLowerCase is not null)
             {
                 @Model.ViewDataTypeShortName = @viewDataTypeShortNameLowerCase;
+
+                return Page();
             }
-            return Page();
+
+            return NotFound();
         }
 
         public async Task<IActionResult> OnPostAsync(@primaryKeyNullableTypeName id)

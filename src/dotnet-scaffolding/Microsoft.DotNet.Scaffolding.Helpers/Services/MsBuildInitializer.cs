@@ -28,12 +28,19 @@ internal class MsBuildInitializer
         {
             // Path to the directory containing the SDKs
             string sdkBasePath = GetDefaultSdkPath();
+            if (!Directory.Exists(sdkBasePath))
+            {
+                _logger.LogMessage($"Could not find a .NET SDK at the default locations.");
+                MSBuildLocator.RegisterDefaults();
+                return;
+            }
+
             //register newest MSBuild from the newest dotnet sdk installed.
             var sdkPath = Directory.GetDirectories(sdkBasePath)
                                   .OrderByDescending(d => new DirectoryInfo(d).Name)
                                   .FirstOrDefault();
 
-            if (!Directory.Exists(sdkBasePath) || string.IsNullOrEmpty(sdkPath))
+            if (string.IsNullOrEmpty(sdkPath))
             {
                 _logger.LogMessage($"Could not find a .NET SDK at the default locations.");
                 MSBuildLocator.RegisterDefaults();
@@ -45,7 +52,6 @@ internal class MsBuildInitializer
             {
                 // Register the latest SDK
                 MSBuildLocator.RegisterMSBuildPath(sdkPath);
-                //MSBuildLocator.RegisterDefaults();
                 _logger.LogMessage($"Registered .NET SDK at {sdkPath}");
             }
             else

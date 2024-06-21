@@ -47,7 +47,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] MinimalApiSettings settings)
     {
-        MsBuildInitializer.RegisterMsbuild();
+        new MsBuildInitializer(_logger).Initialize();
         if (!ValidateMinimalApiSettings(settings))
         {
             return -1;

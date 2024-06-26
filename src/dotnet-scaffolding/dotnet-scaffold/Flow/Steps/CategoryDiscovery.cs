@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -52,6 +51,8 @@ internal class CategoryDiscovery
             ?.Select(y => y.Value.DisplayCategory)
             ?.Distinct()
             ?.ToList();
+        //using Sort() to sort 'DisplayCategory's alphabetically.
+        displayCategories?.Sort();
 
         var prompt = new FlowSelectionPrompt<string>()
             .Title("[lightseagreen]Pick a scaffolding category: [/]")

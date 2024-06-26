@@ -1,11 +1,13 @@
-using Microsoft.DotNet.Scaffolding.Helpers.Environment;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
-using Spectre.Console.Cli;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
-using System.Diagnostics;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MVC;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.RazorPage;
+using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet;
 public static class Program
@@ -16,8 +18,13 @@ public static class Program
         var app = new CommandApp(serviceRegistrations);
         app.Configure(config =>
         {
+            config.AddCommand<BlazorEmptyCommand>("blazor-empty");
             config.AddCommand<MinimalApiCommand>("minimalapi");
+            config.AddCommand<ApiControllerEmptyCommand>("apicontroller-empty");
             config.AddCommand<AreaCommand>("area");
+            config.AddCommand<MvcControllerEmptyCommand>("mvccontroller-empty");
+            config.AddCommand<RazorViewEmptyCommand>("razorview-empty");
+            config.AddCommand<RazorPageEmptyCommand>("razorpage-empty");
             config.AddCommand<GetCmdsCommand>("get-commands");
         });
 

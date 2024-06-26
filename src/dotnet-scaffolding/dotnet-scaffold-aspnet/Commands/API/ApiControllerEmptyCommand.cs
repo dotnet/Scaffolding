@@ -44,7 +44,8 @@ internal class ApiControllerEmptyCommand : Command<ApiControllerEmptyCommand.Api
     private bool AddEmptyApiController(ApiControllerEmptySettings settings)
     {
         var projectBasePath = Path.GetDirectoryName(settings.Project);
-        if (Directory.Exists(projectBasePath))
+        var projectName = Path.GetFileNameWithoutExtension(settings.Project);
+        if (!string.IsNullOrEmpty(projectName) && Directory.Exists(projectBasePath))
         {
             var apiControllerName = settings.Name;
             var actionsParameter = settings.Actions ? "--actions" : string.Empty;
@@ -56,6 +57,8 @@ internal class ApiControllerEmptyCommand : Command<ApiControllerEmptyCommand.Api
                 apiControllerName,
                 "--output",
                 projectBasePath,
+                "--namespace",
+                projectName,
                 actionsParameter
             };
 

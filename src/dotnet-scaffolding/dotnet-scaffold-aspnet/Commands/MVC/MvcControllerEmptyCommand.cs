@@ -44,7 +44,8 @@ internal class MvcControllerEmptyCommand : Command<MvcControllerEmptyCommand.Mvc
     private bool AddEmptyMvcController(MvcControllerEmptySettings settings)
     {
         var projectBasePath = Path.GetDirectoryName(settings.Project);
-        if (Directory.Exists(projectBasePath))
+        var projectName = Path.GetFileNameWithoutExtension(settings.Project);
+        if (!string.IsNullOrEmpty(projectName) && Directory.Exists(projectBasePath))
         {
             var mvcControllerName = settings.Name;
             var actionsParameter = settings.Actions ? "--actions" : string.Empty;
@@ -56,6 +57,8 @@ internal class MvcControllerEmptyCommand : Command<MvcControllerEmptyCommand.Mvc
                 mvcControllerName,
                 "--output",
                 projectBasePath,
+                "--namespace",
+                projectName,
                 actionsParameter
             };
 

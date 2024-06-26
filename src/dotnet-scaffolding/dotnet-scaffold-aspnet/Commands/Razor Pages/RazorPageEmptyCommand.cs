@@ -44,17 +44,20 @@ internal class RazorPageEmptyCommand : Command<RazorPageEmptyCommand.RazorPageEm
     private bool AddEmptyRazorPage(RazorPageEmptySettings settings)
     {
         var projectBasePath = Path.GetDirectoryName(settings.Project);
-        if (Directory.Exists(projectBasePath))
+        var projectName = Path.GetFileNameWithoutExtension(settings.Project);
+        if (!string.IsNullOrEmpty(projectName) && Directory.Exists(projectBasePath))
         {
             var razorPageName = settings.Name;
             //arguments for 'dotnet new razorpage'
             var args = new List<string>()
             {
-                "razorpage",
+                "page",
                 "--name",
                 razorPageName,
                 "--output",
-                projectBasePath
+                projectBasePath,
+                "--namespace",
+                projectName
             };
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);

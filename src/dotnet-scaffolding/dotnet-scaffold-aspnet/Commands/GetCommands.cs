@@ -29,6 +29,46 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
                     DisplayCategory = "MVC",
                     Description = "Generates an Area folder structure.",
                     Parameters = GetCmdsHelper.AreaParameters // Add parameters if any
+                },
+                new()
+                {
+                    Name = "blazor-empty",
+                    DisplayName = "Razor Component - Empty",
+                    DisplayCategory = "Blazor",
+                    Description = "Generates an empty Razor Component (.razor) file.",
+                    Parameters = GetCmdsHelper.BlazorEmptyParameters
+                },
+                new()
+                {
+                    Name = "razorpage-empty",
+                    DisplayName = "Razor Page - Empty",
+                    DisplayCategory = "Web",
+                    Description = "Generates an empty Razor Page (.cshtml) file.",
+                    Parameters = GetCmdsHelper.RazorPageEmptyParameters
+                },
+                new()
+                {
+                    Name = "mvccontroller-empty",
+                    DisplayName = "MVC Controller - Empty",
+                    DisplayCategory = "MVC",
+                    Description = "Generates an empty MVC Controller (.cs) file.",
+                    Parameters = GetCmdsHelper.MvcControllerEmptyParameters
+                },
+                new()
+                {
+                    Name = "apicontroller-empty",
+                    DisplayName = "API Controller - Empty",
+                    DisplayCategory = "API",
+                    Description = "Generates an empty API Controller (.cs) file.",
+                    Parameters = GetCmdsHelper.ApiControllerEmptyParameters
+                },
+                new()
+                {
+                    Name = "razorview-empty",
+                    DisplayName = "Razor View - Empty",
+                    DisplayCategory = "MVC",
+                    Description = "Generates an empty Razor View",
+                    Parameters = GetCmdsHelper.RazorViewEmptyParameters
                 }
                 // Add other commands here
             };
@@ -49,7 +89,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal static Parameter DatabaseProvider = new() { Name = "--dbProvider", DisplayName = "Database Provider", Description = "", Required = false, Type = BaseTypes.String, PickerType = InteractivePickerType.CustomPicker, CustomPickerValues = [.. AspNetDbContextHelper.DatabaseTypeDefaults.Keys] };
         internal static Parameter PrereleaseParameter = new() { Name = "--prerelease", DisplayName = "Include prerelease packages?", Description = "Include prerelease package versions when installing latest Aspire components", Required = true, Type = BaseTypes.Bool, PickerType = InteractivePickerType.YesNo };
         internal static Parameter AreaName = new() { Name = "--name", DisplayName = "Area Name", Description = "Name for the area being created", Required = true, Type = BaseTypes.String };
+        internal static Parameter FileName = new() { Name = "--name", DisplayName = "File Name", Description = "Name for the item being created", Required = true, Type = BaseTypes.String };
+        internal static Parameter Actions = new() { Name = "--actions", DisplayName = "Read/Write Actions", Description = "Create controller with read/write actions?", Required = true, Type = BaseTypes.Bool, PickerType = InteractivePickerType.YesNo };
         internal static Parameter[] AreaParameters = [Project, AreaName];
         internal static Parameter[] MinimalApiParameters = [Project, ModelName, EndpointsClass, DataContextClass, DatabaseProvider, OpenApi, PrereleaseParameter];
+        internal static Parameter[] BlazorEmptyParameters = [Project, FileName];
+        internal static Parameter[] MvcControllerEmptyParameters = [Project, FileName, Actions];
+        internal static Parameter[] ApiControllerEmptyParameters = [Project, FileName, Actions];
+        internal static Parameter[] RazorPageEmptyParameters = [Project, FileName];
+        internal static Parameter[] RazorViewEmptyParameters = [Project, FileName];
     }
 }

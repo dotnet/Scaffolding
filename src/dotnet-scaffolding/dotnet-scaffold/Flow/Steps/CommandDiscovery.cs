@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
@@ -53,7 +52,10 @@ internal class CommandDiscovery
         }
 
         var scaffoldingCategory = context.GetScaffoldingCategory();
-        var allCommandsByCategory = allCommands?.Where(x => x.Value.DisplayCategory.Equals(scaffoldingCategory)).ToList();
+        var allCommandsByCategory = allCommands?
+            .Where(x => x.Value.DisplayCategory.Equals(scaffoldingCategory))
+            .OrderBy(kvp => kvp.Value.DisplayName)
+            .ToList();
 
         var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()
             .Title("[lightseagreen]Pick a scaffolding command: [/]")

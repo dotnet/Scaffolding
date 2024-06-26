@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -51,6 +50,7 @@ internal class CategoryDiscovery
         displayCategories = (_componentPicked != null ? allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)) : allCommands)
             ?.Select(y => y.Value.DisplayCategory)
             ?.Distinct()
+            ?.Order()
             ?.ToList();
 
         var prompt = new FlowSelectionPrompt<string>()

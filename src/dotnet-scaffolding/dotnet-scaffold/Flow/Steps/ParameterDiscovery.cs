@@ -54,8 +54,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     }
 
                     return Validate(context, x);
-                })
-                .AllowEmpty();
+                });
+
+                if (!_parameter.Required)
+                {
+                    prompt = prompt.AllowEmpty();
+                }
 
                 await Task.Delay(1);
                 return AnsiConsole.Prompt(prompt).Trim();

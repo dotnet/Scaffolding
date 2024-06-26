@@ -4,7 +4,6 @@ using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
 
-
 internal class MinimalApiSettings : CommandSettings
 {
     [CommandOption("--project <PROJECT>")]

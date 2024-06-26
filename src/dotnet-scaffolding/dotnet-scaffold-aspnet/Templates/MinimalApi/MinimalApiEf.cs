@@ -26,30 +26,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         public virtual string TransformText()
         {
 
-    string modelName = Model.ModelTypeName;
-    string dbProvider = Model.DatabaseProvider;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string dbProvider = Model.DbContextInfo.DatabaseProvider;
     string routePrefix = "/api/" + modelName;
     string endPointsClassName = Model.EndpointsClassName;
     string methodName = $"Map{modelName}Endpoints";
-    string pluralModel = Model.ModelTypePluralName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string getAllModels = $"GetAll{pluralModel}";
     string getModelById = $"Get{modelName}ById";
     string deleteModel = $"Delete{modelName}";
     string createModel = $"Create{modelName}";
     string updateModel = $"Update{modelName}";
-    string dbContextName = Model.DbContextClassName;
-    var entitySetName = Model.EntitySetVariableName ?? modelName;
+    string dbContextName = Model.DbContextInfo.DbContextClassName;
+    var entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     var entitySetNoTracking = $"{entitySetName}.AsNoTracking()";
-    var entityProperties = Model.ModelProperties;
-    var primaryKeyName = Model.PrimaryKeyName;
+    var entityProperties = Model.ModelInfo.ModelProperties;
+    var primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
-    var primaryKeyShortTypeName = Model.PrimaryKeyShortTypeName;
-    var primaryKeyType = Model.PrimaryKeyTypeName;
+    var primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyShortTypeName;
+    var primaryKeyType = Model.ModelInfo.PrimaryKeyTypeName;
     var modelList = $"List<{modelName}>";
     var modelToList = $"{entitySetName}.ToListAsync()";
     var findModel = $"{entitySetName}.FindAsync({primaryKeyNameLowerCase})";
-    var add = $"{entitySetName}.Add({Model.ModelVariable})";
-    var remove = $"{entitySetName}.Remove({Model.ModelVariable})";
+    var add = $"{entitySetName}.Add({Model.ModelInfo.ModelVariable})";
+    var remove = $"{entitySetName}.Remove({Model.ModelInfo.ModelVariable})";
     string resultsExtension = Model.UseTypedResults ? "TypedResults" : "Results";
     string typedTaskWithNotFound = Model.UseTypedResults ? $"Task<Results<Ok<{modelName}>, NotFound>>" : "";
     string typedTaskOkNotFound = Model.UseTypedResults ? $"Task<Results<Ok, NotFound>>" : "";
@@ -58,20 +58,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsOkEmpty = $"{resultsExtension}.Ok()";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
-    string resultsOkModelVariable = $"{resultsExtension}.Ok({Model.ModelVariable})";
-    string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", routePrefix, Model.ModelVariable, primaryKeyName, Model.ModelVariable);
+    string resultsOkModelVariable = $"{resultsExtension}.Ok({Model.ModelInfo.ModelVariable})";
+    string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", routePrefix, Model.ModelInfo.ModelVariable, primaryKeyName, Model.ModelInfo.ModelVariable);
     string resultsCreated = $"{resultsExtension}.Created(" + $"{createdApiVar}" + ")";
     string builderExtensionSpaces = new string(' ', 8);
         string group = Model.OpenAPI
-        ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelTypeName}));"
+        ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
         : $"var group = routes.MapGroup(\"{routePrefix}\");";
 
             this.Write("using Microsoft.AspNetCore.Http.HttpResults;\r\nusing Microsoft.EntityFrameworkCore" +
                     ";\r\n");
- if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+ if (!string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace))
 {
             this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
             this.Write(";\r\n");
 
 }
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         }
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n    .Produces<{Model.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n    .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
             builderExtensions += $"\r\n    .Produces(StatusCodes.Status404NotFound)";
         }
         
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(", ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelVariable));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelVariable));
             this.Write(", ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
             this.Write(" db) =>\r\n        {\r\n            var foundModel = await db.");
@@ -156,7 +156,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n\r\n            if (foundModel is null)\r\n            {\r\n                return ");
             this.Write(this.ToStringHelper.ToStringWithCulture(resultsNotFound));
             this.Write(";\r\n            }\r\n\r\n            db.Update(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelVariable));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelVariable));
             this.Write(");\r\n            await db.SaveChangesAsync();\r\n\r\n            return ");
             this.Write(this.ToStringHelper.ToStringWithCulture(resultsNoContent));
             this.Write(";\r\n        })\r\n    ");
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(", ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelVariable));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelVariable));
             this.Write(", ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
             this.Write(" db) =>\r\n        {\r\n            var affected = await db.");
@@ -189,8 +189,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             //should be atleast one property (primary key)
             foreach(var modelProperty in entityProperties)
             {
-                string modelPropertyName = modelProperty;
-                string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName})";
+                string modelPropertyName = modelProperty.Name;
+                string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelInfo.ModelVariable}.{modelPropertyName})";
         
             this.Write("        ");
             this.Write(this.ToStringHelper.ToStringWithCulture(setPropertyString));
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n\r\n        group.MapPost(\"/\", async (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelVariable));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelVariable));
             this.Write(", ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
             this.Write(" db) =>\r\n        {\r\n            db.");
@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         }
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n    .Produces<{Model.ModelTypeName}>(StatusCodes.Status201Created)";
+            builderExtensions += $"\r\n    .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
         }
     
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
@@ -261,7 +261,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(" is ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelVariable));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelVariable));
             this.Write(")\r\n            {\r\n                db.");
             this.Write(this.ToStringHelper.ToStringWithCulture(remove));
             this.Write(";\r\n                await db.SaveChangesAsync();\r\n                return ");

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -16,9 +17,9 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud;
 
-internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
+internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
 {
     private readonly IAppSettings _appSettings;
     private readonly IFileSystem _fileSystem;
@@ -28,7 +29,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
     private readonly ICodeService _codeService;
     private List<string> _excludeList;
 
-    public MinimalApiCommand(
+    public BlazorCrudCommand(
         IAppSettings appSettings,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
@@ -45,33 +46,34 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         _excludeList = [];
     }
 
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] MinimalApiSettings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] BlazorCrudSettings settings)
     {
+        Debugger.Launch();
         new MsBuildInitializer(_logger).Initialize();
-        if (!ValidateMinimalApiSettings(settings))
+        if (!ValidateBlazorCrudSettings(settings))
         {
             return -1;
         }
 
-        //initialize MinimalApiModel
+        //initialize BlazorCrudModel
         _logger.LogMessage("Initializing scaffolding model...");
-        var minimalApiModel = await GetMinimalApiModelAsync(settings);
-        if (minimalApiModel is null)
+        var blazorCrudModel = await GetBlazorCrudModelAsync(settings);
+        if (blazorCrudModel is null)
         {
             _logger.LogMessage("An error occurred.");
-            return -1; 
+            return -1;
         }
 
         //Install packages and add a DbContext (if needed)
-        if (minimalApiModel.DbContextInfo.EfScenario)
+        if (blazorCrudModel.DbContextInfo.EfScenario)
         {
             _logger.LogMessage("Installing packages...");
             InstallEfPackages(settings);
-            CommandHelpers.AddDbContext(minimalApiModel.DbContextInfo, _logger, _fileSystem);
+            AddDbContext(blazorCrudModel);
         }
 
-        _logger.LogMessage("Adding API controller...");
-        var executeTemplateResult = ExecuteTemplates(minimalApiModel);
+        _logger.LogMessage("Adding razor components...");
+        var executeTemplateResult = ExecuteTemplates(blazorCrudModel);
         //if we were not able to execute the templates successfully,
         //exit and don't update the project
         if (!executeTemplateResult)
@@ -82,7 +84,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
 
         //Update the project's Program.cs file
         _logger.LogMessage("Updating project...");
-        var projectUpdateResult = await UpdateProjectAsync(minimalApiModel);
+        var projectUpdateResult = await UpdateProjectAsync(blazorCrudModel);
         if (projectUpdateResult)
         {
             _logger.LogMessage("Finished");
@@ -95,9 +97,15 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         }
     }
 
+    private void AddDbContext(BlazorCrudModel blazorCrudModel)
+    {
+        if (blazorCrudModel.DbContextInfo is not null)
+        {
+            blazorCrudModel.DbContextInfo.AddDbContext(_logger, _fileSystem);
+        }
+    }
 
-
-    private bool ValidateMinimalApiSettings(MinimalApiSettings commandSettings)
+    private bool ValidateBlazorCrudSettings(BlazorCrudSettings commandSettings)
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
@@ -111,8 +119,23 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
             return false;
         }
 
-        if (!string.IsNullOrEmpty(commandSettings.DataContext) &&
-            (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider)))
+        if (string.IsNullOrEmpty(commandSettings.Page))
+        {
+            _logger.LogMessage("Missing/Invalid --page option.", LogMessageType.Error);
+            return false;
+        }
+        else if(!string.IsNullOrEmpty(commandSettings.Page) && !BlazorCrudHelper.CRUDPages.Contains(commandSettings.Page, StringComparer.OrdinalIgnoreCase))
+        {
+            //if an invalid page name, switch to just "CRUD" and scaffold all pages
+            commandSettings.Page = BlazorCrudHelper.CrudPageType;
+        }
+
+        if (string.IsNullOrEmpty(commandSettings.DataContext))
+        {
+            _logger.LogMessage("Missing/Invalid --dataContext option.", LogMessageType.Error);
+            return false;
+        }
+        else if(string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider))
         {
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
@@ -120,83 +143,69 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return true;
     }
 
-    private bool ExecuteTemplates(MinimalApiModel minimalApiModel)
+    private bool ExecuteTemplates(BlazorCrudModel blazorCrudModel)
     {
-        var projectPath = minimalApiModel.ProjectInfo.AppSettings?.Workspace()?.InputPath;
-        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
-        ITextTransformation? textTransformation = null;
-        string? t4TemplatePath = null;
-        if (minimalApiModel.DbContextInfo.EfScenario)
-        {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApiEf.tt", StringComparison.OrdinalIgnoreCase));
-        }
-        else
-        {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApi.tt", StringComparison.OrdinalIgnoreCase));
-        }
+        var projectPath = blazorCrudModel.ProjectInfo.AppSettings?.Workspace()?.InputPath;
+        var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
+        var neededT4FileNames = BlazorCrudHelper.GetT4Templates(blazorCrudModel.PageType);
+        // Create a HashSet for quick lookup of needed file names
+        var neededFileNamesSet = new HashSet<string>(neededT4FileNames, StringComparer.OrdinalIgnoreCase);
 
-        textTransformation = GetMinimalApiTransformation(t4TemplatePath);
-        if (textTransformation is null)
-        {
-            throw new Exception($"Unable to process T4 template '{t4TemplatePath}' correctly");
-        }
+        // Filter the paths based on the presence of the file names in the hash set
+        var matchingPaths = allT4TemplatePaths
+            .Where(path => neededFileNamesSet.Contains(Path.GetFileName(path)))
+            .ToList();
 
-        var templateInvoker = new TemplateInvoker();
         var dictParams = new Dictionary<string, object>()
         {
-            { "Model" , minimalApiModel }
+            { "Model" , blazorCrudModel }
         };
 
-        var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
-        if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(minimalApiModel.EndpointsPath))
+        foreach (var templatePath in matchingPaths)
         {
-            _fileSystem.WriteAllText(minimalApiModel.EndpointsPath, templatedString);
-            return true;
+            ITextTransformation? textTransformation = null;
+            textTransformation = BlazorCrudHelper.GetBlazorCrudTransformation(templatePath);
+            if (textTransformation is null)
+            {
+                throw new Exception($"Unable to process T4 template '{templatePath}' correctly");
+            }
+
+            var templateInvoker = new TemplateInvoker();
+            var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
+            string outputPath = BlazorCrudHelper.ValidateAndGetOutputPath(
+                blazorCrudModel.ModelInfo.ModelTypeName,
+                Path.GetFileNameWithoutExtension(templatePath),
+                blazorCrudModel.ProjectInfo.AppSettings?.Workspace().InputPath);
+
+            var outputDirectory = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(templatedString) &&
+                !string.IsNullOrEmpty(outputPath) &&
+                !string.IsNullOrEmpty(outputDirectory))
+            {
+                if (!_fileSystem.DirectoryExists(outputDirectory))
+                {
+                    _fileSystem.CreateDirectory(outputDirectory);
+                }
+
+                _fileSystem.WriteAllText(outputPath, templatedString);
+            }
         }
 
-        return false;
+        return true;
     }
 
-    private static ITextTransformation? GetMinimalApiTransformation(string? templatePath)
+    private async Task<bool> UpdateProjectAsync(BlazorCrudModel blazorCrudModel)
     {
-        if (string.IsNullOrEmpty(templatePath))
+        CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
+        if (blazorCrudModel.ProjectInfo.AppSettings is not null && blazorCrudModel.ProjectInfo.CodeService is not null && blazorCrudModel.ProjectInfo.CodeChangeOptions is not null)
         {
-            return null;
-        }
-
-        var host = new TextTemplatingEngineHost { TemplateFile = templatePath };
-        ITextTransformation? transformation = null;
-
-        switch (Path.GetFileName(templatePath))
-        {
-            case "MinimalApi.tt":
-                transformation = new Templates.MinimalApi.MinimalApi() { Host = host };
-                break;
-            case "MinimalApiEf.tt":
-                transformation = new Templates.MinimalApi.MinimalApiEf() { Host = host };
-                break;
-        }
-
-        if (transformation is not null)
-        {
-            transformation.Session = host.CreateSession();
-        }
-
-        return transformation;
-    }
-
-    private async Task<bool> UpdateProjectAsync(MinimalApiModel minimalApiModel)
-    {
-        CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
-        if (minimalApiModel.ProjectInfo.AppSettings is not null && minimalApiModel.ProjectInfo.CodeService is not null && minimalApiModel.ProjectInfo.CodeChangeOptions is not null)
-        {
-            config = EditConfigForMinimalApi(config, minimalApiModel);
+            config = EditConfigForMinimalApi(config, blazorCrudModel);
             var projectModifier = new ProjectModifier(
                 _environmentService,
-                minimalApiModel.ProjectInfo.AppSettings,
-                minimalApiModel.ProjectInfo.CodeService,
+                blazorCrudModel.ProjectInfo.AppSettings,
+                blazorCrudModel.ProjectInfo.CodeService,
                 _logger,
-                minimalApiModel.ProjectInfo.CodeChangeOptions,
+                blazorCrudModel.ProjectInfo.CodeChangeOptions,
                 config);
 
             return await projectModifier.RunAsync();
@@ -205,7 +214,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return false;
     }
 
-    private CodeModifierConfig? EditConfigForMinimalApi(CodeModifierConfig? configToEdit, MinimalApiModel minimalApiModel)
+    private CodeModifierConfig? EditConfigForMinimalApi(CodeModifierConfig? configToEdit, BlazorCrudModel BlazorCrudModel)
     {
         if (configToEdit is null)
         {
@@ -215,26 +224,11 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
         var globalMethod = programCsFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
         if (globalMethod is not null)
-        {   
-            //only one change in here
-            var addEndpointsChange = globalMethod?.CodeChanges?.FirstOrDefault();
-            if (minimalApiModel.ProjectInfo.CodeChangeOptions is not null &&
-                !minimalApiModel.ProjectInfo.CodeChangeOptions.UsingTopLevelsStatements &&
-                addEndpointsChange is not null)
-            {
-                addEndpointsChange = DocumentBuilder.AddLeadingTriviaSpaces(addEndpointsChange, spaces: 12);
-            }
-
-            if (addEndpointsChange is not null &&
-                !string.IsNullOrEmpty(addEndpointsChange.Block) &&
-                !string.IsNullOrEmpty(minimalApiModel.EndpointsMethodName))
-            {
-                //formatting the endpoints method call onto "app.{0}()"
-                addEndpointsChange.Block = string.Format(addEndpointsChange.Block, minimalApiModel.EndpointsMethodName);
-            }
+        {
+            //find the blazor crud changes
         }
 
-        var dbContextInfo = minimalApiModel.DbContextInfo;
+        var dbContextInfo = BlazorCrudModel.DbContextInfo;
 
         if (dbContextInfo.EfScenario)
         {
@@ -276,7 +270,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return configToEdit;
     }
 
-    private async Task<MinimalApiModel?> GetMinimalApiModelAsync(MinimalApiSettings settings)
+    private async Task<BlazorCrudModel?> GetBlazorCrudModelAsync(BlazorCrudSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         if (projectInfo is null || projectInfo.CodeService is null)
@@ -308,46 +302,20 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();
 
-        if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
+        if (!string.IsNullOrEmpty(dbContextClassName))
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
             dbContextInfo = ClassAnalyzers.GetDbContextInfo(dbContextClassSymbol, projectInfo.AppSettings, dbContextClassName, settings.DatabaseProvider, settings.Model);
         }
 
-        MinimalApiModel scaffoldingModel = new()
+        BlazorCrudModel scaffoldingModel = new()
         {
+            PageType = settings.Page,
             ProjectInfo = projectInfo,
             ModelInfo = modelInfo,
             DbContextInfo = dbContextInfo
         };
 
-        //find endpoints class name and path
-        var allDocs = await projectInfo.CodeService.GetAllDocumentsAsync();
-        scaffoldingModel.EndpointsMethodName = $"Map{modelClassSymbol.Name}Endpoints";
-        if (!string.IsNullOrEmpty(settings.Endpoints))
-        {
-            scaffoldingModel.EndpointsFileName = StringUtil.EnsureCsExtension(settings.Endpoints);
-            var existingEndpointsDoc = allDocs.FirstOrDefault(x => x.Name.Equals(scaffoldingModel.EndpointsFileName, StringComparison.OrdinalIgnoreCase) || x.Name.EndsWith(scaffoldingModel.EndpointsFileName, StringComparison.OrdinalIgnoreCase));
-            if (existingEndpointsDoc is not null)
-            {
-                scaffoldingModel.EndpointsPath = existingEndpointsDoc.FilePath ?? existingEndpointsDoc.Name;
-            }
-            else
-            {
-                scaffoldingModel.EndpointsClassName = Path.GetFileNameWithoutExtension(scaffoldingModel.EndpointsFileName);
-                scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(scaffoldingModel.ProjectInfo.AppSettings, scaffoldingModel.EndpointsFileName);
-            }
-        }
-        else
-        {
-            scaffoldingModel.EndpointsFileName = $"{settings.Model}Endpoints.cs";
-            scaffoldingModel.EndpointsClassName = $"{settings.Model}Endpoints";
-            scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(scaffoldingModel.ProjectInfo.AppSettings, scaffoldingModel.EndpointsFileName);
-        }
-
-        
-
-        scaffoldingModel.OpenAPI = settings.OpenApi;
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
         {
             scaffoldingModel.ProjectInfo.CodeChangeOptions = new CodeChangeOptions
@@ -361,7 +329,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return scaffoldingModel;
     }
 
-    private void InstallEfPackages(MinimalApiSettings commandSettings)
+    private void InstallEfPackages(BlazorCrudSettings commandSettings)
     {
         //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
         var packageList = new List<string>()

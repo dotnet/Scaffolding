@@ -32,6 +32,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Commands\CodeModificationConfigs\blazorWebCrudChanges.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\BlazorCrud\Create.tt">
+      <LastGenOutput>Create.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\BlazorCrud\Delete.tt">
+      <LastGenOutput>Delete.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\BlazorCrud\Details.tt">
+      <LastGenOutput>Details.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\BlazorCrud\Edit.tt">
+      <LastGenOutput>Edit.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\BlazorCrud\Index.tt">
+      <LastGenOutput>Index.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
     <None Update="Templates\MinimalApi\MinimalApi.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MinimalApi.cs</LastGenOutput>
@@ -39,6 +63,31 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Templates\BlazorCrud\Create.cs">
+      <DependentUpon>Create.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\BlazorCrud\Delete.cs">
+      <DependentUpon>Delete.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\BlazorCrud\Details.cs">
+      <DependentUpon>Details.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\BlazorCrud\Edit.cs">
+      <DependentUpon>Edit.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\BlazorCrud\Index.cs">
+      <DependentUpon>Index.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Templates\MinimalApi\MinimalApi.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -56,6 +105,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

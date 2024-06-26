@@ -50,9 +50,8 @@ internal class CategoryDiscovery
         displayCategories = (_componentPicked != null ? allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)) : allCommands)
             ?.Select(y => y.Value.DisplayCategory)
             ?.Distinct()
+            ?.Order()
             ?.ToList();
-        //using Sort() to sort 'DisplayCategory's alphabetically.
-        displayCategories?.Sort();
 
         var prompt = new FlowSelectionPrompt<string>()
             .Title("[lightseagreen]Pick a scaffolding category: [/]")

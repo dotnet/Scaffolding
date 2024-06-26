@@ -52,14 +52,15 @@ internal class CommandDiscovery
         }
 
         var scaffoldingCategory = context.GetScaffoldingCategory();
-        var allCommandsByCategory = allCommands?.Where(x => x.Value.DisplayCategory.Equals(scaffoldingCategory)).ToList();
-        //using OrderBy() to sort 'DisplayName's alphabetically.
-        var sortedCommands = allCommandsByCategory?.OrderBy(kvp => kvp.Value.DisplayName).ToList();
+        var allCommandsByCategory = allCommands?
+            .Where(x => x.Value.DisplayCategory.Equals(scaffoldingCategory))
+            .OrderBy(kvp => kvp.Value.DisplayName)
+            .ToList();
 
         var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()
             .Title("[lightseagreen]Pick a scaffolding command: [/]")
             .Converter(GetCommandInfoDisplayName)
-            .AddChoices(sortedCommands, navigation: context.Navigation);
+            .AddChoices(allCommandsByCategory, navigation: context.Navigation);
 
         var result = prompt.Show();
         State = result.State;

@@ -12,6 +12,7 @@ internal class BlazorCrudModel
     public required ModelInfo ModelInfo { get; init; }
     public required ProjectInfo ProjectInfo { get; init; }
 
+    //used to get correct Input tag to add to BlazorCrud\Create.tt and BlazorCrud\Edit.tt template
     public string GetInputType(string inputType)
     {
         if (string.IsNullOrEmpty(inputType))
@@ -49,7 +50,7 @@ internal class BlazorCrudModel
         }
     }
 
-    //used for Create and Edit pages for the Blazor CRUD scenario
+    //used to get correct form class to add to BlazorCrud\Create.tt and BlazorCrud\Edit.tt template
     public string GetInputClassType(string inputType)
     {
         if (string.Equals(inputType, "bool", StringComparison.OrdinalIgnoreCase))

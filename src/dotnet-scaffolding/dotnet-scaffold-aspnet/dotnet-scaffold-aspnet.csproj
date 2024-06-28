@@ -32,10 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Commands\CodeModificationConfigs\blazorWebCrudChanges.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Templates\BlazorCrud\Create.tt">
       <LastGenOutput>Create.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -105,10 +101,6 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

@@ -29,7 +29,7 @@ internal interface ICodeService
     /// <returns></returns>
     Task ReloadWorkspaceAsync(string? projectPath);
 
-    Task <IList<ISymbol>> GetAllClassSymbolsAsync();
-    Task<IList<Document>> GetAllDocumentsAsync();
+    Task <List<ISymbol>> GetAllClassSymbolsAsync();
+    Task<List<Document>> GetAllDocumentsAsync();
     Task<Document?> GetDocumentAsync(string? documentName);
 }

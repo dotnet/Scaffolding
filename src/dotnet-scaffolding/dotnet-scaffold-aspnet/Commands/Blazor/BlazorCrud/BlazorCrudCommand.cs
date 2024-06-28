@@ -17,7 +17,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 
 internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
 {
@@ -48,7 +48,6 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
 
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] BlazorCrudSettings settings)
     {
-        Debugger.Launch();
         new MsBuildInitializer(_logger).Initialize();
         if (!ValidateBlazorCrudSettings(settings))
         {
@@ -68,7 +67,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         if (blazorCrudModel.DbContextInfo.EfScenario)
         {
             _logger.LogMessage("Installing packages...");
-            InstallEfPackages(settings);
+            InstallPackages(settings);
             AddDbContext(blazorCrudModel);
         }
 
@@ -124,7 +123,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             _logger.LogMessage("Missing/Invalid --page option.", LogMessageType.Error);
             return false;
         }
-        else if(!string.IsNullOrEmpty(commandSettings.Page) && !BlazorCrudHelper.CRUDPages.Contains(commandSettings.Page, StringComparer.OrdinalIgnoreCase))
+        else if (!string.IsNullOrEmpty(commandSettings.Page) && !BlazorCrudHelper.CRUDPages.Contains(commandSettings.Page, StringComparer.OrdinalIgnoreCase))
         {
             //if an invalid page name, switch to just "CRUD" and scaffold all pages
             commandSettings.Page = BlazorCrudHelper.CrudPageType;
@@ -135,7 +134,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             _logger.LogMessage("Missing/Invalid --dataContext option.", LogMessageType.Error);
             return false;
         }
-        else if(string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider))
+        else if (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider))
         {
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
@@ -197,9 +196,12 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
     private async Task<bool> UpdateProjectAsync(BlazorCrudModel blazorCrudModel)
     {
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
-        if (blazorCrudModel.ProjectInfo.AppSettings is not null && blazorCrudModel.ProjectInfo.CodeService is not null && blazorCrudModel.ProjectInfo.CodeChangeOptions is not null)
+        if (blazorCrudModel.ProjectInfo.AppSettings is not null &&
+            blazorCrudModel.ProjectInfo.CodeService is not null &&
+            blazorCrudModel.ProjectInfo.CodeChangeOptions is not null &&
+            config is not null)
         {
-            config = EditConfigForMinimalApi(config, blazorCrudModel);
+            config = await EditConfigForBlazorCrudAsync(config, blazorCrudModel);
             var projectModifier = new ProjectModifier(
                 _environmentService,
                 blazorCrudModel.ProjectInfo.AppSettings,
@@ -214,59 +216,18 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         return false;
     }
 
-    private CodeModifierConfig? EditConfigForMinimalApi(CodeModifierConfig? configToEdit, BlazorCrudModel BlazorCrudModel)
+    private async Task<CodeModifierConfig> EditConfigForBlazorCrudAsync(CodeModifierConfig configToEdit, BlazorCrudModel blazorCrudModel)
     {
-        if (configToEdit is null)
+        var codeService = blazorCrudModel.ProjectInfo?.CodeService;
+        if (codeService is not null)
         {
-            return null;
+            var programCsDocument = await codeService.GetDocumentAsync("Program.cs");
+            var appRazorDocument = await codeService.GetDocumentAsync("App.razor");
+            var blazorAppProperties = await BlazorCrudHelper.GetBlazorPropertiesAsync(programCsDocument, appRazorDocument);
+            configToEdit = BlazorCrudHelper.AddBlazorChangesToCodeFile(configToEdit, blazorAppProperties);
         }
 
-        var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-        var globalMethod = programCsFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
-        if (globalMethod is not null)
-        {
-            //find the blazor crud changes
-        }
-
-        var dbContextInfo = BlazorCrudModel.DbContextInfo;
-
-        if (dbContextInfo.EfScenario)
-        {
-            var efChangesFile = configToEdit.Files?.FirstOrDefault(x =>
-                    !string.IsNullOrEmpty(x.FileName) &&
-                    x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase) &&
-                    x.Options is not null &&
-                    x.Options.Contains(CodeChangeOptionStrings.EfScenario));
-
-            var efChangesGlobalMethod = efChangesFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
-            var addDbContextChange = efChangesGlobalMethod?.CodeChanges?.FirstOrDefault(x => x.Block.Contains("builder.Services.AddDbContext", StringComparison.OrdinalIgnoreCase));
-            if (dbContextInfo.CreateDbContext &&
-                addDbContextChange is not null &&
-                !string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
-                PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(dbContextInfo.DatabaseProvider, out var useDbMethod))
-            {
-                addDbContextChange.Block = string.Format(addDbContextChange.Block, dbContextInfo.DbContextClassName, useDbMethod);
-            }
-
-            if (string.IsNullOrEmpty(dbContextInfo.EntitySetVariableName) &&
-                !dbContextInfo.CreateDbContext &&
-                !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
-                efChangesGlobalMethod != null)
-            {
-                var addDbStatementCodeChange = new CodeFile()
-                {
-                    FileName = StringUtil.EnsureCsExtension(dbContextInfo.DbContextClassName),
-                    Options = [CodeChangeOptionStrings.EfScenario],
-                    ClassProperties = [new CodeBlock
-                    {
-                        Block = dbContextInfo.NewDbSetStatement
-                    }]
-                };
-
-                configToEdit.Files = configToEdit.Files?.Append(addDbStatementCodeChange).ToArray();
-            }
-        }
-
+        configToEdit = AspNetDbContextHelper.AddDbContextChanges(blazorCrudModel.DbContextInfo, configToEdit);
         return configToEdit;
     }
 
@@ -329,12 +290,14 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         return scaffoldingModel;
     }
 
-    private void InstallEfPackages(BlazorCrudSettings commandSettings)
+    private void InstallPackages(BlazorCrudSettings commandSettings)
     {
-        //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
+        //add these packages regardless of the DatabaseProvider
         var packageList = new List<string>()
         {
-            PackageConstants.EfConstants.EfToolsPackageName
+            PackageConstants.EfConstants.EfToolsPackageName,
+            PackageConstants.EfConstants.QuickGridEfAdapterPackageName,
+            PackageConstants.EfConstants.AspNetCoreDiagnosticsEfCorePackageName
         };
 
         if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&

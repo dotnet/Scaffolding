@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
                 {
                     string modelPropertyName = property.Name;
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
-                    string propertyShortTypeName = property.Type.Name.Replace("?", string.Empty);
+                    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
 
@@ -181,12 +181,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             }
         }
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel Model
 {
     get
     {
@@ -205,7 +205,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -213,18 +213,18 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudMo" +
-                    "del\' of the parameter \'Model\' did not match the type of the data passed to the t" +
-                    "emplate.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.Blazo" +
+                    "rCrudModel\' of the parameter \'Model\' did not match the type of the data passed t" +
+                    "o the template.");
         }
     }
 }
@@ -233,7 +233,7 @@ if ((ModelValueAcquired == false))
     object data = global::Microsoft.DotNet.Scaffolding.Helpers.T4Templating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(data));
     }
 }
 

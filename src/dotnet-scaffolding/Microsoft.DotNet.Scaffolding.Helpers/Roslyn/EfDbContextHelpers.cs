@@ -20,7 +20,7 @@ internal static class EfDbContextHelpers
                 EfModelProperties efModelProperties = new()
                 {
                     PrimaryKeyName = primaryKey.Name,
-                    PrimaryKeyShortTypeName = primaryKey.Type.Name,
+                    PrimaryKeyShortTypeName = primaryKey.Type.ToDisplayString(),
                     PrimaryKeyTypeName = primaryKey.Type.ToDisplayString(),
                     AllModelProperties = allModelProperties.ToList()
                 };

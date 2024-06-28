@@ -107,10 +107,6 @@ internal class ProjectModifier
 
         // add code snippets/changes.
         return await ProjectModifierHelper.ModifyDocumentTextAsync(fileDoc, filteredCodeChanges);
-/*            if (editedDocument != null)
-        {
-            await ProjectModifierHelper.UpdateDocument(editedDocument);
-        }*/
     }
 
     /// <summary>

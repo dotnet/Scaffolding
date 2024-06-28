@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud.BlazorCrudModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -12,7 +12,7 @@
     string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;

@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 

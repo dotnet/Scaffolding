@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -30,6 +30,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
                     DisplayCategory = "MVC",
                     Description = "Generates an Area folder structure.",
                     Parameters = GetCmdsHelper.AreaParameters // Add parameters if any
+                },
+                new()
+                {
+                    Name = "blazor-crud",
+                    DisplayName = "Razor Components w/ EF (CRUD)",
+                    DisplayCategory = "Blazor",
+                    Description = "Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model",
+                    Parameters = GetCmdsHelper.BlazorCrudParameters
                 },
                 new()
                 {
@@ -70,14 +78,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
                     DisplayCategory = "MVC",
                     Description = "Generates an empty Razor View",
                     Parameters = GetCmdsHelper.RazorViewEmptyParameters
-                },
-                new()
-                {
-                    Name = "blazor-crud",
-                    DisplayName = "Razor Components w/ EF (CRUD)",
-                    DisplayCategory = "Blazor",
-                    Description = "Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model",
-                    Parameters = GetCmdsHelper.BlazorCrudParameters
                 }
                 // Add other commands here
             };
@@ -105,11 +105,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal static Parameter Actions = new() { Name = "--actions", DisplayName = "Read/Write Actions", Description = "Create controller with read/write actions?", Required = true, Type = BaseTypes.Bool, PickerType = InteractivePickerType.YesNo };
         internal static Parameter[] AreaParameters = [Project, AreaName];
         internal static Parameter[] MinimalApiParameters = [Project, ModelName, EndpointsClass, DataContextClass, DatabaseProvider, OpenApi, PrereleaseParameter];
+        internal static Parameter[] BlazorCrudParameters = [Project, ModelName, PageType, DataContextClassRequired, DatabaseProviderRequired, PrereleaseParameter];
         internal static Parameter[] BlazorEmptyParameters = [Project, FileName];
         internal static Parameter[] MvcControllerEmptyParameters = [Project, FileName, Actions];
         internal static Parameter[] ApiControllerEmptyParameters = [Project, FileName, Actions];
         internal static Parameter[] RazorPageEmptyParameters = [Project, FileName];
         internal static Parameter[] RazorViewEmptyParameters = [Project, FileName];
-        internal static Parameter[] BlazorCrudParameters = [Project, ModelName, PageType, DataContextClassRequired, DatabaseProviderRequired, PrereleaseParameter];
     }
 }

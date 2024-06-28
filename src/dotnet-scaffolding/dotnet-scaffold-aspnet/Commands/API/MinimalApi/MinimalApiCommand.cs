@@ -16,7 +16,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 
 internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
 {
@@ -59,7 +59,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         if (minimalApiModel is null)
         {
             _logger.LogMessage("An error occurred.");
-            return -1; 
+            return -1;
         }
 
         //Install packages and add a DbContext (if needed)
@@ -215,7 +215,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
         var globalMethod = programCsFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
         if (globalMethod is not null)
-        {   
+        {
             //only one change in here
             var addEndpointsChange = globalMethod?.CodeChanges?.FirstOrDefault();
             if (minimalApiModel.ProjectInfo.CodeChangeOptions is not null &&
@@ -235,44 +235,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         }
 
         var dbContextInfo = minimalApiModel.DbContextInfo;
-
-        if (dbContextInfo.EfScenario)
-        {
-            var efChangesFile = configToEdit.Files?.FirstOrDefault(x =>
-                    !string.IsNullOrEmpty(x.FileName) &&
-                    x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase) &&
-                    x.Options is not null &&
-                    x.Options.Contains(CodeChangeOptionStrings.EfScenario));
-
-            var efChangesGlobalMethod = efChangesFile?.Methods?.FirstOrDefault(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).Value;
-            var addDbContextChange = efChangesGlobalMethod?.CodeChanges?.FirstOrDefault(x => x.Block.Contains("builder.Services.AddDbContext", StringComparison.OrdinalIgnoreCase));
-            if (dbContextInfo.CreateDbContext &&
-                addDbContextChange is not null &&
-                !string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
-                PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(dbContextInfo.DatabaseProvider, out var useDbMethod))
-            {
-                addDbContextChange.Block = string.Format(addDbContextChange.Block, dbContextInfo.DbContextClassName, useDbMethod);
-            }
-
-            if (string.IsNullOrEmpty(dbContextInfo.EntitySetVariableName) &&
-                !dbContextInfo.CreateDbContext &&
-                !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
-                efChangesGlobalMethod != null)
-            {
-                var addDbStatementCodeChange = new CodeFile()
-                {
-                    FileName = StringUtil.EnsureCsExtension(dbContextInfo.DbContextClassName),
-                    Options = [CodeChangeOptionStrings.EfScenario],
-                    ClassProperties = [new CodeBlock
-                    {
-                        Block = dbContextInfo.NewDbSetStatement
-                    }]
-                };
-
-                configToEdit.Files = configToEdit.Files?.Append(addDbStatementCodeChange).ToArray();
-            }
-        }
-
+        configToEdit = AspNetDbContextHelper.AddDbContextChanges(dbContextInfo, configToEdit);
         return configToEdit;
     }
 
@@ -345,7 +308,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
             scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(scaffoldingModel.ProjectInfo.AppSettings, scaffoldingModel.EndpointsFileName);
         }
 
-        
+
 
         scaffoldingModel.OpenAPI = settings.OpenApi;
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -18,7 +18,8 @@
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     var entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     var entitySetNoTracking = $"{entitySetName}.AsNoTracking()";
-    var entityProperties = Model.ModelInfo.ModelProperties;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     var primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
     var primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyShortTypeName;

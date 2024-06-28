@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
     using System.Text;
     using System.Linq;
     using System;
-    
+
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -186,12 +186,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             }
         }
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel Model
 {
     get
     {
@@ -210,7 +210,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -218,11 +218,11 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
@@ -238,7 +238,7 @@ if ((ModelValueAcquired == false))
     object data = global::Microsoft.DotNet.Scaffolding.Helpers.T4Templating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel)(data));
     }
 }
 

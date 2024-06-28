@@ -3,7 +3,7 @@
 using System;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 
 internal class BlazorCrudModel
 {
@@ -27,6 +27,10 @@ internal class BlazorCrudModel
             case "DateTimeOffset":
             case "DateOnly":
             case "TimeOnly":
+            case "System.DateTime":
+            case "System.DateTimeOffset":
+            case "System.DateOnly":
+            case "System.TimeOnly":
                 return "InputDate";
             case "int":
             case "long":

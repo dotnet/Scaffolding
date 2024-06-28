@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.BlazorCrud;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 
 internal class BlazorCrudSettings : CommandSettings
 {

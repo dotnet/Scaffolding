@@ -60,7 +60,7 @@ internal class CodeService : ICodeService, IDisposable
         var workspace = MSBuildWorkspace.Create(_settings.GlobalProperties);
         workspace.WorkspaceFailed += OnWorkspaceFailed;
         workspace.LoadMetadataForReferencedProjects = true;
-        await workspace.OpenProjectAsync(path).ConfigureAwait(false);
+        await workspace.OpenProjectAsync(path);
         _workspace = workspace;
         return _workspace;
     }
@@ -126,7 +126,7 @@ internal class CodeService : ICodeService, IDisposable
         UnloadWorkspace();
     }
 
-    public async Task<IList<ISymbol>> GetAllClassSymbolsAsync()
+    public async Task<List<ISymbol>> GetAllClassSymbolsAsync()
     {
         List<ISymbol> classSymbols = [];
         if (_compilation is null)
@@ -161,7 +161,7 @@ internal class CodeService : ICodeService, IDisposable
         return classSymbols;
     }
 
-    public async Task<IList<Document>> GetAllDocumentsAsync()
+    public async Task<List<Document>> GetAllDocumentsAsync()
     {
         var workspace = await GetWorkspaceAsync();
         var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);

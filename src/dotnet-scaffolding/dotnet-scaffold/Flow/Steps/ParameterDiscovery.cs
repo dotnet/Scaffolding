@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     }
                     else
                     {
-                        var allDocuments = (await codeService.GetAllDocumentsAsync()).ToList();
+                        var allDocuments = await codeService.GetAllDocumentsAsync();
                         stepOptions = GetDocumentNames(allDocuments);
                     }
 
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var allClassSymbols = await AnsiConsole
                 .Status()
                 .WithSpinner()
-                .Start("Gathering project classes!", async statusContext =>
+                .StartAsync("Gathering project classes!", async statusContext =>
                 {
                     //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     //will add better documentation so users will know what to expect.
@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                         return [];
                     }
 
-                    return (await codeService.GetAllClassSymbolsAsync()).ToList();
+                    return await codeService.GetAllClassSymbolsAsync();
                 });
 
             List<StepOption> classNames = [];

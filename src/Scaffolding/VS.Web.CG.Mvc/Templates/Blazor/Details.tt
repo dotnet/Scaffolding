@@ -9,7 +9,7 @@
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.ContextTypeName}> DbFactory";
     string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
@@ -18,15 +18,16 @@
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/details"
-@inject <#= dbContextFullName #> DB
+
+@using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
     {
         #>@using <#= modelNamespace#>
 <#  }
 #>
+@inject <#= dbContextFactory #>
 @inject NavigationManager NavigationManager
-@using Microsoft.EntityFrameworkCore
 
 <PageTitle>Details</PageTitle>
 
@@ -64,7 +65,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        <#= modelNameLowerInv #> = await DB.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+        using var context = DbFactory.CreateDbContext();
+        <#= modelNameLowerInv #> = await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
 
         if (<#= modelNameLowerInv #> is null)
         {

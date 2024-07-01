@@ -101,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _fileSystem = fileSystem;
         }
 
-        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider)
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider, bool useDbFactory = false)
         {
             if (string.IsNullOrEmpty(dbContextFullTypeName))
             {
@@ -119,7 +119,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _projectContext,
                 _applicationInfo,
                 _fileSystem,
-                _logger);
+                _logger,
+                useDbFactory);
 
             await processor.Process();
 

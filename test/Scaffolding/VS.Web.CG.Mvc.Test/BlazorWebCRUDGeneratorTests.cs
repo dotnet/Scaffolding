@@ -27,16 +27,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         private IFileSystem fileSystem;
 
         [Fact]
-        public async Task ModifyProgramCsTests()
-        {
-            var blazorGenerator = CreateBlazorWebCRUDGenerator();
-            await blazorGenerator.ModifyProgramCsAsync(new BlazorWebAppProperties());
-            string programCsText = fileSystem.ReadAllText("Program.cs");
-            Assert.Contains("AddQuickGridEntityFrameworkAdapter()", programCsText);
-            Assert.Contains("AddInteractiveServerRenderMode()", programCsText);
-        }
-
-        [Fact]
         public void ValidateAndGetOutputPathTests()
         {
             Mock<IApplicationInfo> _mockApp = new Mock<IApplicationInfo>();

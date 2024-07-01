@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -42,9 +42,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/edit\"\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
-            this.Write(" DB\r\n");
+            this.Write("/edit\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -54,8 +52,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("\r\n");
   }
 
-            this.Write("@inject NavigationManager NavigationManager\r\n@using Microsoft.EntityFrameworkCore" +
-                    "\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>");
+            this.Write("@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
+            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<" +
+                    "h1>Edit</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n<hr />\r\n@if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
@@ -116,9 +116,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
-                    "        ");
+                    "        using var context = DbFactory.CreateDbContext();\r\n        ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" ??= await DB.");
+            this.Write(" ??= await context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write(".FirstOrDefaultAsync(m => m.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
@@ -136,11 +136,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("()\r\n    {\r\n        DB.Attach(");
+            this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
+                    "ext.Attach(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("!).State = EntityState.Modified;\r\n\r\n        try\r\n        {\r\n            await DB." +
-                    "SaveChangesAsync();\r\n        }\r\n        catch (DbUpdateConcurrencyException)\r\n  " +
-                    "      {\r\n            if (!");
+            this.Write("!).State = EntityState.Modified;\r\n\r\n        try\r\n        {\r\n            await con" +
+                    "text.SaveChangesAsync();\r\n        }\r\n        catch (DbUpdateConcurrencyException" +
+                    ")\r\n        {\r\n            if (!");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("Exists(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
@@ -156,7 +157,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(")\r\n    {\r\n        return DB.");
+            this.Write(")\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        retur" +
+                    "n context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write(".Any(e => e.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));

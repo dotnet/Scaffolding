@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -42,9 +42,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/delete\"\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
-            this.Write(" DB\r\n");
+            this.Write("/delete\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -54,9 +52,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("\r\n");
   }
 
-            this.Write("@inject NavigationManager NavigationManager\r\n@using Microsoft.EntityFrameworkCore" +
-                    "\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r\n<h1>Delete</h1>\r\n\r\n<h3>Are you sure you wan" +
-                    "t to delete this?</h3>\r\n<div>\r\n    <h4>");
+            this.Write("@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
+            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r" +
+                    "\n<h1>Delete</h1>\r\n\r\n<h3>Are you sure you want to delete this?</h3>\r\n<div>\r\n    <" +
+                    "h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n    <hr />\r\n    @if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
@@ -92,9 +92,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
-                    "        ");
+                    "        using var context = DbFactory.CreateDbContext();\r\n        ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" = await DB.");
+            this.Write(" = await context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write(".FirstOrDefaultAsync(m => m.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
@@ -105,12 +105,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(" is null)\r\n        {\r\n            NavigationManager.NavigateTo(\"notfound\");\r\n    " +
                     "    }\r\n    }\r\n\r\n    public async Task Delete");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("()\r\n    {\r\n        DB.");
+            this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
+                    "ext.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write(".Remove(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write("!);\r\n        await DB.SaveChangesAsync();\r\n        NavigationManager.NavigateTo(\"" +
-                    "/");
+            this.Write("!);\r\n        await context.SaveChangesAsync();\r\n        NavigationManager.Navigat" +
+                    "eTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();

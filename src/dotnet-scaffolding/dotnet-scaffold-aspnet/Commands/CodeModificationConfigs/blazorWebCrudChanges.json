@@ -15,14 +15,14 @@
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
-              "CheckBlock": "builder.Services.AddDbContext",
-              "Block": "builder.Services.AddDbContext<{0}>(options => options.{1}(connectionString))\"",
+              "CheckBlock": "builder.Services.AddDbContextFactory",
+              "Block": "builder.Services.AddDbContextFactory<{0}>(options => options.{1}(connectionString))\"",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
               "LeadingTrivia": {
                 "Newline": true

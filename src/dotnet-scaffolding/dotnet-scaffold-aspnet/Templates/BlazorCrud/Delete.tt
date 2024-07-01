@@ -9,7 +9,7 @@
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -19,15 +19,16 @@
     string entitySetName = Model.DbContextInfo.EntitySetVariableName;
 #>
 @page "/<#= pluralModelLowerInv #>/delete"
-@inject <#= dbContextFullName #> DB
+
+@using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
     {
         #>@using <#= modelNamespace#>
 <#  }
 #>
+@inject <#=dbContextFactory #>
 @inject NavigationManager NavigationManager
-@using Microsoft.EntityFrameworkCore
 
 <PageTitle>Delete</PageTitle>
 
@@ -67,7 +68,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        <#= modelNameLowerInv #> = await DB.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+        using var context = DbFactory.CreateDbContext();
+        <#= modelNameLowerInv #> = await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
 
         if (<#= modelNameLowerInv #> is null)
         {
@@ -77,8 +79,9 @@
 
     public async Task Delete<#= modelName #>()
     {
-        DB.<#= entitySetName #>.Remove(<#= modelNameLowerInv #>!);
-        await DB.SaveChangesAsync();
+        using var context = DbFactory.CreateDbContext();
+        context.<#= entitySetName #>.Remove(<#= modelNameLowerInv #>!);
+        await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 }

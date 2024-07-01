@@ -101,12 +101,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _fileSystem = fileSystem;
         }
 
+<<<<<<< HEAD
         public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, bool useSqlite)
         {
             return await GetModelMetadata(dbContextFullTypeName, modelTypeSymbol, areaName, useSqlite ? DbProvider.SQLite : DbProvider.SqlServer);
         }
 
         public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider)
+=======
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider, bool useDbFactory = false)
+>>>>>>> a9711390 (added code changes in json config and using IDbContextFactory now (#2835))
         {
             if (string.IsNullOrEmpty(dbContextFullTypeName))
             {
@@ -124,7 +128,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _projectContext,
                 _applicationInfo,
                 _fileSystem,
-                _logger);
+                _logger,
+                useDbFactory);
 
             await processor.Process();
 

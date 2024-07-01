@@ -39,7 +39,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
            IEntityFrameworkService entityFrameworkService,
            IModelTypesLocator modelTypesLocator,
            ILogger logger,
-           string areaName)
+           string areaName, 
+           bool useDbFactory = false)
         {
             ModelType model = ValidationUtil.ValidateType(modelClass, "model", modelTypesLocator);
             // Validation successful
@@ -64,7 +65,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     dbContextFullName,
                     model,
                     areaName,
-                    databaseProvider: dbProvider);
+                    databaseProvider: dbProvider,
+                    useDbFactory);
             }
 
             return new ModelTypeAndContextModel()
@@ -107,7 +109,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 entityFrameworkService,
                 modelTypesLocator,
                 logger,
-                areaName);
+                areaName,
+                useDbFactory: true);
         }
 
         internal static async Task<ModelTypeAndContextModel> GetModelEFMetadataMinimalAsync(

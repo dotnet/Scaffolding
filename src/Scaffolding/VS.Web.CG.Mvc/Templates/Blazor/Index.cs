@@ -31,7 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.ContextTypeName}> DbFactory";
     string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
@@ -40,9 +40,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\"\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
-            this.Write(" DB\r\n");
+            this.Write("\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n@using Microsoft.AspNetCore.Components" +
+                    ".QuickGrid\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -52,9 +51,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("\r\n");
   }
 
-            this.Write("\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
+            this.Write("@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
+            this.Write("\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"DB.");
+            this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"DbFactory.Create" +
+                    "DbContext().");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelMetadata.EntitySetName));
             this.Write("\">\r\n");
 

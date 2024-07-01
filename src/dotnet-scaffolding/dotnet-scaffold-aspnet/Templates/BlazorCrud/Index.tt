@@ -1,0 +1,53 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
+#>
+@page "/<#= pluralModelLowerInv #>"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject <#=dbContextFullName #> DB
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="<#= pluralModelLowerInv #>/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="DB.<#= entitySetName #>">
+<#
+    foreach (var property in entityProperties)
+    {
+        string modelPropertyName = property.Name;
+#>
+    <PropertyColumn Property="<#= modelNameLowerInv #> => <#= modelNameLowerInv #>.<#=modelPropertyName #>" />
+<#  } #>
+
+    <TemplateColumn Context="<#= modelNameLowerInv #>">
+        <a href="@($"<#= pluralModelLowerInv #>/edit?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Edit</a> |
+        <a href="@($"<#= pluralModelLowerInv #>/details?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Details</a> |
+        <a href="@($"<#= pluralModelLowerInv #>/delete?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>

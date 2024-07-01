@@ -7,167 +7,107 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 {
     using System.Collections.Generic;
     using System.Text;
     using System.Linq;
     using System;
-
+    
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class MinimalApi : MinimalApiBase
+    public partial class Create : CreateBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("public static class ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.EndpointsClassName));
-            this.Write("\r\n{\r\n    public static void ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.EndpointsMethodName));
-            this.Write("(this IEndpointRouteBuilder routes)\r\n    {\r\n        ");
 
-        string modelName = Model.ModelInfo.ModelTypeName;
-        string modelConstructor = $"{modelName}()";
-        string modelArray = $"{modelName}[]";
-        string routePrefix = "/api/" + modelName;
-        string endPointsClassName = Model.EndpointsClassName;
-        string methodName = $"Map{@modelName}Endpoints";
-        string pluralModel = Model.ModelInfo.ModelTypePluralName;
-        string routePrefixPlural = "/api/" + pluralModel;
-        string getAllModels = $"GetAll{@pluralModel}";
-        string getModelById = $"Get{modelName}ById";
-        string deleteModel = $"Delete{modelName}";
-        string createModel = $"Create{modelName}";
-        string updateModel = $"Update{modelName}";
-        string resultsExtension = (Model.UseTypedResults ? "TypedResults" : "Results") + ".NoContent()";
-        string builderExtensionSpaces = new string(' ', 8);
-            string group = Model.OpenAPI
-            ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
-            : $"var group = routes.MapGroup(\"{routePrefix}\");";
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
+    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            this.Write("@page \"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/create\"\r\n@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
+            this.Write(" DB\r\n");
+
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
         
-            this.Write(this.ToStringHelper.ToStringWithCulture(group));
-            this.Write("\r\n\r\n        group.MapGet(\"/\", () =>\r\n        {\r\n            return new[] { new ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelConstructor));
-            this.Write(" };\r\n        })");
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
+            this.Write("\r\n");
+  }
 
-        string builderExtensions = $".WithName(\"{getAllModels}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n.WithOpenApi()";
-        }
-        if(!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n.Produces<{modelArray}>(StatusCodes.Status200OK)";
-        }
-        
-            this.Write("\r\n        ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
-            this.Write(";\r\n\r\n        group.MapGet(\"/{id}\", (int id) =>\r\n        {\r\n            //return n" +
-                    "ew ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelTypeName));
-            this.Write(" { ID = id };\r\n        })");
+            this.Write("@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r\n<" +
+                    "h1>Create</h1>\r\n\r\n<h4>");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
+                    "ethod=\"post\" Model=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("\" OnValidSubmit=\"Add");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("\" FormName=\"create\" Enhance>\r\n            <DataAnnotationsValidator />\r\n         " +
+                    "   <ValidationSummary class=\"text-danger\" />\r\n            ");
 
-        builderExtensions = $".WithName(\"{getModelById}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n.WithOpenApi()";
-        }
-        if(!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
-        }
-        
-            this.Write("\r\n        ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
-            this.Write(";\r\n\r\n        group.MapPut(\"/{id}\", (int id, ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelTypeName));
-            this.Write(" input) =>\r\n        {\r\n            return ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(resultsExtension));
-            this.Write(";\r\n        })");
-
-        builderExtensions = $".WithName(\"{updateModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n.WithOpenApi()";
-        }
-        if (!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n.Produces(StatusCodes.Status204NoContent)";
-        }
-        
-            this.Write("\r\n        ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
-            this.Write(";\r\n\r\n        group.MapPost(\"/\", (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelTypeName));
-            this.Write(" model) =>\r\n        {\r\n            ");
-
-            if(!Model.UseTypedResults)
-            {
-                
-            this.Write("//return Results.Created($\"/{model.ID}\", model);\r\n            ");
-
-            }
-            else
-            {
-                
-            this.Write("//return TypedResults.Created($\"");
-            this.Write(this.ToStringHelper.ToStringWithCulture(routePrefix));
-            this.Write("/{model.ID}\", model);\r\n        ");
-
-            }
-        
-            this.Write("})\r\n        ");
-
-        builderExtensions = $".WithName(\"{createModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions+= $"\r\n.WithOpenApi()";
-        }
-        if (!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
-        }
-        
-            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
-            this.Write(";\r\n\r\n        group.MapDelete(\"/{id}\", (int id) =>\r\n        {\r\n            ");
-
-            if(!Model.UseTypedResults)
-            {
-                
-            this.Write("//return Results.Ok(new ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelTypeName));
-            this.Write(" { ID = id });\r\n            ");
-
-            }
-            else
-            {
-                
-            this.Write("//return TypedResults.Ok(new ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelTypeName));
-            this.Write(" { ID = id });\r\n        ");
-
-            }
-        
-            this.Write("})");
-
-        builderExtensions = $".WithName(\"{deleteModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n.WithOpenApi()";
-        }
-        if (!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
-        }
-        
-            this.Write("\r\n        ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
-            this.Write(";\r\n    }\r\n}\r\n");
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.Name;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    var inputClass = Model.GetInputClassType(propertyShortTypeName);
+            
+            this.Write("<div class=\"mb-3\">\r\n                <label for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+            this.Write("\" class=\"form-label\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write(":</label> \r\n                <");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
+            this.Write(" id=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+            this.Write("\" @bind-Value=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
+            this.Write("\" /> \r\n                <ValidationMessage For=\"() => ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"text-danger\" /> \r\n            </div>        \r\n            ");
+  } 
+            this.Write("<button type=\"submit\" class=\"btn btn-primary\">Create</button>\r\n        </EditForm" +
+                    ">\r\n    </div>\r\n</div>\r\n\r\n<div>\r\n    <a href=\"/");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n\r\n    [SupplyParameterFromForm]\r\n    publi" +
+                    "c ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" { get; set; } = new();\r\n\r\n    // To protect from overposting attacks, see https:" +
+                    "//aka.ms/RazorPagesCRUD\r\n    public async Task Add");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("()\r\n    {\r\n        DB.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName));
+            this.Write(".Add(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(");\r\n        await DB.SaveChangesAsync();\r\n        NavigationManager.NavigateTo(\"/" +
+                    "");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -186,12 +126,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             }
         }
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel Model
 {
     get
     {
@@ -210,7 +150,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -218,18 +158,18 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiMo" +
-                    "del\' of the parameter \'Model\' did not match the type of the data passed to the t" +
-                    "emplate.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.Blazo" +
+                    "rCrudModel\' of the parameter \'Model\' did not match the type of the data passed t" +
+                    "o the template.");
         }
     }
 }
@@ -238,7 +178,7 @@ if ((ModelValueAcquired == false))
     object data = global::Microsoft.DotNet.Scaffolding.Helpers.T4Templating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(data));
     }
 }
 
@@ -253,7 +193,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class MinimalApiBase
+    public class CreateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

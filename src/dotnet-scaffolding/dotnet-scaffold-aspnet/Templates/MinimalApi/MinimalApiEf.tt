@@ -1,33 +1,34 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 <#
-    string modelName = Model.ModelTypeName;
-    string dbProvider = Model.DatabaseProvider;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string dbProvider = Model.DbContextInfo.DatabaseProvider;
     string routePrefix = "/api/" + modelName;
     string endPointsClassName = Model.EndpointsClassName;
     string methodName = $"Map{modelName}Endpoints";
-    string pluralModel = Model.ModelTypePluralName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string getAllModels = $"GetAll{pluralModel}";
     string getModelById = $"Get{modelName}ById";
     string deleteModel = $"Delete{modelName}";
     string createModel = $"Create{modelName}";
     string updateModel = $"Update{modelName}";
-    string dbContextName = Model.DbContextClassName;
-    var entitySetName = Model.EntitySetVariableName ?? modelName;
+    string dbContextName = Model.DbContextInfo.DbContextClassName;
+    var entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     var entitySetNoTracking = $"{entitySetName}.AsNoTracking()";
-    var entityProperties = Model.ModelProperties;
-    var primaryKeyName = Model.PrimaryKeyName;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    var primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
-    var primaryKeyShortTypeName = Model.PrimaryKeyShortTypeName;
-    var primaryKeyType = Model.PrimaryKeyTypeName;
+    var primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyShortTypeName;
+    var primaryKeyType = Model.ModelInfo.PrimaryKeyTypeName;
     var modelList = $"List<{modelName}>";
     var modelToList = $"{entitySetName}.ToListAsync()";
     var findModel = $"{entitySetName}.FindAsync({primaryKeyNameLowerCase})";
-    var add = $"{entitySetName}.Add({Model.ModelVariable})";
-    var remove = $"{entitySetName}.Remove({Model.ModelVariable})";
+    var add = $"{entitySetName}.Add({Model.ModelInfo.ModelVariable})";
+    var remove = $"{entitySetName}.Remove({Model.ModelInfo.ModelVariable})";
     string resultsExtension = Model.UseTypedResults ? "TypedResults" : "Results";
     string typedTaskWithNotFound = Model.UseTypedResults ? $"Task<Results<Ok<{modelName}>, NotFound>>" : "";
     string typedTaskOkNotFound = Model.UseTypedResults ? $"Task<Results<Ok, NotFound>>" : "";
@@ -36,19 +37,19 @@
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsOkEmpty = $"{resultsExtension}.Ok()";
     string resultsNoContent = $"{resultsExtension}.NoContent()";
-    string resultsOkModelVariable = $"{resultsExtension}.Ok({Model.ModelVariable})";
-    string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", routePrefix, Model.ModelVariable, primaryKeyName, Model.ModelVariable);
+    string resultsOkModelVariable = $"{resultsExtension}.Ok({Model.ModelInfo.ModelVariable})";
+    string createdApiVar = string.Format("$\"{0}/{{{1}.{2}}}\",{3}", routePrefix, Model.ModelInfo.ModelVariable, primaryKeyName, Model.ModelInfo.ModelVariable);
     string resultsCreated = $"{resultsExtension}.Created(" + $"{createdApiVar}" + ")";
     string builderExtensionSpaces = new string(' ', 8);
         string group = Model.OpenAPI
-        ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelTypeName}));"
+        ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
         : $"var group = routes.MapGroup(\"{routePrefix}\");";
 #>
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-<# if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+<# if (!string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace))
 {#>
-using <#= Model.DbContextNamespace #>;
+using <#= Model.DbContextInfo.DbContextNamespace #>;
 <#
 }#>
 
@@ -90,7 +91,7 @@ public static class <#= Model.EndpointsClassName #>
         }
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n    .Produces<{Model.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n    .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
             builderExtensions += $"\r\n    .Produces(StatusCodes.Status404NotFound)";
         }
         #>
@@ -101,7 +102,7 @@ public static class <#= Model.EndpointsClassName #>
         if (dbProvider == "cosmos-efcore")
         {
 #>
-        group.MapPut("/{id}", async <#= typedTaskWithNoContent #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= modelName #> <#= Model.ModelVariable #>, <#= dbContextName #> db) =>
+        group.MapPut("/{id}", async <#= typedTaskWithNoContent #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= modelName #> <#= Model.ModelInfo.ModelVariable #>, <#= dbContextName #> db) =>
         {
             var foundModel = await db.<#= findModel #>;
 
@@ -110,7 +111,7 @@ public static class <#= Model.EndpointsClassName #>
                 return <#= resultsNotFound #>;
             }
 
-            db.Update(<#= Model.ModelVariable #>);
+            db.Update(<#= Model.ModelInfo.ModelVariable #>);
             await db.SaveChangesAsync();
 
             return <#= resultsNoContent #>;
@@ -121,7 +122,7 @@ public static class <#= Model.EndpointsClassName #>
         if (dbProvider != "cosmos-efcore")
         {
 #>
-    group.MapPut("/{id}", async <#= typedTaskOkNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= modelName #> <#= Model.ModelVariable #>, <#= dbContextName #> db) =>
+    group.MapPut("/{id}", async <#= typedTaskOkNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= modelName #> <#= Model.ModelInfo.ModelVariable #>, <#= dbContextName #> db) =>
         {
             var affected = await db.<#= entitySetName #>
                 .Where(model => model.<#= primaryKeyName #> == <#= primaryKeyNameLowerCase #>)
@@ -130,8 +131,8 @@ public static class <#= Model.EndpointsClassName #>
             //should be atleast one property (primary key)
             foreach(var modelProperty in entityProperties)
             {
-                string modelPropertyName = modelProperty;
-                string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelVariable}.{modelPropertyName})";
+                string modelPropertyName = modelProperty.Name;
+                string setPropertyString = $".SetProperty(m => m.{modelPropertyName}, {Model.ModelInfo.ModelVariable}.{modelPropertyName})";
         #>
         <#= setPropertyString #>
         <#
@@ -157,7 +158,7 @@ public static class <#= Model.EndpointsClassName #>
     #>
     <#= builderExtensions #>;
 
-        group.MapPost("/", async (<#= modelName #> <#= Model.ModelVariable #>, <#= dbContextName #> db) =>
+        group.MapPost("/", async (<#= modelName #> <#= Model.ModelInfo.ModelVariable #>, <#= dbContextName #> db) =>
         {
             db.<#= add #>;
             await db.SaveChangesAsync();
@@ -171,7 +172,7 @@ public static class <#= Model.EndpointsClassName #>
         }
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n    .Produces<{Model.ModelTypeName}>(StatusCodes.Status201Created)";
+            builderExtensions += $"\r\n    .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
         }
     #>
 <#= builderExtensions #>;
@@ -182,7 +183,7 @@ public static class <#= Model.EndpointsClassName #>
 #>
 group.MapDelete("/{id}", async <#= typedTaskWithNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= dbContextName #> db) =>
         {
-            if (await db.<#= findModel #> is <#= modelName #> <#= Model.ModelVariable #>)
+            if (await db.<#= findModel #> is <#= modelName #> <#= Model.ModelInfo.ModelVariable #>)
             {
                 db.<#= remove #>;
                 await db.SaveChangesAsync();

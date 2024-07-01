@@ -8,13 +8,13 @@ public static class <#= Model.EndpointsClassName #>
     public static void <#= Model.EndpointsMethodName #>(this IEndpointRouteBuilder routes)
     {
         <#
-        string modelName = Model.ModelTypeName;
+        string modelName = Model.ModelInfo.ModelTypeName;
         string modelConstructor = $"{modelName}()";
         string modelArray = $"{modelName}[]";
         string routePrefix = "/api/" + modelName;
         string endPointsClassName = Model.EndpointsClassName;
         string methodName = $"Map{@modelName}Endpoints";
-        string pluralModel = Model.ModelTypeName;
+        string pluralModel = Model.ModelInfo.ModelTypePluralName;
         string routePrefixPlural = "/api/" + pluralModel;
         string getAllModels = $"GetAll{@pluralModel}";
         string getModelById = $"Get{modelName}ById";
@@ -24,7 +24,7 @@ public static class <#= Model.EndpointsClassName #>
         string resultsExtension = (Model.UseTypedResults ? "TypedResults" : "Results") + ".NoContent()";
         string builderExtensionSpaces = new string(' ', 8);
             string group = Model.OpenAPI
-            ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelTypeName}));"
+            ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
             : $"var group = routes.MapGroup(\"{routePrefix}\");";
         #>
 <#= group #>
@@ -48,7 +48,7 @@ public static class <#= Model.EndpointsClassName #>
 
         group.MapGet("/{id}", (int id) =>
         {
-            //return new <#= Model.ModelTypeName #> { ID = id };
+            //return new <#= Model.ModelInfo.ModelTypeName #> { ID = id };
         })<#
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(Model.OpenAPI)
@@ -57,13 +57,13 @@ public static class <#= Model.EndpointsClassName #>
         }
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
         }
         #>
 
         <#= builderExtensions #>;
 
-        group.MapPut("/{id}", (int id, <#= Model.ModelTypeName #> input) =>
+        group.MapPut("/{id}", (int id, <#= Model.ModelInfo.ModelTypeName #> input) =>
         {
             return <#= resultsExtension #>;
         })<#
@@ -80,7 +80,7 @@ public static class <#= Model.EndpointsClassName #>
 
         <#= builderExtensions #>;
 
-        group.MapPost("/", (<#= Model.ModelTypeName #> model) =>
+        group.MapPost("/", (<#= Model.ModelInfo.ModelTypeName #> model) =>
         {
             <#
             if(!Model.UseTypedResults)
@@ -103,7 +103,7 @@ public static class <#= Model.EndpointsClassName #>
         }
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelTypeName}>(StatusCodes.Status201Created)";
+            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
         }
         #>
 <#= builderExtensions #>;
@@ -113,12 +113,12 @@ public static class <#= Model.EndpointsClassName #>
             <#
             if(!Model.UseTypedResults)
             {
-                #>//return Results.Ok(new <#= Model.ModelTypeName #> { ID = id });
+                #>//return Results.Ok(new <#= Model.ModelInfo.ModelTypeName #> { ID = id });
             <#
             }
             else
             {
-                #>//return TypedResults.Ok(new <#= Model.ModelTypeName #> { ID = id });
+                #>//return TypedResults.Ok(new <#= Model.ModelInfo.ModelTypeName #> { ID = id });
         <#
             }
         #>
@@ -130,7 +130,7 @@ public static class <#= Model.EndpointsClassName #>
         }
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
         }
         #>
 

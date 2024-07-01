@@ -3,8 +3,9 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MVC;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.RazorPage;
 using Spectre.Console.Cli;
@@ -19,6 +20,7 @@ public static class Program
         app.Configure(config =>
         {
             config.AddCommand<BlazorEmptyCommand>("blazor-empty");
+            config.AddCommand<BlazorCrudCommand>("blazor-crud");
             config.AddCommand<MinimalApiCommand>("minimalapi");
             config.AddCommand<ApiControllerEmptyCommand>("apicontroller-empty");
             config.AddCommand<AreaCommand>("area");

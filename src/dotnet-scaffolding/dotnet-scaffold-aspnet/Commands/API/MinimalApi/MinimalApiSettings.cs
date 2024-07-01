@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
-
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 
 internal class MinimalApiSettings : CommandSettings
 {

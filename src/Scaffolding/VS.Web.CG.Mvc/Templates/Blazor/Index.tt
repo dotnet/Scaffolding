@@ -9,7 +9,7 @@
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.ContextTypeName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.ContextTypeName}> DbFactory";
     string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
@@ -17,14 +17,16 @@
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>"
+
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
-@inject <#=dbContextFullName #> DB
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
     {
         #>@using <#= modelNamespace#>
 <#  }
 #>
+@inject <#= dbContextFactory #>
 
 <PageTitle>Index</PageTitle>
 
@@ -34,7 +36,7 @@
     <a href="<#= pluralModelLowerInv #>/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="DB.<#= Model.ModelMetadata.EntitySetName #>">
+<QuickGrid Class="table" Items="DbFactory.CreateDbContext().<#= Model.ModelMetadata.EntitySetName #>">
 <#
     foreach (var property in entityProperties)
     {

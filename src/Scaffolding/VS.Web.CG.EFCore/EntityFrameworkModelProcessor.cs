@@ -43,6 +43,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private EditSyntaxTreeResult _startupEditResult;
         private EditSyntaxTreeResult _programEditResult;
         private IFileSystem _fileSystem;
+        private bool _useDbFactory;
 
         public EntityFrameworkModelProcessor(
             string dbContextFullTypeName,
@@ -56,7 +57,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             IProjectContext projectContext,
             IApplicationInfo applicationInfo,
             IFileSystem fileSystem,
-            ILogger logger)
+            ILogger logger,
+            bool useDbFactory = false)
         {
             if (string.IsNullOrEmpty(dbContextFullTypeName))
             {
@@ -76,6 +78,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             _workspace = workspace;
             _databaseProvider = databaseProvider;
             _assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
+            _useDbFactory = useDbFactory;
         }
 
         public async Task Process()
@@ -98,7 +101,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 
                 if (!dbContextSymbols.Any())
                 {
-                    await GenerateNewDbContextAndRegisterProgramFile(programType, _applicationInfo);
+                    await GenerateNewDbContextAndRegisterProgramFile(programType, _applicationInfo, _useDbFactory);
                 }
                 else if (TryGetDbContextSymbolInWebProject(dbContextSymbols, out dbContextSymbolInWebProject))
                 {
@@ -365,7 +368,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _logger);
         }
 
-        private async Task GenerateNewDbContextAndRegisterProgramFile(ModelType programType, IApplicationInfo applicationInfo)
+        private async Task GenerateNewDbContextAndRegisterProgramFile(ModelType programType, IApplicationInfo applicationInfo, bool useDbFactory = false)
         {
             AssemblyAttributeGenerator assemblyAttributeGenerator = GetAssemblyAttributeGenerator();
             _programEditResult = new EditSyntaxTreeResult()
@@ -395,7 +398,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     { nameof(NewDbContextTemplateModel.DbContextNamespace),  dbContextTemplateModel.DbContextNamespace },
                     { "dataBaseName", dbContextTemplateModel.DbContextTypeName + "-" + Guid.NewGuid().ToString()},
                     { "databaseProvider", _databaseProvider.ToString() },
-                    { "useTopLevelStatements", useTopLevelsStatements.ToString() }
+                    { "useTopLevelStatements", useTopLevelsStatements.ToString() },
+                    { "useDbFactory", useDbFactory.ToString()}
                 };
 
                 _programEditResult = _dbContextEditorServices.EditStartupForNewContext(programType, parameters);

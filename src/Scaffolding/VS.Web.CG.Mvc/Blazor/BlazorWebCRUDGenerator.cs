@@ -195,8 +195,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             docEditor.ReplaceNode(docRoot, newRoot);
             //write to Program.cs file
             var changedDocument = docEditor.GetChangedDocument();
-            var classFileTxt = await changedDocument.GetTextAsync();
-            FileSystem.WriteAllText(programDocument.Name, classFileTxt.ToString());
+            //ApplyTextReplacements will write the updated document to disk (takes changes from above as well).
+            await DocumentBuilder.ApplyTextReplacements(programCsFile, changedDocument, new CodeChangeOptions());
             ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 

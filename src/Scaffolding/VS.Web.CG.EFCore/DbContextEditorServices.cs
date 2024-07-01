@@ -197,35 +197,36 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return "builder";
         }
 
-        internal string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider)
+        internal string AddDbContextString(bool minimalHostingTemplate, string statementLeadingTrivia, DbProvider databaseProvider, bool useDbFactory = false)
         {
             string textToAddAtEnd = string.Empty;
             string additionalNewline = Environment.NewLine;
             string additionalLeadingTrivia = minimalHostingTemplate ? string.Empty : "    ";
             string leadingTrivia = minimalHostingTemplate ? string.Empty : statementLeadingTrivia;
+            string addDbString = useDbFactory ? "AddDbContextFactory" : "AddDbContext";
             switch (databaseProvider)
             {
                 case DbProvider.SQLite:
                     textToAddAtEnd =
-                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        leadingTrivia + "{0}." + addDbString + "<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlite({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
 
                 case DbProvider.SqlServer:
                     textToAddAtEnd =
-                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        leadingTrivia + "{0}." + addDbString + "<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseSqlServer({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
 
                 case DbProvider.CosmosDb:
                     textToAddAtEnd =
-                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        leadingTrivia + "{0}." + addDbString + "<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseCosmos({2}.GetConnectionString(\"{1}\"){3}, \"DATABASE_NAME\"));" + Environment.NewLine;
                     break;
 
                 case DbProvider.Postgres:
                     textToAddAtEnd =
-                        leadingTrivia + "{0}.AddDbContext<{1}>(options =>" + additionalNewline +
+                        leadingTrivia + "{0}." + addDbString + "<{1}>(options =>" + additionalNewline +
                         statementLeadingTrivia + additionalLeadingTrivia + "    options.UseNpgsql({2}.GetConnectionString(\"{1}\"){3}));" + Environment.NewLine;
                     break;
 
@@ -409,6 +410,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 var useTopLevelStatements = useTopLevelStatementsString.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
                 parameters.TryGetValue(nameof(NewDbContextTemplateModel.DbContextNamespace), out var dbContextNamespace);
                 parameters.TryGetValue("dataBaseName", out var databaseName);
+                parameters.TryGetValue("useDbFactory", out var useDbFactoryString);
+                bool.TryParse(useDbFactoryString, out bool useDbFactory);
                 Contract.Assert(!string.IsNullOrEmpty(dbContextTypeName));
                 Contract.Assert(!string.IsNullOrEmpty(dataBaseName));
 
@@ -432,7 +435,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
                     if (servicesParam != null)
                     {
-                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, statementLeadingTrivia, dataContextType);
+                        string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: false, statementLeadingTrivia, dataContextType, useDbFactory);
                         _connectionStringsWriter.AddConnectionString(dbContextTypeName, databaseName, dataContextType);
                         if (configServicesMethod.Body.Statements.Any())
                         {

@@ -7,14 +7,21 @@
           "CodeChanges": [
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
-              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter();",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
-              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter();",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter",
+              "Block": "WebApplication.CreateBuilder.Services.AddDatabaseDeveloperPageExceptionFilter()",
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -22,8 +29,19 @@
           ]
         }
       },
+      "Replacements": [
+        {
+          "MultiLineBlock": [
+            "app.UseHsts();",
+            "    app.UseMigrationsEndPoint()"
+          ],
+          "ReplaceSnippet": [
+            "app.UseHsts()"
+          ]
+        }
+      ],
       "Usings": [
-        "Microsoft.AspNetCore.Identity"
+        "Microsoft.EntityFrameworkCore"
       ]
     }
   ]

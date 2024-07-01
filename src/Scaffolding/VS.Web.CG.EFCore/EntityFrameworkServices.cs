@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -25,7 +24,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         private readonly Workspace _workspace;
         private readonly IProjectContext _projectContext;
         private readonly IFileSystem _fileSystem;
-
 
         public EntityFrameworkServices(
             IProjectContext projectContext,
@@ -106,7 +104,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
             return await GetModelMetadata(dbContextFullTypeName, modelTypeSymbol, areaName, useSqlite ? DbProvider.SQLite : DbProvider.SqlServer);
         }
 
-        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider)
+        public async Task<ContextProcessingResult> GetModelMetadata(string dbContextFullTypeName, ModelType modelTypeSymbol, string areaName, DbProvider databaseProvider, bool useDbFactory = false)
         {
             if (string.IsNullOrEmpty(dbContextFullTypeName))
             {
@@ -124,7 +122,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 _projectContext,
                 _applicationInfo,
                 _fileSystem,
-                _logger);
+                _logger,
+                useDbFactory);
 
             await processor.Process();
 

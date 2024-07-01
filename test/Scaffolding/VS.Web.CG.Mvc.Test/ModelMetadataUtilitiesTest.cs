@@ -115,7 +115,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, DbProvider.SqlServer))
+            efService.Setup(e => e.GetModelMetadata(model.DataContextClass, modelType, string.Empty, DbProvider.SqlServer, false))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -138,7 +138,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbProvider.Existing))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbProvider.Existing, false))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -220,7 +220,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 ModelMetadata = null
             };
 
-            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, DbProvider.SqlServer))
+            efService.Setup(e => e.GetModelMetadata(minimalApiModelWithContext.DataContextClass, modelType, string.Empty, DbProvider.SqlServer, false))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act
@@ -255,7 +255,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
                 FullName = "A.B.C.SampleDataContext"
             };
             dataContextTypes.Add(dataContextType);
-            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbProvider.Existing))
+            efService.Setup(e => e.GetModelMetadata(dataContextType.FullName, modelType, string.Empty, DbProvider.Existing, false))
                 .Returns(Task.FromResult(contextProcessingResult));
 
             //Act

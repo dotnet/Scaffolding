@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.MSIdentity.Properties;
 using Microsoft.DotNet.MSIdentity.Shared;
 using Microsoft.DotNet.MSIdentity.Tool;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
@@ -160,7 +161,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(fileDoc, filteredCodeChanges);
             if (editedDocument != null)
             {
-                await ProjectModifierHelper.UpdateDocument(editedDocument);
+                await ProjectModifierHelper.UpdateDocument(editedDocument, new DefaultFileSystem());
             }
         }
 
@@ -188,7 +189,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
-                await ProjectModifierHelper.UpdateDocument(editedDocument);
+                await ProjectModifierHelper.UpdateDocument(editedDocument, new DefaultFileSystem());
             }
         }
 

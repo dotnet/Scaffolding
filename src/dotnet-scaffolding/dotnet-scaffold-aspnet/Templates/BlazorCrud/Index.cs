@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -42,9 +42,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\"\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFullName));
-            this.Write(" DB\r\n");
+            this.Write("\"\r\n\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@using Microsoft.EntityFra" +
+                    "meworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -54,9 +53,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("\r\n");
   }
 
-            this.Write("\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
+            this.Write("@inject ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
+            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n" +
+                    "<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"DB.");
+            this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"DbFactory.Create" +
+                    "DbContext().");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write("\">\r\n");
 

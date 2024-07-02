@@ -1,16 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Microsoft.CodeAnalysis;
-using System.Threading.Tasks;
-using System.Linq;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 

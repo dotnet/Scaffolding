@@ -9,19 +9,21 @@
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : $"{Model.DbContextInfo.DbContextNamespace}.";
-    string dbContextFullName = $"{dbContextNamespace}{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.ContextTypeName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/create"
-@inject <#=dbContextFullName #> DB
+
+@using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
     {
         #>@using <#= modelNamespace#>
 <#  }
 #>
+@inject <#=dbContextFactory #>
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create</PageTitle>
@@ -67,8 +69,9 @@
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
     public async Task Add<#= modelName #>()
     {
-        DB.<#= Model.DbContextInfo.EntitySetVariableName #>.Add(<#= modelName #>);
-        await DB.SaveChangesAsync();
+        using var context = DbFactory.CreateDbContext();
+        context.<#= Model.DbContextInfo.EntitySetVariableName #>.Add(<#= modelName #>);
+        await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 }

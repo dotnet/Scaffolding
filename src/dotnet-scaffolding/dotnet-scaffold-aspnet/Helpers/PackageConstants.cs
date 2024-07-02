@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -21,19 +20,6 @@ internal class PackageConstants
         public const string QuickGridEfAdapterPackageName = "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter";
         public const string AspNetCoreDiagnosticsEfCorePackageName = "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore";
         public const string PostgresPackageName = "Npgsql.EntityFrameworkCore.PostgreSQL";
-        public const string SQLConnectionStringFormat = "Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true";
-        public const string SQLiteConnectionStringFormat = "Data Source={0}.db";
-        public const string CosmosDbConnectionStringFormat = "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
-        public const string PostgresConnectionStringFormat = "server=localhost;username=postgres;database={0}";
-
-        public static readonly IDictionary<string, string> ConnectionStringsDict = new Dictionary<string, string>
-        {
-            { SqlServer, SQLConnectionStringFormat },
-            { SQLite, SQLiteConnectionStringFormat },
-            { CosmosDb, CosmosDbConnectionStringFormat },
-            { Postgres, PostgresConnectionStringFormat }
-        };
-
         public static readonly IDictionary<string, string> EfPackagesDict = new Dictionary<string, string>
         {
             { SqlServer, SqlServerPackageName },

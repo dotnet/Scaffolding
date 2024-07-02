@@ -67,7 +67,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         {
             _logger.LogMessage("Installing packages...");
             InstallEfPackages(settings);
-            CommandHelpers.AddDbContext(minimalApiModel.DbContextInfo, _logger, _fileSystem);
+            minimalApiModel.DbContextInfo.AddDbContext(minimalApiModel.ProjectInfo, _logger, _fileSystem);
         }
 
         _logger.LogMessage("Adding API controller...");

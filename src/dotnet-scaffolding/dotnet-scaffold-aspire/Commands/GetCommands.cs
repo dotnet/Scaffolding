@@ -57,7 +57,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             DbType = "sqlserver",
             DbName = "sqldb",
             AddDbMethod = "AddSqlServer",
-            AddDbContextMethod = "AddSqlServerDbContext"
+            AddDbContextMethod = "AddSqlServerDbContext",
+            NewDbConnectionString = "Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true"
         };
 
         internal static DbContextProperties NpgsqlDefaults = new()
@@ -65,7 +66,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             DbType = "postgresql",
             DbName = "postgresqldb",
             AddDbMethod = "AddPostgres",
-            AddDbContextMethod = "AddNpgsqlDbContext"
+            AddDbContextMethod = "AddNpgsqlDbContext",
+            NewDbConnectionString = "server=localhost;username=postgres;database={0}"
         };
 
         internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];

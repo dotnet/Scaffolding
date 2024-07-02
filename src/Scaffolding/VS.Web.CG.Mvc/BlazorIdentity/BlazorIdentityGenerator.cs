@@ -353,7 +353,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             foreach (var file in otherFiles)
             {
                 var fileDoc = project.GetDocumentFromName(file.FileName, FileSystem);
-                await DocumentBuilder.ApplyTextReplacements(file, fileDoc, new CodeChangeOptions());
+                await DocumentBuilder.ApplyTextReplacements(file, fileDoc, new CodeChangeOptions(), FileSystem);
                 if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase) &&
                     FileSystem.FileExists(fileDoc.Name))
                 {

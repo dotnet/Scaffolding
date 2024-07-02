@@ -127,11 +127,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         /// <param name="dbContextTypeName"></param>
         /// <param name="dataBaseName"></param>
         /// <param name="dataContextTypeString"></param>
-        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, DbProvider dataContextTypeString)
+        /// <param name="useDbFactory">bool to indicate whether to add 'AddDbContextFactory' instead of 'AddDbContext' when creating a new database </param>
+        internal StatementSyntax GetAddDbContextStatement(SyntaxNode rootNode, string dbContextTypeName, string dataBaseName, DbProvider dataContextTypeString, bool useDbFactory = false)
         {
             //get leading trivia. there should be atleast one member var statementLeadingTrivia = classSyntax.ChildNodes()
             var statementLeadingTrivia = rootNode.ChildNodes().First()?.GetLeadingTrivia().ToString();
-            string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, statementLeadingTrivia, dataContextTypeString);
+            string textToAddAtEnd = AddDbContextString(minimalHostingTemplate: true, statementLeadingTrivia, dataContextTypeString, useDbFactory);
             _connectionStringsWriter.AddConnectionString(dbContextTypeName, dataBaseName, dataContextTypeString);
             textToAddAtEnd = Environment.NewLine + textToAddAtEnd;
 
@@ -452,11 +453,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                     if (!useTopLevelStatements)
                     {
                         MethodDeclarationSyntax methodSyntax = DocumentBuilder.GetMethodFromSyntaxRoot(compilationSyntax, Main);
-                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, databaseName, dataContextType);
+                        dbContextExpression = GetAddDbContextStatement(methodSyntax.Body, dbContextTypeName, databaseName, dataContextType, useDbFactory);
                     }
                     else if (useTopLevelStatements)
                     {
-                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, databaseName, dataContextType);
+                        dbContextExpression = GetAddDbContextStatement(compilationSyntax, dbContextTypeName, databaseName, dataContextType, useDbFactory);
                     }
 
                     if (statementLeadingTrivia != null && dbContextExpression != null)

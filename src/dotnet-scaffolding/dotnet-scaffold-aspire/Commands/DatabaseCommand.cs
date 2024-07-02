@@ -72,9 +72,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         private bool CreateNewDbContext(DatabaseCommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
+            var projectBasePath = Path.GetDirectoryName(settings.Project);
             var relativeContextPath = Path.GetRelativePath(settings.Project, newDbContextPath);
-            var dbContextCreated = DbContextHelper.CreateDbContext(GetCmdsHelper.SqlServerDefaults, newDbContextPath, _fileSystem);
-            return dbContextCreated;
+            if (GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) && dbContextProperties is not null)
+            {
+                return DbContextHelper.CreateDbContext(dbContextProperties, newDbContextPath, projectBasePath, _fileSystem);
+            }
+
+            return false;
         }
 
         private string CreateNewDbContextPath(DatabaseCommandSettings commandSettings)

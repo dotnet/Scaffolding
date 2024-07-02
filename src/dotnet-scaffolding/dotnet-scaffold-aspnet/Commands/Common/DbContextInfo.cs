@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.IO;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -17,7 +18,7 @@ internal class DbContextInfo
     public string? EntitySetVariableName { get; set; }
     public string? NewDbSetStatement { get; set; }
 
-    internal void AddDbContext(ILogger logger, IFileSystem fileSystem)
+    internal void AddDbContext(ProjectInfo projectInfo, ILogger logger, IFileSystem fileSystem)
     {
         if (CreateDbContext && !string.IsNullOrEmpty(DatabaseProvider))
         {
@@ -26,10 +27,11 @@ internal class DbContextInfo
                 !string.IsNullOrEmpty(DbContextClassName) &&
                 !string.IsNullOrEmpty(DbContextClassPath))
             {
+                var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
                 dbContextProperties.DbContextName = DbContextClassName;
                 dbContextProperties.DbSetStatement = NewDbSetStatement;
                 logger.LogMessage($"Adding new DbContext '{dbContextProperties.DbContextName}'...");
-                DbContextHelper.CreateDbContext(dbContextProperties, DbContextClassPath, fileSystem);
+                DbContextHelper.CreateDbContext(dbContextProperties, DbContextClassPath, projectBasePath, fileSystem);
             }
         }
     }

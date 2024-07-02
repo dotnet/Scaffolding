@@ -41,16 +41,16 @@ internal static class DbContextHelper
 
         var t4TemplateName = Path.GetFileNameWithoutExtension(t4TemplatePath);
         var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
-        if (!string.IsNullOrEmpty(templatedString) &&
-            !string.IsNullOrEmpty(dbContextPath) &&
-            !string.IsNullOrEmpty(projectBasePath))
+        if (string.IsNullOrEmpty(templatedString) ||
+            string.IsNullOrEmpty(dbContextPath) ||
+            string.IsNullOrEmpty(projectBasePath))
         {
-            fileSystem.WriteAllText(dbContextPath, templatedString);
-            AddConnectionString(dbContextProperties, projectBasePath, fileSystem);
-            return true;
+            return false;
         }
 
-        return false;
+        fileSystem.WriteAllText(dbContextPath, templatedString);
+        AddConnectionString(dbContextProperties, projectBasePath, fileSystem);
+        return true;
     }
 
     public static void AddConnectionString(DbContextProperties dbContextProperties, string projectBasePath, IFileSystem fileSystem)

@@ -73,12 +73,14 @@ internal static class DbContextHelper
 
         string connectionStringNodeName = "ConnectionStrings";
 
+        //find the "ConnectionStrings" node.
         if (content[connectionStringNodeName] is null)
         {
             writeContent = true;
             content[connectionStringNodeName] = new JObject();
         }
 
+        //if a key with the 'databaseName' already exists, skipping adding a connection string.
         if (content[connectionStringNodeName] is JObject connectionStringObject &&
             connectionStringObject[databaseName] is null &&
             !string.IsNullOrEmpty(dbContextProperties.NewDbConnectionString))

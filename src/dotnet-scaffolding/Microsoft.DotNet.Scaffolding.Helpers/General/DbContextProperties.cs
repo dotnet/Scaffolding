@@ -9,4 +9,5 @@ internal class DbContextProperties
     public string? DbName { get; set; }
     public string? DbType { get; set; }
     public string? DbSetStatement { get; set; }
+    public string? NewDbConnectionString { get; set; }
 }

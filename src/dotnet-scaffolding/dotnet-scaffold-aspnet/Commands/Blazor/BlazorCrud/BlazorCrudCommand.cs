@@ -68,7 +68,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         {
             _logger.LogMessage("Installing packages...");
             InstallPackages(settings);
-            AddDbContext(blazorCrudModel);
+            blazorCrudModel.DbContextInfo.AddDbContext(blazorCrudModel.ProjectInfo, _logger, _fileSystem);
         }
 
         _logger.LogMessage("Adding razor components...");
@@ -93,14 +93,6 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         {
             _logger.LogMessage("An error occurred.");
             return -1;
-        }
-    }
-
-    private void AddDbContext(BlazorCrudModel blazorCrudModel)
-    {
-        if (blazorCrudModel.DbContextInfo is not null)
-        {
-            blazorCrudModel.DbContextInfo.AddDbContext(_logger, _fileSystem);
         }
     }
 

@@ -4,30 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 
 internal static class CommandHelpers
 {
-    internal static void AddDbContext(DbContextInfo dbContextInfo, ILogger logger, IFileSystem fileSystem)
-    {
-        //need to create a DbContext
-        if (dbContextInfo.CreateDbContext && !string.IsNullOrEmpty(dbContextInfo.DatabaseProvider))
-        {
-            AspNetDbContextHelper.DatabaseTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties);
-            if (dbContextProperties != null &&
-                !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
-                !string.IsNullOrEmpty(dbContextInfo.DbContextClassPath))
-            {
-                dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
-                dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
-                logger.LogMessage($"Adding new DbContext '{dbContextProperties.DbContextName}'...");
-                DbContextHelper.CreateDbContext(dbContextProperties, dbContextInfo.DbContextClassPath, fileSystem);
-            }
-        }
-    }
-
     /// <summary>
     /// Given a class name (only meant for C# classes), get a file path at the base of the project (where the .csproj is on disk)
     /// </summary>

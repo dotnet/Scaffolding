@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             try
             {
                 result = await app.AcquireTokenSilent(scopes, account)
-                    .WithAuthority(Instance, TenantId)
+                    .WithTenantId(TenantId)
                     .ExecuteAsync(cancellationToken);
             }
             catch (MsalUiRequiredException ex)
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                     result = await app.AcquireTokenInteractive(scopes)
                         .WithAccount(account)
                         .WithClaims(ex.Claims)
-                        .WithAuthority(Instance, TenantId)
+                        .WithTenantId(TenantId)
                         .WithUseEmbeddedWebView(false)
                         .ExecuteAsync(cancellationToken);
                 }
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
             try
             {
                 result = await app.AcquireTokenInteractive(scopes)
-                   .WithAuthority(Instance, TenantId)
+                   .WithTenantId(TenantId)
                    .WithUseEmbeddedWebView(false)
                    .ExecuteAsync(cancellationToken);
             }
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.MSIdentity.DeveloperCredentials
                 {
                     result = await app.AcquireTokenInteractive(scopes)
                         .WithClaims(ex.Claims)
-                        .WithAuthority(Instance, TenantId)
+                        .WithTenantId(TenantId)
                         .WithUseEmbeddedWebView(false)
                         .ExecuteAsync(cancellationToken);
                 }

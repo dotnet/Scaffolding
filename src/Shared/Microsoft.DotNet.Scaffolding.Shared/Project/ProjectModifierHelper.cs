@@ -1,9 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -574,10 +572,10 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
             return fileDoc.WithText(updatedSourceText);
         }
 
-        internal static async Task UpdateDocument(Document document)
+        internal static async Task UpdateDocument(Document document, IFileSystem fileSystem)
         {
             var classFileTxt = await document.GetTextAsync();
-            File.WriteAllText(document.Name, classFileTxt.ToString(), new UTF8Encoding(false));
+            fileSystem.WriteAllText(document.Name, classFileTxt.ToString());
         }
 
         // Filter out CodeBlocks that are invalid using FilterOptions

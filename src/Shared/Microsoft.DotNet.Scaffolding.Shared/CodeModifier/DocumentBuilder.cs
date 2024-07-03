@@ -315,7 +315,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             return updatedMethod ?? originalMethod;
         }
 
-        internal static async Task ApplyTextReplacements(CodeFile file, Document document, CodeChangeOptions toolOptions)
+        internal static async Task ApplyTextReplacements(CodeFile file, Document document, CodeChangeOptions toolOptions, IFileSystem fileSystem)
         {
             if (document is null)
             {
@@ -331,7 +331,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
             var editedDocument = await ProjectModifierHelper.ModifyDocumentText(document, replacements);
             if (editedDocument != null)
             {
-                await ProjectModifierHelper.UpdateDocument(editedDocument);
+                await ProjectModifierHelper.UpdateDocument(editedDocument, fileSystem);
             }
         }
 

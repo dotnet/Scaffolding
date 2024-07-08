@@ -261,9 +261,10 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
             modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
         }
 
-        if (modelInfo is null)
+        var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
+        if (!validateModelInfoResult)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}' provided", LogMessageType.Error);
+            _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
             return null;
         }
 

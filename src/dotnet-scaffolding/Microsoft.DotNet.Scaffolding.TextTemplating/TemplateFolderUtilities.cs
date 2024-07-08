@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Reflection;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
+namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 internal class TemplateFoldersUtilities : ITemplateFolderService
 {
     public IEnumerable<string> GetTemplateFolders(string[] baseFolders)

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
-using Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 

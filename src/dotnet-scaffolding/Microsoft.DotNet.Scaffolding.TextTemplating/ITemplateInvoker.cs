@@ -1,4 +1,4 @@
-namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
+namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 
 /// <summary>
 /// Services for invoking T4 text templates for code generation.

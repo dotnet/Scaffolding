@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.CodeDom.Compiler;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
+namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 
 /// <summary>
 ///     This is currently an internal API that supports scaffolding. Use with caution.

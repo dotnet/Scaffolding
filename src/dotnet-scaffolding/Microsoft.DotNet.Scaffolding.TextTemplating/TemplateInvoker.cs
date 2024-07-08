@@ -1,7 +1,6 @@
 using System.CodeDom.Compiler;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
+namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 
 /// <summary>
 /// Contains useful helper functions for running visual studio text transformation.
@@ -10,15 +9,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.T4Templating;
 /// </summary>
 internal class TemplateInvoker : ITemplateInvoker
 {
-    private readonly ConsoleLogger _consoleLogger;
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public TemplateInvoker(ConsoleLogger? consoleLogger = null)
-    {
-        _consoleLogger = consoleLogger ?? new ConsoleLogger();
-    }
-
     /// <summary>
     /// Executes a code generator template to generate the code.
     /// </summary>
@@ -56,7 +46,7 @@ internal class TemplateInvoker : ITemplateInvoker
         {
             foreach (CompilerError error in transformation.Errors)
             {
-                _consoleLogger.LogMessage(error.ErrorText, LogMessageType.Error);
+                Console.Error.WriteLine(error.ErrorText);
             }
 
             throw new InvalidOperationException($"Processing '{transformation.GetType().Name}' failed");

@@ -34,11 +34,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     case LogMessageType.Error:
                         if (removeNewLine)
                         {
-                            AnsiConsole.Console.Markup($"[red]{message}");
+                            AnsiConsole.Console.MarkupInterpolated($"[red]{message}[/]");
                         }
                         else
                         {
-                            AnsiConsole.Console.MarkupLine($"[red]{message}");
+                            AnsiConsole.Console.MarkupLineInterpolated($"[red]{message}[/]");
                         }
                         break;
                     case LogMessageType.Information:

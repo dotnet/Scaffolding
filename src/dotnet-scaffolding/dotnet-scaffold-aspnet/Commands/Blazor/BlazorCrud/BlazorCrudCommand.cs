@@ -237,7 +237,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}' provided", LogMessageType.Error);
+            _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
             return null;
         }
         else
@@ -245,12 +245,13 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
         }
 
-        if (modelInfo is null)
+        var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
+        if (!validateModelInfoResult)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}' provided", LogMessageType.Error);
+            _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
             return null;
         }
-
+        
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();

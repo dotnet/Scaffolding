@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Spectre.Console.Cli;
@@ -78,6 +79,11 @@ internal class BlazorEmptyCommand : Command<BlazorEmptyCommand.BlazorEmptySettin
         {
             _logger.LogMessage("Missing/Invalid --name option.", LogMessageType.Error);
             return false;
+        }
+        else
+        {
+            //Component names cannot start with a lowercase character, using CurrentCulture to capitalize the first letter
+            commandSettings.Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(commandSettings.Name);
         }
 
         return true;

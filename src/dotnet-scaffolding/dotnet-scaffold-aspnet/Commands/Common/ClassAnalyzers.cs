@@ -70,6 +70,32 @@ internal static class ClassAnalyzers
         return modelInfo;
     }
 
+    /// <summary>
+    /// Check if atleast one property and a primary key property were found for given --model class.
+    /// </summary>
+    /// <param name="modelInfo"></param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
+    internal static bool ValidateModelForCrudScaffolders(ModelInfo modelInfo, ILogger logger)
+    {
+        if (modelInfo is null || string.IsNullOrEmpty(modelInfo.ModelTypeName))
+        {
+            return false;
+        }
+        else if (modelInfo.ModelProperties is null || modelInfo.ModelProperties.Count == 0)
+        {
+            logger.LogMessage($"No properties found for --model '{modelInfo.ModelTypeName}'", LogMessageType.Error);
+            return false;
+        }
+        else if (string.IsNullOrEmpty(modelInfo.PrimaryKeyName))
+        {
+            logger.LogMessage($"No primary key found for --model '{modelInfo.ModelTypeName}'", LogMessageType.Error);
+            return false;
+        }
+
+        return true;
+    }
+
     internal static ProjectInfo GetProjectInfo(string projectPath, ILogger logger)
     {
         var projectInfo = new ProjectInfo();

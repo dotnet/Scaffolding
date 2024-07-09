@@ -298,14 +298,12 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             packageList.Add(projectPackageName);
         }
 
-        var packageStepInfo = new AddPackageStepInfo
+        await new AddPackagesStep
         {
             PackageNames = packageList,
             ProjectPath = commandSettings.Project,
             Prerelease = commandSettings.Prerelease,
             Logger = _logger
-        };
-
-        await new AddPackagesStep(packageStepInfo).ExecuteAsync();
+        }.ExecuteAsync();
     }
 }

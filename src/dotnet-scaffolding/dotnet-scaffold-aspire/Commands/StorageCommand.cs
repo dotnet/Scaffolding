@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
@@ -246,7 +245,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     internal async Task InstallPackagesAsync(StorageCommandSettings commandSettings)
     {
-        var appHostPackageStepInfo = new AddPackageStepInfo
+        var appHostPackageStep= new AddPackagesStep
         {
             PackageNames = [PackageConstants.StoragePackages.AppHostStoragePackageName],
             ProjectPath = commandSettings.AppHostProject,
@@ -255,7 +254,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
         };
 
         PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-        var workerProjPackageStepInfo = new AddPackageStepInfo
+        var workerProjPackageStep= new AddPackagesStep
         {
             PackageNames = [projectPackageName],
             ProjectPath = commandSettings.AppHostProject,
@@ -263,7 +262,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
             Logger = _logger
         };
 
-        List<AddPackagesStep> packageSteps = [new AddPackagesStep(appHostPackageStepInfo), new AddPackagesStep(workerProjPackageStepInfo)];
+        List<AddPackagesStep> packageSteps = [appHostPackageStep, workerProjPackageStep];
         foreach (var packageStep in packageSteps)
         {
             await packageStep.ExecuteAsync();

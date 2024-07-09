@@ -6,8 +6,3 @@ internal abstract class ScaffoldStep
 {
     public abstract Task<bool> ExecuteAsync();
 }
-
-internal abstract class ScaffoldStep<TScaffoldingInfo>(TScaffoldingInfo stepInfo) : ScaffoldStep
-{
-    public TScaffoldingInfo StepInfo { get; } = stepInfo;
-}

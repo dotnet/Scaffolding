@@ -125,6 +125,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-scaffold-aspire", "s
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-scaffolding", "dotnet-scaffolding", "{73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Scaffolding.TextTemplating", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj", "{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_x86|Any CPU = debug_x86|Any CPU
@@ -786,6 +788,24 @@ Global
 		{E86098F3-69EF-4530-8ADD-D49EB8BBFA92}.Release|x64.Build.0 = Release|Any CPU
 		{E86098F3-69EF-4530-8ADD-D49EB8BBFA92}.Release|x86.ActiveCfg = Release|Any CPU
 		{E86098F3-69EF-4530-8ADD-D49EB8BBFA92}.Release|x86.Build.0 = Release|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Debug|x64.Build.0 = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Debug|x86.Build.0 = Debug|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x64.ActiveCfg = Release|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x64.Build.0 = Release|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x86.ActiveCfg = Release|Any CPU
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -835,6 +855,7 @@ Global
 		{289D2898-EC15-4496-9AF8-E20FAB151BFE} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 		{E86098F3-69EF-4530-8ADD-D49EB8BBFA92} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 		{73FF6F8B-3D15-41F1-9358-A497DAE4AD8B} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
+		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

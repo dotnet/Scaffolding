@@ -176,7 +176,7 @@ if ((ModelValueAcquired == false))
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.Helpers.T4Templating.CallContext.LogicalGetData("Model");
+    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
         this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(data));

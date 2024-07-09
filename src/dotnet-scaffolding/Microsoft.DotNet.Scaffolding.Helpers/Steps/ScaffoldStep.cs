@@ -5,7 +5,6 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
 internal abstract class ScaffoldStep
 {
     public abstract Task<bool> ExecuteAsync();
-    public bool ContinueOnError { get; set; }
 }
 
 internal abstract class ScaffoldStep<TScaffoldingInfo>(TScaffoldingInfo stepInfo) : ScaffoldStep

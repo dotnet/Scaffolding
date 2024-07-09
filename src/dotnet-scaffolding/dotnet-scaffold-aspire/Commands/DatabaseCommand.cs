@@ -13,6 +13,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps.AddPackageStep;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Spectre.Console.Cli;
 
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             }
 
             _logger.LogMessage("Installing packages...");
-            InstallPackages(settings);
+            await InstallPackagesAsync(settings);
 
             _logger.LogMessage("Updating App host project...");
             var appHostResult = await UpdateAppHostAsync(settings);
@@ -127,26 +128,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             return true;
         }
 
-        private void InstallPackages(DatabaseCommandSettings commandSettings)
+        private async Task InstallPackagesAsync(DatabaseCommandSettings commandSettings)
         {
             PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName);
-            if (!string.IsNullOrEmpty(appHostPackageName))
-            {
-                DotnetCommands.AddPackage(
-                    packageName: appHostPackageName,
-                    logger: _logger,
-                    projectFile: commandSettings.AppHostProject,
-                    includePrerelease: commandSettings.Prerelease);
-            }
-
             PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-            if (!string.IsNullOrEmpty(projectPackageName))
+            var appHostPackageStepInfo = new AddPackageStepInfo
             {
-                DotnetCommands.AddPackage(
-                    packageName: projectPackageName,
-                    logger: _logger,
-                    projectFile: commandSettings.Project,
-                    includePrerelease: commandSettings.Prerelease);
+                PackageNames = [appHostPackageName],
+                ProjectPath = commandSettings.AppHostProject,
+                Prerelease = commandSettings.Prerelease,
+                Logger = _logger
+            };
+
+            var workerProjPackageStepInfo = new AddPackageStepInfo
+            {
+                PackageNames = [projectPackageName],
+                ProjectPath = commandSettings.AppHostProject,
+                Prerelease = commandSettings.Prerelease,
+                Logger = _logger
+            };
+
+            List<AddPackagesStep> packageSteps = [new AddPackagesStep(appHostPackageStepInfo), new AddPackagesStep(workerProjPackageStepInfo)];
+            foreach (var packageStep in packageSteps)
+            {
+                await packageStep.ExecuteAsync();
             }
         }
 

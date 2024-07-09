@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps.AddPackageStep;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -66,7 +67,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
             _logger.LogMessage("Installing packages...");
-            InstallEfPackages(settings);
+            await InstallPackagesAsync(settings);
             minimalApiModel.DbContextInfo.AddDbContext(minimalApiModel.ProjectInfo, _logger, _fileSystem);
         }
 
@@ -325,10 +326,10 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return scaffoldingModel;
     }
 
-    private void InstallEfPackages(MinimalApiSettings commandSettings)
+    private async Task InstallPackagesAsync(MinimalApiSettings commandSettings)
     {
         //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
-        var packageList = new List<string>()
+        var packageList = new List<string?>()
         {
             PackageConstants.EfConstants.EfToolsPackageName
         };
@@ -339,6 +340,14 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
             packageList.Add(projectPackageName);
         }
 
-        CommandHelpers.InstallPackages(_logger, commandSettings.Project, commandSettings.Prerelease, packageList);
+        var packageStepInfo = new AddPackageStepInfo
+        {
+            PackageNames = packageList,
+            ProjectPath = commandSettings.Project,
+            Prerelease = commandSettings.Prerelease,
+            Logger = _logger
+        };
+
+        await new AddPackagesStep(packageStepInfo).ExecuteAsync();
     }
 }

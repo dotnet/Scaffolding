@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps.AddPackageStep;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Spectre.Console.Cli;
 
@@ -42,7 +42,7 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
         }
 
         _logger.LogMessage("Installing packages...");
-        InstallPackages(settings);
+        await InstallPackagesAsync(settings);
 
         _logger.LogMessage("Updating App host project...");
         var appHostResult = await UpdateAppHostAsync(settings);
@@ -189,25 +189,29 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
         return true;
     }
 
-    internal void InstallPackages(CachingCommandSettings commandSettings)
+    internal async Task InstallPackagesAsync(CachingCommandSettings commandSettings)
     {
-        if (_fileSystem.FileExists(commandSettings.AppHostProject))
+        var appHostPackageStepInfo = new AddPackageStepInfo
         {
-            DotnetCommands.AddPackage(
-                packageName: PackageConstants.CachingPackages.AppHostRedisPackageName,
-                logger: _logger,
-                projectFile: commandSettings.AppHostProject,
-                includePrerelease: commandSettings.Prerelease);
-        }
-        
+            PackageNames = [PackageConstants.CachingPackages.AppHostRedisPackageName],
+            ProjectPath = commandSettings.AppHostProject,
+            Prerelease = commandSettings.Prerelease,
+            Logger = _logger
+        };
+
         PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-        if (_fileSystem.FileExists(commandSettings.Project) && !string.IsNullOrEmpty(projectPackageName))
+        var workerProjPackageStepInfo = new AddPackageStepInfo
         {
-            DotnetCommands.AddPackage(
-                packageName: projectPackageName,
-                logger: _logger,
-                projectFile: commandSettings.Project,
-                includePrerelease: commandSettings.Prerelease);
+            PackageNames = [projectPackageName],
+            ProjectPath = commandSettings.AppHostProject,
+            Prerelease = commandSettings.Prerelease,
+            Logger = _logger
+        };
+
+        List<AddPackagesStep> packageSteps = [new AddPackagesStep(appHostPackageStepInfo), new AddPackagesStep(workerProjPackageStepInfo)];
+        foreach (var packageStep in packageSteps) 
+        {
+            await packageStep.ExecuteAsync();
         }
     }
 

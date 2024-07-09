@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         {
             PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName);
             PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-            var appHostPackageStep= new AddPackagesStep
+            var appHostPackageStep = new AddPackagesStep
             {
                 PackageNames = [appHostPackageName],
                 ProjectPath = commandSettings.AppHostProject,
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 Logger = _logger
             };
 
-            var workerProjPackageStep= new AddPackagesStep
+            var workerProjPackageStep = new AddPackagesStep
             {
                 PackageNames = [projectPackageName],
                 ProjectPath = commandSettings.AppHostProject,

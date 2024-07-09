@@ -3,7 +3,7 @@
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Steps.AddPackageStep;
+namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
 internal class AddPackagesStep : ScaffoldStep
 {

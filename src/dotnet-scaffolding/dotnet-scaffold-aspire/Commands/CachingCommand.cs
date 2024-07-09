@@ -11,7 +11,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
-using Microsoft.DotNet.Scaffolding.Helpers.Steps.AddPackageStep;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Spectre.Console.Cli;
 

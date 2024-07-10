@@ -9,7 +9,7 @@ internal class FirstPartyComponentInitializer
 {
     private readonly ILogger _logger;
     private readonly IDotNetToolService _dotnetToolService;
-    private readonly List<string> _firstPartyTools = ["dotnet-scaffold-aspnet", "dotnet-scaffold-aspire"];
+    private readonly List<string> _firstPartyTools = ["Microsoft.dotnet-scaffold-aspnet", "Microsoft.dotnet-scaffold-aspire"];
     public FirstPartyComponentInitializer(ILogger logger, IDotNetToolService dotnetToolService)
     {
         _logger = logger;

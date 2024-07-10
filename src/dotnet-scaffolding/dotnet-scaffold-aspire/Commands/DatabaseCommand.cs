@@ -130,25 +130,33 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         private async Task InstallPackagesAsync(DatabaseCommandSettings commandSettings)
         {
-            PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName);
-            PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-            var appHostPackageStep = new AddPackagesStep
+            List<AddPackagesStep> packageSteps = [];
+            if (PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName))
             {
-                PackageNames = [appHostPackageName],
-                ProjectPath = commandSettings.AppHostProject,
-                Prerelease = commandSettings.Prerelease,
-                Logger = _logger
-            };
+                var appHostPackageStep = new AddPackagesStep
+                {
+                    PackageNames = [appHostPackageName],
+                    ProjectPath = commandSettings.AppHostProject,
+                    Prerelease = commandSettings.Prerelease,
+                    Logger = _logger
+                };
 
-            var workerProjPackageStep = new AddPackagesStep
+                packageSteps.Add(appHostPackageStep);
+            }
+
+            if(PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName))
             {
-                PackageNames = [projectPackageName],
-                ProjectPath = commandSettings.AppHostProject,
-                Prerelease = commandSettings.Prerelease,
-                Logger = _logger
-            };
+                var workerProjPackageStep = new AddPackagesStep
+                {
+                    PackageNames = [projectPackageName],
+                    ProjectPath = commandSettings.AppHostProject,
+                    Prerelease = commandSettings.Prerelease,
+                    Logger = _logger
+                };
 
-            List<AddPackagesStep> packageSteps = [appHostPackageStep, workerProjPackageStep];
+                packageSteps.Add(workerProjPackageStep);
+            }
+
             foreach (var packageStep in packageSteps)
             {
                 await packageStep.ExecuteAsync();

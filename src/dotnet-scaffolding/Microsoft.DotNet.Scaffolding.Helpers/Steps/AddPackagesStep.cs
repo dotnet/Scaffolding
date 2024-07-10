@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
 internal class AddPackagesStep : ScaffoldStep
 {
-    public required IList<string?> PackageNames { get; init; }
+    public required IList<string> PackageNames { get; init; }
     public required string ProjectPath { get; init; }
     public required ILogger Logger { get; init; }
     public bool Prerelease { get; set; } = false;

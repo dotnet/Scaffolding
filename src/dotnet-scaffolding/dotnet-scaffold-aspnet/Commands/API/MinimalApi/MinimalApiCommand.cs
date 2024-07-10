@@ -329,7 +329,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
     private async Task InstallPackagesAsync(MinimalApiSettings commandSettings)
     {
         //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
-        var packageList = new List<string?>()
+        var packageList = new List<string>()
         {
             PackageConstants.EfConstants.EfToolsPackageName
         };

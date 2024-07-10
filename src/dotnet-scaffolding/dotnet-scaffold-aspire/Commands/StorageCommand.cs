@@ -245,6 +245,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
 
     internal async Task InstallPackagesAsync(StorageCommandSettings commandSettings)
     {
+        List<AddPackagesStep> packageSteps = [];
         var appHostPackageStep= new AddPackagesStep
         {
             PackageNames = [PackageConstants.StoragePackages.AppHostStoragePackageName],
@@ -253,16 +254,19 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
             Logger = _logger
         };
 
-        PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-        var workerProjPackageStep= new AddPackagesStep
+        if (PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName))
         {
-            PackageNames = [projectPackageName],
-            ProjectPath = commandSettings.AppHostProject,
-            Prerelease = commandSettings.Prerelease,
-            Logger = _logger
-        };
+            var workerProjPackageStep = new AddPackagesStep
+            {
+                PackageNames = [projectPackageName],
+                ProjectPath = commandSettings.AppHostProject,
+                Prerelease = commandSettings.Prerelease,
+                Logger = _logger
+            };
 
-        List<AddPackagesStep> packageSteps = [appHostPackageStep, workerProjPackageStep];
+            packageSteps.Add(workerProjPackageStep);
+        }
+
         foreach (var packageStep in packageSteps)
         {
             await packageStep.ExecuteAsync();

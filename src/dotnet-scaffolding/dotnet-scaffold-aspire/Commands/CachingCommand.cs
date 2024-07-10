@@ -191,6 +191,7 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
 
     internal async Task InstallPackagesAsync(CachingCommandSettings commandSettings)
     {
+        List<AddPackagesStep> packageSteps = [];
         var appHostPackageStep = new AddPackagesStep
         {
             PackageNames = [PackageConstants.CachingPackages.AppHostRedisPackageName],
@@ -199,16 +200,20 @@ internal class CachingCommand : AsyncCommand<CachingCommand.CachingCommandSettin
             Logger = _logger
         };
 
-        PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-        var workerProjPackageStep = new AddPackagesStep
+        packageSteps.Add(appHostPackageStep);
+        if (PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName))
         {
-            PackageNames = [projectPackageName],
-            ProjectPath = commandSettings.AppHostProject,
-            Prerelease = commandSettings.Prerelease,
-            Logger = _logger
-        };
+            var workerProjPackageStep = new AddPackagesStep
+            {
+                PackageNames = [projectPackageName],
+                ProjectPath = commandSettings.AppHostProject,
+                Prerelease = commandSettings.Prerelease,
+                Logger = _logger
+            };
 
-        List<AddPackagesStep> packageSteps = [appHostPackageStep, workerProjPackageStep];
+            packageSteps.Add(workerProjPackageStep);
+        }
+
         foreach (var packageStep in packageSteps) 
         {
             await packageStep.ExecuteAsync();

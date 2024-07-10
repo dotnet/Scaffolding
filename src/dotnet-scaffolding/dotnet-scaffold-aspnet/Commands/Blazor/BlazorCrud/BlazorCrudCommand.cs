@@ -285,7 +285,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
     private async Task InstallPackagesAsync(BlazorCrudSettings commandSettings)
     {
         //add these packages regardless of the DatabaseProvider
-        var packageList = new List<string?>()
+        var packageList = new List<string>()
         {
             PackageConstants.EfConstants.EfToolsPackageName,
             PackageConstants.EfConstants.QuickGridEfAdapterPackageName,

@@ -8,8 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
-using Microsoft.DotNet.Scaffolding.TextTemplating;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
@@ -111,41 +109,35 @@ internal static class BlazorCrudHelper
 
     internal static Dictionary<string, string> CRUDTemplates => _crudTemplates.Value;
 
-    internal static ITextTransformation? GetBlazorCrudTransformation(string? templatePath)
+    internal static Type? GetTemplateType(string? templatePath)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        var host = new TextTemplatingEngineHost { TemplateFile = templatePath };
-        ITextTransformation? transformation = null;
+        Type? templateType = null;
 
         switch (Path.GetFileName(templatePath))
         {
             case CreateBlazorTemplate:
-                transformation = new Create() { Host = host };
+                templateType = typeof(Create);
                 break;
             case IndexBlazorTemplate:
-                transformation = new Templates.BlazorCrud.Index() { Host = host };
+                templateType = typeof(Templates.BlazorCrud.Index);
                 break;
             case DeleteBlazorTemplate:
-                transformation = new Delete() { Host = host };
+                templateType = typeof(Delete);
                 break;
             case EditBlazorTemplate:
-                transformation = new Edit() { Host = host };
+                templateType = typeof(Edit);
                 break;
             case DetailsBlazorTemplate:
-                transformation = new Details() { Host = host };
+                templateType = typeof(Details);
                 break;
         }
 
-        if (transformation is not null)
-        {
-            transformation.Session = host.CreateSession();
-        }
-
-        return transformation;
+        return templateType;
     }
 
     internal static IList<string> GetT4Templates(string templateName)
@@ -170,16 +162,10 @@ internal static class BlazorCrudHelper
         return templates;
     }
 
-    internal static string ValidateAndGetOutputPath(string modelName, string templateName, string? projectPath)
+    internal static string GetBaseOutputPath(string modelName, string? projectPath)
     {
-        string outputFileName = string.IsNullOrEmpty(modelName) ?
-            $"{templateName}{Constants.BlazorExtension}" :
-            Path.Combine($"{modelName}Pages", $"{templateName}{Constants.BlazorExtension}");
         string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
-        string outputFolder = Path.Combine(projectBasePath, "Components", "Pages");
-
-        var outputPath = Path.Combine(outputFolder, outputFileName);
-        return outputPath;
+        return Path.Combine(projectBasePath, "Components", "Pages", $"{modelName}Pages");
     }
 
     internal static async Task<BlazorCrudAppProperties> GetBlazorPropertiesAsync(Document? programDocument, Document? appRazorDocument)

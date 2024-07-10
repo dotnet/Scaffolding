@@ -15,6 +15,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console.Cli;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 
@@ -66,7 +67,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
             _logger.LogMessage("Installing packages...");
-            InstallEfPackages(settings);
+            await InstallPackagesAsync(settings);
             minimalApiModel.DbContextInfo.AddDbContext(minimalApiModel.ProjectInfo, _logger, _fileSystem);
         }
 
@@ -325,7 +326,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return scaffoldingModel;
     }
 
-    private void InstallEfPackages(MinimalApiSettings commandSettings)
+    private async Task InstallPackagesAsync(MinimalApiSettings commandSettings)
     {
         //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
         var packageList = new List<string>()
@@ -339,6 +340,12 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
             packageList.Add(projectPackageName);
         }
 
-        CommandHelpers.InstallPackages(_logger, commandSettings.Project, commandSettings.Prerelease, packageList);
+        await new AddPackagesStep
+        {
+            PackageNames = packageList,
+            ProjectPath = commandSettings.Project,
+            Prerelease = commandSettings.Prerelease,
+            Logger = _logger
+        }.ExecuteAsync();
     }
 }

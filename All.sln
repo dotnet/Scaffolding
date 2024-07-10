@@ -125,7 +125,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-scaffold-aspire", "s
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-scaffolding", "dotnet-scaffolding", "{73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Scaffolding.TextTemplating", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj", "{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.TextTemplating", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj", "{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

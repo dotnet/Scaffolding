@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
@@ -16,6 +14,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console.Cli;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 
@@ -67,7 +66,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         if (blazorCrudModel.DbContextInfo.EfScenario)
         {
             _logger.LogMessage("Installing packages...");
-            InstallPackages(settings);
+            await InstallPackagesAsync(settings);
             blazorCrudModel.DbContextInfo.AddDbContext(blazorCrudModel.ProjectInfo, _logger, _fileSystem);
         }
 
@@ -283,7 +282,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         return scaffoldingModel;
     }
 
-    private void InstallPackages(BlazorCrudSettings commandSettings)
+    private async Task InstallPackagesAsync(BlazorCrudSettings commandSettings)
     {
         //add these packages regardless of the DatabaseProvider
         var packageList = new List<string>()
@@ -299,6 +298,12 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             packageList.Add(projectPackageName);
         }
 
-        CommandHelpers.InstallPackages(_logger, commandSettings.Project, commandSettings.Prerelease, packageList);
+        await new AddPackagesStep
+        {
+            PackageNames = packageList,
+            ProjectPath = commandSettings.Project,
+            Prerelease = commandSettings.Prerelease,
+            Logger = _logger
+        }.ExecuteAsync();
     }
 }

@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Spectre.Console.Cli;
 
@@ -41,7 +41,7 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
             return -1;
         }
         _logger.LogMessage("Installing packages...");
-        InstallPackages(settings);
+        await InstallPackagesAsync(settings);
 
         _logger.LogMessage("Updating App host project...");
         var appHostResult = await UpdateAppHostAsync(settings);
@@ -243,25 +243,33 @@ internal class StorageCommand : AsyncCommand<StorageCommand.StorageCommandSettin
         return true;
     }
 
-    internal void InstallPackages(StorageCommandSettings commandSettings)
+    internal async Task InstallPackagesAsync(StorageCommandSettings commandSettings)
     {
-        if (_fileSystem.FileExists(commandSettings.AppHostProject))
+        List<AddPackagesStep> packageSteps = [];
+        var appHostPackageStep= new AddPackagesStep
         {
-            DotnetCommands.AddPackage(
-                packageName: PackageConstants.StoragePackages.AppHostStoragePackageName,
-                logger: _logger,
-                projectFile: commandSettings.AppHostProject,
-                includePrerelease: commandSettings.Prerelease);
+            PackageNames = [PackageConstants.StoragePackages.AppHostStoragePackageName],
+            ProjectPath = commandSettings.AppHostProject,
+            Prerelease = commandSettings.Prerelease,
+            Logger = _logger
+        };
+
+        if (PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName))
+        {
+            var workerProjPackageStep = new AddPackagesStep
+            {
+                PackageNames = [projectPackageName],
+                ProjectPath = commandSettings.AppHostProject,
+                Prerelease = commandSettings.Prerelease,
+                Logger = _logger
+            };
+
+            packageSteps.Add(workerProjPackageStep);
         }
 
-        PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName);
-        if (_fileSystem.FileExists(commandSettings.Project) && !string.IsNullOrEmpty(projectPackageName))
+        foreach (var packageStep in packageSteps)
         {
-            DotnetCommands.AddPackage(
-                packageName: projectPackageName,
-                logger: _logger,
-                projectFile: commandSettings.Project,
-                includePrerelease: commandSettings.Prerelease);
+            await packageStep.ExecuteAsync();
         }
     }
 

@@ -26,16 +26,4 @@ internal static class CommandHelpers
 
         return newFilePath;
     }
-
-    internal static void InstallPackages(ILogger logger, string projectPath, bool prerelease, List<string> packages)
-    {
-        foreach (var package in packages)
-        {
-            DotnetCommands.AddPackage(
-            packageName: package,
-            logger: logger,
-            projectFile: projectPath,
-            includePrerelease: prerelease);
-        }
-    }
 }

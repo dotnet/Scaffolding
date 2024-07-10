@@ -60,7 +60,7 @@ internal class DotNetToolService : IDotNetToolService
             return null;
         }
 
-        var matchingTools = GlobalDotNetTools.Where(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+        var matchingTools = GlobalDotNetTools.Where(x => x.PackageName.Equals(componentName, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(version))
         {
             return matchingTools.FirstOrDefault();

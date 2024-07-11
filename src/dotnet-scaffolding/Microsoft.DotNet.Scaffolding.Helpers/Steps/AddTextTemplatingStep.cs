@@ -4,7 +4,9 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
-
+/// <summary>
+/// Provided all the required properties, this ScaffoldStep can template T4 onto a file on disk.
+/// </summary>
 internal class AddTextTemplatingStep : ScaffoldStep
 {
     //Path to .tt (T4) template on disk (likely to be packed in a dotnet tool)
@@ -29,9 +31,9 @@ internal class AddTextTemplatingStep : ScaffoldStep
 
         var host = new TextTemplatingEngineHost { TemplateFile = TemplatePath };
         ITextTransformation? textTransformation;
-
         try
         {
+            //need to re-instantiate the ITextTransformation type provided (using the TextTemplatingFilePreprocessor in the scaffolder)
             textTransformation = Activator.CreateInstance(TemplateType) as ITextTransformation;
             if (textTransformation != null)
             {
@@ -48,6 +50,7 @@ internal class AddTextTemplatingStep : ScaffoldStep
         {
             var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
             var outputFolderPath = Path.GetDirectoryName(OutputPath);
+            //create the directory for the output file incase not already there.
             if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(outputFolderPath))
             {
                 if (!FileSystem.DirectoryExists(outputFolderPath))

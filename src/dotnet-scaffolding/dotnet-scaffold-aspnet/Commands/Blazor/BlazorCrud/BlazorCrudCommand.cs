@@ -71,7 +71,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         }
 
         _logger.LogMessage("Adding razor components...");
-        var executeTemplateResult = ExecuteTemplates(blazorCrudModel);
+        var executeTemplateResult = await ExecuteTemplatesAsync(blazorCrudModel);
         //if we were not able to execute the templates successfully,
         //exit and don't update the project
         if (!executeTemplateResult)
@@ -133,9 +133,8 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         return true;
     }
 
-    private bool ExecuteTemplates(BlazorCrudModel blazorCrudModel)
+    private async Task<bool> ExecuteTemplatesAsync(BlazorCrudModel blazorCrudModel)
     {
-        var projectPath = blazorCrudModel.ProjectInfo.AppSettings?.Workspace()?.InputPath;
         var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
         var neededT4FileNames = BlazorCrudHelper.GetT4Templates(blazorCrudModel.PageType);
         // Create a HashSet for quick lookup of needed file names
@@ -146,39 +145,33 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             .Where(path => neededFileNamesSet.Contains(Path.GetFileName(path)))
             .ToList();
 
-        var dictParams = new Dictionary<string, object>()
-        {
-            { "Model" , blazorCrudModel }
-        };
-
+        string baseOutputPath = BlazorCrudHelper.GetBaseOutputPath(
+                blazorCrudModel.ModelInfo.ModelTypeName,
+                blazorCrudModel.ProjectInfo.AppSettings?.Workspace().InputPath);
+        List<ScaffoldStep> textTemplatingSteps = [];
         foreach (var templatePath in matchingPaths)
         {
-            ITextTransformation? textTransformation = null;
-            textTransformation = BlazorCrudHelper.GetBlazorCrudTransformation(templatePath);
-            if (textTransformation is null)
+            var templateName = Path.GetFileNameWithoutExtension(templatePath);
+            string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Constants.BlazorExtension}");
+            var templateType = BlazorCrudHelper.GetTemplateType(templatePath);
+            if (!string.IsNullOrEmpty(templatePath) && templateType != null)
             {
-                throw new Exception($"Unable to process T4 template '{templatePath}' correctly");
-            }
-
-            var templateInvoker = new TemplateInvoker();
-            var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
-            string outputPath = BlazorCrudHelper.ValidateAndGetOutputPath(
-                blazorCrudModel.ModelInfo.ModelTypeName,
-                Path.GetFileNameWithoutExtension(templatePath),
-                blazorCrudModel.ProjectInfo.AppSettings?.Workspace().InputPath);
-
-            var outputDirectory = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(templatedString) &&
-                !string.IsNullOrEmpty(outputPath) &&
-                !string.IsNullOrEmpty(outputDirectory))
-            {
-                if (!_fileSystem.DirectoryExists(outputDirectory))
+                textTemplatingSteps.Add(new AddTextTemplatingStep
                 {
-                    _fileSystem.CreateDirectory(outputDirectory);
-                }
-
-                _fileSystem.WriteAllText(outputPath, templatedString);
+                    FileSystem = _fileSystem,
+                    Logger = _logger,
+                    TemplatePath = templatePath,
+                    TemplateType = templateType,
+                    TemplateModel = blazorCrudModel,
+                    TemplateModelName = "Model",
+                    OutputPath = outputFileName,
+                });
             }
+        }
+
+        foreach (var step in textTemplatingSteps)
+        {
+            await step.ExecuteAsync();
         }
 
         return true;

@@ -72,7 +72,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         }
 
         _logger.LogMessage("Adding API controller...");
-        var executeTemplateResult = ExecuteTemplates(minimalApiModel);
+        var executeTemplateResult = await ExecuteTemplatesAsync(minimalApiModel);
         //if we were not able to execute the templates successfully,
         //exit and don't update the project
         if (!executeTemplateResult)
@@ -121,11 +121,9 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         return true;
     }
 
-    private bool ExecuteTemplates(MinimalApiModel minimalApiModel)
+    private async Task<bool> ExecuteTemplatesAsync(MinimalApiModel minimalApiModel)
     {
-        var projectPath = minimalApiModel.ProjectInfo.AppSettings?.Workspace()?.InputPath;
         var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
-        ITextTransformation? textTransformation = null;
         string? t4TemplatePath = null;
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
@@ -135,55 +133,47 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         {
             t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApi.tt", StringComparison.OrdinalIgnoreCase));
         }
+        var templateType = GetTemplateType(t4TemplatePath);
 
-        textTransformation = GetMinimalApiTransformation(t4TemplatePath);
-        if (textTransformation is null)
+        if (string.IsNullOrEmpty(t4TemplatePath) ||
+            string.IsNullOrEmpty(minimalApiModel.EndpointsPath) ||
+            templateType is null)
         {
-            throw new Exception($"Unable to process T4 template '{t4TemplatePath}' correctly");
+            return false;
         }
 
-        var templateInvoker = new TemplateInvoker();
-        var dictParams = new Dictionary<string, object>()
+        var textTemplatingStep = new AddTextTemplatingStep
         {
-            { "Model" , minimalApiModel }
+            FileSystem = _fileSystem,
+            Logger = _logger,
+            TemplatePath = t4TemplatePath,
+            TemplateType = templateType,
+            TemplateModel = minimalApiModel,
+            TemplateModelName = "Model",
+            OutputPath = minimalApiModel.EndpointsPath,
         };
 
-        var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
-        if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(minimalApiModel.EndpointsPath))
-        {
-            _fileSystem.WriteAllText(minimalApiModel.EndpointsPath, templatedString);
-            return true;
-        }
-
-        return false;
+        return await textTemplatingStep.ExecuteAsync();
     }
 
-    private static ITextTransformation? GetMinimalApiTransformation(string? templatePath)
+    private static Type? GetTemplateType(string? templatePath)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        var host = new TextTemplatingEngineHost { TemplateFile = templatePath };
-        ITextTransformation? transformation = null;
-
         switch (Path.GetFileName(templatePath))
         {
             case "MinimalApi.tt":
-                transformation = new Templates.MinimalApi.MinimalApi() { Host = host };
-                break;
+                return typeof(Templates.MinimalApi.MinimalApi);
             case "MinimalApiEf.tt":
-                transformation = new Templates.MinimalApi.MinimalApiEf() { Host = host };
+                return typeof(Templates.MinimalApi.MinimalApiEf);
+            default:
                 break;
         }
 
-        if (transformation is not null)
-        {
-            transformation.Session = host.CreateSession();
-        }
-
-        return transformation;
+        return null;
     }
 
     private async Task<bool> UpdateProjectAsync(MinimalApiModel minimalApiModel)

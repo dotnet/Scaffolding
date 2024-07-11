@@ -6,16 +6,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console.Cli;
-using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 
@@ -68,7 +67,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         {
             _logger.LogMessage("Installing packages...");
             await InstallPackagesAsync(settings);
-            minimalApiModel.DbContextInfo.AddDbContext(minimalApiModel.ProjectInfo, _logger, _fileSystem);
+            await AddDbContextAsync(minimalApiModel.DbContextInfo, minimalApiModel.ProjectInfo);
         }
 
         _logger.LogMessage("Adding API controller...");
@@ -96,7 +95,32 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         }
     }
 
+    private async Task<bool> AddDbContextAsync(DbContextInfo dbContextInfo, ProjectInfo projectInfo)
+    {
+        var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
+        if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) && 
+            AspNetDbContextHelper.DbContextTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties) &&
+            dbContextProperties is not null &&
+            !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
+            !string.IsNullOrEmpty(dbContextInfo.DbContextClassPath) &&
+            !string.IsNullOrEmpty(projectBasePath))
+        {
+            dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
+            dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
+            dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
+            var addDbContextStep = new AddNewDbContextStep
+            {
+                DbContextProperties = dbContextProperties,
+                ProjectBaseDirectory = projectBasePath,
+                FileSystem = _fileSystem,
+                Logger = _logger,
+            };
 
+            return await addDbContextStep.ExecuteAsync();
+        }
+
+        return true;
+    }
 
     private bool ValidateMinimalApiSettings(MinimalApiSettings commandSettings)
     {

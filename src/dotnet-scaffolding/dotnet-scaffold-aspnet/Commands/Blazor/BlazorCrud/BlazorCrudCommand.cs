@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
@@ -67,7 +66,7 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         {
             _logger.LogMessage("Installing packages...");
             await InstallPackagesAsync(settings);
-            blazorCrudModel.DbContextInfo.AddDbContext(blazorCrudModel.ProjectInfo, _logger, _fileSystem);
+            await AddDbContextAsync(blazorCrudModel.DbContextInfo, blazorCrudModel.ProjectInfo);
         }
 
         _logger.LogMessage("Adding razor components...");
@@ -128,6 +127,33 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         else if (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider))
         {
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> AddDbContextAsync(DbContextInfo dbContextInfo, ProjectInfo projectInfo)
+    {
+        var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
+        if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
+            AspNetDbContextHelper.DbContextTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties) &&
+            dbContextProperties is not null &&
+            !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
+            !string.IsNullOrEmpty(dbContextInfo.DbContextClassPath) &&
+            !string.IsNullOrEmpty(projectBasePath))
+        {
+            dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
+            dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
+            dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
+            var addDbContextStep = new AddNewDbContextStep
+            {
+                DbContextProperties = dbContextProperties,
+                ProjectBaseDirectory = projectBasePath,
+                FileSystem = _fileSystem,
+                Logger = _logger,
+            };
+
+            return await addDbContextStep.ExecuteAsync();
         }
 
         return true;

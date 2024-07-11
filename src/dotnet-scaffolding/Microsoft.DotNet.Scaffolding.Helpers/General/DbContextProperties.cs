@@ -4,10 +4,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 internal class DbContextProperties
 {
     public string DbContextName { get; set; } = "NewDbContext";
-    public required string AddDbMethod { get; set; }
-    public string? AddDbContextMethod { get; set; }
-    public string? DbName { get; set; }
-    public string? DbType { get; set; }
+    public string? DbContextPath { get; set; }
     public string? DbSetStatement { get; set; }
     public string? NewDbConnectionString { get; set; }
 }

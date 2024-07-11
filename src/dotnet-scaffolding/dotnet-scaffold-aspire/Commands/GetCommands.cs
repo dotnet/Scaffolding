@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -52,31 +53,35 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
     {
         internal static Parameter AppHostProjectParameter = new() { Name = "--apphost-project", DisplayName = "Aspire App host project file", Description = "Aspire App host project for the scaffolding", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
         internal static Parameter ProjectParameter = new() { Name = "--project", DisplayName = "Web or worker project file", Description = "Web or worker project associated with the Aspire App host", Required = true, Type = BaseTypes.String, PickerType = InteractivePickerType.ProjectPicker };
-        internal static DbContextProperties SqlServerDefaults = new()
+        internal static DatabaseProperties SqlServerDefaults = new()
         {
-            DbType = "sqlserver",
-            DbName = "sqldb",
-            AddDbMethod = "AddSqlServer",
-            AddDbContextMethod = "AddSqlServerDbContext",
-            NewDbConnectionString = "Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true"
+            AspireDbType = "sqlserver",
+            AspireDbName = "sqldb",
+            AspireAddDbMethod = "AddSqlServer",
+            AspireAddDbContextMethod = "AddSqlServerDbContext",
         };
 
-        internal static DbContextProperties NpgsqlDefaults = new()
+        internal static DatabaseProperties NpgsqlDefaults = new()
         {
-            DbType = "postgresql",
-            DbName = "postgresqldb",
-            AddDbMethod = "AddPostgres",
-            AddDbContextMethod = "AddNpgsqlDbContext",
-            NewDbConnectionString = "server=localhost;username=postgres;database={0}"
+            AspireDbType = "postgresql",
+            AspireDbName = "postgresqldb",
+            AspireAddDbMethod = "AddPostgres",
+            AspireAddDbContextMethod = "AddNpgsqlDbContext",
         };
 
-        internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
-        internal static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
+        internal static Dictionary<string, DatabaseProperties?> DatabaseTypeDefaults = new()
         {
             { "npgsql-efcore", NpgsqlDefaults },
             { "sqlserver-efcore", SqlServerDefaults }
         };
 
+        internal static Dictionary<string, DbContextProperties?> DbContextTypeDefaults = new()
+        {
+            { "npgsql-efcore", DbContextHelper.NpgsqlDefaults },
+            { "sqlserver-efcore", DbContextHelper.SqlServerDefaults }
+        };
+
+        internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
         internal static List<string> DatabaseTypeCustomValues = [.. DatabaseTypeDefaults.Keys];
         internal static List<string> StorageTypeCustomValues = ["azure-storage-queues", "azure-storage-blobs", "azure-data-tables"];
 

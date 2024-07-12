@@ -59,7 +59,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             //KeyValuePair with key being name of the DotnetToolInfo (component) and value being the CommandInfo supported by that component.
             KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
             CommandInfo? commandInfo = null;
-            var dotnetToolComponent = _dotnetToolService.GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent);
             commandInfoKvp = commandDiscovery.Discover(context);
             if (commandDiscovery.State.IsNavigation())
@@ -102,7 +103,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             //check if user input included a component name.
             //if included, check for a command name, and get the CommandInfo object.
-            var dotnetToolComponent = _dotnetToolService.GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
                 var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent.Command);

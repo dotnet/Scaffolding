@@ -46,7 +46,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             string? displayCategory = null;
-            var dotnetToolComponent = _dotnetToolService.GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
 
             CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent);
             displayCategory = categoryDiscovery.Discover(context);
@@ -76,7 +77,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             //check if user input included a component name.
             //if included, check for a command name, and get the CommandInfo object.
-            var dotnetToolComponent = _dotnetToolService.GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
                 var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent.Command);

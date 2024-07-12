@@ -6,9 +6,9 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 internal interface IDotNetToolService
 {
-    IList<DotNetToolInfo> GlobalDotNetTools { get; }
     IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null);
     DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null);
+    IList<DotNetToolInfo> GetDotNetTools(bool refresh = false);
     bool InstallDotNetTool(string toolName, string? version = null, bool prerelease = false);
     List<CommandInfo> GetCommands(string dotnetToolName);
 }

@@ -17,22 +17,15 @@ internal class DotNetToolService : IDotNetToolService
     {
         _environmentService = environmentService;
         _fileSystem = fileSystem;
+        _dotNetTools = [];
     }
 
-    private IList<DotNetToolInfo>? _dotNetTools;
-    public IList<DotNetToolInfo> GlobalDotNetTools
-    {
-        get
-        {
-            _dotNetTools ??= GetDotNetTools();
-            return _dotNetTools;
-        }
-    }
-
+    private IList<DotNetToolInfo> _dotNetTools;
     public List<CommandInfo> GetCommands(string dotnetToolName)
     {
         List<CommandInfo>? commands = null;
-        if (GlobalDotNetTools.FirstOrDefault(x => x.Command.Equals(dotnetToolName, StringComparison.OrdinalIgnoreCase)) != null)
+        var dotnetTools = GetDotNetTools();
+        if (dotnetTools.FirstOrDefault(x => x.Command.Equals(dotnetToolName, StringComparison.OrdinalIgnoreCase)) != null)
         {
             var runner = DotnetCliRunner.Create(dotnetToolName, ["get-commands"]);
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
@@ -59,8 +52,8 @@ internal class DotNetToolService : IDotNetToolService
         {
             return null;
         }
-
-        var matchingTools = GlobalDotNetTools.Where(x => x.PackageName.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+        var dotnetTools = GetDotNetTools();
+        var matchingTools = dotnetTools.Where(x => x.PackageName.Equals(componentName, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(version))
         {
             return matchingTools.FirstOrDefault();
@@ -75,7 +68,7 @@ internal class DotNetToolService : IDotNetToolService
     {
         if (components is null || components.Count == 0)
         {
-            components = GlobalDotNetTools;
+            components = GetDotNetTools();
         }
 
         var options = new ParallelOptions
@@ -123,27 +116,32 @@ internal class DotNetToolService : IDotNetToolService
         return exitCode == 0;
     }
 
-    private static IList<DotNetToolInfo> GetDotNetTools()
+    public IList<DotNetToolInfo> GetDotNetTools(bool refresh = false)
     {
-        var dotnetToolList = new List<DotNetToolInfo>();
-        var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);
-        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
-        if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+        if (refresh || _dotNetTools.Count == 0)
         {
-            var stdOutByLine = stdOut.Split(System.Environment.NewLine);
-            foreach (var line in stdOutByLine)
+            var dotnetToolList = new List<DotNetToolInfo>();
+            var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);
+            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
+            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
-                var parsedDotNetTool = ParseToolInfo(line);
-                if (parsedDotNetTool != null &&
-                    !parsedDotNetTool.Command.Equals("dotnet-scaffold", StringComparison.OrdinalIgnoreCase) &&
-                    !parsedDotNetTool.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase))
+                var stdOutByLine = stdOut.Split(System.Environment.NewLine);
+                foreach (var line in stdOutByLine)
                 {
-                    dotnetToolList.Add(parsedDotNetTool);
+                    var parsedDotNetTool = ParseToolInfo(line);
+                    if (parsedDotNetTool != null &&
+                        !parsedDotNetTool.Command.Equals("dotnet-scaffold", StringComparison.OrdinalIgnoreCase) &&
+                        !parsedDotNetTool.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dotnetToolList.Add(parsedDotNetTool);
+                    }
                 }
+
+                _dotNetTools = dotnetToolList;
             }
         }
 
-        return dotnetToolList;
+        return _dotNetTools;
     }
 
     private static DotNetToolInfo? ParseToolInfo(string line)

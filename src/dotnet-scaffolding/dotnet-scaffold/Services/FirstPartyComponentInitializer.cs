@@ -20,7 +20,7 @@ internal class FirstPartyComponentInitializer
     public void Initialize()
     {
         List<string> toolsToInstall = [];
-        var installedTools = _dotnetToolService.GetDotNetTools();
+        var installedTools = _dotnetToolService.GetDotNetTools(refresh: true);
         foreach (var tool in _firstPartyTools)
         {
             if (installedTools.FirstOrDefault(x => x.PackageName.Equals(tool)) is null)

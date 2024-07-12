@@ -11,36 +11,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 internal class AspNetDbContextHelper
 {
-    internal static DbContextProperties SqlServerDefaults = new()
+    internal static Dictionary<string, DbContextProperties?> DbContextTypeDefaults = new()
     {
-        AddDbMethod = "AddSqlServer",
-        NewDbConnectionString = "Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true"
-    };
-
-    internal static DbContextProperties SqliteDefaults = new()
-    {
-        AddDbMethod = "AddSqlite",
-        NewDbConnectionString = "Data Source={0}.db"
-    };
-
-    internal static DbContextProperties CosmosDefaults = new()
-    {
-        AddDbMethod = "AddCosmos",
-        NewDbConnectionString = "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="
-    };
-
-    internal static DbContextProperties NpgsqlDefaults = new()
-    {
-        AddDbMethod = "AddPostgres",
-        NewDbConnectionString = "server=localhost;username=postgres;database={0}"
-    };
-
-    internal static Dictionary<string, DbContextProperties?> DatabaseTypeDefaults = new()
-    {
-        { PackageConstants.EfConstants.Postgres, NpgsqlDefaults },
-        { PackageConstants.EfConstants.SqlServer, SqlServerDefaults },
-        { PackageConstants.EfConstants.SQLite, SqliteDefaults },
-        { PackageConstants.EfConstants.CosmosDb, CosmosDefaults }
+        { PackageConstants.EfConstants.Postgres, DbContextHelper.NpgsqlDefaults },
+        { PackageConstants.EfConstants.SqlServer, DbContextHelper.SqlServerDefaults },
+        { PackageConstants.EfConstants.SQLite, DbContextHelper.SqliteDefaults },
+        { PackageConstants.EfConstants.CosmosDb, DbContextHelper.CosmosDefaults }
     };
 
     internal static CodeModifierConfig AddDbContextChanges(DbContextInfo dbContextInfo, CodeModifierConfig configToEdit)

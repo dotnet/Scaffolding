@@ -48,8 +48,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             _logger.LogMessage("Updating App host project...");
             var appHostResult = await UpdateAppHostAsync(settings);
 
-            _logger.LogMessage("Adding new DbContext...");
-            var dbContextCreationResult = CreateNewDbContext(settings);
+            var dbContextCreationResult = await CreateNewDbContextAsync(settings);
 
             _logger.LogMessage("Updating web/worker project...");
             var workerResult = await UpdateWebAppAsync(settings);
@@ -70,14 +69,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         /// generate a path for DbContext, then use DbContextHelper.CreateDbContext to invoke 'NewDbContext.tt'
         /// DbContextHelper.CreateDbContext will also write the resulting templated string (class text) to disk
         /// </summary>
-        private bool CreateNewDbContext(DatabaseCommandSettings settings)
+        private async Task<bool> CreateNewDbContextAsync(DatabaseCommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
             var projectBasePath = Path.GetDirectoryName(settings.Project);
-            var relativeContextPath = Path.GetRelativePath(settings.Project, newDbContextPath);
-            if (GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) && dbContextProperties is not null)
+            if (GetCmdsHelper.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
+                dbContextProperties is not null &&
+                !string.IsNullOrEmpty(projectBasePath))
             {
-                return DbContextHelper.CreateDbContext(dbContextProperties, newDbContextPath, projectBasePath, _fileSystem);
+                dbContextProperties.DbContextPath = newDbContextPath;
+                var addDbContextStep = new AddNewDbContextStep
+                {
+                    DbContextProperties = dbContextProperties,
+                    ProjectBaseDirectory = projectBasePath,
+                    FileSystem = _fileSystem,
+                    Logger = _logger
+                };
+
+                return await addDbContextStep.ExecuteAsync();
             }
 
             return false;
@@ -85,7 +94,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         private string CreateNewDbContextPath(DatabaseCommandSettings commandSettings)
         {
-            if (!GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
+            if (!GetCmdsHelper.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
             {
                 return string.Empty;
             }
@@ -276,7 +285,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                     //format projectName onto "builder.AddProject<{0}>"
                     addProjectChange.Parent = string.Format(addProjectChange.Parent, projectName);
                     //format DbContextProperties onto "var {0} = builder.{1}("{2}").AddDatabase("{0}")"
-                    addProjectChange.Block = string.Format(addProjectChange.Block, dbProperties.DbName);
+                    addProjectChange.Block = string.Format(addProjectChange.Block, dbProperties.AspireDbName);
                 }
 
                 if (!codeChangeOptions.UsingTopLevelsStatements && addDbChange != null)
@@ -286,7 +295,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
                 if (addDbChange != null)
                 {
-                    addDbChange.Block = string.Format(addDbChange.Block, dbProperties.DbName, dbProperties.AddDbMethod, dbProperties.DbType);
+                    addDbChange.Block = string.Format(addDbChange.Block, dbProperties.AspireDbName, dbProperties.AspireAddDbMethod, dbProperties.AspireDbType);
                 }
             }
 
@@ -311,13 +320,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                     addDbChange = DocumentBuilder.AddLeadingTriviaSpaces(addDbChange, spaces: 12);
                 }
 
-                if (addDbChange != null &&
+                if (addDbChange is not null &&
                     !string.IsNullOrEmpty(addDbChange.Block) &&
                     GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(dbType, out var dbProperties) &&
-                    dbProperties is not null)
+                    GetCmdsHelper.DbContextTypeDefaults.TryGetValue(dbType, out var dbContextProperties) &&
+                    dbProperties is not null &&
+                    dbContextProperties is not null)
                 {
                     //formatting DbContextProperties vars onto "builder.{0}<{1}>("{2}")"
-                    addDbChange.Block = string.Format(addDbChange.Block, dbProperties.AddDbContextMethod, dbProperties.DbContextName, dbProperties.DbName);
+                    addDbChange.Block = string.Format(addDbChange.Block, dbProperties.AspireAddDbContextMethod, dbContextProperties.DbContextName, dbProperties.AspireDbName);
                 }
             }
 

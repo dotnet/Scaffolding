@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.ObjectModel;
 
 namespace Microsoft.DotNet.Scaffolding.ComponentModel;
@@ -10,50 +11,34 @@ internal class Parameter
     public required string DisplayName { get; init; }
     public required bool Required { get; set; } = false;
     public string? Description { get; set; }
-    public required BaseTypes Type { get; set; } = BaseTypes.String;
-    public InteractivePickerType? PickerType { get; set; }
-    public List<string>? CustomPickerValues { get; set; }
+    public required CliTypes Type { get; set; } = CliTypes.String;
+    public InteractivePickerType PickerType { get; set; } = InteractivePickerType.None;
+    public IEnumerable<string>? CustomPickerValues { get; set; }
 
-    internal static readonly ReadOnlyDictionary<BaseTypes, Type> TypeDict = new(
-        new Dictionary<BaseTypes, Type>
+    private static readonly ReadOnlyDictionary<CliTypes, Type> s_baseTypeToTypeMapping = new(
+        new Dictionary<CliTypes, Type>
         {
-            { BaseTypes.Bool, typeof(bool) },
-            { BaseTypes.Int, typeof(int) },
-            { BaseTypes.Long, typeof(long) },
-            { BaseTypes.Double, typeof(double) },
-            { BaseTypes.Decimal, typeof(decimal) },
-            { BaseTypes.Char, typeof(char) },
-            { BaseTypes.String, typeof(string) }
+            { CliTypes.Bool, typeof(bool) },
+            { CliTypes.Int, typeof(int) },
+            { CliTypes.Long, typeof(long) },
+            { CliTypes.Double, typeof(double) },
+            { CliTypes.Decimal, typeof(decimal) },
+            { CliTypes.Char, typeof(char) },
+            { CliTypes.String, typeof(string) }
         });
 
-    public static Type GetParameterType(BaseTypes baseType)
+    private static readonly ReadOnlyDictionary<Type, CliTypes> s_typeToBaseTypeMapping = new(s_baseTypeToTypeMapping.ToDictionary(x => x.Value, x => x.Key));
+
+    public static Type GetType(CliTypes baseType)
     {
-        return TypeDict[baseType];
+        return s_baseTypeToTypeMapping[baseType];
     }
 
-    public Type GetParameterType()
+    public static CliTypes GetCliType(Type type)
     {
-        return TypeDict[Type];
+        return s_typeToBaseTypeMapping[type];
     }
-}
 
-//will add List types for all these soon!
-public enum BaseTypes
-{
-    Bool,
-    Int,
-    Long,
-    Double,
-    Decimal,
-    Char,
-    String
-}
-
-public enum InteractivePickerType
-{
-    ClassPicker,
-    FilePicker,
-    ProjectPicker,
-    CustomPicker,
-    YesNo
+    public static CliTypes GetCliType<T>()
+        => GetCliType(typeof(T));
 }

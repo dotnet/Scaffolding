@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         private async Task<string> PromptAsync(IFlowContext context, string title)
         {
             //check if Parameter has a InteractivePickerType
-            if (_parameter.PickerType is null)
+            if (_parameter.PickerType is InteractivePickerType.None)
             {
                 var prompt = new TextPrompt<string>($"[lightseagreen]{title}[/]")
                 .ValidationErrorMessage("bad value fix it please")
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     break;
             }
 
-            if (!_parameter.Required && stepOptions.FirstOrDefault(x => x.Name.Equals("None")) is null)
+            if (ShouldAddNoneOption(pickerType, stepOptions))
             {
                 stepOptions.Insert(0, new StepOption() { Name = "None", Value = string.Empty });
             }
@@ -132,9 +132,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return result.Value?.Value;
         }
 
-        private static List<StepOption> GetCustomValues(List<string>? customPickerValues)
+        private bool ShouldAddNoneOption(InteractivePickerType? pickerType, List<StepOption> stepOptions)
         {
-            if (customPickerValues is null || customPickerValues.Count == 0)
+            return pickerType is not InteractivePickerType.YesNo && // Don't add it for Yes/No
+                   !_parameter.Required && // Only add it if its not required
+                   stepOptions.Any(x => x.Name.Equals("None")); // Don't add it if its already in the list
+        }
+
+        private static List<StepOption> GetCustomValues(IEnumerable<string>? customPickerValues)
+        {
+            if (customPickerValues is null || customPickerValues.Count() == 0)
             {
                 throw new InvalidOperationException("Missing 'Parameter.CustomPickerValues' values!.\nNeeded when using 'Parameter.InteractivePicker.CustomPicker'");
             }

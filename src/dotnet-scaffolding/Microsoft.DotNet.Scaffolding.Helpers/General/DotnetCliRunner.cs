@@ -93,5 +93,11 @@ internal class DotnetCliRunner
             RedirectStandardError = true,
             RedirectStandardOutput = true
         };
+
+        // Clear MSBuild related environment variables so it doesn't interfere with dotnet calls
+        // automatic lookups via global.json, etc.
+        _psi.Environment["MSBuildSDKsPath"] = null;
+        _psi.Environment["MSBuildExtensionsPath"] = null;
+        _psi.Environment["MSBUILD_EXE_PATH"] = null;
     }
 }

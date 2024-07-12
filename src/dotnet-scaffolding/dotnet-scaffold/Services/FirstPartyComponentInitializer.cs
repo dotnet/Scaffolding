@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
@@ -19,9 +20,10 @@ internal class FirstPartyComponentInitializer
     public void Initialize()
     {
         List<string> toolsToInstall = [];
+        var installedTools = _dotnetToolService.GetDotNetTools();
         foreach (var tool in _firstPartyTools)
         {
-            if (_dotnetToolService.GetDotNetTool(tool) is null)
+            if (installedTools.FirstOrDefault(x => x.PackageName.Equals(tool)) is null)
             {
                 toolsToInstall.Add(tool);
             }

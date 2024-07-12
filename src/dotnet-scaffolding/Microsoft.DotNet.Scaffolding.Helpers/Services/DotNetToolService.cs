@@ -123,7 +123,7 @@ internal class DotNetToolService : IDotNetToolService
         return exitCode == 0;
     }
 
-    private static IList<DotNetToolInfo> GetDotNetTools()
+    public IList<DotNetToolInfo> GetDotNetTools()
     {
         var dotnetToolList = new List<DotNetToolInfo>();
         var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);

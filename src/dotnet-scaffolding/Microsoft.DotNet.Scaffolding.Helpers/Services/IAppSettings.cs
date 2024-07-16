@@ -4,6 +4,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
 internal interface IAppSettings
 {
+    //used for MSBuildWorkspace.Create()
     IDictionary<string, string> GlobalProperties { get; }
     object? GetSettings(string sectionName);
     void AddSettings(string sectionName, object settings);

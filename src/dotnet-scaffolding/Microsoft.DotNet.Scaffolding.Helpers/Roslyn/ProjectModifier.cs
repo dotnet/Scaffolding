@@ -2,38 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 
 internal class ProjectModifier
 {
     private readonly ILogger _consoleLogger;
-    private readonly IEnvironmentService _environmentService;
     private readonly ICodeService _codeService;
-    private readonly IAppSettings _appSettings;
     private const string Main = nameof(Main);
     private readonly StringBuilder _output;
-    private readonly CodeChangeOptions _codeChangeOptions;
+    private readonly string _projectPath;
     private readonly CodeModifierConfig? _codeModifierConfig;
 
     public ProjectModifier(
-        IEnvironmentService environmentService,
-        IAppSettings appSettings,
+        string projectPath,
         ICodeService codeService,
         ILogger consoleLogger,
-        CodeChangeOptions codeChangeOptions,
         CodeModifierConfig? codeModifierConfig = null)
     {
-        _appSettings = appSettings;
-        _environmentService = environmentService;
         _codeService = codeService;
         _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
         _output = new StringBuilder();
-        _codeChangeOptions = codeChangeOptions;
+        _projectPath = projectPath;
         _codeModifierConfig = codeModifierConfig;
     }
 
@@ -44,15 +36,20 @@ internal class ProjectModifier
             return false;
         }
 
-        var solution = (await _codeService.GetWorkspaceAsync())?.CurrentSolution;
-        var roslynProject = solution?.GetProject(_appSettings.Workspace().InputPath);
+        var codeChangeOptions = new CodeChangeOptions()
+        {
+            IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(_codeService),
+            UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_codeService)
+        };
 
-        var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
+        var solution = (await _codeService.GetWorkspaceAsync())?.CurrentSolution;
+        var roslynProject = solution?.GetProject(_projectPath);
+
+        var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, codeChangeOptions));
         foreach (var file in filteredFiles)
         {
             Document? originalDocument = roslynProject?.GetDocument(file.FileName);
-            var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, _codeChangeOptions);
-            var relativeModifiedPath = modifiedDocument?.FilePath.MakeRelativePath(_environmentService.CurrentDirectory) ?? modifiedDocument?.Name.MakeRelativePath(_environmentService.CurrentDirectory);
+            var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, codeChangeOptions);
             roslynProject = modifiedDocument?.Project;
         }
 

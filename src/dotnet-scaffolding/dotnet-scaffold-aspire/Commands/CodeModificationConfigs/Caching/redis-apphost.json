@@ -14,7 +14,7 @@
             },
             {
               "Block": "WithReference(redis)",
-              "Parent": "builder.AddProject<{0}>",
+              "Parent": "builder.AddProject<$(AutoGenProjectName)>",
               "CodeChangeType": "MemberAccess",
               "LeadingTrivia": {
                 "Newline": true,

@@ -7,14 +7,14 @@
           "CodeChanges": [
             {
               "InsertAfter": "var builder = DistributedApplication.CreateBuilder(args)",
-              "Block": "var {0} = builder.{1}(\"{2}\").AddDatabase(\"{0}\")",
+              "Block": "var $(DbName) = builder.$(AddDbMethod)(\"$(DbType)\").AddDatabase(\"$(DbName)\")",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "Block": "WithReference({0})",
-              "Parent": "builder.AddProject<{0}>",
+              "Block": "WithReference($(DbName))",
+              "Parent": "builder.AddProject<$(AutoGenProjectName)>",
               "CodeChangeType": "MemberAccess",
               "LeadingTrivia": {
                 "Newline": true,

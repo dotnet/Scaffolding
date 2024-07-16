@@ -207,11 +207,9 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
         {
             config = EditConfigForMinimalApi(config, minimalApiModel);
             var projectModifier = new ProjectModifier(
-                _environmentService,
-                minimalApiModel.ProjectInfo.AppSettings,
+                minimalApiModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
                 minimalApiModel.ProjectInfo.CodeService,
                 _logger,
-                minimalApiModel.ProjectInfo.CodeChangeOptions,
                 config);
 
             return await projectModifier.RunAsync();

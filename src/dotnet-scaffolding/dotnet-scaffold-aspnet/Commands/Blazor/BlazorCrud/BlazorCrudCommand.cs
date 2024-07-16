@@ -213,11 +213,9 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
         {
             config = await EditConfigForBlazorCrudAsync(config, blazorCrudModel);
             var projectModifier = new ProjectModifier(
-                _environmentService,
-                blazorCrudModel.ProjectInfo.AppSettings,
+                blazorCrudModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
                 blazorCrudModel.ProjectInfo.CodeService,
                 _logger,
-                blazorCrudModel.ProjectInfo.CodeChangeOptions,
                 config);
 
             return await projectModifier.RunAsync();

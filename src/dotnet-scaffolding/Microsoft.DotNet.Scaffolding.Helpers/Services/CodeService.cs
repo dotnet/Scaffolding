@@ -20,22 +20,47 @@ internal class CodeService : ICodeService, IDisposable
     private MSBuildWorkspace? _workspace;
     private Compilation? _compilation;
     private readonly IAppSettings _settings;
-
+    private bool _initialized;
+    private readonly object _initLock = new object();
     public CodeService(IAppSettings settings, ILogger logger)
     {
         _logger = logger;
         _settings = settings;
     }
 
+    private void Initialize()
+    {
+        lock (_initLock)
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            new MsBuildInitializer(_logger).Initialize();
+            _initialized = true;
+        }
+    }
+
+    private void EnsureInitialized()
+    {
+        if (!_initialized)
+        {
+            Initialize();
+        }
+    }
+
     /// <inheritdoc />
     public async Task<Workspace?> GetWorkspaceAsync()
     {
+        EnsureInitialized();
         return await GetMsBuildWorkspaceAsync(_settings.Workspace().InputPath);
     }
 
     /// <inheritdoc />
     public bool TryApplyChanges(Solution? solution)
     {
+        EnsureInitialized();
         if (solution is null || _workspace is null)
         {
             return false;
@@ -47,6 +72,7 @@ internal class CodeService : ICodeService, IDisposable
 
     private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(string? path)
     {
+        EnsureInitialized();
         if (string.IsNullOrEmpty(path))
         {
             return _workspace;
@@ -67,6 +93,7 @@ internal class CodeService : ICodeService, IDisposable
 
     public async Task OpenProjectAsync(string projectPath)
     {
+        EnsureInitialized();
         if (string.IsNullOrEmpty(projectPath))
         {
             return;
@@ -109,6 +136,7 @@ internal class CodeService : ICodeService, IDisposable
 
     public async Task ReloadWorkspaceAsync(string? projectPath)
     {
+        EnsureInitialized();
         UnloadWorkspace();
 
         await GetMsBuildWorkspaceAsync(_settings.Workspace().InputPath);
@@ -128,6 +156,7 @@ internal class CodeService : ICodeService, IDisposable
 
     public async Task<List<ISymbol>> GetAllClassSymbolsAsync()
     {
+        EnsureInitialized();
         List<ISymbol> classSymbols = [];
         if (_compilation is null)
         {
@@ -163,6 +192,7 @@ internal class CodeService : ICodeService, IDisposable
 
     public async Task<List<Document>> GetAllDocumentsAsync()
     {
+        EnsureInitialized();
         var workspace = await GetWorkspaceAsync();
         var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
         if (project is not null)
@@ -175,6 +205,7 @@ internal class CodeService : ICodeService, IDisposable
 
     public async Task<Document?> GetDocumentAsync(string? documentName)
     {
+        EnsureInitialized();
         if (string.IsNullOrWhiteSpace(documentName))
         {
             return null;

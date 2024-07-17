@@ -60,14 +60,12 @@ internal class CodeChangeStep : ScaffoldStep
 
     private string? ReplaceString(string? input)
     {
-        if (string.IsNullOrEmpty(input))
+        if (!string.IsNullOrEmpty(input))
         {
-            return null;
-        }
-
-        foreach (var kvp in CodeModifierProperties)
-        {
-            input = input.Replace(kvp.Key, kvp.Value);
+            foreach (var kvp in CodeModifierProperties)
+            {
+                input = input.Replace(kvp.Key, kvp.Value);
+            }
         }
 
         return input;

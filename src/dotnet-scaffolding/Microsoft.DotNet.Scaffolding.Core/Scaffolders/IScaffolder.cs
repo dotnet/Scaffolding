@@ -8,7 +8,9 @@ namespace Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 public interface IScaffolder
 {
     string Name { get; }
+    string DisplayName { get; }
     string Category { get; }
+    string? Description { get; }
     IEnumerable<ScaffolderOption> Options { get; }
     Task ExecuteAsync(ScaffolderContext context);
 }

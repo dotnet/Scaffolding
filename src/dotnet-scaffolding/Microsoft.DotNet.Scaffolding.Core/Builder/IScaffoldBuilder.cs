@@ -10,6 +10,7 @@ public interface IScaffoldBuilder
 {
     IScaffoldBuilder WithDisplayName(string displayName);
     IScaffoldBuilder WithCategory(string category);
+    IScaffoldBuilder WithDescription(string description);
     IScaffoldBuilder WithOption(ScaffolderOption option);
     IScaffoldBuilder WithStep<TStep>(Action<ScaffoldStepConfigurator<TStep>>? preExecute = null, Action<ScaffoldStepConfigurator<TStep>>? postExecute = null) where TStep : ScaffoldStep;
 

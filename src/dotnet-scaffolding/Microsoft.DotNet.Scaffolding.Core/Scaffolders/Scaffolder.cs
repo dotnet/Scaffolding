@@ -11,6 +11,7 @@ public class Scaffolder : IScaffolder
     private readonly string _name;
     private readonly string _displayName;
     private readonly string _category;
+    private readonly string? _description;
     private readonly List<ScaffolderOption> _options;
     private readonly List<ScaffoldStep> _steps;
     private readonly List<ScaffoldStepPreparer> _preparers;
@@ -18,13 +19,15 @@ public class Scaffolder : IScaffolder
     public string Name => _name;
     public string DisplayName => _displayName;
     public string Category => _category;
+    public string? Description => _description;
     public IEnumerable<ScaffolderOption> Options => _options;
 
-    internal Scaffolder(string name, string displayName, string category, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers)
+    internal Scaffolder(string name, string displayName, string category, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers)
     {
         _name = name;
         _displayName = displayName;
         _category = category;
+        _description = description;
         _options = options;
         _steps = steps;
         _preparers = preparers;

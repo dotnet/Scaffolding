@@ -20,6 +20,7 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
         {
             throw new InvalidOperationException("RootCommand is not set.");
         }
+
         await RootCommand.InvokeAsync(args);
     }
 }

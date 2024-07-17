@@ -10,7 +10,4 @@ public class ScaffoldStepConfigurator<TStep> where TStep : ScaffoldStep
 {
     public required TStep Step { get; init; }
     public required ScaffolderContext Context { get; init; }
-
-    //public T GetOption<T>(string name) => (T)Options[name];
-    //public T GetOption<T>(Option<T> option) => (T)Options[option.DisplayName];
 }

@@ -62,15 +62,15 @@ internal static class CommandLineExtensions
         return context;
     }
 
-    private static CommandInfo ToCommandInfo(this IScaffolder scaffoldBuilder)
+    private static CommandInfo ToCommandInfo(this IScaffolder scaffolder)
     {
         var commandInfo = new CommandInfo
         {
-            Name = scaffoldBuilder.Name,
-            DisplayName = scaffoldBuilder.Name,
-            DisplayCategory = scaffoldBuilder.Category,
-            Description = null,
-            Parameters = scaffoldBuilder.Options.Select(o => o.ToParameter()).ToArray()
+            Name = scaffolder.Name,
+            DisplayName = scaffolder.DisplayName,
+            DisplayCategory = scaffolder.Category,
+            Description = scaffolder.Description,
+            Parameters = scaffolder.Options.Select(o => o.ToParameter()).ToArray()
         };
 
         return commandInfo;

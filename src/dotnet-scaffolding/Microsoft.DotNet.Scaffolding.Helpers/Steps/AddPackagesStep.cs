@@ -14,7 +14,6 @@ internal class AddPackagesStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync()
     {
-        new MsBuildInitializer(Logger).Initialize();
         foreach (var packageName in PackageNames)
         {
             if (!string.IsNullOrEmpty(packageName))

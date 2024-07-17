@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
@@ -22,7 +21,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 DisplayName = "Param Display Name",
                 Required = true,
                 Description = "Parameter description",
-                Type = BaseTypes.String
+                Type = CliTypes.String
             };
 
             PartialParameter = new()
@@ -30,7 +29,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 Name = string.Empty,
                 DisplayName = "Param Display Name 2",
                 Required = true,
-                Type = BaseTypes.Int
+                Type = CliTypes.Int
             };
 
             PartialParameter2 = new()
@@ -38,9 +37,9 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 Name = "parameter2",
                 DisplayName = "Param Display Name 3",
                 Required = true,
-                Type = BaseTypes.Int,
+                Type = CliTypes.Int,
                 Description = null,
-                PickerType = null
+                PickerType = InteractivePickerType.None
             };
 
             ValidCommandInfo = new()
@@ -104,7 +103,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
             Assert.Contains(validCommandInfoDeserialized.Parameters, x => x.Name.Equals("parameter"));
             Assert.Contains(partialCommandInfoDeserialized.Parameters, x => x.Name.Equals(PartialParameter.Name));
             Assert.Contains(partialCommandInfo2Deserialized.Parameters, x => x.Description is null);
-            Assert.Contains(partialCommandInfo2Deserialized.Parameters, x => x.PickerType is null);
+            Assert.Contains(partialCommandInfo2Deserialized.Parameters, x => x.PickerType is InteractivePickerType.None);
         }
     }
 }

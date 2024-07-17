@@ -127,6 +127,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-scaffolding", "dotne
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.TextTemplating", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj", "{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Scaffolding.Core", "src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj", "{A3AAB1D5-5338-476A-8236-1849A326DE3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_x86|Any CPU = debug_x86|Any CPU
@@ -806,6 +808,24 @@ Global
 		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x64.Build.0 = Release|Any CPU
 		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x86.ActiveCfg = Release|Any CPU
 		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65}.Release|x86.Build.0 = Release|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Debug|x64.Build.0 = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Debug|x86.Build.0 = Debug|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Release|x64.ActiveCfg = Release|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Release|x64.Build.0 = Release|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Release|x86.ActiveCfg = Release|Any CPU
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -856,6 +876,7 @@ Global
 		{E86098F3-69EF-4530-8ADD-D49EB8BBFA92} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 		{73FF6F8B-3D15-41F1-9358-A497DAE4AD8B} = {A4057ACF-27F0-4724-963B-44548B6BC4E9}
 		{E83BE1A0-E6BD-429A-8AC3-AC37FC112C65} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
+		{A3AAB1D5-5338-476A-8236-1849A326DE3C} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

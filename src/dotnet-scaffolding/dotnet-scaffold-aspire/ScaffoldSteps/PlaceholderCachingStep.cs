@@ -9,8 +9,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 internal class PlaceholderCachingStep : PlaceholderStepBase<CachingCommand>
 {
-    public PlaceholderCachingStep(IFileSystem fileSystem, ILogger logger, IEnvironmentService environmentService)
-        : base(new CachingCommand(fileSystem, logger, environmentService))
+    public PlaceholderCachingStep(IFileSystem fileSystem, ILogger logger)
+        : base(new CachingCommand(fileSystem, logger))
     {
         
     }

@@ -9,8 +9,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 internal class PlaceholderStorageStep : PlaceholderStepBase<StorageCommand>
 {
-    public PlaceholderStorageStep(IFileSystem fileSystem, ILogger logger, IEnvironmentService environmentService)
-        : base(new StorageCommand(fileSystem, logger, environmentService))
+    public PlaceholderStorageStep(IFileSystem fileSystem, ILogger logger)
+        : base(new StorageCommand(fileSystem, logger))
     {
 
     }

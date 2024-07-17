@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 internal class PlaceholderDatabaseStep : PlaceholderStepBase<DatabaseCommand>
 {
-    public PlaceholderDatabaseStep(IFileSystem fileSystem, ILogger logger, IEnvironmentService environmentService)
-        :base(new DatabaseCommand(fileSystem, logger, environmentService))
+    public PlaceholderDatabaseStep(IFileSystem fileSystem, ILogger logger)
+        :base(new DatabaseCommand(fileSystem, logger))
     {
         
     }

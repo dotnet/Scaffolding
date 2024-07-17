@@ -79,11 +79,15 @@ internal static class CommandLineExtensions
     private static void AddGetCommandsCommand(this RootCommand rootCommand, List<CommandInfo> commandInfo)
     {
         var getCommandsCommand = new Command("get-commands");
+
         getCommandsCommand.SetHandler(() =>
         {
             var json = System.Text.Json.JsonSerializer.Serialize(commandInfo);
+
+            // This probably shouldn't be a direct Console.WriteLine call in the long run.
             Console.WriteLine(json);
         });
+
         rootCommand.AddCommand(getCommandsCommand);
     }
 }

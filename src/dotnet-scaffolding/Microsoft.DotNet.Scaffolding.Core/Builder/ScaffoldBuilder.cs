@@ -12,7 +12,7 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
 
     private readonly List<ScaffolderOption> _options = [];
     private readonly List<ScaffoldStepPreparer> _stepPreparers = [];
-    private readonly string _name = name.ToLowerInvariant();
+    private readonly string _name = FixName(name);
     private string? _displayName;
     private string? _category;
     private string? _description;
@@ -74,4 +74,7 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
 
         return new Scaffolder(Name, DisplayName, Category, Description, _options, steps, _stepPreparers);
     }
+
+    private static string FixName(string name)
+        => name.Replace(" ", "-").ToLowerInvariant();
 }

@@ -7,5 +7,8 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 public static class Host
 {
+    /// <summary>
+    /// The starting point for creating a scaffolder. Returns a builder for a scaffold runner that allows configuration of any number of scaffolders, their options and steps.
+    /// </summary>
     public static IScaffoldRunnerBuilder CreateScaffoldBuilder() => new ScaffoldRunnerBuilder();
 }

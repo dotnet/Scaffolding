@@ -7,4 +7,6 @@ internal class EfWithModelCommandSettings : BaseCommandSettings
     public string? DatabaseProvider { get; set; }
     public string? DataContext { get; set; }
     public required string Model { get; set; }
+
+    public bool Prerelease { get; init; }
 }

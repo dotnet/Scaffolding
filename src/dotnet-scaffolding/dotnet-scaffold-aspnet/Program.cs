@@ -132,6 +132,19 @@ public static class Program
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
             });
 
+        builder.AddScaffolder("area")
+            .WithDisplayName("Area")
+            .WithCategory("MVC")
+            .WithDescription("Creates a MVC Area folder structure.")
+            .WithOptions([projectOption, areaNameOption])
+            .WithStep<AreaScaffolderStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.Name = context.GetOptionResult(areaNameOption);
+            });
+
         var runner = builder.Build();
         runner.RunAsync(args).Wait();
         //    config.AddCommand<AreaCommand>("area");
@@ -140,6 +153,7 @@ public static class Program
 
     static void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<AreaScaffolderStep>();
         services.AddSingleton<DotnetNewScaffolderStep>();
         services.AddSingleton<EmptyControllerScaffolderStep>();
         services.AddSingleton<MinimalApiScaffolderStep>();

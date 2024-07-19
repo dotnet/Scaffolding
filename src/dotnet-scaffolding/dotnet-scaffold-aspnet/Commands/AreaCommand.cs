@@ -1,14 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Spectre.Console.Cli;
 using System.IO;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
-internal class AreaCommand : Command<AreaCommand.AreaSettings>
+internal class AreaCommand : ICommandWithSettings<AreaCommandSettings>
 {
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
@@ -20,20 +20,20 @@ internal class AreaCommand : Command<AreaCommand.AreaSettings>
         _logger = logger;
     }
 
-    public override int Execute([NotNull] CommandContext context, [NotNull] AreaSettings settings)
+    public Task<int> ExecuteAsync(AreaCommandSettings settings)
     {
         if (!ValidateAreaCommandSettings(settings))
         {
-            return -1;
+            return Task.FromResult(-1);
         }
 
         _logger.LogMessage("Updating project...");
         EnsureFolderLayout(settings);
         _logger.LogMessage("Finished");
-        return 0;
+        return Task.FromResult(0);
     }
 
-    private bool ValidateAreaCommandSettings(AreaSettings commandSettings)
+    private bool ValidateAreaCommandSettings(AreaCommandSettings commandSettings)
     {
         if (string.IsNullOrEmpty(commandSettings.Name))
         {
@@ -44,7 +44,7 @@ internal class AreaCommand : Command<AreaCommand.AreaSettings>
         return true;
     }
 
-    private void EnsureFolderLayout(AreaSettings commandSettings)
+    private void EnsureFolderLayout(AreaCommandSettings commandSettings)
     {
         var basePath = _environmentService.CurrentDirectory;
         var projectDirectoryPath = Path.GetDirectoryName(commandSettings.Project);
@@ -75,6 +75,7 @@ internal class AreaCommand : Command<AreaCommand.AreaSettings>
         }
     }
 
+
     private static readonly string[] AreaFolders =
     [
         "Controllers",
@@ -82,13 +83,4 @@ internal class AreaCommand : Command<AreaCommand.AreaSettings>
         "Data",
         "Views"
     ];
-
-    public class AreaSettings : CommandSettings
-    {
-        [CommandOption("--project <PROJECT>")]
-        public string? Project { get; set; }
-
-        [CommandOption("--name <NAME>")]
-        public required string Name { get; set; }
-    }
 }

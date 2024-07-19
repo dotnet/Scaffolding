@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 
-internal class DotnetNewCommandSettings : BaseCommandSettings
+internal class AreaCommandSettings : BaseCommandSettings
 {
-    public required string CommandName { get; set; }
     public required string Name { get; set; }
 }

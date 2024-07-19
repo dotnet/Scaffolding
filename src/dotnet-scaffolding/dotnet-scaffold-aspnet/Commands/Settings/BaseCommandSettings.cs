@@ -5,6 +5,4 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 internal class BaseCommandSettings : ICommandSettings
 {
     public required string Project { get; init; }
-
-    public bool Prerelease { get; init; }
 }

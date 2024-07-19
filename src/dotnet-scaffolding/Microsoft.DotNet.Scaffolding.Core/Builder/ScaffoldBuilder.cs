@@ -48,6 +48,12 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
         return this;
     }
 
+    public IScaffoldBuilder WithOptions(IEnumerable<ScaffolderOption> options)
+    {
+        _options.AddRange(options);
+        return this;
+    }
+
     public IScaffoldBuilder WithStep<TStep>(Action<ScaffoldStepConfigurator<TStep>>? preExecute = null, Action<ScaffoldStepConfigurator<TStep>>? postExecute = null) where TStep : ScaffoldStep
     {
         var preparer = new ScaffoldStepPreparer<TStep>()

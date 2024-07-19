@@ -2,52 +2,36 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 
-internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
+internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
 {
-    private readonly IAppSettings _appSettings;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-    private readonly IEnvironmentService _environmentService;
-    private readonly IHostService _hostService;
-    private readonly ICodeService _codeService;
-    private List<string> _excludeList;
 
     public MinimalApiCommand(
-        IAppSettings appSettings,
-        IEnvironmentService environmentService,
         IFileSystem fileSystem,
-        IHostService hostService,
-        ICodeService codeService,
         ILogger logger)
     {
-        _appSettings = appSettings;
-        _environmentService = environmentService;
         _fileSystem = fileSystem;
-        _hostService = hostService;
         _logger = logger;
-        _codeService = codeService;
-        _excludeList = [];
     }
 
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] MinimalApiSettings settings)
+    public async Task<int> ExecuteAsync(MinimalApiSettings settings)
     {
-        new MsBuildInitializer(_logger).Initialize();
         if (!ValidateMinimalApiSettings(settings))
         {
             return -1;
@@ -98,7 +82,7 @@ internal class MinimalApiCommand : AsyncCommand<MinimalApiSettings>
     private async Task<bool> AddDbContextAsync(DbContextInfo dbContextInfo, ProjectInfo projectInfo)
     {
         var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
-        if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) && 
+        if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
             AspNetDbContextHelper.DbContextTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties) &&
             dbContextProperties is not null &&
             !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&

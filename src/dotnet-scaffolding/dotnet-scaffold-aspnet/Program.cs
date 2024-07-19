@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,14 +44,7 @@ public static class Program
             .WithDescription("Add an empty razor view to a given project")
             .WithOption(projectOption)
             .WithOption(fileNameOption)
-            .WithStep<DotnetNewScaffolderStep>(config =>
-            {
-                var step = config.Step;
-                var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
-                step.CommandName = "view";
-            });
+            .WithDotnetNewScaffolderStep(projectOption, fileNameOption, "view");
 
         builder.AddScaffolder("razorpage-empty")
             .WithDisplayName("Razor Page - Empty")
@@ -58,14 +52,7 @@ public static class Program
             .WithDescription("Add an empty razor page to a given project")
             .WithOption(projectOption)
             .WithOption(fileNameOption)
-            .WithStep<DotnetNewScaffolderStep>(config =>
-            {
-                var step = config.Step;
-                var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
-                step.CommandName = "page";
-            });
+            .WithDotnetNewScaffolderStep(projectOption, fileNameOption, "page");
 
         builder.AddScaffolder("apicontroller-empty")
             .WithDisplayName("API Controller - Empty")

@@ -48,7 +48,7 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
         return this;
     }
 
-    public IScaffoldBuilder WithOptions(List<ScaffolderOption> options)
+    public IScaffoldBuilder WithOptions(IEnumerable<ScaffolderOption> options)
     {
         _options.AddRange(options);
         return this;

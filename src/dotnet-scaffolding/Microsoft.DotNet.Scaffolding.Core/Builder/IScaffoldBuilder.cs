@@ -35,7 +35,7 @@ public interface IScaffoldBuilder
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
-    IScaffoldBuilder WithOptions(List<ScaffolderOption> options); 
+    IScaffoldBuilder WithOptions(IEnumerable<ScaffolderOption> options); 
 
     /// <summary>
     /// Adds a <see cref="ScaffoldStep"/> to the scaffolder to be run in the order it was added. Additionally allows for pre- and post-execution actions to be performed to configure the step and subsequent steps

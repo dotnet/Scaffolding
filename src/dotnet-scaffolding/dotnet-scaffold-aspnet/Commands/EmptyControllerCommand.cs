@@ -26,7 +26,7 @@ internal class EmptyControllerCommand : ICommandWithSettings<EmptyControllerComm
             return Task.FromResult(-1);
         }
 
-        _logger.LogMessage($"Adding {commandSettings.CommandName}...");
+        _logger.LogMessage($"Adding '{commandSettings.CommandName}'...");
         var addingResult = InvokeDotnetNew(commandSettings);
 
         if (addingResult)

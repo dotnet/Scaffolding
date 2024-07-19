@@ -26,7 +26,7 @@ internal class DotnetNewCommand : ICommandWithSettings<DotnetNewCommandSettings>
             return Task.FromResult(-1);
         }
 
-        _logger.LogMessage("Adding Razor Component...");
+        _logger.LogMessage($"Adding '{commandSettings.CommandName}'...");
         var addingResult = InvokeDotnetNew(commandSettings);
 
         if (addingResult)

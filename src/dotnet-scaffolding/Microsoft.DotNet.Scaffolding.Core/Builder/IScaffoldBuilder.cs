@@ -30,6 +30,14 @@ public interface IScaffoldBuilder
     IScaffoldBuilder WithOption(ScaffolderOption option);
 
     /// <summary>
+    /// Adds mulitple options to be used with this scaffolder. This adds the configured options to both the command line and
+    /// to the dotnet-scaffold interactive UI.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    IScaffoldBuilder WithOptions(List<ScaffolderOption> options); 
+
+    /// <summary>
     /// Adds a <see cref="ScaffoldStep"/> to the scaffolder to be run in the order it was added. Additionally allows for pre- and post-execution actions to be performed to configure the step and subsequent steps
     /// </summary>
     IScaffoldBuilder WithStep<TStep>(Action<ScaffoldStepConfigurator<TStep>>? preExecute = null, Action<ScaffoldStepConfigurator<TStep>>? postExecute = null) where TStep : ScaffoldStep;

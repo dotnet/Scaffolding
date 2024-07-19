@@ -2,49 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Spectre.Console.Cli;
-using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 
-internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
+internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
 {
-    private readonly IAppSettings _appSettings;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-    private readonly IEnvironmentService _environmentService;
-    private readonly IHostService _hostService;
-    private readonly ICodeService _codeService;
-    private List<string> _excludeList;
-
     public BlazorCrudCommand(
-        IAppSettings appSettings,
-        IEnvironmentService environmentService,
         IFileSystem fileSystem,
-        IHostService hostService,
-        ICodeService codeService,
         ILogger logger)
     {
-        _appSettings = appSettings;
-        _environmentService = environmentService;
         _fileSystem = fileSystem;
-        _hostService = hostService;
         _logger = logger;
-        _codeService = codeService;
-        _excludeList = [];
     }
 
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] BlazorCrudSettings settings)
+    public async Task<int> ExecuteAsync(BlazorCrudSettings settings)
     {
         new MsBuildInitializer(_logger).Initialize();
         if (!ValidateBlazorCrudSettings(settings))
@@ -267,12 +250,12 @@ internal class BlazorCrudCommand : AsyncCommand<BlazorCrudSettings>
             _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
             return null;
         }
-        
+
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();
 
-        if (!string.IsNullOrEmpty(dbContextClassName))
+        if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
             dbContextInfo = ClassAnalyzers.GetDbContextInfo(dbContextClassSymbol, projectInfo.AppSettings, dbContextClassName, settings.DatabaseProvider, settings.Model);

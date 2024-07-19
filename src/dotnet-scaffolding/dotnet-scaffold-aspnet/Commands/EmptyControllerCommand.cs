@@ -1,62 +1,62 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Spectre.Console.Cli;
-
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
-internal class BlazorEmptyCommand : Command<BlazorEmptyCommand.BlazorEmptySettings>
+internal class EmptyControllerCommand : ICommandWithSettings<EmptyControllerCommandSettings>
 {
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
-    public BlazorEmptyCommand(IFileSystem fileSystem, ILogger logger)
+    public EmptyControllerCommand(IFileSystem fileSystem, ILogger logger)
     {
         _fileSystem = fileSystem;
         _logger = logger;
     }
 
-    public override int Execute([NotNull] CommandContext context, [NotNull] BlazorEmptySettings settings)
+    public Task<int> ExecuteAsync(EmptyControllerCommandSettings commandSettings)
     {
-        if (!ValidateBlazorEmptyCommandSettings(settings))
+        if (!ValidateEmptyControllerCommandSettings(commandSettings))
         {
-            return -1;
+            return Task.FromResult(-1);
         }
 
-        _logger.LogMessage("Adding Razor Component...");
-        var addingComponentResult = AddEmptyRazorComponent(settings);
+        _logger.LogMessage($"Adding {commandSettings.CommandName}...");
+        var addingResult = InvokeDotnetNew(commandSettings);
 
-        if (addingComponentResult)
+        if (addingResult)
         {
             _logger.LogMessage("Finished");
-            return 0;
+            return Task.FromResult(0);
         }
         else
         {
             _logger.LogMessage("An error occurred.");
-            return -1;
+            return Task.FromResult(-1);
         }
     }
 
-    private bool AddEmptyRazorComponent(BlazorEmptySettings settings)
+    private bool InvokeDotnetNew(EmptyControllerCommandSettings settings)
     {
         var projectBasePath = Path.GetDirectoryName(settings.Project);
+        var actionsParameter = settings.Actions ? "--actions" : string.Empty;
         if (Directory.Exists(projectBasePath))
         {
-            var razorComponentName = settings.Name;
-            //arguments for 'dotnet new razorcomponent'
+            //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
             {
-                "razorcomponent",
+                settings.CommandName,
                 "--name",
-                razorComponentName,
+                settings.Name,
+                "--actions",
                 "--output",
-                projectBasePath
+                projectBasePath,
+                actionsParameter
             };
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);
@@ -67,7 +67,7 @@ internal class BlazorEmptyCommand : Command<BlazorEmptyCommand.BlazorEmptySettin
         return false;
     }
 
-    private bool ValidateBlazorEmptyCommandSettings(BlazorEmptySettings commandSettings)
+    private bool ValidateEmptyControllerCommandSettings(EmptyControllerCommandSettings commandSettings)
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
@@ -87,14 +87,5 @@ internal class BlazorEmptyCommand : Command<BlazorEmptyCommand.BlazorEmptySettin
         }
 
         return true;
-    }
-
-    public class BlazorEmptySettings : CommandSettings
-    {
-        [CommandOption("--project <PROJECT>")]
-        public string? Project { get; set; }
-
-        [CommandOption("--name <NAME>")]
-        public required string Name { get; set; }
     }
 }

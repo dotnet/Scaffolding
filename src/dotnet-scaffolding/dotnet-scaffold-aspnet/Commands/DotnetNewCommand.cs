@@ -1,58 +1,57 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Spectre.Console.Cli;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MVC;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
-internal class RazorViewEmptyCommand : Command<RazorViewEmptyCommand.RazorViewEmptySettings>
+internal class DotnetNewCommand : ICommandWithSettings<DotnetNewCommandSettings>
 {
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
-    public RazorViewEmptyCommand(IFileSystem fileSystem, ILogger logger)
+    public DotnetNewCommand(IFileSystem fileSystem, ILogger logger)
     {
         _fileSystem = fileSystem;
         _logger = logger;
     }
 
-    public override int Execute([NotNull] CommandContext context, [NotNull] RazorViewEmptySettings settings)
+    public Task<int> ExecuteAsync(DotnetNewCommandSettings commandSettings)
     {
-        if (!ValidateRazorViewEmptyCommandSettings(settings))
+        if (!ValidateDotnetNewCommandSettings(commandSettings))
         {
-            return -1;
+            return Task.FromResult(-1);
         }
 
-        _logger.LogMessage("Adding Razor View...");
-        var addingComponentResult = AddEmptyRazorView(settings);
+        _logger.LogMessage("Adding Razor Component...");
+        var addingResult = InvokeDotnetNew(commandSettings);
 
-        if (addingComponentResult)
+        if (addingResult)
         {
             _logger.LogMessage("Finished");
-            return 0;
+            return Task.FromResult(0);
         }
         else
         {
             _logger.LogMessage("An error occurred.");
-            return -1;
+            return Task.FromResult(-1);
         }
     }
 
-    private bool AddEmptyRazorView(RazorViewEmptySettings settings)
+    private bool InvokeDotnetNew(DotnetNewCommandSettings settings)
     {
         var projectBasePath = Path.GetDirectoryName(settings.Project);
         if (Directory.Exists(projectBasePath))
         {
-            var razorViewName = settings.Name;
-            //arguments for 'dotnet new view'
+            //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
             {
-                "view",
+                settings.CommandName,
                 "--name",
-                razorViewName,
+                settings.Name,
                 "--output",
                 projectBasePath
             };
@@ -65,7 +64,7 @@ internal class RazorViewEmptyCommand : Command<RazorViewEmptyCommand.RazorViewEm
         return false;
     }
 
-    private bool ValidateRazorViewEmptyCommandSettings(RazorViewEmptySettings commandSettings)
+    private bool ValidateDotnetNewCommandSettings(DotnetNewCommandSettings commandSettings)
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
@@ -78,16 +77,12 @@ internal class RazorViewEmptyCommand : Command<RazorViewEmptyCommand.RazorViewEm
             _logger.LogMessage("Missing/Invalid --name option.", LogMessageType.Error);
             return false;
         }
+        else
+        {
+            //Component names cannot start with a lowercase character, using CurrentCulture to capitalize the first letter
+            commandSettings.Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(commandSettings.Name);
+        }
 
         return true;
-    }
-
-    public class RazorViewEmptySettings : CommandSettings
-    {
-        [CommandOption("--project <PROJECT>")]
-        public string? Project { get; init; }
-
-        [CommandOption("--name <NAME>")]
-        public required string Name { get; init; }
     }
 }

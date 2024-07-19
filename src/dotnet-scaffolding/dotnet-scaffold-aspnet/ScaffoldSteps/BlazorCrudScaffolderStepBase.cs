@@ -21,10 +21,10 @@ internal abstract class BlazorCrudScaffolderStepBase<T>(T command) : ScaffoldSte
     public string? Page { get; set; }
     public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        if (Project is null)
+        if (Project is null || Model is null || Page is null)
         {
             // TODO: Change this process to add validation once when pulling out the real steps
-            throw new InvalidOperationException("Name/Project/CommandName must be set before executing the step.");
+            throw new InvalidOperationException("Name/Model/Page must be set before executing the step.");
         }
 
         await _command.ExecuteAsync(new BlazorCrudSettings()

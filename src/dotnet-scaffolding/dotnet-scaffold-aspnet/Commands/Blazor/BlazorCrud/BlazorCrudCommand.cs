@@ -29,7 +29,6 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
 
     public async Task<int> ExecuteAsync(BlazorCrudSettings settings)
     {
-        new MsBuildInitializer(_logger).Initialize();
         if (!ValidateBlazorCrudSettings(settings))
         {
             return -1;

@@ -32,7 +32,6 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
 
     public async Task<int> ExecuteAsync(MinimalApiSettings settings)
     {
-        new MsBuildInitializer(_logger).Initialize();
         if (!ValidateMinimalApiSettings(settings))
         {
             return -1;

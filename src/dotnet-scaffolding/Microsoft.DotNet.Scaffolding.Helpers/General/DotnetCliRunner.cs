@@ -96,8 +96,8 @@ internal class DotnetCliRunner
 
         // Clear MSBuild related environment variables so it doesn't interfere with dotnet calls
         // automatic lookups via global.json, etc.
-        _psi.Environment["MSBuildSDKsPath"] = null;
-        _psi.Environment["MSBuildExtensionsPath"] = null;
-        _psi.Environment["MSBUILD_EXE_PATH"] = null;
+        _psi.Environment.Remove("MSBuildSDKsPath");
+        _psi.Environment.Remove("MSBuildExtensionsPath");
+        _psi.Environment.Remove("MSBUILD_EXE_PATH");
     }
 }

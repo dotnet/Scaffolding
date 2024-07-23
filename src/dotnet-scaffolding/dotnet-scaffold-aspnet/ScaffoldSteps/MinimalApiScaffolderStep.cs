@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 internal class MinimalApiScaffolderStep : MinimalApiScaffolderStepBase<MinimalApiCommand>
 {
-    public MinimalApiScaffolderStep(IFileSystem fileSystem, ILogger logger)
+    public MinimalApiScaffolderStep(IFileSystem fileSystem, ILogger<MinimalApiScaffolderStep> logger)
         : base(new MinimalApiCommand(fileSystem, logger))
     {
 

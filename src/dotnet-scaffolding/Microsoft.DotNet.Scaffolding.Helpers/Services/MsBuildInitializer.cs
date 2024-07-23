@@ -1,7 +1,9 @@
-using System.Reflection;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using Microsoft.Build.Locator;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 
@@ -30,7 +32,7 @@ internal class MsBuildInitializer
             string sdkBasePath = GetDefaultSdkPath();
             if (!Directory.Exists(sdkBasePath))
             {
-                _logger.LogMessage($"Could not find a .NET SDK at the default locations.");
+                _logger.LogInformation($"Could not find a .NET SDK at the default locations.");
                 MSBuildLocator.RegisterDefaults();
                 return;
             }
@@ -42,7 +44,7 @@ internal class MsBuildInitializer
 
             if (string.IsNullOrEmpty(sdkPath))
             {
-                _logger.LogMessage($"Could not find a .NET SDK at the default locations.");
+                _logger.LogInformation($"Could not find a .NET SDK at the default locations.");
                 MSBuildLocator.RegisterDefaults();
                 return;
             }
@@ -52,11 +54,11 @@ internal class MsBuildInitializer
             {
                 // Register the latest SDK
                 MSBuildLocator.RegisterMSBuildPath(sdkPath);
-                _logger.LogMessage($"Registered .NET SDK at {sdkPath}");
+                _logger.LogInformation($"Registered .NET SDK at {sdkPath}");
             }
             else
             {
-                _logger.LogMessage($"MSBuild.dll not found in the SDK path '{sdkPath}'.");
+                _logger.LogInformation($"MSBuild.dll not found in the SDK path '{sdkPath}'.");
                 MSBuildLocator.RegisterDefaults();
             }
         }

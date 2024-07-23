@@ -4,6 +4,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Templates.DbContext;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
@@ -18,7 +19,7 @@ internal class AddNewDbContextStep : ScaffoldStep
     public async override Task<bool> ExecuteAsync()
     {
         var addedDbContext = false;
-        Logger.LogMessage($"Adding new DbContext '{DbContextProperties.DbContextName}'...");
+        Logger.LogInformation($"Adding new DbContext '{DbContextProperties.DbContextName}'...");
         var addTextTemplateStep = GetAddTextTemplatingStep();
         if (addTextTemplateStep is null)
         {

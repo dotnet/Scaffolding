@@ -14,6 +14,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi;
 
@@ -38,43 +39,43 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         }
 
         //initialize MinimalApiModel
-        _logger.LogMessage("Initializing scaffolding model...");
+        _logger.LogInformation("Initializing scaffolding model...");
         var minimalApiModel = await GetMinimalApiModelAsync(settings);
         if (minimalApiModel is null)
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return -1;
         }
 
         //Install packages and add a DbContext (if needed)
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
-            _logger.LogMessage("Installing packages...");
+            _logger.LogInformation("Installing packages...");
             await InstallPackagesAsync(settings);
             await AddDbContextAsync(minimalApiModel.DbContextInfo, minimalApiModel.ProjectInfo);
         }
 
-        _logger.LogMessage("Adding API controller...");
+        _logger.LogInformation("Adding API controller...");
         var executeTemplateResult = await ExecuteTemplatesAsync(minimalApiModel);
         //if we were not able to execute the templates successfully,
         //exit and don't update the project
         if (!executeTemplateResult)
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return -1;
         }
 
         //Update the project's Program.cs file
-        _logger.LogMessage("Updating project...");
+        _logger.LogInformation("Updating project...");
         var projectUpdateResult = await UpdateProjectAsync(minimalApiModel);
         if (projectUpdateResult)
         {
-            _logger.LogMessage("Finished");
+            _logger.LogInformation("Finished");
             return 0;
         }
         else
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return -1;
         }
     }
@@ -110,13 +111,13 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
-            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --project option.");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.Model))
         {
-            _logger.LogMessage("Missing/Invalid --model option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --model option.");
             return false;
         }
 
@@ -250,7 +251,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}' provided", LogMessageType.Error);
+            _logger.LogError($"Invalid --model '{settings.Model}' provided");
             return null;
         }
         else
@@ -261,7 +262,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
         if (!validateModelInfoResult)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
+            _logger.LogError($"Invalid --model '{settings.Model}'");
             return null;
         }
 

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -64,12 +65,7 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     private void AddCoreServices()
     {
         Services.AddLogging();
-        Logging.AddSimpleConsole(options =>
-        {
-            options.IncludeScopes = true;
-            options.SingleLine = true;
-        });
-
+        Logging.AddCleanConsoleFormatter();
         Logging.AddDebug();
     }
 

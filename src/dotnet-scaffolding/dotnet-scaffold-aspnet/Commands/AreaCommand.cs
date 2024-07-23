@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
@@ -27,9 +28,9 @@ internal class AreaCommand : ICommandWithSettings<AreaCommandSettings>
             return Task.FromResult(-1);
         }
 
-        _logger.LogMessage("Updating project...");
+        _logger.LogInformation("Updating project...");
         EnsureFolderLayout(settings);
-        _logger.LogMessage("Finished");
+        _logger.LogInformation("Finished");
         return Task.FromResult(0);
     }
 
@@ -37,7 +38,7 @@ internal class AreaCommand : ICommandWithSettings<AreaCommandSettings>
     {
         if (string.IsNullOrEmpty(commandSettings.Name))
         {
-            _logger.LogMessage("Missing/Invalid --name option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --name option.");
             return false;
         }
 

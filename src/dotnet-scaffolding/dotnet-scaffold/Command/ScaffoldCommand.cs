@@ -1,10 +1,8 @@
-
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.UpgradeAssistant.Cli.Commands;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
@@ -24,7 +22,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
         IHostService hostService,
-        ILogger logger)
+        ILogger<ScaffoldCommand> logger)
         : base(flowProvider)
     {
         _appSettings = appSettings;

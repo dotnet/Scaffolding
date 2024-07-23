@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
 /// <summary>
@@ -42,7 +43,7 @@ internal class AddTextTemplatingStep : ScaffoldStep
         }
         catch (Exception)
         {
-            Logger.LogMessage($"Unable to create an instance of template type '{TemplateType.Name}'");
+            Logger.LogInformation($"Unable to create an instance of template type '{TemplateType.Name}'");
             return Task.FromResult(false);
         }
 

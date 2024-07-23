@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Spectre.Console.Flow;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 /// <summary>

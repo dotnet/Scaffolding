@@ -3,12 +3,13 @@
 
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 internal class PlaceholderCachingStep : PlaceholderStepBase<CachingCommand>
 {
-    public PlaceholderCachingStep(IFileSystem fileSystem, ILogger logger)
+    public PlaceholderCachingStep(IFileSystem fileSystem, ILogger<PlaceholderCachingStep> logger)
         : base(new CachingCommand(fileSystem, logger))
     {
         

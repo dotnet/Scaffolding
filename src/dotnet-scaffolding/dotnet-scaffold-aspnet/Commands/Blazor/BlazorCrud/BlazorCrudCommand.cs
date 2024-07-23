@@ -12,6 +12,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 
@@ -35,43 +36,43 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         }
 
         //initialize BlazorCrudModel
-        _logger.LogMessage("Initializing scaffolding model...");
+        _logger.LogInformation("Initializing scaffolding model...");
         var blazorCrudModel = await GetBlazorCrudModelAsync(settings);
         if (blazorCrudModel is null)
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return -1;
         }
 
         //Install packages and add a DbContext (if needed)
         if (blazorCrudModel.DbContextInfo.EfScenario)
         {
-            _logger.LogMessage("Installing packages...");
+            _logger.LogInformation("Installing packages...");
             await InstallPackagesAsync(settings);
             await AddDbContextAsync(blazorCrudModel.DbContextInfo, blazorCrudModel.ProjectInfo);
         }
 
-        _logger.LogMessage("Adding razor components...");
+        _logger.LogInformation("Adding razor components...");
         var executeTemplateResult = await ExecuteTemplatesAsync(blazorCrudModel);
         //if we were not able to execute the templates successfully,
         //exit and don't update the project
         if (!executeTemplateResult)
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return -1;
         }
 
         //Update the project's Program.cs file
-        _logger.LogMessage("Updating project...");
+        _logger.LogInformation("Updating project...");
         var projectUpdateResult = await UpdateProjectAsync(blazorCrudModel);
         if (projectUpdateResult)
         {
-            _logger.LogMessage("Finished");
+            _logger.LogInformation("Finished");
             return 0;
         }
         else
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return -1;
         }
     }
@@ -80,19 +81,19 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
-            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --project option.");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.Model))
         {
-            _logger.LogMessage("Missing/Invalid --model option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --model option.");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.Page))
         {
-            _logger.LogMessage("Missing/Invalid --page option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --page option.");
             return false;
         }
         else if (!string.IsNullOrEmpty(commandSettings.Page) && !BlazorCrudHelper.CRUDPages.Contains(commandSettings.Page, StringComparer.OrdinalIgnoreCase))
@@ -103,7 +104,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
 
         if (string.IsNullOrEmpty(commandSettings.DataContext))
         {
-            _logger.LogMessage("Missing/Invalid --dataContext option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --dataContext option.");
             return false;
         }
         else if (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider))
@@ -235,7 +236,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
+            _logger.LogError($"Invalid --model '{settings.Model}'");
             return null;
         }
         else
@@ -246,7 +247,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
         if (!validateModelInfoResult)
         {
-            _logger.LogMessage($"Invalid --model '{settings.Model}'", LogMessageType.Error);
+            _logger.LogError($"Invalid --model '{settings.Model}'");
             return null;
         }
 

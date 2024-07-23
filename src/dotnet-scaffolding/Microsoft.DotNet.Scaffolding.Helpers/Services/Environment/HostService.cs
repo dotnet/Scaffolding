@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 
@@ -9,7 +10,7 @@ internal class HostService : IHostService
     private readonly IEnumerable<IEnvironmentVariableProvider> _providers;
     private Dictionary<string, string>? _variables;
 
-    public HostService(ILogger logger, IEnumerable<IEnvironmentVariableProvider> providers)
+    public HostService(ILogger<HostService> logger, IEnumerable<IEnvironmentVariableProvider> providers)
     {
         _logger = logger;
         _providers = providers;
@@ -42,7 +43,7 @@ internal class HostService : IHostService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogMessage(ex.Message, LogMessageType.Error);
+                    _logger.LogError(ex.Message);
                 }
             }
 

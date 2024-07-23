@@ -3,12 +3,13 @@
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 internal class AreaScaffolderStep : AreaScaffolderStepBase<AreaCommand>
 {
-    public AreaScaffolderStep(IFileSystem fileSystem, ILogger logger, IEnvironmentService environmentService)
+    public AreaScaffolderStep(IFileSystem fileSystem, ILogger<AreaScaffolderStep> logger, IEnvironmentService environmentService)
         : base(new AreaCommand(fileSystem, logger, environmentService))
     {
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 
 internal interface ICommandWithSettings
 {
-    Task<int> ExecuteAsync(CommandSettings settings);
+    Task<int> ExecuteAsync(CommandSettings settings, ScaffolderContext context);
 }
 
 internal class CachingCommand : ICommandWithSettings
@@ -28,7 +29,7 @@ internal class CachingCommand : ICommandWithSettings
         _logger = logger;
     }
 
-    public async Task<int> ExecuteAsync(CommandSettings settings)
+    public async Task<int> ExecuteAsync(CommandSettings settings, ScaffolderContext context)
     {
         new MsBuildInitializer(_logger).Initialize();
         if (!ValidateCachingCommandSettings(settings))

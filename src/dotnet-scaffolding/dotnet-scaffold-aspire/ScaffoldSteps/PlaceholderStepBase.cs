@@ -33,6 +33,6 @@ internal abstract class PlaceholderStepBase<T>(T command) : ScaffoldStep where T
             AppHostProject = AppHostProject,
             Project = Project,
             Prerelease = Prerelease
-        });
+        }, context);
     }
 }

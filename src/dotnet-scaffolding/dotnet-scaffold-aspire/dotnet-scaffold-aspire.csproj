@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

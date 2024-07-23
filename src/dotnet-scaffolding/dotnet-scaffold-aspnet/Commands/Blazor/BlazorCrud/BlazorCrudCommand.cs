@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
-using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -28,7 +28,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         _logger = logger;
     }
 
-    public async Task<int> ExecuteAsync(BlazorCrudSettings settings)
+    public async Task<int> ExecuteAsync(BlazorCrudSettings settings, ScaffolderContext context)
     {
         if (!ValidateBlazorCrudSettings(settings))
         {
@@ -49,17 +49,11 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         {
             _logger.LogInformation("Installing packages...");
             await InstallPackagesAsync(settings);
-            await AddDbContextAsync(blazorCrudModel.DbContextInfo, blazorCrudModel.ProjectInfo);
-        }
-
-        _logger.LogInformation("Adding razor components...");
-        var executeTemplateResult = await ExecuteTemplatesAsync(blazorCrudModel);
-        //if we were not able to execute the templates successfully,
-        //exit and don't update the project
-        if (!executeTemplateResult)
-        {
-            _logger.LogError("An error occurred.");
-            return -1;
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(blazorCrudModel.DbContextInfo, blazorCrudModel.ProjectInfo);
+            if (dbContextProperties is not null)
+            {
+                context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
+            }
         }
 
         //Update the project's Program.cs file
@@ -110,77 +104,6 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         else if (string.IsNullOrEmpty(commandSettings.DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(commandSettings.DatabaseProvider))
         {
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
-        }
-
-        return true;
-    }
-
-    private async Task<bool> AddDbContextAsync(DbContextInfo dbContextInfo, ProjectInfo projectInfo)
-    {
-        var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
-        if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
-            AspNetDbContextHelper.DbContextTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties) &&
-            dbContextProperties is not null &&
-            !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
-            !string.IsNullOrEmpty(dbContextInfo.DbContextClassPath) &&
-            !string.IsNullOrEmpty(projectBasePath))
-        {
-            dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
-            dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
-            dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
-            var addDbContextStep = new AddNewDbContextStep
-            {
-                DbContextProperties = dbContextProperties,
-                ProjectBaseDirectory = projectBasePath,
-                FileSystem = _fileSystem,
-                Logger = _logger,
-            };
-
-            return await addDbContextStep.ExecuteAsync();
-        }
-
-        return true;
-    }
-
-    private async Task<bool> ExecuteTemplatesAsync(BlazorCrudModel blazorCrudModel)
-    {
-        var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
-        var neededT4FileNames = BlazorCrudHelper.GetT4Templates(blazorCrudModel.PageType);
-        // Create a HashSet for quick lookup of needed file names
-        var neededFileNamesSet = new HashSet<string>(neededT4FileNames, StringComparer.OrdinalIgnoreCase);
-
-        // Filter the paths based on the presence of the file names in the hash set
-        var matchingPaths = allT4TemplatePaths
-            .Where(path => neededFileNamesSet.Contains(Path.GetFileName(path)))
-            .ToList();
-
-        string baseOutputPath = BlazorCrudHelper.GetBaseOutputPath(
-                blazorCrudModel.ModelInfo.ModelTypeName,
-                blazorCrudModel.ProjectInfo.AppSettings?.Workspace().InputPath);
-        List<ScaffoldStep> textTemplatingSteps = [];
-        foreach (var templatePath in matchingPaths)
-        {
-            var templateName = Path.GetFileNameWithoutExtension(templatePath);
-            string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Constants.BlazorExtension}");
-            var templateType = BlazorCrudHelper.GetTemplateType(templatePath);
-            if (!string.IsNullOrEmpty(templatePath) && templateType != null)
-            {
-                textTemplatingSteps.Add(new AddTextTemplatingStep
-                {
-                    FileSystem = _fileSystem,
-                    Logger = _logger,
-                    TemplatePath = templatePath,
-                    TemplateType = templateType,
-                    TemplateModel = blazorCrudModel,
-                    TemplateModelName = "Model",
-                    OutputPath = outputFileName,
-                });
-            }
-        }
-
-        foreach (var step in textTemplatingSteps)
-        {
-            await step.ExecuteAsync();
         }
 
         return true;

@@ -9,4 +9,8 @@
     <PackageReference Include="Mono.TextTemplating" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
+  </ItemGroup>
 </Project>

@@ -28,6 +28,6 @@ internal abstract class AreaScaffolderStepBase<T>(T command) : ScaffoldStep wher
         {
             Project = Project,
             Name = Name
-        });
+        }, context);
     }
 }

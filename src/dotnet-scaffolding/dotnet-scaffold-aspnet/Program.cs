@@ -4,6 +4,7 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -112,7 +113,9 @@ public static class Program
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Page = context.GetOptionResult(pageTypeOption);
-            });
+            })
+            .WithAddDbContextStep(addConnectionString: true)
+            .WithBlazorCrudTextTemplatingStep("CRUD");
 
         builder.AddScaffolder("minimalapi")
             .WithDisplayName("Minimal API")
@@ -126,11 +129,13 @@ public static class Program
                 step.Project = context.GetOptionResult(projectOption);
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.Endpoints = context.GetOptionResult(endpointsClassOption);
-                step.OpenApi =  context.GetOptionResult(openApiOption);
+                step.OpenApi = context.GetOptionResult(openApiOption);
                 step.DataContext = context.GetOptionResult(dataContextClassOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
-            });
+            })
+            .WithAddDbContextStep(addConnectionString: true)
+            .WithMinimalApiTextTemplatingStep();
 
         builder.AddScaffolder("area")
             .WithDisplayName("Area")
@@ -147,12 +152,11 @@ public static class Program
 
         var runner = builder.Build();
         runner.RunAsync(args).Wait();
-        //    config.AddCommand<AreaCommand>("area");
-
     }
 
     static void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<TextTemplatingStep>();
         services.AddSingleton<AreaScaffolderStep>();
         services.AddSingleton<DotnetNewScaffolderStep>();
         services.AddSingleton<EmptyControllerScaffolderStep>();

@@ -5,6 +5,6 @@ internal class DbContextProperties
 {
     public string DbContextName { get; set; } = "NewDbContext";
     public string? DbContextPath { get; set; }
-    public string? DbSetStatement { get; set; }
+    public string? DbSetStatement { get; set; } 
     public string? NewDbConnectionString { get; set; }
 }

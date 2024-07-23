@@ -30,6 +30,6 @@ internal abstract class DotnetNewScaffolderStepBase<T>(T command) : ScaffoldStep
             Project = Project,
             Name = Name,
             CommandName = CommandName
-        });
+        }, context);
     }
 }

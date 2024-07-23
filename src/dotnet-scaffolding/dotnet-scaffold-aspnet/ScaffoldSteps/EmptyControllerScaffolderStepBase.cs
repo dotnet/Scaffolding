@@ -32,6 +32,6 @@ internal abstract class EmptyControllerScaffolderStepBase<T>(T command) : Scaffo
             Project = Project,
             Name = Name,
             Actions = Actions
-        });
+        }, context);
     }
 }

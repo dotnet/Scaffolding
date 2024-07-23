@@ -528,7 +528,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(modelType));
             }
 
-            DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, dbContextType);
+            DbContext dbContextInstance = TryCreateContextUsingAppCode(dbContextType, startupType);
             Console.WriteLine($"\nUsing database provider '{dbContextInstance.Database.ProviderName}'!\n");
             if (dbContextInstance == null)
             {

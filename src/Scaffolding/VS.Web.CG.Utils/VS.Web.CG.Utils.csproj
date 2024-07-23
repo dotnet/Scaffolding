@@ -9,6 +9,7 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <Nullable>disable</Nullable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,4 +25,7 @@
     <PackageReference Include="Microsoft.Build" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Pack="true" Include="$(RepoRoot)src\Scaffolding\README.md"  PackagePath="\"/>
+  </ItemGroup>
 </Project>

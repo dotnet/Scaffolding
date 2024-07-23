@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
+using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Setup.Configuration;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Environment;
@@ -65,7 +66,7 @@ internal class WindowsEnvironmentVariableProvider : IEnvironmentVariableProvider
 
         if (latest.InstallPath is null)
         {
-            _logger.LogMessage("Did not find a Visual Studio instance", LogMessageType.Information);
+            _logger.LogInformation("Did not find a Visual Studio instance");
             return default;
         }
 

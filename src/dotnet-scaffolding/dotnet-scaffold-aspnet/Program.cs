@@ -161,7 +161,6 @@ public static class Program
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
         services.AddSingleton<IDotNetToolService, DotNetToolService>();
-        services.AddSingleton<ILogger, AnsiConsoleLogger>();
     }
 
 

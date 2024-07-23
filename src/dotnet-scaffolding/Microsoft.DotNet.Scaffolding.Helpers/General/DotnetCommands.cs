@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
+
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
@@ -26,7 +27,7 @@ internal static class DotnetCommands
             {
                 arguments.Add("--prerelease");
             }
-            logger.LogMessage(string.Format("\nAdding package '{0}'...", packageName));
+            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
 
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
@@ -37,18 +38,18 @@ internal static class DotnetCommands
             {
                 if (!string.IsNullOrWhiteSpace(stdOut))
                 {
-                    logger.LogMessage($"\n{stdOut}");
+                    logger.LogInformation($"\n{stdOut}");
                 }
                 if (!string.IsNullOrWhiteSpace(stdErr))
                 {
-                    logger.LogMessage($"\n{stdErr}");
+                    logger.LogInformation($"\n{stdErr}");
                 }
 
-                logger.LogMessage("Failed!");
+                logger.LogInformation("Failed!");
             }
             else
             {
-                logger.LogMessage("Done");
+                logger.LogInformation("Done");
             }
         }
     }

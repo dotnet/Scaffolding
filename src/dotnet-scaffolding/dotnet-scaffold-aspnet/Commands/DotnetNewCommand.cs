@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
@@ -26,17 +27,17 @@ internal class DotnetNewCommand : ICommandWithSettings<DotnetNewCommandSettings>
             return Task.FromResult(-1);
         }
 
-        _logger.LogMessage($"Adding '{commandSettings.CommandName}'...");
+        _logger.LogInformation($"Adding '{commandSettings.CommandName}'...");
         var addingResult = InvokeDotnetNew(commandSettings);
 
         if (addingResult)
         {
-            _logger.LogMessage("Finished");
+            _logger.LogInformation("Finished");
             return Task.FromResult(0);
         }
         else
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogError("An error occurred.");
             return Task.FromResult(-1);
         }
     }
@@ -68,13 +69,13 @@ internal class DotnetNewCommand : ICommandWithSettings<DotnetNewCommandSettings>
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
-            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+            _logger.LogInformation("Missing/Invalid --project option.");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.Name))
         {
-            _logger.LogMessage("Missing/Invalid --name option.", LogMessageType.Error);
+            _logger.LogInformation("Missing/Invalid --name option.");
             return false;
         }
         else

@@ -10,6 +10,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 {
@@ -30,25 +31,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 return -1;
             }
 
-            _logger.LogMessage("Installing packages...");
+            _logger.LogInformation("Installing packages...");
             await InstallPackagesAsync(settings);
 
-            _logger.LogMessage("Updating App host project...");
+            _logger.LogInformation("Updating App host project...");
             var appHostResult = await UpdateAppHostAsync(settings);
 
             var dbContextCreationResult = await CreateNewDbContextAsync(settings);
 
-            _logger.LogMessage("Updating web/worker project...");
+            _logger.LogInformation("Updating web/worker project...");
             var workerResult = await UpdateWebAppAsync(settings);
 
             if (appHostResult && dbContextCreationResult && workerResult)
             {
-                _logger.LogMessage("Finished");
+                _logger.LogInformation("Finished");
                 return 0;
             }
             else
             {
-                _logger.LogMessage("An error occurred.");
+                _logger.LogInformation("An error occurred.");
                 return -1;
             }
         }
@@ -105,20 +106,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             {
                 string dbTypeDisplayList = string.Join(", ", GetCmdsHelper.DatabaseTypeCustomValues.GetRange(0, GetCmdsHelper.DatabaseTypeCustomValues.Count - 1)) +
                     (GetCmdsHelper.DatabaseTypeCustomValues.Count > 1 ? " and " : "") + GetCmdsHelper.DatabaseTypeCustomValues[GetCmdsHelper.DatabaseTypeCustomValues.Count - 1];
-                _logger.LogMessage("Missing/Invalid --type option.", LogMessageType.Error);
-                _logger.LogMessage($"Valid options : {dbTypeDisplayList}", LogMessageType.Error);
+                _logger.LogError("Missing/Invalid --type option.");
+                _logger.LogError($"Valid options : {dbTypeDisplayList}");
                 return false;
             }
 
             if (string.IsNullOrEmpty(commandSettings.AppHostProject) || !_fileSystem.FileExists(commandSettings.AppHostProject))
             {
-                _logger.LogMessage("Missing/Invalid --apphost-project option.", LogMessageType.Error);
+                _logger.LogError("Missing/Invalid --apphost-project option.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
             {
-                _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+                _logger.LogError("Missing/Invalid --project option.");
                 return false;
             }
 
@@ -165,7 +166,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (config is null)
             {
-                _logger.LogMessage("Unable to parse 'db-apphost.json' CodeModifierConfig.");
+                _logger.LogInformation("Unable to parse 'db-apphost.json' CodeModifierConfig.");
                 return false;
             }
 

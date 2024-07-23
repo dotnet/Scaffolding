@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 
@@ -31,23 +32,23 @@ internal class StorageCommand : ICommandWithSettings
         {
             return -1;
         }
-        _logger.LogMessage("Installing packages...");
+        _logger.LogInformation("Installing packages...");
         await InstallPackagesAsync(settings);
 
-        _logger.LogMessage("Updating App host project...");
+        _logger.LogInformation("Updating App host project...");
         var appHostResult = await UpdateAppHostAsync(settings);
 
-        _logger.LogMessage("Updating web/worker project...");
+        _logger.LogInformation("Updating web/worker project...");
         var workerResult = await UpdateWebApiAsync(settings);
 
         if (appHostResult && workerResult)
         {
-            _logger.LogMessage("Finished");
+            _logger.LogInformation("Finished");
             return 0;
         }
         else
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogInformation("An error occurred.");
             return -1;
         }
     }
@@ -57,7 +58,7 @@ internal class StorageCommand : ICommandWithSettings
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("storage-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
         if (config is null)
         {
-            _logger.LogMessage("Unable to parse 'storage-apphost.json' CodeModifierConfig.");
+            _logger.LogInformation("Unable to parse 'storage-apphost.json' CodeModifierConfig.");
             return false;
         }
 
@@ -140,20 +141,20 @@ internal class StorageCommand : ICommandWithSettings
         {
             string storageTypeDisplayList = string.Join(", ", GetCmdsHelper.StorageTypeCustomValues.GetRange(0, GetCmdsHelper.StorageTypeCustomValues.Count - 1)) +
                 (GetCmdsHelper.StorageTypeCustomValues.Count > 1 ? " and " : "") + GetCmdsHelper.StorageTypeCustomValues[GetCmdsHelper.StorageTypeCustomValues.Count - 1];
-            _logger.LogMessage("Missing/Invalid --type option.", LogMessageType.Error);
-            _logger.LogMessage($"Valid options : {storageTypeDisplayList}", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --type option.");
+            _logger.LogError($"Valid options : {storageTypeDisplayList}");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.AppHostProject))
         {
-            _logger.LogMessage("Missing/Invalid --apphost-project option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --apphost-project option.");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.Project))
         {
-            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --project option.");
             return false;
         }
 

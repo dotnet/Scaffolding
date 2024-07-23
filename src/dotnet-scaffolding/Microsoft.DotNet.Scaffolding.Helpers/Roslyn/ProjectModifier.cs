@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 

@@ -1,8 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
@@ -31,11 +30,11 @@ internal class FirstPartyComponentInitializer
 
         foreach (var tool in toolsToInstall)
         {
-            _logger.LogMessage($"Installing {tool}!");
+            _logger.LogInformation($"Installing {tool}!");
             var successfullyInstalled = _dotnetToolService.InstallDotNetTool(tool, prerelease: true);
             if (!successfullyInstalled)
             {
-                _logger.LogMessage($"Failed to install {tool}!");
+                _logger.LogInformation($"Failed to install {tool}!");
             }
         }
     }

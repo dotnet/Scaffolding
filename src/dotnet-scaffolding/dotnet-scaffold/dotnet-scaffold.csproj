@@ -8,19 +8,34 @@
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <!--
+      TODO: Find a better place for these files to live that is shared between .Core and dotnet-scaffold. Linking them like this is temporary
+      to get around the fact that dotnet-scaffold doesn't (and likely won't) have a dependency on .Core.
+    -->
+    <Compile Include="..\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatter.cs" Link="Logging\CleanConsoleFormatter.cs" />
+    <Compile Include="..\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatterOptions.cs" Link="Logging\CleanConsoleFormatterOptions.cs" />
+    <Compile Include="..\Microsoft.DotNet.Scaffolding.Core\Logging\ConsoleLoggerExtensions.cs" Link="Logging\ConsoleLoggerExtensions.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" />
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Logging\" />
   </ItemGroup>
 
 </Project>

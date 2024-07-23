@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions.Roslyn;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 /// <summary>
@@ -117,7 +118,7 @@ internal class CodeService : ICodeService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogMessage(ex.ToString(), LogMessageType.Error);
+            _logger.LogError(ex.ToString());
         }
     }
 

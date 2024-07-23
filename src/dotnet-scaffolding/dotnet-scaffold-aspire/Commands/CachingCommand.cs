@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 
@@ -35,23 +36,23 @@ internal class CachingCommand : ICommandWithSettings
             return -1;
         }
 
-        _logger.LogMessage("Installing packages...");
+        _logger.LogInformation("Installing packages...");
         await InstallPackagesAsync(settings);
 
-        _logger.LogMessage("Updating App host project...");
+        _logger.LogInformation("Updating App host project...");
         var appHostResult = await UpdateAppHostAsync(settings);
 
-        _logger.LogMessage("Updating web/worker project...");
+        _logger.LogInformation("Updating web/worker project...");
         var workerResult = await UpdateWebAppAsync(settings);
 
         if (appHostResult && workerResult)
         {
-            _logger.LogMessage("Finished");
+            _logger.LogInformation("Finished");
             return 0;
         }
         else
         {
-            _logger.LogMessage("An error occurred.");
+            _logger.LogInformation("An error occurred.");
             return -1;
         }
     }
@@ -61,7 +62,7 @@ internal class CachingCommand : ICommandWithSettings
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
         if (config is null)
         {
-            _logger.LogMessage("Unable to parse 'redis-apphost.json' CodeModifierConfig.");
+            _logger.LogInformation("Unable to parse 'redis-apphost.json' CodeModifierConfig.");
             return false;
         }
 
@@ -92,7 +93,7 @@ internal class CachingCommand : ICommandWithSettings
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig(configName, System.Reflection.Assembly.GetExecutingAssembly());
         if (config is null)
         {
-            _logger.LogMessage($"Unable to parse '{configName}' CodeModifierConfig.");
+            _logger.LogInformation($"Unable to parse '{configName}' CodeModifierConfig.");
             return false; 
         }
 
@@ -113,20 +114,20 @@ internal class CachingCommand : ICommandWithSettings
         {
             string cachingTypeDisplayList = string.Join(", ", GetCmdsHelper.CachingTypeCustomValues.GetRange(0, GetCmdsHelper.CachingTypeCustomValues.Count - 1)) +
                 (GetCmdsHelper.CachingTypeCustomValues.Count > 1 ? " and " : "") + GetCmdsHelper.CachingTypeCustomValues[GetCmdsHelper.CachingTypeCustomValues.Count - 1];
-            _logger.LogMessage("Missing/Invalid --type option.", LogMessageType.Error);
-            _logger.LogMessage($"Valid options : {cachingTypeDisplayList}", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --type option.");
+            _logger.LogError($"Valid options : {cachingTypeDisplayList}");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.AppHostProject))
         {
-            _logger.LogMessage("Missing/Invalid --apphost-project option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --apphost-project option.");
             return false;
         }
 
         if (string.IsNullOrEmpty(commandSettings.Project))
         {
-            _logger.LogMessage("Missing/Invalid --project option.", LogMessageType.Error);
+            _logger.LogError("Missing/Invalid --project option.");
             return false;
         }
 

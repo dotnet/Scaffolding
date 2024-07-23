@@ -3,12 +3,13 @@
 
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 internal class PlaceholderDatabaseStep : PlaceholderStepBase<DatabaseCommand>
 {
-    public PlaceholderDatabaseStep(IFileSystem fileSystem, ILogger logger)
+    public PlaceholderDatabaseStep(IFileSystem fileSystem, ILogger<PlaceholderDatabaseStep> logger)
         :base(new DatabaseCommand(fileSystem, logger))
     {
         

@@ -56,6 +56,7 @@ internal static class ScaffolderBuilderExtensions
         
     }
 
+    //TODO : fix this extension method to not do extra work every 'preExecute'
     public static IScaffoldBuilder WithBlazorCrudTextTemplatingStep(
         this IScaffoldBuilder builder)
     {

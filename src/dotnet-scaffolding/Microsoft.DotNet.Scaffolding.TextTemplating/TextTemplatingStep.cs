@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 /// <summary>
@@ -19,6 +20,13 @@ public class TextTemplatingStep : ScaffoldStep
     public required string TemplateModelName { get; set; }
     //the 'type' property of <#@ parameter #> in provided .tt template
     public required object TemplateModel { get; set; }
+    private readonly ILogger _logger;
+
+    public TextTemplatingStep(ILogger<TextTemplatingStep> logger)
+    {
+        _logger = logger;
+    }
+
     public override Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var templateInvoker = new TemplateInvoker();
@@ -57,6 +65,7 @@ public class TextTemplatingStep : ScaffoldStep
                 }
 
                 File.WriteAllText(OutputPath, templatedString);
+                _logger.LogInformation($"Added '{Path.GetFileName(OutputPath)}'");
                 return Task.FromResult(true);
             }
         }

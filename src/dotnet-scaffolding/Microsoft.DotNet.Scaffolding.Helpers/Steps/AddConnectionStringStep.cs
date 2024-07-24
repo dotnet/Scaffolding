@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ScaffoldingStep = Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep;
 
@@ -11,6 +12,12 @@ internal class AddConnectionStringStep : ScaffoldingStep
     public required string BaseProjectPath { get; set; }
     public required string ConnectionStringName { get; set; }
     public required string ConnectionString { get; set; }
+    private readonly ILogger _logger;
+
+    public AddConnectionStringStep(ILogger<AddConnectionStringStep> logger)
+    {
+        _logger = logger;   
+    }
 
     public override Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
@@ -54,6 +61,7 @@ internal class AddConnectionStringStep : ScaffoldingStep
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             File.WriteAllText(appSettingsFile, content.ToString());
+            _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             return Task.FromResult(true);
         }
 

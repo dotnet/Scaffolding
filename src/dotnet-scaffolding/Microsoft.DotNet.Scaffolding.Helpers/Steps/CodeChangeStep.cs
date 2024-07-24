@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
 internal class CodeChangeStep : ScaffoldStep
 {
     public required CodeModifierConfig CodeModifierConfig { get; set; }
+    public required CodeChangeOptions CodeChangeOptions { get; set; }
     //.csproj path for the .NET project
     public required string ProjectPath { get; init; }
     public required ILogger Logger { get; init; }
@@ -37,7 +38,8 @@ internal class CodeChangeStep : ScaffoldStep
             ProjectPath,
             CodeService,
             Logger,
-            CodeModifierConfig);
+            CodeModifierConfig,
+            CodeChangeOptions);
 
         return await projectModifier.RunAsync();
     }

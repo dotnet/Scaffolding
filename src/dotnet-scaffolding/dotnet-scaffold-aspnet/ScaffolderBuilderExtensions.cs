@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -20,6 +19,7 @@ internal static class ScaffolderBuilderExtensions
         string? t4TemplatePath = null;
         return builder.WithStep<TextTemplatingStep>(config =>
         {
+            config.Step.SkipStep = false;
             var step = config.Step;
             var context = config.Context;
             MinimalApiModel? minimalApiModel = null;
@@ -58,31 +58,29 @@ internal static class ScaffolderBuilderExtensions
     }
 
     public static IScaffoldBuilder WithBlazorCrudTextTemplatingStep(
-        this IScaffoldBuilder builder,
-        string pageType)
+        this IScaffoldBuilder builder)
     {
         var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
-        var neededT4FileNames = BlazorCrudHelper.GetT4Templates(pageType);
-        // Create a HashSet for quick lookup of needed file names
-        var neededFileNamesSet = new HashSet<string>(neededT4FileNames, StringComparer.OrdinalIgnoreCase);
-
-        // Filter the paths based on the presence of the file names in the hash set
-        var matchingPaths = allT4TemplatePaths
-            .Where(path => neededFileNamesSet.Contains(Path.GetFileName(path)))
-            .ToList();
-
-        foreach (var templatePath in matchingPaths)
+        foreach (var templatePath in allT4TemplatePaths)
         {
             var templateName = Path.GetFileNameWithoutExtension(templatePath);
             var templateType = BlazorCrudHelper.GetTemplateType(templatePath);
-            if (!string.IsNullOrEmpty(templatePath) && templateType != null)
+            if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
             {
                 builder = builder.WithStep<TextTemplatingStep>(config =>
                 {
+                    config.Step.SkipStep = false;
                     var context = config.Context;
                     context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
-                    BlazorCrudModel? blazorCrudModel = blazorCrudModelObj as BlazorCrudModel ??
+                    BlazorCrudModel blazorCrudModel = blazorCrudModelObj as BlazorCrudModel ??
                         throw new InvalidOperationException("missing 'BlazorCrudModel' in 'ScaffolderContext.Properties'");
+
+                    if (!BlazorCrudHelper.IsValidTemplate(blazorCrudModel.PageType, templateName))
+                    {
+                        config.Step.SkipStep = true;
+                        return;
+                    }
+
                     string baseOutputPath = BlazorCrudHelper.GetBaseOutputPath(
                         blazorCrudModel.ModelInfo.ModelTypeName,
                         blazorCrudModel.ProjectInfo.AppSettings?.Workspace().InputPath);

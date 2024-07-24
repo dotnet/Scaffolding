@@ -79,6 +79,7 @@ internal class StorageCommand : ICommandWithSettings
             CodeService = codeService,
             Logger = _logger,
             ProjectPath = commandSettings.AppHostProject,
+            CodeChangeOptions = new CodeChangeOptions()
         };
 
         return await codeChangeStep.ExecuteAsync();
@@ -118,6 +119,7 @@ internal class StorageCommand : ICommandWithSettings
             CodeModifierProperties = codeModifierProperties,
             Logger = _logger,
             ProjectPath = commandSettings.Project,
+            CodeChangeOptions = new CodeChangeOptions()
         };
 
         return await codeChangeStep.ExecuteAsync();

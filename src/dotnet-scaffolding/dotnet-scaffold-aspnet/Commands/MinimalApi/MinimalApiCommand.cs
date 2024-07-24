@@ -10,6 +10,7 @@ using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
@@ -61,6 +62,13 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
             {
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
+
+            var projectPath = minimalApiModel.ProjectInfo?.AppSettings?.Workspace()?.InputPath;
+            var projectBasePath = Path.GetDirectoryName(projectPath);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add("BaseProjectPath", projectBasePath);
+            }
         }
 
         //Update the project's Program.cs file
@@ -104,14 +112,25 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
     private async Task<bool> UpdateProjectAsync(MinimalApiModel minimalApiModel)
     {
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
-        if (minimalApiModel.ProjectInfo.AppSettings is not null && minimalApiModel.ProjectInfo.CodeService is not null && minimalApiModel.ProjectInfo.CodeChangeOptions is not null)
+        config = EditConfigForMinimalApi(config, minimalApiModel);
+        if (minimalApiModel.ProjectInfo.AppSettings is not null &&
+            minimalApiModel.ProjectInfo.CodeService is not null &&
+            minimalApiModel.ProjectInfo.CodeChangeOptions is not null &&
+            config is not null)
         {
-            config = EditConfigForMinimalApi(config, minimalApiModel);
+            var codeChangeOptions = new CodeChangeOptions()
+            {
+                IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(minimalApiModel.ProjectInfo.CodeService),
+                UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(minimalApiModel.ProjectInfo.CodeService),
+                EfScenario = minimalApiModel.DbContextInfo.EfScenario
+            };
+
             var projectModifier = new ProjectModifier(
                 minimalApiModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
                 minimalApiModel.ProjectInfo.CodeService,
                 _logger,
-                config);
+                config,
+                codeChangeOptions);
 
             return await projectModifier.RunAsync();
         }

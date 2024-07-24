@@ -44,7 +44,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
+<<<<<<< HEAD
             _logger.LogInformation("Updating web/worker project...");
+=======
+            var projectBasePath = Path.GetDirectoryName(settings.Project);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add("ProjectBasePath", projectBasePath);
+            }
+
+            _logger.LogMessage("Updating web/worker project...");
+>>>>>>> all scenarios work now, need minor cleanup
             var workerResult = await UpdateWebAppAsync(settings);
 
             if (appHostResult && workerResult)
@@ -66,7 +76,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         private DbContextProperties? GetDbContextProperties(CommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
-            var projectBasePath = Path.GetDirectoryName(settings.Project);
             if (GetCmdsHelper.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
                 dbContextProperties is not null)
             {
@@ -181,6 +190,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 CodeModifierProperties = codeModifierProperties,
                 Logger = _logger,
                 ProjectPath = commandSettings.AppHostProject,
+                CodeChangeOptions = new CodeChangeOptions()
             };
 
             return await codeChangeStep.ExecuteAsync();
@@ -201,6 +211,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 CodeModifierProperties = codeModifierProperties,
                 Logger = _logger,
                 ProjectPath = commandSettings.Project,
+                CodeChangeOptions = new CodeChangeOptions()
             };
 
             return await codeChangeStep.ExecuteAsync();

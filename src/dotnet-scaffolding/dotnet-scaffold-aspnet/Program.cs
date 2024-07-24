@@ -4,6 +4,7 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -114,8 +115,9 @@ public static class Program
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Page = context.GetOptionResult(pageTypeOption);
             })
-            .WithAddDbContextStep(addConnectionString: true)
-            .WithBlazorCrudTextTemplatingStep("CRUD");
+            .WithDbContextStep()
+            .WithConnectionStringStep()
+            .WithBlazorCrudTextTemplatingStep();
 
         builder.AddScaffolder("minimalapi")
             .WithDisplayName("Minimal API")
@@ -134,7 +136,8 @@ public static class Program
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
             })
-            .WithAddDbContextStep(addConnectionString: true)
+            .WithDbContextStep()
+            .WithConnectionStringStep()
             .WithMinimalApiTextTemplatingStep();
 
         builder.AddScaffolder("area")
@@ -156,6 +159,7 @@ public static class Program
 
     static void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<AddConnectionStringStep>();
         services.AddSingleton<TextTemplatingStep>();
         services.AddSingleton<AreaScaffolderStep>();
         services.AddSingleton<DotnetNewScaffolderStep>();

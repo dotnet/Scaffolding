@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -43,6 +45,10 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
             _logger.LogError("An error occurred.");
             return -1;
         }
+        else
+        {
+            context.Properties.Add(nameof(BlazorCrudModel), blazorCrudModel);
+        }
 
         //Install packages and add a DbContext (if needed)
         if (blazorCrudModel.DbContextInfo.EfScenario)
@@ -53,6 +59,13 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
             if (dbContextProperties is not null)
             {
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
+            }
+
+            var projectPath = blazorCrudModel.ProjectInfo?.AppSettings?.Workspace()?.InputPath;
+            var projectBasePath = Path.GetDirectoryName(projectPath);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add("BaseProjectPath", projectBasePath);
             }
         }
 
@@ -118,11 +131,19 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
             config is not null)
         {
             config = await EditConfigForBlazorCrudAsync(config, blazorCrudModel);
+            var codeChangeOptions = new CodeChangeOptions()
+            {
+                IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(blazorCrudModel.ProjectInfo.CodeService),
+                UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(blazorCrudModel.ProjectInfo.CodeService),
+                EfScenario = blazorCrudModel.DbContextInfo.EfScenario
+            };
+
             var projectModifier = new ProjectModifier(
                 blazorCrudModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
                 blazorCrudModel.ProjectInfo.CodeService,
                 _logger,
-                config);
+                config,
+                codeChangeOptions);
 
             return await projectModifier.RunAsync();
         }
@@ -182,6 +203,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
             dbContextInfo = ClassAnalyzers.GetDbContextInfo(dbContextClassSymbol, projectInfo.AppSettings, dbContextClassName, settings.DatabaseProvider, settings.Model);
+            dbContextInfo.EfScenario = true;
         }
 
         BlazorCrudModel scaffoldingModel = new()

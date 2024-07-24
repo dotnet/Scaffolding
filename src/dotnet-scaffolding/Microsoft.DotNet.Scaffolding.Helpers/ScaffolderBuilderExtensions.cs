@@ -14,14 +14,13 @@ internal static class ScaffolderBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IScaffoldBuilder WithAddDbContextStep(
+    public static IScaffoldBuilder WithDbContextStep(
         this IScaffoldBuilder builder,
-        bool addConnectionString = true,
-        DbContextProperties? dbContextProperties = null,
-        string? baseProjectPath = null)
+        DbContextProperties? dbContextProperties = null)
     {
         builder = builder.WithStep<TextTemplatingStep>(config =>
         {
+            config.Step.SkipStep = false;
             var step = config.Step;
             var context = config.Context;
             if (dbContextProperties is null &&
@@ -34,7 +33,8 @@ internal static class ScaffolderBuilderExtensions
             if (dbContextProperties is null ||
                 string.IsNullOrEmpty(dbContextProperties.DbContextPath))
             {
-                throw new ArgumentException("'DbContextProperties' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
+                config.Step.SkipStep = true;
+                return;
             }
 
             GetDbContextTemplatingStepProperties(out var templatePath, out var templateType, out var templateModelName);
@@ -45,34 +45,53 @@ internal static class ScaffolderBuilderExtensions
             step.OutputPath = dbContextProperties.DbContextPath;
         });
 
-        if (addConnectionString &&
-            !string.IsNullOrEmpty(dbContextProperties?.NewDbConnectionString))
+        return builder;
+    }
+
+    public static IScaffoldBuilder WithConnectionStringStep(
+        this IScaffoldBuilder builder,
+        string? baseProjectPath = null,
+        DbContextProperties? dbContextProperties = null)
+    {
+        builder = builder.WithStep<AddConnectionStringStep>(config =>
         {
-            builder = builder.WithStep<AddConnectionStringStep>(config =>
+            config.Step.SkipStep = false;
+            var step = config.Step;
+            var context = config.Context;
+            if (dbContextProperties is null &&
+                context.Properties.TryGetValue("DbContextProperties", out var dbContextPropertiesObj) &&
+                dbContextPropertiesObj is DbContextProperties)
             {
-                var step = config.Step;
-                var context = config.Context;
-                if (!string.IsNullOrEmpty(baseProjectPath))
-                {
-                    step.BaseProjectPath = baseProjectPath;
-                }
-                else 
-                {
-                    context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
-                    var baseProjectPathVal = baseProjectPathObj?.ToString();
-                    if (string.IsNullOrEmpty(baseProjectPathVal))
-                    {
-                        throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
-                    }
+                dbContextProperties = dbContextPropertiesObj as DbContextProperties;
+            }
 
-                    step.BaseProjectPath = baseProjectPathVal;
+            if (dbContextProperties is null ||
+                string.IsNullOrEmpty(dbContextProperties.DbContextPath) ||
+                string.IsNullOrEmpty(dbContextProperties.NewDbConnectionString))
+            {
+                config.Step.SkipStep = true;
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(baseProjectPath))
+            {
+                step.BaseProjectPath = baseProjectPath;
+            }
+            else
+            {
+                context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
+                var baseProjectPathVal = baseProjectPathObj?.ToString();
+                if (string.IsNullOrEmpty(baseProjectPathVal))
+                {
+                    throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
                 }
 
-                step.ConnectionString = dbContextProperties.NewDbConnectionString;
-                step.ConnectionStringName = dbContextProperties.DbContextName;
-                
-            });
-        }
+                step.BaseProjectPath = baseProjectPathVal;
+            }
+
+            step.ConnectionString = string.Format(dbContextProperties.NewDbConnectionString, dbContextProperties.DbContextName);
+            step.ConnectionStringName = dbContextProperties.DbContextName;
+        });
 
         return builder;
     }

@@ -76,6 +76,7 @@ internal class CachingCommand : ICommandWithSettings
         hostAppSettings.AddSettings("workspace", workspaceSettings);
         var codeService = new CodeService(hostAppSettings, _logger);
         var codeModifierProperties = await GetCodeModifierPropertiesAsync(commandSettings, codeService);
+
         CodeChangeStep codeChangeStep = new()
         {
             CodeModifierConfig = config,
@@ -83,6 +84,7 @@ internal class CachingCommand : ICommandWithSettings
             CodeService = codeService,
             Logger = _logger,
             ProjectPath = commandSettings.AppHostProject,
+            CodeChangeOptions = new CodeChangeOptions()
         };
 
         return await codeChangeStep.ExecuteAsync();
@@ -104,6 +106,7 @@ internal class CachingCommand : ICommandWithSettings
             CodeModifierProperties = new Dictionary<string, string>(),
             Logger = _logger,
             ProjectPath = commandSettings.Project,
+            CodeChangeOptions = new CodeChangeOptions()
         };
 
         return await codeChangeStep.ExecuteAsync();

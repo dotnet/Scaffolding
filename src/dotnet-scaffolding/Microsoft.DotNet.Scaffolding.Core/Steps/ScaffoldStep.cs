@@ -9,4 +9,5 @@ public abstract class ScaffoldStep
 {
     public abstract Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default);
     public bool ContinueOnError { get; set; }
+    public bool SkipStep { get; set; } = false;
 }

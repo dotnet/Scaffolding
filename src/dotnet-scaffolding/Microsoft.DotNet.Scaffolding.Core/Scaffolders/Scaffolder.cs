@@ -39,9 +39,12 @@ public class Scaffolder : IScaffolder
         {
             var step = _steps[stepIndex];
             var preparer = _preparers[stepIndex];
-
             preparer.RunPreExecute(step, context);
-            await step.ExecuteAsync(context);
+            if (!step.SkipStep)
+            {
+                await step.ExecuteAsync(context);
+            }
+
             preparer.RunPostExecute(step, context);
         }
     }

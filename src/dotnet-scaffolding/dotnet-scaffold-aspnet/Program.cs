@@ -166,9 +166,9 @@ public static class Program
         services.AddTransient<EmptyControllerScaffolderStep>();
         services.AddTransient<MinimalApiScaffolderStep>();
         services.AddTransient<BlazorCrudScaffolderStep>();
-        services.AddTransient<IFileSystem, FileSystem>();
-        services.AddTransient<IEnvironmentService, EnvironmentService>();
-        services.AddTransient<IDotNetToolService, DotNetToolService>();
+        services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddSingleton<IEnvironmentService, EnvironmentService>();
+        services.AddSingleton<IDotNetToolService, DotNetToolService>();
     }
 
 

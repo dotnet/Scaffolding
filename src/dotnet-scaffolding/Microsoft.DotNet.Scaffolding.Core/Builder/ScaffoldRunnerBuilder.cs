@@ -59,7 +59,7 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     private void AddDefaultServices()
     {
         AddCoreServices();
-        Services.AddTransient<IScaffoldRunner, ScaffoldRunner>();
+        Services.AddSingleton<IScaffoldRunner, ScaffoldRunner>();
     }
 
     private void AddCoreServices()

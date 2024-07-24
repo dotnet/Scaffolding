@@ -76,6 +76,7 @@ var runner = builder.Build();
 
 runner.RunAsync(args).Wait();
 
+//TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
     services.AddTransient<TextTemplatingStep>();

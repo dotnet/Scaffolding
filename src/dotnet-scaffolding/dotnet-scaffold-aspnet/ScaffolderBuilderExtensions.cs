@@ -15,8 +15,6 @@ internal static class ScaffolderBuilderExtensions
 {
     public static IScaffoldBuilder WithMinimalApiTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
-        string? t4TemplatePath = null;
         return builder.WithStep<TextTemplatingStep>(config =>
         {
             var step = config.Step;
@@ -29,6 +27,8 @@ internal static class ScaffolderBuilderExtensions
             }
 
             ArgumentNullException.ThrowIfNull(minimalApiModel);
+            var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
+            string? t4TemplatePath = null;
             if (minimalApiModel.DbContextInfo.EfScenario)
             {
                 t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApiEf.tt", StringComparison.OrdinalIgnoreCase));

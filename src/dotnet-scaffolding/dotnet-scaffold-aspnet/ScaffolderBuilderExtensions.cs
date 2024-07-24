@@ -19,7 +19,6 @@ internal static class ScaffolderBuilderExtensions
         string? t4TemplatePath = null;
         return builder.WithStep<TextTemplatingStep>(config =>
         {
-            config.Step.SkipStep = false;
             var step = config.Step;
             var context = config.Context;
             MinimalApiModel? minimalApiModel = null;
@@ -69,7 +68,6 @@ internal static class ScaffolderBuilderExtensions
             {
                 builder = builder.WithStep<TextTemplatingStep>(config =>
                 {
-                    config.Step.SkipStep = false;
                     var context = config.Context;
                     context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
                     BlazorCrudModel blazorCrudModel = blazorCrudModelObj as BlazorCrudModel ??

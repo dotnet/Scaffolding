@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             var projectBasePath = Path.GetDirectoryName(settings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add("ProjectBasePath", projectBasePath);
+                context.Properties.Add("BaseProjectPath", projectBasePath);
             }
 
             _logger.LogInformation("Updating web/worker project...");

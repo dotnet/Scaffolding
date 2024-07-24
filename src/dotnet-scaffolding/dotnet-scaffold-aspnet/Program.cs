@@ -159,16 +159,16 @@ public static class Program
 
     static void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<AddConnectionStringStep>();
-        services.AddSingleton<TextTemplatingStep>();
-        services.AddSingleton<AreaScaffolderStep>();
-        services.AddSingleton<DotnetNewScaffolderStep>();
-        services.AddSingleton<EmptyControllerScaffolderStep>();
-        services.AddSingleton<MinimalApiScaffolderStep>();
-        services.AddSingleton<BlazorCrudScaffolderStep>();
-        services.AddSingleton<IFileSystem, FileSystem>();
-        services.AddSingleton<IEnvironmentService, EnvironmentService>();
-        services.AddSingleton<IDotNetToolService, DotNetToolService>();
+        services.AddTransient<AddConnectionStringStep>();
+        services.AddTransient<TextTemplatingStep>();
+        services.AddTransient<AreaScaffolderStep>();
+        services.AddTransient<DotnetNewScaffolderStep>();
+        services.AddTransient<EmptyControllerScaffolderStep>();
+        services.AddTransient<MinimalApiScaffolderStep>();
+        services.AddTransient<BlazorCrudScaffolderStep>();
+        services.AddTransient<IFileSystem, FileSystem>();
+        services.AddTransient<IEnvironmentService, EnvironmentService>();
+        services.AddTransient<IDotNetToolService, DotNetToolService>();
     }
 
 

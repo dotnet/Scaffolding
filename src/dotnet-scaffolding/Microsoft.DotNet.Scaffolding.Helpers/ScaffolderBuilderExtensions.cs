@@ -20,7 +20,6 @@ internal static class ScaffolderBuilderExtensions
     {
         builder = builder.WithStep<TextTemplatingStep>(config =>
         {
-            config.Step.SkipStep = false;
             var step = config.Step;
             var context = config.Context;
             if (dbContextProperties is null &&
@@ -55,7 +54,6 @@ internal static class ScaffolderBuilderExtensions
     {
         builder = builder.WithStep<AddConnectionStringStep>(config =>
         {
-            config.Step.SkipStep = false;
             var step = config.Step;
             var context = config.Context;
             if (dbContextProperties is null &&

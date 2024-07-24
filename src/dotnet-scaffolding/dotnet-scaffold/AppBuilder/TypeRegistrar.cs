@@ -28,7 +28,7 @@ internal sealed class TypeRegistrar : ITypeRegistrar
 
     public void Register(Type service, Type implementation)
     {
-        _services.AddSingleton(service, implementation);
+        _services.AddTransient(service, implementation);
     }
 
     public void RegisterInstance(Type service, object implementation)
@@ -43,7 +43,7 @@ internal sealed class TypeRegistrar : ITypeRegistrar
             throw new ArgumentNullException(nameof(func));
         }
 
-        _services.AddSingleton(service, (provider) => func());
+        _services.AddTransient(service, (provider) => func());
     }
 
     private sealed class LoggingBuilder(IServiceCollection services) : ILoggingBuilder

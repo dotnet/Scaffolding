@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
@@ -20,7 +21,7 @@ internal class DotnetNewCommand : ICommandWithSettings<DotnetNewCommandSettings>
         _logger = logger;
     }
 
-    public Task<int> ExecuteAsync(DotnetNewCommandSettings commandSettings)
+    public Task<int> ExecuteAsync(DotnetNewCommandSettings commandSettings, ScaffolderContext context)
     {
         if (!ValidateDotnetNewCommandSettings(commandSettings))
         {

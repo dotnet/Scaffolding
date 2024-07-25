@@ -15,42 +15,39 @@ internal class ProjectModifier
     private const string Main = nameof(Main);
     private readonly StringBuilder _output;
     private readonly string _projectPath;
-    private readonly CodeModifierConfig? _codeModifierConfig;
+    private readonly CodeModifierConfig _codeModifierConfig;
+    private readonly CodeChangeOptions _codeChangeOptions;
 
     public ProjectModifier(
         string projectPath,
         ICodeService codeService,
         ILogger consoleLogger,
-        CodeModifierConfig? codeModifierConfig = null)
+        CodeModifierConfig codeModifierConfig,
+        CodeChangeOptions codeChangeOptions)
     {
         _codeService = codeService;
         _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
         _output = new StringBuilder();
         _projectPath = projectPath;
         _codeModifierConfig = codeModifierConfig;
+        _codeChangeOptions = codeChangeOptions;
     }
 
     public async Task<bool> RunAsync()
     {
-        if (_codeModifierConfig is null || _codeModifierConfig.Files is null || !_codeModifierConfig.Files.Any())
+        if (_codeModifierConfig.Files is null || !_codeModifierConfig.Files.Any())
         {
             return false;
         }
 
-        var codeChangeOptions = new CodeChangeOptions()
-        {
-            IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(_codeService),
-            UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(_codeService)
-        };
-
         var solution = (await _codeService.GetWorkspaceAsync())?.CurrentSolution;
         var roslynProject = solution?.GetProject(_projectPath);
 
-        var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, codeChangeOptions));
+        var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
         foreach (var file in filteredFiles)
         {
             Document? originalDocument = roslynProject?.GetDocument(file.FileName);
-            var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, codeChangeOptions);
+            var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, _codeChangeOptions);
             roslynProject = modifiedDocument?.Project;
         }
 

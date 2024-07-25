@@ -35,6 +35,6 @@ internal abstract class BlazorCrudScaffolderStepBase<T>(T command) : ScaffoldSte
             DataContext = DataContext,
             Prerelease = Prerelease,
             Page = Page
-        });
+        }, context);
     }
 }

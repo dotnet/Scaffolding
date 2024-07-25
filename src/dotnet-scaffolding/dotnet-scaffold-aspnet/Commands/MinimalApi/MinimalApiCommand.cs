@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
-using Microsoft.DotNet.Scaffolding.TextTemplating;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
@@ -31,7 +32,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         _logger = logger;
     }
 
-    public async Task<int> ExecuteAsync(MinimalApiSettings settings)
+    public async Task<int> ExecuteAsync(MinimalApiSettings settings, ScaffolderContext context)
     {
         if (!ValidateMinimalApiSettings(settings))
         {
@@ -46,23 +47,28 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
             _logger.LogError("An error occurred.");
             return -1;
         }
+        else
+        {
+            context.Properties.Add(nameof(MinimalApiModel), minimalApiModel);
+        }
 
         //Install packages and add a DbContext (if needed)
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
             _logger.LogInformation("Installing packages...");
             await InstallPackagesAsync(settings);
-            await AddDbContextAsync(minimalApiModel.DbContextInfo, minimalApiModel.ProjectInfo);
-        }
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(minimalApiModel.DbContextInfo, minimalApiModel.ProjectInfo);
+            if (dbContextProperties is not null)
+            {
+                context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
+            }
 
-        _logger.LogInformation("Adding API controller...");
-        var executeTemplateResult = await ExecuteTemplatesAsync(minimalApiModel);
-        //if we were not able to execute the templates successfully,
-        //exit and don't update the project
-        if (!executeTemplateResult)
-        {
-            _logger.LogError("An error occurred.");
-            return -1;
+            var projectPath = minimalApiModel.ProjectInfo?.AppSettings?.Workspace()?.InputPath;
+            var projectBasePath = Path.GetDirectoryName(projectPath);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add("BaseProjectPath", projectBasePath);
+            }
         }
 
         //Update the project's Program.cs file
@@ -78,33 +84,6 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
             _logger.LogError("An error occurred.");
             return -1;
         }
-    }
-
-    private async Task<bool> AddDbContextAsync(DbContextInfo dbContextInfo, ProjectInfo projectInfo)
-    {
-        var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
-        if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
-            AspNetDbContextHelper.DbContextTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties) &&
-            dbContextProperties is not null &&
-            !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
-            !string.IsNullOrEmpty(dbContextInfo.DbContextClassPath) &&
-            !string.IsNullOrEmpty(projectBasePath))
-        {
-            dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
-            dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
-            dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
-            var addDbContextStep = new AddNewDbContextStep
-            {
-                DbContextProperties = dbContextProperties,
-                ProjectBaseDirectory = projectBasePath,
-                FileSystem = _fileSystem,
-                Logger = _logger,
-            };
-
-            return await addDbContextStep.ExecuteAsync();
-        }
-
-        return true;
     }
 
     private bool ValidateMinimalApiSettings(MinimalApiSettings commandSettings)
@@ -130,72 +109,28 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         return true;
     }
 
-    private async Task<bool> ExecuteTemplatesAsync(MinimalApiModel minimalApiModel)
-    {
-        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
-        string? t4TemplatePath = null;
-        if (minimalApiModel.DbContextInfo.EfScenario)
-        {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApiEf.tt", StringComparison.OrdinalIgnoreCase));
-        }
-        else
-        {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApi.tt", StringComparison.OrdinalIgnoreCase));
-        }
-        var templateType = GetTemplateType(t4TemplatePath);
-
-        if (string.IsNullOrEmpty(t4TemplatePath) ||
-            string.IsNullOrEmpty(minimalApiModel.EndpointsPath) ||
-            templateType is null)
-        {
-            return false;
-        }
-
-        var textTemplatingStep = new AddTextTemplatingStep
-        {
-            FileSystem = _fileSystem,
-            Logger = _logger,
-            TemplatePath = t4TemplatePath,
-            TemplateType = templateType,
-            TemplateModel = minimalApiModel,
-            TemplateModelName = "Model",
-            OutputPath = minimalApiModel.EndpointsPath,
-        };
-
-        return await textTemplatingStep.ExecuteAsync();
-    }
-
-    private static Type? GetTemplateType(string? templatePath)
-    {
-        if (string.IsNullOrEmpty(templatePath))
-        {
-            return null;
-        }
-
-        switch (Path.GetFileName(templatePath))
-        {
-            case "MinimalApi.tt":
-                return typeof(Templates.MinimalApi.MinimalApi);
-            case "MinimalApiEf.tt":
-                return typeof(Templates.MinimalApi.MinimalApiEf);
-            default:
-                break;
-        }
-
-        return null;
-    }
-
     private async Task<bool> UpdateProjectAsync(MinimalApiModel minimalApiModel)
     {
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
-        if (minimalApiModel.ProjectInfo.AppSettings is not null && minimalApiModel.ProjectInfo.CodeService is not null && minimalApiModel.ProjectInfo.CodeChangeOptions is not null)
+        config = EditConfigForMinimalApi(config, minimalApiModel);
+        if (minimalApiModel.ProjectInfo.AppSettings is not null &&
+            minimalApiModel.ProjectInfo.CodeService is not null &&
+            minimalApiModel.ProjectInfo.CodeChangeOptions is not null &&
+            config is not null)
         {
-            config = EditConfigForMinimalApi(config, minimalApiModel);
+            var codeChangeOptions = new CodeChangeOptions()
+            {
+                IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(minimalApiModel.ProjectInfo.CodeService),
+                UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(minimalApiModel.ProjectInfo.CodeService),
+                EfScenario = minimalApiModel.DbContextInfo.EfScenario
+            };
+
             var projectModifier = new ProjectModifier(
                 minimalApiModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
                 minimalApiModel.ProjectInfo.CodeService,
                 _logger,
-                config);
+                config,
+                codeChangeOptions);
 
             return await projectModifier.RunAsync();
         }

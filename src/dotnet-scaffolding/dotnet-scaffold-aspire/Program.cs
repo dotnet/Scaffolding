@@ -3,6 +3,8 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +50,9 @@ database.WithCategory("Aspire")
             step.AppHostProject = context.GetOptionResult(appHostProjectOption);
             step.Project = context.GetOptionResult(projectOption);
             step.Prerelease = context.GetOptionResult(prereleaseOption);
-        });
+        })
+        .WithDbContextStep()
+        .WithConnectionStringStep();
 
 var storage = builder.AddScaffolder("storage");
 storage.WithCategory("Aspire")
@@ -72,11 +76,14 @@ var runner = builder.Build();
 
 runner.RunAsync(args).Wait();
 
+//TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
-    services.AddSingleton<PlaceholderCachingStep>();
-    services.AddSingleton<PlaceholderDatabaseStep>();
-    services.AddSingleton<PlaceholderStorageStep>();
+    services.AddTransient<TextTemplatingStep>();
+    services.AddTransient<AddConnectionStringStep>();
+    services.AddTransient<PlaceholderCachingStep>();
+    services.AddTransient<PlaceholderDatabaseStep>();
+    services.AddTransient<PlaceholderStorageStep>();
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
     services.AddSingleton<IDotNetToolService, DotNetToolService>();

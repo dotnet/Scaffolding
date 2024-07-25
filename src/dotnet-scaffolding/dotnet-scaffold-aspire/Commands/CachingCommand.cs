@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 
 internal interface ICommandWithSettings
 {
-    Task<int> ExecuteAsync(CommandSettings settings);
+    Task<int> ExecuteAsync(CommandSettings settings, ScaffolderContext context);
 }
 
 internal class CachingCommand : ICommandWithSettings
@@ -28,7 +29,7 @@ internal class CachingCommand : ICommandWithSettings
         _logger = logger;
     }
 
-    public async Task<int> ExecuteAsync(CommandSettings settings)
+    public async Task<int> ExecuteAsync(CommandSettings settings, ScaffolderContext context)
     {
         new MsBuildInitializer(_logger).Initialize();
         if (!ValidateCachingCommandSettings(settings))
@@ -75,6 +76,7 @@ internal class CachingCommand : ICommandWithSettings
         hostAppSettings.AddSettings("workspace", workspaceSettings);
         var codeService = new CodeService(hostAppSettings, _logger);
         var codeModifierProperties = await GetCodeModifierPropertiesAsync(commandSettings, codeService);
+
         CodeChangeStep codeChangeStep = new()
         {
             CodeModifierConfig = config,
@@ -82,6 +84,7 @@ internal class CachingCommand : ICommandWithSettings
             CodeService = codeService,
             Logger = _logger,
             ProjectPath = commandSettings.AppHostProject,
+            CodeChangeOptions = new CodeChangeOptions()
         };
 
         return await codeChangeStep.ExecuteAsync();
@@ -103,6 +106,7 @@ internal class CachingCommand : ICommandWithSettings
             CodeModifierProperties = new Dictionary<string, string>(),
             Logger = _logger,
             ProjectPath = commandSettings.Project,
+            CodeChangeOptions = new CodeChangeOptions()
         };
 
         return await codeChangeStep.ExecuteAsync();

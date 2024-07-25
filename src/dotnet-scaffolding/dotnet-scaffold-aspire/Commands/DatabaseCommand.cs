@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
@@ -24,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             _logger = logger;
         }
 
-        public async Task<int> ExecuteAsync(CommandSettings settings)
+        public async Task<int> ExecuteAsync(CommandSettings settings, ScaffolderContext context)
         {
             if (!ValidateDatabaseCommandSettings(settings))
             {
@@ -37,12 +38,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             _logger.LogInformation("Updating App host project...");
             var appHostResult = await UpdateAppHostAsync(settings);
 
-            var dbContextCreationResult = await CreateNewDbContextAsync(settings);
+            var dbContextProperties = GetDbContextProperties(settings);
+            if (dbContextProperties is not null)
+            {
+                context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
+            }
+
+            var projectBasePath = Path.GetDirectoryName(settings.Project);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add("BaseProjectPath", projectBasePath);
+            }
 
             _logger.LogInformation("Updating web/worker project...");
             var workerResult = await UpdateWebAppAsync(settings);
 
-            if (appHostResult && dbContextCreationResult && workerResult)
+            if (appHostResult && workerResult)
             {
                 _logger.LogInformation("Finished");
                 return 0;
@@ -58,27 +69,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         /// generate a path for DbContext, then use DbContextHelper.CreateDbContext to invoke 'NewDbContext.tt'
         /// DbContextHelper.CreateDbContext will also write the resulting templated string (class text) to disk
         /// </summary>
-        private async Task<bool> CreateNewDbContextAsync(CommandSettings settings)
+        private DbContextProperties? GetDbContextProperties(CommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
-            var projectBasePath = Path.GetDirectoryName(settings.Project);
             if (GetCmdsHelper.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
-                dbContextProperties is not null &&
-                !string.IsNullOrEmpty(projectBasePath))
+                dbContextProperties is not null)
             {
                 dbContextProperties.DbContextPath = newDbContextPath;
-                var addDbContextStep = new AddNewDbContextStep
-                {
-                    DbContextProperties = dbContextProperties,
-                    ProjectBaseDirectory = projectBasePath,
-                    FileSystem = _fileSystem,
-                    Logger = _logger
-                };
-
-                return await addDbContextStep.ExecuteAsync();
+                return dbContextProperties;
             }
 
-            return false;
+            return null;
         }
 
         private string CreateNewDbContextPath(CommandSettings commandSettings)
@@ -185,6 +186,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 CodeModifierProperties = codeModifierProperties,
                 Logger = _logger,
                 ProjectPath = commandSettings.AppHostProject,
+                CodeChangeOptions = new CodeChangeOptions()
             };
 
             return await codeChangeStep.ExecuteAsync();
@@ -205,6 +207,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 CodeModifierProperties = codeModifierProperties,
                 Logger = _logger,
                 ProjectPath = commandSettings.Project,
+                CodeChangeOptions = new CodeChangeOptions()
             };
 
             return await codeChangeStep.ExecuteAsync();

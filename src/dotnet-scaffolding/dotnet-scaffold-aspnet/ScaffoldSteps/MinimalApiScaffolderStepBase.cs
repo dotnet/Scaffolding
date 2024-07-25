@@ -37,6 +37,6 @@ internal abstract class MinimalApiScaffolderStepBase<T>(T command) : ScaffoldSte
             OpenApi = OpenApi,
             Endpoints = Endpoints,
             Prerelease = Prerelease
-        });
+        }, context);
     }
 }

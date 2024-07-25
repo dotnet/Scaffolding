@@ -140,26 +140,14 @@ internal static class BlazorCrudHelper
         return templateType;
     }
 
-    internal static IList<string> GetT4Templates(string templateName)
+    internal static bool IsValidTemplate(string templateType, string templateFileName)
     {
-        var templates = new List<string>();
-        var crudTemplate = string.Equals(templateName, CrudPageType, StringComparison.OrdinalIgnoreCase);
-        if (crudTemplate)
+        if (templateType.Equals("CRUD", StringComparison.OrdinalIgnoreCase))
         {
-            templates.AddRange([.. CRUDTemplates.Values]);
-        }
-        else if (CRUDTemplates.TryGetValue(templateName, out var t4Template))
-        {
-            templates.Add(t4Template);
-        }
-        else
-        {
-            //we should not have gotten here since we already validated this data.
-            //default to "CRUD" template
-            templates.AddRange([.. CRUDTemplates.Values]);
+            return true;
         }
 
-        return templates;
+        return templateType.Equals(templateFileName, StringComparison.OrdinalIgnoreCase);
     }
 
     internal static string GetBaseOutputPath(string modelName, string? projectPath)

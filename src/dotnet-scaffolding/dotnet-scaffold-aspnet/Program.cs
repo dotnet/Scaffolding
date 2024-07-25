@@ -4,6 +4,8 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Helpers.Steps;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -112,7 +114,10 @@ public static class Program
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Page = context.GetOptionResult(pageTypeOption);
-            });
+            })
+            .WithDbContextStep()
+            .WithConnectionStringStep()
+            .WithBlazorCrudTextTemplatingStep();
 
         builder.AddScaffolder("minimalapi")
             .WithDisplayName("Minimal API")
@@ -126,11 +131,14 @@ public static class Program
                 step.Project = context.GetOptionResult(projectOption);
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.Endpoints = context.GetOptionResult(endpointsClassOption);
-                step.OpenApi =  context.GetOptionResult(openApiOption);
+                step.OpenApi = context.GetOptionResult(openApiOption);
                 step.DataContext = context.GetOptionResult(dataContextClassOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
-            });
+            })
+            .WithDbContextStep()
+            .WithConnectionStringStep()
+            .WithMinimalApiTextTemplatingStep();
 
         builder.AddScaffolder("area")
             .WithDisplayName("Area")
@@ -147,17 +155,18 @@ public static class Program
 
         var runner = builder.Build();
         runner.RunAsync(args).Wait();
-        //    config.AddCommand<AreaCommand>("area");
-
     }
 
+    //TODO separate adding transient steps from singleton services.
     static void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<AreaScaffolderStep>();
-        services.AddSingleton<DotnetNewScaffolderStep>();
-        services.AddSingleton<EmptyControllerScaffolderStep>();
-        services.AddSingleton<MinimalApiScaffolderStep>();
-        services.AddSingleton<BlazorCrudScaffolderStep>();
+        services.AddTransient<AddConnectionStringStep>();
+        services.AddTransient<TextTemplatingStep>();
+        services.AddTransient<AreaScaffolderStep>();
+        services.AddTransient<DotnetNewScaffolderStep>();
+        services.AddTransient<EmptyControllerScaffolderStep>();
+        services.AddTransient<MinimalApiScaffolderStep>();
+        services.AddTransient<BlazorCrudScaffolderStep>();
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
         services.AddSingleton<IDotNetToolService, DotNetToolService>();

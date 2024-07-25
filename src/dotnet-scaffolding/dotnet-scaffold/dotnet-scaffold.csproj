@@ -8,7 +8,6 @@
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>

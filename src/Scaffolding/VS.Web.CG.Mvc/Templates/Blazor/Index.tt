@@ -26,7 +26,14 @@
         #>@using <#= modelNamespace#>
 <#  }
 #>
+<#
+    if (!string.IsNullOrEmpty(dbContextNamespace))
+    {
+        #>@using <#= dbContextNamespace#>
+<#  }
+#>
 @inject <#= dbContextFactory #>
+@implements IAsyncDisposable
 
 <PageTitle>Index</PageTitle>
 
@@ -36,7 +43,7 @@
     <a href="<#= pluralModelLowerInv #>/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="DbFactory.CreateDbContext().<#= Model.ModelMetadata.EntitySetName #>">
+<QuickGrid Class="table" Items="context.<#= Model.ModelMetadata.EntitySetName #>">
 <#
     foreach (var property in entityProperties)
     {
@@ -51,3 +58,14 @@
         <a href="@($"<#= pluralModelLowerInv #>/delete?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
+
+@code {
+    <#= Model.ContextTypeName #> context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

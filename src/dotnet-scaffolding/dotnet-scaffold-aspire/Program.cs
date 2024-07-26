@@ -5,6 +5,8 @@ using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
+using Microsoft.DotNet.Tools.Scaffold.Aspire;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.CommandHelpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,11 @@ caching.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
+       .WithStep<ValidateContextStep>(config =>
+       {
+           config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
+       })
+       .WithCachingAddPackageSteps()
        .WithStep<PlaceholderCachingStep>(config =>
        {
            var step = config.Step;
@@ -41,6 +48,11 @@ database.WithCategory("Aspire")
         .WithOption(appHostProjectOption)
         .WithOption(projectOption)
         .WithOption(prereleaseOption)
+        .WithStep<ValidateContextStep>(config =>
+        {
+            config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
+        })
+        .WithDatabaseAddPackageSteps()
         .WithStep<PlaceholderDatabaseStep>(config =>
         {
             var step = config.Step;
@@ -61,6 +73,11 @@ storage.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
+       .WithStep<ValidateContextStep>(config =>
+       {
+           config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;
+       })
+       .WithDatabaseAddPackageSteps()
        .WithStep<PlaceholderStorageStep>(config =>
        {
            var step = config.Step;
@@ -79,6 +96,7 @@ runner.RunAsync(args).Wait();
 //TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
+    services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
     services.AddTransient<PlaceholderCachingStep>();
@@ -95,37 +113,37 @@ static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out Sc
     cachingTypeOption = new ScaffolderOption<string>
     {
         DisplayName = "Caching type",
-        CliOption = "--type",
+        CliOption = AspireCommandHelpers.TypeCliOption,
         Description = "Types of caching",
         Required = true,
         PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = GetCmdsHelper.CachingTypeCustomValues
+        CustomPickerValues = AspireCommandHelpers.CachingTypeCustomValues
     };
 
     databaseTypeOption = new ScaffolderOption<string>
     {
         DisplayName = "Database type",
-        CliOption = "--type",
+        CliOption = AspireCommandHelpers.TypeCliOption,
         Description = "Types of database",
         Required = true,
         PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = GetCmdsHelper.DatabaseTypeCustomValues
+        CustomPickerValues = AspireCommandHelpers.DatabaseTypeCustomValues
     };
 
     storageTypeOption = new ScaffolderOption<string>
     {
         DisplayName = "Storage type",
-        CliOption = "--type",
+        CliOption = AspireCommandHelpers.TypeCliOption,
         Description = "Types of storage",
         Required = true,
         PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = GetCmdsHelper.StorageTypeCustomValues
+        CustomPickerValues = AspireCommandHelpers.StorageTypeCustomValues
     };
 
     appHostProjectOption = new ScaffolderOption<string>
     {
         DisplayName = "Aspire App host project file",
-        CliOption = "--apphost-project",
+        CliOption = AspireCommandHelpers.AppHostCliOption,
         Description = "Aspire App host project for the scaffolding",
         Required = true,
         PickerType = InteractivePickerType.ProjectPicker
@@ -134,7 +152,7 @@ static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out Sc
     projectOption = new ScaffolderOption<string>
     {
         DisplayName = "Web or worker project file",
-        CliOption = "--project",
+        CliOption = AspireCommandHelpers.WorkerProjectCliOption,
         Description = "Web or worker project associated with the Aspire App host",
         Required = true,
         PickerType = InteractivePickerType.ProjectPicker
@@ -143,7 +161,7 @@ static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out Sc
     prereleaseOption = new ScaffolderOption<bool>
     {
         DisplayName = "Include Prerelease packages?",
-        CliOption = "--prerelease",
+        CliOption = AspireCommandHelpers.PrereleaseCliOption,
         Description = "Include prerelease package versions when installing latest Aspire components",
         Required = false,
         PickerType = InteractivePickerType.YesNo

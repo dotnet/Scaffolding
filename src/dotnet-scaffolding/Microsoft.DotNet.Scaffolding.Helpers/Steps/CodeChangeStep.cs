@@ -20,17 +20,7 @@ internal class CodeChangeStep : ScaffoldStep
     public override async Task<bool> ExecuteAsync()
     {
         new MsBuildInitializer(Logger).Initialize();
-        if (CodeService is null)
-        {
-            var workspaceSettings = new WorkspaceSettings()
-            {
-                InputPath = ProjectPath
-            };
-
-            var appSettings = new AppSettings();
-            appSettings.AddSettings("workspace", workspaceSettings);
-            CodeService = new CodeService(appSettings, Logger);
-        }
+        CodeService ??= new CodeService(Logger, ProjectPath);
 
         //replace all "variables" provided in 'CodeModifierProperties' in the 'CodeModifierConfig'
         EditCodeModifierConfig();

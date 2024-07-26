@@ -5,7 +5,7 @@ using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 
-internal static class GetCmdsHelper
+internal static class AspireCommandHelpers
 {
     internal static DatabaseProperties SqlServerDefaults = new()
     {
@@ -38,4 +38,9 @@ internal static class GetCmdsHelper
     internal static List<string> CachingTypeCustomValues = ["redis", "redis-with-output-caching"];
     internal static List<string> DatabaseTypeCustomValues = [.. DatabaseTypeDefaults.Keys];
     internal static List<string> StorageTypeCustomValues = ["azure-storage-queues", "azure-storage-blobs", "azure-data-tables"];
+
+    internal static string TypeCliOption = "--type";
+    internal static string AppHostCliOption = "--apphost-project";
+    internal static string WorkerProjectCliOption = "--project";
+    internal static string PrereleaseCliOption = "--prerelease";
 }

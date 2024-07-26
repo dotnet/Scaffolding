@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 internal class ProjectInfo
 {
     //Project info
-    public IAppSettings? AppSettings { get; set; }
+    public string? ProjectPath { get; set; }
     public ICodeService? CodeService { get; set; }
     public CodeChangeOptions? CodeChangeOptions { get; set; }
 }

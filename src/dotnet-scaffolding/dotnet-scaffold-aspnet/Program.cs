@@ -114,6 +114,7 @@ public static class Program
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Page = context.GetOptionResult(pageTypeOption);
             })
+            .WithBlazorCrudAddPackagesStep()
             .WithDbContextStep()
             .WithConnectionStringStep()
             .WithBlazorCrudTextTemplatingStep();
@@ -135,6 +136,7 @@ public static class Program
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
             })
+            .WithMinimalApiAddPackagesStep()
             .WithDbContextStep()
             .WithConnectionStringStep()
             .WithMinimalApiTextTemplatingStep();
@@ -159,6 +161,7 @@ public static class Program
     //TODO separate adding transient steps from singleton services.
     static void ConfigureServices(IServiceCollection services)
     {
+        services.AddTransient<AddPackagesStep>();
         services.AddTransient<AddConnectionStringStep>();
         services.AddTransient<TextTemplatingStep>();
         services.AddTransient<AreaScaffolderStep>();

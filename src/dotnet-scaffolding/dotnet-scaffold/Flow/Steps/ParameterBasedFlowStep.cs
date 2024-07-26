@@ -125,8 +125,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var codeService = context.GetCodeService();
             if (Parameter.PickerType is InteractivePickerType.ProjectPicker && codeService is null && !string.IsNullOrEmpty(projectPath))
             {
-                _appSettings.Workspace().InputPath = projectPath;
-                codeService = new CodeService(_appSettings, _logger);
+                codeService = new CodeService(_logger, projectPath);
                 context.Set(new FlowProperty(
                     FlowContextProperties.CodeService,
                     codeService));

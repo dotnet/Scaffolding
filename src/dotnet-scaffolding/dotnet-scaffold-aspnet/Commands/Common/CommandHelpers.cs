@@ -12,11 +12,11 @@ internal static class CommandHelpers
     /// Given a class name (only meant for C# classes), get a file path at the base of the project (where the .csproj is on disk)
     /// </summary>
     /// <returns>string file path</returns>
-    internal static string GetNewFilePath(IAppSettings? appSettings, string className)
+    internal static string GetNewFilePath(string projectPath, string className)
     {
         var newFilePath = string.Empty;
         var fileName = StringUtil.EnsureCsExtension(className);
-        var baseProjectPath = Path.GetDirectoryName(appSettings?.Workspace().InputPath);
+        var baseProjectPath = Path.GetDirectoryName(projectPath);
         if (!string.IsNullOrEmpty(baseProjectPath))
         {
             newFilePath = Path.Combine(baseProjectPath, $"{fileName}");

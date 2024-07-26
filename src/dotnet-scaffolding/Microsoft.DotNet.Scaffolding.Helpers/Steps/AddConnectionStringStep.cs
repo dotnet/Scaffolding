@@ -1,8 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using ScaffoldingStep = Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
@@ -16,24 +17,31 @@ internal class AddConnectionStringStep : ScaffoldingStep
 
     public AddConnectionStringStep(ILogger<AddConnectionStringStep> logger)
     {
-        _logger = logger;   
+        _logger = logger;
     }
 
-    public override Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var appSettingsFileSearch = Directory.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
-        JObject content;
+        JsonNode? content;
         bool writeContent = false;
 
         if (string.IsNullOrEmpty(appSettingsFile) || !File.Exists(appSettingsFile))
         {
-            content = [];
+            content = new JsonObject();
             writeContent = true;
         }
         else
         {
-            content = JObject.Parse(File.ReadAllText(appSettingsFile));
+            var jsonString = await File.ReadAllTextAsync(appSettingsFile, cancellationToken);
+            content = JsonNode.Parse(jsonString);
+        }
+
+        if (content is null)
+        {
+            _logger.LogError("badbad");
+            return;            
         }
 
         string connectionStringNodeName = "ConnectionStrings";
@@ -42,11 +50,11 @@ internal class AddConnectionStringStep : ScaffoldingStep
         if (content[connectionStringNodeName] is null)
         {
             writeContent = true;
-            content[connectionStringNodeName] = new JObject();
+            content[connectionStringNodeName] = new JsonObject();
         }
 
         //if a key with the 'databaseName' already exists, skipping adding a connection string.
-        if (content[connectionStringNodeName] is JObject connectionStringObject &&
+        if (content[connectionStringNodeName] is JsonObject connectionStringObject &&
             connectionStringObject[ConnectionStringName] is null &&
             !string.IsNullOrEmpty(ConnectionString))
         {
@@ -55,16 +63,13 @@ internal class AddConnectionStringStep : ScaffoldingStep
             content[connectionStringNodeName] = connectionStringObject;
         }
 
-        // Json.Net loses comments so the above code if requires any changes loses
-        // comments in the file. The writeContent bool is for saving
-        // a specific case without losing comments - when no changes are needed.
+        // System.Text.Json does not preserve comments, similar to Json.Net.
+        // The writeContent bool is for saving a specific case without losing comments - when no changes are needed.
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
-            File.WriteAllText(appSettingsFile, content.ToString());
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            await File.WriteAllTextAsync(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
-            return Task.FromResult(true);
         }
-
-        return Task.FromResult(false);
     }
 }

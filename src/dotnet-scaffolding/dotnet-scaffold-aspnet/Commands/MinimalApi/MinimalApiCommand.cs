@@ -28,7 +28,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
 
     public async Task<int> ExecuteAsync(MinimalApiSettings settings, ScaffolderContext context)
     {
-        if (!ValidateMinimalApiSettings(settings))
+        if (!ValidateMinimalApiSettings(settings, context))
         {
             return -1;
         }
@@ -49,16 +49,13 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         //Install packages and add a DbContext (if needed)
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
-            _logger.LogInformation("Installing packages...");
-            await InstallPackagesAsync(settings);
-            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(minimalApiModel.DbContextInfo, minimalApiModel.ProjectInfo);
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(settings.Project, minimalApiModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
-            var projectPath = minimalApiModel.ProjectInfo?.AppSettings?.Workspace()?.InputPath;
-            var projectBasePath = Path.GetDirectoryName(projectPath);
+            var projectBasePath = Path.GetDirectoryName(settings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
                 context.Properties.Add("BaseProjectPath", projectBasePath);
@@ -70,7 +67,6 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         var projectUpdateResult = await UpdateProjectAsync(minimalApiModel);
         if (projectUpdateResult)
         {
-            _logger.LogInformation("Finished");
             return 0;
         }
         else
@@ -80,7 +76,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         }
     }
 
-    private bool ValidateMinimalApiSettings(MinimalApiSettings commandSettings)
+    private bool ValidateMinimalApiSettings(MinimalApiSettings commandSettings, ScaffolderContext context)
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
@@ -100,6 +96,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
 
+        context.Properties.Add(nameof(MinimalApiSettings), commandSettings);
         return true;
     }
 
@@ -107,9 +104,9 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
     {
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
         config = EditConfigForMinimalApi(config, minimalApiModel);
-        if (minimalApiModel.ProjectInfo.AppSettings is not null &&
-            minimalApiModel.ProjectInfo.CodeService is not null &&
+        if (minimalApiModel.ProjectInfo.CodeService is not null &&
             minimalApiModel.ProjectInfo.CodeChangeOptions is not null &&
+            !string.IsNullOrEmpty(minimalApiModel.ProjectInfo.ProjectPath) &&
             config is not null)
         {
             var codeChangeOptions = new CodeChangeOptions()
@@ -120,7 +117,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
             };
 
             var projectModifier = new ProjectModifier(
-                minimalApiModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
+                minimalApiModel.ProjectInfo.ProjectPath,
                 minimalApiModel.ProjectInfo.CodeService,
                 _logger,
                 config,
@@ -202,7 +199,7 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
-            dbContextInfo = ClassAnalyzers.GetDbContextInfo(dbContextClassSymbol, projectInfo.AppSettings, dbContextClassName, settings.DatabaseProvider, settings.Model);
+            dbContextInfo = ClassAnalyzers.GetDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider, settings.Model);
         }
 
         MinimalApiModel scaffoldingModel = new()
@@ -226,14 +223,14 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
             else
             {
                 scaffoldingModel.EndpointsClassName = Path.GetFileNameWithoutExtension(scaffoldingModel.EndpointsFileName);
-                scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(scaffoldingModel.ProjectInfo.AppSettings, scaffoldingModel.EndpointsFileName);
+                scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(settings.Project, scaffoldingModel.EndpointsFileName);
             }
         }
         else
         {
             scaffoldingModel.EndpointsFileName = $"{settings.Model}Endpoints.cs";
             scaffoldingModel.EndpointsClassName = $"{settings.Model}Endpoints";
-            scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(scaffoldingModel.ProjectInfo.AppSettings, scaffoldingModel.EndpointsFileName);
+            scaffoldingModel.EndpointsPath = CommandHelpers.GetNewFilePath(settings.Project, scaffoldingModel.EndpointsFileName);
         }
 
 
@@ -250,28 +247,5 @@ internal class MinimalApiCommand : ICommandWithSettings<MinimalApiSettings>
         }
 
         return scaffoldingModel;
-    }
-
-    private async Task InstallPackagesAsync(MinimalApiSettings commandSettings)
-    {
-        //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
-        var packageList = new List<string>()
-        {
-            PackageConstants.EfConstants.EfToolsPackageName
-        };
-
-        if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-           PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
-        {
-            packageList.Add(projectPackageName);
-        }
-
-        await new AddPackagesStep
-        {
-            PackageNames = packageList,
-            ProjectPath = commandSettings.Project,
-            Prerelease = commandSettings.Prerelease,
-            Logger = _logger
-        }.ExecuteAsync();
     }
 }

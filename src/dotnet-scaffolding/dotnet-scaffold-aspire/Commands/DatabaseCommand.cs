@@ -22,14 +22,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         public async Task<int> ExecuteAsync(CommandSettings settings, ScaffolderContext context)
         {
-            if (!ValidateDatabaseCommandSettings(settings))
-            {
-                return -1;
-            }
-
-            _logger.LogInformation("Installing packages...");
-            await InstallPackagesAsync(settings);
-
             _logger.LogInformation("Updating App host project...");
             var appHostResult = await UpdateAppHostAsync(settings);
 
@@ -50,7 +42,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
             if (appHostResult && workerResult)
             {
-                _logger.LogInformation("Finished");
                 return 0;
             }
             else
@@ -67,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         private DbContextProperties? GetDbContextProperties(CommandSettings settings)
         {
             var newDbContextPath = CreateNewDbContextPath(settings);
-            if (GetCmdsHelper.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
+            if (AspireCommandHelpers.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
                 dbContextProperties is not null)
             {
                 dbContextProperties.DbContextPath = newDbContextPath;
@@ -79,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
 
         private string CreateNewDbContextPath(CommandSettings commandSettings)
         {
-            if (!GetCmdsHelper.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
+            if (!AspireCommandHelpers.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
             {
                 return string.Empty;
             }
@@ -96,67 +87,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             return dbContextPath;
         }
 
-        private bool ValidateDatabaseCommandSettings(CommandSettings commandSettings)
-        {
-            if (string.IsNullOrEmpty(commandSettings.Type) || !GetCmdsHelper.DatabaseTypeCustomValues.Contains(commandSettings.Type, StringComparer.OrdinalIgnoreCase))
-            {
-                string dbTypeDisplayList = string.Join(", ", GetCmdsHelper.DatabaseTypeCustomValues.GetRange(0, GetCmdsHelper.DatabaseTypeCustomValues.Count - 1)) +
-                    (GetCmdsHelper.DatabaseTypeCustomValues.Count > 1 ? " and " : "") + GetCmdsHelper.DatabaseTypeCustomValues[GetCmdsHelper.DatabaseTypeCustomValues.Count - 1];
-                _logger.LogError("Missing/Invalid --type option.");
-                _logger.LogError($"Valid options : {dbTypeDisplayList}");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(commandSettings.AppHostProject) || !_fileSystem.FileExists(commandSettings.AppHostProject))
-            {
-                _logger.LogError("Missing/Invalid --apphost-project option.");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
-            {
-                _logger.LogError("Missing/Invalid --project option.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private async Task InstallPackagesAsync(CommandSettings commandSettings)
-        {
-            List<AddPackagesStep> packageSteps = [];
-            if (PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName))
-            {
-                var appHostPackageStep = new AddPackagesStep
-                {
-                    PackageNames = [appHostPackageName],
-                    ProjectPath = commandSettings.AppHostProject,
-                    Prerelease = commandSettings.Prerelease,
-                    Logger = _logger
-                };
-
-                packageSteps.Add(appHostPackageStep);
-            }
-
-            if(PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName))
-            {
-                var workerProjPackageStep = new AddPackagesStep
-                {
-                    PackageNames = [projectPackageName],
-                    ProjectPath = commandSettings.AppHostProject,
-                    Prerelease = commandSettings.Prerelease,
-                    Logger = _logger
-                };
-
-                packageSteps.Add(workerProjPackageStep);
-            }
-
-            foreach (var packageStep in packageSteps)
-            {
-                await packageStep.ExecuteAsync();
-            }
-        }
-
         private async Task<bool> UpdateAppHostAsync(CommandSettings commandSettings)
         {
             CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
@@ -166,15 +96,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
                 return false;
             }
 
-            var workspaceSettings = new WorkspaceSettings
-            {
-                InputPath = commandSettings.AppHostProject
-            };
-
-            var hostAppSettings = new AppSettings();
-            hostAppSettings.AddSettings("workspace", workspaceSettings);
-            var codeService = new CodeService(hostAppSettings, _logger);
-            var codeModifierProperties = await GetAppHostPropertiesAsync(commandSettings, codeService);
+            var codeService = new CodeService(_logger, commandSettings.AppHostProject);
+            var codeModifierProperties = await GetAppHostPropertiesAsync(commandSettings);
             CodeChangeStep codeChangeStep = new()
             {
                 CodeModifierConfig = config,
@@ -208,17 +131,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
             return await codeChangeStep.ExecuteAsync();
         }
 
-        internal async Task<Dictionary<string, string>> GetAppHostPropertiesAsync(CommandSettings commandSettings, ICodeService codeService)
+        internal async Task<Dictionary<string, string>> GetAppHostPropertiesAsync(CommandSettings commandSettings)
         {
             var codeModifierProperties = new Dictionary<string, string>();
-            var autoGenProjectNames = await AspireHelpers.GetAutoGeneratedProjectNamesAsync(commandSettings.AppHostProject, codeService);
+            var autoGenProjectNames = await AspireHelpers.GetAutoGeneratedProjectNamesAsync(commandSettings.AppHostProject, _logger);
             //add the web worker project name
             if (autoGenProjectNames.TryGetValue(commandSettings.Project, out var autoGenProjectName))
             {
                 codeModifierProperties.Add("$(AutoGenProjectName)", autoGenProjectName);
             }
 
-            if (GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) && dbProperties is not null)
+            if (AspireCommandHelpers.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) && dbProperties is not null)
             {
                 codeModifierProperties.Add("$(DbName)", dbProperties.AspireDbName);
                 codeModifierProperties.Add("$(AddDbMethod)", dbProperties.AspireAddDbMethod);
@@ -231,8 +154,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands
         internal Dictionary<string, string> GetApiProjectProperties(CommandSettings commandSettings)
         {
             var codeModifierProperties = new Dictionary<string, string>();
-            if (GetCmdsHelper.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) &&
-                GetCmdsHelper.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) &&
+            if (AspireCommandHelpers.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) &&
+                AspireCommandHelpers.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) &&
                 dbProperties is not null &&
                 dbContextProperties is not null)
             {

@@ -1,18 +1,24 @@
-// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.Extensions.Logging;
+using ScaffoldingStep = Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep;
 
 namespace Microsoft.DotNet.Scaffolding.Helpers.Steps;
 
-internal class AddPackagesStep : ScaffoldStep
+internal class AddPackagesStep : ScaffoldingStep
 {
-    public required IList<string> PackageNames { get; init; }
-    public required string ProjectPath { get; init; }
-    public required ILogger Logger { get; init; }
+    public required IList<string> PackageNames { get; set; }
+    public required string ProjectPath { get; set; }
     public bool Prerelease { get; set; } = false;
+    private readonly ILogger _logger;
 
-    public override Task<bool> ExecuteAsync()
+    public AddPackagesStep(ILogger<AddPackagesStep> logger)
+    {
+        _logger = logger;
+    }
+
+    public override Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         foreach (var packageName in PackageNames)
         {
@@ -20,7 +26,7 @@ internal class AddPackagesStep : ScaffoldStep
             {
                 DotnetCommands.AddPackage(
                     packageName: packageName,
-                    logger: Logger,
+                    logger: _logger,
                     projectFile: ProjectPath,
                     includePrerelease: Prerelease);
             }

@@ -16,7 +16,7 @@ internal abstract class PlaceholderStepBase<T>(T command) : ScaffoldStep where T
     public string? Project { get; set; }
     public bool Prerelease { get; set; }
 
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (Type is null || AppHostProject is null || Project is null)
         {
@@ -24,12 +24,14 @@ internal abstract class PlaceholderStepBase<T>(T command) : ScaffoldStep where T
             throw new InvalidOperationException("Type, AppHostProject, and Project must be set before executing the step.");
         }
 
-        await _command.ExecuteAsync(new CommandSettings()
+        var exitCode = await _command.ExecuteAsync(new CommandSettings()
         {
             Type = Type,
             AppHostProject = AppHostProject,
             Project = Project,
             Prerelease = Prerelease
         }, context);
+
+        return exitCode == 0;
     }
 }

@@ -17,7 +17,7 @@ internal abstract class MinimalApiScaffolderStepBase<T>(T command) : ScaffoldSte
     public string? DatabaseProvider { get; set; }
     public string? DataContext { get; set; }
     public string? Model { get; set; }
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (Project is null || Model is null)
         {
@@ -25,7 +25,7 @@ internal abstract class MinimalApiScaffolderStepBase<T>(T command) : ScaffoldSte
             throw new InvalidOperationException("Project/Model must be set before executing the step.");
         }
 
-        await _command.ExecuteAsync(new MinimalApiSettings()
+        var exitCode = await _command.ExecuteAsync(new MinimalApiSettings()
         {
             Project = Project,
             Model = Model,
@@ -35,5 +35,7 @@ internal abstract class MinimalApiScaffolderStepBase<T>(T command) : ScaffoldSte
             Endpoints = Endpoints,
             Prerelease = Prerelease
         }, context);
+
+        return exitCode == 0;
     }
 }

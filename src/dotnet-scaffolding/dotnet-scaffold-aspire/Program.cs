@@ -25,7 +25,7 @@ caching.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
-       .WithStep<ValidateContextStep>(config =>
+       .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
        })
@@ -48,7 +48,7 @@ database.WithCategory("Aspire")
         .WithOption(appHostProjectOption)
         .WithOption(projectOption)
         .WithOption(prereleaseOption)
-        .WithStep<ValidateContextStep>(config =>
+        .WithStep<ValidateOptionsStep>(config =>
         {
             config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
         })
@@ -73,7 +73,7 @@ storage.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
-       .WithStep<ValidateContextStep>(config =>
+       .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;
        })
@@ -96,7 +96,7 @@ runner.RunAsync(args).Wait();
 //TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
-    services.AddTransient<ValidateContextStep>();
+    services.AddTransient<ValidateOptionsStep>();
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();

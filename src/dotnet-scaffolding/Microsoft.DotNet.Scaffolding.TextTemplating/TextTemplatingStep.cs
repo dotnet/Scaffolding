@@ -27,7 +27,7 @@ public class TextTemplatingStep : ScaffoldStep
         _logger = logger;
     }
 
-    public override Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var templateInvoker = new TemplateInvoker();
         var dictParams = new Dictionary<string, object>()

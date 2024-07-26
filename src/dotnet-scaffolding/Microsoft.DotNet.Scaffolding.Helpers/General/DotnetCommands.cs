@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.General;
 
 internal static class DotnetCommands
 {
-    public static void AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
+    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
         {
@@ -27,8 +27,8 @@ internal static class DotnetCommands
             {
                 arguments.Add("--prerelease");
             }
-            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
 
+            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
             // Buffer the output here because we'll only display it in the failure scenario
@@ -51,6 +51,10 @@ internal static class DotnetCommands
             {
                 logger.LogInformation("Done");
             }
+
+            return exitCode == 0;
         }
+
+        return false;
     }
 }

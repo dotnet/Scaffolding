@@ -13,7 +13,7 @@ internal abstract class AreaScaffolderStepBase<T>(T command) : ScaffoldStep wher
     public string? Project { get; set; }
     public string? Name { get; set; }
 
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (Name is null || Project is null)
         {
@@ -21,10 +21,12 @@ internal abstract class AreaScaffolderStepBase<T>(T command) : ScaffoldStep wher
             throw new InvalidOperationException("Name/Project/CommandName must be set before executing the step.");
         }
 
-        await _command.ExecuteAsync(new AreaCommandSettings()
+        var exitCode = await _command.ExecuteAsync(new AreaCommandSettings()
         {
             Project = Project,
             Name = Name
         }, context);
+
+        return exitCode == 0;
     }
 }

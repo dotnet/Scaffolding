@@ -16,19 +16,21 @@ internal class AddPackagesStep : ScaffoldingStep
     public AddPackagesStep(ILogger<AddPackagesStep> logger)
     {
         _logger = logger;
+        ContinueOnError = true;
     }
 
-    public override Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         foreach (var packageName in PackageNames)
         {
             if (!string.IsNullOrEmpty(packageName))
             {
-                DotnetCommands.AddPackage(
-                    packageName: packageName,
-                    logger: _logger,
-                    projectFile: ProjectPath,
-                    includePrerelease: Prerelease);
+                return Task.FromResult(
+                    DotnetCommands.AddPackage(
+                        packageName: packageName,
+                        logger: _logger,
+                        projectFile: ProjectPath,
+                        includePrerelease: Prerelease));
             }
         }
 

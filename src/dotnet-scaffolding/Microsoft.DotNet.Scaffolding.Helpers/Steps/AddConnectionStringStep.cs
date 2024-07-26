@@ -3,6 +3,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.Extensions.Logging;
 using ScaffoldingStep = Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep;
 
@@ -14,34 +15,36 @@ internal class AddConnectionStringStep : ScaffoldingStep
     public required string ConnectionStringName { get; set; }
     public required string ConnectionString { get; set; }
     private readonly ILogger _logger;
+    private readonly IFileSystem _fileSystem;
 
-    public AddConnectionStringStep(ILogger<AddConnectionStringStep> logger)
+    public AddConnectionStringStep(ILogger<AddConnectionStringStep> logger, IFileSystem fileSystem)
     {
         _logger = logger;
+        _fileSystem = fileSystem;
     }
 
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var appSettingsFileSearch = Directory.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
+        var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
 
-        if (string.IsNullOrEmpty(appSettingsFile) || !File.Exists(appSettingsFile))
+        if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
             writeContent = true;
         }
         else
         {
-            var jsonString = await File.ReadAllTextAsync(appSettingsFile, cancellationToken);
+            var jsonString = _fileSystem.ReadAllText(appSettingsFile);
             content = JsonNode.Parse(jsonString);
         }
 
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            return;            
+            return Task.FromResult(false);            
         }
 
         string connectionStringNodeName = "ConnectionStrings";
@@ -66,8 +69,10 @@ internal class AddConnectionStringStep : ScaffoldingStep
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
-            await File.WriteAllTextAsync(appSettingsFile, content.ToJsonString(options));
+            _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
         }
+
+        return Task.FromResult(true);
     }
 }

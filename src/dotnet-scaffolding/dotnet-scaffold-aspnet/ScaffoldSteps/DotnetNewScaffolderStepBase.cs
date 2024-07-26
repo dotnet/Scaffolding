@@ -14,7 +14,7 @@ internal abstract class DotnetNewScaffolderStepBase<T>(T command) : ScaffoldStep
     public string? Name { get; set; }
     public required string CommandName { get; set; }
 
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (Name  is null || Project is null || CommandName is null)
         {
@@ -22,11 +22,13 @@ internal abstract class DotnetNewScaffolderStepBase<T>(T command) : ScaffoldStep
             throw new InvalidOperationException("Name/Project/CommandName must be set before executing the step.");
         }
 
-        await _command.ExecuteAsync(new DotnetNewCommandSettings()
+        var exitCode = await _command.ExecuteAsync(new DotnetNewCommandSettings()
         {
             Project = Project,
             Name = Name,
             CommandName = CommandName
         }, context);
+
+        return exitCode == 0;
     }
 }

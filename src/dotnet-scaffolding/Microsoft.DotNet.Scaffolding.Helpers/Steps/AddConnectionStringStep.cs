@@ -40,7 +40,7 @@ internal class AddConnectionStringStep : ScaffoldingStep
 
         if (content is null)
         {
-            _logger.LogError("badbad");
+            _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
             return;            
         }
 
@@ -63,8 +63,6 @@ internal class AddConnectionStringStep : ScaffoldingStep
             content[connectionStringNodeName] = connectionStringObject;
         }
 
-        // System.Text.Json does not preserve comments, similar to Json.Net.
-        // The writeContent bool is for saving a specific case without losing comments - when no changes are needed.
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             var options = new JsonSerializerOptions { WriteIndented = true };

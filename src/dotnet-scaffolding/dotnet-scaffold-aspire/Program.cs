@@ -96,6 +96,7 @@ runner.RunAsync(args).Wait();
 //TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
+    services.AddTransient<ValidateContextStep>();
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();

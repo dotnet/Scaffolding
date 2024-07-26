@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
+//TODO: move to Microsoft.DotNet.Scaffolding.Core and register it there.
 public class ValidateOptionsStep : ScaffoldStep
 {
     public required Func<ScaffolderContext, ILogger, bool> ValidateMethod { get; set; }

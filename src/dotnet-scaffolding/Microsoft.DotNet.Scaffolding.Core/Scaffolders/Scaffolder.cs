@@ -14,7 +14,6 @@ public class Scaffolder : IScaffolder
     private readonly List<ScaffolderOption> _options;
     private readonly List<ScaffoldStep> _steps;
     private readonly List<ScaffoldStepPreparer> _preparers;
-    
     public string Name => _name;
     public string DisplayName => _displayName;
     public string Category => _category;
@@ -48,6 +47,7 @@ public class Scaffolder : IScaffolder
                 }
             }
 
+            //TODO: should we post execute run if above failed?
             preparer.RunPostExecute(step, context);
         }
     }

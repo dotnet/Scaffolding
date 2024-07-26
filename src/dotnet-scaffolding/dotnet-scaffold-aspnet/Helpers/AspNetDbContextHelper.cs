@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -66,9 +65,9 @@ internal class AspNetDbContextHelper
         return configToEdit;
     }
 
-    internal static DbContextProperties? GetDbContextProperties(DbContextInfo dbContextInfo, ProjectInfo projectInfo)
+    internal static DbContextProperties? GetDbContextProperties(string projectPath, DbContextInfo dbContextInfo)
     {
-        var projectBasePath = Path.GetDirectoryName(projectInfo.AppSettings?.Workspace()?.InputPath);
+        var projectBasePath = Path.GetDirectoryName(projectPath);
         if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
             DbContextTypeDefaults.TryGetValue(dbContextInfo.DatabaseProvider, out var dbContextProperties) &&
             dbContextProperties is not null &&

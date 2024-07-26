@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 
@@ -15,7 +14,6 @@ public class Scaffolder : IScaffolder
     private readonly List<ScaffolderOption> _options;
     private readonly List<ScaffoldStep> _steps;
     private readonly List<ScaffoldStepPreparer> _preparers;
-
     public string Name => _name;
     public string DisplayName => _displayName;
     public string Category => _category;
@@ -42,9 +40,14 @@ public class Scaffolder : IScaffolder
             preparer.RunPreExecute(step, context);
             if (!step.SkipStep)
             {
-                await step.ExecuteAsync(context);
+                var stepResult = await step.ExecuteAsync(context);
+                if (!stepResult && !step.ContinueOnError)
+                {
+                    break;
+                }
             }
 
+            //TODO: should we post execute run if above failed?
             preparer.RunPostExecute(step, context);
         }
     }

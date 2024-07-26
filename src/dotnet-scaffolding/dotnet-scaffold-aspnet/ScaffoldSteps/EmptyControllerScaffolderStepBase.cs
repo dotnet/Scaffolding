@@ -15,7 +15,7 @@ internal abstract class EmptyControllerScaffolderStepBase<T>(T command) : Scaffo
     public bool Actions { get; set; }
     public required string CommandName { get; set; }
 
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (Name is null || Project is null)
         {
@@ -23,12 +23,14 @@ internal abstract class EmptyControllerScaffolderStepBase<T>(T command) : Scaffo
             throw new InvalidOperationException("Name and Project must be set before executing the step.");
         }
 
-        await _command.ExecuteAsync(new EmptyControllerCommandSettings()
+        var exitCode = await _command.ExecuteAsync(new EmptyControllerCommandSettings()
         {
             CommandName = CommandName,
             Project = Project,
             Name = Name,
             Actions = Actions
         }, context);
+
+        return exitCode == 0;
     }
 }

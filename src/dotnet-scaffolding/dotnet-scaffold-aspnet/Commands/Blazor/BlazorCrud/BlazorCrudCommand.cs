@@ -26,7 +26,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
 
     public async Task<int> ExecuteAsync(BlazorCrudSettings settings, ScaffolderContext context)
     {
-        if (!ValidateBlazorCrudSettings(settings))
+        if (!ValidateBlazorCrudSettings(settings, context))
         {
             return -1;
         }
@@ -47,16 +47,13 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         //Install packages and add a DbContext (if needed)
         if (blazorCrudModel.DbContextInfo.EfScenario)
         {
-            _logger.LogInformation("Installing packages...");
-            await InstallPackagesAsync(settings);
-            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(blazorCrudModel.DbContextInfo, blazorCrudModel.ProjectInfo);
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(settings.Project, blazorCrudModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
-            var projectPath = blazorCrudModel.ProjectInfo?.AppSettings?.Workspace()?.InputPath;
-            var projectBasePath = Path.GetDirectoryName(projectPath);
+            var projectBasePath = Path.GetDirectoryName(settings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
                 context.Properties.Add("BaseProjectPath", projectBasePath);
@@ -68,7 +65,6 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         var projectUpdateResult = await UpdateProjectAsync(blazorCrudModel);
         if (projectUpdateResult)
         {
-            _logger.LogInformation("Finished");
             return 0;
         }
         else
@@ -78,7 +74,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         }
     }
 
-    private bool ValidateBlazorCrudSettings(BlazorCrudSettings commandSettings)
+    private bool ValidateBlazorCrudSettings(BlazorCrudSettings commandSettings, ScaffolderContext context)
     {
         if (string.IsNullOrEmpty(commandSettings.Project) || !_fileSystem.FileExists(commandSettings.Project))
         {
@@ -113,15 +109,16 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
             commandSettings.DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
 
+        context.Properties.Add(nameof(BlazorCrudSettings), commandSettings);
         return true;
     }
 
     private async Task<bool> UpdateProjectAsync(BlazorCrudModel blazorCrudModel)
     {
         CodeModifierConfig? config = ProjectModifierHelper.GetCodeModifierConfig("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
-        if (blazorCrudModel.ProjectInfo.AppSettings is not null &&
-            blazorCrudModel.ProjectInfo.CodeService is not null &&
+        if (blazorCrudModel.ProjectInfo.CodeService is not null &&
             blazorCrudModel.ProjectInfo.CodeChangeOptions is not null &&
+            !string.IsNullOrEmpty(blazorCrudModel.ProjectInfo.ProjectPath) &&
             config is not null)
         {
             config = await EditConfigForBlazorCrudAsync(config, blazorCrudModel);
@@ -133,7 +130,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
             };
 
             var projectModifier = new ProjectModifier(
-                blazorCrudModel.ProjectInfo.AppSettings.Workspace().InputPath ?? string.Empty,
+                blazorCrudModel.ProjectInfo.ProjectPath,
                 blazorCrudModel.ProjectInfo.CodeService,
                 _logger,
                 config,
@@ -196,7 +193,7 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
-            dbContextInfo = ClassAnalyzers.GetDbContextInfo(dbContextClassSymbol, projectInfo.AppSettings, dbContextClassName, settings.DatabaseProvider, settings.Model);
+            dbContextInfo = ClassAnalyzers.GetDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider, settings.Model);
             dbContextInfo.EfScenario = true;
         }
 
@@ -219,30 +216,5 @@ internal class BlazorCrudCommand : ICommandWithSettings<BlazorCrudSettings>
         }
 
         return scaffoldingModel;
-    }
-
-    private async Task InstallPackagesAsync(BlazorCrudSettings commandSettings)
-    {
-        //add these packages regardless of the DatabaseProvider
-        var packageList = new List<string>()
-        {
-            PackageConstants.EfConstants.EfToolsPackageName,
-            PackageConstants.EfConstants.QuickGridEfAdapterPackageName,
-            PackageConstants.EfConstants.AspNetCoreDiagnosticsEfCorePackageName
-        };
-
-        if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-           PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
-        {
-            packageList.Add(projectPackageName);
-        }
-
-        await new AddPackagesStep
-        {
-            PackageNames = packageList,
-            ProjectPath = commandSettings.Project,
-            Prerelease = commandSettings.Prerelease,
-            Logger = _logger
-        }.ExecuteAsync();
     }
 }

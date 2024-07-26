@@ -27,7 +27,7 @@ internal interface ICodeService
     /// <param name="projectPath"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task ReloadWorkspaceAsync(string? projectPath);
+    Task ReloadWorkspaceAsync();
 
     Task <List<ISymbol>> GetAllClassSymbolsAsync();
     Task<List<Document>> GetAllDocumentsAsync();

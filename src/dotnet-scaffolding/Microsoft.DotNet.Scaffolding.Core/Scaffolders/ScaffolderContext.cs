@@ -25,4 +25,15 @@ public class ScaffolderContext
 
         return default;
     }
+
+    public T? GetOptionResult<T>(string optionCliName)
+    {
+        var optionResult = OptionResults.FirstOrDefault(x => !string.IsNullOrEmpty(x.Key.CliOption) &&  x.Key.CliOption.Equals(optionCliName, StringComparison.OrdinalIgnoreCase));
+        if (optionResult.Value is not null)
+        {
+            return (T?)optionResult.Value;
+        }
+
+        return default;
+    }
 }

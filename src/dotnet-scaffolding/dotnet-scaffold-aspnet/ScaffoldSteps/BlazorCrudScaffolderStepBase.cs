@@ -16,7 +16,7 @@ internal abstract class BlazorCrudScaffolderStepBase<T>(T command) : ScaffoldSte
     public string? DataContext { get; set; }
     public string? Model { get; set; } 
     public string? Page { get; set; }
-    public override async Task ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (Project is null || Model is null || Page is null)
         {
@@ -24,7 +24,7 @@ internal abstract class BlazorCrudScaffolderStepBase<T>(T command) : ScaffoldSte
             throw new InvalidOperationException("Name/Model/Page must be set before executing the step.");
         }
 
-        await _command.ExecuteAsync(new BlazorCrudSettings()
+        var exitCode = await _command.ExecuteAsync(new BlazorCrudSettings()
         {
             Project = Project,
             Model = Model,
@@ -33,5 +33,7 @@ internal abstract class BlazorCrudScaffolderStepBase<T>(T command) : ScaffoldSte
             Prerelease = Prerelease,
             Page = Page
         }, context);
+
+        return exitCode == 0;
     }
 }

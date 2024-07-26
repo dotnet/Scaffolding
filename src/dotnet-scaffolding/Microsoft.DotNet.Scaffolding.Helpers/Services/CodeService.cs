@@ -15,18 +15,18 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 ///       when it creates a new instance of <see cref="IProject"/>) it should call OpenProjectAsync
 ///       here and that would ensure project is loaded in the workspace.
 /// </summary>
-internal class CodeService : ICodeService, IDisposable
+public class CodeService : ICodeService, IDisposable
 {
     private readonly ILogger _logger;
     private MSBuildWorkspace? _workspace;
     private Compilation? _compilation;
-    private readonly IAppSettings _settings;
+    private readonly string _projectPath;
     private bool _initialized;
-    private readonly object _initLock = new object();
-    public CodeService(IAppSettings settings, ILogger logger)
+    private readonly object _initLock = new();
+    public CodeService(ILogger logger, string projectPath)
     {
         _logger = logger;
-        _settings = settings;
+        _projectPath = projectPath;
     }
 
     private void Initialize()
@@ -55,7 +55,7 @@ internal class CodeService : ICodeService, IDisposable
     public async Task<Workspace?> GetWorkspaceAsync()
     {
         EnsureInitialized();
-        return await GetMsBuildWorkspaceAsync(_settings.Workspace().InputPath);
+        return await GetMsBuildWorkspaceAsync();
     }
 
     /// <inheritdoc />
@@ -71,31 +71,27 @@ internal class CodeService : ICodeService, IDisposable
         return success;
     }
 
-    private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(string? path)
+    private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(bool refresh = false)
     {
         EnsureInitialized();
-        if (string.IsNullOrEmpty(path))
+
+        if (_workspace is not null && !refresh)
         {
             return _workspace;
         }
 
-        if (_workspace is not null)
-        {
-            return _workspace;
-        }
-
-        var workspace = MSBuildWorkspace.Create(_settings.GlobalProperties);
+        var workspace = MSBuildWorkspace.Create();
         workspace.WorkspaceFailed += OnWorkspaceFailed;
         workspace.LoadMetadataForReferencedProjects = true;
-        await workspace.OpenProjectAsync(path);
+        await workspace.OpenProjectAsync(_projectPath);
         _workspace = workspace;
         return _workspace;
     }
 
-    public async Task OpenProjectAsync(string projectPath)
+    public async Task OpenProjectAsync()
     {
         EnsureInitialized();
-        if (string.IsNullOrEmpty(projectPath))
+        if (string.IsNullOrEmpty(_projectPath))
         {
             return;
         }
@@ -106,7 +102,7 @@ internal class CodeService : ICodeService, IDisposable
             return;
         }
 
-        Project? project = msbuildWorkspace.CurrentSolution.GetProject(projectPath);
+        Project? project = msbuildWorkspace.CurrentSolution.GetProject(_projectPath);
         if (project is not null)
         {
             return;
@@ -114,7 +110,7 @@ internal class CodeService : ICodeService, IDisposable
 
         try
         {
-            await msbuildWorkspace.OpenProjectAsync(projectPath).ConfigureAwait(false);
+            await msbuildWorkspace.OpenProjectAsync(_projectPath).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -135,13 +131,12 @@ internal class CodeService : ICodeService, IDisposable
         }
     }
 
-    public async Task ReloadWorkspaceAsync(string? projectPath)
+    public async Task ReloadWorkspaceAsync()
     {
         EnsureInitialized();
         UnloadWorkspace();
 
-        await GetMsBuildWorkspaceAsync(_settings.Workspace().InputPath);
-        await OpenProjectAsync(projectPath!);
+        await GetMsBuildWorkspaceAsync(refresh: true);
     }
 
     //TODO add a debug option to logging.
@@ -162,7 +157,7 @@ internal class CodeService : ICodeService, IDisposable
         if (_compilation is null)
         {
             var workspace = await GetWorkspaceAsync();
-            var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
+            var project = workspace?.CurrentSolution?.GetProject(_projectPath);
             if (project is not null)
             {
                 _compilation = await project.GetCompilationAsync();
@@ -195,7 +190,7 @@ internal class CodeService : ICodeService, IDisposable
     {
         EnsureInitialized();
         var workspace = await GetWorkspaceAsync();
-        var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
+        var project = workspace?.CurrentSolution?.GetProject(_projectPath);
         if (project is not null)
         {
             return project.Documents.ToList();
@@ -213,7 +208,7 @@ internal class CodeService : ICodeService, IDisposable
         }
 
         var workspace = await GetWorkspaceAsync();
-        var project = workspace?.CurrentSolution?.GetProject(_settings.Workspace().InputPath);
+        var project = workspace?.CurrentSolution?.GetProject(_projectPath);
         if (project is not null)
         {
             return project.Documents.FirstOrDefault(x => x.Name.EndsWith(documentName));

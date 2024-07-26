@@ -10,8 +10,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 internal static class ClassAnalyzers
 {
     internal static DbContextInfo GetDbContextInfo(
+        string projectPath,
         ISymbol? existingDbContextClass,
-        IAppSettings? appSettings,
         string dbContextClassName,
         string dbProvider,
         string modelName)
@@ -32,7 +32,7 @@ internal static class ClassAnalyzers
             dbContextInfo.CreateDbContext = true;
             dbContextInfo.NewDbSetStatement = $"public DbSet<{modelName}> {modelName} {{ get; set; }} = default!;";
             dbContextInfo.DbContextClassName = dbContextClassName;
-            dbContextInfo.DbContextClassPath = CommandHelpers.GetNewFilePath(appSettings, dbContextClassName);
+            dbContextInfo.DbContextClassPath = CommandHelpers.GetNewFilePath(projectPath, dbContextClassName);
             dbContextInfo.DatabaseProvider = dbProvider;
             dbContextInfo.EntitySetVariableName = modelName;
         }
@@ -97,17 +97,12 @@ internal static class ClassAnalyzers
 
     internal static ProjectInfo GetProjectInfo(string projectPath, ILogger logger)
     {
-        var projectInfo = new ProjectInfo();
-        var workspaceSettings = new WorkspaceSettings
+        var projectInfo = new ProjectInfo()
         {
-            InputPath = projectPath
+            CodeService = new CodeService(logger, projectPath),
+            ProjectPath = projectPath
         };
 
-        var projectAppSettings = new AppSettings();
-        projectAppSettings.AddSettings("workspace", workspaceSettings);
-        var codeService = new CodeService(projectAppSettings, logger);
-        projectInfo.CodeService = codeService;
-        projectInfo.AppSettings = projectAppSettings;
         return projectInfo;
     }
 }

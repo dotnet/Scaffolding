@@ -26,11 +26,7 @@
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
   </ItemGroup>
 
-<<<<<<< HEAD
-</Project>
-=======
   <ItemGroup>
     <None Pack="true" Include="$(RepoRoot)src\Scaffolding\README.md"  PackagePath="\"/>
   </ItemGroup>
 </Project>
->>>>>>> 3fc550a1 (add PackageReadmeFile to scaffolding projects (#2885))

@@ -105,7 +105,6 @@ static void ConfigureServices(IServiceCollection services)
     services.AddTransient<PlaceholderStorageStep>();
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
-    //services.AddSingleton<IDotNetToolService, DotNetToolService>();
 }
 
 static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out ScaffolderOption<string> databaseTypeOption, out ScaffolderOption<string> storageTypeOption,

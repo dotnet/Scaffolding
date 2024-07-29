@@ -3,11 +3,12 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Microsoft.DotNet.Scaffolding.ComponentModel;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Core;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+
+namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
 internal class DotNetToolService : IDotNetToolService
 {

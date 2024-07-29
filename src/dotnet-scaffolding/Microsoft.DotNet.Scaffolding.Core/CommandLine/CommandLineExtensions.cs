@@ -3,9 +3,9 @@
 
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
-using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 
 namespace Microsoft.DotNet.Scaffolding.Core.CommandLine;
 

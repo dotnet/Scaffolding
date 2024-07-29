@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 using System.Globalization;
+using Microsoft.DotNet.Scaffolding.Core;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Settings;
 using Microsoft.Extensions.Logging;
 

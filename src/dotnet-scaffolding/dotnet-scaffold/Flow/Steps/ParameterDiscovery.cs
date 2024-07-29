@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Spectre.Console;
 using Spectre.Console.Flow;
 

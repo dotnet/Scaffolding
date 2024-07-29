@@ -1,11 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
-namespace Microsoft.DotNet.Scaffolding.ComponentModel;
+namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 
 /// <summary>
-/// What we want components to initialize and return (to stdout serialized as json) when 'get-commands' is invoked.
-/// Should be serialized as 'List<CommandInfo>'
+/// What we want components to initialize and return (to stdout serialized as json) when 'get-commands' is invoked.]
 /// </summary>
 internal class CommandInfo
 {

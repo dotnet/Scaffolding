@@ -1,9 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
-using Microsoft.DotNet.Scaffolding.ComponentModel;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Services;
+using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
@@ -15,19 +14,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     /// </summary>
     internal class CommandPickerFlowStep : IFlowStep
     {
-        private readonly IAppSettings _appSettings;
         private readonly ILogger _logger;
         private readonly IDotNetToolService _dotnetToolService;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         public CommandPickerFlowStep(
-            IAppSettings appSettings,
             ILogger logger,
             IDotNetToolService dotnetToolService,
             IEnvironmentService environmentService,
             IFileSystem fileSystem)
         {
-            _appSettings = appSettings; 
             _logger = logger;
             _dotnetToolService = dotnetToolService;
             _environmentService = environmentService;
@@ -153,7 +149,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 var step = new ParameterBasedFlowStep(
                     parameter,
                     null,
-                    _appSettings,
                     _environmentService,
                     _fileSystem,
                     _logger);

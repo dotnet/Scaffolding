@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Diagnostics;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.General;
+namespace Microsoft.DotNet.Scaffolding.Core;
 
 /// <summary>
 /// To run 'dotnet' or any processes and capture consequent stdout and stderr (using 'ExecuteAndCaptureOutput'
 /// </summary>
-internal class DotnetCliRunner
+public class DotnetCliRunner
 {
     public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args)
     {

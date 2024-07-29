@@ -1,6 +1,5 @@
-using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
@@ -16,27 +15,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 /// </summary>
 internal class StartupFlowStep : IFlowStep
 {
-    private readonly IAppSettings _appSettings;
     private readonly IEnvironmentService _environmentService;
     private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
-    private readonly IHostService _hostService;
     private readonly ILogger _logger;
     private readonly bool _initializeMsbuild;
     public StartupFlowStep(
-        IAppSettings appSettings,
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
-        IHostService hostService,
         ILogger logger,
         bool initializeMsbuild = true)
     {
-        _appSettings = appSettings;
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
-        _hostService = hostService;
         _logger = logger;
         _initializeMsbuild = initializeMsbuild;
     }
@@ -62,9 +55,6 @@ internal class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
-                //add 'workspace' settings
-                var workspaceSettings = new WorkspaceSettings();
-                _appSettings.AddSettings("workspace", workspaceSettings);
                 new MsBuildInitializer(_logger).Initialize();
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Initializing 1st party components (dotnet tools)";

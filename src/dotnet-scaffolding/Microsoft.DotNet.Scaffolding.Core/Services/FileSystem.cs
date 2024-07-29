@@ -3,13 +3,13 @@
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Core.Services;
 
 /// <summary>
 /// The default implementation of <see cref="IFileSystem"/>
 /// used by product code. This just makes calls to methods in System.IO
 /// </summary>
-internal class FileSystem : IFileSystem
+public class FileSystem : IFileSystem
 {
     private static IFileSystem? _fileSystem;
     public static IFileSystem Instance => _fileSystem ??= new FileSystem();

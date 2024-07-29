@@ -10,8 +10,4 @@
     <PackageReference Include="System.CommandLine.NamingConventionBinder" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.ComponentModel\Microsoft.DotNet.Scaffolding.ComponentModel.csproj" />
-  </ItemGroup>
-
 </Project>

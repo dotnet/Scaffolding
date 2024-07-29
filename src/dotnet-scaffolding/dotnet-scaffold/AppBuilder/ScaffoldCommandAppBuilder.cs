@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-
 using System.Reflection;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
@@ -36,8 +35,6 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
-        registrar.Register(typeof(IAppSettings), typeof(AppSettings));
-        registrar.Register(typeof(IHostService), typeof(HostService));
         return registrar;
     }
 

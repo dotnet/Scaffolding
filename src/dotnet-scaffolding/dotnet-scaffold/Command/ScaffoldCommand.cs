@@ -1,5 +1,4 @@
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
@@ -9,27 +8,21 @@ using Spectre.Console.Flow;
 
 internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
-    private readonly IAppSettings _appSettings;
     private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
-    private readonly IHostService _hostService;
     public ScaffoldCommand(
-        IAppSettings appSettings,
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
-        IHostService hostService,
         ILogger<ScaffoldCommand> logger)
         : base(flowProvider)
     {
-        _appSettings = appSettings;
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
-        _hostService = hostService;
         _logger = logger;
     }
 
@@ -49,9 +42,9 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     {
         IEnumerable<IFlowStep> flowSteps =
         [
-            new StartupFlowStep(_appSettings, _dotnetToolService, _environmentService, _fileSystem, _hostService, _logger),
+            new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger),
             new CategoryPickerFlowStep(_logger, _dotnetToolService),
-            new CommandPickerFlowStep(_appSettings, _logger, _dotnetToolService, _environmentService, _fileSystem),
+            new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
             new CommandExecuteFlowStep()
         ];
 

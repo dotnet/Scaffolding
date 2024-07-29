@@ -3,7 +3,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.Extensions.Logging;
 using ScaffoldingStep = Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep;
 

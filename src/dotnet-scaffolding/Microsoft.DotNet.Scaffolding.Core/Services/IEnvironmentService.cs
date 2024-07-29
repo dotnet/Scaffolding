@@ -1,6 +1,6 @@
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+namespace Microsoft.DotNet.Scaffolding.Core.Services;
 
-internal interface IEnvironmentService
+public interface IEnvironmentService
 {
     string UserProfilePath { get; }
     string NugetCachePath { get; }

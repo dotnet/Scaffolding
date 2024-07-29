@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 

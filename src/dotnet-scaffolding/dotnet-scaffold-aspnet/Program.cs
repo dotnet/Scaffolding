@@ -1,8 +1,8 @@
-using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Core.Services;
+using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
@@ -171,7 +171,6 @@ public static class Program
         services.AddTransient<BlazorCrudScaffolderStep>();
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
-        services.AddSingleton<IDotNetToolService, DotNetToolService>();
     }
 
 

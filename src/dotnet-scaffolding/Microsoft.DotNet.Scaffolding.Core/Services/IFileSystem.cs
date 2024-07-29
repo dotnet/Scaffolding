@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
+namespace Microsoft.DotNet.Scaffolding.Core.Services;
 
 ///<summary>
 /// A wrapper interface to be used for all file system related operations for easy unit testing.
@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Helpers.Services;
 /// to System.IO implementations. Unit tests can then provide a mock implementation of
 /// this interface for testing that component.
 ///</summary>
-internal interface IFileSystem
+public interface IFileSystem
 {
     bool FileExists(string path);
 

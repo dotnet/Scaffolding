@@ -1,8 +1,8 @@
-using Microsoft.DotNet.Scaffolding.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
+using Microsoft.DotNet.Scaffolding.Core.Services;
+using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Helpers.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
@@ -105,7 +105,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddTransient<PlaceholderStorageStep>();
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
-    services.AddSingleton<IDotNetToolService, DotNetToolService>();
+    //services.AddSingleton<IDotNetToolService, DotNetToolService>();
 }
 
 static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out ScaffolderOption<string> databaseTypeOption, out ScaffolderOption<string> storageTypeOption,

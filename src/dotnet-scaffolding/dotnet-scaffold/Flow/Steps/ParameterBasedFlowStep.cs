@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Scaffolding.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Scaffolding.Helpers.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services.Environment;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
@@ -13,21 +13,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     {
         public Parameter Parameter { get; set; }
         public ParameterBasedFlowStep? NextStep { get; set; }
-        private readonly IAppSettings _appSettings;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
         public ParameterBasedFlowStep(
             Parameter parameter,
             ParameterBasedFlowStep? nextStep,
-            IAppSettings appSettings,
             IEnvironmentService environmentService,
             IFileSystem fileSystem,
             ILogger logger)
         {
             Parameter = parameter;
             NextStep = nextStep;
-            _appSettings = appSettings;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
             _logger = logger;

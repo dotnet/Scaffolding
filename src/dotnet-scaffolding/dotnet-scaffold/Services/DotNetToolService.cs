@@ -6,16 +6,18 @@ using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Core;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Services;
-
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
 internal class DotNetToolService : IDotNetToolService
 {
+    private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
     private readonly IFileSystem _fileSystem;
-    public DotNetToolService(IEnvironmentService environmentService, IFileSystem fileSystem)
+    public DotNetToolService(ILogger<DotNetToolService> logger, IEnvironmentService environmentService, IFileSystem fileSystem)
     {
+        _logger = logger;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _dotNetTools = [];
@@ -96,7 +98,7 @@ internal class DotNetToolService : IDotNetToolService
         return commands.ToList();
     }
 
-    public bool InstallDotNetTool(string toolName, string? version = null, bool prerelease = false)
+    public bool InstallDotNetTool(string toolName, string? version = null, bool prerelease = false, string[]? addSources = null, string? configFile = null)
     {
         if (string.IsNullOrEmpty(toolName))
         {
@@ -106,7 +108,7 @@ internal class DotNetToolService : IDotNetToolService
         var installParams = new List<string> { "install", "-g", toolName };
         if (!string.IsNullOrEmpty(version))
         {
-            installParams.Add("-v");
+            installParams.Add("--version");
             installParams.Add(version);
         }
 
@@ -114,8 +116,34 @@ internal class DotNetToolService : IDotNetToolService
         {
             installParams.Add("--prerelease");
         }
-        
+
+        if (addSources is not null)
+        {
+            foreach (var source in addSources)
+            {
+                installParams.Add("--add-source");
+                installParams.Add(source);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(configFile))
+        {
+            installParams.Add("--configfile");
+            installParams.Add(configFile);
+        }
+
         var runner = DotnetCliRunner.CreateDotNet("tool", installParams);
+        var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+        return exitCode == 0;
+    }
+
+    public bool UninstallDotNetTool(string toolName)
+    {
+        if (string.IsNullOrEmpty(toolName))
+        {
+            return false;
+        }
+        var runner = DotnetCliRunner.CreateDotNet("tool", ["uninstall", "-g", toolName]);
         var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
         return exitCode == 0;
     }

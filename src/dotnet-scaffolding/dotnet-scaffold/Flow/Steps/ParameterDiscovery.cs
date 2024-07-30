@@ -1,10 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -66,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         private async Task<string?> PromptInteractivePicker(IFlowContext context, InteractivePickerType? pickerType)
         {
             List<StepOption> stepOptions = [];
-            //var codeService = context.GetCodeService();
+            var codeService = context.GetCodeService();
             var converter = GetDisplayName;
             await Task.Delay(0);
             switch (pickerType)
@@ -74,28 +76,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 case InteractivePickerType.ClassPicker:
                     //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     //will add better documentation so users will know what to expect.
-                    //if (codeService is null)
-                    //{
-                    //    stepOptions = [];
-                    //}
-                    //else
-                    //{
-                    //    stepOptions = await GetClassDisplayNamesAsync(codeService);
-                    //}
+                    if (codeService is null)
+                    {
+                        stepOptions = [];
+                    }
+                    else
+                    {
+                        stepOptions = await GetClassDisplayNamesAsync(codeService);
+                    }
 
                     break;
                 case InteractivePickerType.FilePicker:
                     //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     //will add better documentation so users will know what to expect.
-                    //if (codeService is null)
-                    //{
-                    //    stepOptions = [];
-                    //}
-                    //else
-                    //{
-                    //    var allDocuments = await codeService.GetAllDocumentsAsync();
-                    //    stepOptions = GetDocumentNames(allDocuments);
-                    //}
+                    if (codeService is null)
+                    {
+                        stepOptions = [];
+                    }
+                    else
+                    {
+                        var allDocuments = await codeService.GetAllDocumentsAsync();
+                        stepOptions = GetDocumentNames(allDocuments);
+                    }
 
                     break;
                 case InteractivePickerType.ProjectPicker:
@@ -172,57 +174,57 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return ValidationResult.Success();
         }
 
-        //private static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService)
-        //{
-        //    var allClassSymbols = await AnsiConsole
-        //        .Status()
-        //        .WithSpinner()
-        //        .StartAsync("Gathering project classes!", async statusContext =>
-        //        {
-        //            //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
-        //            //will add better documentation so users will know what to expect.
-        //            if (codeService is null)
-        //            {
-        //                return [];
-        //            }
+        private static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService)
+        {
+            var allClassSymbols = await AnsiConsole
+                .Status()
+                .WithSpinner()
+                .StartAsync("Gathering project classes!", async statusContext =>
+                {
+                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
+                    //will add better documentation so users will know what to expect.
+                    if (codeService is null)
+                    {
+                        return [];
+                    }
 
-        //            return await codeService.GetAllClassSymbolsAsync();
-        //        });
+                    return await codeService.GetAllClassSymbolsAsync();
+                });
 
-        //    List<StepOption> classNames = [];
-        //    if (allClassSymbols != null && allClassSymbols.Count != 0)
-        //    {
-        //        allClassSymbols.ForEach(
-        //        x =>
-        //        {
-        //            if (x != null)
-        //            {
-        //                classNames.Add(new StepOption() { Name = x.MetadataName, Value = x.Name });
-        //            }
-        //        });
-        //    }
+            List<StepOption> classNames = [];
+            if (allClassSymbols != null && allClassSymbols.Count != 0)
+            {
+                allClassSymbols.ForEach(
+                x =>
+                {
+                    if (x != null)
+                    {
+                        classNames.Add(new StepOption() { Name = x.MetadataName, Value = x.Name });
+                    }
+                });
+            }
 
-        //    return classNames;
-        //}
+            return classNames;
+        }
 
-        //internal static List<StepOption> GetDocumentNames(List<Document> documents)
-        //{
-        //    List<StepOption> classNames = [];
-        //    if (documents != null && documents.Count != 0)
-        //    {
-        //        documents.ForEach(
-        //        x =>
-        //        {
-        //            if (x != null)
-        //            {
-        //                string fileName = System.IO.Path.GetFileName(x.Name);
-        //                classNames.Add(new StepOption() { Name = fileName, Value = x.Name });
-        //            }
-        //        });
-        //    }
+        internal static List<StepOption> GetDocumentNames(List<Document> documents)
+        {
+            List<StepOption> classNames = [];
+            if (documents != null && documents.Count != 0)
+            {
+                documents.ForEach(
+                x =>
+                {
+                    if (x != null)
+                    {
+                        string fileName = System.IO.Path.GetFileName(x.Name);
+                        classNames.Add(new StepOption() { Name = fileName, Value = x.Name });
+                    }
+                });
+            }
 
-        //    return classNames;
-        //}
+            return classNames;
+        }
 
         internal List<StepOption> GetProjectFiles()
         {

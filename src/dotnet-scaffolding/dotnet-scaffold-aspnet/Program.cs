@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -15,6 +16,7 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        Debugger.Launch();
         var builder = Host.CreateScaffoldBuilder();
         ConfigureServices(builder.Services);
         CreateOptions(
@@ -131,8 +133,8 @@ public static class Program
                 var context = config.Context;
                 step.Project = context.GetOptionResult(projectOption);
                 step.Model = context.GetOptionResult(modelNameOption);
-                step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
-                step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
+                step.DataContext = context.GetOptionResult(dataContextClassOption);
+                step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.OpenApi = context.GetOptionResult(openApiOption);
                 step.Endpoints = context.GetOptionResult(endpointsClassOption);

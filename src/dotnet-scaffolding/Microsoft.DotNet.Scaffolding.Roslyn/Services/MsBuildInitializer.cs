@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Locator;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Scaffolding.CodeModification.Services;
+namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 internal class MsBuildInitializer
 {

@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.DotNet.Scaffolding.CodeModification.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 

@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
   </ItemGroup>
 
 </Project>

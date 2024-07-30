@@ -3,8 +3,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.DotNet.Scaffolding.CodeModification.Extensions;
-using Microsoft.DotNet.Scaffolding.CodeModification.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;

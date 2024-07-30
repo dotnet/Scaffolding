@@ -2,10 +2,10 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
-using Microsoft.DotNet.Scaffolding.CodeModification.Extensions;
+using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Scaffolding.CodeModification.Services;
+namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 /// <summary>
 /// Service that manages Roslyn workspace. It ensures that all projects of interest are loaded in the workspace and are up to date.
 ///     - If user's input path is project we also always open it since we expect some contracts might

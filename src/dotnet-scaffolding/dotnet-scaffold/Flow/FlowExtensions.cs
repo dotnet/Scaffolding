@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
@@ -9,6 +10,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
 {
     internal static class FlowContextExtensions
     {
+        public static ICodeService? GetCodeService(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<ICodeService>(FlowContextProperties.CodeService, throwIfEmpty);
+        }
+
         public static DotNetToolInfo? GetComponentObj(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<DotNetToolInfo>(FlowContextProperties.ComponentObj, throwIfEmpty);

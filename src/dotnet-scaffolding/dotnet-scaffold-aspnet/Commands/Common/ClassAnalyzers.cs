@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
-using Microsoft.DotNet.Scaffolding.CodeModification.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.DotNet.Scaffolding.CodeModification.Extensions;
+namespace Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 
 public static class ClassDeclarationSyntaxExtensions
 {

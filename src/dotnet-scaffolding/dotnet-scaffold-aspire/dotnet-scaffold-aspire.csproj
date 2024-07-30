@@ -26,6 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\DbContext\*.tt" PackagePath="Templates\DbContext\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
   </ItemGroup>
 </Project>

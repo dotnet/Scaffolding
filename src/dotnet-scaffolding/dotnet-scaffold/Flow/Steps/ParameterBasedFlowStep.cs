@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
@@ -98,7 +99,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
             else
             {
-                   return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+                return new ValueTask<FlowStepResult>(FlowStepResult.Success);
             }
         }
 
@@ -111,6 +112,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     parameterValue,
                     Parameter.DisplayName,
                     isVisible: true));
+                SelectCodeService(context, parameterValue);
+            }
+        }
+
+        private void SelectCodeService(IFlowContext context, string projectPath)
+        {
+            var codeService = context.GetCodeService();
+            if (Parameter.PickerType is InteractivePickerType.ProjectPicker && codeService is null && !string.IsNullOrEmpty(projectPath))
+            {
+                codeService = new CodeService(_logger, projectPath);
+                context.Set(new FlowProperty(
+                    FlowContextProperties.CodeService,
+                    codeService));
             }
         }
     }

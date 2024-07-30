@@ -24,6 +24,7 @@
       <Pack>true</Pack>
     </EmbeddedResource>
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\*\*.tt" PackagePath="Templates\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
   </ItemGroup>
 
   <ItemGroup>

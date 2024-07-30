@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.DotNet.Scaffolding.CodeModification.Services;
+namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 public interface ICodeService
 {

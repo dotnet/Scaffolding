@@ -21,7 +21,7 @@ internal static class ScaffolderBuilderExtensions
             var context = config.Context;
 
             DbContextProperties? dbContextProperties = null;
-            if (context.Properties.TryGetValue("DbContextProperties", out var dbContextPropertiesObj) &&
+            if (context.Properties.TryGetValue(nameof(DbContextProperties), out var dbContextPropertiesObj) &&
                 dbContextPropertiesObj is DbContextProperties)
             {
                 dbContextProperties = dbContextPropertiesObj as DbContextProperties;

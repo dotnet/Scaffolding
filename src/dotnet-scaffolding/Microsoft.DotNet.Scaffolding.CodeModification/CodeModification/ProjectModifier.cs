@@ -3,8 +3,8 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
-using Microsoft.DotNet.Scaffolding.CodeModification.Services;
-using Microsoft.DotNet.Scaffolding.CodeModification.Extensions;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;

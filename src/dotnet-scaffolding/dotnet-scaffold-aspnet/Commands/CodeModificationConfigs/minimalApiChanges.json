@@ -7,7 +7,7 @@
           "CodeChanges": [
             {
               "InsertAfter": "app.MapRazorPages();",
-              "Block": "app.{0}()",
+              "Block": "app.$(EndpointsMethodName)()",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
@@ -31,12 +31,12 @@
             {
               "InsertAfter": "WebApplication.CreateBuilder",
               "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"{0}\") ?? throw new InvalidOperationException(\"Connection string '{0}' not found.\")"
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
               "CheckBlock": "builder.Services.AddDbContext",
-              "Block": "builder.Services.AddDbContext<{0}>(options => options.{1}(connectionString))\"",
+              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod)(connectionString))\"",
               "LeadingTrivia": {
                 "Newline": true
               }

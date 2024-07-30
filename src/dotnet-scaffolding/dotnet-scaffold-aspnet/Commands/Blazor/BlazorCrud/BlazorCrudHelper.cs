@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
+using Microsoft.DotNet.Scaffolding.CodeModification;
+using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
@@ -151,7 +152,7 @@ internal static class BlazorCrudHelper
         return Path.Combine(projectBasePath, "Components", "Pages", $"{modelName}Pages");
     }
 
-    internal static async Task<BlazorCrudAppProperties> GetBlazorPropertiesAsync(Document? programDocument, Document? appRazorDocument)
+    private static async Task<BlazorCrudAppProperties> GetBlazorPropertiesAsync(Document? programDocument, Document? appRazorDocument)
     {
         var blazorAppProperties = new BlazorCrudAppProperties();
         if (programDocument is not null)
@@ -186,7 +187,7 @@ internal static class BlazorCrudHelper
         return blazorAppProperties;
     }
 
-    internal static CodeModifierConfig AddBlazorChangesToCodeFile(CodeModifierConfig configToEdit, BlazorCrudAppProperties appProperties)
+    private static CodeModifierConfig AddBlazorChangesToCodeFile(CodeModifierConfig configToEdit, BlazorCrudAppProperties appProperties)
     {
         var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
         var globalMethod = programCsFile?.Methods?["Global"];
@@ -234,6 +235,20 @@ internal static class BlazorCrudHelper
         if (programCsFile is not null && programCsFile.Methods is not null)
         {
             programCsFile.Methods["Global"] = globalMethod;
+        }
+
+        return configToEdit;
+    }
+
+    internal static async Task<CodeModifierConfig> EditConfigForBlazorCrudAsync(CodeModifierConfig configToEdit, BlazorCrudModel blazorCrudModel)
+    {
+        var codeService = blazorCrudModel.ProjectInfo?.CodeService;
+        if (codeService is not null)
+        {
+            var programCsDocument = await codeService.GetDocumentAsync("Program.cs");
+            var appRazorDocument = await codeService.GetDocumentAsync("App.razor");
+            var blazorAppProperties = await GetBlazorPropertiesAsync(programCsDocument, appRazorDocument);
+            configToEdit = AddBlazorChangesToCodeFile(configToEdit, blazorAppProperties);
         }
 
         return configToEdit;

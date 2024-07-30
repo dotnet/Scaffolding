@@ -9,8 +9,8 @@ call dotnet tool uninstall -g Microsoft.dotnet-scaffold
 
 call cd %DEFAULT_NUPKG_PATH%
 call rd /Q /S Microsoft.dotnet-scaffold
-call rd /Q /S Microsoft.DotNet.Scaffolding.Helpers
-call rd /Q /S Microsoft.DotNet.Scaffolding.ComponentModel
+call rd /Q /S Microsoft.DotNet.Scaffolding.Internal
+call rd /Q /S Microsoft.DotNet.Scaffolding.Core
 
 call cd  %SRC_DIR%/%NUPKG% 
 call dotnet tool install -g Microsoft.dotnet-scaffold --add-source %SRC_DIR%\%NUPKG% --version %VERSION%

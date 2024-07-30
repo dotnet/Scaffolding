@@ -4,7 +4,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 internal class DbContextInfo
 {
     //DbContext info
-    public bool CreateDbContext { get; set; } = false;
     public string? DbContextClassName { get; set; }
     public string? DbContextClassPath { get; set; }
     public string? DbContextNamespace { get; set; }

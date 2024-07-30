@@ -14,9 +14,9 @@ internal static class MinimalApiHelper
         switch (Path.GetFileName(templatePath))
         {
             case "MinimalApi.tt":
-                return typeof(Tools.Scaffold.AspNet.Templates.MinimalApi.MinimalApi);
+                return typeof(Templates.MinimalApi.MinimalApi);
             case "MinimalApiEf.tt":
-                return typeof(Tools.Scaffold.AspNet.Templates.MinimalApi.MinimalApiEf);
+                return typeof(Templates.MinimalApi.MinimalApiEf);
             default:
                 break;
         }

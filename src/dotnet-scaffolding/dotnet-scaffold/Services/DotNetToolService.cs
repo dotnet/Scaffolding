@@ -3,9 +3,9 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Microsoft.DotNet.Scaffolding.Core;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
-using Microsoft.DotNet.Scaffolding.Core.Services;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;

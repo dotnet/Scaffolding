@@ -1,3 +1,4 @@
+using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -162,9 +163,13 @@ public static class Program
     //TODO separate adding transient steps from singleton services.
     static void ConfigureServices(IServiceCollection services)
     {
+        services.AddTransient<CodeModificationStep>();
+        services.AddTransient<ValidateBlazorCrudStep>();
+        services.AddTransient<ValidateMinimalApiStep>();
         services.AddTransient<AddPackagesStep>();
         services.AddTransient<AddConnectionStringStep>();
         services.AddTransient<TextTemplatingStep>();
+        services.AddTransient<AreaScaffolderStep>();
         services.AddTransient<DotnetNewScaffolderStep>();
         services.AddTransient<EmptyControllerScaffolderStep>();
         services.AddSingleton<IEnvironmentService, EnvironmentService>();

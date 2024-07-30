@@ -1,3 +1,4 @@
+using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -68,6 +69,8 @@ runner.RunAsync(args).Wait();
 //TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
+    services.AddTransient<CodeModificationStep>();
+    services.AddTransient<AddAspireCodeChangeStep>();
     services.AddTransient<ValidateOptionsStep>();
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();

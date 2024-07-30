@@ -2,6 +2,7 @@
 using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
 
@@ -21,7 +22,13 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         {
             config
                 .SetApplicationName("dotnet-scaffold")
-                .SetApplicationVersion(GetToolVersion());
+                .SetApplicationVersion(GetToolVersion())
+                .AddBranch<ToolSettings>("tool", tool =>
+                {
+                    tool.AddCommand<ToolInstallCommand>("install");
+                    tool.AddCommand<ToolListCommand>("list");
+                    tool.AddCommand<ToolUninstallCommand>("uninstall");
+                });
         });
 
         return new ScaffoldCommandApp(commandApp, _args);
@@ -34,6 +41,8 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
+        registrar.Register(typeof(IToolManager), typeof(ToolManager));
+        registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
         return registrar;
     }
 

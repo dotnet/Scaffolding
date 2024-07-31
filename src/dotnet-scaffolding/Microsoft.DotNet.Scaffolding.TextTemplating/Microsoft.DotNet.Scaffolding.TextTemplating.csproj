@@ -12,4 +12,21 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DbContext\NewDbContext.tt">
+      <PackagePath>Templates\</PackagePath>
+      <LastGenOutput>NewDbContext.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="DbContext\NewDbContext.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NewDbContext.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

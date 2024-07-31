@@ -18,7 +18,7 @@
     <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatter.cs" Link="Logging\CleanConsoleFormatter.cs" />
     <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatterOptions.cs" Link="Logging\CleanConsoleFormatterOptions.cs" />
     <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\ConsoleLoggerExtensions.cs" Link="Logging\ConsoleLoggerExtensions.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\ComponentModel\Shared\*.cs">
+    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\ComponentModel\*.cs">
       <Link>ComponentModel\%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
@@ -32,7 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Helpers\Microsoft.DotNet.Scaffolding.Helpers.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,13 +1,12 @@
+using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
-using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Scaffolding.Helpers.Steps;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.CommandHelpers;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,16 +29,7 @@ caching.WithCategory("Aspire")
            config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
        })
        .WithCachingAddPackageSteps()
-       .WithStep<PlaceholderCachingStep>(config =>
-       {
-           var step = config.Step;
-           var context = config.Context;
-
-           step.Type = context.GetOptionResult(cachingTypeOption);
-           step.AppHostProject = context.GetOptionResult(appHostProjectOption);
-           step.Project = context.GetOptionResult(projectOption);
-           step.Prerelease = context.GetOptionResult(prereleaseOption);
-       });
+       .WithCachingCodeModificationSteps();
 
 var database = builder.AddScaffolder("database");
 database.WithCategory("Aspire")
@@ -53,18 +43,9 @@ database.WithCategory("Aspire")
             config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
         })
         .WithDatabaseAddPackageSteps()
-        .WithStep<PlaceholderDatabaseStep>(config =>
-        {
-            var step = config.Step;
-            var context = config.Context;
-
-            step.Type = context.GetOptionResult(databaseTypeOption);
-            step.AppHostProject = context.GetOptionResult(appHostProjectOption);
-            step.Project = context.GetOptionResult(projectOption);
-            step.Prerelease = context.GetOptionResult(prereleaseOption);
-        })
         .WithDbContextStep()
-        .WithConnectionStringStep();
+        .WithConnectionStringStep()
+        .WithDatabaseCodeModificationSteps();
 
 var storage = builder.AddScaffolder("storage");
 storage.WithCategory("Aspire")
@@ -77,17 +58,8 @@ storage.WithCategory("Aspire")
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;
        })
-       .WithDatabaseAddPackageSteps()
-       .WithStep<PlaceholderStorageStep>(config =>
-       {
-           var step = config.Step;
-           var context = config.Context;
-
-           step.Type = context.GetOptionResult(storageTypeOption);
-           step.AppHostProject = context.GetOptionResult(appHostProjectOption);
-           step.Project = context.GetOptionResult(projectOption);
-           step.Prerelease = context.GetOptionResult(prereleaseOption);
-       });
+       .WithStorageAddPackageSteps()
+       .WithStorageCodeModificationSteps();
 
 var runner = builder.Build();
 
@@ -96,13 +68,12 @@ runner.RunAsync(args).Wait();
 //TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
 {
+    services.AddTransient<CodeModificationStep>();
+    services.AddTransient<AddAspireCodeChangeStep>();
     services.AddTransient<ValidateOptionsStep>();
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
-    services.AddTransient<PlaceholderCachingStep>();
-    services.AddTransient<PlaceholderDatabaseStep>();
-    services.AddTransient<PlaceholderStorageStep>();
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
 }

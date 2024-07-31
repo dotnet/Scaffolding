@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.Helpers.General;
-using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
+using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -16,53 +15,24 @@ internal class AspNetDbContextHelper
         { PackageConstants.EfConstants.CosmosDb, DbContextHelper.CosmosDefaults }
     };
 
-    internal static CodeModifierConfig AddDbContextChanges(DbContextInfo dbContextInfo, CodeModifierConfig configToEdit)
+    internal static Dictionary<string, string> GetDbContextCodeModifierProperties(DbContextInfo dbContextInfo)
     {
+        var dbContextProperties = new Dictionary<string, string>();
         if (dbContextInfo.EfScenario)
         {
-            var programCsFile = configToEdit.Files?.FirstOrDefault(x =>
-                !string.IsNullOrEmpty(x.FileName) &&
-                x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase) &&
-                x.Options is not null &&
-                x.Options.Contains(CodeChangeOptionStrings.EfScenario));
-
-            var globalMethod = programCsFile?.Methods?["Global"];
-            var addDbContextChange = globalMethod?.CodeChanges?.FirstOrDefault(x => x.Block.Contains("builder.Services.AddDbContext", StringComparison.OrdinalIgnoreCase));
-            var getConnectionStringChange = globalMethod?.CodeChanges?.FirstOrDefault(x => x.Block.Contains("builder.Configuration.GetConnectionString", StringComparison.OrdinalIgnoreCase));
-            if (dbContextInfo.CreateDbContext &&
-                addDbContextChange is not null &&
-                !string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
+            if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
                 PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(dbContextInfo.DatabaseProvider, out var useDbMethod))
             {
-                addDbContextChange.Block = string.Format(addDbContextChange.Block, dbContextInfo.DbContextClassName, useDbMethod);
+                dbContextProperties.Add("$(UseDbMethod)", useDbMethod);
             }
 
-            if (dbContextInfo.CreateDbContext &&
-                getConnectionStringChange is not null)
+            if (!string.IsNullOrEmpty(dbContextInfo.DbContextClassName))
             {
-                getConnectionStringChange.Block = string.Format(getConnectionStringChange.Block, dbContextInfo.DbContextClassName);
-            }
-
-            if (string.IsNullOrEmpty(dbContextInfo.EntitySetVariableName) &&
-                !dbContextInfo.CreateDbContext &&
-                !string.IsNullOrEmpty(dbContextInfo.DbContextClassName) &&
-                globalMethod != null)
-            {
-                var addDbStatementCodeChange = new CodeFile()
-                {
-                    FileName = StringUtil.EnsureCsExtension(dbContextInfo.DbContextClassName),
-                    Options = [CodeChangeOptionStrings.EfScenario],
-                    ClassProperties = [new CodeBlock
-                    {
-                        Block = dbContextInfo.NewDbSetStatement
-                    }]
-                };
-
-                configToEdit.Files = configToEdit.Files?.Append(addDbStatementCodeChange).ToArray();
+                dbContextProperties.Add("$(DbContextName)", dbContextInfo.DbContextClassName);
             }
         }
 
-        return configToEdit;
+        return dbContextProperties;
     }
 
     internal static DbContextProperties? GetDbContextProperties(string projectPath, DbContextInfo dbContextInfo)

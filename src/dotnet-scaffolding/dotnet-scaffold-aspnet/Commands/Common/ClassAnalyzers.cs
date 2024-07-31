@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.Helpers.Roslyn;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
@@ -29,7 +29,6 @@ internal static class ClassAnalyzers
         //properties for creating a new DbContext
         else
         {
-            dbContextInfo.CreateDbContext = true;
             dbContextInfo.NewDbSetStatement = $"public DbSet<{modelName}> {modelName} {{ get; set; }} = default!;";
             dbContextInfo.DbContextClassName = dbContextClassName;
             dbContextInfo.DbContextClassPath = CommandHelpers.GetNewFilePath(projectPath, dbContextClassName);

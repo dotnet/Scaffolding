@@ -1,0 +1,191 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.CodeModification;
+using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.Extensions.Logging;
+
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+
+internal class ValidateBlazorCrudStep : ScaffoldStep
+{
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger _logger;
+
+    public string? Project { get; set; }
+    public bool Prerelease { get; set; }
+    public string? DatabaseProvider { get; set; }
+    public string? DataContext { get; set; }
+    public string? Model { get; set; }
+    public string? Page { get; set; }
+
+    public ValidateBlazorCrudStep(
+        IFileSystem fileSystem,
+        ILogger<ValidateMinimalApiStep> logger)
+    {
+        _fileSystem = fileSystem;
+        _logger = logger;
+    }
+
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    {
+        var blazorCrudSettings = ValidateBlazorCrudSettings();
+        var codeModifierProperties = new Dictionary<string, string>();
+        if (blazorCrudSettings is null)
+        {
+            return false;
+        }
+        else
+        {
+            context.Properties.Add(nameof(BlazorCrudSettings), blazorCrudSettings);
+        }
+
+        //initialize MinimalApiModel
+        _logger.LogInformation("Initializing scaffolding model...");
+        var blazorCrudModel = await GetBlazorCrudModelAsync(blazorCrudSettings);
+        if (blazorCrudModel is null)
+        {
+            _logger.LogError("An error occurred.");
+            return false;
+        }
+        else
+        {
+            context.Properties.Add(nameof(BlazorCrudModel), blazorCrudModel);
+        }
+
+        //Install packages and add a DbContext (if needed)
+        if (blazorCrudModel.DbContextInfo.EfScenario)
+        {
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(blazorCrudSettings.Project, blazorCrudModel.DbContextInfo);
+            if (dbContextProperties is not null)
+            {
+                context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
+            }
+
+            var projectBasePath = Path.GetDirectoryName(blazorCrudSettings.Project);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add("BaseProjectPath", projectBasePath);
+            }
+
+            codeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorCrudModel.DbContextInfo);
+        }
+
+        context.Properties.Add("CodeModifierProperties", codeModifierProperties);
+        return true;
+    }
+
+    private BlazorCrudSettings? ValidateBlazorCrudSettings()
+    {
+        if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
+        {
+            _logger.LogError("Missing/Invalid --project option.");
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(Model))
+        {
+            _logger.LogError("Missing/Invalid --model option.");
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(Page))
+        {
+            _logger.LogError("Missing/Invalid --page option.");
+            return null;
+        }
+        else if (!string.IsNullOrEmpty(Page) && !BlazorCrudHelper.CRUDPages.Contains(Page, StringComparer.OrdinalIgnoreCase))
+        {
+            //if an invalid page name, switch to just "CRUD" and scaffold all pages
+            Page = BlazorCrudHelper.CrudPageType;
+        }
+
+        if (string.IsNullOrEmpty(DataContext))
+        {
+            _logger.LogError("Missing/Invalid --dataContext option.");
+            return null;
+        }
+        else if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(DatabaseProvider))
+        {
+            DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+        }
+
+        return new BlazorCrudSettings
+        {
+            Model = Model,
+            Project = Project,
+            Page = Page,
+            DataContext = DataContext,
+            DatabaseProvider = DatabaseProvider,
+            Prerelease = Prerelease,
+        };
+    }
+
+    private async Task<BlazorCrudModel?> GetBlazorCrudModelAsync(BlazorCrudSettings settings)
+    {
+        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        if (projectInfo is null || projectInfo.CodeService is null)
+        {
+            return null;
+        }
+
+        //find and set --model class properties
+        ModelInfo? modelInfo = null;
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
+        var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
+        {
+            _logger.LogError($"Invalid --model '{settings.Model}'");
+            return null;
+        }
+        else
+        {
+            modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
+        }
+
+        var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
+        if (!validateModelInfoResult)
+        {
+            _logger.LogError($"Invalid --model '{settings.Model}'");
+            return null;
+        }
+
+        //find DbContext info or create properties for a new one.
+        var dbContextClassName = settings.DataContext;
+        DbContextInfo dbContextInfo = new();
+
+        if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
+        {
+            var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
+            dbContextInfo = ClassAnalyzers.GetDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider, settings.Model);
+            dbContextInfo.EfScenario = true;
+        }
+
+        BlazorCrudModel scaffoldingModel = new()
+        {
+            PageType = settings.Page,
+            ProjectInfo = projectInfo,
+            ModelInfo = modelInfo,
+            DbContextInfo = dbContextInfo
+        };
+
+        if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
+        {
+            scaffoldingModel.ProjectInfo.CodeChangeOptions = new CodeChangeOptions
+            {
+                IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(scaffoldingModel.ProjectInfo.CodeService),
+                UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(scaffoldingModel.ProjectInfo.CodeService),
+                EfScenario = scaffoldingModel.DbContextInfo.EfScenario
+            };
+        }
+
+        return scaffoldingModel;
+    }
+}

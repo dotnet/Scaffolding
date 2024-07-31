@@ -1,9 +1,9 @@
+using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
-using Microsoft.DotNet.Scaffolding.Core.Services;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Scaffolding.Helpers.Steps;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -33,8 +33,8 @@ public static class Program
             {
                 var step = config.Step;
                 var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
+                step.ProjectPath = context.GetOptionResult(projectOption);
+                step.FileName = context.GetOptionResult(fileNameOption);
                 step.CommandName = "razorcomponent";
             });
 
@@ -48,8 +48,8 @@ public static class Program
             {
                 var step = config.Step;
                 var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
+                step.ProjectPath = context.GetOptionResult(projectOption);
+                step.FileName = context.GetOptionResult(fileNameOption);
                 step.CommandName = "view";
             });
 
@@ -63,8 +63,8 @@ public static class Program
             {
                 var step = config.Step;
                 var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
+                step.ProjectPath = context.GetOptionResult(projectOption);
+                step.FileName = context.GetOptionResult(fileNameOption);
                 step.CommandName = "page";
             });
 
@@ -77,8 +77,8 @@ public static class Program
             {
                 var step = config.Step;
                 var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
+                step.ProjectPath = context.GetOptionResult(projectOption);
+                step.FileName = context.GetOptionResult(fileNameOption);
                 step.Actions = context.GetOptionResult(actionsOption);
                 step.CommandName = "apicontroller";
             });
@@ -92,8 +92,8 @@ public static class Program
             {
                 var step = config.Step;
                 var context = config.Context;
-                step.Project = context.GetOptionResult(projectOption);
-                step.Name = context.GetOptionResult(fileNameOption);
+                step.ProjectPath = context.GetOptionResult(projectOption);
+                step.FileName = context.GetOptionResult(fileNameOption);
                 step.Actions = context.GetOptionResult(actionsOption);
                 step.CommandName = "mvccontroller";
             });
@@ -103,7 +103,7 @@ public static class Program
             .WithCategory("Blazor")
             .WithDescription("Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
             .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
-            .WithStep<BlazorCrudScaffolderStep>(config =>
+            .WithStep<ValidateBlazorCrudStep>(config =>
             {
                 var step = config.Step;
                 var context = config.Context;
@@ -117,29 +117,31 @@ public static class Program
             .WithBlazorCrudAddPackagesStep()
             .WithDbContextStep()
             .WithConnectionStringStep()
-            .WithBlazorCrudTextTemplatingStep();
+            .WithBlazorCrudTextTemplatingStep()
+            .WithBlazorCrudCodeChangeStep();
 
         builder.AddScaffolder("minimalapi")
             .WithDisplayName("Minimal API")
             .WithCategory("API")
             .WithDescription("Generates an endpoints file (with CRUD API endpoints) given a model and optional DbContext.")
             .WithOptions([projectOption, modelNameOption, endpointsClassOption, openApiOption, dataContextClassOption, databaseProviderOption, prereleaseOption])
-            .WithStep<MinimalApiScaffolderStep>(config =>
+            .WithStep<ValidateMinimalApiStep>(config =>
             {
                 var step = config.Step;
                 var context = config.Context;
                 step.Project = context.GetOptionResult(projectOption);
                 step.Model = context.GetOptionResult(modelNameOption);
-                step.Endpoints = context.GetOptionResult(endpointsClassOption);
-                step.OpenApi = context.GetOptionResult(openApiOption);
                 step.DataContext = context.GetOptionResult(dataContextClassOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
+                step.OpenApi = context.GetOptionResult(openApiOption);
+                step.Endpoints = context.GetOptionResult(endpointsClassOption);
             })
             .WithMinimalApiAddPackagesStep()
             .WithDbContextStep()
             .WithConnectionStringStep()
-            .WithMinimalApiTextTemplatingStep();
+            .WithMinimalApiTextTemplatingStep()
+            .WithMinimalApiCodeChangeStep();
 
         builder.AddScaffolder("area")
             .WithDisplayName("Area")
@@ -161,16 +163,17 @@ public static class Program
     //TODO separate adding transient steps from singleton services.
     static void ConfigureServices(IServiceCollection services)
     {
+        services.AddTransient<CodeModificationStep>();
+        services.AddTransient<ValidateBlazorCrudStep>();
+        services.AddTransient<ValidateMinimalApiStep>();
         services.AddTransient<AddPackagesStep>();
         services.AddTransient<AddConnectionStringStep>();
         services.AddTransient<TextTemplatingStep>();
         services.AddTransient<AreaScaffolderStep>();
         services.AddTransient<DotnetNewScaffolderStep>();
         services.AddTransient<EmptyControllerScaffolderStep>();
-        services.AddTransient<MinimalApiScaffolderStep>();
-        services.AddTransient<BlazorCrudScaffolderStep>();
-        services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
+        services.AddSingleton<IFileSystem, FileSystem>();
     }
 
 

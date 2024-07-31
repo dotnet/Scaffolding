@@ -1,5 +1,4 @@
-using Microsoft.DotNet.Scaffolding.Core.Services;
-using Microsoft.DotNet.Scaffolding.Helpers.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
@@ -55,7 +54,8 @@ internal class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
-                new MsBuildInitializer(_logger).Initialize();
+                //TODO fix
+                //new MsBuildInitializer(_logger).Initialize();
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Initializing 1st party components (dotnet tools)";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();

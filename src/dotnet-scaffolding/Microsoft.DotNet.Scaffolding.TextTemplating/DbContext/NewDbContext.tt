@@ -1,0 +1,15 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.DbContextProperties" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+using Microsoft.EntityFrameworkCore;
+
+public class <#= Model.DbContextName #>(DbContextOptions<<#= Model.DbContextName #>> options) : DbContext(options)
+{
+<# if (!string.IsNullOrEmpty(Model.DbSetStatement))
+{
+#>    <#= Model.DbSetStatement #>
+<# }
+#>
+}

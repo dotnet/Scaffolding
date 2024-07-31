@@ -2,161 +2,45 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire;
 
 internal static class ScaffolderBuilderExtensions
 {
-    public static IScaffoldBuilder WithCachingAddPackageSteps(this IScaffoldBuilder builder)
+    public static IScaffoldBuilder WithConnectionStringStep(
+        this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<AddPackagesStep>(config =>
+        builder = builder.WithStep<AddConnectionStringStep>(config =>
         {
             var step = config.Step;
-            var properties = config.Context.Properties;
-            if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings)
+            var context = config.Context;
+
+            DbContextProperties? dbContextProperties = null;
+            if (context.Properties.TryGetValue("DbContextProperties", out var dbContextPropertiesObj) &&
+                dbContextPropertiesObj is DbContextProperties)
             {
-                step.PackageNames = [PackageConstants.CachingPackages.AppHostRedisPackageName];
-                step.ProjectPath = commandSettings.AppHostProject;
-                step.Prerelease = commandSettings.Prerelease;
+                dbContextProperties = dbContextPropertiesObj as DbContextProperties;
             }
-            else
+
+            if (dbContextProperties is null ||
+                string.IsNullOrEmpty(dbContextProperties.DbContextPath) ||
+                string.IsNullOrEmpty(dbContextProperties.NewDbConnectionString))
             {
-                step.SkipStep = true;
+                config.Step.SkipStep = true;
                 return;
             }
-        });
 
-        builder = builder.WithStep<AddPackagesStep>(config =>
-        {
-            var step = config.Step;
-            var properties = config.Context.Properties;
-            if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings)
+            context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
+            var baseProjectPathVal = baseProjectPathObj?.ToString();
+            if (string.IsNullOrEmpty(baseProjectPathVal))
             {
-                if (!PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
-                {
-                    step.SkipStep = true;
-                    return;
-
-                }
-
-                step.PackageNames = [projectPackageName];
-                step.ProjectPath = commandSettings.Project;
-                step.Prerelease = commandSettings.Prerelease;
+                throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
             }
-            else
-            {
-                step.SkipStep = true;
-                return;
-            }
-        });
 
-        return builder;
-    }
-
-    public static IScaffoldBuilder WithStorageAddPackageSteps(this IScaffoldBuilder builder)
-    {
-        builder = builder.WithStep<AddPackagesStep>(config =>
-        {
-            var step = config.Step;
-            var properties = config.Context.Properties;
-            if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings)
-            {
-                step.PackageNames = [PackageConstants.StoragePackages.AppHostStoragePackageName];
-                step.ProjectPath = commandSettings.AppHostProject;
-                step.Prerelease = commandSettings.Prerelease;
-            }
-            else
-            {
-                step.SkipStep = true;
-                return;
-            }
-        });
-
-        builder = builder.WithStep<AddPackagesStep>(config =>
-        {
-            var step = config.Step;
-            var properties = config.Context.Properties;
-            if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings)
-            {
-                if (!PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
-                {
-                    step.SkipStep = true;
-                    return;
-
-                }
-
-                step.PackageNames = [projectPackageName];
-                step.ProjectPath = commandSettings.Project;
-                step.Prerelease = commandSettings.Prerelease;
-            }
-            else
-            {
-                step.SkipStep = true;
-                return;
-            }
-        });
-
-        return builder;
-    }
-
-    public static IScaffoldBuilder WithDatabaseAddPackageSteps(this IScaffoldBuilder builder)
-    {
-        builder = builder.WithStep<AddPackagesStep>(config =>
-        {
-            var step = config.Step;
-            var properties = config.Context.Properties;
-            if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings)
-            {
-                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName))
-                {
-                    step.SkipStep = true;
-                    return;
-                }
-
-                step.PackageNames = [appHostPackageName];
-                step.ProjectPath = commandSettings.AppHostProject;
-                step.Prerelease = commandSettings.Prerelease;
-            }
-            else
-            {
-                step.SkipStep = true;
-                return;
-            }
-        });
-
-        builder = builder.WithStep<AddPackagesStep>(config =>
-        {
-            var step = config.Step;
-            var properties = config.Context.Properties;
-            if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings)
-            {
-                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
-                {
-                    step.SkipStep = true;
-                    return;
-
-                }
-
-                step.PackageNames = [projectPackageName];
-                step.ProjectPath = commandSettings.Project;
-                step.Prerelease = commandSettings.Prerelease;
-            }
-            else
-            {
-                step.SkipStep = true;
-                return;
-            }
+            step.BaseProjectPath = baseProjectPathVal;
+            step.ConnectionString = string.Format(dbContextProperties.NewDbConnectionString, dbContextProperties.DbContextName);
+            step.ConnectionStringName = dbContextProperties.DbContextName;
         });
 
         return builder;

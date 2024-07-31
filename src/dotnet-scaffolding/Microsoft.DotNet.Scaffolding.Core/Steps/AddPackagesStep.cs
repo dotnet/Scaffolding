@@ -1,6 +1,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Scaffolding.Internal.CommandLine;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;

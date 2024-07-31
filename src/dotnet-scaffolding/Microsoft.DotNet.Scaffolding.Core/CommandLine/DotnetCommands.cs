@@ -3,7 +3,7 @@
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Scaffolding.Internal.CommandLine;
+namespace Microsoft.DotNet.Scaffolding.Core.CommandLine;
 
 internal static class DotnetCommands
 {

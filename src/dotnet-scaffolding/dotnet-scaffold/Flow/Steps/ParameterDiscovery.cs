@@ -70,7 +70,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             List<StepOption> stepOptions = [];
             var codeService = context.GetCodeService();
             var converter = GetDisplayName;
-            await Task.Delay(0);
             switch (pickerType)
             {
                 case InteractivePickerType.ClassPicker:

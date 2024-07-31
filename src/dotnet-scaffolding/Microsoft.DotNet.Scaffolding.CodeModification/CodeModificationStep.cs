@@ -34,6 +34,8 @@ public class CodeModificationStep : ScaffoldStep
             CodeModifierConfig,
             CodeChangeOptions);
 
+        string projectName = Path.GetFileName(ProjectPath);
+        _logger.LogInformation($"Updating project '{projectName}'");
         return await projectModifier.RunAsync();
     }
 

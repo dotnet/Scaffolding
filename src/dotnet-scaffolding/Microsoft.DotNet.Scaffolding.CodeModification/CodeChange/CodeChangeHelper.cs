@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
 
+//TODO split these into different files.
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CodeChangeType
 {

@@ -6,7 +6,6 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;

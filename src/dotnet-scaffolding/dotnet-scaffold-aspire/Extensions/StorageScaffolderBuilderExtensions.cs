@@ -4,10 +4,11 @@ using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
+namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 internal static class StorageScaffolderBuilderExtensions
 {

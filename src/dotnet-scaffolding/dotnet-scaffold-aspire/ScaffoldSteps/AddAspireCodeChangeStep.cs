@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +13,6 @@ internal class AddAspireCodeChangeStep : CodeModificationStep
     public AddAspireCodeChangeStep(ILogger<CodeModificationStep> logger) : base(logger)
     {
         _logger = logger;
-
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)

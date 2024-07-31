@@ -3,7 +3,6 @@
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;

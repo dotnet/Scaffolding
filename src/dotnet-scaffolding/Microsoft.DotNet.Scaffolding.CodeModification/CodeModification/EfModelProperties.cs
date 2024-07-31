@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
+
 public class EfModelProperties
 {
     public required List<IPropertySymbol> AllModelProperties { get; init; }

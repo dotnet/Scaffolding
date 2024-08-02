@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+namespace Microsoft.DotNet.Scaffolding.Roslyn;
 
 public static class RoslynUtilities
 {

@@ -32,13 +32,12 @@ internal static class ScaffolderBuilderExtensions
                 return;
             }
 
+            string? connectionStringName = null;
             context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
             context.Properties.TryGetValue("CodeModifierProperties", out var codeModifierPropertiesObj); 
             var baseProjectPathVal = baseProjectPathObj?.ToString();
             var codeModifierProperties = codeModifierPropertiesObj as IDictionary<string, string>;
-            string? connectionStringName = null;
             codeModifierProperties?.TryGetValue("$(ConnectionStringName)", out connectionStringName);
-
             if (string.IsNullOrEmpty(baseProjectPathVal))
             {
                 throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");

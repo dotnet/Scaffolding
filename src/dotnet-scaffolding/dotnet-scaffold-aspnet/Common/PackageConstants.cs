@@ -15,7 +15,6 @@ internal class PackageConstants
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
-        
         public const string PostgresPackageName = "Npgsql.EntityFrameworkCore.PostgreSQL";
         public static readonly IDictionary<string, string> EfPackagesDict = new Dictionary<string, string>
         {

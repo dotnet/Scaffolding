@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Roslyn;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 

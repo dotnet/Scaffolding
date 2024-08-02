@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -16,14 +17,17 @@ internal class DocumentBuilder
     private readonly CodeFile _codeFile;
     private readonly ILogger _consoleLogger;
     private readonly Document _document;
+    private readonly IList<string> _options;
 
     public DocumentBuilder(
         Document document,
         CodeFile codeFile,
+        IList<string> options,
         ILogger consoleLogger)
     {
         _document = document ?? throw new ArgumentNullException(nameof(document));
         _codeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
+        _options = options ?? [];
         _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
     }
 
@@ -31,7 +35,7 @@ internal class DocumentBuilder
     {
         var document = _document;
         var syntaxRoot = await document.GetSyntaxRootAsync() as CompilationUnitSyntax;
-        var modifiedRoot = ModifyRoot(syntaxRoot, new CodeChangeOptions());
+        var modifiedRoot = ModifyRoot(syntaxRoot, _options);
         if (modifiedRoot != null)
         {
             return document.WithSyntaxRoot(modifiedRoot);
@@ -41,7 +45,7 @@ internal class DocumentBuilder
         return document;
     }
 
-    internal static BaseMethodDeclarationSyntax GetModifiedMethod(string fileName, BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options, StringBuilder? output)
+    internal static BaseMethodDeclarationSyntax GetModifiedMethod(string fileName, BaseMethodDeclarationSyntax method, Method methodChanges, IList<string> options, StringBuilder? output)
     {
         method = ModifyMethodAttributes(method, methodChanges, options);
         method = AddCodeSnippetsToMethod(fileName, method, methodChanges, options, output);
@@ -50,7 +54,7 @@ internal class DocumentBuilder
         return method;
     }
 
-    private static BaseMethodDeclarationSyntax ModifyMethodAttributes(BaseMethodDeclarationSyntax method, Method methodChanges, CodeChangeOptions options)
+    private static BaseMethodDeclarationSyntax ModifyMethodAttributes(BaseMethodDeclarationSyntax method, Method methodChanges, IList<string> options)
     {
         if (methodChanges.Attributes != null && methodChanges.Attributes.Any())
         {
@@ -63,7 +67,7 @@ internal class DocumentBuilder
         return method;
     }
 
-    public CompilationUnitSyntax? ModifyRoot(CompilationUnitSyntax? root, CodeChangeOptions options)
+    public CompilationUnitSyntax? ModifyRoot(CompilationUnitSyntax? root, IList<string> options)
     {
         if (root is null)
         {
@@ -82,7 +86,7 @@ internal class DocumentBuilder
                 filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
             }
 
-            if (!options.UsingTopLevelsStatements)
+            if (!options.Contains("UseTopLevelStatements", StringComparer.OrdinalIgnoreCase))
             {
                 var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
                     .FirstOrDefault(n => ProjectModifierHelper.Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
@@ -131,7 +135,7 @@ internal class DocumentBuilder
         return root;
     }
 
-    public CompilationUnitSyntax AddUsings(CompilationUnitSyntax docRoot, CodeChangeOptions options)
+    public CompilationUnitSyntax AddUsings(CompilationUnitSyntax docRoot, IList<string> options)
     {
         // adding usings
         if (_codeFile.UsingsWithOptions != null && _codeFile.UsingsWithOptions.Any())
@@ -159,7 +163,7 @@ internal class DocumentBuilder
                      .OrderBy(us => us.Name?.ToString()));
     }
 
-    internal static IList<string> FilterUsingsWithOptions(CodeFile codeFile, CodeChangeOptions options)
+    internal static IList<string> FilterUsingsWithOptions(CodeFile codeFile, IList<string> options)
     {
         List<string> usingsWithOptions = [];
         if (codeFile != null)
@@ -175,7 +179,7 @@ internal class DocumentBuilder
     }
 
     //Add class members to the top of the class.
-    public ClassDeclarationSyntax AddProperties(ClassDeclarationSyntax classDeclarationSyntax, CodeChangeOptions options)
+    public ClassDeclarationSyntax AddProperties(ClassDeclarationSyntax classDeclarationSyntax, IList<string> options)
     {
         var modifiedClassDeclarationSyntax = classDeclarationSyntax;
         if (_codeFile.ClassProperties != null && _codeFile.ClassProperties.Any() && classDeclarationSyntax != null)
@@ -207,7 +211,7 @@ internal class DocumentBuilder
     }
 
     //Add class attributes '[Attribute]' to a class.
-    public ClassDeclarationSyntax AddClassAttributes(ClassDeclarationSyntax classDeclarationSyntax, CodeChangeOptions options)
+    public ClassDeclarationSyntax AddClassAttributes(ClassDeclarationSyntax classDeclarationSyntax, IList<string> options)
     {
         var modifiedClassDeclarationSyntax = classDeclarationSyntax;
         if (_codeFile.ClassAttributes != null && _codeFile.ClassAttributes.Any() && classDeclarationSyntax != null)
@@ -219,7 +223,7 @@ internal class DocumentBuilder
         return modifiedClassDeclarationSyntax;
     }
 
-    internal static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, Dictionary<string, Method> methods, CodeChangeOptions options, StringBuilder? output = null)
+    internal static ClassDeclarationSyntax ModifyMethods(string fileName, ClassDeclarationSyntax classNode, Dictionary<string, Method> methods, IList<string> options, StringBuilder? output = null)
     {
         foreach ((string methodName, Method methodChanges) in methods)
         {
@@ -250,20 +254,20 @@ internal class DocumentBuilder
         return classNode;
     }
 
-    internal static BaseMethodDeclarationSyntax AddMethodParameters(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+    internal static BaseMethodDeclarationSyntax AddMethodParameters(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, IList<string> options)
     {
         if (methodChanges is null || methodChanges.AddParameters is null || !methodChanges.AddParameters.Any())
         {
             return originalMethod;
         }
 
-        // Filter for CodeChangeOptions
+        // Filter for IList<string>
         methodChanges.AddParameters = ProjectModifierHelper.FilterCodeBlocks(methodChanges.AddParameters, options);
         return AddParameters(originalMethod, methodChanges.AddParameters, options);
     }
 
     // Add all the different code snippet.
-    internal static BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(string fileName, BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options, StringBuilder? output)
+    internal static BaseMethodDeclarationSyntax AddCodeSnippetsToMethod(string fileName, BaseMethodDeclarationSyntax originalMethod, Method methodChanges, IList<string> options, StringBuilder? output)
     {
         if (methodChanges.CodeChanges == null || !methodChanges.CodeChanges.Any())
         {
@@ -599,7 +603,7 @@ internal class DocumentBuilder
         return specifiedDescendant;
     }
 
-    internal static BaseMethodDeclarationSyntax EditMethodReturnType(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, CodeChangeOptions options)
+    internal static BaseMethodDeclarationSyntax EditMethodReturnType(BaseMethodDeclarationSyntax originalMethod, Method methodChanges, IList<string> options)
     {
         if (methodChanges is null || methodChanges.EditType is null || !(originalMethod is MethodDeclarationSyntax modifiedMethod))
         {
@@ -631,7 +635,7 @@ internal class DocumentBuilder
         return originalMethod;
     }
 
-    internal static BaseMethodDeclarationSyntax AddParameters(BaseMethodDeclarationSyntax methodNode, CodeBlock[] addParameters, CodeChangeOptions toolOptions)
+    internal static BaseMethodDeclarationSyntax AddParameters(BaseMethodDeclarationSyntax methodNode, CodeBlock[] addParameters, IList<string> toolOptions)
     {
         var newMethod = methodNode;
         List<ParameterSyntax> newParameters = new List<ParameterSyntax>();

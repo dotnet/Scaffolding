@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.CodeModification;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
@@ -65,15 +65,15 @@ internal static class CachingScaffolderBuilderExtensions
     {
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
-            CodeModifierConfig? codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
-            if (codeModifierConfig is not null &&
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
+            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                 config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 var step = config.Step;
-                step.CodeModifierConfig = codeModifierConfig;
+                step.CodeModifierConfigPath = codeModificationFilePath;
                 step.ProjectPath = commandSettings.AppHostProject;
-                step.CodeChangeOptions = new CodeChangeOptions();
+                step.CodeChangeOptions = [];
             }
             else
             {
@@ -89,17 +89,17 @@ internal static class CachingScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 var configName = commandSettings.Type.Equals("redis-with-output-caching", StringComparison.OrdinalIgnoreCase) ? "redis-webapp-oc.json" : "redis-webapp.json";
-                CodeModifierConfig? codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig(configName, System.Reflection.Assembly.GetExecutingAssembly());
-                if (codeModifierConfig is null)
+                var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
+                if (string.IsNullOrEmpty(codeModificationFilePath))
                 {
                     step.SkipStep = true;
                     return;
                 }
 
-                step.CodeModifierConfig = codeModifierConfig;
+                step.CodeModifierConfigPath = codeModificationFilePath;
                 step.CodeModifierProperties = new Dictionary<string, string>();
                 step.ProjectPath = commandSettings.AppHostProject;
-                step.CodeChangeOptions = new CodeChangeOptions();
+                step.CodeChangeOptions = [];
             }
             else
             {

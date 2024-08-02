@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
 internal class PackageConstants
 {
@@ -15,8 +15,7 @@ internal class PackageConstants
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
-        public const string QuickGridEfAdapterPackageName = "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter";
-        public const string AspNetCoreDiagnosticsEfCorePackageName = "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore";
+        
         public const string PostgresPackageName = "Npgsql.EntityFrameworkCore.PostgreSQL";
         public static readonly IDictionary<string, string> EfPackagesDict = new Dictionary<string, string>
         {
@@ -33,5 +32,12 @@ internal class PackageConstants
             { SQLite, "UseSqlite" },
             { CosmosDb, "UseCosmos" }
         };
+    }
+
+    public static class AspNetCorePackages
+    {
+        public const string QuickGridEfAdapterPackageName = "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter";
+        public const string AspNetCoreDiagnosticsEfCorePackageName = "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore";
+        public const string OpenApiPackageName = "Microsoft.AspNetCore.OpenApi";
     }
 }

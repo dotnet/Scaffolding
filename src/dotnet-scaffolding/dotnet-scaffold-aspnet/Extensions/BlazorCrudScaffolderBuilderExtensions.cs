@@ -1,14 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.CodeModification;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
-namespace Microsoft.DotNet.Scaffolding.Core.Builder;
+namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 internal static class BlazorCrudScaffolderBuilderExtensions
 {
@@ -38,7 +40,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                     string baseOutputPath = BlazorCrudHelper.GetBaseOutputPath(
                         blazorCrudModel.ModelInfo.ModelTypeName,
                         blazorCrudModel.ProjectInfo.ProjectPath);
-                    string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Constants.BlazorExtension}");
+                    string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Tools.Scaffold.AspNet.Common.Constants.BlazorExtension}");
 
                     var step = config.Step;
                     step.TemplatePath = templatePath;
@@ -62,8 +64,8 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             var packageList = new List<string>()
             {
                 PackageConstants.EfConstants.EfToolsPackageName,
-                PackageConstants.EfConstants.QuickGridEfAdapterPackageName,
-                PackageConstants.EfConstants.AspNetCoreDiagnosticsEfCorePackageName
+                PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackageName,
+                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName
             };
 
             if (context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var commandSettingsObj) &&
@@ -89,10 +91,10 @@ internal static class BlazorCrudScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithBlazorCrudCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<CodeModificationStep>(async config =>
+        builder = builder.WithStep<CodeModificationStep>(config =>
         {
             var step = config.Step;
-            CodeModifierConfig? codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var blazorCrudSettingsObj);
             config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
@@ -102,16 +104,42 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
 
             //initialize CodeModificationStep's properties
-            if (codeModifierConfig is not null &&
+            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                 blazorCrudSettings is not null &&
                 codeModifierProperties is not null &&
                 blazorCrudModel is not null)
             {
-                codeModifierConfig = await BlazorCrudHelper.EditConfigForBlazorCrudAsync(codeModifierConfig, blazorCrudModel);
-                step.CodeModifierConfig = codeModifierConfig;
+                step.CodeModifierConfigPath = codeModificationFilePath;
                 step.CodeModifierProperties = codeModifierProperties;
                 step.ProjectPath = blazorCrudSettings.Project;
-                step.CodeChangeOptions = blazorCrudModel.ProjectInfo.CodeChangeOptions ?? new CodeChangeOptions();
+                step.CodeChangeOptions = blazorCrudModel.ProjectInfo.CodeChangeOptions ?? [];
+            }
+            else
+            {
+                step.SkipStep = true;
+                return;
+            }
+        });
+
+        //blazor-crud scenario has some custom Program.cs additions that get decided after some analysis.
+        //adding these changes with a programmatically created config
+        builder = builder.WithStep<CodeModificationStep>(config =>
+        {
+            var step = config.Step;
+            config.Context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var blazorCrudSettingsObj);
+            config.Context.Properties.TryGetValue("AdditionalCodeModifier", out var blazorCodeModifierStringObj);
+            config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
+            var blazorCrudSettings = blazorCrudSettingsObj as BlazorCrudSettings;
+            var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
+            var blazorCodeModifierString = blazorCodeModifierStringObj as string;
+            if (blazorCrudSettings is not null &&
+                blazorCrudModel is not null &&
+                !string.IsNullOrEmpty(blazorCodeModifierString))
+            {
+                step.CodeModifierConfigJsonText = blazorCodeModifierString;
+                step.CodeModifierProperties = new Dictionary<string, string>();
+                step.ProjectPath = blazorCrudSettings.Project;
+                step.CodeChangeOptions = blazorCrudModel.ProjectInfo.CodeChangeOptions ?? [];
             }
             else
             {

@@ -6,11 +6,12 @@ using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 
-public static class ProjectModifierHelper
+internal static class ProjectModifierHelper
 {
     internal static char[] CodeSnippetTrimChars = new char[] { ' ', '\r', '\n', ';' };
     internal static IEnumerable<string> CodeSnippetTrimStrings = CodeSnippetTrimChars.Select(c => c.ToString());
@@ -425,7 +426,7 @@ public static class ProjectModifierHelper
     }
 
     // Filter out CodeSnippets that are invalid using FilterOptions
-    internal static CodeSnippet[]? FilterCodeSnippets(CodeSnippet[]? codeSnippets, CodeChangeOptions options) => codeSnippets?.Where(cs => FilterOptions(cs.Options, options)).ToArray();
+    internal static CodeSnippet[]? FilterCodeSnippets(CodeSnippet[]? codeSnippets, IList<string> options) => codeSnippets?.Where(cs => FilterOptions(cs.Options, options)).ToArray();
 
     /// <summary>
     /// Filter Options string array to matching CodeChangeOptions.
@@ -434,7 +435,7 @@ public static class ProjectModifierHelper
     /// <param name="options">string [] in cm_*.json files for code modifications</param>
     /// <param name="codeChangeOptions">based on cli parameters</param>
     /// <returns>true if the CodeChangeOptions apply, false otherwise. </returns>
-    internal static bool FilterOptions(string[]? options, CodeChangeOptions codeChangeOptions)
+    internal static bool FilterOptions(string[]? options, IList<string> codeChangeOptions)
     {
         //if no options are passed, CodeBlock is valid
         if (options == null)
@@ -442,55 +443,15 @@ public static class ProjectModifierHelper
             return true;
         }
 
-        //if options have a "Skip", every CodeBlock is invalid
-        if (options.Contains(CodeChangeOptionStrings.Skip))
+        foreach (var option in options)
         {
-            return false;
-        }
-        // for example, program.cs is only modified when codeChangeOptions.IsMinimalApp is true
-        if (options.Contains(CodeChangeOptionStrings.MinimalApp) && !codeChangeOptions.IsMinimalApp)
-        {
-            return false;
-        }
-        //if its a minimal app and options have a "NonMinimalApp", don't add the CodeBlock
-        if (options.Contains(CodeChangeOptionStrings.NonMinimalApp) && codeChangeOptions.IsMinimalApp)
-        {
-            return false;
-        }
-        //if the CodeChange in the config is for an 'EfScenario' and the scenario is not, skip the CodeChange
-        if (options.Contains(CodeChangeOptionStrings.EfScenario) && !codeChangeOptions.EfScenario)
-        {
-            return false;
-        }
-
-        //an app will either support DownstreamApi, MicrosoftGraph, both, or neither.
-        if (codeChangeOptions.DownstreamApi)
-        {
-            if (options.Contains(CodeChangeOptionStrings.DownstreamApi) ||
-                !options.Contains(CodeChangeOptionStrings.MicrosoftGraph))
+            if (!codeChangeOptions.Contains(option, StringComparer.OrdinalIgnoreCase))
             {
-                return true;
-            }
-        }
-        if (codeChangeOptions.MicrosoftGraph)
-        {
-            if (options.Contains(CodeChangeOptionStrings.MicrosoftGraph) ||
-                !options.Contains(CodeChangeOptionStrings.DownstreamApi))
-            {
-                return true;
-            }
-        }
-        if (!codeChangeOptions.DownstreamApi && !codeChangeOptions.MicrosoftGraph)
-        {
-            if (options == null ||
-                !options.Contains(CodeChangeOptionStrings.MicrosoftGraph) &&
-                !options.Contains(CodeChangeOptionStrings.DownstreamApi))
-            {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /// <summary>
@@ -553,7 +514,7 @@ public static class ProjectModifierHelper
     }
 
     // Filter out CodeBlocks that are invalid using FilterOptions
-    internal static CodeBlock[] FilterCodeBlocks(CodeBlock[] codeBlocks, CodeChangeOptions options)
+    internal static CodeBlock[] FilterCodeBlocks(CodeBlock[] codeBlocks, IList<string> options)
     {
         var filteredCodeBlocks = new HashSet<CodeBlock>();
         if (codeBlocks != null && codeBlocks.Any() && options != null)

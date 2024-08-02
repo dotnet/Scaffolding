@@ -3,9 +3,10 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
 internal static class ClassAnalyzers
 {
@@ -37,7 +38,7 @@ internal static class ClassAnalyzers
         }
 
         if (!string.IsNullOrEmpty(dbContextInfo.DbContextNamespace) &&
-            dbContextInfo.DbContextNamespace.Equals(Helpers.Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
+            dbContextInfo.DbContextNamespace.Equals(Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
         {
             dbContextInfo.DbContextNamespace = string.Empty;
         }
@@ -51,7 +52,7 @@ internal static class ClassAnalyzers
         modelInfo.ModelTypeName = modelClassSymbol.Name;
         modelInfo.ModelNamespace = modelClassSymbol.ContainingNamespace.ToDisplayString();
         if (!string.IsNullOrEmpty(modelInfo.ModelNamespace) &&
-            modelInfo.ModelNamespace.Equals(Helpers.Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
+            modelInfo.ModelNamespace.Equals(Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
         {
             modelInfo.ModelNamespace = string.Empty;
         }

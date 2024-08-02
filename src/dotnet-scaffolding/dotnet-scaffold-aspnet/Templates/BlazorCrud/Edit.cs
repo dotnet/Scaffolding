@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     using System.Text;
     using System.Linq;
     using System;
-    
+
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -183,12 +183,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             }
         }
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel Model
 {
     get
     {
@@ -207,7 +207,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -215,11 +215,11 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
@@ -235,7 +235,7 @@ if ((ModelValueAcquired == false))
     object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.BlazorCrudModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(data));
     }
 }
 

@@ -8,51 +8,6 @@ namespace Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 
 public static class RoslynUtilities
 {
-    public static IEnumerable<ITypeSymbol> GetDirectTypesInCompilation(Compilation compilation)
-    {
-        ArgumentNullException.ThrowIfNull(compilation);
-        var types = new List<ITypeSymbol>();
-        CollectTypes(compilation.Assembly.GlobalNamespace, types);
-        return types;
-    }
-
-    /// <summary>
-    /// Creates an escaped identifier if the identifier is a keyword (or contextual keyword) in C#.
-    /// </summary>
-    /// <param name="identifier"></param>
-    /// <returns></returns>
-    public static string CreateEscapedIdentifier(string identifier)
-    {
-        if (identifier == null)
-        {
-            throw new ArgumentNullException(nameof(identifier));
-        }
-        return IsKeyWord(identifier) ? $"@{identifier}" : identifier;
-    }
-
-    public static bool IsValidNamespace(string namespaceName)
-    {
-        if (namespaceName == null)
-        {
-            throw new ArgumentNullException(nameof(namespaceName));
-        }
-
-        if (IsKeyWord(namespaceName))
-        {
-            return false;
-        }
-
-        var parts = namespaceName.Split('.');
-        foreach (var part in parts)
-        {
-            if (!SyntaxFacts.IsValidIdentifier(part))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /// <summary>
     /// Given a document, checks if the document contains a method invocation with the given method name and containing type (string).
     /// </summary>
@@ -110,12 +65,12 @@ public static class RoslynUtilities
         return fileText.Contains(text, StringComparison.OrdinalIgnoreCase);
     }
 
-    public static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string methodContainingType)
+    internal static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string methodContainingType)
     {
         return SymbolMatchesType(symbol, methodName, new string[] { methodContainingType });
     }
 
-    public static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)
+    internal static bool SymbolMatchesType(IMethodSymbol symbol, string methodName, string[] methodContainingTypes)
     {
         if (symbol is null || string.IsNullOrEmpty(methodName) || methodContainingTypes is null || !methodContainingTypes.Any())
         {

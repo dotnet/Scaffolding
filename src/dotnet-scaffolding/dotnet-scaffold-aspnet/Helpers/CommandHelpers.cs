@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 internal static class CommandHelpers
 {

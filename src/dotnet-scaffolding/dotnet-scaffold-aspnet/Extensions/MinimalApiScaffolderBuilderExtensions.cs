@@ -1,14 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.CodeModification;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
-namespace Microsoft.DotNet.Scaffolding.Core.Builder;
+namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 internal static class MinimalApiScaffolderBuilderExtensions
 {
@@ -18,7 +20,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
         builder = builder.WithStep<CodeModificationStep>(config =>
         {
             var step = config.Step;
-            CodeModifierConfig? codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(MinimalApiSettings), out var minimalApiSettingsObj);
             config.Context.Properties.TryGetValue(nameof(MinimalApiModel), out var minimalApiModelObj);
@@ -28,15 +30,15 @@ internal static class MinimalApiScaffolderBuilderExtensions
             var minimalApiModel = minimalApiModelObj as MinimalApiModel;
 
             //initialize CodeModificationStep's properties
-            if (codeModifierConfig is not null &&
+            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                 minimalApiSettings is not null &&
                 codeModifierProperties is not null &&
                 minimalApiModel is not null)
             {
-                step.CodeModifierConfig = codeModifierConfig;
+                step.CodeModifierConfigPath = codeModificationFilePath;
                 step.CodeModifierProperties = codeModifierProperties;
                 step.ProjectPath = minimalApiSettings.Project;
-                step.CodeChangeOptions = minimalApiModel.ProjectInfo.CodeChangeOptions ?? new CodeChangeOptions();
+                step.CodeChangeOptions = minimalApiModel.ProjectInfo.CodeChangeOptions ?? [];
             }
             else
             {
@@ -69,6 +71,11 @@ internal static class MinimalApiScaffolderBuilderExtensions
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
                     packageList.Add(projectPackageName);
+                }
+
+                if (commandSettings.OpenApi)
+                {
+                    packageList.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
                 }
 
                 step.PackageNames = packageList;

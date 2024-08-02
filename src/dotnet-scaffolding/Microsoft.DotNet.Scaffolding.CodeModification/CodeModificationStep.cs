@@ -4,13 +4,21 @@ using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
+using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
 
+/// <summary>
+/// other than the required properties, expecting either the 'CodeModifierConfigPath'
+/// or the 'CodeModifierConfigJsonText' strings to not be null.
+/// </summary>
 public class CodeModificationStep : ScaffoldStep
 {
-    public required CodeModifierConfig CodeModifierConfig { get; set; }
-    public required CodeChangeOptions CodeChangeOptions { get; set; }
+    public string? CodeModifierConfigPath { get; set; }
+    public string? CodeModifierConfigJsonText { get; set; }
+    public required IList<string> CodeChangeOptions { get; set; }
     //.csproj path for the .NET project
     public required string ProjectPath { get; set; }
     //properties to be injected into the CodeModifierConfig.CodeFile.Method.CodeSnippet's Blocks/Parents/CheckBlock
@@ -24,29 +32,50 @@ public class CodeModificationStep : ScaffoldStep
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        Debugger.Launch();
+        CodeModifierConfig? codeModifierConfig = null;
+        if (!string.IsNullOrEmpty(CodeModifierConfigPath))
+        {
+            codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig(CodeModifierConfigPath);
+        }
+        else if (!string.IsNullOrEmpty(CodeModifierConfigJsonText))
+        {
+            codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfigFromJson(CodeModifierConfigJsonText);
+        }
+        else
+        {
+            return false;
+        }
+        
+        if (codeModifierConfig is null)
+        {
+            _logger.LogError($"Unable to parse the {nameof(CodeModifierConfig)} provided. Please check the {nameof(CodeModifierConfig)} definition.");
+            return false;
+        }
+
         ICodeService codeService = new CodeService(_logger, ProjectPath);
         //replace all "variables" provided in 'CodeModifierProperties' in the 'CodeModifierConfig'
-        EditCodeModifierConfig();
+        EditCodeModifierConfig(codeModifierConfig);
         var projectModifier = new ProjectModifier(
             ProjectPath,
             codeService,
             _logger,
-            CodeModifierConfig,
+            codeModifierConfig,
             CodeChangeOptions);
 
-        string projectName = Path.GetFileName(ProjectPath);
+        string projectName = Path.GetFileNameWithoutExtension(ProjectPath);
         _logger.LogInformation($"Updating project '{projectName}'");
         return await projectModifier.RunAsync();
     }
 
-    private void EditCodeModifierConfig()
+    private void EditCodeModifierConfig(CodeModifierConfig codeModifierConfig)
     {
-        if (CodeModifierConfig.Files is null)
+        if (codeModifierConfig.Files is null)
         {
             return;
         }
 
-        var methods = CodeModifierConfig.Files.SelectMany(x => x.Methods?.Values ?? Enumerable.Empty<Method>());
+        var methods = codeModifierConfig.Files.SelectMany(x => x.Methods?.Values ?? Enumerable.Empty<Method>());
         var codeSnippets = methods.SelectMany(x => x.CodeChanges ?? Enumerable.Empty<CodeSnippet>());
         foreach (var codeSnippet in codeSnippets)
         {

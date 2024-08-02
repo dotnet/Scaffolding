@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
-namespace Microsoft.DotNet.Scaffolding.Core.Builder;
+namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 internal static class ScaffolderBuilderExtensions
 {
@@ -44,25 +44,5 @@ internal static class ScaffolderBuilderExtensions
         });
 
         return builder;
-    }
-
-    private static void GetDbContextTemplatingStepProperties(
-        out string templatePath,
-        out Type templateType,
-        out string templateModelName)
-    {
-        //get .tt template file path
-        var templateUtilities = new TemplateFoldersUtilities();
-        var allT4Templates = templateUtilities.GetAllT4Templates(["DbContext"]);
-        string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));
-        if (string.IsNullOrEmpty(t4TemplatePath))
-        {
-            throw new Exception();
-        }
-
-        //get System.Type for NewDbContext
-        templateType = typeof(NewDbContext);
-        templatePath = t4TemplatePath;
-        templateModelName = "Model";
     }
 }

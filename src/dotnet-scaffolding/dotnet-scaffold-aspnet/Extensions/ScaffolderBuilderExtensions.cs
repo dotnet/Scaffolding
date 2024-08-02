@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Aspire;
+namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 internal static class ScaffolderBuilderExtensions
 {
@@ -32,17 +33,42 @@ internal static class ScaffolderBuilderExtensions
             }
 
             context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
+            context.Properties.TryGetValue("CodeModifierProperties", out var codeModifierPropertiesObj); 
             var baseProjectPathVal = baseProjectPathObj?.ToString();
+            var codeModifierProperties = codeModifierPropertiesObj as IDictionary<string, string>;
+            string? connectionStringName = null;
+            codeModifierProperties?.TryGetValue("$(ConnectionStringName)", out connectionStringName);
+
             if (string.IsNullOrEmpty(baseProjectPathVal))
             {
                 throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
             }
 
             step.BaseProjectPath = baseProjectPathVal;
-            step.ConnectionString = string.Format(dbContextProperties.NewDbConnectionString, dbContextProperties.DbContextName);
+            step.ConnectionString = string.Format(dbContextProperties.NewDbConnectionString, connectionStringName ?? dbContextProperties.DbContextName);
             step.ConnectionStringName = dbContextProperties.DbContextName;
         });
 
         return builder;
+    }
+
+    private static void GetDbContextTemplatingStepProperties(
+        out string templatePath,
+        out Type templateType,
+        out string templateModelName)
+    {
+        //get .tt template file path
+        var templateUtilities = new TemplateFoldersUtilities();
+        var allT4Templates = templateUtilities.GetAllT4Templates(["DbContext"]);
+        string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrEmpty(t4TemplatePath))
+        {
+            throw new Exception();
+        }
+
+        //get System.Type for NewDbContext
+        templateType = typeof(NewDbContext);
+        templatePath = t4TemplatePath;
+        templateModelName = "Model";
     }
 }

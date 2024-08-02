@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-namespace Microsoft.DotNet.Scaffolding.CodeModification;
+namespace Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 
-public class CodeFile
+internal class CodeFile
 {
     public Dictionary<string, Method>? Methods { get; set; }
     public CodeSnippet[]? Replacements { get; set; }
@@ -15,17 +15,4 @@ public class CodeFile
     public CodeBlock[]? ClassAttributes { get; set; }
     public string[]? GlobalVariables { get; set; }
     public string[]? Options { get; set; }
-}
-
-public class CodeBlock
-{
-    public string? Block { get; set; }
-    public string[]? Options { get; set; }
-}
-
-public class Formatting
-{
-    public bool Newline { get; set; }
-    public int NumberOfSpaces { get; set; }
-    public bool Semicolon { get; set; }
 }

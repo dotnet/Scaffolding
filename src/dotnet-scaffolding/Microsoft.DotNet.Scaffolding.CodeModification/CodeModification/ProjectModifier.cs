@@ -6,6 +6,7 @@ using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
 
@@ -17,14 +18,14 @@ internal class ProjectModifier
     private readonly StringBuilder _output;
     private readonly string _projectPath;
     private readonly CodeModifierConfig _codeModifierConfig;
-    private readonly CodeChangeOptions _codeChangeOptions;
+    private readonly IList<string> _codeChangeOptions;
 
     public ProjectModifier(
         string projectPath,
         ICodeService codeService,
         ILogger consoleLogger,
         CodeModifierConfig codeModifierConfig,
-        CodeChangeOptions codeChangeOptions)
+        IList<string> codeChangeOptions)
     {
         _codeService = codeService;
         _consoleLogger = consoleLogger ?? throw new ArgumentNullException(nameof(consoleLogger));
@@ -55,7 +56,7 @@ internal class ProjectModifier
         return _codeService.TryApplyChanges(roslynProject?.Solution);
     }
 
-    private async Task<Document?> HandleCodeFileAsync(Document? document, CodeFile file, CodeChangeOptions options)
+    private async Task<Document?> HandleCodeFileAsync(Document? document, CodeFile file, IList<string> options)
     {
         try
         {
@@ -88,7 +89,7 @@ internal class ProjectModifier
         return document;
     }
 
-    internal static async Task<Document?> ModifyCshtmlFile(CodeFile file, Document? fileDoc, CodeChangeOptions options)
+    internal static async Task<Document?> ModifyCshtmlFile(CodeFile file, Document? fileDoc, IList<string> options)
     {
         if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
         {
@@ -112,7 +113,7 @@ internal class ProjectModifier
     /// <param name="project"></param>
     /// <param name="toolOptions"></param>
     /// <returns></returns>
-    internal static async Task<Document?> ApplyTextReplacements(CodeFile file, Document? document, CodeChangeOptions toolOptions)
+    internal static async Task<Document?> ApplyTextReplacements(CodeFile file, Document? document, IList<string> toolOptions)
     {
         if (document is null)
         {
@@ -128,14 +129,14 @@ internal class ProjectModifier
         return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements);
     }
 
-    internal async Task<Document?> ModifyCsFile(CodeFile file, Document? fileDoc, CodeChangeOptions options)
+    internal async Task<Document?> ModifyCsFile(CodeFile file, Document? fileDoc, IList<string> options)
     {
         if (fileDoc is null || string.IsNullOrEmpty(fileDoc.Name))
         {
             return fileDoc;
         }
 
-        DocumentBuilder documentBuilder = new(fileDoc, file, _consoleLogger);
+        DocumentBuilder documentBuilder = new(fileDoc, file, options, _consoleLogger);
         return await documentBuilder.RunAsync();
     }
 

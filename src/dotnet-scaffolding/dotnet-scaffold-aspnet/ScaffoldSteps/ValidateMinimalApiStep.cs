@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -62,7 +63,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 
         if (!string.IsNullOrEmpty(minimalApiModel.EndpointsMethodName))
         {
-            codeModifierProperties.Add("$(EndpointsMethodName)", minimalApiModel.EndpointsMethodName);
+            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.EndpointsMethodName, minimalApiModel.EndpointsMethodName);
         }
         
         //Install packages and add a DbContext (if needed)
@@ -77,7 +78,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
             var projectBasePath = Path.GetDirectoryName(minimalApiSettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add("BaseProjectPath", projectBasePath);
+                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
             var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(minimalApiModel.DbContextInfo);
@@ -86,7 +87,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
-        context.Properties.Add("CodeModifierProperties", codeModifierProperties);
+        context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
         return true;
     }
 

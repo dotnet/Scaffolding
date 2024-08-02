@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -98,7 +99,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var blazorCrudSettingsObj);
             config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
-            config.Context.Properties.TryGetValue("CodeModifierProperties", out var codeModifierPropertiesObj);
+            config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var blazorCrudSettings = blazorCrudSettingsObj as BlazorCrudSettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
@@ -127,7 +128,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         {
             var step = config.Step;
             config.Context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var blazorCrudSettingsObj);
-            config.Context.Properties.TryGetValue("AdditionalCodeModifier", out var blazorCodeModifierStringObj);
+            config.Context.Properties.TryGetValue(Constants.StepConstants.AdditionalCodeModifier, out var blazorCodeModifierStringObj);
             config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
             var blazorCrudSettings = blazorCrudSettingsObj as BlazorCrudSettings;
             var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;

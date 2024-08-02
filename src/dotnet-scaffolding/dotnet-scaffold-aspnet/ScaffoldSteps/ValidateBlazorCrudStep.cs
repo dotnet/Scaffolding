@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -70,19 +71,19 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             var projectBasePath = Path.GetDirectoryName(blazorCrudSettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add("BaseProjectPath", projectBasePath);
+                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
             codeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorCrudModel.DbContextInfo);
         }
 
-        context.Properties.Add("CodeModifierProperties", codeModifierProperties);
+        context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
         var additionalCodeChanges = await BlazorCrudHelper.GetBlazorCrudCodeChangesAsync(blazorCrudModel);
         if (additionalCodeChanges.Count != 0)
         {
             var allCodeChangesString = string.Join(",", additionalCodeChanges);
-            var codeModificationConfigString = BlazorCrudHelper.AdditionaCodeModificationJson.Replace("$(CodeChanges)", allCodeChangesString);
-            context.Properties.Add("AdditionalCodeModifier", codeModificationConfigString);
+            var codeModificationConfigString = BlazorCrudHelper.AdditionalCodeModificationJson.Replace("$(CodeChanges)", allCodeChangesString);
+            context.Properties.Add(Constants.StepConstants.AdditionalCodeModifier, codeModificationConfigString);
         }
 
         return true;

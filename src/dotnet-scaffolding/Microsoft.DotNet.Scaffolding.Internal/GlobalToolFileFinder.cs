@@ -7,7 +7,7 @@ internal static class GlobalToolFileFinder
 {
     internal static string? FindCodeModificationConfigFile(string fileName, Assembly executingAssembly)
     {
-        var assemblyDirectory = Path.GetDirectoryName(executingAssembly.Location);
+        var assemblyDirectory = Path.GetDirectoryName(executingAssembly?.Location);
         if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(assemblyDirectory))
         {
             return null;

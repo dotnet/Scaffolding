@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -24,7 +25,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(MinimalApiSettings), out var minimalApiSettingsObj);
             config.Context.Properties.TryGetValue(nameof(MinimalApiModel), out var minimalApiModelObj);
-            config.Context.Properties.TryGetValue("CodeModifierProperties", out var codeModifierPropertiesObj);
+            config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var minimalApiSettings = minimalApiSettingsObj as MinimalApiSettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var minimalApiModel = minimalApiModelObj as MinimalApiModel;

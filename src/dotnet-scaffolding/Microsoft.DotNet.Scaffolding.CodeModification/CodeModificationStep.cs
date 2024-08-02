@@ -43,12 +43,17 @@ public class CodeModificationStep : ScaffoldStep
         }
         else
         {
+            _logger.LogError($"No {nameof(CodeModifierConfig)} provided. Provide a valid value for either '{nameof(CodeModifierConfigJsonText)}' or '{nameof(CodeModifierConfigPath)}' variable");
             return false;
         }
         
         if (codeModifierConfig is null)
         {
-            _logger.LogError($"Unable to parse the {nameof(CodeModifierConfig)} provided. Please check the {nameof(CodeModifierConfig)} definition.");
+            _logger.LogError($"Unable to parse the {nameof(CodeModifierConfig)} provided. Check the {nameof(CodeModifierConfig)} definition.");
+            //log a more specific error message.
+            var errorMessage = string.IsNullOrEmpty(CodeModifierConfigJsonText) ?
+                $"Invalid {nameof(CodeModifierConfigJsonText)} provided" : $"Invalid config/path provided at {CodeModifierConfigPath}";
+            _logger.LogError(errorMessage);
             return false;
         }
 

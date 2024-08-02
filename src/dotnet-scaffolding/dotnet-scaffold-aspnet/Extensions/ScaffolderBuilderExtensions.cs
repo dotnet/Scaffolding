@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
@@ -18,7 +19,7 @@ internal static class ScaffolderBuilderExtensions
             var context = config.Context;
 
             DbContextProperties? dbContextProperties = null;
-            if (context.Properties.TryGetValue("DbContextProperties", out var dbContextPropertiesObj) &&
+            if (context.Properties.TryGetValue(Constants.StepConstants.DbContextProperties, out var dbContextPropertiesObj) &&
                 dbContextPropertiesObj is DbContextProperties)
             {
                 dbContextProperties = dbContextPropertiesObj as DbContextProperties;
@@ -33,11 +34,11 @@ internal static class ScaffolderBuilderExtensions
             }
 
             string? connectionStringName = null;
-            context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
-            context.Properties.TryGetValue("CodeModifierProperties", out var codeModifierPropertiesObj); 
+            context.Properties.TryGetValue(Constants.StepConstants.BaseProjectPath, out var baseProjectPathObj);
+            context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj); 
             var baseProjectPathVal = baseProjectPathObj?.ToString();
             var codeModifierProperties = codeModifierPropertiesObj as IDictionary<string, string>;
-            codeModifierProperties?.TryGetValue("$(ConnectionStringName)", out connectionStringName);
+            codeModifierProperties?.TryGetValue(Constants.CodeModifierPropertyConstants.ConnectionStringName, out connectionStringName);
             if (string.IsNullOrEmpty(baseProjectPathVal))
             {
                 throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");

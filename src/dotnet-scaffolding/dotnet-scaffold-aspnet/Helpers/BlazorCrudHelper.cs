@@ -31,12 +31,81 @@ internal static class BlazorCrudHelper
     internal const string GlobalWebAssemblyRenderModeText = @"<HeadOutlet @rendermode=""@InteractiveWebAssembly"" />";
     internal const string GlobalWebAssemblyRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveWebAssembly"" />";
     internal const string GlobalServerRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveServer"" />";
-    internal static string AdditionaCodeModificationJson = "{ \"Files\": [ { \"FileName\": \"Program.cs\", \"Options\": [], \"Methods\": { \"Global\": { \"CodeChanges\": [$(CodeChanges)] } } } ] }";
-    internal static string AddRazorComponentsSnippet = "{\"Block\":\"WebApplication.CreateBuilder.Services.AddRazorComponents()\",\"InsertBefore\":[\"var app = WebApplication.CreateBuilder.Build()\"],\"CodeChangeType\":\"Default\",\"LeadingTrivia\":{\"Newline\":true,\"NumberOfSpaces\":0}}";
-    internal static string AddMapRazorComponentsSnippet = "{\"Block\":\"app.MapRazorComponents<App>()\",\"InsertBefore\":[\"app.Run()\"],\"CodeChangeType\":\"Default\",\"LeadingTrivia\":{\"Newline\":true,\"NumberOfSpaces\":0}}";
-    internal static string AddInteractiveServerRenderModeSnippet = "{\"Block\":\"AddInteractiveServerRenderMode()\",\"Parent\":\"MapRazorComponents<App>\",\"CodeChangeType\":\"MemberAccess\",\"LeadingTrivia\":{\"Newline\":true,\"NumberOfSpaces\":4}}";
-    internal static string AddInteractiveServerComponentsSnippet = "{\"Block\":\"AddInteractiveServerComponents()\",\"Parent\":\"WebApplication.CreateBuilder.Services.AddRazorComponents()\",\"CodeChangeType\":\"MemberAccess\",\"LeadingTrivia\":{\"Newline\":true,\"NumberOfSpaces\":4}}";
-    internal static string AddInteractiveWebAssemblyRenderModeSnippet = "{\"Block\":\"AddInteractiveWebAssemblyRenderMode()\",\"Parent\":\"MapRazorComponents<App>\",\"CodeChangeType\":\"MemberAccess\",\"LeadingTrivia\":{\"Newline\":true,\"NumberOfSpaces\":4}}";
+    internal static string AdditionalCodeModificationJson = @"
+    {
+        ""Files"": [
+            {
+                ""FileName"": ""Program.cs"",
+                ""Options"": [],
+                ""Methods"": {
+                    ""Global"": {
+                        ""CodeChanges"": [
+                            $(CodeChanges)
+                        ]
+                    }
+                }
+            }
+        ]
+    }";
+
+    internal static string AddRazorComponentsSnippet = @"
+    {
+        ""Block"": ""WebApplication.CreateBuilder.Services.AddRazorComponents()"",
+        ""InsertBefore"": [
+            ""var app = WebApplication.CreateBuilder.Build()""
+        ],
+        ""CodeChangeType"": ""Default"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 0
+        }
+    }";
+
+    internal static string AddMapRazorComponentsSnippet = @"
+    {
+        ""Block"": ""app.MapRazorComponents<App>()"",
+        ""InsertBefore"": [
+            ""app.Run()""
+        ],
+        ""CodeChangeType"": ""Default"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 0
+        }
+    }";
+
+    internal static string AddInteractiveServerRenderModeSnippet = @"
+    {
+        ""Block"": ""AddInteractiveServerRenderMode()"",
+        ""Parent"": ""MapRazorComponents<App>"",
+        ""CodeChangeType"": ""MemberAccess"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 4
+        }
+    }";
+
+    internal static string AddInteractiveServerComponentsSnippet = @"
+    {
+        ""Block"": ""AddInteractiveServerComponents()"",
+        ""Parent"": ""WebApplication.CreateBuilder.Services.AddRazorComponents()"",
+        ""CodeChangeType"": ""MemberAccess"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 4
+        }
+    }";
+
+    internal static string AddInteractiveWebAssemblyRenderModeSnippet = @"
+    {
+        ""Block"": ""AddInteractiveWebAssemblyRenderMode()"",
+        ""Parent"": ""MapRazorComponents<App>"",
+        ""CodeChangeType"": ""MemberAccess"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 4
+        }
+    }";
 
     internal static Type? GetTemplateType(string? templatePath)
     {

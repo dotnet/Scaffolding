@@ -1,15 +1,29 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Reflection;
-
 namespace Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 
-public static class CodeModifierConfigHelper
+internal static class CodeModifierConfigHelper
 {
-    public static CodeModifierConfig? GetCodeModifierConfig(string configName, Assembly? assembly = null)
+    public static CodeModifierConfig? GetCodeModifierConfig(string configPath)
     {
-        assembly = assembly ?? Assembly.GetExecutingAssembly();
-        string jsonText = ProjectModelHelper.GetManifestResource(assembly, shortResourceName: configName);
-        return System.Text.Json.JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+        if (!string.IsNullOrEmpty(configPath) && File.Exists(configPath))
+        {
+            string jsonText = File.ReadAllText(configPath);
+            return GetCodeModifierConfigFromJson(jsonText);
+        }
+
+        return null;
+    }
+
+    public static CodeModifierConfig? GetCodeModifierConfigFromJson(string jsonText)
+    {
+        try
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

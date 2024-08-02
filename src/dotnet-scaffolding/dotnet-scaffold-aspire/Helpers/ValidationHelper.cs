@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.Extensions.Logging;
 
@@ -93,7 +94,7 @@ internal static class ValidationHelper
         var projectBasePath = Path.GetDirectoryName(commandSettings.Project);
         if (!string.IsNullOrEmpty(projectBasePath))
         {
-            context.Properties.Add("BaseProjectPath", projectBasePath);
+            context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
         }
         return true;
     }

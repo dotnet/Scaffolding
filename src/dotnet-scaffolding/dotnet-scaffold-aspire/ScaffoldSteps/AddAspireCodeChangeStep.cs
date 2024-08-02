@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -33,7 +34,7 @@ internal class AddAspireCodeChangeStep : CodeModificationStep
         //add the web worker project name
         if (autoGenProjectNames.TryGetValue(commandSettings.Project, out var autoGenProjectName))
         {
-            CodeModifierProperties.Add("$(AutoGenProjectName)", autoGenProjectName);
+            CodeModifierProperties.Add(Constants.CodeModifierPropertyConstants.AutoGenProjectName, autoGenProjectName);
         }
     }
 

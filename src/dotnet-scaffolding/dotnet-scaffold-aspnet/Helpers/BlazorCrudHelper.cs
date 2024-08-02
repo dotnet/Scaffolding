@@ -1,12 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Scaffolding.CodeModification;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Roslyn;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 internal static class BlazorCrudHelper
 {
@@ -32,78 +31,81 @@ internal static class BlazorCrudHelper
     internal const string GlobalWebAssemblyRenderModeText = @"<HeadOutlet @rendermode=""@InteractiveWebAssembly"" />";
     internal const string GlobalWebAssemblyRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveWebAssembly"" />";
     internal const string GlobalServerRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveServer"" />";
-
-    internal static CodeSnippet AddRazorComponentsSnippet = new()
+    internal const string AdditionalCodeModificationJson = @"
     {
-        Block = "WebApplication.CreateBuilder.Services.AddRazorComponents()",
-        InsertBefore = new string[] { "var app = WebApplication.CreateBuilder.Build()" },
-        CodeChangeType = CodeChangeType.Default,
-        LeadingTrivia = new Formatting()
-        {
-            Newline = true,
-            NumberOfSpaces = 0
-        }
-    };
+        ""Files"": [
+            {
+                ""FileName"": ""Program.cs"",
+                ""Options"": [],
+                ""Methods"": {
+                    ""Global"": {
+                        ""CodeChanges"": [
+                            $(CodeChanges)
+                        ]
+                    }
+                }
+            }
+        ]
+    }";
 
-    internal static CodeSnippet AddMapRazorComponentsSnippet = new()
+    internal const string AddRazorComponentsSnippet = @"
     {
-        Block = "app.MapRazorComponents<App>()",
-        InsertBefore = [ "app.Run()" ],
-        CodeChangeType = CodeChangeType.Default,
-        LeadingTrivia = new Formatting()
-        {
-            Newline = true,
-            NumberOfSpaces = 0
+        ""Block"": ""WebApplication.CreateBuilder.Services.AddRazorComponents()"",
+        ""InsertBefore"": [
+            ""var app = WebApplication.CreateBuilder.Build()""
+        ],
+        ""CodeChangeType"": ""Default"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 0
         }
-    };
+    }";
 
-    internal static CodeSnippet AddInteractiveServerRenderModeSnippet = new()
+    internal const string AddMapRazorComponentsSnippet = @"
     {
-        Block = "AddInteractiveServerRenderMode()",
-        Parent = "MapRazorComponents<App>",
-        CodeChangeType = CodeChangeType.MemberAccess,
-        LeadingTrivia = new Formatting()
-        {
-            Newline = true,
-            NumberOfSpaces = 4
+        ""Block"": ""app.MapRazorComponents<App>()"",
+        ""InsertBefore"": [
+            ""app.Run()""
+        ],
+        ""CodeChangeType"": ""Default"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 0
         }
-    };
+    }";
 
-    internal static CodeSnippet AddInteractiveServerComponentsSnippet = new()
+    internal const string AddInteractiveServerRenderModeSnippet = @"
     {
-        Block = "AddInteractiveServerComponents()",
-        Parent = "WebApplication.CreateBuilder.Services.AddRazorComponents()",
-        CodeChangeType = CodeChangeType.MemberAccess,
-        LeadingTrivia = new Formatting()
-        {
-            Newline = true,
-            NumberOfSpaces = 4
+        ""Block"": ""AddInteractiveServerRenderMode()"",
+        ""Parent"": ""MapRazorComponents<App>"",
+        ""CodeChangeType"": ""MemberAccess"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 4
         }
-    };
+    }";
 
-    internal static CodeSnippet AddInteractiveWebAssemblyRenderModeSnippet = new CodeSnippet()
+    internal const string AddInteractiveServerComponentsSnippet = @"
     {
-        Block = "AddInteractiveWebAssemblyRenderMode()",
-        Parent = "MapRazorComponents<App>",
-        CodeChangeType = CodeChangeType.MemberAccess,
-        LeadingTrivia = new Formatting()
-        {
-            Newline = true,
-            NumberOfSpaces = 4
+        ""Block"": ""AddInteractiveServerComponents()"",
+        ""Parent"": ""WebApplication.CreateBuilder.Services.AddRazorComponents()"",
+        ""CodeChangeType"": ""MemberAccess"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 4
         }
-    };
+    }";
 
-    private static readonly Lazy<Dictionary<string, string>> _crudTemplates =
-        new(() => new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "Create", CreateBlazorTemplate },
-            { "Delete", DeleteBlazorTemplate },
-            { "Details", DetailsBlazorTemplate },
-            { "Edit", EditBlazorTemplate },
-            { "Index", IndexBlazorTemplate }
-        });
-
-    internal static Dictionary<string, string> CRUDTemplates => _crudTemplates.Value;
+    internal const string AddInteractiveWebAssemblyRenderModeSnippet = @"
+    {
+        ""Block"": ""AddInteractiveWebAssemblyRenderMode()"",
+        ""Parent"": ""MapRazorComponents<App>"",
+        ""CodeChangeType"": ""MemberAccess"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 4
+        }
+    }";
 
     internal static Type? GetTemplateType(string? templatePath)
     {
@@ -152,6 +154,21 @@ internal static class BlazorCrudHelper
         return Path.Combine(projectBasePath, "Components", "Pages", $"{modelName}Pages");
     }
 
+    internal static async Task<IList<string>> GetBlazorCrudCodeChangesAsync(BlazorCrudModel blazorCrudModel)
+    {
+        var codeChanges = new List<string>();
+        var codeService = blazorCrudModel.ProjectInfo?.CodeService;
+        if (codeService is not null)
+        {
+            var programCsDocument = await codeService.GetDocumentAsync("Program.cs");
+            var appRazorDocument = await codeService.GetDocumentAsync("App.razor");
+            var blazorAppProperties = await GetBlazorPropertiesAsync(programCsDocument, appRazorDocument);
+            return GetAdditionalBlazorCrudCodeChanges(blazorAppProperties);
+        }
+
+        return codeChanges;
+    }
+
     private static async Task<BlazorCrudAppProperties> GetBlazorPropertiesAsync(Document? programDocument, Document? appRazorDocument)
     {
         var blazorAppProperties = new BlazorCrudAppProperties();
@@ -174,7 +191,7 @@ internal static class BlazorCrudHelper
                 blazorAppProperties.InteractiveWebAssemblyRenderModeNeeded = !hasInteractiveWebAssemblyRenderMode && blazorAppProperties.InteractiveWebAssemblyComponentsExists;
             }
         }
-        
+
         if (appRazorDocument != null)
         {
             blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalServerRenderModeText) ||
@@ -187,70 +204,42 @@ internal static class BlazorCrudHelper
         return blazorAppProperties;
     }
 
-    private static CodeModifierConfig AddBlazorChangesToCodeFile(CodeModifierConfig configToEdit, BlazorCrudAppProperties appProperties)
+    private static IList<string> GetAdditionalBlazorCrudCodeChanges(BlazorCrudAppProperties appProperties)
     {
-        var programCsFile = configToEdit.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.FileName) && x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-        var globalMethod = programCsFile?.Methods?["Global"];
-        if (globalMethod is null)
-        {
-            return configToEdit;
-        }
-
-        var codeChanges = globalMethod.CodeChanges?.ToHashSet();
+        var codeChanges = new List<string>();
         if (appProperties.AddRazorComponentsExists)
         {
             if (!appProperties.InteractiveWebAssemblyComponentsExists && !appProperties.InteractiveServerComponentsExists)
             {
-                codeChanges?.Add(AddInteractiveServerComponentsSnippet);
-                codeChanges?.Add(AddInteractiveServerRenderModeSnippet);
+                codeChanges.Add(AddInteractiveServerComponentsSnippet);
+                codeChanges.Add(AddInteractiveServerRenderModeSnippet);
             }
         }
         else
         {
-            codeChanges?.Add(AddRazorComponentsSnippet);
-            codeChanges?.Add(AddInteractiveServerComponentsSnippet);
-            codeChanges?.Add(AddInteractiveServerRenderModeSnippet);
+            codeChanges.Add(AddRazorComponentsSnippet);
+            codeChanges.Add(AddInteractiveServerComponentsSnippet);
+            codeChanges.Add(AddInteractiveServerRenderModeSnippet);
         }
 
         if (appProperties.MapRazorComponentsExists)
         {
             if (appProperties.InteractiveServerRenderModeNeeded)
             {
-                codeChanges?.Add(AddInteractiveServerRenderModeSnippet);
+                codeChanges.Add(AddInteractiveServerRenderModeSnippet);
             }
 
             if (appProperties.InteractiveWebAssemblyRenderModeNeeded)
             {
-                codeChanges?.Add(AddInteractiveWebAssemblyRenderModeSnippet);
+                codeChanges.Add(AddInteractiveWebAssemblyRenderModeSnippet);
             }
         }
         else
         {
-            codeChanges?.Add(AddMapRazorComponentsSnippet);
-            codeChanges?.Add(AddInteractiveServerRenderModeSnippet);
+            codeChanges.Add(AddMapRazorComponentsSnippet);
+            codeChanges.Add(AddInteractiveServerRenderModeSnippet);
         }
 
-        globalMethod.CodeChanges = codeChanges?.ToArray();
-
-        if (programCsFile is not null && programCsFile.Methods is not null)
-        {
-            programCsFile.Methods["Global"] = globalMethod;
-        }
-
-        return configToEdit;
-    }
-
-    internal static async Task<CodeModifierConfig> EditConfigForBlazorCrudAsync(CodeModifierConfig configToEdit, BlazorCrudModel blazorCrudModel)
-    {
-        var codeService = blazorCrudModel.ProjectInfo?.CodeService;
-        if (codeService is not null)
-        {
-            var programCsDocument = await codeService.GetDocumentAsync("Program.cs");
-            var appRazorDocument = await codeService.GetDocumentAsync("App.razor");
-            var blazorAppProperties = await GetBlazorPropertiesAsync(programCsDocument, appRazorDocument);
-            configToEdit = AddBlazorChangesToCodeFile(configToEdit, blazorAppProperties);
-        }
-
-        return configToEdit;
+        return codeChanges;
     }
 }

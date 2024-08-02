@@ -1,17 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Helpers.General;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -64,7 +63,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 
         if (!string.IsNullOrEmpty(minimalApiModel.EndpointsMethodName))
         {
-            codeModifierProperties.Add("$(EndpointsMethodName)", minimalApiModel.EndpointsMethodName);
+            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.EndpointsMethodName, minimalApiModel.EndpointsMethodName);
         }
         
         //Install packages and add a DbContext (if needed)
@@ -79,7 +78,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
             var projectBasePath = Path.GetDirectoryName(minimalApiSettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add("BaseProjectPath", projectBasePath);
+                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
             var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(minimalApiModel.DbContextInfo);
@@ -88,7 +87,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
-        context.Properties.Add("CodeModifierProperties", codeModifierProperties);
+        context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
         return true;
     }
 
@@ -199,12 +198,12 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         scaffoldingModel.OpenAPI = settings.OpenApi;
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
         {
-            scaffoldingModel.ProjectInfo.CodeChangeOptions = new CodeChangeOptions
-            {
-                IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(scaffoldingModel.ProjectInfo.CodeService),
-                UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(scaffoldingModel.ProjectInfo.CodeService),
-                EfScenario = scaffoldingModel.DbContextInfo.EfScenario
-            };
+            scaffoldingModel.ProjectInfo.CodeChangeOptions =
+            [
+                "IsMinimalApp",
+                "UseTopLevelStatements",
+                scaffoldingModel.DbContextInfo.EfScenario ? "EfScenario" : string.Empty
+            ];
         }
 
         return scaffoldingModel;

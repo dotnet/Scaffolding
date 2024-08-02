@@ -20,12 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="CodeModificationConfigs\*\*.json">
-      <Pack>true</Pack>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
+    <None Pack="true" Include="CodeModificationConfigs\*\*.json" PackagePath="CodeModificationConfigs\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
   </ItemGroup>
 </Project>

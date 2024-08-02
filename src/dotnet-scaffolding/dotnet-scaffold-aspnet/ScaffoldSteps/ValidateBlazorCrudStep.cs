@@ -1,16 +1,15 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -72,13 +71,21 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             var projectBasePath = Path.GetDirectoryName(blazorCrudSettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add("BaseProjectPath", projectBasePath);
+                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
             codeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorCrudModel.DbContextInfo);
         }
 
-        context.Properties.Add("CodeModifierProperties", codeModifierProperties);
+        context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
+        var additionalCodeChanges = await BlazorCrudHelper.GetBlazorCrudCodeChangesAsync(blazorCrudModel);
+        if (additionalCodeChanges.Count != 0)
+        {
+            var allCodeChangesString = string.Join(",", additionalCodeChanges);
+            var codeModificationConfigString = BlazorCrudHelper.AdditionalCodeModificationJson.Replace("$(CodeChanges)", allCodeChangesString);
+            context.Properties.Add(Constants.StepConstants.AdditionalCodeModifier, codeModificationConfigString);
+        }
+
         return true;
     }
 
@@ -178,12 +185,12 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
         {
-            scaffoldingModel.ProjectInfo.CodeChangeOptions = new CodeChangeOptions
-            {
-                IsMinimalApp = await ProjectModifierHelper.IsMinimalApp(scaffoldingModel.ProjectInfo.CodeService),
-                UsingTopLevelsStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(scaffoldingModel.ProjectInfo.CodeService),
-                EfScenario = scaffoldingModel.DbContextInfo.EfScenario
-            };
+            scaffoldingModel.ProjectInfo.CodeChangeOptions =
+            [
+                "IsMinimalApp",
+                "UseTopLevelStatements",
+                scaffoldingModel.DbContextInfo.EfScenario ? "EfScenario" : string.Empty
+            ];
         }
 
         return scaffoldingModel;

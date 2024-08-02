@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-namespace Microsoft.DotNet.Scaffolding.CodeModification;
+namespace Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 
-public class Method
+internal class Method
 {
     public string[]? Parameters { get; set; }
     public CodeBlock[]? AddParameters { get; set; }

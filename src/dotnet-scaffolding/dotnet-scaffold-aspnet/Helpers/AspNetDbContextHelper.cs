@@ -1,7 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -23,12 +24,13 @@ internal class AspNetDbContextHelper
             if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
                 PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(dbContextInfo.DatabaseProvider, out var useDbMethod))
             {
-                dbContextProperties.Add("$(UseDbMethod)", useDbMethod);
+                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.UseDbMethod, useDbMethod);
             }
 
             if (!string.IsNullOrEmpty(dbContextInfo.DbContextClassName))
             {
-                dbContextProperties.Add("$(DbContextName)", dbContextInfo.DbContextClassName);
+                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.DbContextName, dbContextInfo.DbContextClassName);
+                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.ConnectionStringName, dbContextInfo.DbContextClassName);
             }
         }
 

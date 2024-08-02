@@ -1,9 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
-using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
@@ -71,33 +70,33 @@ internal static class DatabaseScaffolderBuilderExtensions
     {
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
-            CodeModifierConfig? codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig("db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
-            if (codeModifierConfig is not null &&
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
+            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                 config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 var step = config.Step;
                 var codeModifierProperties = GetAppHostProperties(commandSettings);
-                step.CodeModifierConfig = codeModifierConfig;
+                step.CodeModifierConfigPath = codeModificationFilePath;
                 step.CodeModifierProperties = codeModifierProperties;
                 step.ProjectPath = commandSettings.AppHostProject;
-                step.CodeChangeOptions = new CodeChangeOptions();
+                step.CodeChangeOptions = [];
             }
         });
 
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
             var step = config.Step;
-            CodeModifierConfig? codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig("db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings &&
-                codeModifierConfig is not null)
+                !string.IsNullOrEmpty(codeModificationFilePath))
             {
 
-                step.CodeModifierConfig = codeModifierConfig;
+                step.CodeModifierConfigPath = codeModificationFilePath;
                 step.CodeModifierProperties = GetApiProjectProperties(commandSettings);
                 step.ProjectPath = commandSettings.Project;
-                step.CodeChangeOptions = new CodeChangeOptions();
+                step.CodeChangeOptions = [];
             }
             else
             {

@@ -31,7 +31,7 @@ internal static class BlazorCrudHelper
     internal const string GlobalWebAssemblyRenderModeText = @"<HeadOutlet @rendermode=""@InteractiveWebAssembly"" />";
     internal const string GlobalWebAssemblyRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveWebAssembly"" />";
     internal const string GlobalServerRenderModeRoutesText = @"<Routes @rendermode=""@InteractiveServer"" />";
-    internal static string AdditionalCodeModificationJson = @"
+    internal const string AdditionalCodeModificationJson = @"
     {
         ""Files"": [
             {
@@ -48,7 +48,7 @@ internal static class BlazorCrudHelper
         ]
     }";
 
-    internal static string AddRazorComponentsSnippet = @"
+    internal const string AddRazorComponentsSnippet = @"
     {
         ""Block"": ""WebApplication.CreateBuilder.Services.AddRazorComponents()"",
         ""InsertBefore"": [
@@ -61,7 +61,7 @@ internal static class BlazorCrudHelper
         }
     }";
 
-    internal static string AddMapRazorComponentsSnippet = @"
+    internal const string AddMapRazorComponentsSnippet = @"
     {
         ""Block"": ""app.MapRazorComponents<App>()"",
         ""InsertBefore"": [
@@ -74,7 +74,7 @@ internal static class BlazorCrudHelper
         }
     }";
 
-    internal static string AddInteractiveServerRenderModeSnippet = @"
+    internal const string AddInteractiveServerRenderModeSnippet = @"
     {
         ""Block"": ""AddInteractiveServerRenderMode()"",
         ""Parent"": ""MapRazorComponents<App>"",
@@ -85,7 +85,7 @@ internal static class BlazorCrudHelper
         }
     }";
 
-    internal static string AddInteractiveServerComponentsSnippet = @"
+    internal const string AddInteractiveServerComponentsSnippet = @"
     {
         ""Block"": ""AddInteractiveServerComponents()"",
         ""Parent"": ""WebApplication.CreateBuilder.Services.AddRazorComponents()"",
@@ -96,7 +96,7 @@ internal static class BlazorCrudHelper
         }
     }";
 
-    internal static string AddInteractiveWebAssemblyRenderModeSnippet = @"
+    internal const string AddInteractiveWebAssemblyRenderModeSnippet = @"
     {
         ""Block"": ""AddInteractiveWebAssemblyRenderMode()"",
         ""Parent"": ""MapRazorComponents<App>"",

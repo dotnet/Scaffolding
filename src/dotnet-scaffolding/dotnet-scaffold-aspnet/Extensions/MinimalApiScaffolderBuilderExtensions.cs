@@ -103,31 +103,8 @@ internal static class MinimalApiScaffolderBuilderExtensions
             }
 
             ArgumentNullException.ThrowIfNull(minimalApiModel);
-            var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
-            string? t4TemplatePath = null;
-            if (minimalApiModel.DbContextInfo.EfScenario)
-            {
-                t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApiEf.tt", StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApi.tt", StringComparison.OrdinalIgnoreCase));
-            }
-
-            var templateType = MinimalApiHelper.GetMinimalApiTemplateType(t4TemplatePath);
-
-            if (string.IsNullOrEmpty(t4TemplatePath) ||
-                string.IsNullOrEmpty(minimalApiModel.EndpointsPath) ||
-                templateType is null)
-            {
-                throw new InvalidOperationException("could not get minimal api template");
-            }
-
-            step.TemplatePath = t4TemplatePath;
-            step.TemplateType = templateType;
-            step.TemplateModel = minimalApiModel;
-            step.TemplateModelName = "Model";
-            step.OutputPath = minimalApiModel.EndpointsPath;
+            step.TextTemplatingProperties = [MinimalApiHelper.GetMinimalApiTemplatingProperty(minimalApiModel)];
+            step.DisplayName = "Minimal API controller";
         });
     }
 }

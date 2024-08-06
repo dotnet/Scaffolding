@@ -15,45 +15,29 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
 internal static class BlazorCrudScaffolderBuilderExtensions
 {
-    //TODO : fix this extension method to not do extra work every 'preExecute'
     public static IScaffoldBuilder WithBlazorCrudTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
-        foreach (var templatePath in allT4TemplatePaths)
+        return builder.WithStep<TextTemplatingStep>(config =>
         {
-            var templateName = Path.GetFileNameWithoutExtension(templatePath);
-            var templateType = BlazorCrudHelper.GetTemplateType(templatePath);
-            if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
+            var step = config.Step;
+            var context = config.Context;
+            context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
+            BlazorCrudModel blazorCrudModel = blazorCrudModelObj as BlazorCrudModel ??
+                throw new InvalidOperationException("missing 'BlazorCrudModel' in 'ScaffolderContext.Properties'");
+
+            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
+            var blazorCrudTemplateProperties = BlazorCrudHelper.GetTextTemplatingProperties(allT4TemplatePaths, blazorCrudModel);
+            if (blazorCrudTemplateProperties.Any())
             {
-                builder = builder.WithStep<TextTemplatingStep>(config =>
-                {
-                    var context = config.Context;
-                    context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
-                    BlazorCrudModel blazorCrudModel = blazorCrudModelObj as BlazorCrudModel ??
-                        throw new InvalidOperationException("missing 'BlazorCrudModel' in 'ScaffolderContext.Properties'");
-
-                    if (!BlazorCrudHelper.IsValidTemplate(blazorCrudModel.PageType, templateName))
-                    {
-                        config.Step.SkipStep = true;
-                        return;
-                    }
-
-                    string baseOutputPath = BlazorCrudHelper.GetBaseOutputPath(
-                        blazorCrudModel.ModelInfo.ModelTypeName,
-                        blazorCrudModel.ProjectInfo.ProjectPath);
-                    string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Tools.Scaffold.AspNet.Common.Constants.BlazorExtension}");
-
-                    var step = config.Step;
-                    step.TemplatePath = templatePath;
-                    step.TemplateType = templateType;
-                    step.TemplateModelName = "Model";
-                    step.TemplateModel = blazorCrudModel;
-                    step.OutputPath = outputFileName;
-                });
+                step.TextTemplatingProperties = blazorCrudTemplateProperties;
+                step.DisplayName = "Blazor CRUD files (.razor)";
             }
-        }
-
-        return builder;
+            else
+            {
+                step.SkipStep = true;
+                return;
+            }
+        });
     }
 
     public static IScaffoldBuilder WithBlazorCrudAddPackagesStep(this IScaffoldBuilder builder)

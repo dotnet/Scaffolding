@@ -12,11 +12,11 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Ref packages from darc subscriptions-->
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.33</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>6.0.34</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
-    <MicrosoftEntityFrameworkCorePackageVersion>6.0.33</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>6.0.34</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>6.0.33</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>6.0.34</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
     <MicrosoftExtensionsIdentityStoresPackageVersion>6.0.33</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->

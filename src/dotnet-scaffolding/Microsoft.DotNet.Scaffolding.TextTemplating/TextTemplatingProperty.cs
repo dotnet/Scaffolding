@@ -4,7 +4,6 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 
 public class TextTemplatingProperty
 {
-    public string? MyProperty { get; set; }
     //Path to .tt (T4) template on disk (likely to be packed in a dotnet tool)
     public required string TemplatePath { get; set; }
     //the System.Type auto-generated object of the template (using TextTemplatingFilePreprocessor)

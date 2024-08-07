@@ -447,8 +447,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     }
 
                     templatedString = StringUtil.NormalizeLineEndings(templatedString);
-                    FileSystem.WriteAllText(templatedFilePath, templatedString);
-                    Logger.LogMessage($"Added Blazor identity file : {templatedFilePath}");
+                    if (!FileSystem.FileExists(templatedFilePath))
+                    {
+                        FileSystem.WriteAllText(templatedFilePath, templatedString);
+                        Logger.LogMessage($"Added Blazor identity file : {templatedFilePath}");
+                    }
                 }
             }
         }

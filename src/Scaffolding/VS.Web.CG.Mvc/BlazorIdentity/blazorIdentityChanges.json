@@ -69,6 +69,7 @@
             },
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "CheckBlock" : "builder.Services.AddIdentityCore",
               "MultiLineBlock": [
                 "builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)",
                 "    .AddEntityFrameworkStores<ApplicationDbContext>()",
@@ -81,6 +82,7 @@
             },
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "CheckBlock" : "builder.Services.AddSingleton<IEmailSender",
               "Block": "builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>()",
               "LeadingTrivia": {
                 "Newline": true

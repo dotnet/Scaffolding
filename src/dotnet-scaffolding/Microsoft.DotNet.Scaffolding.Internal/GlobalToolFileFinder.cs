@@ -22,7 +22,7 @@ internal static class GlobalToolFileFinder
         var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "CodeModificationConfigs");
         if (Directory.Exists(codeModificationConfigFolder))
         {
-            var files = Directory.EnumerateFiles(codeModificationConfigFolder, "*.json");
+            var files = Directory.EnumerateFiles(codeModificationConfigFolder, "*.json", SearchOption.AllDirectories);
             return files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
         }
 

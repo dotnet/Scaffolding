@@ -22,12 +22,13 @@ public class CodeModificationStep : ScaffoldStep
     //.csproj path for the .NET project
     public required string ProjectPath { get; set; }
     //properties to be injected into the CodeModifierConfig.CodeFile.Method.CodeSnippet's Blocks/Parents/CheckBlock
-    public required IDictionary<string, string> CodeModifierProperties { get; set; }
+    public IDictionary<string, string> CodeModifierProperties { get; } 
     private readonly ILogger _logger;
 
     public CodeModificationStep(ILogger<CodeModificationStep> logger)
     {
         _logger = logger;
+        CodeModifierProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)

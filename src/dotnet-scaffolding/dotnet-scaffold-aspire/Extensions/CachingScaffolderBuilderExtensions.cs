@@ -89,7 +89,7 @@ internal static class CachingScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 var configName = commandSettings.Type.Equals("redis-with-output-caching", StringComparison.OrdinalIgnoreCase) ? "redis-webapp-oc.json" : "redis-webapp.json";
-                var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
+                var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(configName, System.Reflection.Assembly.GetExecutingAssembly());
                 if (string.IsNullOrEmpty(codeModificationFilePath))
                 {
                     step.SkipStep = true;
@@ -97,8 +97,7 @@ internal static class CachingScaffolderBuilderExtensions
                 }
 
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = new Dictionary<string, string>();
-                step.ProjectPath = commandSettings.AppHostProject;
+                step.ProjectPath = commandSettings.Project;
                 step.CodeChangeOptions = [];
             }
             else

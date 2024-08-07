@@ -72,7 +72,11 @@ internal static class StorageScaffolderBuilderExtensions
                 var step = config.Step;
                 var codeModifierProperties = GetAppHostProperties(commandSettings);
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = codeModifierProperties;
+                foreach (var kvp in codeModifierProperties)
+                {
+                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                }
+
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.CodeChangeOptions = [];
             }
@@ -87,7 +91,12 @@ internal static class StorageScaffolderBuilderExtensions
             {
                 var step = config.Step;
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = GetApiProjectProperties(commandSettings);
+                var codeModifierProperties = GetApiProjectProperties(commandSettings);
+                foreach (var kvp in codeModifierProperties)
+                {
+                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                }
+
                 step.ProjectPath = commandSettings.Project;
                 step.CodeChangeOptions = [];
             }
@@ -102,7 +111,7 @@ internal static class StorageScaffolderBuilderExtensions
         if (StorageConstants.StoragePropertiesDict.TryGetValue(commandSettings.Type, out var storageProperties) && storageProperties is not null)
         {
             codeModifierProperties.Add("$(StorageVariableName)", storageProperties.VariableName);
-            codeModifierProperties.Add("$(AddStorageMethodName)", storageProperties.AddClientMethodName);
+            codeModifierProperties.Add("$(AddStorageMethodName)", storageProperties.AddMethodName);
         }
 
         return codeModifierProperties;

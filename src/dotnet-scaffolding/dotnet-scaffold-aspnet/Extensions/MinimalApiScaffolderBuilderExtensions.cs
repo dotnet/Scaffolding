@@ -37,7 +37,11 @@ internal static class MinimalApiScaffolderBuilderExtensions
                 minimalApiModel is not null)
             {
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = codeModifierProperties;
+                foreach (var kvp in codeModifierProperties)
+                {
+                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                }
+
                 step.ProjectPath = minimalApiSettings.Project;
                 step.CodeChangeOptions = minimalApiModel.ProjectInfo.CodeChangeOptions ?? [];
             }

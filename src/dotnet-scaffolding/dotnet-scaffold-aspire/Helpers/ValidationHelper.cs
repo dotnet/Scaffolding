@@ -55,7 +55,7 @@ internal static class ValidationHelper
         string? appHostProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.AppHostCliOption);
         string? workerProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.WorkerProjectCliOption);
         bool prereleaseValue = context.GetOptionResult<bool>(AspireCommandHelpers.PrereleaseCliOption);
-        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.CachingTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.DatabaseTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
         {
             string dbTypeDisplayList = string.Join(", ", AspireCommandHelpers.DatabaseTypeCustomValues.GetRange(0, AspireCommandHelpers.DatabaseTypeCustomValues.Count - 1)) +
                 (AspireCommandHelpers.DatabaseTypeCustomValues.Count > 1 ? " and " : "") + AspireCommandHelpers.DatabaseTypeCustomValues[AspireCommandHelpers.DatabaseTypeCustomValues.Count - 1];
@@ -105,7 +105,7 @@ internal static class ValidationHelper
         string? appHostProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.AppHostCliOption);
         string? workerProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.WorkerProjectCliOption);
         bool prereleaseValue = context.GetOptionResult<bool>(AspireCommandHelpers.PrereleaseCliOption);
-        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.CachingTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.StorageTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
         {
             string storageTypeDisplayList = string.Join(", ", AspireCommandHelpers.StorageTypeCustomValues.GetRange(0, AspireCommandHelpers.StorageTypeCustomValues.Count - 1)) +
                 (AspireCommandHelpers.StorageTypeCustomValues.Count > 1 ? " and " : "") + AspireCommandHelpers.StorageTypeCustomValues[AspireCommandHelpers.StorageTypeCustomValues.Count - 1];

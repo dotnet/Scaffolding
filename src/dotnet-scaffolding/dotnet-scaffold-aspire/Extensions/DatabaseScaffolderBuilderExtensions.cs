@@ -78,7 +78,11 @@ internal static class DatabaseScaffolderBuilderExtensions
                 var step = config.Step;
                 var codeModifierProperties = GetAppHostProperties(commandSettings);
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = codeModifierProperties;
+                foreach (var kvp in codeModifierProperties)
+                {
+                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                }
+
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.CodeChangeOptions = [];
             }
@@ -94,7 +98,12 @@ internal static class DatabaseScaffolderBuilderExtensions
             {
 
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = GetApiProjectProperties(commandSettings);
+                var codeModifierProperties = GetApiProjectProperties(commandSettings);
+                foreach (var kvp in codeModifierProperties)
+                {
+                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                }
+
                 step.ProjectPath = commandSettings.Project;
                 step.CodeChangeOptions = [];
             }

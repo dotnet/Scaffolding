@@ -111,7 +111,11 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 blazorCrudModel is not null)
             {
                 step.CodeModifierConfigPath = codeModificationFilePath;
-                step.CodeModifierProperties = codeModifierProperties;
+                foreach (var kvp in codeModifierProperties)
+                {
+                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                }
+
                 step.ProjectPath = blazorCrudSettings.Project;
                 step.CodeChangeOptions = blazorCrudModel.ProjectInfo.CodeChangeOptions ?? [];
             }
@@ -138,7 +142,6 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 !string.IsNullOrEmpty(blazorCodeModifierString))
             {
                 step.CodeModifierConfigJsonText = blazorCodeModifierString;
-                step.CodeModifierProperties = new Dictionary<string, string>();
                 step.ProjectPath = blazorCrudSettings.Project;
                 step.CodeChangeOptions = blazorCrudModel.ProjectInfo.CodeChangeOptions ?? [];
             }

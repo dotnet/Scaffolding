@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     using System.Text;
     using System.Linq;
     using System;
-
+    
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -224,9 +224,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.Blazor.BlazorCrud.Blazo" +
-                    "rCrudModel\' of the parameter \'Model\' did not match the type of the data passed t" +
-                    "o the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel\' of the p" +
+                    "arameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

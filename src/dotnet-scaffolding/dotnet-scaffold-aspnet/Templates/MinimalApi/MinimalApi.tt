@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.MinimalApiModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -26,6 +26,7 @@ public static class <#= Model.EndpointsClassName #>
             string group = Model.OpenAPI
             ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
             : $"var group = routes.MapGroup(\"{routePrefix}\");";
+        string withOpenApiStatement = "        .WithOpenApi()";
         #>
 <#= group #>
 
@@ -36,7 +37,7 @@ public static class <#= Model.EndpointsClassName #>
         string builderExtensions = $".WithName(\"{getAllModels}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if(!Model.UseTypedResults)
         {
@@ -53,7 +54,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if(!Model.UseTypedResults)
         {
@@ -70,7 +71,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{updateModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if (!Model.UseTypedResults)
         {
@@ -99,7 +100,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{createModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions+= $"\r\n.WithOpenApi()";
+            builderExtensions+= $"\r\n{withOpenApiStatement}";
         }
         if (!Model.UseTypedResults)
         {
@@ -126,7 +127,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{deleteModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if (!Model.UseTypedResults)
         {

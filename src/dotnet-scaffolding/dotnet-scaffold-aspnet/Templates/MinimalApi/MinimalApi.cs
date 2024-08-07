@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
     using System.Text;
     using System.Linq;
     using System;
-
+    
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -49,6 +49,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             string group = Model.OpenAPI
             ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
             : $"var group = routes.MapGroup(\"{routePrefix}\");";
+        string withOpenApiStatement = "        .WithOpenApi()";
         
             this.Write(this.ToStringHelper.ToStringWithCulture(group));
             this.Write("\r\n\r\n        group.MapGet(\"/\", () =>\r\n        {\r\n            return new[] { new ");
@@ -58,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         string builderExtensions = $".WithName(\"{getAllModels}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if(!Model.UseTypedResults)
         {
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if(!Model.UseTypedResults)
         {
@@ -93,7 +94,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{updateModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if (!Model.UseTypedResults)
         {
@@ -126,7 +127,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{createModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions+= $"\r\n.WithOpenApi()";
+            builderExtensions+= $"\r\n{withOpenApiStatement}";
         }
         if (!Model.UseTypedResults)
         {
@@ -158,7 +159,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{deleteModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n.WithOpenApi()";
+            builderExtensions += $"\r\n{withOpenApiStatement}";
         }
         if (!Model.UseTypedResults)
         {
@@ -227,9 +228,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.MinimalApi.MinimalApiMo" +
-                    "del\' of the parameter \'Model\' did not match the type of the data passed to the t" +
-                    "emplate.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.MinimalApiModel\' of the p" +
+                    "arameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

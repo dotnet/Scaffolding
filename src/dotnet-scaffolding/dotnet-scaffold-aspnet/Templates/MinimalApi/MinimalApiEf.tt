@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalApiModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.MinimalApiModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -66,7 +66,7 @@ public static class <#= Model.EndpointsClassName #>
         string builderExtensions = $".WithName(\"{getAllModels}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n    .WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if(!Model.UseTypedResults)
         {
@@ -87,7 +87,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n    .WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if(!Model.UseTypedResults)
         {
@@ -168,7 +168,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{createModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions+= $"\r\n    .WithOpenApi()";
+            builderExtensions+= $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if (!Model.UseTypedResults)
         {

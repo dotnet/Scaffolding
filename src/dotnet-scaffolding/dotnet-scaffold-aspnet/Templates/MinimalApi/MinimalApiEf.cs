@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
     using System.Text;
     using System.Linq;
     using System;
-
+    
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         string builderExtensions = $".WithName(\"{getAllModels}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n    .WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if(!Model.UseTypedResults)
         {
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions += $"\r\n    .WithOpenApi()";
+            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if(!Model.UseTypedResults)
         {
@@ -236,7 +236,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{createModel}\")";
         if(Model.OpenAPI)
         {
-            builderExtensions+= $"\r\n    .WithOpenApi()";
+            builderExtensions+= $"\r\n{builderExtensionSpaces}.WithOpenApi()";
         }
         if (!Model.UseTypedResults)
         {
@@ -370,9 +370,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Commands.API.MinimalApi.MinimalA" +
-                    "piModel\' of the parameter \'Model\' did not match the type of the data passed to t" +
-                    "he template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.MinimalApiModel\' of the p" +
+                    "arameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

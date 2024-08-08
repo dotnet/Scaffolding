@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Roslyn;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
 
@@ -241,5 +242,38 @@ internal static class BlazorCrudHelper
         }
 
         return codeChanges;
+    }
+
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, BlazorCrudModel blazorCrudModel)
+    {
+        var textTemplatingProperties = new List<TextTemplatingProperty>();
+        foreach (var templatePath in allT4TemplatePaths)
+        {
+            var templateName = Path.GetFileNameWithoutExtension(templatePath);
+            var templateType = GetTemplateType(templatePath);
+            if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
+            {
+                if (!IsValidTemplate(blazorCrudModel.PageType, templateName))
+                {
+                    break;
+                }
+
+                string baseOutputPath = GetBaseOutputPath(
+                    blazorCrudModel.ModelInfo.ModelTypeName,
+                    blazorCrudModel.ProjectInfo.ProjectPath);
+                string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+
+                textTemplatingProperties.Add(new()
+                {
+                    TemplateModel = blazorCrudModel,
+                    TemplateModelName = "Model",
+                    TemplatePath = templatePath,
+                    TemplateType = templateType,
+                    OutputPath = outputFileName
+                });
+            }
+        }
+
+        return textTemplatingProperties;
     }
 }

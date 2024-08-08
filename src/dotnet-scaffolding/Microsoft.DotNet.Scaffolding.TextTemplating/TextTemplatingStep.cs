@@ -10,16 +10,8 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 /// </summary>
 public class TextTemplatingStep : ScaffoldStep
 {
-    //Path to .tt (T4) template on disk (likely to be packed in a dotnet tool)
-    public required string TemplatePath { get; set; }
-    //the System.Type auto-generated object of the template (using TextTemplatingFilePreprocessor)
-    public required Type TemplateType { get; set; }
-    //output file path where the templated content will be written (should include the extension if one is wanted)
-    public required string OutputPath { get; set; }
-    //the 'name' property of <#@ parameter #> in provided .tt template
-    public required string TemplateModelName { get; set; }
-    //the 'type' property of <#@ parameter #> in provided .tt template
-    public required object TemplateModel { get; set; }
+    public string? DisplayName { get; set; } = "files";
+    public required IEnumerable<TextTemplatingProperty> TextTemplatingProperties { get; set; }
     private readonly ILogger _logger;
 
     public TextTemplatingStep(ILogger<TextTemplatingStep> logger)
@@ -29,47 +21,56 @@ public class TextTemplatingStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        if (TextTemplatingProperties is null || !TextTemplatingProperties.Any())
+        {
+            _logger.LogError("Invalid/empty value provided for the 'TextTemplatingStep.TextTemplatingProperties' variable");
+            return Task.FromResult(false);
+        }
+
         var templateInvoker = new TemplateInvoker();
-        var dictParams = new Dictionary<string, object>()
+        _logger.LogInformation($"Adding {DisplayName}...");
+        foreach(var templatingProperty in TextTemplatingProperties)
         {
-            { TemplateModelName, TemplateModel }
-        };
-
-        var host = new TextTemplatingEngineHost { TemplateFile = TemplatePath };
-        ITextTransformation? textTransformation;
-        try
-        {
-            //need to re-instantiate the ITextTransformation type provided (using the TextTemplatingFilePreprocessor in the scaffolder)
-            textTransformation = Activator.CreateInstance(TemplateType) as ITextTransformation;
-            if (textTransformation != null)
+            var dictParams = new Dictionary<string, object>()
             {
-                textTransformation.Session = host.CreateSession();
-            }
-        }
-        catch (Exception ex)
-        {
-            var newException = new Exception($"Unable to create an instance of template type '{TemplateType.Name}'", ex);
-            throw newException;
-        }
+                { templatingProperty.TemplateModelName, templatingProperty.TemplateModel }
+            };
 
-        if (textTransformation is not null)
-        {
-            var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
-            var outputFolderPath = Path.GetDirectoryName(OutputPath);
-            //create the directory for the output file incase not already there.
-            if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(outputFolderPath))
+            var host = new TextTemplatingEngineHost { TemplateFile = templatingProperty.TemplatePath };
+            ITextTransformation? textTransformation = null;
+            try
             {
-                if (!Directory.Exists(outputFolderPath))
+                //need to re-instantiate the ITextTransformation type provided (using the TextTemplatingFilePreprocessor in the scaffolder)
+                textTransformation = Activator.CreateInstance(templatingProperty.TemplateType) as ITextTransformation;
+                if (textTransformation != null)
                 {
-                    Directory.CreateDirectory(outputFolderPath);
+                    textTransformation.Session = host.CreateSession();
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unable to create an instance of template type '{templatingProperty.TemplateType.Name}'");
+                _logger.LogError(ex.Message);
+            }
 
-                File.WriteAllText(OutputPath, templatedString);
-                _logger.LogInformation($"Added '{Path.GetFileName(OutputPath)}'");
-                return Task.FromResult(true);
+            if (textTransformation is not null)
+            {
+                var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
+                var outputFolderPath = Path.GetDirectoryName(templatingProperty.OutputPath);
+                //create the directory for the output file incase not already there.
+                if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(outputFolderPath))
+                {
+                    if (!Directory.Exists(outputFolderPath))
+                    {
+                        Directory.CreateDirectory(outputFolderPath);
+                    }
+
+                    File.WriteAllText(templatingProperty.OutputPath, templatedString);
+                }
             }
         }
 
-        return Task.FromResult(false);
+        _logger.LogInformation("Done\n");
+        return Task.FromResult(true);
     }
 }

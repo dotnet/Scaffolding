@@ -394,6 +394,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     globalChanges = ProjectModifierHelper.UpdateVariables(globalChanges, oldValue, newValue);
                 }
 
+                globalChanges = BlazorIdentityHelper.ApplyIdentityChanges(globalChanges, blazorIdentityModel.DbContextName, blazorIdentityModel.UserClassName, blazorIdentityModel.DatabaseProvider);
                 if (useTopLevelStatements)
                 {
                     newRoot = DocumentBuilder.ApplyChangesToMethod(newRoot, globalChanges) as CompilationUnitSyntax;
@@ -409,9 +410,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 }
             }
 
-            (string oldBuilderVal, string newBuilderVal) = builderIdentifier.Value;
-            var serverComponentNode = newRoot.Members.FirstOrDefault(x => x.ToString().Contains("Services.AddRazorComponents()"));
-            newRoot = newRoot.InsertNodesAfter(serverComponentNode, BlazorIdentityHelper.GetBlazorIdentityGlobalNodes(newBuilderVal, blazorIdentityModel));
             //replace root node with all the updates.
             docEditor.ReplaceNode(docRoot, newRoot);
             //write to Program.cs file
@@ -449,8 +447,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     }
 
                     templatedString = StringUtil.NormalizeLineEndings(templatedString);
-                    FileSystem.WriteAllText(templatedFilePath, templatedString);
-                    Logger.LogMessage($"Added Blazor identity file : {templatedFilePath}");
+                    if (!FileSystem.FileExists(templatedFilePath))
+                    {
+                        FileSystem.WriteAllText(templatedFilePath, templatedString);
+                        Logger.LogMessage($"Added Blazor identity file : {templatedFilePath}");
+                    }
                 }
             }
         }

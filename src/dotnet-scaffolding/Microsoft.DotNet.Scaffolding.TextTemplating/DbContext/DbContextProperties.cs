@@ -4,7 +4,7 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
 internal class DbContextProperties
 {
-    public string DbContextName { get; set; } = "NewDbContext";
+    public string DbContextName { get; set; } = Constants.NewDbContext;
     public string DbContextPath { get; set; } = default!;
     public string? DbSetStatement { get; set; }
     public string? NewDbConnectionString { get; set; }

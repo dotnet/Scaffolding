@@ -76,7 +76,7 @@ public class CodeModificationStep : ScaffoldStep
         }
         else
         {
-            _logger.LogInformation("Failed");
+            _logger.LogError("Failed");
         }
 
         return projectModificationResult;

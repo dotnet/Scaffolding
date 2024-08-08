@@ -21,6 +21,12 @@ public class TextTemplatingStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        if (TextTemplatingProperties is null || !TextTemplatingProperties.Any())
+        {
+            _logger.LogError("Invalid/empty value provided for the 'TextTemplatingStep.TextTemplatingProperties' variable");
+            return Task.FromResult(false);
+        }
+
         var templateInvoker = new TemplateInvoker();
         _logger.LogInformation($"Adding {DisplayName}...");
         foreach(var templatingProperty in TextTemplatingProperties)

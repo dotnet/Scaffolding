@@ -35,7 +35,7 @@ internal static class ScaffolderBuilderExtensions
             }
 
             step.TextTemplatingProperties = [dbContextTextTemplatingProperty];
-            step.DisplayName = $"{dbContextProperties?.DbContextName ?? "NewDbContext"}.cs";
+            step.DisplayName = $"{dbContextProperties?.DbContextName ?? Constants.NewDbContext}{Constants.CSharpExtension}";
         });
 
         return builder;

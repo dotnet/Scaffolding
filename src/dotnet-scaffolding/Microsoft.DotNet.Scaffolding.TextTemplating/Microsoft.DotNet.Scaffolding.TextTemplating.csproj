@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
+    <PackageTags>dotnet;scaffold;</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +22,7 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <Pack>true</Pack>
     </None>
+    <None Pack="true" Include="README.md"  PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>

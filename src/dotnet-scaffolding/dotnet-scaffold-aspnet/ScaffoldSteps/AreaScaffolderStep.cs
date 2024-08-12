@@ -45,6 +45,7 @@ internal class AreaScaffolderStep : ScaffoldStep
 
     private void EnsureFolderLayout(AreaStepSettings stepSettings)
     {
+        _logger.LogInformation($"Adding area '{stepSettings.Name}'...");
         var basePath = _environmentService.CurrentDirectory;
         var projectDirectoryPath = Path.GetDirectoryName(stepSettings.Project);
         if (!string.IsNullOrEmpty(projectDirectoryPath) && _fileSystem.DirectoryExists(projectDirectoryPath))
@@ -72,6 +73,8 @@ internal class AreaScaffolderStep : ScaffoldStep
                 _fileSystem.CreateDirectory(path);
             }
         }
+
+        _logger.LogInformation("Done");
     }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)

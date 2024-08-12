@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <PackageTags>dotnet;scaffold;</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,4 +18,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
   </ItemGroup>
   
+  <ItemGroup>
+    <None Pack="true" Include="README.md"  PackagePath="\"/>
+  </ItemGroup>
 </Project>

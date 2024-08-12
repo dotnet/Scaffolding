@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var allClassSymbols = await AnsiConsole
                 .Status()
                 .WithSpinner()
-                .StartAsync("Gathering project classes!", async statusContext =>
+                .StartAsync("Finding model classes", async statusContext =>
                 {
                     //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     //will add better documentation so users will know what to expect.

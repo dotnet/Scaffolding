@@ -99,7 +99,7 @@ public static class <#= Model.EndpointsClassName #>
         <#= builderExtensions #>;
 
     <#
-        if (dbProvider == "cosmos-efcore")
+        if (dbProvider.Equals("cosmos-efcore", StringComparison.OrdinalIgnoreCase))
         {
 #>
         group.MapPut("/{id}", async <#= typedTaskWithNoContent #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= modelName #> <#= Model.ModelInfo.ModelVariable #>, <#= dbContextName #> db) =>
@@ -118,8 +118,7 @@ public static class <#= Model.EndpointsClassName #>
         })
     <#
         }
-
-        if (dbProvider != "cosmos-efcore")
+        else
         {
 #>
     group.MapPut("/{id}", async <#= typedTaskOkNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= modelName #> <#= Model.ModelInfo.ModelVariable #>, <#= dbContextName #> db) =>
@@ -178,7 +177,7 @@ public static class <#= Model.EndpointsClassName #>
 <#= builderExtensions #>;
 
         <#
-        if (dbProvider == "cosmos-efcore")
+        if (dbProvider.Equals("cosmos-efcore", StringComparison.OrdinalIgnoreCase))
         {
 #>
 group.MapDelete("/{id}", async <#= typedTaskWithNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= dbContextName #> db) =>
@@ -194,8 +193,7 @@ group.MapDelete("/{id}", async <#= typedTaskWithNotFound #> (<#= primaryKeyShort
         })
         <#
         }
-
-        if (dbProvider != "cosmos-efcore")
+        else
         {
 #>
 group.MapDelete("/{id}", async <#= typedTaskOkNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= dbContextName #> db) =>

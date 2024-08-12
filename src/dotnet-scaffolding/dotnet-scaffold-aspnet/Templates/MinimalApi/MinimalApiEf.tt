@@ -178,7 +178,7 @@ public static class <#= Model.EndpointsClassName #>
 <#= builderExtensions #>;
 
         <#
-        if (dbProvider == "CosmosDb")
+        if (dbProvider == "cosmos-efcore")
         {
 #>
 group.MapDelete("/{id}", async <#= typedTaskWithNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= dbContextName #> db) =>
@@ -195,7 +195,7 @@ group.MapDelete("/{id}", async <#= typedTaskWithNotFound #> (<#= primaryKeyShort
         <#
         }
 
-        if (dbProvider != "CosmosDb")
+        if (dbProvider != "cosmos-efcore")
         {
 #>
 group.MapDelete("/{id}", async <#= typedTaskOkNotFound #> (<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerCase #>, <#= dbContextName #> db) =>

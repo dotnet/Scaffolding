@@ -31,7 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : $"{Model.DbContextNamespace}";
-    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}{Model.ContextTypeName}> DbFactory";
+    string dbContextFactory = $"IDbContextFactory<{dbContextNamespace}.{Model.ContextTypeName}> DbFactory";
     string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
     string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
     string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
@@ -178,7 +178,7 @@ if ((ModelValueAcquired == false))
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
         this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));

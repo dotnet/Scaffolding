@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
             this.Write(";\r\n\r\n    ");
 
-        if (dbProvider == "cosmos-efcore")
+        if (dbProvider.Equals("cosmos-efcore", StringComparison.OrdinalIgnoreCase))
         {
 
             this.Write("        group.MapPut(\"/{id}\", async ");
@@ -163,8 +163,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n        })\r\n    ");
 
         }
-
-        if (dbProvider != "cosmos-efcore")
+        else
         {
 
             this.Write("    group.MapPut(\"/{id}\", async ");
@@ -246,7 +245,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
             this.Write(";\r\n\r\n        ");
 
-        if (dbProvider == "CosmosDb")
+        if (dbProvider.Equals("cosmos-efcore", StringComparison.OrdinalIgnoreCase))
         {
 
             this.Write("group.MapDelete(\"/{id}\", async ");
@@ -272,8 +271,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n        })\r\n        ");
 
         }
-
-        if (dbProvider != "CosmosDb")
+        else
         {
 
             this.Write("group.MapDelete(\"/{id}\", async ");

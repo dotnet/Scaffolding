@@ -27,7 +27,7 @@ internal class CommandDiscovery
             allCommands = AnsiConsole
             .Status()
             .WithSpinner()
-            .Start("Gathering scaffolding commands!", statusContext =>
+            .Start("Discovering scaffolders", statusContext =>
             {
                 return _dotnetToolService.GetAllCommandsParallel();
             });

@@ -55,11 +55,10 @@ internal class StartupFlowStep : IFlowStep
             {
                 statusContext.Refresh();
                 //TODO fix
-                //new MsBuildInitializer(_logger).Initialize();
                 //initialize 1st party components (dotnet tools)
-                statusContext.Status = "Initializing 1st party components (dotnet tools)";
+                statusContext.Status = "Getting ready";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();
-                statusContext.Status = "DONE\n";
+                statusContext.Status = "Done\n";
                 //parse args passed
                 statusContext.Status = "Parsing args!";
                 var remainingArgs = context.GetRemainingArgs();
@@ -72,7 +71,7 @@ internal class StartupFlowStep : IFlowStep
                     }
                 }
 
-                statusContext.Status = "DONE\n";
+                statusContext.Status = "Done\n";
             });
 
         return new ValueTask<FlowStepResult>(FlowStepResult.Success);

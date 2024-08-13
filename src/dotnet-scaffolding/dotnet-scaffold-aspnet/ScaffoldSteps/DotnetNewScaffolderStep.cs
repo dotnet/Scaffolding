@@ -26,13 +26,24 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation($"Adding '{CommandName}' using 'dotnet new'...");
+        var result = false;
         var stepSettings = ValidateDotnetNewCommandSettings();
         if (stepSettings is not null)
         {
-            return Task.FromResult(InvokeDotnetNew(stepSettings));
+            result = InvokeDotnetNew(stepSettings);
         }
 
-        return Task.FromResult(false);
+        if (result)
+        {
+            _logger.LogInformation("Done");
+        }
+        else
+        {
+            _logger.LogError("Failed");
+        }
+
+        return Task.FromResult(result);
     }
 
     private bool InvokeDotnetNew(DotnetNewStepSettings stepSettings)

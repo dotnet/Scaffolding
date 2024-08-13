@@ -69,7 +69,7 @@ public class CodeModificationStep : ScaffoldStep
             CodeChangeOptions);
 
         string projectName = Path.GetFileNameWithoutExtension(ProjectPath);
-        _logger.LogInformation($"Updating project '{projectName}'");
+        _logger.LogInformation($"Updating project '{projectName}'...");
         var projectModificationResult = await projectModifier.RunAsync();
         if (projectModificationResult)
         {

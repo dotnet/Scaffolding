@@ -26,9 +26,9 @@ internal class PackageConstants
 
         internal static Dictionary<string, string> UseDatabaseMethods = new()
         {
-            { Postgres, "UsePostgres" },
             { SqlServer, "UseSqlServer" },
             { SQLite, "UseSqlite" },
+            { Postgres, "UsePostgres" },
             { CosmosDb, "UseCosmos" }
         };
     }

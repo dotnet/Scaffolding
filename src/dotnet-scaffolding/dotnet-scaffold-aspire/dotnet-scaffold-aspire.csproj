@@ -7,6 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>
     <PackageTags>dotnet;scaffold;aspire;</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageId>Microsoft.dotnet-scaffold-aspire</PackageId>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold.Aspire</RootNamespace>
     <NoWarn>$(NoWarn);8002</NoWarn>
@@ -22,5 +23,6 @@
   <ItemGroup>
     <None Pack="true" Include="CodeModificationConfigs\*\*.json" PackagePath="CodeModificationConfigs\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
+    <None Pack="true" Include="README.md"  PackagePath="\"/>
   </ItemGroup>
 </Project>

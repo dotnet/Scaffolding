@@ -16,6 +16,7 @@ public static class Program
     {
         var builder = Host.CreateScaffoldBuilder();
         ConfigureServices(builder.Services);
+        ConfigureSteps(builder.Services);
         CreateOptions(
             out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
@@ -159,8 +160,13 @@ public static class Program
         runner.RunAsync(args).Wait();
     }
 
-    //TODO separate adding transient steps from singleton services.
     static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IEnvironmentService, EnvironmentService>();
+        services.AddSingleton<IFileSystem, FileSystem>();
+    }
+
+    static void ConfigureSteps(IServiceCollection services)
     {
         services.AddTransient<CodeModificationStep>();
         services.AddTransient<ValidateBlazorCrudStep>();
@@ -171,10 +177,7 @@ public static class Program
         services.AddTransient<AreaScaffolderStep>();
         services.AddTransient<DotnetNewScaffolderStep>();
         services.AddTransient<EmptyControllerScaffolderStep>();
-        services.AddSingleton<IEnvironmentService, EnvironmentService>();
-        services.AddSingleton<IFileSystem, FileSystem>();
     }
-
 
     static void CreateOptions(
         out ScaffolderOption<string> projectOption,

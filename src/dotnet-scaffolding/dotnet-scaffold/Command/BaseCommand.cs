@@ -4,7 +4,7 @@ using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
-namespace Microsoft.UpgradeAssistant.Cli.Commands;
+namespace Microsoft.DotNet.Tools.Scaffold.Command;
 
 public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings

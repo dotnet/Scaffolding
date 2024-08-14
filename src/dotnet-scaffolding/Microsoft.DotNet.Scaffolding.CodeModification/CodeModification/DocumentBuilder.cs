@@ -86,7 +86,7 @@ internal class DocumentBuilder
                 filteredChanges = ProjectModifierHelper.UpdateVariables(filteredChanges, oldValue, newValue);
             }
 
-            if (!options.Contains("UseTopLevelStatements", StringComparer.OrdinalIgnoreCase))
+            if (!options.Contains(Constants.UseTopLevelStatements, StringComparer.OrdinalIgnoreCase))
             {
                 var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
                     .FirstOrDefault(n => ProjectModifierHelper.Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
@@ -595,7 +595,6 @@ internal class DocumentBuilder
             return null;
         }
 
-        // TODO descendantNodes could be null
         var specifiedDescendant =
             descendantNodes?.FirstOrDefault(d => d != null && d.ToString().Contains(specifierStatement)) ??
             descendantNodes?.FirstOrDefault(d => d != null && d.ToString().Contains(ProjectModifierHelper.TrimStatement(specifierStatement)));

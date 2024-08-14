@@ -2,9 +2,10 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.UpgradeAssistant.Cli.Commands;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
+
+namespace Microsoft.DotNet.Tools.Scaffold.Command;
 
 internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {

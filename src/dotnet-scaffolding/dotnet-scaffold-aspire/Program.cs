@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = Host.CreateScaffoldBuilder();
 
 ConfigureServices(builder.Services);
+ConfigureSteps(builder.Services);
 
 CreateOptions(out var cachingTypeOption, out var databaseTypeOption, out var storageTypeOption,
               out var appHostProjectOption, out var projectOption, out var prereleaseOption);
@@ -64,8 +65,13 @@ var runner = builder.Build();
 
 runner.RunAsync(args).Wait();
 
-//TODO separate adding transient steps from singleton services.
 static void ConfigureServices(IServiceCollection services)
+{
+    services.AddSingleton<IFileSystem, FileSystem>();
+    services.AddSingleton<IEnvironmentService, EnvironmentService>();
+}
+
+static void ConfigureSteps(IServiceCollection services)
 {
     services.AddTransient<CodeModificationStep>();
     services.AddTransient<AddAspireCodeChangeStep>();
@@ -73,8 +79,6 @@ static void ConfigureServices(IServiceCollection services)
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
-    services.AddSingleton<IFileSystem, FileSystem>();
-    services.AddSingleton<IEnvironmentService, EnvironmentService>();
 }
 
 static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out ScaffolderOption<string> databaseTypeOption, out ScaffolderOption<string> storageTypeOption,

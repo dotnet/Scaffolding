@@ -113,7 +113,6 @@ internal class TextTemplatingEngineHost : ITextTemplatingSessionHost, ITextTempl
         {
         }
 
-        // TODO: Expand variables?
         return assemblyReference;
     }
 

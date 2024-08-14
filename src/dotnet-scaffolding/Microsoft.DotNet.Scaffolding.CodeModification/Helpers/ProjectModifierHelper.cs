@@ -40,7 +40,7 @@ internal static class ProjectModifierHelper
         return startupType == null;
     }
 
-    public static async Task<bool> IsUsingTopLevelStatements(ICodeService codeService)
+    public static async Task<bool> IsUsingTopLevelStatementsAsync(ICodeService codeService)
     {
         var allDocuments = await codeService.GetAllDocumentsAsync();
         var programDocument = allDocuments?.FirstOrDefault(d => d.Name.EndsWith("Program.cs"));
@@ -303,7 +303,7 @@ internal static class ProjectModifierHelper
     /// <param name="oldValue"></param>
     /// <param name="newValue"></param>
     /// <returns>updated CodeSnippet</returns>
-    internal static CodeSnippet UpdateVariables(CodeSnippet change, string oldValue, string newValue) //TODO
+    internal static CodeSnippet UpdateVariables(CodeSnippet change, string oldValue, string newValue)
     {
         // format CodeSnippet fields for any variables or parameters.
         if (!string.IsNullOrEmpty(change.Block))
@@ -491,10 +491,6 @@ internal static class ProjectModifierHelper
                 if (sourceFileString.Contains(replaceSnippet))
                 {
                     sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
-                }
-                else
-                {
-                    // TODO: Generate readme file when replace snippets not found in file
                 }
             }
             else

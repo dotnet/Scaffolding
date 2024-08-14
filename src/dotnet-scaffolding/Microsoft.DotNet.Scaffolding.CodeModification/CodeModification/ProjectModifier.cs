@@ -60,25 +60,18 @@ internal class ProjectModifier
     {
         try
         {
-            if (!string.IsNullOrEmpty(file.AddFilePath))
+            switch (file.Extension)
             {
-                return AddFile(file);
-            }
-            else
-            {
-                switch (file.Extension)
-                {
-                    case "cs":
-                        //apply CodeFile.CodeSnippet changes
-                        var doc = await ModifyCsFile(file, document, options);
-                        //replace simple CodeFile.Replacements
-                        return await ApplyTextReplacements(file, doc, options);
-                    case "cshtml":
-                        return await ModifyCshtmlFile(file, document, options);
-                    case "razor":
-                    case "html":
-                        return await ApplyTextReplacements(file, document, options);
-                }
+                case "cs":
+                    //apply CodeFile.CodeSnippet changes
+                    var doc = await ModifyCsFile(file, document, options);
+                    //replace simple CodeFile.Replacements
+                    return await ApplyTextReplacements(file, doc, options);
+                case "cshtml":
+                    return await ModifyCshtmlFile(file, document, options);
+                case "razor":
+                case "html":
+                    return await ApplyTextReplacements(file, document, options);
             }
         }
         catch (Exception)
@@ -138,24 +131,5 @@ internal class ProjectModifier
 
         DocumentBuilder documentBuilder = new(fileDoc, file, options, _consoleLogger);
         return await documentBuilder.RunAsync();
-    }
-
-    private Document? AddFile(CodeFile file)
-    {
-        /*            var filePath = Path.Combine("TODOprojectpath", file.AddFilePath);
-                    if (File.Exists(filePath))
-                    {
-                        return; // File exists, don't need to create
-                    }
-
-                    var codeFileString = string.Empty;// GetCodeFileString(file);
-
-                    var fileDir = Path.GetDirectoryName(filePath);
-                    if (!string.IsNullOrEmpty(fileDir))
-                    {
-                        Directory.CreateDirectory(fileDir);
-                        File.WriteAllText(filePath, codeFileString);
-                    }*/
-        return null;
     }
 }

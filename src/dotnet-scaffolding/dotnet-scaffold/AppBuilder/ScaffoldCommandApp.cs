@@ -1,3 +1,5 @@
+using Microsoft.DotNet.Tools.Scaffold.Command;
+
 namespace Microsoft.DotNet.Tools.Scaffold;
 
 internal class ScaffoldCommandApp

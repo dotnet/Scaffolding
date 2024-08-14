@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;

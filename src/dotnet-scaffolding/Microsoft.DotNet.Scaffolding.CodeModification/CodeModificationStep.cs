@@ -29,6 +29,7 @@ public class CodeModificationStep : ScaffoldStep
     {
         _logger = logger;
         CodeModifierProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        CodeChangeOptions ??= [];
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -61,7 +62,7 @@ public class CodeModificationStep : ScaffoldStep
         ICodeService codeService = new CodeService(_logger, ProjectPath);
         if (await ProjectModifierHelper.IsUsingTopLevelStatementsAsync(codeService))
         {
-            CodeChangeOptions?.Add(Constants.UseTopLevelStatements);
+            CodeChangeOptions.Add(Constants.UseTopLevelStatements);
         }
 
         //replace all "variables" provided in 'CodeModifierProperties' in the 'CodeModifierConfig'

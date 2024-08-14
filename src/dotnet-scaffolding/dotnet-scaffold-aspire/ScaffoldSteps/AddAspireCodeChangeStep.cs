@@ -24,9 +24,6 @@ internal class AddAspireCodeChangeStep : CodeModificationStep
             await AddAutoGenProjectPropertiesAsync(commandSettings);
         }
 
-        //TODO: analyze the project for these options, use default currently
-        CodeChangeOptions.Add("IsMinimalApp");
-        CodeChangeOptions.Add("UseTopLevelStatements");
         return await base.ExecuteAsync(context, cancellationToken);
     }
 

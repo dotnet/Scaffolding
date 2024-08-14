@@ -54,10 +54,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
                 if (exitCode != null)
                 {
-                    // TODO: Put this behind a --verbose type flag. It's helpful for debugging but makes the 
-                    // demo noisy
-                    //AnsiConsole.Console.WriteLine($"\nCommand: '{componentExecutionString}'");
-
                     if (exitCode != 0)
                     {
                         AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");

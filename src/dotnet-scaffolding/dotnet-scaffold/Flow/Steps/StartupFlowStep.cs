@@ -54,7 +54,6 @@ internal class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
-                //TODO fix
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Getting ready";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();

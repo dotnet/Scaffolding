@@ -46,8 +46,6 @@ public class Scaffolder : IScaffolder
                     break;
                 }
             }
-
-            //TODO: should we post execute run if above failed?
             preparer.RunPostExecute(step, context);
         }
     }

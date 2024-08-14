@@ -187,8 +187,6 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         {
             scaffoldingModel.ProjectInfo.CodeChangeOptions =
             [
-                "IsMinimalApp",
-                "UseTopLevelStatements",
                 scaffoldingModel.DbContextInfo.EfScenario ? "EfScenario" : string.Empty
             ];
         }

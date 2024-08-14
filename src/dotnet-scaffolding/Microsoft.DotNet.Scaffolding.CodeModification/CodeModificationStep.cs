@@ -59,6 +59,11 @@ public class CodeModificationStep : ScaffoldStep
         }
 
         ICodeService codeService = new CodeService(_logger, ProjectPath);
+        if (await ProjectModifierHelper.IsUsingTopLevelStatementsAsync(codeService))
+        {
+            CodeChangeOptions?.Add(Constants.UseTopLevelStatements);
+        }
+
         //replace all "variables" provided in 'CodeModifierProperties' in the 'CodeModifierConfig'
         EditCodeModifierConfig(codeModifierConfig);
         var projectModifier = new ProjectModifier(

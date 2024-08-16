@@ -107,6 +107,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
 
         if (string.IsNullOrEmpty(ControllerType))
         {
+            _logger.LogError($"Missing/Invalid '{nameof(ValidateEfControllerStep.ControllerType)}' value.");
             return null;
         }
         else if (

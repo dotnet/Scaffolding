@@ -21,7 +21,7 @@ public static class Program
             out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
             out var databaseProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
-            out var openApiOption, out var pageTypeOption);
+            out var openApiOption, out var pageTypeOption, out var controllerNameOption);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component - Empty")
@@ -98,8 +98,54 @@ public static class Program
                 step.CommandName = "mvccontroller";
             });
 
+        builder.AddScaffolder("apicontroller-crud")
+            .WithDisplayName("API Controller with actions, using Entity Framework (CRUD)")
+            .WithCategory("API")
+            .WithDescription("Create an API controller with REST actions to create, read, update, delete, and list entities")
+            .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
+            .WithStep<ValidateEfControllerStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.Model = context.GetOptionResult(modelNameOption);
+                step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
+                step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
+                step.Prerelease = context.GetOptionResult(prereleaseOption);
+                step.ControllerType = "API";
+                step.ControllerName = context.GetOptionResult(controllerNameOption);
+            })
+            .WithEfControllerAddPackagesStep()
+            .WithDbContextStep()
+            .WithConnectionStringStep()
+            .WithEfControllerTextTemplatingStep()
+            .WithEfControllerCodeChangeStep();
+
+        builder.AddScaffolder("mvccontroller-crud")
+            .WithDisplayName("MVC Controller with views, using Entity Framework (CRUD)")
+            .WithCategory("MVC")
+            .WithDescription("Create a MVC controller with read/write actions and views using Entity Framework")
+            .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption])
+            .WithStep<ValidateEfControllerStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.Model = context.GetOptionResult(modelNameOption);
+                step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
+                step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
+                step.Prerelease = context.GetOptionResult(prereleaseOption);
+                step.ControllerType = "MVC";
+                step.ControllerName = context.GetOptionResult(controllerNameOption);
+            })
+            .WithEfControllerAddPackagesStep()
+            .WithDbContextStep()
+            .WithConnectionStringStep()
+            .WithEfControllerTextTemplatingStep()
+            .WithEfControllerCodeChangeStep();
+
         builder.AddScaffolder("blazor-crud")
-            .WithDisplayName("Razor Components w/ EF (CRUD)")
+            .WithDisplayName("Razor Components with EntityFrameworkCore (CRUD)")
             .WithCategory("Blazor")
             .WithDescription("Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
             .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
@@ -177,6 +223,7 @@ public static class Program
         services.AddTransient<AreaScaffolderStep>();
         services.AddTransient<DotnetNewScaffolderStep>();
         services.AddTransient<EmptyControllerScaffolderStep>();
+        services.AddTransient<ValidateEfControllerStep>();
     }
 
     static void CreateOptions(
@@ -192,7 +239,8 @@ public static class Program
         out ScaffolderOption<string> dataContextClassOption,
         out ScaffolderOption<string> dataContextClassRequiredOption,
         out ScaffolderOption<bool> openApiOption,
-        out ScaffolderOption<string> pageTypeOption)
+        out ScaffolderOption<string> pageTypeOption,
+        out ScaffolderOption<string> controllerNameOption)
     {
         projectOption = new ScaffolderOption<string>
         {
@@ -227,6 +275,14 @@ public static class Program
             Description = "Create controller with read/write actions?",
             Required = true,
             PickerType = InteractivePickerType.YesNo
+        };
+
+        controllerNameOption = new ScaffolderOption<string>
+        {
+            DisplayName = "Controller Name",
+            CliOption = "--controller",
+            Description = "Name for the controller being created",
+            Required = true
         };
 
         areaNameOption = new ScaffolderOption<string>

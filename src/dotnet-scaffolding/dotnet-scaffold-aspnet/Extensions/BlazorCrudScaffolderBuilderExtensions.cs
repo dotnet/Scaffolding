@@ -53,8 +53,8 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName
             };
 
-            if (context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var commandSettingsObj) &&
-                commandSettingsObj is BlazorCrudSettings commandSettings)
+            if (context.Properties.TryGetValue(nameof(CrudSettings), out var commandSettingsObj) &&
+                commandSettingsObj is CrudSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
@@ -81,10 +81,10 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
-            config.Context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var blazorCrudSettingsObj);
+            config.Context.Properties.TryGetValue(nameof(CrudSettings), out var blazorCrudSettingsObj);
             config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
             config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var blazorCrudSettings = blazorCrudSettingsObj as BlazorCrudSettings;
+            var blazorCrudSettings = blazorCrudSettingsObj as CrudSettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
 
@@ -115,10 +115,10 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         builder = builder.WithStep<CodeModificationStep>(config =>
         {
             var step = config.Step;
-            config.Context.Properties.TryGetValue(nameof(BlazorCrudSettings), out var blazorCrudSettingsObj);
+            config.Context.Properties.TryGetValue(nameof(CrudSettings), out var blazorCrudSettingsObj);
             config.Context.Properties.TryGetValue(Constants.StepConstants.AdditionalCodeModifier, out var blazorCodeModifierStringObj);
             config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
-            var blazorCrudSettings = blazorCrudSettingsObj as BlazorCrudSettings;
+            var blazorCrudSettings = blazorCrudSettingsObj as CrudSettings;
             var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
             var blazorCodeModifierString = blazorCodeModifierStringObj as string;
             if (blazorCrudSettings is not null &&

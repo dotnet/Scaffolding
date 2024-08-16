@@ -13,21 +13,21 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
-internal class ValidateBlazorCrudStep : ScaffoldStep
+internal class ValidateEfControllerStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-
     public string? Project { get; set; }
     public bool Prerelease { get; set; }
     public string? DatabaseProvider { get; set; }
     public string? DataContext { get; set; }
     public string? Model { get; set; }
-    public string? Page { get; set; }
+    public string? ControllerName { get; set; }
+    public string? ControllerType { get; set; }
 
-    public ValidateBlazorCrudStep(
+    public ValidateEfControllerStep(
         IFileSystem fileSystem,
-        ILogger<ValidateBlazorCrudStep> logger)
+        ILogger<ValidateEfControllerStep> logger)
     {
         _fileSystem = fileSystem;
         _logger = logger;
@@ -35,61 +35,53 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var blazorCrudSettings = ValidateBlazorCrudSettings();
+        var efControllerSettings = ValidateEfControllerSettings();
         var codeModifierProperties = new Dictionary<string, string>();
-        if (blazorCrudSettings is null)
+        if (efControllerSettings is null)
         {
             return false;
         }
         else
         {
-            context.Properties.Add(nameof(CrudSettings), blazorCrudSettings);
+            context.Properties.Add(nameof(EfControllerSettings), efControllerSettings);
         }
 
-        //initialize MinimalApiModel
+        //initialize CrudControllerModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var blazorCrudModel = await GetBlazorCrudModelAsync(blazorCrudSettings);
-        if (blazorCrudModel is null)
+        var efControllerModel = await GetEfControllerModelAsync(efControllerSettings);
+        if (efControllerModel is null)
         {
             _logger.LogError("An error occurred.");
             return false;
         }
         else
         {
-            context.Properties.Add(nameof(BlazorCrudModel), blazorCrudModel);
+            context.Properties.Add(nameof(EfControllerModel), efControllerModel);
         }
 
         //Install packages and add a DbContext (if needed)
-        if (blazorCrudModel.DbContextInfo.EfScenario)
+        if (efControllerModel.DbContextInfo.EfScenario)
         {
-            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(blazorCrudSettings.Project, blazorCrudModel.DbContextInfo);
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(efControllerSettings.Project, efControllerModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
-            var projectBasePath = Path.GetDirectoryName(blazorCrudSettings.Project);
+            var projectBasePath = Path.GetDirectoryName(efControllerSettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
                 context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
-            codeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorCrudModel.DbContextInfo);
+            codeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(efControllerModel.DbContextInfo);
         }
 
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
-        var additionalCodeChanges = await BlazorCrudHelper.GetBlazorCrudCodeChangesAsync(blazorCrudModel);
-        if (additionalCodeChanges.Count != 0)
-        {
-            var allCodeChangesString = string.Join(",", additionalCodeChanges);
-            var codeModificationConfigString = BlazorCrudHelper.AdditionalCodeModificationJson.Replace("$(CodeChanges)", allCodeChangesString);
-            context.Properties.Add(Constants.StepConstants.AdditionalCodeModifier, codeModificationConfigString);
-        }
-
         return true;
     }
 
-    private CrudSettings? ValidateBlazorCrudSettings()
+    private EfControllerSettings? ValidateEfControllerSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -103,15 +95,27 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             return null;
         }
 
-        if (string.IsNullOrEmpty(Page))
+        if (string.IsNullOrEmpty(ControllerName))
         {
-            _logger.LogError("Missing/Invalid --page option.");
+            _logger.LogError("Missing/Invalid --controller option.");
             return null;
         }
-        else if (!string.IsNullOrEmpty(Page) && !BlazorCrudHelper.CRUDPages.Contains(Page, StringComparer.OrdinalIgnoreCase))
+        else
         {
-            //if an invalid page name, switch to just "CRUD" and scaffold all pages
-            Page = BlazorCrudHelper.CrudPageType;
+            ControllerName = Path.GetFileNameWithoutExtension(ControllerName);
+        }
+
+        if (string.IsNullOrEmpty(ControllerType))
+        {
+            return null;
+        }
+        else if (
+            !string.IsNullOrEmpty(ControllerType) &&
+            !ControllerType.Equals("API", StringComparison.OrdinalIgnoreCase) &&
+            !ControllerType.Equals("MVC", StringComparison.OrdinalIgnoreCase))
+        {
+            //defaulting to API controller
+            ControllerType = "API";
         }
 
         if (string.IsNullOrEmpty(DataContext))
@@ -124,21 +128,23 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
 
-        return new CrudSettings
+        return new EfControllerSettings
         {
             Model = Model,
+            ControllerName = ControllerName,
             Project = Project,
-            Page = Page,
+            ControllerType = ControllerType,
             DataContext = DataContext,
             DatabaseProvider = DatabaseProvider,
-            Prerelease = Prerelease,
+            Prerelease = Prerelease
         };
     }
 
-    private async Task<BlazorCrudModel?> GetBlazorCrudModelAsync(CrudSettings settings)
+    private async Task<EfControllerModel?> GetEfControllerModelAsync(EfControllerSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        if (projectInfo is null || projectInfo.CodeService is null)
+        var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
+        if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {
             return null;
         }
@@ -175,12 +181,14 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             dbContextInfo.EfScenario = true;
         }
 
-        BlazorCrudModel scaffoldingModel = new()
+        EfControllerModel scaffoldingModel = new()
         {
-            PageType = settings.Page,
+            ControllerName = settings.ControllerName,
+            ControllerType = settings.ControllerType,
             ProjectInfo = projectInfo,
             ModelInfo = modelInfo,
-            DbContextInfo = dbContextInfo
+            DbContextInfo = dbContextInfo,
+            ControllerOutputPath = projectDirectory
         };
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

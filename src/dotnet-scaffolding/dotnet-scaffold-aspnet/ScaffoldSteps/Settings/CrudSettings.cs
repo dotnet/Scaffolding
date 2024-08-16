@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
-internal class BlazorCrudSettings : EfWithModelStepSettings
+internal class CrudSettings : EfWithModelStepSettings
 {
     public required string Page { get; set; }
 }
